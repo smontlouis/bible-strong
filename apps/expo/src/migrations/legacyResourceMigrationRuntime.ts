@@ -12,6 +12,7 @@ import {
   createStrongSidecarDownloadPlan,
 } from '~helpers/downloadItemFactory'
 import { installManagedResource } from '~helpers/managedResourceInstallation'
+import { loadMobileResourceCatalog } from '~helpers/mobileResourceCatalog'
 import { getDownloadItemIdentity, type DownloadItem } from '~helpers/offlineCopy'
 import type { OfflineCopyIdentity } from '~helpers/offlineCopyId'
 import { isCanonicalBibleSchemaVersion } from '~helpers/canonicalBibleInstallation'
@@ -31,6 +32,18 @@ import {
 } from './legacyResourceEvidence'
 import { migrateLegacyPersistedReferences } from './legacyPersistedReferences'
 import { createLegacyResourceCleanup } from './legacyResourceCleanup'
+
+/** An installation is already a large download: give the live catalog longer than startup does. */
+const INSTALLATION_CATALOG_TIMEOUT_MS = 15_000
+
+const loadReplacementCatalog = async (stage: 'plan' | 'install'): Promise<void> => {
+  await loadMobileResourceCatalog(
+    fetch,
+    stage === 'install'
+      ? { retryFallback: true, timeoutMs: INSTALLATION_CATALOG_TIMEOUT_MS }
+      : undefined
+  )
+}
 
 const toReplacementResource = (item: DownloadItem): LegacyReplacementResource => ({
   identity: getDownloadItemIdentity(item),
@@ -142,6 +155,7 @@ export const legacyResourceMigration = createLegacyResourceMigration({
         return { exists: info.exists, ...(info.exists ? { size: info.size } : {}) }
       },
     }),
+  loadReplacementCatalog,
   resolveReplacementPlan,
   isReplacementReady,
   installReplacement,

@@ -1,6 +1,7 @@
 import { nearGameStation } from './game-station'
 import { nearGuestbook } from './guestbook'
 import { defaultNavigation, stationAt, type NavigationDocument, type Point } from './world'
+import { nearWorldPortal } from './world-portal'
 
 /** Fixed visual centers in the map's original 1671 × 941 coordinate system. */
 export const islandActions = [
@@ -13,6 +14,8 @@ export const islandActions = [
   { id: 'themes', x: 310, y: 710 },
   { id: 'comparison', x: 836, y: 770 },
   { id: 'commentaries', x: 1390, y: 705 },
+  // The portal to Valence 1876, floating in the arch's opening (world-portal.ts).
+  { id: 'portal', x: 940, y: 470 },
 ] as const
 
 export type IslandActionId = (typeof islandActions)[number]['id']
@@ -25,6 +28,7 @@ export function nearIslandAction(
   navigation: NavigationDocument = defaultNavigation
 ) {
   if (id === 'games') return nearGameStation(point, navigation)
+  if (id === 'portal') return nearWorldPortal(point)
   const anchor = islandActions.find(action => action.id === id)
   const radius = id === 'guestbook' ? 70 : ISLAND_ACTION_RADIUS
   if (!anchor || Math.hypot(point.x - anchor.x, point.y - anchor.y) > radius) {

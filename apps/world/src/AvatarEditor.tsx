@@ -64,12 +64,14 @@ export function AvatarEditor({
   language,
   onSave,
   onClose,
+  eyebrow = 'BIBLE STRONG · WORLD',
 }: {
   profile: AvatarProfile
   onboarding: boolean
   language: keyof typeof profileCopy
   onSave: (profile: AvatarProfile) => void
   onClose: () => void
+  eyebrow?: string
 }) {
   const [draft, setDraft] = useState(profile)
   const input = useRef<HTMLInputElement>(null)
@@ -100,7 +102,7 @@ export function AvatarEditor({
             if (next) onSave(next)
           }}
         >
-          <p className="avatar-eyebrow">BIBLE STRONG · WORLD</p>
+          <p className="avatar-eyebrow">{eyebrow}</p>
           <h1 id="avatar-title">{t.title}</h1>
           <p className="avatar-intro">{t.intro}</p>
           <label className="avatar-field" htmlFor="avatar-name">

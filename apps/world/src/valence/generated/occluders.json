@@ -1,0 +1,2862 @@
+[
+ {
+  "id": "tree-01",
+  "name": "tree 1",
+  "x": 716.0,
+  "y": 44.0,
+  "width": 60.5,
+  "height": 75.0,
+  "baseY": 119.0,
+  "url": "./valence-1876/occlusion/tree-01.webp"
+ },
+ {
+  "id": "crate-01",
+  "name": "crate 1",
+  "x": 1131.0,
+  "y": 110.5,
+  "width": 7.0,
+  "height": 14.5,
+  "baseY": 125.0,
+  "url": "./valence-1876/occlusion/crate-01.webp"
+ },
+ {
+  "id": "building-01",
+  "name": "building 1",
+  "x": 1111.5,
+  "y": 77.5,
+  "width": 21.0,
+  "height": 69.5,
+  "baseY": 147.0,
+  "url": "./valence-1876/occlusion/building-01.webp"
+ },
+ {
+  "id": "tree-02",
+  "name": "tree 2",
+  "x": 771.0,
+  "y": 91.0,
+  "width": 27.0,
+  "height": 57.5,
+  "baseY": 148.5,
+  "url": "./valence-1876/occlusion/tree-02.webp"
+ },
+ {
+  "id": "bush-01",
+  "name": "bush 1",
+  "x": 664.5,
+  "y": 138.5,
+  "width": 12.5,
+  "height": 12.5,
+  "baseY": 151.0,
+  "url": "./valence-1876/occlusion/bush-01.webp"
+ },
+ {
+  "id": "tree-03",
+  "name": "tree 3",
+  "x": 690.5,
+  "y": 50.0,
+  "width": 25.0,
+  "height": 109.0,
+  "baseY": 159.0,
+  "url": "./valence-1876/occlusion/tree-03.webp"
+ },
+ {
+  "id": "tree-04",
+  "name": "tree 4",
+  "x": 395.5,
+  "y": 133.5,
+  "width": 23.0,
+  "height": 26.0,
+  "baseY": 159.5,
+  "url": "./valence-1876/occlusion/tree-04.webp"
+ },
+ {
+  "id": "crate-02",
+  "name": "crate 2",
+  "x": 1247.0,
+  "y": 154.0,
+  "width": 23.5,
+  "height": 21.0,
+  "baseY": 175.0,
+  "url": "./valence-1876/occlusion/crate-02.webp"
+ },
+ {
+  "id": "tree-05",
+  "name": "tree 5",
+  "x": 1145.0,
+  "y": 98.0,
+  "width": 55.0,
+  "height": 82.0,
+  "baseY": 180.0,
+  "url": "./valence-1876/occlusion/tree-05.webp"
+ },
+ {
+  "id": "building-03",
+  "name": "building 3",
+  "x": 1243.0,
+  "y": 49.5,
+  "width": 48.0,
+  "height": 139.0,
+  "baseY": 188.5,
+  "url": "./valence-1876/occlusion/building-03.webp"
+ },
+ {
+  "id": "wall-01",
+  "name": "wall 1",
+  "x": 503.0,
+  "y": 167.0,
+  "width": 48.0,
+  "height": 25.0,
+  "baseY": 192.0,
+  "url": "./valence-1876/occlusion/wall-01.webp"
+ },
+ {
+  "id": "tree-06",
+  "name": "tree 6",
+  "x": 715.0,
+  "y": 133.5,
+  "width": 37.5,
+  "height": 59.0,
+  "baseY": 192.5,
+  "url": "./valence-1876/occlusion/tree-06.webp"
+ },
+ {
+  "id": "tree-07",
+  "name": "tree 7",
+  "x": 385.0,
+  "y": 153.5,
+  "width": 40.5,
+  "height": 39.0,
+  "baseY": 192.5,
+  "url": "./valence-1876/occlusion/tree-07.webp"
+ },
+ {
+  "id": "wall-03",
+  "name": "wall 3",
+  "x": 647.0,
+  "y": 149.0,
+  "width": 37.0,
+  "height": 47.0,
+  "baseY": 196.0,
+  "url": "./valence-1876/occlusion/wall-03.webp"
+ },
+ {
+  "id": "tree-08",
+  "name": "tree 8",
+  "x": 417.5,
+  "y": 185.0,
+  "width": 10.0,
+  "height": 13.0,
+  "baseY": 198.0,
+  "url": "./valence-1876/occlusion/tree-08.webp"
+ },
+ {
+  "id": "wall-02",
+  "name": "wall 2",
+  "x": 551.0,
+  "y": 175.5,
+  "width": 48.0,
+  "height": 23.5,
+  "baseY": 199.0,
+  "url": "./valence-1876/occlusion/wall-02.webp"
+ },
+ {
+  "id": "tree-09",
+  "name": "tree 9",
+  "x": 425.5,
+  "y": 167.5,
+  "width": 39.0,
+  "height": 40.5,
+  "baseY": 208.0,
+  "url": "./valence-1876/occlusion/tree-09.webp"
+ },
+ {
+  "id": "wall-04",
+  "name": "wall 4",
+  "x": 727.5,
+  "y": 189.5,
+  "width": 23.5,
+  "height": 19.5,
+  "baseY": 209.0,
+  "url": "./valence-1876/occlusion/wall-04.webp"
+ },
+ {
+  "id": "building-02",
+  "name": "building 2",
+  "x": 778.0,
+  "y": 81.0,
+  "width": 48.0,
+  "height": 130.0,
+  "baseY": 211.0,
+  "url": "./valence-1876/occlusion/building-02.webp"
+ },
+ {
+  "id": "tree-10",
+  "name": "tree 10",
+  "x": 749.0,
+  "y": 118.0,
+  "width": 24.0,
+  "height": 94.0,
+  "baseY": 212.0,
+  "url": "./valence-1876/occlusion/tree-10.webp"
+ },
+ {
+  "id": "tree-11",
+  "name": "tree 11",
+  "x": 456.5,
+  "y": 192.5,
+  "width": 15.0,
+  "height": 20.5,
+  "baseY": 213.0,
+  "url": "./valence-1876/occlusion/tree-11.webp"
+ },
+ {
+  "id": "tree-12",
+  "name": "tree 12",
+  "x": 695.0,
+  "y": 172.0,
+  "width": 40.0,
+  "height": 44.0,
+  "baseY": 216.0,
+  "url": "./valence-1876/occlusion/tree-12.webp"
+ },
+ {
+  "id": "bush-02",
+  "name": "bush 2",
+  "x": 764.0,
+  "y": 170.0,
+  "width": 17.5,
+  "height": 49.0,
+  "baseY": 219.0,
+  "url": "./valence-1876/occlusion/bush-02.webp"
+ },
+ {
+  "id": "tree-13",
+  "name": "tree 13",
+  "x": 914.5,
+  "y": 150.5,
+  "width": 52.0,
+  "height": 73.5,
+  "baseY": 224.0,
+  "url": "./valence-1876/occlusion/tree-13.webp"
+ },
+ {
+  "id": "tree-14",
+  "name": "tree 14",
+  "x": 715.0,
+  "y": 202.5,
+  "width": 19.5,
+  "height": 23.0,
+  "baseY": 225.5,
+  "url": "./valence-1876/occlusion/tree-14.webp"
+ },
+ {
+  "id": "tree-15",
+  "name": "tree 15",
+  "x": 471.5,
+  "y": 184.5,
+  "width": 30.0,
+  "height": 42.5,
+  "baseY": 227.0,
+  "url": "./valence-1876/occlusion/tree-15.webp"
+ },
+ {
+  "id": "building-04",
+  "name": "building 4",
+  "x": 1435.0,
+  "y": 65.5,
+  "width": 48.0,
+  "height": 165.5,
+  "baseY": 231.0,
+  "url": "./valence-1876/occlusion/building-04.webp"
+ },
+ {
+  "id": "tree-16",
+  "name": "tree 16",
+  "x": 969.0,
+  "y": 176.0,
+  "width": 19.0,
+  "height": 58.0,
+  "baseY": 234.0,
+  "url": "./valence-1876/occlusion/tree-16.webp"
+ },
+ {
+  "id": "tree-17",
+  "name": "tree 17",
+  "x": 467.5,
+  "y": 204.5,
+  "width": 14.5,
+  "height": 29.5,
+  "baseY": 234.0,
+  "url": "./valence-1876/occlusion/tree-17.webp"
+ },
+ {
+  "id": "tree-18",
+  "name": "tree 18",
+  "x": 1155.0,
+  "y": 196.0,
+  "width": 18.5,
+  "height": 40.5,
+  "baseY": 236.5,
+  "url": "./valence-1876/occlusion/tree-18.webp"
+ },
+ {
+  "id": "tree-19",
+  "name": "tree 19",
+  "x": 1170.5,
+  "y": 172.0,
+  "width": 45.0,
+  "height": 68.0,
+  "baseY": 240.0,
+  "url": "./valence-1876/occlusion/tree-19.webp"
+ },
+ {
+  "id": "wall-07",
+  "name": "wall 7",
+  "x": 340.5,
+  "y": 182.0,
+  "width": 48.0,
+  "height": 60.5,
+  "baseY": 242.5,
+  "url": "./valence-1876/occlusion/wall-07.webp"
+ },
+ {
+  "id": "wall-05",
+  "name": "wall 5",
+  "x": 694.5,
+  "y": 193.5,
+  "width": 48.0,
+  "height": 53.0,
+  "baseY": 246.5,
+  "url": "./valence-1876/occlusion/wall-05.webp"
+ },
+ {
+  "id": "tree-20",
+  "name": "tree 20",
+  "x": 493.0,
+  "y": 199.0,
+  "width": 35.0,
+  "height": 50.5,
+  "baseY": 249.5,
+  "url": "./valence-1876/occlusion/tree-20.webp"
+ },
+ {
+  "id": "tree-21",
+  "name": "tree 21",
+  "x": 903.5,
+  "y": 221.5,
+  "width": 13.5,
+  "height": 29.5,
+  "baseY": 251.0,
+  "url": "./valence-1876/occlusion/tree-21.webp"
+ },
+ {
+  "id": "wall-06",
+  "name": "wall 6",
+  "x": 896.5,
+  "y": 208.0,
+  "width": 76.5,
+  "height": 43.5,
+  "baseY": 251.5,
+  "url": "./valence-1876/occlusion/wall-06.webp"
+ },
+ {
+  "id": "crate-03",
+  "name": "crate 3",
+  "x": 1452.0,
+  "y": 229.5,
+  "width": 23.0,
+  "height": 22.0,
+  "baseY": 251.5,
+  "url": "./valence-1876/occlusion/crate-03.webp"
+ },
+ {
+  "id": "tree-22",
+  "name": "tree 22",
+  "x": 562.5,
+  "y": 211.0,
+  "width": 33.0,
+  "height": 48.5,
+  "baseY": 259.5,
+  "url": "./valence-1876/occlusion/tree-22.webp"
+ },
+ {
+  "id": "tree-23",
+  "name": "tree 23",
+  "x": 528.0,
+  "y": 203.0,
+  "width": 37.0,
+  "height": 57.5,
+  "baseY": 260.5,
+  "url": "./valence-1876/occlusion/tree-23.webp"
+ },
+ {
+  "id": "tree-24",
+  "name": "tree 24",
+  "x": 333.5,
+  "y": 250.5,
+  "width": 18.5,
+  "height": 23.5,
+  "baseY": 274.0,
+  "url": "./valence-1876/occlusion/tree-24.webp"
+ },
+ {
+  "id": "locomotive-01",
+  "name": "locomotive 1",
+  "x": 1528.5,
+  "y": 188.5,
+  "width": 110.0,
+  "height": 86.0,
+  "baseY": 274.5,
+  "url": "./valence-1876/occlusion/locomotive-01.webp"
+ },
+ {
+  "id": "tree-25",
+  "name": "tree 25",
+  "x": 770.5,
+  "y": 260.0,
+  "width": 18.5,
+  "height": 18.0,
+  "baseY": 278.0,
+  "url": "./valence-1876/occlusion/tree-25.webp"
+ },
+ {
+  "id": "tree-26",
+  "name": "tree 26",
+  "x": 753.0,
+  "y": 257.5,
+  "width": 18.0,
+  "height": 22.0,
+  "baseY": 279.5,
+  "url": "./valence-1876/occlusion/tree-26.webp"
+ },
+ {
+  "id": "crate-04",
+  "name": "crate 4",
+  "x": 1505.5,
+  "y": 256.0,
+  "width": 24.0,
+  "height": 24.0,
+  "baseY": 280.0,
+  "url": "./valence-1876/occlusion/crate-04.webp"
+ },
+ {
+  "id": "tree-27",
+  "name": "tree 27",
+  "x": 377.5,
+  "y": 233.5,
+  "width": 41.5,
+  "height": 52.5,
+  "baseY": 286.0,
+  "url": "./valence-1876/occlusion/tree-27.webp"
+ },
+ {
+  "id": "tree-28",
+  "name": "tree 28",
+  "x": 1386.5,
+  "y": 226.0,
+  "width": 48.5,
+  "height": 64.5,
+  "baseY": 290.5,
+  "url": "./valence-1876/occlusion/tree-28.webp"
+ },
+ {
+  "id": "tree-29",
+  "name": "tree 29",
+  "x": 790.5,
+  "y": 270.0,
+  "width": 17.0,
+  "height": 20.5,
+  "baseY": 290.5,
+  "url": "./valence-1876/occlusion/tree-29.webp"
+ },
+ {
+  "id": "wall-08",
+  "name": "wall 8",
+  "x": 388.5,
+  "y": 183.5,
+  "width": 48.0,
+  "height": 108.0,
+  "baseY": 291.5,
+  "url": "./valence-1876/occlusion/wall-08.webp"
+ },
+ {
+  "id": "tree-30",
+  "name": "tree 30",
+  "x": 353.5,
+  "y": 245.5,
+  "width": 29.0,
+  "height": 46.5,
+  "baseY": 292.0,
+  "url": "./valence-1876/occlusion/tree-30.webp"
+ },
+ {
+  "id": "lamp-01",
+  "name": "lamp 1",
+  "x": 1538.5,
+  "y": 250.0,
+  "width": 11.0,
+  "height": 42.0,
+  "baseY": 292.0,
+  "url": "./valence-1876/occlusion/lamp-01.webp"
+ },
+ {
+  "id": "wall-11",
+  "name": "wall 11",
+  "x": 580.5,
+  "y": 249.0,
+  "width": 18.5,
+  "height": 43.0,
+  "baseY": 292.0,
+  "url": "./valence-1876/occlusion/wall-11.webp"
+ },
+ {
+  "id": "tree-31",
+  "name": "tree 31",
+  "x": 699.0,
+  "y": 262.5,
+  "width": 45.5,
+  "height": 34.0,
+  "baseY": 296.5,
+  "url": "./valence-1876/occlusion/tree-31.webp"
+ },
+ {
+  "id": "tree-32",
+  "name": "tree 32",
+  "x": 925.0,
+  "y": 259.0,
+  "width": 15.0,
+  "height": 39.0,
+  "baseY": 298.0,
+  "url": "./valence-1876/occlusion/tree-32.webp"
+ },
+ {
+  "id": "bush-03",
+  "name": "bush 3",
+  "x": 819.5,
+  "y": 289.5,
+  "width": 14.5,
+  "height": 9.5,
+  "baseY": 299.0,
+  "url": "./valence-1876/occlusion/bush-03.webp"
+ },
+ {
+  "id": "tree-33",
+  "name": "tree 33",
+  "x": 837.0,
+  "y": 254.5,
+  "width": 28.5,
+  "height": 46.0,
+  "baseY": 300.5,
+  "url": "./valence-1876/occlusion/tree-33.webp"
+ },
+ {
+  "id": "tree-34",
+  "name": "tree 34",
+  "x": 857.5,
+  "y": 254.5,
+  "width": 30.0,
+  "height": 47.5,
+  "baseY": 302.0,
+  "url": "./valence-1876/occlusion/tree-34.webp"
+ },
+ {
+  "id": "tree-35",
+  "name": "tree 35",
+  "x": 1421.5,
+  "y": 262.5,
+  "width": 37.5,
+  "height": 39.5,
+  "baseY": 302.0,
+  "url": "./valence-1876/occlusion/tree-35.webp"
+ },
+ {
+  "id": "tree-36",
+  "name": "tree 36",
+  "x": 803.5,
+  "y": 279.0,
+  "width": 16.0,
+  "height": 24.5,
+  "baseY": 303.5,
+  "url": "./valence-1876/occlusion/tree-36.webp"
+ },
+ {
+  "id": "tree-37",
+  "name": "tree 37",
+  "x": 1337.5,
+  "y": 245.0,
+  "width": 48.0,
+  "height": 63.0,
+  "baseY": 308.0,
+  "url": "./valence-1876/occlusion/tree-37.webp"
+ },
+ {
+  "id": "crate-05",
+  "name": "crate 5",
+  "x": 1557.5,
+  "y": 286.0,
+  "width": 22.0,
+  "height": 24.5,
+  "baseY": 310.5,
+  "url": "./valence-1876/occlusion/crate-05.webp"
+ },
+ {
+  "id": "tree-38",
+  "name": "tree 38",
+  "x": 1022.0,
+  "y": 244.0,
+  "width": 82.5,
+  "height": 66.5,
+  "baseY": 310.5,
+  "url": "./valence-1876/occlusion/tree-38.webp"
+ },
+ {
+  "id": "tree-39",
+  "name": "tree 39",
+  "x": 939.5,
+  "y": 253.0,
+  "width": 55.0,
+  "height": 66.0,
+  "baseY": 319.0,
+  "url": "./valence-1876/occlusion/tree-39.webp"
+ },
+ {
+  "id": "tree-40",
+  "name": "tree 40",
+  "x": 1103.0,
+  "y": 281.0,
+  "width": 49.0,
+  "height": 38.0,
+  "baseY": 319.0,
+  "url": "./valence-1876/occlusion/tree-40.webp"
+ },
+ {
+  "id": "tree-41",
+  "name": "tree 41",
+  "x": 381.0,
+  "y": 275.5,
+  "width": 41.5,
+  "height": 45.0,
+  "baseY": 320.5,
+  "url": "./valence-1876/occlusion/tree-41.webp"
+ },
+ {
+  "id": "lamp-02",
+  "name": "lamp 2",
+  "x": 423.5,
+  "y": 274.0,
+  "width": 11.0,
+  "height": 49.0,
+  "baseY": 323.0,
+  "url": "./valence-1876/occlusion/lamp-02.webp"
+ },
+ {
+  "id": "crate-06",
+  "name": "crate 6",
+  "x": 1582.5,
+  "y": 303.0,
+  "width": 20.0,
+  "height": 23.0,
+  "baseY": 326.0,
+  "url": "./valence-1876/occlusion/crate-06.webp"
+ },
+ {
+  "id": "lamp-03",
+  "name": "lamp 3",
+  "x": 351.5,
+  "y": 282.5,
+  "width": 12.5,
+  "height": 46.0,
+  "baseY": 328.5,
+  "url": "./valence-1876/occlusion/lamp-03.webp"
+ },
+ {
+  "id": "lamp-04",
+  "name": "lamp 4",
+  "x": 1250.5,
+  "y": 306.5,
+  "width": 6.5,
+  "height": 23.5,
+  "baseY": 330.0,
+  "url": "./valence-1876/occlusion/lamp-04.webp"
+ },
+ {
+  "id": "crate-07",
+  "name": "crate 7",
+  "x": 798.5,
+  "y": 314.5,
+  "width": 10.0,
+  "height": 16.5,
+  "baseY": 331.0,
+  "url": "./valence-1876/occlusion/crate-07.webp"
+ },
+ {
+  "id": "stall-03",
+  "name": "stall 3",
+  "x": 803.5,
+  "y": 291.0,
+  "width": 12.0,
+  "height": 41.0,
+  "baseY": 332.0,
+  "url": "./valence-1876/occlusion/stall-03.webp"
+ },
+ {
+  "id": "tree-42",
+  "name": "tree 42",
+  "x": 1001.5,
+  "y": 277.5,
+  "width": 18.5,
+  "height": 55.0,
+  "baseY": 332.5,
+  "url": "./valence-1876/occlusion/tree-42.webp"
+ },
+ {
+  "id": "tree-43",
+  "name": "tree 43",
+  "x": 1449.5,
+  "y": 288.0,
+  "width": 59.0,
+  "height": 44.5,
+  "baseY": 332.5,
+  "url": "./valence-1876/occlusion/tree-43.webp"
+ },
+ {
+  "id": "tree-44",
+  "name": "tree 44",
+  "x": 635.5,
+  "y": 250.5,
+  "width": 64.5,
+  "height": 84.0,
+  "baseY": 334.5,
+  "url": "./valence-1876/occlusion/tree-44.webp"
+ },
+ {
+  "id": "crate-08",
+  "name": "crate 8",
+  "x": 692.5,
+  "y": 314.0,
+  "width": 16.0,
+  "height": 21.5,
+  "baseY": 335.5,
+  "url": "./valence-1876/occlusion/crate-08.webp"
+ },
+ {
+  "id": "wall-12",
+  "name": "wall 12",
+  "x": 274.0,
+  "y": 263.5,
+  "width": 48.0,
+  "height": 74.5,
+  "baseY": 338.0,
+  "url": "./valence-1876/occlusion/wall-12.webp"
+ },
+ {
+  "id": "crate-09",
+  "name": "crate 9",
+  "x": 651.5,
+  "y": 323.5,
+  "width": 12.5,
+  "height": 16.0,
+  "baseY": 339.5,
+  "url": "./valence-1876/occlusion/crate-09.webp"
+ },
+ {
+  "id": "tree-45",
+  "name": "tree 45",
+  "x": 1505.5,
+  "y": 296.5,
+  "width": 35.5,
+  "height": 43.5,
+  "baseY": 340.0,
+  "url": "./valence-1876/occlusion/tree-45.webp"
+ },
+ {
+  "id": "wall-09",
+  "name": "wall 9",
+  "x": 436.5,
+  "y": 208.0,
+  "width": 48.0,
+  "height": 132.5,
+  "baseY": 340.5,
+  "url": "./valence-1876/occlusion/wall-09.webp"
+ },
+ {
+  "id": "wall-10",
+  "name": "wall 10",
+  "x": 484.5,
+  "y": 240.0,
+  "width": 48.0,
+  "height": 104.0,
+  "baseY": 344.0,
+  "url": "./valence-1876/occlusion/wall-10.webp"
+ },
+ {
+  "id": "stall-02",
+  "name": "stall 2",
+  "x": 755.5,
+  "y": 273.0,
+  "width": 48.0,
+  "height": 71.0,
+  "baseY": 344.0,
+  "url": "./valence-1876/occlusion/stall-02.webp"
+ },
+ {
+  "id": "crate-10",
+  "name": "crate 10",
+  "x": 680.0,
+  "y": 324.5,
+  "width": 16.0,
+  "height": 20.5,
+  "baseY": 345.0,
+  "url": "./valence-1876/occlusion/crate-10.webp"
+ },
+ {
+  "id": "stall-01",
+  "name": "stall 1",
+  "x": 707.5,
+  "y": 280.5,
+  "width": 48.0,
+  "height": 69.0,
+  "baseY": 349.5,
+  "url": "./valence-1876/occlusion/stall-01.webp"
+ },
+ {
+  "id": "tree-46",
+  "name": "tree 46",
+  "x": 1148.5,
+  "y": 320.5,
+  "width": 17.5,
+  "height": 33.0,
+  "baseY": 353.5,
+  "url": "./valence-1876/occlusion/tree-46.webp"
+ },
+ {
+  "id": "tree-47",
+  "name": "tree 47",
+  "x": 1274.5,
+  "y": 264.5,
+  "width": 69.0,
+  "height": 94.0,
+  "baseY": 358.5,
+  "url": "./valence-1876/occlusion/tree-47.webp"
+ },
+ {
+  "id": "stall-04",
+  "name": "stall 4",
+  "x": 859.0,
+  "y": 283.0,
+  "width": 48.0,
+  "height": 75.5,
+  "baseY": 358.5,
+  "url": "./valence-1876/occlusion/stall-04.webp"
+ },
+ {
+  "id": "stall-05",
+  "name": "stall 5",
+  "x": 907.0,
+  "y": 289.0,
+  "width": 48.0,
+  "height": 69.5,
+  "baseY": 358.5,
+  "url": "./valence-1876/occlusion/stall-05.webp"
+ },
+ {
+  "id": "building-07",
+  "name": "building 7",
+  "x": 1143.5,
+  "y": 319.0,
+  "width": 4.0,
+  "height": 40.5,
+  "baseY": 359.5,
+  "url": "./valence-1876/occlusion/building-07.webp"
+ },
+ {
+  "id": "manual-bridge-railing-1",
+  "name": "Rambarde avant du pont",
+  "x": 150.0,
+  "y": 337.0,
+  "width": 48.0,
+  "height": 23.0,
+  "baseY": 360.0,
+  "url": "./valence-1876/occlusion/manual-bridge-railing-1.webp"
+ },
+ {
+  "id": "tree-48",
+  "name": "tree 48",
+  "x": 1623.5,
+  "y": 323.5,
+  "width": 43.0,
+  "height": 37.5,
+  "baseY": 361.0,
+  "url": "./valence-1876/occlusion/tree-48.webp"
+ },
+ {
+  "id": "manual-bridge-railing-2",
+  "name": "Rambarde avant du pont",
+  "x": 198.0,
+  "y": 345.5,
+  "width": 48.0,
+  "height": 23.5,
+  "baseY": 369.0,
+  "url": "./valence-1876/occlusion/manual-bridge-railing-2.webp"
+ },
+ {
+  "id": "tree-49",
+  "name": "tree 49",
+  "x": 1484.0,
+  "y": 328.5,
+  "width": 48.5,
+  "height": 45.0,
+  "baseY": 373.5,
+  "url": "./valence-1876/occlusion/tree-49.webp"
+ },
+ {
+  "id": "manual-bridge-railing-3",
+  "name": "Rambarde avant du pont",
+  "x": 246.0,
+  "y": 354.5,
+  "width": 48.0,
+  "height": 23.0,
+  "baseY": 377.5,
+  "url": "./valence-1876/occlusion/manual-bridge-railing-3.webp"
+ },
+ {
+  "id": "manual-bridge-railing-4",
+  "name": "Rambarde avant du pont",
+  "x": 294.0,
+  "y": 363.0,
+  "width": 48.0,
+  "height": 23.5,
+  "baseY": 386.5,
+  "url": "./valence-1876/occlusion/manual-bridge-railing-4.webp"
+ },
+ {
+  "id": "tree-50",
+  "name": "tree 50",
+  "x": 1540.5,
+  "y": 314.5,
+  "width": 23.5,
+  "height": 73.5,
+  "baseY": 388.0,
+  "url": "./valence-1876/occlusion/tree-50.webp"
+ },
+ {
+  "id": "crate-11",
+  "name": "crate 11",
+  "x": 652.5,
+  "y": 374.5,
+  "width": 11.5,
+  "height": 15.0,
+  "baseY": 389.5,
+  "url": "./valence-1876/occlusion/crate-11.webp"
+ },
+ {
+  "id": "lamp-05",
+  "name": "lamp 5",
+  "x": 399.0,
+  "y": 330.0,
+  "width": 13.0,
+  "height": 61.0,
+  "baseY": 391.0,
+  "url": "./valence-1876/occlusion/lamp-05.webp"
+ },
+ {
+  "id": "building-05",
+  "name": "building 5",
+  "x": 1047.5,
+  "y": 286.5,
+  "width": 48.0,
+  "height": 106.0,
+  "baseY": 392.5,
+  "url": "./valence-1876/occlusion/building-05.webp"
+ },
+ {
+  "id": "building-06",
+  "name": "building 6",
+  "x": 1095.5,
+  "y": 293.5,
+  "width": 48.0,
+  "height": 99.5,
+  "baseY": 393.0,
+  "url": "./valence-1876/occlusion/building-06.webp"
+ },
+ {
+  "id": "manual-bridge-railing-5",
+  "name": "Rambarde avant du pont",
+  "x": 342.0,
+  "y": 372.0,
+  "width": 48.0,
+  "height": 23.0,
+  "baseY": 395.0,
+  "url": "./valence-1876/occlusion/manual-bridge-railing-5.webp"
+ },
+ {
+  "id": "tree-51",
+  "name": "tree 51",
+  "x": 562.0,
+  "y": 363.0,
+  "width": 24.0,
+  "height": 32.5,
+  "baseY": 395.5,
+  "url": "./valence-1876/occlusion/tree-51.webp"
+ },
+ {
+  "id": "tree-52",
+  "name": "tree 52",
+  "x": 1563.0,
+  "y": 335.5,
+  "width": 18.5,
+  "height": 63.5,
+  "baseY": 399.0,
+  "url": "./valence-1876/occlusion/tree-52.webp"
+ },
+ {
+  "id": "manual-bridge-railing-6",
+  "name": "Rambarde avant du pont",
+  "x": 390.0,
+  "y": 380.5,
+  "width": 23.5,
+  "height": 19.0,
+  "baseY": 399.5,
+  "url": "./valence-1876/occlusion/manual-bridge-railing-6.webp"
+ },
+ {
+  "id": "lamp-06",
+  "name": "lamp 6",
+  "x": 442.0,
+  "y": 351.5,
+  "width": 10.0,
+  "height": 50.0,
+  "baseY": 401.5,
+  "url": "./valence-1876/occlusion/lamp-06.webp"
+ },
+ {
+  "id": "crate-12",
+  "name": "crate 12",
+  "x": 743.0,
+  "y": 386.5,
+  "width": 18.5,
+  "height": 16.0,
+  "baseY": 402.5,
+  "url": "./valence-1876/occlusion/crate-12.webp"
+ },
+ {
+  "id": "tree-53",
+  "name": "tree 53",
+  "x": 580.5,
+  "y": 298.0,
+  "width": 73.5,
+  "height": 107.5,
+  "baseY": 405.5,
+  "url": "./valence-1876/occlusion/tree-53.webp"
+ },
+ {
+  "id": "crate-13",
+  "name": "crate 13",
+  "x": 592.0,
+  "y": 386.5,
+  "width": 17.0,
+  "height": 24.0,
+  "baseY": 410.5,
+  "url": "./valence-1876/occlusion/crate-13.webp"
+ },
+ {
+  "id": "tree-54",
+  "name": "tree 54",
+  "x": 1283.5,
+  "y": 373.0,
+  "width": 29.5,
+  "height": 40.0,
+  "baseY": 413.0,
+  "url": "./valence-1876/occlusion/tree-54.webp"
+ },
+ {
+  "id": "crate-14",
+  "name": "crate 14",
+  "x": 737.5,
+  "y": 390.0,
+  "width": 18.5,
+  "height": 24.0,
+  "baseY": 414.0,
+  "url": "./valence-1876/occlusion/crate-14.webp"
+ },
+ {
+  "id": "bush-04",
+  "name": "bush 4",
+  "x": 1269.5,
+  "y": 404.0,
+  "width": 13.5,
+  "height": 13.5,
+  "baseY": 417.5,
+  "url": "./valence-1876/occlusion/bush-04.webp"
+ },
+ {
+  "id": "building-08",
+  "name": "building 8",
+  "x": 1303.5,
+  "y": 307.0,
+  "width": 48.0,
+  "height": 111.0,
+  "baseY": 418.0,
+  "url": "./valence-1876/occlusion/building-08.webp"
+ },
+ {
+  "id": "bush-05",
+  "name": "bush 5",
+  "x": 1259.0,
+  "y": 408.5,
+  "width": 13.0,
+  "height": 11.5,
+  "baseY": 420.0,
+  "url": "./valence-1876/occlusion/bush-05.webp"
+ },
+ {
+  "id": "stall-06",
+  "name": "stall 6",
+  "x": 661.0,
+  "y": 338.0,
+  "width": 48.0,
+  "height": 82.0,
+  "baseY": 420.0,
+  "url": "./valence-1876/occlusion/stall-06.webp"
+ },
+ {
+  "id": "stall-07",
+  "name": "stall 7",
+  "x": 709.0,
+  "y": 337.0,
+  "width": 48.0,
+  "height": 90.5,
+  "baseY": 427.5,
+  "url": "./valence-1876/occlusion/stall-07.webp"
+ },
+ {
+  "id": "tree-55",
+  "name": "tree 55",
+  "x": 1217.5,
+  "y": 330.5,
+  "width": 72.5,
+  "height": 98.5,
+  "baseY": 429.0,
+  "url": "./valence-1876/occlusion/tree-55.webp"
+ },
+ {
+  "id": "wall-13",
+  "name": "wall 13",
+  "x": 1078.0,
+  "y": 403.5,
+  "width": 52.5,
+  "height": 29.5,
+  "baseY": 433.0,
+  "url": "./valence-1876/occlusion/wall-13.webp"
+ },
+ {
+  "id": "crate-15",
+  "name": "crate 15",
+  "x": 808.0,
+  "y": 424.5,
+  "width": 12.0,
+  "height": 13.0,
+  "baseY": 437.5,
+  "url": "./valence-1876/occlusion/crate-15.webp"
+ },
+ {
+  "id": "tree-56",
+  "name": "tree 56",
+  "x": 1291.0,
+  "y": 395.0,
+  "width": 34.0,
+  "height": 45.0,
+  "baseY": 440.0,
+  "url": "./valence-1876/occlusion/tree-56.webp"
+ },
+ {
+  "id": "tree-57",
+  "name": "tree 57",
+  "x": 626.0,
+  "y": 391.5,
+  "width": 35.0,
+  "height": 52.0,
+  "baseY": 443.5,
+  "url": "./valence-1876/occlusion/tree-57.webp"
+ },
+ {
+  "id": "wall-14",
+  "name": "wall 14",
+  "x": 568.5,
+  "y": 388.5,
+  "width": 48.0,
+  "height": 57.5,
+  "baseY": 446.0,
+  "url": "./valence-1876/occlusion/wall-14.webp"
+ },
+ {
+  "id": "crate-16",
+  "name": "crate 16",
+  "x": 821.0,
+  "y": 431.5,
+  "width": 15.0,
+  "height": 19.5,
+  "baseY": 451.0,
+  "url": "./valence-1876/occlusion/crate-16.webp"
+ },
+ {
+  "id": "building-09",
+  "name": "building 9",
+  "x": 1351.5,
+  "y": 282.5,
+  "width": 48.0,
+  "height": 170.5,
+  "baseY": 453.0,
+  "url": "./valence-1876/occlusion/building-09.webp"
+ },
+ {
+  "id": "building-10",
+  "name": "building 10",
+  "x": 1399.5,
+  "y": 283.5,
+  "width": 48.0,
+  "height": 170.0,
+  "baseY": 453.5,
+  "url": "./valence-1876/occlusion/building-10.webp"
+ },
+ {
+  "id": "wall-16",
+  "name": "wall 16",
+  "x": 664.5,
+  "y": 427.0,
+  "width": 12.0,
+  "height": 28.5,
+  "baseY": 455.5,
+  "url": "./valence-1876/occlusion/wall-16.webp"
+ },
+ {
+  "id": "tree-58",
+  "name": "tree 58",
+  "x": 975.0,
+  "y": 378.5,
+  "width": 73.0,
+  "height": 81.0,
+  "baseY": 459.5,
+  "url": "./valence-1876/occlusion/tree-58.webp"
+ },
+ {
+  "id": "crate-17",
+  "name": "crate 17",
+  "x": 795.0,
+  "y": 428.5,
+  "width": 13.0,
+  "height": 31.0,
+  "baseY": 459.5,
+  "url": "./valence-1876/occlusion/crate-17.webp"
+ },
+ {
+  "id": "tree-59",
+  "name": "tree 59",
+  "x": 478.0,
+  "y": 394.5,
+  "width": 38.0,
+  "height": 65.5,
+  "baseY": 460.0,
+  "url": "./valence-1876/occlusion/tree-59.webp"
+ },
+ {
+  "id": "wall-15",
+  "name": "wall 15",
+  "x": 616.5,
+  "y": 420.0,
+  "width": 48.0,
+  "height": 40.0,
+  "baseY": 460.0,
+  "url": "./valence-1876/occlusion/wall-15.webp"
+ },
+ {
+  "id": "crate-18",
+  "name": "crate 18",
+  "x": 806.5,
+  "y": 432.5,
+  "width": 15.0,
+  "height": 29.5,
+  "baseY": 462.0,
+  "url": "./valence-1876/occlusion/crate-18.webp"
+ },
+ {
+  "id": "wall-17",
+  "name": "wall 17",
+  "x": 1261.5,
+  "y": 411.5,
+  "width": 48.0,
+  "height": 57.0,
+  "baseY": 468.5,
+  "url": "./valence-1876/occlusion/wall-17.webp"
+ },
+ {
+  "id": "bush-06",
+  "name": "bush 6",
+  "x": 1518.5,
+  "y": 445.0,
+  "width": 31.0,
+  "height": 24.5,
+  "baseY": 469.5,
+  "url": "./valence-1876/occlusion/bush-06.webp"
+ },
+ {
+  "id": "crate-19",
+  "name": "crate 19",
+  "x": 817.0,
+  "y": 449.0,
+  "width": 19.0,
+  "height": 23.0,
+  "baseY": 472.0,
+  "url": "./valence-1876/occlusion/crate-19.webp"
+ },
+ {
+  "id": "stall-10",
+  "name": "stall 10",
+  "x": 927.5,
+  "y": 393.0,
+  "width": 40.0,
+  "height": 79.5,
+  "baseY": 472.5,
+  "url": "./valence-1876/occlusion/stall-10.webp"
+ },
+ {
+  "id": "bush-07",
+  "name": "bush 7",
+  "x": 1502.5,
+  "y": 452.5,
+  "width": 18.0,
+  "height": 23.5,
+  "baseY": 476.0,
+  "url": "./valence-1876/occlusion/bush-07.webp"
+ },
+ {
+  "id": "tree-60",
+  "name": "tree 60",
+  "x": 328.5,
+  "y": 396.0,
+  "width": 48.0,
+  "height": 83.0,
+  "baseY": 479.0,
+  "url": "./valence-1876/occlusion/tree-60.webp"
+ },
+ {
+  "id": "stall-09",
+  "name": "stall 9",
+  "x": 879.5,
+  "y": 395.0,
+  "width": 48.0,
+  "height": 88.0,
+  "baseY": 483.0,
+  "url": "./valence-1876/occlusion/stall-09.webp"
+ },
+ {
+  "id": "tree-61",
+  "name": "tree 61",
+  "x": 499.5,
+  "y": 426.0,
+  "width": 38.0,
+  "height": 57.5,
+  "baseY": 483.5,
+  "url": "./valence-1876/occlusion/tree-61.webp"
+ },
+ {
+  "id": "stall-08",
+  "name": "stall 8",
+  "x": 831.5,
+  "y": 403.0,
+  "width": 48.0,
+  "height": 81.5,
+  "baseY": 484.5,
+  "url": "./valence-1876/occlusion/stall-08.webp"
+ },
+ {
+  "id": "bush-08",
+  "name": "bush 8",
+  "x": 1473.0,
+  "y": 475.5,
+  "width": 16.0,
+  "height": 11.0,
+  "baseY": 486.5,
+  "url": "./valence-1876/occlusion/bush-08.webp"
+ },
+ {
+  "id": "wall-19",
+  "name": "wall 19",
+  "x": 1357.5,
+  "y": 459.5,
+  "width": 2.5,
+  "height": 29.0,
+  "baseY": 488.5,
+  "url": "./valence-1876/occlusion/wall-19.webp"
+ },
+ {
+  "id": "wall-18",
+  "name": "wall 18",
+  "x": 1309.5,
+  "y": 440.0,
+  "width": 48.0,
+  "height": 51.0,
+  "baseY": 491.0,
+  "url": "./valence-1876/occlusion/wall-18.webp"
+ },
+ {
+  "id": "tree-62",
+  "name": "tree 62",
+  "x": 524.5,
+  "y": 449.0,
+  "width": 36.0,
+  "height": 43.0,
+  "baseY": 492.0,
+  "url": "./valence-1876/occlusion/tree-62.webp"
+ },
+ {
+  "id": "tree-63",
+  "name": "tree 63",
+  "x": 1323.0,
+  "y": 450.0,
+  "width": 16.0,
+  "height": 50.5,
+  "baseY": 500.5,
+  "url": "./valence-1876/occlusion/tree-63.webp"
+ },
+ {
+  "id": "tree-64",
+  "name": "tree 64",
+  "x": 723.0,
+  "y": 438.5,
+  "width": 48.0,
+  "height": 64.5,
+  "baseY": 503.0,
+  "url": "./valence-1876/occlusion/tree-64.webp"
+ },
+ {
+  "id": "wall-22",
+  "name": "wall 22",
+  "x": 1520.5,
+  "y": 454.5,
+  "width": 43.0,
+  "height": 50.0,
+  "baseY": 504.5,
+  "url": "./valence-1876/occlusion/wall-22.webp"
+ },
+ {
+  "id": "tree-65",
+  "name": "tree 65",
+  "x": 790.0,
+  "y": 482.0,
+  "width": 21.5,
+  "height": 24.0,
+  "baseY": 506.0,
+  "url": "./valence-1876/occlusion/tree-65.webp"
+ },
+ {
+  "id": "tree-66",
+  "name": "tree 66",
+  "x": 694.0,
+  "y": 467.5,
+  "width": 32.5,
+  "height": 39.0,
+  "baseY": 506.5,
+  "url": "./valence-1876/occlusion/tree-66.webp"
+ },
+ {
+  "id": "tree-67",
+  "name": "tree 67",
+  "x": 762.0,
+  "y": 476.5,
+  "width": 29.0,
+  "height": 32.0,
+  "baseY": 508.5,
+  "url": "./valence-1876/occlusion/tree-67.webp"
+ },
+ {
+  "id": "lamp-07",
+  "name": "lamp 7",
+  "x": 313.5,
+  "y": 470.5,
+  "width": 10.5,
+  "height": 38.0,
+  "baseY": 508.5,
+  "url": "./valence-1876/occlusion/lamp-07.webp"
+ },
+ {
+  "id": "tree-68",
+  "name": "tree 68",
+  "x": 991.0,
+  "y": 487.5,
+  "width": 38.0,
+  "height": 26.0,
+  "baseY": 513.5,
+  "url": "./valence-1876/occlusion/tree-68.webp"
+ },
+ {
+  "id": "wall-20",
+  "name": "wall 20",
+  "x": 1402.5,
+  "y": 480.5,
+  "width": 26.0,
+  "height": 33.0,
+  "baseY": 513.5,
+  "url": "./valence-1876/occlusion/wall-20.webp"
+ },
+ {
+  "id": "wall-24",
+  "name": "wall 24",
+  "x": 810.0,
+  "y": 498.5,
+  "width": 4.5,
+  "height": 20.5,
+  "baseY": 519.0,
+  "url": "./valence-1876/occlusion/wall-24.webp"
+ },
+ {
+  "id": "wall-21",
+  "name": "wall 21",
+  "x": 1472.5,
+  "y": 469.0,
+  "width": 48.0,
+  "height": 57.0,
+  "baseY": 526.0,
+  "url": "./valence-1876/occlusion/wall-21.webp"
+ },
+ {
+  "id": "wall-23",
+  "name": "wall 23",
+  "x": 762.0,
+  "y": 499.5,
+  "width": 48.0,
+  "height": 29.0,
+  "baseY": 528.5,
+  "url": "./valence-1876/occlusion/wall-23.webp"
+ },
+ {
+  "id": "crate-20",
+  "name": "crate 20",
+  "x": 1494.5,
+  "y": 512.0,
+  "width": 12.5,
+  "height": 19.5,
+  "baseY": 531.5,
+  "url": "./valence-1876/occlusion/crate-20.webp"
+ },
+ {
+  "id": "bush-09",
+  "name": "bush 9",
+  "x": 1393.5,
+  "y": 513.0,
+  "width": 26.0,
+  "height": 21.0,
+  "baseY": 534.0,
+  "url": "./valence-1876/occlusion/bush-09.webp"
+ },
+ {
+  "id": "bush-10",
+  "name": "bush 10",
+  "x": 1413.5,
+  "y": 522.5,
+  "width": 18.0,
+  "height": 17.0,
+  "baseY": 539.5,
+  "url": "./valence-1876/occlusion/bush-10.webp"
+ },
+ {
+  "id": "tree-69",
+  "name": "tree 69",
+  "x": 918.5,
+  "y": 513.5,
+  "width": 26.0,
+  "height": 32.0,
+  "baseY": 545.5,
+  "url": "./valence-1876/occlusion/tree-69.webp"
+ },
+ {
+  "id": "tree-70",
+  "name": "tree 70",
+  "x": 1420.5,
+  "y": 468.0,
+  "width": 60.0,
+  "height": 82.5,
+  "baseY": 550.5,
+  "url": "./valence-1876/occlusion/tree-70.webp"
+ },
+ {
+  "id": "tree-71",
+  "name": "tree 71",
+  "x": 1123.5,
+  "y": 479.0,
+  "width": 71.5,
+  "height": 74.0,
+  "baseY": 553.0,
+  "url": "./valence-1876/occlusion/tree-71.webp"
+ },
+ {
+  "id": "tree-72",
+  "name": "tree 72",
+  "x": 883.0,
+  "y": 498.5,
+  "width": 37.0,
+  "height": 57.5,
+  "baseY": 556.0,
+  "url": "./valence-1876/occlusion/tree-72.webp"
+ },
+ {
+  "id": "wall-25",
+  "name": "wall 25",
+  "x": 502.5,
+  "y": 473.0,
+  "width": 48.0,
+  "height": 89.0,
+  "baseY": 562.0,
+  "url": "./valence-1876/occlusion/wall-25.webp"
+ },
+ {
+  "id": "building-11",
+  "name": "building 11",
+  "x": 1592.5,
+  "y": 494.5,
+  "width": 79.5,
+  "height": 74.0,
+  "baseY": 568.5,
+  "url": "./valence-1876/occlusion/building-11.webp"
+ },
+ {
+  "id": "lamp-08",
+  "name": "lamp 8",
+  "x": 372.0,
+  "y": 529.5,
+  "width": 11.5,
+  "height": 50.0,
+  "baseY": 579.5,
+  "url": "./valence-1876/occlusion/lamp-08.webp"
+ },
+ {
+  "id": "tree-73",
+  "name": "tree 73",
+  "x": 437.0,
+  "y": 487.0,
+  "width": 69.5,
+  "height": 93.5,
+  "baseY": 580.5,
+  "url": "./valence-1876/occlusion/tree-73.webp"
+ },
+ {
+  "id": "lamp-09",
+  "name": "lamp 9",
+  "x": 823.5,
+  "y": 534.5,
+  "width": 9.5,
+  "height": 50.0,
+  "baseY": 584.5,
+  "url": "./valence-1876/occlusion/lamp-09.webp"
+ },
+ {
+  "id": "tree-74",
+  "name": "tree 74",
+  "x": 836.5,
+  "y": 536.0,
+  "width": 17.5,
+  "height": 50.0,
+  "baseY": 586.0,
+  "url": "./valence-1876/occlusion/tree-74.webp"
+ },
+ {
+  "id": "tree-75",
+  "name": "tree 75",
+  "x": 1586.5,
+  "y": 556.0,
+  "width": 26.0,
+  "height": 35.0,
+  "baseY": 591.0,
+  "url": "./valence-1876/occlusion/tree-75.webp"
+ },
+ {
+  "id": "tree-76",
+  "name": "tree 76",
+  "x": 837.0,
+  "y": 510.5,
+  "width": 54.5,
+  "height": 81.5,
+  "baseY": 592.0,
+  "url": "./valence-1876/occlusion/tree-76.webp"
+ },
+ {
+  "id": "tree-77",
+  "name": "tree 77",
+  "x": 873.5,
+  "y": 568.5,
+  "width": 18.5,
+  "height": 23.5,
+  "baseY": 592.0,
+  "url": "./valence-1876/occlusion/tree-77.webp"
+ },
+ {
+  "id": "tree-78",
+  "name": "tree 78",
+  "x": 1186.0,
+  "y": 507.0,
+  "width": 73.0,
+  "height": 86.0,
+  "baseY": 593.0,
+  "url": "./valence-1876/occlusion/tree-78.webp"
+ },
+ {
+  "id": "tree-79",
+  "name": "tree 79",
+  "x": 1540.0,
+  "y": 506.5,
+  "width": 55.5,
+  "height": 91.5,
+  "baseY": 598.0,
+  "url": "./valence-1876/occlusion/tree-79.webp"
+ },
+ {
+  "id": "tree-80",
+  "name": "tree 80",
+  "x": 623.0,
+  "y": 533.0,
+  "width": 66.5,
+  "height": 65.5,
+  "baseY": 598.5,
+  "url": "./valence-1876/occlusion/tree-80.webp"
+ },
+ {
+  "id": "tree-81",
+  "name": "tree 81",
+  "x": 549.0,
+  "y": 551.0,
+  "width": 62.0,
+  "height": 49.0,
+  "baseY": 600.0,
+  "url": "./valence-1876/occlusion/tree-81.webp"
+ },
+ {
+  "id": "wall-26",
+  "name": "wall 26",
+  "x": 839.0,
+  "y": 577.0,
+  "width": 29.0,
+  "height": 26.0,
+  "baseY": 603.0,
+  "url": "./valence-1876/occlusion/wall-26.webp"
+ },
+ {
+  "id": "bush-11",
+  "name": "bush 11",
+  "x": 825.5,
+  "y": 592.0,
+  "width": 11.5,
+  "height": 14.5,
+  "baseY": 606.5,
+  "url": "./valence-1876/occlusion/bush-11.webp"
+ },
+ {
+  "id": "bush-12",
+  "name": "bush 12",
+  "x": 836.0,
+  "y": 597.0,
+  "width": 14.0,
+  "height": 19.5,
+  "baseY": 616.5,
+  "url": "./valence-1876/occlusion/bush-12.webp"
+ },
+ {
+  "id": "tree-82",
+  "name": "tree 82",
+  "x": 652.5,
+  "y": 577.5,
+  "width": 34.5,
+  "height": 56.0,
+  "baseY": 633.5,
+  "url": "./valence-1876/occlusion/tree-82.webp"
+ },
+ {
+  "id": "tree-83",
+  "name": "tree 83",
+  "x": 1363.0,
+  "y": 619.5,
+  "width": 11.5,
+  "height": 16.0,
+  "baseY": 635.5,
+  "url": "./valence-1876/occlusion/tree-83.webp"
+ },
+ {
+  "id": "tree-84",
+  "name": "tree 84",
+  "x": 511.5,
+  "y": 586.5,
+  "width": 36.0,
+  "height": 52.0,
+  "baseY": 638.5,
+  "url": "./valence-1876/occlusion/tree-84.webp"
+ },
+ {
+  "id": "tree-85",
+  "name": "tree 85",
+  "x": 1247.0,
+  "y": 558.0,
+  "width": 25.5,
+  "height": 83.5,
+  "baseY": 641.5,
+  "url": "./valence-1876/occlusion/tree-85.webp"
+ },
+ {
+  "id": "tree-86",
+  "name": "tree 86",
+  "x": 1269.5,
+  "y": 604.5,
+  "width": 33.5,
+  "height": 42.0,
+  "baseY": 646.5,
+  "url": "./valence-1876/occlusion/tree-86.webp"
+ },
+ {
+  "id": "tree-87",
+  "name": "tree 87",
+  "x": 1374.0,
+  "y": 577.5,
+  "width": 22.5,
+  "height": 69.5,
+  "baseY": 647.0,
+  "url": "./valence-1876/occlusion/tree-87.webp"
+ },
+ {
+  "id": "tree-88",
+  "name": "tree 88",
+  "x": 1466.0,
+  "y": 568.5,
+  "width": 84.5,
+  "height": 78.5,
+  "baseY": 647.0,
+  "url": "./valence-1876/occlusion/tree-88.webp"
+ },
+ {
+  "id": "tree-89",
+  "name": "tree 89",
+  "x": 786.5,
+  "y": 643.0,
+  "width": 15.5,
+  "height": 16.0,
+  "baseY": 659.0,
+  "url": "./valence-1876/occlusion/tree-89.webp"
+ },
+ {
+  "id": "tree-90",
+  "name": "tree 90",
+  "x": 1395.5,
+  "y": 585.0,
+  "width": 60.0,
+  "height": 75.5,
+  "baseY": 660.5,
+  "url": "./valence-1876/occlusion/tree-90.webp"
+ },
+ {
+  "id": "wall-27",
+  "name": "wall 27",
+  "x": 860.0,
+  "y": 581.0,
+  "width": 40.5,
+  "height": 79.5,
+  "baseY": 660.5,
+  "url": "./valence-1876/occlusion/wall-27.webp"
+ },
+ {
+  "id": "bench-01",
+  "name": "bench 1",
+  "x": 662.5,
+  "y": 633.5,
+  "width": 33.0,
+  "height": 28.0,
+  "baseY": 661.5,
+  "url": "./valence-1876/occlusion/bench-01.webp"
+ },
+ {
+  "id": "tree-91",
+  "name": "tree 91",
+  "x": 1434.5,
+  "y": 642.5,
+  "width": 13.5,
+  "height": 19.0,
+  "baseY": 661.5,
+  "url": "./valence-1876/occlusion/tree-91.webp"
+ },
+ {
+  "id": "tree-92",
+  "name": "tree 92",
+  "x": 680.0,
+  "y": 557.5,
+  "width": 73.0,
+  "height": 105.5,
+  "baseY": 663.0,
+  "url": "./valence-1876/occlusion/tree-92.webp"
+ },
+ {
+  "id": "wall-31",
+  "name": "wall 31",
+  "x": 1531.5,
+  "y": 604.5,
+  "width": 48.0,
+  "height": 63.5,
+  "baseY": 668.0,
+  "url": "./valence-1876/occlusion/wall-31.webp"
+ },
+ {
+  "id": "tree-93",
+  "name": "tree 93",
+  "x": 1448.0,
+  "y": 659.0,
+  "width": 8.5,
+  "height": 11.0,
+  "baseY": 670.0,
+  "url": "./valence-1876/occlusion/tree-93.webp"
+ },
+ {
+  "id": "tree-94",
+  "name": "tree 94",
+  "x": 751.0,
+  "y": 597.0,
+  "width": 44.5,
+  "height": 73.5,
+  "baseY": 670.5,
+  "url": "./valence-1876/occlusion/tree-94.webp"
+ },
+ {
+  "id": "wall-28",
+  "name": "wall 28",
+  "x": 355.5,
+  "y": 533.5,
+  "width": 46.0,
+  "height": 139.5,
+  "baseY": 673.0,
+  "url": "./valence-1876/occlusion/wall-28.webp"
+ },
+ {
+  "id": "tree-95",
+  "name": "tree 95",
+  "x": 446.0,
+  "y": 607.0,
+  "width": 77.0,
+  "height": 74.0,
+  "baseY": 681.0,
+  "url": "./valence-1876/occlusion/tree-95.webp"
+ },
+ {
+  "id": "tree-96",
+  "name": "tree 96",
+  "x": 842.5,
+  "y": 635.5,
+  "width": 31.0,
+  "height": 49.5,
+  "baseY": 685.0,
+  "url": "./valence-1876/occlusion/tree-96.webp"
+ },
+ {
+  "id": "wall-30",
+  "name": "wall 30",
+  "x": 1483.5,
+  "y": 629.0,
+  "width": 48.0,
+  "height": 61.5,
+  "baseY": 690.5,
+  "url": "./valence-1876/occlusion/wall-30.webp"
+ },
+ {
+  "id": "lamp-10",
+  "name": "lamp 10",
+  "x": 274.0,
+  "y": 660.5,
+  "width": 15.0,
+  "height": 45.5,
+  "baseY": 706.0,
+  "url": "./valence-1876/occlusion/lamp-10.webp"
+ },
+ {
+  "id": "building-12",
+  "name": "building 12",
+  "x": 872.0,
+  "y": 547.0,
+  "width": 48.0,
+  "height": 160.0,
+  "baseY": 707.0,
+  "url": "./valence-1876/occlusion/building-12.webp"
+ },
+ {
+  "id": "tree-97",
+  "name": "tree 97",
+  "x": 877.5,
+  "y": 612.0,
+  "width": 23.5,
+  "height": 95.5,
+  "baseY": 707.5,
+  "url": "./valence-1876/occlusion/tree-97.webp"
+ },
+ {
+  "id": "bush-13",
+  "name": "bush 13",
+  "x": 1475.5,
+  "y": 690.0,
+  "width": 15.5,
+  "height": 18.5,
+  "baseY": 708.5,
+  "url": "./valence-1876/occlusion/bush-13.webp"
+ },
+ {
+  "id": "manual-laundry-north",
+  "name": "\u00c9tendoir du quai bas",
+  "x": 224.0,
+  "y": 699.0,
+  "width": 70.5,
+  "height": 92.5,
+  "baseY": 716,
+  "url": "./valence-1876/occlusion/manual-laundry-north.webp"
+ },
+ {
+  "id": "wall-29",
+  "name": "wall 29",
+  "x": 1435.5,
+  "y": 652.5,
+  "width": 48.0,
+  "height": 65.5,
+  "baseY": 718.0,
+  "url": "./valence-1876/occlusion/wall-29.webp"
+ },
+ {
+  "id": "bandstand-01",
+  "name": "bandstand 1",
+  "x": 531.0,
+  "y": 571.0,
+  "width": 149.0,
+  "height": 149.0,
+  "baseY": 720.0,
+  "url": "./valence-1876/occlusion/bandstand-01.webp"
+ },
+ {
+  "id": "tree-98",
+  "name": "tree 98",
+  "x": 430.5,
+  "y": 693.0,
+  "width": 29.5,
+  "height": 48.0,
+  "baseY": 741.0,
+  "url": "./valence-1876/occlusion/tree-98.webp"
+ },
+ {
+  "id": "bush-14",
+  "name": "bush 14",
+  "x": 1434.0,
+  "y": 727.0,
+  "width": 14.5,
+  "height": 14.0,
+  "baseY": 741.0,
+  "url": "./valence-1876/occlusion/bush-14.webp"
+ },
+ {
+  "id": "tree-99",
+  "name": "tree 99",
+  "x": 381.5,
+  "y": 688.0,
+  "width": 51.5,
+  "height": 63.5,
+  "baseY": 751.5,
+  "url": "./valence-1876/occlusion/tree-99.webp"
+ },
+ {
+  "id": "building-13",
+  "name": "building 13",
+  "x": 920.0,
+  "y": 514.0,
+  "width": 48.0,
+  "height": 238.5,
+  "baseY": 752.5,
+  "url": "./valence-1876/occlusion/building-13.webp"
+ },
+ {
+  "id": "tree-100",
+  "name": "tree 100",
+  "x": 1447.0,
+  "y": 649.0,
+  "width": 29.5,
+  "height": 108.0,
+  "baseY": 757.0,
+  "url": "./valence-1876/occlusion/tree-100.webp"
+ },
+ {
+  "id": "building-14",
+  "name": "building 14",
+  "x": 968.0,
+  "y": 497.0,
+  "width": 48.0,
+  "height": 260.0,
+  "baseY": 757.0,
+  "url": "./valence-1876/occlusion/building-14.webp"
+ },
+ {
+  "id": "wall-33",
+  "name": "wall 33",
+  "x": 1207.0,
+  "y": 726.0,
+  "width": 46.5,
+  "height": 33.5,
+  "baseY": 759.5,
+  "url": "./valence-1876/occlusion/wall-33.webp"
+ },
+ {
+  "id": "building-21",
+  "name": "building 21",
+  "x": 1438.0,
+  "y": 748.0,
+  "width": 5.5,
+  "height": 12.5,
+  "baseY": 760.5,
+  "url": "./valence-1876/occlusion/building-21.webp"
+ },
+ {
+  "id": "tree-101",
+  "name": "tree 101",
+  "x": 688.0,
+  "y": 746.5,
+  "width": 25.5,
+  "height": 20.0,
+  "baseY": 766.5,
+  "url": "./valence-1876/occlusion/tree-101.webp"
+ },
+ {
+  "id": "tree-102",
+  "name": "tree 102",
+  "x": 757.5,
+  "y": 724.5,
+  "width": 39.5,
+  "height": 48.0,
+  "baseY": 772.5,
+  "url": "./valence-1876/occlusion/tree-102.webp"
+ },
+ {
+  "id": "building-17",
+  "name": "building 17",
+  "x": 1112.0,
+  "y": 484.0,
+  "width": 21.0,
+  "height": 289.0,
+  "baseY": 773.0,
+  "url": "./valence-1876/occlusion/building-17.webp"
+ },
+ {
+  "id": "building-20",
+  "name": "building 20",
+  "x": 1390.0,
+  "y": 647.0,
+  "width": 48.0,
+  "height": 127.0,
+  "baseY": 774.0,
+  "url": "./valence-1876/occlusion/building-20.webp"
+ },
+ {
+  "id": "tree-103",
+  "name": "tree 103",
+  "x": 833.5,
+  "y": 731.0,
+  "width": 33.5,
+  "height": 45.0,
+  "baseY": 776.0,
+  "url": "./valence-1876/occlusion/tree-103.webp"
+ },
+ {
+  "id": "wall-32",
+  "name": "wall 32",
+  "x": 1159.0,
+  "y": 741.5,
+  "width": 48.0,
+  "height": 35.0,
+  "baseY": 776.5,
+  "url": "./valence-1876/occlusion/wall-32.webp"
+ },
+ {
+  "id": "tree-104",
+  "name": "tree 104",
+  "x": 1467.0,
+  "y": 708.5,
+  "width": 65.0,
+  "height": 69.0,
+  "baseY": 777.5,
+  "url": "./valence-1876/occlusion/tree-104.webp"
+ },
+ {
+  "id": "building-16",
+  "name": "building 16",
+  "x": 1064.0,
+  "y": 466.5,
+  "width": 48.0,
+  "height": 311.0,
+  "baseY": 777.5,
+  "url": "./valence-1876/occlusion/building-16.webp"
+ },
+ {
+  "id": "manual-statue-championnet",
+  "name": "Statue de Championnet et son pi\u00e9destal",
+  "x": 690.0,
+  "y": 634.0,
+  "width": 102.5,
+  "height": 166.5,
+  "baseY": 778,
+  "url": "./valence-1876/occlusion/manual-statue-championnet.webp"
+ },
+ {
+  "id": "lamp-11",
+  "name": "lamp 11",
+  "x": 359.0,
+  "y": 712.5,
+  "width": 16.5,
+  "height": 66.0,
+  "baseY": 778.5,
+  "url": "./valence-1876/occlusion/lamp-11.webp"
+ },
+ {
+  "id": "tree-105",
+  "name": "tree 105",
+  "x": 1218.5,
+  "y": 673.0,
+  "width": 28.0,
+  "height": 106.0,
+  "baseY": 779.0,
+  "url": "./valence-1876/occlusion/tree-105.webp"
+ },
+ {
+  "id": "building-15",
+  "name": "building 15",
+  "x": 1016.0,
+  "y": 476.5,
+  "width": 48.0,
+  "height": 306.0,
+  "baseY": 782.5,
+  "url": "./valence-1876/occlusion/building-15.webp"
+ },
+ {
+  "id": "tree-106",
+  "name": "tree 106",
+  "x": 459.5,
+  "y": 662.0,
+  "width": 84.0,
+  "height": 123.0,
+  "baseY": 785.0,
+  "url": "./valence-1876/occlusion/tree-106.webp"
+ },
+ {
+  "id": "wall-35",
+  "name": "wall 35",
+  "x": 257.5,
+  "y": 690.0,
+  "width": 48.0,
+  "height": 98.5,
+  "baseY": 788.5,
+  "url": "./valence-1876/occlusion/wall-35.webp"
+ },
+ {
+  "id": "bench-02",
+  "name": "bench 2",
+  "x": 464.0,
+  "y": 762.0,
+  "width": 31.0,
+  "height": 31.5,
+  "baseY": 793.5,
+  "url": "./valence-1876/occlusion/bench-02.webp"
+ },
+ {
+  "id": "tree-107",
+  "name": "tree 107",
+  "x": 1173.5,
+  "y": 748.5,
+  "width": 43.0,
+  "height": 47.5,
+  "baseY": 796.0,
+  "url": "./valence-1876/occlusion/tree-107.webp"
+ },
+ {
+  "id": "tree-108",
+  "name": "tree 108",
+  "x": 1049.0,
+  "y": 763.5,
+  "width": 36.0,
+  "height": 35.0,
+  "baseY": 798.5,
+  "url": "./valence-1876/occlusion/tree-108.webp"
+ },
+ {
+  "id": "wall-34",
+  "name": "wall 34",
+  "x": 1203.5,
+  "y": 773.0,
+  "width": 50.0,
+  "height": 30.5,
+  "baseY": 803.5,
+  "url": "./valence-1876/occlusion/wall-34.webp"
+ },
+ {
+  "id": "bush-15",
+  "name": "bush 15",
+  "x": 1412.5,
+  "y": 770.5,
+  "width": 46.5,
+  "height": 33.5,
+  "baseY": 804.0,
+  "url": "./valence-1876/occlusion/bush-15.webp"
+ },
+ {
+  "id": "building-19",
+  "name": "building 19",
+  "x": 1342.0,
+  "y": 629.0,
+  "width": 48.0,
+  "height": 181.5,
+  "baseY": 810.5,
+  "url": "./valence-1876/occlusion/building-19.webp"
+ },
+ {
+  "id": "building-18",
+  "name": "building 18",
+  "x": 1294.0,
+  "y": 634.5,
+  "width": 48.0,
+  "height": 179.0,
+  "baseY": 813.5,
+  "url": "./valence-1876/occlusion/building-18.webp"
+ },
+ {
+  "id": "tree-109",
+  "name": "tree 109",
+  "x": 861.5,
+  "y": 760.5,
+  "width": 32.0,
+  "height": 59.5,
+  "baseY": 820.0,
+  "url": "./valence-1876/occlusion/tree-109.webp"
+ },
+ {
+  "id": "lamp-12",
+  "name": "lamp 12",
+  "x": 438.0,
+  "y": 754.5,
+  "width": 16.0,
+  "height": 67.5,
+  "baseY": 822.0,
+  "url": "./valence-1876/occlusion/lamp-12.webp"
+ },
+ {
+  "id": "tree-110",
+  "name": "tree 110",
+  "x": 526.0,
+  "y": 705.0,
+  "width": 101.5,
+  "height": 118.0,
+  "baseY": 823.0,
+  "url": "./valence-1876/occlusion/tree-110.webp"
+ },
+ {
+  "id": "bush-16",
+  "name": "bush 16",
+  "x": 531.0,
+  "y": 797.5,
+  "width": 32.5,
+  "height": 28.0,
+  "baseY": 825.5,
+  "url": "./valence-1876/occlusion/bush-16.webp"
+ },
+ {
+  "id": "wall-37",
+  "name": "wall 37",
+  "x": 1462.0,
+  "y": 762.5,
+  "width": 48.0,
+  "height": 64.0,
+  "baseY": 826.5,
+  "url": "./valence-1876/occlusion/wall-37.webp"
+ },
+ {
+  "id": "tree-111",
+  "name": "tree 111",
+  "x": 756.5,
+  "y": 786.5,
+  "width": 33.0,
+  "height": 40.5,
+  "baseY": 827.0,
+  "url": "./valence-1876/occlusion/tree-111.webp"
+ },
+ {
+  "id": "manual-rhone-crate",
+  "name": "Petite caisse devant \u00c9lise",
+  "x": 321.0,
+  "y": 806.0,
+  "width": 18.5,
+  "height": 20.5,
+  "baseY": 827,
+  "url": "./valence-1876/occlusion/manual-rhone-crate.webp"
+ },
+ {
+  "id": "tree-112",
+  "name": "tree 112",
+  "x": 632.0,
+  "y": 749.0,
+  "width": 58.5,
+  "height": 78.5,
+  "baseY": 827.5,
+  "url": "./valence-1876/occlusion/tree-112.webp"
+ },
+ {
+  "id": "bush-17",
+  "name": "bush 17",
+  "x": 1399.0,
+  "y": 807.5,
+  "width": 17.0,
+  "height": 23.0,
+  "baseY": 830.5,
+  "url": "./valence-1876/occlusion/bush-17.webp"
+ },
+ {
+  "id": "tree-113",
+  "name": "tree 113",
+  "x": 636.0,
+  "y": 815.0,
+  "width": 19.5,
+  "height": 16.0,
+  "baseY": 831.0,
+  "url": "./valence-1876/occlusion/tree-113.webp"
+ },
+ {
+  "id": "tree-114",
+  "name": "tree 114",
+  "x": 1378.5,
+  "y": 736.5,
+  "width": 30.0,
+  "height": 98.5,
+  "baseY": 835.0,
+  "url": "./valence-1876/occlusion/tree-114.webp"
+ },
+ {
+  "id": "bush-18",
+  "name": "bush 18",
+  "x": 651.0,
+  "y": 826.0,
+  "width": 13.5,
+  "height": 9.5,
+  "baseY": 835.5,
+  "url": "./valence-1876/occlusion/bush-18.webp"
+ },
+ {
+  "id": "tree-115",
+  "name": "tree 115",
+  "x": 744.0,
+  "y": 813.0,
+  "width": 22.0,
+  "height": 23.0,
+  "baseY": 836.0,
+  "url": "./valence-1876/occlusion/tree-115.webp"
+ },
+ {
+  "id": "tree-116",
+  "name": "tree 116",
+  "x": 737.0,
+  "y": 796.5,
+  "width": 19.0,
+  "height": 40.0,
+  "baseY": 836.5,
+  "url": "./valence-1876/occlusion/tree-116.webp"
+ },
+ {
+  "id": "wall-36",
+  "name": "wall 36",
+  "x": 1414.0,
+  "y": 783.0,
+  "width": 48.0,
+  "height": 58.0,
+  "baseY": 841.0,
+  "url": "./valence-1876/occlusion/wall-36.webp"
+ },
+ {
+  "id": "tree-117",
+  "name": "tree 117",
+  "x": 663.0,
+  "y": 813.5,
+  "width": 28.0,
+  "height": 28.0,
+  "baseY": 841.5,
+  "url": "./valence-1876/occlusion/tree-117.webp"
+ },
+ {
+  "id": "wall-38",
+  "name": "wall 38",
+  "x": 783.0,
+  "y": 773.5,
+  "width": 83.0,
+  "height": 71.0,
+  "baseY": 844.5,
+  "url": "./valence-1876/occlusion/wall-38.webp"
+ },
+ {
+  "id": "tree-118",
+  "name": "tree 118",
+  "x": 717.5,
+  "y": 807.5,
+  "width": 26.5,
+  "height": 37.5,
+  "baseY": 845.0,
+  "url": "./valence-1876/occlusion/tree-118.webp"
+ },
+ {
+  "id": "tree-119",
+  "name": "tree 119",
+  "x": 689.0,
+  "y": 792.0,
+  "width": 32.5,
+  "height": 56.0,
+  "baseY": 848.0,
+  "url": "./valence-1876/occlusion/tree-119.webp"
+ },
+ {
+  "id": "tree-120",
+  "name": "tree 120",
+  "x": 1188.5,
+  "y": 802.0,
+  "width": 37.0,
+  "height": 49.0,
+  "baseY": 851.0,
+  "url": "./valence-1876/occlusion/tree-120.webp"
+ },
+ {
+  "id": "tree-121",
+  "name": "tree 121",
+  "x": 1353.5,
+  "y": 814.5,
+  "width": 30.0,
+  "height": 39.0,
+  "baseY": 853.5,
+  "url": "./valence-1876/occlusion/tree-121.webp"
+ },
+ {
+  "id": "tree-122",
+  "name": "tree 122",
+  "x": 1335.5,
+  "y": 822.5,
+  "width": 24.5,
+  "height": 36.5,
+  "baseY": 859.0,
+  "url": "./valence-1876/occlusion/tree-122.webp"
+ },
+ {
+  "id": "tree-123",
+  "name": "tree 123",
+  "x": 914.0,
+  "y": 805.5,
+  "width": 41.5,
+  "height": 56.5,
+  "baseY": 862.0,
+  "url": "./valence-1876/occlusion/tree-123.webp"
+ },
+ {
+  "id": "wall-39",
+  "name": "wall 39",
+  "x": 366.5,
+  "y": 777.0,
+  "width": 67.5,
+  "height": 86.0,
+  "baseY": 863.0,
+  "url": "./valence-1876/occlusion/wall-39.webp"
+ },
+ {
+  "id": "wall-40",
+  "name": "wall 40",
+  "x": 626.5,
+  "y": 823.0,
+  "width": 79.0,
+  "height": 46.5,
+  "baseY": 869.5,
+  "url": "./valence-1876/occlusion/wall-40.webp"
+ },
+ {
+  "id": "bush-19",
+  "name": "bush 19",
+  "x": 1308.0,
+  "y": 852.5,
+  "width": 22.5,
+  "height": 20.0,
+  "baseY": 872.5,
+  "url": "./valence-1876/occlusion/bush-19.webp"
+ },
+ {
+  "id": "tree-124",
+  "name": "tree 124",
+  "x": 950.0,
+  "y": 826.5,
+  "width": 34.5,
+  "height": 48.0,
+  "baseY": 874.5,
+  "url": "./valence-1876/occlusion/tree-124.webp"
+ },
+ {
+  "id": "tree-125",
+  "name": "tree 125",
+  "x": 895.5,
+  "y": 844.5,
+  "width": 32.0,
+  "height": 31.0,
+  "baseY": 875.5,
+  "url": "./valence-1876/occlusion/tree-125.webp"
+ },
+ {
+  "id": "tree-126",
+  "name": "tree 126",
+  "x": 1257.5,
+  "y": 801.0,
+  "width": 61.0,
+  "height": 81.5,
+  "baseY": 882.5,
+  "url": "./valence-1876/occlusion/tree-126.webp"
+ },
+ {
+  "id": "lamp-13",
+  "name": "lamp 13",
+  "x": 612.0,
+  "y": 768.5,
+  "width": 19.0,
+  "height": 114.0,
+  "baseY": 882.5,
+  "url": "./valence-1876/occlusion/lamp-13.webp"
+ },
+ {
+  "id": "wall-41",
+  "name": "wall 41",
+  "x": 842.0,
+  "y": 831.0,
+  "width": 75.0,
+  "height": 52.0,
+  "baseY": 883.0,
+  "url": "./valence-1876/occlusion/wall-41.webp"
+ },
+ {
+  "id": "manual-laundry-south-1",
+  "name": "\u00c9tendoir sud",
+  "x": 328.0,
+  "y": 839.0,
+  "width": 48.0,
+  "height": 55.0,
+  "baseY": 885,
+  "url": "./valence-1876/occlusion/manual-laundry-south-1.webp"
+ },
+ {
+  "id": "manual-laundry-south-2",
+  "name": "\u00c9tendoir sud",
+  "x": 376.0,
+  "y": 841.5,
+  "width": 42.5,
+  "height": 61.0,
+  "baseY": 885,
+  "url": "./valence-1876/occlusion/manual-laundry-south-2.webp"
+ },
+ {
+  "id": "tree-127",
+  "name": "tree 127",
+  "x": 1239.0,
+  "y": 857.5,
+  "width": 30.0,
+  "height": 30.5,
+  "baseY": 888.0,
+  "url": "./valence-1876/occlusion/tree-127.webp"
+ },
+ {
+  "id": "tree-128",
+  "name": "tree 128",
+  "x": 864.0,
+  "y": 859.5,
+  "width": 23.0,
+  "height": 29.5,
+  "baseY": 889.0,
+  "url": "./valence-1876/occlusion/tree-128.webp"
+ },
+ {
+  "id": "tree-129",
+  "name": "tree 129",
+  "x": 986.0,
+  "y": 839.5,
+  "width": 42.5,
+  "height": 59.5,
+  "baseY": 899.0,
+  "url": "./valence-1876/occlusion/tree-129.webp"
+ },
+ {
+  "id": "wall-42",
+  "name": "wall 42",
+  "x": 724.5,
+  "y": 820.0,
+  "width": 67.0,
+  "height": 79.5,
+  "baseY": 899.5,
+  "url": "./valence-1876/occlusion/wall-42.webp"
+ },
+ {
+  "id": "wall-45",
+  "name": "wall 45",
+  "x": 1367.5,
+  "y": 831.0,
+  "width": 48.0,
+  "height": 68.5,
+  "baseY": 899.5,
+  "url": "./valence-1876/occlusion/wall-45.webp"
+ },
+ {
+  "id": "wall-43",
+  "name": "wall 43",
+  "x": 1199.0,
+  "y": 827.0,
+  "width": 48.0,
+  "height": 77.0,
+  "baseY": 904.0,
+  "url": "./valence-1876/occlusion/wall-43.webp"
+ },
+ {
+  "id": "tree-130",
+  "name": "tree 130",
+  "x": 1019.5,
+  "y": 849.5,
+  "width": 64.5,
+  "height": 66.5,
+  "baseY": 916.0,
+  "url": "./valence-1876/occlusion/tree-130.webp"
+ },
+ {
+  "id": "wall-44",
+  "name": "wall 44",
+  "x": 1247.0,
+  "y": 829.0,
+  "width": 23.5,
+  "height": 89.0,
+  "baseY": 918.0,
+  "url": "./valence-1876/occlusion/wall-44.webp"
+ },
+ {
+  "id": "wall-46",
+  "name": "wall 46",
+  "x": 636.5,
+  "y": 864.5,
+  "width": 32.0,
+  "height": 57.5,
+  "baseY": 922.0,
+  "url": "./valence-1876/occlusion/wall-46.webp"
+ },
+ {
+  "id": "tree-131",
+  "name": "tree 131",
+  "x": 1087.0,
+  "y": 881.0,
+  "width": 78.0,
+  "height": 60.0,
+  "baseY": 941.0,
+  "url": "./valence-1876/occlusion/tree-131.webp"
+ },
+ {
+  "id": "tree-132",
+  "name": "tree 132",
+  "x": 741.0,
+  "y": 907.5,
+  "width": 51.5,
+  "height": 33.5,
+  "baseY": 941.0,
+  "url": "./valence-1876/occlusion/tree-132.webp"
+ },
+ {
+  "id": "tree-133",
+  "name": "tree 133",
+  "x": 1140.0,
+  "y": 893.5,
+  "width": 79.5,
+  "height": 47.5,
+  "baseY": 941.0,
+  "url": "./valence-1876/occlusion/tree-133.webp"
+ },
+ {
+  "id": "tree-134",
+  "name": "tree 134",
+  "x": 704.0,
+  "y": 922.0,
+  "width": 36.0,
+  "height": 19.0,
+  "baseY": 941.0,
+  "url": "./valence-1876/occlusion/tree-134.webp"
+ },
+ {
+  "id": "building-22",
+  "name": "building 22",
+  "x": 987.5,
+  "y": 897.5,
+  "width": 48.0,
+  "height": 43.5,
+  "baseY": 941.0,
+  "url": "./valence-1876/occlusion/building-22.webp"
+ },
+ {
+  "id": "building-23",
+  "name": "building 23",
+  "x": 1035.5,
+  "y": 904.5,
+  "width": 48.0,
+  "height": 36.5,
+  "baseY": 941.0,
+  "url": "./valence-1876/occlusion/building-23.webp"
+ },
+ {
+  "id": "building-24",
+  "name": "building 24",
+  "x": 1083.5,
+  "y": 927.5,
+  "width": 5.0,
+  "height": 13.5,
+  "baseY": 941.0,
+  "url": "./valence-1876/occlusion/building-24.webp"
+ },
+ {
+  "id": "building-25",
+  "name": "building 25",
+  "x": 790.5,
+  "y": 852.5,
+  "width": 48.0,
+  "height": 88.5,
+  "baseY": 941.0,
+  "url": "./valence-1876/occlusion/building-25.webp"
+ },
+ {
+  "id": "building-26",
+  "name": "building 26",
+  "x": 838.5,
+  "y": 858.5,
+  "width": 48.0,
+  "height": 82.5,
+  "baseY": 941.0,
+  "url": "./valence-1876/occlusion/building-26.webp"
+ },
+ {
+  "id": "building-27",
+  "name": "building 27",
+  "x": 934.5,
+  "y": 856.5,
+  "width": 48.0,
+  "height": 84.5,
+  "baseY": 941.0,
+  "url": "./valence-1876/occlusion/building-27.webp"
+ },
+ {
+  "id": "building-28",
+  "name": "building 28",
+  "x": 982.5,
+  "y": 879.5,
+  "width": 21.5,
+  "height": 61.5,
+  "baseY": 941.0,
+  "url": "./valence-1876/occlusion/building-28.webp"
+ },
+ {
+  "id": "bush-20",
+  "name": "bush 20",
+  "x": 611.0,
+  "y": 904.0,
+  "width": 98.0,
+  "height": 37.0,
+  "baseY": 941.0,
+  "url": "./valence-1876/occlusion/bush-20.webp"
+ }
+]

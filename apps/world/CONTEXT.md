@@ -60,3 +60,39 @@ in the Exploration world, without being a connected visitor or a Bible game part
 
 **Stand display**:
 The World opened with the `stand` URL parameter for an event screen.
+
+**Universe**:
+A separate explorable map on the same engine, opened by its own address. The archipelago is the default universe; Valence 1876 is the second.
+_Avoid_: Level, mode
+
+**Portal**:
+A place on a world's map that leads to another world: the stone arch on the central plaza, east of the Bible, leads to Valence 1876, and the train at Valence's station leads back.
+_Avoid_: Door, teleporter
+
+**Journey**:
+Going from one world to another through a portal, without leaving the page; the traveller keeps their avatar and arrives at the destination's portal.
+
+**Valence 1876**:
+The sepia universe at `/valence-1876` that retraces Daniel Bourdeau's eleven months in Valence, from October 1876 to September 1877.
+
+**Station**:
+One dated place of Valence 1876 where townsfolk tell what happened, how they studied, and what Bible Strong offers today.
+_Avoid_: Place (reserved for the archipelago's resource islands)
+
+**Thread**:
+The route linking the stations of Valence 1876 in the order of their dates; it is no longer drawn on the ground, the timeline shows the order.
+
+**Pioneer object**:
+One of seven study objects of 1877 hidden in Valence 1876; finding it opens a "yesterday, today" card.
+
+**Composite character**:
+An invented townsperson of Valence 1876 who carries daily life and emotion; real people only say what the sources allow. Visitors are not told which is which.
+
+**Mood**:
+The expression a speaker wears for one spoken line of a station (neutral, happy, thinking, surprised or grave), shown by their bust in the dialogue scene.
+_Avoid_: Emotion, emote (reserved for visitors' reactions)
+
+**Workshop**:
+The development-only editor of Valence 1876 (access zones, landmarks and thread, water and effects, shorelines, ambient zones), saving straight into the project files.
+_Avoid_: Debug mode
+

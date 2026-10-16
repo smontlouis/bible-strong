@@ -1,7 +1,5 @@
 import {
   acceptsServedCatalogIn2711,
-  BHG_ARCHIVE_ENTRY_IN_2711,
-  BHG_TEXT_REVISION_IN_2711,
   isMobileResourceCatalogIn2711,
 } from '../../../test/fixtures/mobileResourceCatalog-27.1.1'
 import {
@@ -15,22 +13,45 @@ jest.mock('../firebase', () => ({
   cdnUrl: (path: string) => `https://assets.example/${path}`,
 }))
 
+/** A BHG text that is not published yet. */
 const nextText = {
-  textRevision: 'bhg-e15bd9f0f1a91140579c',
-  textSha256: 'e15bd9f0f1a91140579c9eb9c8f4e173b8a4df361859758e0fe252ef55edc107',
+  textRevision: `bhg-${'f'.repeat(20)}`,
+  textSha256: 'f'.repeat(64),
 }
 
-/** The catalog once the rebuilt BHG and both rebuilt indexes are published. */
+/**
+ * The catalog once the rebuilt BHG and both rebuilt indexes are published, BHG as its canonical
+ * JSON like the other Bibles.
+ */
 const publishNextBhg = (): MobileResourceCatalog => {
   const catalog = structuredClone(BUNDLED_MOBILE_RESOURCE_CATALOG)
-  catalog.generatedAt = '2026-10-09T08:00:00.000Z'
-  const republish = (id: string, archiveSha256: string, archiveBytes: number) => {
+  catalog.generatedAt = '2099-01-01T00:00:00.000Z'
+  const republish = (
+    id: string,
+    archiveSha256: string,
+    archiveBytes: number,
+    archive?: { file: string; entry: string }
+  ) => {
     const entry = catalog.resources[id]!
-    const url = new URL(entry.url)
+    const url = new URL(archive?.file ?? entry.file, new URL('/v1/offline-artifacts/', entry.url))
     url.searchParams.set('sha256', archiveSha256)
-    Object.assign(entry, { archiveSha256, archiveBytes, url: url.toString(), ...nextText })
+    Object.assign(entry, {
+      archiveSha256,
+      archiveBytes,
+      url: url.toString(),
+      ...nextText,
+      ...(archive
+        ? {
+            ...archive,
+            entries: { canonical: { ...entry.entries.canonical!, entry: archive.entry } },
+          }
+        : {}),
+    })
   }
-  republish('bible:BHG', 'a'.repeat(64), 1784741)
+  republish('bible:BHG', 'a'.repeat(64), 1952000, {
+    file: 'bibles/bible-bhg.json.zip',
+    entry: 'bible-bhg.json',
+  })
   republish('bible-interlinear:BHG:fr', 'b'.repeat(64), 22552991)
   republish('bible-interlinear:BHG:en', 'c'.repeat(64), 22961000)
   return catalog
@@ -40,12 +61,8 @@ describe('the catalog served to Bible Strong 27.1.1', () => {
   it('is still accepted with the text declarations of BHG and its indexes', () => {
     const served = BUNDLED_MOBILE_RESOURCE_CATALOG
 
-    expect(served.resources['bible:BHG']).toMatchObject({
-      textRevision: BHG_TEXT_REVISION_IN_2711,
-      entry: BHG_ARCHIVE_ENTRY_IN_2711,
-    })
     expect(served.resources['bible-interlinear:BHG:fr']!.textRevision).toBe(
-      BHG_TEXT_REVISION_IN_2711
+      served.resources['bible:BHG']!.textRevision
     )
     expect(isMobileResourceCatalogIn2711(served)).toBe(true)
     expect(acceptsServedCatalogIn2711(served)).toBe(true)
@@ -57,13 +74,6 @@ describe('the catalog served to Bible Strong 27.1.1', () => {
     expect(isMobileResourceCatalogIn2711(served)).toBe(true)
     expect(acceptsServedCatalogIn2711(served)).toBe(true)
     expect(resolveMobileResourceCatalog(served)).toBe(served)
-  })
-
-  it('keeps the archive entry name 27.1.1 compiled in for BHG', () => {
-    // 27.1.1 unzips BHG under the entry name it was built with, whatever the catalog says.
-    expect(BUNDLED_MOBILE_RESOURCE_CATALOG.resources['bible:BHG']!.entries.canonical?.entry).toBe(
-      BHG_ARCHIVE_ENTRY_IN_2711
-    )
   })
 
   it('would be rejected, and replaced by its own bundled catalog, if an entry lost a field', () => {

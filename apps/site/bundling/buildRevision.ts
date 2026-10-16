@@ -32,6 +32,27 @@ export const digestBuild = (modules: readonly BuiltModule[], root: string): stri
   return hash.digest('hex').slice(0, 16)
 }
 
+/**
+ * Published data the site must not bundle: each publication rewrites it, and a build that
+ * carries it would name itself anew, emptying the page cache for a change no page shows
+ * (ADR-0084). The site reads published resources through the Resource API instead.
+ */
+const PUBLICATION_DATA_MODULES = [
+  /\/packages\/resource-catalog\/src\/mobile-resource-catalog\.json$/u,
+]
+
+/** Fails a build that would bundle published data. */
+export const assertNoPublicationData = (modules: readonly BuiltModule[]): void => {
+  const bundled = modules
+    .map(module => module.id.replace(/^\0+/u, '').split('?')[0])
+    .filter(id => PUBLICATION_DATA_MODULES.some(pattern => pattern.test(id)))
+  if (bundled.length > 0) {
+    throw new Error(
+      `BUILD_REVISION: the site bundles published data, which would change its revision with every publication: ${bundled.join(', ')}`
+    )
+  }
+}
+
 export const buildRevision = (): Plugin => {
   let root = process.cwd()
   let revision: string | undefined
@@ -47,6 +68,7 @@ export const buildRevision = (): Plugin => {
       for (const id of this.getModuleIds()) {
         modules.push({ id, code: this.getModuleInfo(id)?.code ?? null })
       }
+      assertNoPublicationData(modules)
       revision = digestBuild(modules, root)
     },
     renderChunk(code) {

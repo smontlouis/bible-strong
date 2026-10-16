@@ -4,6 +4,12 @@ import { isReactiveBush, prepareBushCutout } from './bush-cutouts'
 export type BushShape = { x: number; y: number; width: number; height: number }
 export type BushContact = { x: number; y: number; moving: boolean }
 export type BushMask = { width: number; height: number; alpha: Uint8ClampedArray }
+export type BushRustleOptions = {
+  /** Which foreground cutouts react to contact; the archipelago's shrubs by default. */
+  reactive?: (object: BushShape & { id: string }) => boolean
+  /** Falling leaves: three fills and an outline. */
+  leaves?: { colors: [number, number, number]; stroke: number }
+}
 
 // Feet plus a small contact margin, in source-map coordinates (independent of zoom).
 export function touchesBush(shape: BushShape, mask: BushMask, avatar: BushContact): boolean {
@@ -47,14 +53,16 @@ export class BushRustle {
 
   constructor(
     private readonly scene: Phaser.Scene,
-    foreground: Foreground[]
+    foreground: Foreground[],
+    private readonly options: BushRustleOptions = {}
   ) {
     this.add(foreground)
+    const leaves = options.leaves ?? { colors: [0x9dcf50, 0xc5df72, 0xe0e994], stroke: 0x365d30 }
     // Fixed pool: concurrent visitors cannot create unbounded particles.
     for (let i = 0; i < 64; i++) {
       const image = scene.add
-        .ellipse(0, 0, 4.6, 2.4, [0x9dcf50, 0xc5df72, 0xe0e994][i % 3])
-        .setStrokeStyle(0.6, 0x365d30, 0.9)
+        .ellipse(0, 0, 4.6, 2.4, leaves.colors[i % 3])
+        .setStrokeStyle(0.6, leaves.stroke, 0.9)
         .setVisible(false)
       this.leaves.push({ image, age: 1, vx: 0, vy: 0, spin: 0 })
     }
@@ -63,7 +71,7 @@ export class BushRustle {
   add(foreground: Foreground[]) {
     const scene = this.scene
     for (const entry of foreground) {
-      if (!isReactiveBush(entry.object.id)) continue
+      if (!(this.options.reactive?.(entry.object) ?? isReactiveBush(entry.object.id))) continue
       const { object, image } = entry
       prepareBushCutout(scene, object.id, image)
       const canvas = document.createElement('canvas')

@@ -130,3 +130,35 @@ Delivering `BHG` as a canonical Bible removes the case.
 A token id space shared by `BHG` and the Strong indexes is still not named by either file. If a
 future `BHG` renumbers published tokens, both must declare a lineage and readers must compare it;
 until then the stability rule of ADR-0078 is the only guard.
+
+## Amendment (2026-10-14): BHG is delivered like the other Bibles
+
+Application 27.2, which carries this decision, is in the stores, and 27.1.1 is no longer a
+constraint for `BHG`. The `BHG` text is therefore not delivered under the `bible-step.json` entry
+27.1.1 compiled in. Like any ordinary Bible whose text changes, it is delivered as its canonical
+JSON, `bible-bhg.json` in `bibles/bible-bhg.json.zip`: the file names its own revision, and the
+application takes the entry and the address from the catalog. An ordinary Bible keeps its source
+file as its Offline copy only while that file is the one readers already hold.
+
+On 27.1.1 the published `BHG` can no longer be installed (the entry it looks for is absent); an
+installed pair stays as it is. The two cases above that concern 27.1.1 under a canonical or flat
+`BHG` no longer apply.
+
+## Amendment (2026-10-15): a retired archive stays served for the SHA applications compiled in
+
+The previous amendment assumed only 27.1.1 still asked for `bibles/bible-step.json.zip`. 27.2
+asks for it too: its startup migration installs replacement resources before the live catalog is
+loaded, so it reads the catalog compiled in the binary, and that catalog names the old `BHG`
+archive. Once the Worker stopped declaring the file, every such installation failed with a 404
+and left readers on the migration error screen (Sentry `BIBLE-STRONG-M9Y`).
+
+The Resource service therefore keeps a list of retired Offline copies
+(`packages/resource-service/src/runtime/retiredOfflineArtifacts.ts`). A retired file is served
+only from the immutable key of a SHA it was published with, plain or encrypted, and never from its
+stable key. A request without a SHA, as compiled catalogs make for `BHG`, gets the last SHA listed
+for that file. The archive delivered is the old one, which is the one the compiled catalog verifies;
+the application then learns the newer revision from the live catalog, as decided above.
+
+Republishing a resource under a new file name, or with a new encrypted copy, adds the outgoing
+archive to that list for as long as installed binaries compile in its catalog entry, and its R2
+objects under `revisions/` are kept.

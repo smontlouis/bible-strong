@@ -1813,6 +1813,29 @@
           513
         ]
       ]
+    },
+    {
+      "id": "portal-pillar-west",
+      "name": "Pilier ouest du portail",
+      "kind": "blocked",
+      "points": [
+        [
+          911,
+          503
+        ],
+        [
+          964.49,
+          503.46
+        ],
+        [
+          967.32,
+          514.77
+        ],
+        [
+          911,
+          514
+        ]
+      ]
     }
   ]
 }

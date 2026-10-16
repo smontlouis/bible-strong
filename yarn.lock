@@ -30698,11 +30698,11 @@ multer@emadalam/multer:
 
 "rn-fetch-blob@patch:rn-fetch-blob@npm%3A0.12.0#~/.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch":
   version: 0.12.0
-  resolution: "rn-fetch-blob@patch:rn-fetch-blob@npm%3A0.12.0#~/.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch::version=0.12.0&hash=9ac8ae"
+  resolution: "rn-fetch-blob@patch:rn-fetch-blob@npm%3A0.12.0#~/.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch::version=0.12.0&hash=0fc8dd"
   dependencies:
     base-64: "npm:0.1.0"
     glob: "npm:7.0.6"
-  checksum: 10c0/778e98a7fd79fa259b9815408a808b928bda0c1240b6e8986d465fa177abd4a57612bf1e4a78535f4ccab86adfc093305c13dc3d083d5765c4012e55300e2fc7
+  checksum: 10c0/4f584ccfe351ec09906b8ec80600b85bfb1f744e8c9eccb5e508cf2881e215ab957ff4444d4fcbf59f4ace7b7094ea7479bff6630d1dac4b1ee0acc67e504f04
   languageName: node
   linkType: hard
 

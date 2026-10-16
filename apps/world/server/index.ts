@@ -7,12 +7,18 @@ import { authenticateAdmin, validAdminMutation } from './guestbook-auth'
 import { GUESTBOOK_INSTANCE, routeGuestbook, type GuestbookEnv } from './guestbook'
 export { Guestbook } from './guestbook'
 import navigationJson from '../public/navigation/archipelago.json'
+import valenceNavigationJson from '../public/valence-1876/navigation.json'
+import valenceLayoutJson from '../public/valence-1876/layout.json'
 import { parseNavigation } from '../src/navigation-document'
 import { chooseCentralSpawn } from '../src/multiplayer-spawn'
+import { parseLayout, VALENCE_NAVIGATION } from '../src/valence/valence-documents'
+import { tileNavigation } from '../src/valence/navigation-tiles'
+import { chooseValenceSpawn } from '../src/valence/valence-spawn'
 import { Server, routePartykitRequest, type Connection } from 'partyserver'
 import {
   MAX_PLAYERS,
-  ROOM,
+  ROOMS,
+  VALENCE_ROOM,
   isOutdatedJoin,
   parseClientMessage,
   type Player,
@@ -20,6 +26,8 @@ import {
 } from '../src/multiplayer-protocol'
 
 const navigation = parseNavigation(navigationJson)
+const valenceNavigation = tileNavigation(parseNavigation(valenceNavigationJson, VALENCE_NAVIGATION))
+const valenceArrival = (({ spawn: [x, y] }) => ({ x, y }))(parseLayout(valenceLayoutJson))
 
 const RESUME_TTL = 24 * 60 * 60 * 1000
 /** A hidden tab stops sending heartbeats; its avatar leaves after this, and resumes later. */
@@ -39,6 +47,8 @@ type Session = {
   gameHistoryId?: string
   lastReaction?: number
   lastGameAction?: number
+  /** A stand screen: it receives the room's presence and reactions, but is never a visitor. */
+  watching?: boolean
 }
 interface Env extends GuestbookEnv, GameAIEnv, GameCatalogueEnv {
   WorldRoom: DurableObjectNamespace<WorldRoom>
@@ -48,6 +58,10 @@ interface Env extends GuestbookEnv, GameAIEnv, GameCatalogueEnv {
 
 export class WorldRoom extends Server<Env> {
   static options = { hibernate: true }
+  /** Valence 1876 shares presence and reactions, but has no Bible games. */
+  private get hasGames() {
+    return this.name !== VALENCE_ROOM
+  }
   private gameService?: WorldGames
   private get games() {
     return (this.gameService ??= new WorldGames(
@@ -95,10 +109,11 @@ export class WorldRoom extends Server<Env> {
         this.publish(JSON.stringify({ type: 'frame', players } satisfies ServerMessage))
     }, 50)
   }
-  /** Presence goes to admitted visitors only, never to sockets that have not joined. */
+  /** Presence goes to admitted visitors and stand screens, never to sockets that have not joined. */
   private publish(message: string, except?: string) {
     for (const peer of this.getConnections<Session>())
-      if (peer.id !== except && peer.readyState === 1 && peer.state?.player) peer.send(message)
+      if (peer.id !== except && peer.readyState === 1 && (peer.state?.player || peer.state?.watching))
+        peer.send(message)
   }
   private saved(player: Player, lastReaction?: number): SavedSession {
     return {
@@ -156,10 +171,15 @@ export class WorldRoom extends Server<Env> {
           id: session.player!.id,
           reaction: message.reaction,
         } satisfies ServerMessage)
-        // Only admitted visitors receive reactions; never persist or replay them on join.
+        // Only admitted visitors and stand screens receive reactions; never persist or replay them.
         for (const peer of this.getConnections<Session>())
-          if (peer.readyState === 1 && peer.state?.player && !peer.state.hidden) peer.send(frame)
+          if (peer.readyState === 1 && (peer.state?.player || peer.state?.watching) && !peer.state.hidden)
+            peer.send(frame)
       }
+      return
+    }
+    if (message.type === 'game' && session.player && !this.hasGames) {
+      connection.setState(next)
       return
     }
     if (message.type === 'game' && session.player) {
@@ -182,7 +202,15 @@ export class WorldRoom extends Server<Env> {
       connection.send(JSON.stringify({ type: 'pong' } satisfies ServerMessage))
       return
     }
-    if (message.type === 'join' && !session.player) {
+    if (message.type === 'watch' && !session.player && !session.watching) {
+      // A stand screen sees everyone already here, then follows the room like a visitor would,
+      // without a place, a position or a count of its own.
+      connection.setState({ ...next, watching: true })
+      const players = [...this.getConnections<Session>()].flatMap(c => (c.state?.player ? [c.state.player] : []))
+      connection.send(JSON.stringify({ type: 'watching', players } satisfies ServerMessage))
+      return
+    }
+    if (message.type === 'join' && !session.player && !session.watching) {
       // Serialize resume/arrival against close callbacks and other join attempts.
       await this.ctx.blockConcurrencyWhile(async () => {
         const previous = message.resumeToken
@@ -206,7 +234,11 @@ export class WorldRoom extends Server<Env> {
           connection.close(4008, 'Room full')
           return
         }
-        const spawn = restored?.pose ?? chooseCentralSpawn(navigation)
+        const spawn =
+          restored?.pose ??
+          (this.hasGames
+            ? chooseCentralSpawn(navigation)
+            : chooseValenceSpawn(valenceNavigation, valenceArrival))
         if (!spawn) {
           connection.send(JSON.stringify({ type: 'full' } satisfies ServerMessage))
           connection.close(4008, 'No free arrival position')
@@ -248,7 +280,7 @@ export class WorldRoom extends Server<Env> {
             resumeToken: next.resumeToken,
           } satisfies ServerMessage)
         )
-        this.games.presence(next.player.id, true)
+        if (this.hasGames) this.games.presence(next.player.id, true)
         this.pending.delete(next.player.id)
         this.publish(
           JSON.stringify({ type: 'player', player: next.player } satisfies ServerMessage),
@@ -259,7 +291,7 @@ export class WorldRoom extends Server<Env> {
     } else if (session.player && message.type === 'visibility') {
       next.hidden = message.hidden
       connection.setState(next)
-      this.games.presence(session.player.id, !message.hidden)
+      if (this.hasGames) this.games.presence(session.player.id, !message.hidden)
       return
     } else if (session.player && message.type === 'move') {
       if (message.seq <= session.player.seq) {
@@ -291,7 +323,7 @@ export class WorldRoom extends Server<Env> {
         )
       )
     const id = session.player.id
-    this.games.presence(id, false)
+    if (this.hasGames) this.games.presence(id, false)
     this.pending.delete(id)
     connection.setState({ ...session, player: null })
     this.publish(JSON.stringify({ type: 'leave', id } satisfies ServerMessage), connection.id)
@@ -311,8 +343,9 @@ export class WorldRoom extends Server<Env> {
       const session = connection.state
       if (
         !session ||
-        (!session.player && now - (session.since ?? session.lastSeen) > 10_000) ||
-        now - session.lastSeen > (session.player ? (session.hidden ? HIDDEN_TTL : 45_000) : 10_000)
+        (!session.player && !session.watching && now - (session.since ?? session.lastSeen) > 10_000) ||
+        now - session.lastSeen >
+          (session.player ? (session.hidden ? HIDDEN_TTL : 45_000) : session.watching ? 45_000 : 10_000)
       ) {
         this.remove(connection)
         connection.close(4000, 'Session expired')
@@ -335,7 +368,7 @@ export class WorldRoom extends Server<Env> {
     const expired = [...saved].filter(([, value]) => value.expires <= now).map(([key]) => key)
     for (let i = 0; i < expired.length; i += 128)
       await this.ctx.storage.delete(expired.slice(i, i + 128))
-    const gameWake = this.games.tick()
+    const gameWake = this.hasGames ? this.games.tick() : null
     if (active || saved.size > expired.length || gameWake !== null)
       await this.ctx.storage.setAlarm(
         Math.min(gameWake ?? Infinity, Date.now() + (active ? 30_000 : 60 * 60 * 1000))
@@ -411,7 +444,7 @@ export default {
       response.headers.set('Vary', 'Origin')
       return response
     }
-    if (url.pathname !== `/parties/world-room/${ROOM}`)
+    if (!ROOMS.some(room => url.pathname === `/parties/world-room/${room}`))
       return new Response('Not found', { status: 404 })
     if (request.headers.get('Upgrade')?.toLowerCase() !== 'websocket')
       return new Response('WebSocket required', { status: 426 })

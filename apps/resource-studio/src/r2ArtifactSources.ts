@@ -305,8 +305,9 @@ export async function patchMobileCatalog(options: {
       catalog.resources[archive.catalogId]?.archiveSha256 !== archive.sha256
   );
   if (changed.length === 0) return [];
-  // The bundle, not the inventory, says which text a rebuilt archive carries
-  // or requires: the inventory still describes the archive it replaces.
+  // The bundle, not the inventory, says which entry a rebuilt archive holds
+  // and which text it carries or requires: the inventory still describes the
+  // archive it replaces.
   const inventory = (
     await readJson<MobileResourceInventoryEntry[]>(
       path.join(options.root, "config/mobile-resource-inventory.json")
@@ -314,7 +315,14 @@ export async function patchMobileCatalog(options: {
   ).flatMap((entry) => {
     const archive = changed.find((item) => item.catalogId === entry.id);
     if (!archive) return [];
-    const resource: MobileResourceInventoryEntry = { ...entry };
+    const resource: MobileResourceInventoryEntry = {
+      ...entry,
+      sources: entry.sources.map((source) =>
+        source.role === "canonical"
+          ? { ...source, entry: archive.entry }
+          : source
+      )
+    };
     delete resource.textRevision;
     delete resource.textSha256;
     return [{ ...resource, ...catalogTextOf(archive, catalogIds) }];

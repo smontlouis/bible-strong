@@ -41,5 +41,5 @@ const publicBookSlugs =
 export function referenceUrl(reference: BibleReference, language: Language) {
   const book = publicBookSlugs[reference.book - 1]
   if (!book) throw new Error(`Unknown Bible book: ${reference.book}`)
-  return `https://web.bible-strong.app/bible/${language === 'fr' ? 'lsg' : 'kjv'}/${book}/${reference.chapter}/${reference.verse}`
+  return `https://bible-strong.app/bible/${language === 'fr' ? 'lsg' : 'kjv'}/${book}/${reference.chapter}/${reference.verse}`
 }

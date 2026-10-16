@@ -187,7 +187,7 @@ sqlite3 "$DATA/Documents/SQLite/shared/interlinear-bibles/bible-bhg-interlinear-
   "SELECT key, value FROM ResourceMetadata WHERE key IN ('textRevision','schemaVersion','indexRevision')"
 ```
 
-Today both must read `bhg-803c482ed06005693547`.
+Since 2026-10-14 both must read `bhg-e15bd9f0f1a91140579c` once the published pair is installed.
 
 ### A. Fresh install against production
 
@@ -221,7 +221,7 @@ Today both must read `bhg-803c482ed06005693547`.
 ### C. A new BHG appears in the catalog — local simulation, nothing published
 
 The rebuilt BHG and indexes wait under
-`apps/resource-studio/outputs/releases/*2026-10-08*bracketed-references`. This scenario serves them
+`apps/resource-studio/outputs/releases/*2026-10-14*` (BHG as its canonical JSON, `bible-bhg.json`). This scenario serves them
 from the development machine. It changes the catalog **in the working tree only**: do not commit
 it, and restore it at the end.
 
@@ -229,15 +229,15 @@ Prepare, from the repository root:
 
 ```bash
 REL="$PWD/apps/resource-studio/outputs/releases"
-BHG_ROOTS="$REL/ordinary-bible-publications-2026-10-08-bhg-bracketed-references:$REL/interlinear-bible-publications-2026-10-08-bracketed-references"
+BHG_ROOTS="$REL/ordinary-bible-publications-2026-10-14-bhg:$REL/interlinear-bible-publications-2026-10-14"
 
 # 1. With the committed catalog, install the published pair first (scenario A, steps 4-5).
 
 # 2. Publish the rebuilt BHG in the working-tree catalog only.
 MOBILE_CATALOG_GENERATED_AT="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" \
   yarn workspace @bible-strong/resource-studio resources:publication:r2 catalog-patch \
-  --bundles "$REL/ordinary-bible-publications-2026-10-08-bhg-bracketed-references" \
-  --bundles "$REL/interlinear-bible-publications-2026-10-08-bracketed-references"
+  --bundles "$REL/ordinary-bible-publications-2026-10-14-bhg" \
+  --bundles "$REL/interlinear-bible-publications-2026-10-14"
 git diff --stat packages/resource-catalog   # three entries, textRevision bhg-e15bd9f0f1a91140579c
 
 # 3. Local Resource service: Online access on :8787, Offline-copy archives on :8788.
@@ -282,17 +282,6 @@ text with published tokens.
 
 Restore: `git checkout -- packages/resource-catalog/src/mobile-resource-catalog.json`, stop both
 services, delete the test installs.
-
-### D. 27.1.1 at the time BHG is published — only if the canonical recipe is chosen
-
-Serve the rebuilt bundles as in C to a **27.1.1 development build**, with a BHG bundle whose
-Offline copy is the canonical JSON under the entry name `bible-step.json`.
-
-1. With the published pair installed, update BHG. Expected: the install succeeds; simple mode
-   reads; interlinear mode reads online (connection required) with glosses under the right words;
-   offline it reports an invalid Offline copy instead of rendering.
-2. Update the index. Expected: the download fails validation three times and the previous index
-   file is kept. This is the known, accepted outcome on 27.1.1.
 
 ### What these steps do not prove
 

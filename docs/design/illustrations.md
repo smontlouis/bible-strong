@@ -47,6 +47,10 @@ Use one dominant color, one or two neighboring shades, dark ink, and light paper
 
 For a feature absent from this table, explicitly choose a color family and record it in the brief. Do not present that choice as a mapping already established in the application.
 
+### Brief-specific palette: Valence 1876
+
+The Valence 1876 universe of World (`apps/world/docs/valence-1876/`) is a recorded exception, not a new color world. Everything set in 1877 is sepia: one family of warm browns and ochres, cream paper for light walls and pages, a brown-night ink for lines, with no second hue. Its townsfolk keep the house proportions loosened toward a storybook game: oversized heads, thin limbs, small dot eyes and scratchy nib-pen ink (reference sheet: `art-workbench/experiments/valence-1876/characters/style-sheet-v1.png`, approved concept: `apps/world/docs/valence-1876/concepts/carte-v1.webp`). Only two things leave the sepia, and they carry the message: the visitor's avatar keeps its colour, and the "today" panels open in Bible Strong's own colours with a real capture of the app. Do not reuse this palette for other features.
+
 ## Reference Gallery
 
 Thumbnails link directly to repository files. Their alpha channels have been verified; black shown by an image viewer is not an instruction to use a black background.

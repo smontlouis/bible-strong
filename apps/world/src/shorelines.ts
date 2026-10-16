@@ -49,7 +49,18 @@ export function parseShorelines(value: unknown): Shoreline[] {
     }
   })
 }
-export function createShoreEditor() {
+/** `file` is read at runtime; `saveKey` names the dev-server endpoint `/__study-world/<saveKey>`. */
+export type ShoreDocument = { file: string; saveKey: string; storageKey: string; draftKey: string }
+const ARCHIPELAGO_SHORES: ShoreDocument = {
+  file: './shorelines/archipelago.json',
+  saveKey: 'shorelines',
+  storageKey: STORAGE_KEY,
+  draftKey: DRAFT_KEY,
+}
+
+export function createShoreEditor(document: ShoreDocument = ARCHIPELAGO_SHORES) {
+  const STORAGE_KEY = document.storageKey
+  const DRAFT_KEY = document.draftKey
   let lines: Shoreline[] = []
   let saveError = false
   try {
@@ -78,7 +89,7 @@ export function createShoreEditor() {
     },
     async load() {
       try {
-        const response = await fetch('./shorelines/archipelago.json', { cache: 'no-store' })
+        const response = await fetch(document.file, { cache: 'no-store' })
         if (!response.ok) throw new Error('Cannot load shorelines')
         const project = parseShorelines(await response.json())
         saved = JSON.stringify(project)
@@ -111,7 +122,7 @@ export function createShoreEditor() {
       model.saveError = false
       model.notify()
       try {
-        const response = await fetch('/__study-world/shorelines', {
+        const response = await fetch(`/__study-world/${document.saveKey}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: snapshot,

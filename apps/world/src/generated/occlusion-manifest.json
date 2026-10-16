@@ -828,30 +828,6 @@
     "url": "./assets/occlusion/plaza-south-west-shrubs.webp"
   },
   {
-    "id": "plaza-south-east-tree",
-    "name": "Place · arbre sud-est",
-    "x": 915,
-    "y": 493,
-    "width": 65,
-    "height": 63,
-    "pixelRatio": 2,
-    "baseY": 546,
-    "always": false,
-    "url": "./assets/occlusion/plaza-south-east-tree.webp"
-  },
-  {
-    "id": "plaza-south-east-shrubs",
-    "name": "Place · massif sud-est",
-    "x": 877,
-    "y": 532,
-    "width": 63,
-    "height": 41,
-    "pixelRatio": 2,
-    "baseY": 558,
-    "always": false,
-    "url": "./assets/occlusion/plaza-south-east-shrubs.webp"
-  },
-  {
     "id": "plaza-east-shrub",
     "name": "Place · buisson près du pont commentaires",
     "x": 1044,

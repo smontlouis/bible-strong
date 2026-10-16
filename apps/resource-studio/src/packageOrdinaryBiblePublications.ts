@@ -9,6 +9,7 @@ import {
   writeFile
 } from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 import {
   publishedTextSourceUrl,
@@ -138,12 +139,37 @@ export const getOrdinaryBibleCanon = (versionId: string) => {
   };
 };
 
+/**
+ * A Bible delivers its source file as its Offline copy only while that file is
+ * the copy readers already hold, so an unchanged Bible is not offered an empty
+ * update. A Bible that gains presentation, was repaired, or whose text changed
+ * is delivered as its canonical JSON, which names its own text revision.
+ */
+export const deliversSourceAsOfflineCopy = (bible: {
+  gainsPresentation: boolean;
+  sourceIsDeliverable: boolean;
+  sourceSha256: string;
+  deliveredContentSha256: string | undefined;
+}) =>
+  !bible.gainsPresentation &&
+  bible.sourceIsDeliverable &&
+  bible.sourceSha256 === bible.deliveredContentSha256;
+
+type DeliveredCatalog = {
+  resources: Record<
+    string,
+    { entries?: { canonical?: { sha256: string } } } | undefined
+  >;
+};
+
 export async function buildOrdinaryBiblePublications(options: {
   root?: string;
   outputDir?: string;
   generatedAt: string;
   sourceOverridesPath?: string;
   versionIds?: readonly string[];
+  /** The catalog readers hold; the delivered one by default. */
+  deliveredCatalogPath?: string;
 }) {
   const root = path.resolve(options.root ?? process.cwd());
   const outputDir = path.resolve(
@@ -195,6 +221,16 @@ export async function buildOrdinaryBiblePublications(options: {
     }
   }
   const sourceOptions = { root, textOverrides };
+  const deliveredCatalog = JSON.parse(
+    await readFile(
+      options.deliveredCatalogPath ??
+        path.join(
+          root,
+          "../../packages/resource-catalog/src/mobile-resource-catalog.json"
+        ),
+      "utf8"
+    )
+  ) as DeliveredCatalog;
   const configuredSources = (await readOrdinaryBibleSources(root)).bibles;
   const sourcePatches = (await readBibleSourcePatches(root)).bibles;
   const stagingDir = `${outputDir}.tmp-${process.pid}-${randomUUID()}`;
@@ -262,13 +298,17 @@ export async function buildOrdinaryBiblePublications(options: {
             sha256: sha256(await readFile(datasetPath, "utf8"))
           });
         }
-        // A Bible that gains no presentation keeps its delivered archive byte
-        // for byte: readers are not offered an empty update, and archives
-        // other resources depend on (the BHG text of interlinear indexes) stay
-        // identical. Such Bibles never had side files. A legacy source that
-        // was repaired, or groups verses under a combined key, no longer reads
-        // as its publication: its Offline copy is the canonical JSON.
-        if (!wordsOfJesus && !appliesPericope && text.sourceIsDeliverable) {
+        // An unchanged Bible keeps its delivered archive byte for byte. Such
+        // Bibles never had side files.
+        if (
+          deliversSourceAsOfflineCopy({
+            gainsPresentation: Boolean(wordsOfJesus) || appliesPericope,
+            sourceIsDeliverable: text.sourceIsDeliverable,
+            sourceSha256: text.sourceSha256,
+            deliveredContentSha256:
+              deliveredCatalog.resources[resourceId]?.entries?.canonical?.sha256
+          })
+        ) {
           const archivePath = path.join(
             canonicalDir,
             `bible-${metadata.id.toLowerCase()}.json.zip`
@@ -428,9 +468,9 @@ export const parseOrdinaryBiblePublicationArgs = (
   };
 };
 
-const isMain = process.argv.some((argument) =>
-  argument.includes("packageOrdinaryBiblePublications")
-);
+const isMain =
+  process.argv[1] !== undefined &&
+  import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;
 
 if (isMain) {
   const firstOption = process.argv.findIndex((argument) =>

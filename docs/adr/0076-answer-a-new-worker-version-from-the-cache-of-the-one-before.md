@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted. Amended on 2026-10-15: the Worker version leaves the key, and the fallback goes (see below).
 
 ## Context
 
@@ -160,3 +160,29 @@ as it did.
 The ETag of an answer names its content revision, not the Worker version. A caller that
 revalidates an answer of an earlier version is told 304 by the deployed one, whatever the
 cache does. No client of the API sends a validator today.
+
+## Amendment (2026-10-15): the key names the content and the answers, never the Worker version
+
+Every deployment still read every URL from Neon again, in every data centre: the fallback spared
+readers the wait, not the database the reads, and crawlers ask for far more URLs than readers do.
+Most deployments change no answer. Emptying the cache becomes a decision instead of a side effect
+of deploying.
+
+- **The key.** A cached answer is kept under the revision of the content it reads and
+  `RESOURCE_API_ANSWER_REVISION`, the namespace this decision called the fallback, and spelled
+  alike: the first deployment of the amendment answers what earlier versions stored there as its
+  own. The fallback, its refresh after the answer, the `STALE` answer and the
+  `CF_VERSION_METADATA` binding go.
+- **The content.** A dictionary or a commentary is named by its own catalog entry
+  (`database:<work>:<language>`), the commentaries of a verse by those it filters on, the
+  cross-references by `cross-references:<language>`, which only a hand invalidation changes. They
+  were named by a fingerprint of the whole catalog, which any publication changed.
+- **Invalidations by hand.** `packages/resource-service/src/runtime/resourceApiInvalidations.json`
+  counts, by identity, the invalidations made with `yarn cache:invalidate --api <identity>`; a
+  count is part of the key of that resource only, from the next deployment. An identity absent
+  from it keeps the key it had.
+
+The risk this decision removed comes back, by choice: a deployment that changes what a route
+answers for the same content and forgets to bump `RESOURCE_API_ANSWER_REVISION`, or the route's
+own revision, serves the earlier answer until it expires, thirty days for a read. The README of
+the Resource service and the `cache-invalidation` skill list when to bump it.

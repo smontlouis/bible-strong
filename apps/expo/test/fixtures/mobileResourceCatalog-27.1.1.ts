@@ -265,7 +265,3 @@ export const acceptsServedCatalogIn2711 = (value: unknown): boolean => {
   const candidateTimestamp = Date.parse(value.generatedAt)
   return Number.isFinite(candidateTimestamp) && candidateTimestamp >= bundledTimestamp
 }
-
-/** Publication constants 27.1.1 compiled in for BHG and its two interlinear indexes. */
-export const BHG_TEXT_REVISION_IN_2711 = 'bhg-803c482ed06005693547'
-export const BHG_ARCHIVE_ENTRY_IN_2711 = 'bible-step.json'

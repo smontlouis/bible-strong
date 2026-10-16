@@ -78,18 +78,19 @@ export function arrivalTileTarget(
   viewport: { width: number; height: number },
   zoom: number,
   position: { x: number; y: number },
-  rendererResolution: number
+  rendererResolution: number,
+  manifest: Pick<MapTileManifest, 'worldWidth' | 'worldHeight'> = mapTileManifest
 ): { zoom: number; view: WorldView } {
   const width = viewport.width / zoom
   const height = viewport.height / zoom
   return {
     zoom,
     view: {
-      x: Math.max(0, Math.min(mapTileManifest.worldWidth - width, position.x - width / 2)),
+      x: Math.max(0, Math.min(manifest.worldWidth - width, position.x - width / 2)),
       y: Math.max(
         0,
         Math.min(
-          mapTileManifest.worldHeight - height,
+          manifest.worldHeight - height,
           position.y - (38 * rendererResolution) / zoom - height / 2
         )
       ),

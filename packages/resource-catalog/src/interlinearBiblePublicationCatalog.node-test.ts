@@ -33,8 +33,8 @@ const withoutTextDeclarations = (catalog: MobileResourceCatalog): MobileResource
 })
 
 const nextText = {
-  textRevision: 'bhg-e15bd9f0f1a91140579c',
-  textSha256: 'e15bd9f0f1a91140579c9eb9c8f4e173b8a4df361859758e0fe252ef55edc107',
+  textRevision: `bhg-${'f'.repeat(20)}`,
+  textSha256: 'f'.repeat(64),
 }
 
 describe('interlinear Bible publication catalog', () => {

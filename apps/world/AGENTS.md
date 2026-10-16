@@ -20,3 +20,4 @@ yarn workspace @bible-strong/world build
 - Treat navigation footprints and visual occluders as separate concerns.
 - Keep segmentation inference offline; the browser ships only reviewed cutouts and metadata.
 - The zone editor saves its validated navigation document directly to `public/navigation/archipelago.json` through the local Vite server.
+- Build every world on the shared scene (`src/world-scene.ts`), shell (`src/world-shell.tsx`) and workshop (`src/workshop/`); `docs/create-a-world.md` lists the steps.

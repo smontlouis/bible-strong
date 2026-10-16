@@ -112,8 +112,15 @@ export function newAmbientZone(
     enabled: true,
   }
 }
-const DRAFT = 'bible-strong-ambient-zones-draft-v1'
-export function createAmbientEditor() {
+/** `file` is read at runtime; `saveKey` names the dev-server endpoint `/__study-world/<saveKey>`. */
+export type AmbientDocument = { file: string; saveKey: string; draftKey: string }
+const ARCHIPELAGO_AMBIENCE: AmbientDocument = {
+  file: './ambience/archipelago.json',
+  saveKey: 'ambience',
+  draftKey: 'bible-strong-ambient-zones-draft-v1',
+}
+export function createAmbientEditor(document: AmbientDocument = ARCHIPELAGO_AMBIENCE) {
+  const DRAFT = document.draftKey
   let saved = '[]'
   const listeners = new Set<() => void>(),
     history: AmbientZone[][] = []
@@ -156,7 +163,7 @@ export function createAmbientEditor() {
     },
     async load() {
       try {
-        const response = await fetch('./ambience/archipelago.json', { cache: 'no-store' })
+        const response = await fetch(document.file, { cache: 'no-store' })
         if (!response.ok) throw new Error('Load failed')
         model.zones = parseAmbientZones(await response.json())
         saved = JSON.stringify(model.zones)
@@ -186,7 +193,7 @@ export function createAmbientEditor() {
       const snapshot = JSON.stringify(model.zones)
       try {
         parseAmbientZones(model.zones)
-        const response = await fetch('/__study-world/ambience', {
+        const response = await fetch(`/__study-world/${document.saveKey}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: snapshot,

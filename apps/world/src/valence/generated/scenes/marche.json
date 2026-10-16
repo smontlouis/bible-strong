@@ -1,0 +1,34 @@
+{
+  "id": "marche",
+  "mode": "sprite",
+  "frameRate": 12,
+  "frameCount": 120,
+  "x": 753.09,
+  "y": 311.99,
+  "width": 35.35,
+  "height": 43.75,
+  "depth": 354.55,
+  "pages": [
+    {
+      "key": "page-0",
+      "firstFrame": 0,
+      "frameCount": 120,
+      "width": 2047,
+      "height": 654
+    }
+  ],
+  "shadows": [
+    {
+      "x": 758.7,
+      "y": 334.1,
+      "rx": 5.6,
+      "ry": 1.8
+    },
+    {
+      "x": 780.7,
+      "y": 354.1,
+      "rx": 6.4,
+      "ry": 2.1
+    }
+  ]
+}
