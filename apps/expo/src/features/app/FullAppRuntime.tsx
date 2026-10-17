@@ -1,4 +1,5 @@
 import ReadingReminders from '~features/daily-reading/ReadingReminders'
+import AssistantLauncher from '~features/study-assistant/AssistantLauncher'
 import WorkspaceLayout from '~features/app-switcher/WorkspaceLayout'
 import { SheetProvider } from '~common/sheet'
 import { trackAnalyticsScreen } from '~helpers/analytics'
@@ -188,6 +189,7 @@ const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
                         />
                       </Stack>
                     </WorkspaceLayout>
+                    <AssistantLauncher />
                     <ThemedToaster />
                     <DeferredModals />
                   </StrongAudioProvider>

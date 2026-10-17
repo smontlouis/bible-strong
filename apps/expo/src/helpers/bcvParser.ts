@@ -185,6 +185,20 @@ export const parseInlineBibleReferences = (
   return mergeSameChapterSequence(text, parsedReferences)
 }
 
+/**
+ * References written in either supported language, the current one winning where both match.
+ * The study assistant answers in the language of the question, not always in the app's.
+ */
+export const parseInlineBibleReferencesInAnyLanguage = (text: string): InlineBibleReference[] => {
+  const current: BcvLanguage = getLanguage()
+  const references: InlineBibleReference[] = []
+  for (const language of [current, current === 'fr' ? 'en' : 'fr'] as const)
+    for (const reference of parseInlineBibleReferences(text, language))
+      if (references.every(other => reference.end <= other.start || reference.start >= other.end))
+        references.push(reference)
+  return references.sort((a, b) => a.start - b.start)
+}
+
 const coversWholeInput = (text: string, references: InlineBibleReference[]): boolean => {
   if (!text || !references.length || references[0].start !== 0) return false
   let previousEnd = 0

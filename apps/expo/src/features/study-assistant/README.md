@@ -1,3 +1,87 @@
+# Study assistant
+
+The assistant has one conversation core and two presentations: the web modal described
+below and the native sheet. Both are opened by the Strobi avatar.
+
+## Native sheet (iOS, Android)
+
+Entry: `AssistantLauncher.tsx`, mounted in `FullAppRuntime.tsx`; the web launcher is its `.web`
+counterpart. It uses `@assistant-ui/react-native` (pinned to the release that shares
+`@assistant-ui/core` with the web package) with the same external-store runtime, the same
+`useAssistantSession` hook and the same Firestore repository as the web modal. A conversation
+started on one platform continues on the other.
+
+What is shared and what is not:
+
+- Shared: `useAssistantSession.ts` (history, the single cancellable run, the reading-context
+  preference), `conversationRun.ts`, `conversations.ts`, `conversationMemory.ts`,
+  `conversationRepository.ts`, `client.ts`, `assistantActions.ts`, `resourceContext.ts`,
+  `readingContextSources.ts`, `toolActivity.ts`, `dictationAdapter.ts`, the widget data helpers
+  and `packages/ai-contract`. Presentation state (open sheet, history view, dictation,
+  diagnostics) stays in each launcher.
+- Native only: the sheet, composer, history, message renderer, tool timeline and one native
+  file per study widget, next to its `.web.tsx` counterpart. The two presentations of a widget
+  repeat its query; change both when a widget's data rule changes.
+- Not on native: the development diagnostics panel and the widget playground.
+
+Presentation. The sheet is a `Sheet` (TrueSheet) at full height: header, conversation list and
+a composer footer that rides the keyboard. It stays mounted while hidden, so a running answer
+survives closing it and the avatar shows it is still thinking. The avatar sits above the
+reader's chapter controls. `MoreScreen` opens the same sheet; the `/study-assistant` route
+only opens it over the previous screen.
+
+Navigation. A native sheet cannot stay above a pushed screen. `PushRouteGateContext`
+(`~navigation/pushRouteGate`) lets `usePushRouteOnce` wait for the sheet to close, so shared
+components used inside widgets (Strong card, Nave preview, reference paragraphs) navigate
+correctly without knowing about the sheet. Tab actions close the sheet the same way. There is
+no reference preview popover on native: a passage link opens the passage, and a cited source
+opens `SourceExcerptSheet` with its excerpt and a way to the full resource.
+
+Markdown. `AssistantMessageMarkdown.tsx` renders with `react-native-streamdown`: `remend` closes
+Markdown that is still streaming on a worklet thread, and `react-native-enriched-markdown` draws
+it. The native renderer takes text, not a syntax tree, so `linkifyBibleReferences.ts` writes
+Bible references as links in the source itself (code, existing links and a link still being
+streamed are left alone).
+
+Bundle Mode. A worklet can only call an npm module such as `remend` when
+`react-native-worklets` runs in Bundle Mode. It is enabled for native bundles in two places:
+`babel.config.js` (the Worklets plugin with `bundleMode` and `importForwarding` for `remend`; the
+preset's own copy of the plugin is turned off) and `metro.config.js` (`getBundleModeMetroConfig`,
+skipped for a web-only run). The two Yarn patches on `metro` and `metro-runtime` belong to it:
+they index the worklet modules written while Metro runs and send Fast Refresh updates to the
+worklet runtimes. Keep the four together. With the patches but without Bundle Mode, every Fast
+Refresh update fails on native with `Property '__d' doesn't exist`. `metro.config.js` also keeps
+one exception: Bundle Mode redirects every `react-native` import to its shim and Uniwind
+redirects the shim's own import to its components, so Uniwind's import goes straight to React
+Native; without it the two form a cycle and the app does not start.
+
+Reading context. `useReadingContext.ts` follows the active tab at the workspace root and the
+route pushed over it elsewhere. Native screens publish their context through the same
+`useAssistantResourceContext` registry as the web. The preference to follow the reading is
+stored in MMKV under the web's per-account key.
+
+Avatar. `StrobiAvatar.tsx` renders the same `strobi.avatar.json` with `@bible-strong/avatar-core`
+and `react-native-svg`. The core samples a frame on the JS thread at 30 fps and the paths
+reach the native views through Reanimated shared values. Do not update the paths with
+`setNativeProps`: measured in development on the iOS simulator, it cost about 64 ms per frame
+against about 2 ms with shared values.
+
+Dictation. `dictationAudio.ts` captures mono PCM16 with `expo-audio`'s native audio stream and
+feeds the same `LiveDictationAdapter` as the web. The microphone is requested on first use and
+the audio mode returns to playback when the capture ends.
+
+Verification (2026-10-13, iOS simulator, development build 28.0.0). Checked on screen with the
+signed-in beta account: avatar and its states, sheet, cloud history (load, switch, delete),
+new conversation and context shortcuts, context chip, streaming Markdown with Bible and source
+links, tool timeline, source excerpt, passage navigation, tab action, stop, error and retry,
+keyboard, the entry in the More menu, microphone refusal, and all study widgets with published
+content. Bundle Mode was then restored and checked on the same simulator: start, stored
+Markdown through Streamdown, Fast Refresh, the reader's DOM components, and a production export
+for iOS and Android. The answers came from a scripted local transport, removed afterwards: the simulator
+has no registered App Check debug token, so the hosted service refused the app
+(`exchangeDebugToken` 403). Not verified: a real request to the service from a native build,
+dictation with the microphone allowed, and Android.
+
 # Web assistant modal
 
 ## Live dictation
@@ -8,7 +92,7 @@ transcripts replace the preview and the final transcript is committed once. Stop
 waits for the last words before unlocking Send/Enter. Closing the modal, showing
 history, changing/deleting the conversation, signing out or leaving the page releases
 the microphone and ignores late results. Browser microphone permission and a secure
-context (HTTPS or localhost) are required. This does not add native iOS/Android capture.
+context (HTTPS or localhost) are required. Native capture is described above.
 The single icon button owns every visible state: microphone at rest, spinner while
 connecting or finalizing, filled Stop while listening, and an error icon after failure.
 Errors also use the app error toast; no dictation status or error copy is placed below
@@ -31,7 +115,7 @@ disconnects, timeouts, interim replacement and microphone denial. The microphone
 button was visually checked in the signed-in localhost app. A real microphone session
 through the authenticated app remains a manual check after backend rollout.
 
-Entry: `AssistantLauncher.web.tsx`, mounted only in `FullAppRuntime.web.tsx`. The native screen remains separate. Uses `@assistant-ui/react` 0.15.21 AssistantModal/Thread/Composer primitives with a custom external-store runtime and the existing authenticated Worker SSE client.
+Entry: `AssistantLauncher.web.tsx`, mounted in `FullAppRuntime.web.tsx`. Uses `@assistant-ui/react` 0.15.21 AssistantModal/Thread/Composer primitives with a custom external-store runtime and the existing authenticated Worker SSE client.
 
 Production activation requires both `EXPO_PUBLIC_AI_API_URL` and exact membership in
 `EXPO_PUBLIC_AI_BETA_UIDS`. This public UID list only hides the launcher, settings entry
@@ -55,7 +139,7 @@ Conversation selection and management use an `ExternalStoreThreadListAdapter` pl
 owns account-scoped persistence in Firestore; the adapter bridges subscribed application state
 to assistant-ui.
 
-`useReadingContext.web.ts` observes active Bible selection/chapter and Strong tab/route context. Pin/remove controls affect only future messages. `conversations.ts` validates and limits the persisted model, while `conversationRepository.web.ts` owns Firestore subscriptions and writes. `conversationRun.ts` owns one cancellable streaming operation, snapshots context and refuses late updates from an obsolete session. No keys or tokens are stored in conversations. Streaming stays in memory; one terminal turn and its conversation metadata are committed together. Opening the modal or history does not trigger inference.
+`useReadingContext.web.ts` observes active Bible selection/chapter and Strong tab/route context. Pin/remove controls affect only future messages. `conversations.ts` validates and limits the persisted model, while `conversationRepository.ts` owns Firestore subscriptions and writes. `conversationRun.ts` owns one cancellable streaming operation, snapshots context and refuses late updates from an obsolete session. No keys or tokens are stored in conversations. Streaming stays in memory; one terminal turn and its conversation metadata are committed together. Opening the modal or history does not trigger inference.
 
 Cloud limits: 50 conversations and 300 messages each. The index is subscribed independently from the selected conversation's turns. There is no local-history import or fallback. The UI shows storage failures. Backend authentication and the beta allowlist remain enforced.
 
@@ -80,9 +164,9 @@ Preparation has a visible status. Failure/cancellation preserves the full transc
 
 ## Resource-aware context
 
-The assistant also recognizes commentary chapter/section views, dictionary articles and Nave topics. Resource views publish their current metadata to a web-only registry; dictionary source switches and commentary section changes update the same context without requiring a route change. Commentaries include the actual catalog author and biblical location; dictionary context keeps the work/article identity; Nave keeps the actual topic identifier and resource language. The chip and saved-message caption show a readable label, while the bounded provider context carries identifiers for subsequent tool reads.
+The assistant also recognizes commentary chapter/section views, dictionary articles and Nave topics. Resource views publish their current metadata to a shared registry; dictionary source switches and commentary section changes update the same context without requiring a route change. Commentaries include the actual catalog author and biblical location; dictionary context keeps the work/article identity; Nave keeps the actual topic identifier and resource language. The chip and saved-message caption show a readable label, while the bounded provider context carries identifiers for subsequent tool reads.
 
-Metadata is not the full resource text. No editorial content is automatically scraped or attached; the prompt explicitly says to read the indicated source before explaining it. Existing server tool/catalog restrictions still apply, including unavailable resources. Context publication does not make additional resource or model requests. Native context publication is a no-op.
+Metadata is not the full resource text. No editorial content is automatically scraped or attached; the prompt explicitly says to read the indicated source before explaining it. Existing server tool/catalog restrictions still apply, including unavailable resources. Context publication does not make additional resource or model requests.
 
 Workspace reader/panel surfaces identify pointer, keyboard-focus and wheel interactions. A newly opened route panel becomes the proposed context. Interacting with the reader switches back to its context; interacting with the panel switches to its current resource. Assistant controls are ignored by this focus tracking. Closing/unfocusing panels removes their publications; pin/remove and per-message snapshots continue to work independently.
 
@@ -100,7 +184,7 @@ Up to six activities per assistant message are stored with cloud history. Defens
 
 Validation: 26 frontend tests, 20 server tests (one optional resource integration skipped), typechecks, targeted lint and web export passed. The browser smoke on 2026-09-17 reached DAILY_LIMIT before generation, so live visual confirmation remains pending; no quota was changed.
 
-Error banners use the installed assistant-ui Elements ErrorState with translated text. Quota errors explain the UTC reset without an immediate retry button. Transient failures can be retried explicitly with the original question and reading-context snapshot; the failed final pair is replaced instead of duplicating the user message. Storage failures use the same banner. Retry progress is announced with role=status; errors use role=alert.
+Error banners use the installed assistant-ui Elements ErrorState with translated text. Quota errors explain the UTC reset without an immediate retry button. Transient failures can be retried explicitly with the original question and reading-context snapshot; the failed final pair is replaced instead of duplicating the user message. The retried question keeps its message identity, which is also the identity of its stored turn: the retry overwrites the failed turn in Firestore and the message count does not grow. Storage failures use the same banner. Retry progress is announced with role=status; errors use role=alert.
 
 ### Official component installation
 

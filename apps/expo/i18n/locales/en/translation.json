@@ -2563,6 +2563,7 @@
   "assistant.dictation.stopping": "Finishing transcription…",
   "assistant.dictation.listening": "Listening… Stop dictation to send.",
   "assistant.dictation.error": "Dictation was interrupted. Try again or edit the text.",
+  "assistant.dictation.permissionDevice": "Allow microphone access in your device settings to dictate a message.",
   "assistant.dictation.permission": "Allow microphone access in your browser to dictate.",
   "assistant.debug.title": "AI diagnostics",
   "assistant.debug.active": "Session active",

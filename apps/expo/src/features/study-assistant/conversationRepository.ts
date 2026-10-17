@@ -4,7 +4,7 @@ import {
   observeAssistantConversationIndex,
   renameAssistantConversation,
   saveAssistantConversationTurn,
-} from '~helpers/assistantConversationFirestore.web'
+} from '~helpers/assistantConversationFirestore'
 import {
   conversationMetadata,
   hydrateConversation,

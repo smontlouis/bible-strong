@@ -1,7 +1,7 @@
 import React from 'react'
 import renderer, { act } from 'react-test-renderer'
 import { createStore, Provider } from 'jotai'
-import { useAssistantResourceContext } from '../useAssistantResourceContext.web'
+import { useAssistantResourceContext } from '../useAssistantResourceContext'
 import { resourceContextsAtom } from '../readingContextRegistry'
 import type { ReadingContext } from '../conversations'
 let mockFocused = true
