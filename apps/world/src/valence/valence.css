@@ -2179,12 +2179,12 @@
    clear of the top bar and of the card. */
 @media (min-width: 1800px) and (min-aspect-ratio: 2/1) {
   .valence-shell.is-stand {
-    --v-stand-zoom: 1.5;
+    --v-stand-zoom: 1.3;
   }
 }
 @media (min-width: 2400px) and (min-height: 900px) {
   .valence-shell.is-stand {
-    --v-stand-zoom: 2;
+    --v-stand-zoom: 1.7;
   }
 }
 @media (min-width: 1800px) and (min-aspect-ratio: 2/1), (min-width: 2400px) and (min-height: 900px) {
