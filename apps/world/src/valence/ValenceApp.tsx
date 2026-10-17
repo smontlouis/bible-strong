@@ -421,12 +421,27 @@ export default function ValenceApp({ arrival, onTravel, onReady }: UniverseProps
             }
           >
             <a className="v-stand" href="https://world.bible-strong.app/valence-1876" target="_blank" rel="noreferrer">
-              <img src="./valence-1876/qr.svg" width={150} height={150} alt="QR code — world.bible-strong.app/valence-1876" />
-              <span>
+              {/* Who brings 1876 to the stand: a label of 2026, pinned on the card. */}
+              <span className="v-stand-brand">
+                <img src="/assets/bible-strong-mark.svg" width={52} height={52} alt="" />
+                <span>
+                  <strong>Bible Strong</strong>
+                  <span>{t.standBrand}</span>
+                </span>
+              </span>
+              <img
+                className="v-stand-qr"
+                src="./valence-1876/qr.svg"
+                width={200}
+                height={200}
+                alt="QR code — world.bible-strong.app/valence-1876"
+              />
+              <span className="v-stand-text">
                 <strong>
                   {t.standTitle[0]} <em>{t.standTitle[1]}</em>
                 </strong>
                 <span>{t.stand}</span>
+                <span className="v-stand-url">world.bible-strong.app/valence-1876</span>
               </span>
             </a>
           </StandShell>
