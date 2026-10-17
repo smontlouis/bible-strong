@@ -6,6 +6,8 @@ import type { GameAIEnv } from './games/ai'
 import { authenticateAdmin, validAdminMutation } from './guestbook-auth'
 import { GUESTBOOK_INSTANCE, routeGuestbook, type GuestbookEnv } from './guestbook'
 export { Guestbook } from './guestbook'
+import { SCAN_INSTANCE, SCAN_ROUTES, scanReport, type ScanEnv } from './scans'
+export { ScanCounter } from './scans'
 import navigationJson from '../public/navigation/archipelago.json'
 import valenceNavigationJson from '../public/valence-1876/navigation.json'
 import valenceLayoutJson from '../public/valence-1876/layout.json'
@@ -50,7 +52,7 @@ type Session = {
   /** A stand screen: it receives the room's presence and reactions, but is never a visitor. */
   watching?: boolean
 }
-interface Env extends GuestbookEnv, GameAIEnv, GameCatalogueEnv {
+interface Env extends GuestbookEnv, GameAIEnv, GameCatalogueEnv, ScanEnv {
   WorldRoom: DurableObjectNamespace<WorldRoom>
   ALLOWED_ORIGINS?: string
   ASSETS: Fetcher
@@ -377,15 +379,37 @@ export class WorldRoom extends Server<Env> {
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url)
     if (url.pathname.startsWith('/__study-world/'))
       return new Response('Not found', { status: 404 })
     const adminPage = ['/admin', '/admin/', '/admin-guestbook'].includes(url.pathname)
     if (url.pathname === '/health') return Response.json({ ok: true })
+    // A stand's QR code: the scan is counted on the side, the phone goes on at once.
+    const scanTarget = Object.hasOwn(SCAN_ROUTES, url.pathname) ? SCAN_ROUTES[url.pathname] : null
+    if (scanTarget) {
+      if (request.method === 'GET') {
+        const client = `${request.headers.get('CF-Connecting-IP') ?? ''} ${request.headers.get('User-Agent') ?? ''}`
+        const counter = env.ScanCounter.get(env.ScanCounter.idFromName(SCAN_INSTANCE))
+        ctx.waitUntil(counter.record(scanTarget, client, Date.now()).catch(() => undefined))
+      }
+      return new Response(null, {
+        status: 302,
+        headers: { Location: scanTarget, 'Cache-Control': 'no-store' },
+      })
+    }
     const origin = request.headers.get('Origin')
     const allowed = [url.origin, ...(env.ALLOWED_ORIGINS ?? '').split(',').map(s => s.trim())]
     if (origin && !allowed.includes(origin)) return new Response('Forbidden', { status: 403 })
+    if (url.pathname === '/admin/scans') {
+      const headers = { 'Cache-Control': 'no-store' }
+      if (!(await authenticateAdmin(request, env)))
+        return Response.json({ error: 'unauthorized' }, { status: 401, headers })
+      const counter = env.ScanCounter.get(env.ScanCounter.idFromName(SCAN_INSTANCE))
+      return new Response(scanReport(await counter.stats(), Date.now()), {
+        headers: { ...headers, 'Content-Type': 'text/html; charset=utf-8' },
+      })
+    }
     if (adminPage || url.pathname === '/api/guestbook/admin') {
       const actor = await authenticateAdmin(request, env)
       if (!actor)

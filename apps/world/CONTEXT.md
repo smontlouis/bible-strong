@@ -61,6 +61,10 @@ in the Exploration world, without being a connected visitor or a Bible game part
 **Stand display**:
 The World opened with the `stand` URL parameter for an event screen.
 
+**Stand scan**:
+A phone opening a stand's QR code, counted on the way to its place; a person counts once a day.
+_Avoid_: Visit, hit
+
 **Universe**:
 A separate explorable map on the same engine, opened by its own address. The archipelago is the default universe; Valence 1876 is the second.
 _Avoid_: Level, mode

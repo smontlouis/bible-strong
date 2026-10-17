@@ -10,6 +10,12 @@ vi.mock('./games/room', () => ({
 }))
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 vi.mock('./guestbook', () => ({ Guestbook: class {}, routeGuestbook: vi.fn() }))
+vi.mock('./scans', () => ({
+  ScanCounter: class {},
+  SCAN_INSTANCE: 'stands',
+  SCAN_ROUTES: { '/scan': '/valence-1876' },
+  scanReport: vi.fn(),
+}))
 vi.mock('partyserver', () => ({
   Server: class {
     constructor(

@@ -8,12 +8,14 @@
       { "name": "WorldRoom", "class_name": "WorldRoom" },
       { "name": "Guestbook", "class_name": "Guestbook" },
       { "name": "GameCatalogue", "class_name": "GameCatalogue" },
+      { "name": "ScanCounter", "class_name": "ScanCounter" },
     ],
   },
   "migrations": [
     { "tag": "v1", "new_sqlite_classes": ["WorldRoom"] },
     { "tag": "v2", "new_sqlite_classes": ["Guestbook"] },
     { "tag": "v3", "new_sqlite_classes": ["GameCatalogue"] },
+    { "tag": "v4", "new_sqlite_classes": ["ScanCounter"] },
   ],
   "build": {
     "command": "node scripts/build-game-catalogue.mjs",
@@ -31,6 +33,7 @@
       "/admin-guestbook",
       "/__study-world/*",
       "/health",
+      "/scan",
     ],
   },
   "workers_dev": false,
