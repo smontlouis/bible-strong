@@ -36,6 +36,17 @@ staging release APK on the Android emulator (`gradlew assembleRelease`):
   (`yarn update:rollback-to-embedded:staging`) both bring the application back.
 - The check at launch downloads a new update, then a rollback, without any tap.
 
+Then, with a staging simulator build made by EAS (`yarn build:ios:staging-sim`) and the same APK:
+
+- The EAS build holds the same native configuration and the `com.smontlouis.biblestrong.staging`
+  identity.
+- A device that runs the previous update receives the next one as a patch: the Android log says
+  "Applied diff", and the delivery numbers count one patch of 1.3 to 2.0 MB per update, on both
+  platforms, against 8.3 MB for the full bundle.
+- A broken update (an error thrown at render) lands on the error screen. Once a rollback to the
+  embedded JavaScript is published, the next launch of the broken update fetches it from the error
+  screen ("Mise à jour effectuée"), and the launch after that runs the build's JavaScript again.
+
 Found and fixed on the way:
 
 - `.easignore` dropped the certificate, so `eas build --local` failed at prebuild.
@@ -55,23 +66,21 @@ Found and fixed on the way:
   `open-ota patches --branch staging` then stored 10 patches, 0.5 to 2.3 MB against 7.9 MB for the
   full download (6% to 28%). A bundle fetched like a device does (`A-IM: bsdiff`,
   `Expo-Current-Update-ID`) came back as `226` on both platforms, and the system `bspatch` rebuilt
-  the exact target bundle from it.
+  the exact target bundle from it. Upstream (`focux/open-ota`) has the same bug.
+- The EAS "preview" environment, which the staging profile uses, shared `APP_NAME`,
+  `BUNDLE_IDENTIFIER`, `EAS_BUILD_CHANNEL` and the Firebase file paths with "production". eas-cli
+  lets EAS values win over `.env.staging` when it reads the app config, so it named the Xcode scheme
+  `BibleStrong` while the build made `stagingBibleStrong`. Those five variables now belong to
+  "production" only, like "development", which has none: `.env.staging` decides for staging.
 
 ## Still open
 
-1. **The EAS "preview" environment holds production values** (`APP_NAME`, `BUNDLE_IDENTIFIER`,
-   `EAS_BUILD_CHANNEL=production`, the production Firebase files). The staging profile resolves to
-   it, so `yarn build:ios:staging-sim` fails: eas-cli names the Xcode scheme `BibleStrong` from the
-   EAS value while the prebuild, run with `.env.staging`, makes `stagingBibleStrong`. Align that
-   environment on `.env.staging` or delete those variables from it, then build staging once with
-   EAS and check that the channel header says `staging`.
-2. **No device has received a delta patch yet.** Publish a staging update, check for updates on a
-   device that runs the previous one, and look for the `226` in the dashboard's delivery numbers
-   or the device log. The fix is commit `d9e638f` on `smontlouis/open-ota`; upstream
-   (`focux/open-ota`) has the same bug.
-3. **Sentry receives 7 of 12 source maps** at each publish. Check which files are skipped.
-4. **The first 28.0 builds made with EAS** should be checked once on a device: an update loads, and
-   `EXUpdatesURL` and the channel header are as above. The tests ran on local builds.
+1. **Sentry receives 7 of 12 source maps** at each publish. Check which files are skipped.
+2. **The error screen keeps its spinner** next to "Mise à jour effectuée. Merci de redémarrer
+   l'application." once the update is ready (`apps/expo/src/common/ErrorBoundary.tsx`).
+3. **The production publish workflow** (`.github/workflows/expo-update-production.yml`, by hand
+   only) has never run against Open OTA.
+4. **A physical device** has not run a 28.0 build yet: worth one look at the first store build.
 5. **The npm CLI declares loose versions.** `open-ota@0.3.0` needs a root `resolutions` pin of
    `@effect/platform-node-shared` and a `redis` package extension in `.yarnrc.yml`. Report upstream;
    drop both once a fixed release exists.
