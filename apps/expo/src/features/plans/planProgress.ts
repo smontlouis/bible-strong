@@ -99,6 +99,27 @@ export const getEntitySliceKey = (
   index: number
 ): string => slice.id || `${readingSliceId}:${index}`
 
+/** What follows an element in its day: the next one to read, or the end of the day. */
+export type PlanDayStep =
+  | { kind: 'next'; slice: EntitySlice; index: number; entitySliceId: string }
+  | { kind: 'finish' }
+
+/** Undefined when the element is not, or no longer, in this day. */
+export const getPlanDayStep = (
+  readingSlice: ReadingSlice,
+  entitySliceId: string
+): PlanDayStep | undefined => {
+  const readable = readingSlice.slices.flatMap((slice, index) =>
+    isReadableEntitySlice(slice)
+      ? [{ slice, index, entitySliceId: getEntitySliceKey(readingSlice.id, slice, index) }]
+      : []
+  )
+  const position = readable.findIndex(item => item.entitySliceId === entitySliceId)
+  if (position < 0) return undefined
+  const next = readable[position + 1]
+  return next ? { kind: 'next', ...next } : { kind: 'finish' }
+}
+
 export const getReadableEntitySliceKeys = (readingSlice: ReadingSlice): string[] =>
   readingSlice.slices.flatMap((slice, index) =>
     isReadableEntitySlice(slice) ? [getEntitySliceKey(readingSlice.id, slice, index)] : []

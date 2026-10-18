@@ -2263,6 +2263,8 @@
   "readingPlans.missed_plural": "{{count}} readings to revisit",
   "dailyReading.fallback": "Read the standalone verse for this day",
   "readingPlans.finished": "Journey completed",
+  "readingPlans.seeNext": "See what's next",
+  "readingPlans.finishDay": "Finish the day",
   "readingPlans.todayDay": "Today · Day {{day}}",
   "readingPlans.startsOn": "Starts on {{date}}",
   "readingPlans.legacyProgress": "Resume your reading · choose a schedule",

@@ -46,11 +46,17 @@ Un jour de plan n'a pas de page à lui. La page du plan liste les éléments du 
 sélectionné, chacun avec une case lu / non lu et un chevron :
 
 - un **passage** (`Chapter`, `Verse`) ouvre le lecteur Bible en **mode plan** : l'en-tête
-  nomme le passage, les sélecteurs de livre, chapitre et verset sont absents, et la
-  navigation entre chapitres reste dans le passage. La croix de l'en-tête quitte le mode
-  plan et rend le lecteur libre ;
+  reste celui d'un chapitre, mais le livre n'y est plus un sélecteur, et la navigation
+  entre chapitres reste dans le passage. Un bandeau « Plan — Genèse 1-3 » sous l'en-tête
+  nomme le passage ; sa croix quitte le mode plan et rend le lecteur libre. Pour des
+  versets, une icône y bascule entre les versets et le chapitre entier ;
 - un **texte**, une **image** ou une **vidéo** ouvre sa propre page (`/plan-entity`) ;
 - un **titre** sert d'intertitre dans la liste.
+
+Chaque élément se termine par « Voir la suite », qui ouvre l'élément suivant du jour à sa
+place : revenir en arrière ramène toujours à la page du plan. Dans le lecteur Bible, la
+carte attend le dernier chapitre du passage. Le dernier élément propose « Terminer la
+journée », qui marque le jour comme lu et revient au plan, où il est fêté.
 
 Ouvrir un élément le marque comme lu ; la case permet de le faire à la main. Le jour est
 terminé quand tous ses éléments sont lus, et redevient non terminé si l'un d'eux est

@@ -9,6 +9,7 @@ import {
   canUpdatePlanProgress,
   getReadEntitySliceKeys,
   getReadableEntitySliceKeys,
+  getPlanDayStep,
   setEntitySliceRead,
 } from '../planProgress'
 
@@ -418,5 +419,39 @@ describe('element progress', () => {
   it('sees element progress when comparing ongoing plans', () => {
     expect(areOngoingPlansEqual(started, read(started, 'day-1-a'))).toBe(false)
     expect(areOngoingPlansEqual(read(started, 'day-1-a'), read(started, 'day-1-a'))).toBe(true)
+  })
+})
+
+describe('getPlanDayStep', () => {
+  const day: ReadingSlice = {
+    id: 'day-2',
+    slices: [
+      { type: 'Video', id: 'video', title: 'BibleProject', url: 'https://example.com' },
+      { type: 'Title', id: 'title', title: 'Lecture' },
+      { type: 'Text', id: 'text', description: 'La méditation' },
+      { type: 'Verse', verses: '23|49:13-16' },
+    ],
+  }
+
+  it('leads to the next element to read, past the titles', () => {
+    expect(getPlanDayStep(day, 'video')).toEqual({
+      kind: 'next',
+      slice: day.slices[2],
+      index: 2,
+      entitySliceId: 'text',
+    })
+  })
+
+  it('identifies an element without an id by its place in the day', () => {
+    expect(getPlanDayStep(day, 'text')).toMatchObject({ kind: 'next', entitySliceId: 'day-2:3' })
+  })
+
+  it('ends the day after its last element', () => {
+    expect(getPlanDayStep(day, 'day-2:3')).toEqual({ kind: 'finish' })
+  })
+
+  it('knows nothing of an element outside the day', () => {
+    expect(getPlanDayStep(day, 'title')).toBeUndefined()
+    expect(getPlanDayStep(day, 'missing')).toBeUndefined()
   })
 })

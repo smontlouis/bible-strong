@@ -21,6 +21,8 @@ import { useComputedPlan } from './plan.hooks'
 import { getEntitySliceKey } from './planProgress'
 import ParamsModal from './PlanSliceScreen/ParamsModal'
 import Slice from './PlanSliceScreen/Slice'
+import PlanDayStepCard from './PlanDayStepCard'
+import { usePlanDayStep } from './usePlanDayStep'
 
 /** The page of one text, image or video of a plan day. Passages open the Bible reader instead. */
 const PlanEntityScreen = () => {
@@ -41,6 +43,7 @@ const PlanEntityScreen = () => {
     (item, index) => getEntitySliceKey(reading.id, item, index) === entitySliceId
   )
   useAssistantResourceContext('panel', editorialContext(plan, reading))
+  const dayStep = usePlanDayStep(slice ? { planId, readingSliceId, entitySliceId } : undefined)
   const goBack = () => goBackOrHome(router)
 
   if (!plan || !slice) {
@@ -97,6 +100,11 @@ const PlanEntityScreen = () => {
         }}
       >
         <Slice {...slice} planLanguage={plan.lang} />
+        {dayStep && (
+          <Box className="mt-[32px]" style={{ paddingHorizontal: PLAN_READING_HORIZONTAL_PADDING }}>
+            <PlanDayStepCard step={dayStep} />
+          </Box>
+        )}
       </ScrollView>
       <ParamsModal paramsModalRef={paramsModalRef} />
     </Container>

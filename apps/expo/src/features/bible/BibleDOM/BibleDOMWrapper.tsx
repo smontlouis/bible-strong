@@ -1,4 +1,5 @@
 import { getPassageContextHeaderHeight } from '../passagePreviewPresentation'
+import type { PlanDayStepView } from './PlanDayStepCard'
 import type { LabeledCommentaryChip } from './InlineCommentaryChips'
 import { OPEN_INLINE_COMMENTARY } from './dispatch'
 import { useResourcesLanguageValue } from '~state/resourcesLanguage'
@@ -83,6 +84,7 @@ import {
   ADD_PARALLEL_VERSION,
   ANNOTATION_SELECTED,
   CLEAR_FOCUS_VERSES,
+  PLAN_DAY_STEP,
   CREATE_ANNOTATION,
   ENTER_ANNOTATION_MODE,
   COLLAPSE_CONTEXT,
@@ -256,6 +258,9 @@ export type WebViewProps = {
   clearFocusVerses?: () => void
   /** Plan mode shows its banner under the header, focus or not. */
   inPlan?: boolean
+  /** Plan mode: the way on to the next element of the day, under the passage's last chapter. */
+  planDayStep?: PlanDayStepView
+  onPlanDayStep?: () => void
   // Annotation mode props
   annotationMode?: boolean
   clearSelectionTrigger?: number
@@ -374,6 +379,8 @@ export const BibleDOMWrapper = ({
   isSelectionMode,
   selectedCode,
   inPlan,
+  planDayStep,
+  onPlanDayStep,
   annotationMode,
   clearSelectionTrigger,
   applyAnnotationTrigger,
@@ -947,6 +954,11 @@ export const BibleDOMWrapper = ({
         break
       }
 
+      case PLAN_DAY_STEP: {
+        onPlanDayStep?.()
+        break
+      }
+
       case ENTER_ANNOTATION_MODE: {
         onEnterAnnotationMode?.()
         break
@@ -1190,6 +1202,7 @@ export const BibleDOMWrapper = ({
         translations={translations}
         chapterEntityTranslations={chapterEntityTranslations}
         inPlan={inPlan}
+        planDayStep={planDayStep}
         annotationMode={annotationMode}
         clearSelectionTrigger={clearSelectionTrigger}
         applyAnnotationTrigger={applyAnnotationTrigger}

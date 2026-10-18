@@ -70,6 +70,7 @@ import { toast } from '~helpers/toast'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import verseToReference from '~helpers/verseToReference'
 import { chapterToReference } from '~helpers/chapterToReference'
+import { usePlanDayStep } from '~features/plans/usePlanDayStep'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { RootState } from '~redux/modules/reducer'
 import {
@@ -325,6 +326,16 @@ const BibleViewer = ({
             planPassage.endChapter > planPassage.startChapter ? `-${planPassage.endChapter}` : ''
           }`
         )}${planPosition ? ` · ${planPosition.current}/${planPosition.total}` : ''}`
+  // The way on through the plan day waits for the end of the passage, out of a selection.
+  const planDayStep = usePlanDayStep(planPassage?.entity)
+  const planDayStepView =
+    planDayStep && planPassage && chapter === planPassage.endChapter && !isSelectionMode
+      ? {
+          kind: planDayStep.kind,
+          label: t(planDayStep.kind === 'next' ? 'readingPlans.seeNext' : 'readingPlans.finishDay'),
+          title: planDayStep.kind === 'next' ? planDayStep.title : undefined,
+        }
+      : undefined
   const selectedVersesReference = verseToReference(selectedVerses)
   const { data: coverageData } = useQuery({
     queryKey: resourceQueryKeys.bibleCoverage(version),
@@ -1337,6 +1348,8 @@ const BibleViewer = ({
     expandContext: actions.expandContext,
     collapseContext: actions.collapseContext,
     clearFocusVerses: actions.clearFocusVerses,
+    planDayStep: planDayStepView,
+    onPlanDayStep: planDayStep?.onPress,
     // Annotation mode props
     annotationMode: viewerPersonalData.annotationMode,
     clearSelectionTrigger: annotationMode.clearSelectionTrigger,

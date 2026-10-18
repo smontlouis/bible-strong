@@ -60,7 +60,13 @@ export const getBibleContextDisplayMode = (data: {
   data.contextDisplayMode ?? (data.isReadOnly ? 'focused' : 'fullChapter')
 
 /** A reading-plan passage: one book, from a first to a last chapter. */
-export type BiblePlanPassage = { book: number; startChapter: number; endChapter: number }
+export type BiblePlanPassage = {
+  book: number
+  startChapter: number
+  endChapter: number
+  /** The element of a plan day this passage is, so that the reader can lead on to the next. */
+  entity?: { planId: string; readingSliceId: string; entitySliceId: string }
+}
 
 export interface BibleTab extends TabBase {
   type: 'bible'

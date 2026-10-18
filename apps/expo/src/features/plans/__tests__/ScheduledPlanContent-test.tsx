@@ -121,7 +121,14 @@ it('continues legacy progress with the first element of the next day', () => {
   })
   expect(mockPush).toHaveBeenCalledWith({
     pathname: '/bible-view',
-    params: { book: '1', chapter: '4', planEndChapter: '5' },
+    params: {
+      book: '1',
+      chapter: '4',
+      planEndChapter: '5',
+      planId: 'plan',
+      readingSliceId: 'two',
+      entitySliceId: 'two-a',
+    },
   })
   expect(renderer.root.findAll(node => String(node.type) === 'DatePicker')).toHaveLength(0)
 })
@@ -158,7 +165,14 @@ it('starts a new plan today and opens day one even after browsing another day', 
   })
   expect(mockPush).toHaveBeenCalledWith({
     pathname: '/bible-view',
-    params: { book: '1', chapter: '1', planEndChapter: '3' },
+    params: {
+      book: '1',
+      chapter: '1',
+      planEndChapter: '3',
+      planId: 'plan',
+      readingSliceId: 'one',
+      entitySliceId: 'one-a',
+    },
   })
 })
 it('lists the elements of the day with a checkbox each, and none for a title', () => {

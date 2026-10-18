@@ -2291,6 +2291,8 @@
   "readingPlans.missed_plural": "{{count}} lectures à retrouver",
   "dailyReading.fallback": "Lire le verset habituel pour ce jour",
   "readingPlans.finished": "Parcours terminé",
+  "readingPlans.seeNext": "Voir la suite",
+  "readingPlans.finishDay": "Terminer la journée",
   "readingPlans.todayDay": "Aujourd’hui · Jour {{day}}",
   "readingPlans.startsOn": "Début le {{date}}",
   "readingPlans.legacyProgress": "Reprendre vos lectures · calendrier à choisir",

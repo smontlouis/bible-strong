@@ -40,6 +40,7 @@ import {
   RETRY_BIBLE_RESOURCE,
   DOWNLOAD_CHAPTER_ENTITIES,
   DISMISS_CONTEXTUAL_INFORMATION,
+  PLAN_DAY_STEP,
   DOM_COMPONENT_MOUNTED,
 } from './dispatch'
 import { DispatchProvider } from './DispatchProvider'
@@ -71,6 +72,7 @@ import { isDarkTheme } from './utils'
 import { getScrollTargetVerse } from './verseRenderingModel'
 import { shouldSuppressVerseGestures } from '~helpers/interlinearDisplayMode'
 import ChapterEntities from './ChapterEntities'
+import PlanDayStepCard, { type PlanDayStepView } from './PlanDayStepCard'
 import PassageMediaThumbnails from './PassageMediaThumbnails'
 import { getPassageMediaGalleryItems, getPassageMediaGallerySections } from './passageMediaGallery'
 import { createVersePositionLayoutProps } from './annotationLayoutLifecycle'
@@ -210,6 +212,7 @@ type Props = Pick<
   relationItemsText: { [key: string]: VerseRelationItem[] }
   annotationRelationItems: Record<string, VerseRelationItem[]>
   inPlan?: boolean
+  planDayStep?: PlanDayStepView
   // Annotation mode props (uncontrolled - DOM manages local annotation state)
   annotationMode?: boolean
   clearSelectionTrigger?: number
@@ -592,6 +595,7 @@ const LoadedBibleContent = ({
   chapterEntityDownloadState,
   chapterEntityTranslations,
   inPlan,
+  planDayStep,
   annotationMode,
   clearSelectionTrigger,
   applyAnnotationTrigger,
@@ -1445,6 +1449,15 @@ const LoadedBibleContent = ({
               void dispatch({ type: DISMISS_CONTEXTUAL_INFORMATION })
             }}
           />
+          {planDayStep && !annotationMode && (
+            <PlanDayStepCard
+              step={planDayStep}
+              settings={settings}
+              onPress={() => {
+                void dispatch({ type: PLAN_DAY_STEP })
+              }}
+            />
+          )}
           <ReturnToSelectedVerseButton
             type="button"
             settings={settings}
