@@ -34,6 +34,7 @@ import { Theme } from '~themes/index'
 import { PlaybackService } from '../../../playbackService'
 import { downloadManager } from '~helpers/downloadManager'
 import { loadMobileResourceCatalog } from '~helpers/mobileResourceCatalog'
+import { useAutomaticUpdates } from '~helpers/useAutomaticUpdates'
 import { offlineResourceRegistry } from '~features/resources/resourceAvailability'
 import DeferredVerseOfTheDayPrefetch from '~features/home/DeferredVerseOfTheDayPrefetch'
 
@@ -130,6 +131,11 @@ type FullAppRuntimeProps = {
   theme: Theme
 }
 
+const AutomaticUpdates = () => {
+  useAutomaticUpdates()
+  return null
+}
+
 const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
   useKeepAwake()
 
@@ -191,6 +197,7 @@ const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
                     </WorkspaceLayout>
                     <AssistantLauncher />
                     <ThemedToaster />
+                    <AutomaticUpdates />
                     <DeferredModals />
                   </StrongAudioProvider>
                 </BookSelectorSheetProvider>
