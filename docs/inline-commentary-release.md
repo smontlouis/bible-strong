@@ -26,7 +26,7 @@ caches. Existing downloaded copies continue through the per-chapter sidecar path
 
 ## Required sequence
 
-Follow `.agents/skills/resource-publication/SKILL.md`, ADR-0027 and the Resource
+Follow `.claude/skills/resource-publication/SKILL.md`, ADR-0027 and the Resource
 service operator documentation. The manifest's base commit is provenance, not
 an approved final deploy revision: implementation changes are still uncommitted.
 

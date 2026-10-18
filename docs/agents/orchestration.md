@@ -123,6 +123,16 @@ Use this orchestration shape for mobile user-facing or runtime issue work:
 
 Parallel mobile work is allowed only if every lane has an independent implementation state and a credible independent mobile verification loop before PR readiness. If that cannot be provided, use `mobile-sequential`.
 
+### Parallel issue lanes (`/issue`)
+
+The `/issue` skill (`.claude/skills/issue/`) provides such lanes for Claude Code sessions. Each lane has:
+
+- its own worktree in `.claude/worktrees/<slug>` on branch `issue/<slug>`, created from `origin/master`, with a full `yarn install` and copies of the ignored `.env*` files;
+- its own iOS simulator `bs-<slug>`, cloned with `simslim` from the shut-down template `bs-template` (signed in, slim), with the newest dev client from `~/Builds/bible-strong/` installed over it;
+- its own Metro on a dedicated port (8082 and up; 8081 stays with the main checkout).
+
+Android lanes (`/issue … --android`) use the PC's shared emulator, so only one Android lane runs at a time. `.claude/skills/issue/scripts/lane.mjs` creates, reports, and removes lanes. The PR targets `master`. UI evidence stays with the agent session and is not attached to the PR.
+
 ## PR Gates
 
 The first hosted PR gate is `.github/workflows/pr-checks.yml`.

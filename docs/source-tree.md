@@ -9,7 +9,7 @@
 | `docs/` | System documentation, ADRs, mobile architecture, and agent guidance. |
 | `scripts/` | Repository-wide agent and quality scripts. |
 | `.yarn/patches/` | Versioned Yarn patches used by workspace dependencies. |
-| `.agents/skills/` | Repository-local Codex skills. |
+| `.claude/skills/` | Repository-local agent skills (`/issue`, resource publication, illustrations, cache invalidation). |
 | `CONTEXT-MAP.md` | Map from system concerns to bounded-context glossaries. |
 | `package.json` | Root workspace commands and cross-workspace resolutions. |
 | `yarn.lock` | The only dependency lockfile in the repository. |

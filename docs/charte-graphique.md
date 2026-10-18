@@ -16,7 +16,7 @@ To request an illustration:
 
 The style identifier is a documentation shortcut: provide the guide and reference images to the generator. It is not a trained model or a preset automatically loaded by an image tool.
 
-The repository skill [`bible-strong-illustrations`](../.agents/skills/bible-strong-illustrations/SKILL.md) reads the guide, selects references, and uses `imagegen`. Example:
+The repository skill [`bible-strong-illustrations`](../.claude/skills/bible-strong-illustrations/SKILL.md) reads the guide, selects references, and uses `imagegen`. Example:
 
 > Use $bible-strong-illustrations to create a square illustration of someone taking notes, on a transparent background.
 
