@@ -1,0 +1,203 @@
+diff --git a/src/core/use-motify.ts b/src/core/use-motify.ts
+index 45e0c8aca2f007f0b028eaf75d5787255bea4505..2025276f08b77010fda6a73868b438b499266e92 100644
+--- a/src/core/use-motify.ts
++++ b/src/core/use-motify.ts
+@@ -35,6 +35,7 @@ import type {
+   TransitionType,
+   TransitionDelayConfig,
+ } from './types'
++import { Platform } from 'react-native'
+ 
+ const debug = (...args: any[]) => {
+   'worklet'
+@@ -738,7 +739,7 @@ export function useMotify<Animate>({
+     }
+ 
+     return final
+-  }, [
++  }, Platform.OS === 'web' ? [
+     animateProp,
+     custom,
+     defaultDelay,
+@@ -755,7 +756,7 @@ export function useMotify<Animate>({
+     state,
+     stylePriority,
+     transitionProp,
+-  ])
++  ] : undefined)
+ 
+   useEffect(
+     function allowUnMountIfMissingExit() {
+diff --git a/src/interactions/pressable/hoverable.tsx b/src/interactions/pressable/hoverable.tsx
+index 6b2269b115d9dfec5e63a9570ced2561eca74cb7..2ef0a833378099876fbd691d0878013fa4b0af2d 100644
+--- a/src/interactions/pressable/hoverable.tsx
++++ b/src/interactions/pressable/hoverable.tsx
+@@ -113,7 +113,7 @@ export function Hoverable({
+         }
+       }
+     },
+-    [isHovered, hoverIn, hoverOut]
++    Platform.OS === 'web' ? [isHovered, hoverIn, hoverOut] : undefined
+   )
+ 
+   const handleMouseEnter = useCallback(() => {
+diff --git a/src/interactions/pressable/pressable.tsx b/src/interactions/pressable/pressable.tsx
+index e3d66e9c0c371782d22471e13abbde96f9613fad..fb00718f9ba1860d98cf12a254eca2f3ff92d954 100644
+--- a/src/interactions/pressable/pressable.tsx
++++ b/src/interactions/pressable/pressable.tsx
+@@ -17,6 +17,7 @@ import {
+ import { Hoverable } from './hoverable'
+ import type { MotiPressableInteractionState, MotiPressableProps } from './types'
+ import type { MotiTransition } from '../../core/types'
++import { Platform } from 'react-native'
+ 
+ export const MotiPressable = forwardRef<View, MotiPressableProps>(
+   function MotiPressable(props, ref) {
+@@ -78,7 +79,7 @@ export const MotiPressable = forwardRef<View, MotiPressableProps>(
+         hovered: hovered.value,
+         pressed: pressed.value,
+       }),
+-      [hovered, pressed]
++      Platform.OS === 'web' ? [hovered, pressed] : undefined
+     )
+ 
+     const transition = useDerivedValue((): MotiTransition => {
+@@ -87,7 +88,7 @@ export const MotiPressable = forwardRef<View, MotiPressableProps>(
+       }
+ 
+       return transitionProp || ({} as MotiTransition)
+-    }, [transitionProp, interaction])
++    }, Platform.OS === 'web' ? [transitionProp, interaction] : undefined)
+ 
+     const __state = useDerivedValue(() => {
+       if (typeof animate === 'function') {
+@@ -95,7 +96,7 @@ export const MotiPressable = forwardRef<View, MotiPressableProps>(
+       }
+ 
+       return animate
+-    }, [animate, interaction])
++    }, Platform.OS === 'web' ? [animate, interaction] : undefined)
+ 
+     const state = useMemo(() => ({ __state }), [__state])
+ 
+diff --git a/src/interactions/pressable/use-moti-pressable-animated-props.ts b/src/interactions/pressable/use-moti-pressable-animated-props.ts
+index 041c96a317016b3a955a399edbf80c12d80b272c..16eb57bc3946f36ed741e5fc3c1414b06bd673bf 100644
+--- a/src/interactions/pressable/use-moti-pressable-animated-props.ts
++++ b/src/interactions/pressable/use-moti-pressable-animated-props.ts
+@@ -2,6 +2,7 @@ import type { MotiPressableInteractionState } from './types'
+ import { useAnimatedProps } from 'react-native-reanimated'
+ import { MotiPressableInteractionIds, useMotiPressableContext } from './context'
+ import { useFactory } from './use-validate-factory-or-id'
++import { Platform } from 'react-native'
+ 
+ type Factory<Props> = (interaction: MotiPressableInteractionState) => Props
+ 
+@@ -36,5 +37,5 @@ export function useMotiPressableAnimatedProps<Props extends object>(
+ 
+   return useAnimatedProps<Props>(() => {
+     return context ? factory(context.containers[id].value) : {}
+-  }, deps)
++  }, Platform.OS === 'web' ? deps : undefined)
+ }
+diff --git a/src/interactions/pressable/use-moti-pressable-interpolate.ts b/src/interactions/pressable/use-moti-pressable-interpolate.ts
+index 8b887886e67598198efe958f8e4b8725df065c16..26bb3569bd0f64de7c46d5f507f72fa8532f85a2 100644
+--- a/src/interactions/pressable/use-moti-pressable-interpolate.ts
++++ b/src/interactions/pressable/use-moti-pressable-interpolate.ts
+@@ -2,6 +2,7 @@ import type { MotiPressableInteractionState } from './types'
+ import { SharedValue, useDerivedValue } from 'react-native-reanimated'
+ import { MotiPressableInteractionIds, useMotiPressableContext } from './context'
+ import { useFactory } from './use-validate-factory-or-id'
++import { Platform } from 'react-native'
+ 
+ type Factory<Props> = (interaction: MotiPressableInteractionState) => Props
+ type Deps = unknown[] | null | undefined
+@@ -96,5 +97,5 @@ export function useInterpolateMotiPressable<Props>(
+ 
+   return useDerivedValue<Props>(() => {
+     return context && factory(context.containers[id].value)
+-  }, [...(deps || []), context.containers[id]])
++  }, Platform.OS === 'web' ? [...(deps || []), context.containers[id]] : undefined)
+ }
+diff --git a/src/interactions/pressable/use-moti-pressable-transition.ts b/src/interactions/pressable/use-moti-pressable-transition.ts
+index 7af2af43097997a6bf9167cd99e5e8dd6301337c..b5a7b2e4f4534db1f2adf38228cbcdd53afa550f 100644
+--- a/src/interactions/pressable/use-moti-pressable-transition.ts
++++ b/src/interactions/pressable/use-moti-pressable-transition.ts
+@@ -4,6 +4,7 @@ import type Animated from 'react-native-reanimated'
+ import { MotiPressableInteractionIds, useMotiPressableContext } from './context'
+ import { useFactory } from './use-validate-factory-or-id'
+ import type { MotiTransition } from '../../core'
++import { Platform } from 'react-native'
+ 
+ type Factory<Props> = (interaction: MotiPressableInteractionState) => Props
+ type Deps = unknown[] | null | undefined
+@@ -90,5 +91,5 @@ export function useMotiPressableTransition(
+ 
+   return useDerivedValue<MotiTransition>(() => {
+     return context && factory(context.containers[id].value)
+-  }, [context.containers[id], ...(deps || [])])
++  }, Platform.OS === 'web' ? [context.containers[id], ...(deps || [])] : undefined)
+ }
+diff --git a/src/interactions/pressable/use-pressable.ts b/src/interactions/pressable/use-pressable.ts
+index abaab244c21da6e7dce252a7497b80040288aae9..4d439fd8b12b8111d5ed71568f481be294724027 100644
+--- a/src/interactions/pressable/use-pressable.ts
++++ b/src/interactions/pressable/use-pressable.ts
+@@ -4,6 +4,7 @@ import { useDerivedValue } from 'react-native-reanimated'
+ import type { MotiProps } from '../../core'
+ import { useMemo } from 'react'
+ import { useFactory } from './use-validate-factory-or-id'
++import { Platform } from 'react-native'
+ 
+ type Id = MotiPressableInteractionIds['id']
+ type Deps = unknown[] | null | undefined
+@@ -103,7 +104,7 @@ function useMotiPressable(
+     const interaction = context.containers[id]
+ 
+     return interaction && factory(interaction.value)
+-  }, [context, id, context.containers[id], ...(deps || [])])
++  }, Platform.OS === 'web' ? [context, id, context.containers[id], ...(deps || [])] : undefined)
+ 
+   return useMemo(
+     () => ({
+diff --git a/src/interactions/pressable/use-pressables.ts b/src/interactions/pressable/use-pressables.ts
+index a13f67c1305d70de81ced9c95276e1759b2ff5bd..31cc9ac4c3f34b3e0d05ff9cd9e3080427e56026 100644
+--- a/src/interactions/pressable/use-pressables.ts
++++ b/src/interactions/pressable/use-pressables.ts
+@@ -79,7 +79,7 @@ export function useMotiPressables(
+ 
+     return animatedResult
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+-  }, [context.containers, Platform.select({ web: factory }), ...deps])
++  }, Platform.OS === 'web' ? [context.containers, Platform.select({ web: factory }), ...deps] : undefined)
+ 
+   const state = useMemo(() => ({ __state }), [__state])
+ 
+diff --git a/src/skeleton/skeleton-new.tsx b/src/skeleton/skeleton-new.tsx
+index c8dcb4a0f4b36be547d9a5cc9087a65ddc8fc3e5..f40d07b1e828eb26d176adb56c9d518f44ca0b2e 100644
+--- a/src/skeleton/skeleton-new.tsx
++++ b/src/skeleton/skeleton-new.tsx
+@@ -16,6 +16,7 @@ import {
+   baseColors,
+ } from './shared'
+ import { MotiSkeletonProps } from './types'
++import { Platform } from 'react-native'
+ 
+ export default function Skeleton(props: MotiSkeletonProps) {
+   const skeletonGroupContext = useContext(SkeletonGroupContext)
+@@ -123,7 +124,7 @@ const AnimatedGradient = React.memo(
+             () => ({
+               width: measuredWidthSv.value * backgroundSize,
+             }),
+-            [backgroundSize, measuredWidthSv]
++            Platform.OS === 'web' ? [backgroundSize, measuredWidthSv] : undefined
+           ),
+         ]}
+         from={{
+@@ -135,7 +136,7 @@ const AnimatedGradient = React.memo(
+             opacity: show ? 1 : 0,
+             translateX: -measuredWidthSv.value * (backgroundSize - 1),
+           }
+-        }, [measuredWidthSv, show])}
++        }, Platform.OS === 'web' ? [measuredWidthSv, show] : undefined)}
+         transition={{
+           translateX: {
+             type: 'timing',

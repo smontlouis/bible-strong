@@ -188,11 +188,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   updates: {
     url: 'https://updates.bible-strong.app/manifest',
     checkAutomatically: 'NEVER',
-    codeSigningCertificate: './certs/certificate.pem',
-    codeSigningMetadata: {
-      keyid: 'main',
-      alg: 'rsa-v1_5-sha256',
-    },
+    // Only builds with a channel (staging, production) receive updates. A development client
+    // with the certificate would also demand a signed manifest from Metro.
+    ...(process.env.EAS_BUILD_CHANNEL && {
+      codeSigningCertificate: './certs/certificate.pem',
+      codeSigningMetadata: {
+        keyid: 'main',
+        alg: 'rsa-v1_5-sha256',
+      },
+    }),
     requestHeaders: {
       'expo-channel-name': process.env.EAS_BUILD_CHANNEL,
     },

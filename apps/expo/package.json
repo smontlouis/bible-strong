@@ -62,7 +62,7 @@
     "themes:check": "node scripts/generate-theme-css.cjs --check"
   },
   "dependencies": {
-    "@alloc/moti": "^54.0.0-beta.8",
+    "@alloc/moti": "patch:@alloc/moti@npm%3A54.0.0-beta.8#~/.yarn/patches/@alloc-moti-npm-54.0.0-beta.8-80d4851b65.patch",
     "@assistant-ui/react": "^0.15.21",
     "@assistant-ui/react-native": "0.1.43",
     "@assistant-ui/react-streamdown": "0.3.16",

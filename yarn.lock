@@ -230,7 +230,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@alloc/moti@npm:^54.0.0-beta.8":
+"@alloc/moti@npm:54.0.0-beta.8":
   version: 54.0.0-beta.8
   resolution: "@alloc/moti@npm:54.0.0-beta.8"
   dependencies:
@@ -248,6 +248,27 @@ __metadata:
     react-native-safe-area-context:
       optional: true
   checksum: 10c0/261d708ddc1925831c7cc08025ccb162bbfb88d57472e109724b90d595f3b6e8b42ef2db0fd872eadccd07ab9508a767ea2c9afddaa614fbfaf756ccd5a4b1d1
+  languageName: node
+  linkType: hard
+
+"@alloc/moti@patch:@alloc/moti@npm%3A54.0.0-beta.8#~/.yarn/patches/@alloc-moti-npm-54.0.0-beta.8-80d4851b65.patch":
+  version: 54.0.0-beta.8
+  resolution: "@alloc/moti@patch:@alloc/moti@npm%3A54.0.0-beta.8#~/.yarn/patches/@alloc-moti-npm-54.0.0-beta.8-80d4851b65.patch::version=54.0.0-beta.8&hash=dc4d02"
+  dependencies:
+    framer-motion: "npm:^12.23.12"
+  peerDependencies:
+    expo-linear-gradient: "*"
+    react-native-linear-gradient: "*"
+    react-native-reanimated: "*"
+    react-native-safe-area-context: "*"
+  peerDependenciesMeta:
+    expo-linear-gradient:
+      optional: true
+    react-native-linear-gradient:
+      optional: true
+    react-native-safe-area-context:
+      optional: true
+  checksum: 10c0/1db54a8b24784a9a5b26643d7359abdfbc85a8a05068482630ed91b08d4d149b0254232130f635418a83d32f4eceff8c54f2da3ac032d3f31e8e8e9e721791c3
   languageName: node
   linkType: hard
 
@@ -2483,7 +2504,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@bible-strong/expo@workspace:apps/expo"
   dependencies:
-    "@alloc/moti": "npm:^54.0.0-beta.8"
+    "@alloc/moti": "patch:@alloc/moti@npm%3A54.0.0-beta.8#~/.yarn/patches/@alloc-moti-npm-54.0.0-beta.8-80d4851b65.patch"
     "@assistant-ui/react": "npm:^0.15.21"
     "@assistant-ui/react-native": "npm:0.1.43"
     "@assistant-ui/react-streamdown": "npm:0.3.16"
