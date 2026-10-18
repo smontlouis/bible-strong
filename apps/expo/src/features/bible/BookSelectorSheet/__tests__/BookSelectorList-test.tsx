@@ -80,7 +80,7 @@ const renderList = (gridBook: (typeof books)[number] | null = null) => {
   return createRenderer(
     <BookSelectorList
       data={[]}
-      initialScrollIndex={0}
+      initialScrollOffset={0}
       expandedBook={expandedBook as never}
       bookSelectorData={undefined}
       flatListRef={flatListRef}
@@ -121,12 +121,36 @@ describe('BookSelectorList', () => {
     expect(list.props.keyExtractor(genesis)).toBe('1')
   })
 
+  it('passes the current chapter to the selected book only', () => {
+    const renderer = createRenderer(
+      <BookSelectorList
+        data={[genesis, psalms]}
+        initialScrollOffset={0}
+        expandedBook={expandedBook as never}
+        bookSelectorData={{ selectedBook: psalms, selectedChapter: 119 } as never}
+        flatListRef={flatListRef}
+        renderedChapterBookNumbers={[19]}
+        onBookSelect={onBookSelect}
+        gridBook={null}
+        onGridBookSelect={onGridBookSelect}
+      />
+    )
+    const list = renderer.root.findByType('FlatList' as never)
+
+    expect(list.props.renderItem({ item: psalms }).props).toEqual(
+      expect.objectContaining({ isSelected: true, selectedChapter: 119 })
+    )
+    expect(list.props.renderItem({ item: genesis }).props).toEqual(
+      expect.objectContaining({ isSelected: false, selectedChapter: undefined })
+    )
+  })
+
   it('uses grid book presses to enter the chapter grid', () => {
     mockSelectionMode = 'grid'
     const renderer = createRenderer(
       <BookSelectorList
         data={[genesis, psalms]}
-        initialScrollIndex={0}
+        initialScrollOffset={0}
         expandedBook={expandedBook as never}
         bookSelectorData={undefined}
         flatListRef={flatListRef}

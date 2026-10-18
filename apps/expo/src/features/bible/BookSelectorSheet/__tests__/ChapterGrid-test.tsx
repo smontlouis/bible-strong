@@ -5,6 +5,12 @@ import ChapterGrid from '../ChapterGrid'
 
 const mockEmit = jest.fn()
 
+// The grid is called as a plain function here, outside a React render
+jest.mock('react', () => ({
+  ...jest.requireActual<typeof import('react')>('react'),
+  useRef: (initialValue: unknown) => ({ current: initialValue }),
+}))
+
 jest.mock('react-native', () => ({
   DeviceEventEmitter: {
     emit: (...args: unknown[]) => mockEmit(...args),
