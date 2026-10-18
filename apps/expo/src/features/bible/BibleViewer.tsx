@@ -905,19 +905,35 @@ const BibleViewer = ({
   )
   const taggedVersesInChapter = taggedVersesData.counts
   const versesWithNonHighlightTags = taggedVersesData.hasNonHighlightTags
+  const loadedPassageKeyRef = useRef<string | undefined>(undefined)
   const recordedHistoryKeyRef = useRef<string | undefined>(undefined)
+  const isPassageLoaded =
+    !mainReadingQuery.isPlaceholderData && Boolean(mainResult?.success && mainResult.data)
+  // Cached tabs stay mounted behind the active one: only the reader on screen is consulting.
+  const isViewerOnScreen = isFormSheet || !isInTab || isActiveBibleTab
 
   useEffect(() => {
-    if (mainReadingQuery.isPlaceholderData || !mainResult?.success || !mainResult.data) {
-      return
-    }
-    const historyKey = `${version}:${book.Numero}:${chapter}:${verse}`
-    if (recordedHistoryKeyRef.current === historyKey) return
-    recordedHistoryKeyRef.current = historyKey
+    if (!isPassageLoaded) return
+    const passageKey = `${version}:${book.Numero}:${chapter}:${verse}`
+    if (loadedPassageKeyRef.current === passageKey) return
+    loadedPassageKeyRef.current = passageKey
 
     setDisplayedBook(book.Numero)
     setDisplayedChapter(chapter)
     setDisplayedVersion(version)
+    Sentry.addBreadcrumb({
+      category: 'bible viewer',
+      message: 'Load verses',
+      data: { book: book.Numero, chapter, verse, version },
+    })
+  }, [book.Numero, chapter, isPassageLoaded, verse, version])
+
+  useEffect(() => {
+    if (!isPassageLoaded || !isViewerOnScreen) return
+    const historyKey = `${version}:${book.Numero}:${chapter}:${verse}`
+    if (recordedHistoryKeyRef.current === historyKey) return
+    recordedHistoryKeyRef.current = historyKey
+
     addHistory({
       book: book.Numero,
       chapter,
@@ -926,20 +942,7 @@ const BibleViewer = ({
       type: 'verse',
       date: Date.now(),
     })
-    Sentry.addBreadcrumb({
-      category: 'bible viewer',
-      message: 'Load verses',
-      data: { book: book.Numero, chapter, verse, version },
-    })
-  }, [
-    addHistory,
-    book.Numero,
-    chapter,
-    mainReadingQuery.isPlaceholderData,
-    mainResult,
-    verse,
-    version,
-  ])
+  }, [addHistory, book.Numero, chapter, isPassageLoaded, isViewerOnScreen, verse, version])
 
   const prevBook = usePrevious(book.Numero)
   const prevChapter = usePrevious(chapter)

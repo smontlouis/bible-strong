@@ -339,7 +339,7 @@ const Header = ({
         else addParallelVersion()
         break
       case 'history':
-        router.push('/history')
+        router.push({ pathname: '/history', params: { filter: 'bible' } })
         break
       case 'bookmark':
         bookmarkModalRef.current?.present()

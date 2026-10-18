@@ -33,6 +33,8 @@ import {
 import CommentaryEntryNavigation from './CommentaryEntryNavigation'
 import { groupCommentarySectionsForVerse } from './commentaryResourceNavigation'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { useRecordHistory } from '~features/history/useRecordHistory'
+import { getCommentaryResourceHistoryEntry } from './commentaryResourceHistory'
 const CommentaryEntryScreen = ({
   routeParams,
   onOpenChapter,
@@ -79,6 +81,15 @@ const CommentaryEntryScreen = ({
       params,
       query.data?.sections.find(item => item.id === params.sectionId)
     )
+  )
+  useRecordHistory(
+    params.sectionId
+      ? getCommentaryResourceHistoryEntry(
+          parsed,
+          params.sectionId,
+          query.data?.sections.find(item => item.id === params.sectionId)
+        )
+      : null
   )
 
   if (!parsed || !params.sectionId) {

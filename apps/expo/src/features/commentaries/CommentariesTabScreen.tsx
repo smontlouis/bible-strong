@@ -39,6 +39,7 @@ import { useSheetFooterInset } from '~common/sheet'
 import { getCommentaryScrollBottomInset } from './commentaryScrollInsets'
 import { getCommentaryResourceRoute } from './commentaryResourceNavigation'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { useRecordHistory } from '~features/history/useRecordHistory'
 import ResourceVerseContext, {
   useResourceVerseContext,
 } from '~features/bible/resources/ResourceVerseContext'
@@ -141,6 +142,8 @@ const CommentariesTabScreen = ({
     unavailableResources,
   })
   const verseFormatted = verseStringToObject([verse])
+  // The verse resources sheet embeds this screen without its header: only a full screen is a visit.
+  useRecordHistory(hasHeader && verseFormatted ? { type: 'commentary', verse } : null)
 
   const { title: requestedHeaderTitle } = verseFormatted
     ? formatVerseContent([verse])

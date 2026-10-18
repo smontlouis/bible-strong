@@ -30,6 +30,7 @@ import { useRouter } from 'expo-router'
 import { Events } from './Events'
 import ProfileStats from '~features/profile/components/ProfileStats'
 import PassageMediaLibraryWidget from './PassageMediaLibraryWidget'
+import HistoryHomeSection from '~features/history/HistoryHomeSection'
 // local react props
 type HomeProps = {
   closeHome: () => void
@@ -54,6 +55,7 @@ export const Home = ({ closeHome, inWorkspace = false }: HomeProps) => {
         <UserWidget />
         <ProfileStats />
         <LoginPrompt />
+        <HistoryHomeSection />
         <Box className="overflow-hidden border-continuous pt-[40px] px-[20px]">
           <Text
             className="text-[23px] flex-[1]"

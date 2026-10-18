@@ -6,6 +6,7 @@ import {
   HistoryItem,
   HistoryItemInput,
   migrateHistoryItems,
+  removeHistoryItem,
 } from '~features/history/historyModel'
 import {
   tabGroupsAtom,
@@ -90,6 +91,10 @@ export const historyAtom = atom(
     set(historyBaseAtom, addHistoryItem(history, newItem))
   }
 )
+
+export const removeHistoryItemAtom = atom(null, (get, set, id: string) => {
+  set(historyBaseAtom, removeHistoryItem(get(historyBaseAtom), id))
+})
 
 export const deleteHistoryAtom = atom(null, (_get, set) => {
   set(historyBaseAtom, [])

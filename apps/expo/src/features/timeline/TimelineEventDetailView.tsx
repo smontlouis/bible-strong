@@ -20,6 +20,8 @@ import { buildPublicTimelineEventPath } from './publicTimelineRoutes'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { EventDetailsContent, EventDetailsProps } from './EventDetails'
 import { TimelineEvent } from './types'
+import { calculateLabel } from './constants'
+import { useRecordHistory } from '~features/history/useRecordHistory'
 interface Props {
   languageOverride?: 'fr' | 'en'
   assistantScope?: string
@@ -60,6 +62,20 @@ const TimelineEventDetailContent = ({
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : canGoBack
   const resources = useResourceAccess()
+  useRecordHistory(
+    event
+      ? {
+          type: 'timeline',
+          slug: event.slug,
+          title: getLegacyLocalizedField(lang, { fr: event.title, en: event.titleEn }),
+          dateLabel: String(
+            ('dateLabel' in event ? event.dateLabel : undefined) ||
+              calculateLabel(event.start, event.end, lang)
+          ),
+          language: lang,
+        }
+      : null
+  )
 
   if (!event) {
     return (

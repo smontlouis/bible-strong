@@ -82,7 +82,7 @@ BibleScreen/
     ├── BibleLinkScreen
     ├── NoteDetailTabScreen
     ├── CompareVersesScreen
-    ├── HistoryScreen
+    ├── HistoryScreen (features/history)
     └── PericopeScreen
 ```
 

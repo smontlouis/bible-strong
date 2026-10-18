@@ -47,6 +47,7 @@ import {
 } from '~redux/selectors/bible'
 import { isFullScreenBibleAtom, unifiedTagsModalAtom } from '~state/app'
 import { NotesTab, useIsCurrentTab } from '~state/tabs'
+import { useRecordHistory } from '~features/history/useRecordHistory'
 const IPAD_FORM_SHEET_KEYBOARD_OFFSET = -54
 
 const NOTE_EDITOR_MIN_HEIGHT = 240
@@ -189,6 +190,16 @@ const NoteDetailTabScreen = ({
     ? createNoteEndpoint(noteId, getNoteTitle(currentNote, reference))
     : null
   const relationCount = useRelationCount(noteEndpoint)
+  useRecordHistory(
+    noteId && currentNote
+      ? {
+          type: 'note',
+          noteId,
+          title: getNoteTitle(currentNote, reference),
+          reference: hasNoteVerses ? reference : undefined,
+        }
+      : null
+  )
 
   // Go back to notes list
   const goBack = useCallback(() => {

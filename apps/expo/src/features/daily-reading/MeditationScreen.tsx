@@ -22,6 +22,7 @@ import { READING_TEXT_MAX_WIDTH } from '~common/readingLayout'
 import { getMeditationTitle, toCivilDate, isCivilDate } from '~features/plans/readingCalendar'
 import { useReadingContent, useLocalReadingDate } from './useDailyMeditation'
 import { resolveMeditationReading } from './resolveMeditationReading'
+import { useRecordHistory } from '~features/history/useRecordHistory'
 
 interface MeditationReaderProps {
   assistantScope?: string
@@ -53,6 +54,19 @@ export const MeditationReader = ({
   const cover = useFireStorage(collection?.image)
   const reading = resolved?.reading
   useAssistantResourceContext(assistantScope, editorialContext(collection, reading))
+  const readingTitle = reading && getMeditationTitle(reading)
+  useRecordHistory(
+    collection && reading && readingTitle
+      ? {
+          type: 'meditation',
+          collectionId,
+          readingId: reading.id,
+          title: readingTitle,
+          collectionTitle: collection.title,
+          readingDate: resolved?.date,
+        }
+      : null
+  )
   const date =
     resolved?.date ??
     (!readingId ? (requestedDate && isCivilDate(requestedDate) ? requestedDate : today) : undefined)
