@@ -43,6 +43,19 @@ Found and fixed on the way:
   screen and the launch check only looked at `isAvailable`.
 - On Android the reader lost its icon font after an update. `EX_UPDATES_COPY_EMBEDDED_ASSETS=true`
   is now set through `apps/expo/plugins/gradleProperties.js`.
+- Delta patches never got stored ("0 uploaded, 2 skipped, 10 failed" at each publish): the server
+  refused every upload with `400 "The patch engine is not loaded."`. The Worker loaded bsdiff only
+  when `globalThis.__ALCHEMY_RUNTIME__` was set, and the bundler folds that flag to `true` only when
+  it is written exactly so; `apps/updates/src/worker.ts` wrapped `globalThis` in a cast. Loading the
+  engine would not have been enough: rebuilding a 20.7 MB bundle grows its memory to 91 MB, and
+  with the base and the result held in JavaScript the Worker would pass its 128 MB. The fork
+  (commit `d9e638f`, deployed on 18 October) now checks only the patch's header: BSDIFF40, bzip2
+  blocks, the size of the target bundle. The CLI still rebuilds each patch before uploading it, and
+  the device checks the rebuilt bundle's hash and downloads the full bundle when it does not match.
+  `open-ota patches --branch staging` then stored 10 patches, 0.5 to 2.3 MB against 7.9 MB for the
+  full download (6% to 28%). A bundle fetched like a device does (`A-IM: bsdiff`,
+  `Expo-Current-Update-ID`) came back as `226` on both platforms, and the system `bspatch` rebuilt
+  the exact target bundle from it.
 
 ## Still open
 
@@ -52,8 +65,10 @@ Found and fixed on the way:
    EAS value while the prebuild, run with `.env.staging`, makes `stagingBibleStrong`. Align that
    environment on `.env.staging` or delete those variables from it, then build staging once with
    EAS and check that the channel header says `staging`.
-2. **Delta patches fail at publish** ("0 uploaded, 2 skipped, 10 failed"). Updates still go out as
-   full bundles. Run `open-ota publish --verbose` once to see why.
+2. **No device has received a delta patch yet.** Publish a staging update, check for updates on a
+   device that runs the previous one, and look for the `226` in the dashboard's delivery numbers
+   or the device log. The fix is commit `d9e638f` on `smontlouis/open-ota`; upstream
+   (`focux/open-ota`) has the same bug.
 3. **Sentry receives 7 of 12 source maps** at each publish. Check which files are skipped.
 4. **The first 28.0 builds made with EAS** should be checked once on a device: an update loads, and
    `EXUpdatesURL` and the channel header are as above. The tests ran on local builds.
