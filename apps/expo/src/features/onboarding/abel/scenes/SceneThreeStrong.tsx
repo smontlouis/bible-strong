@@ -6,7 +6,7 @@ import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-au
 import type { TFunction } from 'i18next'
 import { useState } from 'react'
 import { ActivityIndicator, Pressable } from 'react-native'
-import Carousel, { Pagination, type TAnimationStyle } from 'react-native-reanimated-carousel'
+import { Carousel, type CarouselItemAnimation, Pagination } from 'react-native-reanimated-carousel'
 import { configureCarouselPan } from '~helpers/configureCarouselPan'
 import { Extrapolation, interpolate, type SharedValue } from 'react-native-reanimated'
 import Box, { HStack, VStack } from '~common/ui/Box'
@@ -233,7 +233,7 @@ const StrongDefinitionCard = ({
 const createStrongHorizontalStackAnimation = (
   moveSize: number,
   stackInterval: number
-): TAnimationStyle => {
+): CarouselItemAnimation => {
   return rawValue => {
     'worklet'
 
@@ -311,16 +311,13 @@ const StrongCardStack = ({
   return (
     <Carousel
       loop
-      autoFillData
       defaultIndex={activeIndex}
       data={[...STRONG_DEFINITIONS]}
-      windowSize={3}
-      itemWidth={cardWidth}
-      itemHeight={cardHeight}
-      customConfig={{ type: 'positive', viewCount: 2 }}
-      customAnimation={horizontalStackAnimation}
-      onProgressChange={carouselProgress}
-      withAnimation={{ type: 'spring', config: {} }}
+      renderWindowSize={3}
+      itemSize={cardWidth}
+      itemAnimation={horizontalStackAnimation}
+      progress={carouselProgress}
+      animation={{ type: 'spring' }}
       onConfigurePanGesture={configureCarouselPan([-10, 10])}
       style={{ width: cardWidth, height: cardHeight, overflow: 'visible' }}
       contentContainerStyle={{ overflow: 'visible' }}
@@ -349,19 +346,22 @@ const StrongPagination = ({
   const activeDotSize = metrics.s(10)
 
   return (
-    <Pagination.Custom
+    <Pagination
       progress={carouselProgress}
-      data={[...STRONG_DEFINITIONS]}
-      size={dotSize}
+      count={STRONG_DEFINITIONS.length}
       containerStyle={{ gap: metrics.s(8) }}
-      dotStyle={{ borderRadius: dotSize / 2, backgroundColor: theme.colors.lightPrimary }}
+      dotStyle={{
+        width: dotSize,
+        height: dotSize,
+        borderRadius: dotSize / 2,
+        backgroundColor: theme.colors.lightPrimary,
+      }}
       activeDotStyle={{
         width: activeDotSize,
         height: activeDotSize,
         borderRadius: activeDotSize / 2,
         backgroundColor: theme.colors.primary,
       }}
-      carouselName="Strong"
     />
   )
 }

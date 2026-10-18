@@ -1,7 +1,8 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useRef, useState } from 'react'
 import { TouchableOpacity } from 'react-native'
-import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
+import { Easing } from 'react-native-reanimated'
+import { Carousel, type CarouselRef } from 'react-native-reanimated-carousel'
 import { configureCarouselPan } from '~helpers/configureCarouselPan'
 import { twMerge } from '~common/ui/classNames'
 
@@ -70,7 +71,7 @@ type AlphabetListProps = {
 
 const AlphabetList = ({ color, setLetter, letter }: AlphabetListProps) => {
   const [width, setWidth] = useState(0)
-  const CarouselAlphabet = useRef<ICarouselInstance>(null)
+  const CarouselAlphabet = useRef<CarouselRef>(null)
   const index = alphabet.findIndex(l => l === letter.toUpperCase())
 
   return (
@@ -82,17 +83,14 @@ const AlphabetList = ({ color, setLetter, letter }: AlphabetListProps) => {
       >
         <Carousel
           ref={CarouselAlphabet}
-          mode="parallax"
+          layout={{ type: 'parallax', offset: 0, scale: 0.75 }}
           loop={false}
-          defaultIndex={index}
-          scrollAnimationDuration={200}
-          modeConfig={{
-            parallaxScrollingOffset: 0,
-            parallaxScrollingScale: 0.75,
-          }}
+          defaultIndex={Math.max(index, 0)}
+          animation={{ type: 'timing', duration: 300, easing: Easing.bezier(0.25, 1, 0.5, 1) }}
           onConfigurePanGesture={configureCarouselPan([-10, 10])}
           style={{
             width,
+            height: 44,
             justifyContent: 'center',
             alignItems: 'center',
           }}
@@ -100,8 +98,7 @@ const AlphabetList = ({ color, setLetter, letter }: AlphabetListProps) => {
             alignItems: 'center',
             justifyContent: 'center',
           }}
-          itemWidth={36}
-          itemHeight={44}
+          itemSize={36}
           data={alphabet}
           renderItem={({ item: section, index: itemIndex }) => (
             <TouchableOpacity

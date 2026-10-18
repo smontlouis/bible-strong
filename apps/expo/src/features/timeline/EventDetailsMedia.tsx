@@ -1,7 +1,7 @@
 import { Image } from 'expo-image'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import Carousel from 'react-native-reanimated-carousel'
+import { Carousel } from 'react-native-reanimated-carousel'
 import { configureCarouselPan } from '~helpers/configureCarouselPan'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
@@ -59,8 +59,8 @@ const Media = ({
             {t('Images')}
           </Paragraph>
           <Carousel
-            itemWidth={imageWidth + 20}
-            itemHeight={imageWidth + 60}
+            loop
+            itemSize={imageWidth + 20}
             data={images}
             contentContainerStyle={{
               alignItems: 'center',

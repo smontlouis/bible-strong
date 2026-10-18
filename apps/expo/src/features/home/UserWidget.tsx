@@ -3,7 +3,7 @@ import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import * as NativeUI from 'react-native'
-import Carousel from 'react-native-reanimated-carousel'
+import { Carousel } from 'react-native-reanimated-carousel'
 import { twMerge } from '~common/ui/classNames'
 
 import Box from '~common/ui/Box'
@@ -51,7 +51,14 @@ const UserWidget = () => {
       >
         {carouselWidth > 0 && (
           <Carousel
-            mode="vertical-stack"
+            layout={{
+              type: 'vertical-stack',
+              exitDirection: 'right',
+              spacing: -10,
+              scaleStep: 0.04,
+              rotation: 0,
+              opacityStep: 0.4,
+            }}
             data={visibleVerseOffsets}
             loop={false}
             style={{
@@ -64,15 +71,7 @@ const UserWidget = () => {
               justifyContent: 'center',
               overflow: 'visible',
             }}
-            itemWidth={Math.max(carouselWidth - 65, 0)}
-            itemHeight={VERSE_CARD_HEIGHT}
-            modeConfig={{
-              snapDirection: 'right',
-              stackInterval: -10,
-              scaleInterval: 0.04,
-              rotateZDeg: 0,
-              opacityInterval: 0.4,
-            }}
+            itemSize={Math.max(carouselWidth - 65, 1)}
             onSnapToItem={setActiveVerseIndex}
             renderItem={({ item: addDay, index }) => (
               <Box

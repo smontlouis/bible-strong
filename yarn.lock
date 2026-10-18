@@ -2639,11 +2639,11 @@ __metadata:
     react-native-edge-to-edge: "npm:^1.4.3"
     react-native-enriched-markdown: "npm:1.0.2"
     react-native-gesture-handler: "npm:~3.2.1"
-    react-native-keyboard-controller: "npm:1.22.4"
+    react-native-keyboard-controller: "npm:1.22.7"
     react-native-mmkv: "npm:4.3.2"
     react-native-nitro-modules: "npm:^0.37.1"
     react-native-reanimated: "npm:4.7.0"
-    react-native-reanimated-carousel: "npm:^5.0.0-beta.3"
+    react-native-reanimated-carousel: "npm:^5.2.0"
     react-native-reanimated-dnd: "npm:2.0.0"
     react-native-root-siblings: "npm:5.0.1"
     react-native-safe-area-context: "npm:~5.9.1"
@@ -29626,16 +29626,16 @@ multer@emadalam/multer:
   languageName: node
   linkType: hard
 
-"react-native-keyboard-controller@npm:1.22.4":
-  version: 1.22.4
-  resolution: "react-native-keyboard-controller@npm:1.22.4"
+"react-native-keyboard-controller@npm:1.22.7":
+  version: 1.22.7
+  resolution: "react-native-keyboard-controller@npm:1.22.7"
   dependencies:
     react-native-is-edge-to-edge: "npm:^1.2.1"
   peerDependencies:
     react: "*"
     react-native: "*"
     react-native-reanimated: ">=3.0.0"
-  checksum: 10c0/05cab5b3bca4b108235d730f983ff224d5666253a80b8d071658edcc70e898b3e79df87215327c67d6b48d32ff1df03d12f40e2b26ee1da80505aafd28d83460
+  checksum: 10c0/7fe7e8935e59daaaf506ea7543f41fc97fb9862832512c410e9729516a55c1b1327cd2c712f4b81d5868cb7dd483ea8b1ea91cf4cceb22c4bfada6fb747c59ae
   languageName: node
   linkType: hard
 
@@ -29660,16 +29660,18 @@ multer@emadalam/multer:
   languageName: node
   linkType: hard
 
-"react-native-reanimated-carousel@npm:^5.0.0-beta.3":
-  version: 5.0.0-beta.3
-  resolution: "react-native-reanimated-carousel@npm:5.0.0-beta.3"
+"react-native-reanimated-carousel@npm:^5.2.0":
+  version: 5.2.0
+  resolution: "react-native-reanimated-carousel@npm:5.2.0"
   peerDependencies:
     react: ">=18.0.0"
     react-native: ">=0.80.0"
-    react-native-gesture-handler: ">=2.9.0"
-    react-native-reanimated: ">=4.0.0"
+    react-native-gesture-handler: ">=2.9.0 <4.0.0"
+    react-native-reanimated: ">=4.1.0"
     react-native-worklets: ">=0.5.0"
-  checksum: 10c0/6aafe7fea50f166123dbe419d26287ea876bfb901502ea8b12f1fe93c42e08fe091c192e88c6e0b869a6d3a58a82c8af142edbf3366b897236ed020650e8c8b1
+  bin:
+    rnrc-v5-codemod: scripts/codemods/v5.mjs
+  checksum: 10c0/eea20a7722db432ef4dc028b540c9a56cafe3c4cd8cbe9effcf616debd63ad174a7250e743b26dc6a1590d1aba4aada20c6eb52addd8faec0c521e4042004083
   languageName: node
   linkType: hard
 
