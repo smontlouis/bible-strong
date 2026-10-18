@@ -10,6 +10,12 @@ it('reserves the subheader height for a targeted passage and releases it when fo
   expect(getPassageContextHeaderHeight(undefined)).toBe(0)
 })
 
+it('reserves one subheader in plan mode, with or without focused verses', () => {
+  expect(getPassageContextHeaderHeight(undefined, false, true)).toBe(44)
+  expect(getPassageContextHeaderHeight([1, 2], false, true)).toBe(44)
+  expect(getPassageContextHeaderHeight(undefined, true, true)).toBe(0)
+})
+
 it('keeps every normal chapter action in order except parallel display', () => {
   const actions = ['params', 'parallel', 'history', 'bookmark', 'export', 'open-tab'].map(id => ({
     id,

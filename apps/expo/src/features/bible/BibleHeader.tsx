@@ -47,8 +47,6 @@ import { SHARE_LINK_ACTION, shareResourceLink } from '~features/share/resourceSh
 import truncate from '~helpers/truncate'
 import useDimensions from '~helpers/useDimensions'
 import verseToReference from '~helpers/verseToReference'
-import { chapterToReference } from '~helpers/chapterToReference'
-import { getPlanPassagePosition } from './planPassage'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { RootState } from '~redux/modules/reducer'
 import { makeSelectBookmarkForChapter } from '~redux/selectors/bookmarks'
@@ -187,21 +185,6 @@ const Header = ({
     actions.setTitle(`${ref} - ${selectedVersion}`)
   }, [actions, bible])
 
-  // Plan mode names the whole passage, and where the reader stands when it spans chapters.
-  const planPosition = planPassage && getPlanPassagePosition(planPassage, chapter)
-  const planChapters = planPassage
-    ? `${planPassage.book}|${planPassage.startChapter}${
-        planPassage.endChapter > planPassage.startChapter ? `-${planPassage.endChapter}` : ''
-      }`
-    : ''
-  const planReference = !planPassage
-    ? ''
-    : hasFocusVerses
-      ? focusedReference
-      : `${chapterToReference(planChapters)}${
-          planPosition ? ` · ${planPosition.current}/${planPosition.total}` : ''
-        }`
-
   const { addParallelVersion, removeParallelVersion, removeAllParallelVersions } = actions
 
   const isHeaderCollapsed = !isFormSheet && isFullScreenBible
@@ -234,6 +217,20 @@ const Header = ({
       },
     })
   }
+
+  const bookTriggerClassName =
+    'overflow-hidden border-continuous items-center justify-center pl-[12px] pr-[7px] h-[32px]'
+  const bookTriggerContent = (
+    <>
+      <AnimatedBox
+        className="overflow-hidden border-continuous bg-light-grey rounded-tl-[20px] rounded-bl-[20px] absolute left-[0px] bottom-[0px] right-[0px] top-[0px]"
+        style={opacityTransitionStyle}
+      />
+      <AnimatedText className="font-bold text-[14px]" style={translateYTransitionStyle}>
+        {isSmall ? truncate(`${t(bookName)} ${chapter}`, 10) : `${t(bookName)} ${chapter}`}
+      </AnimatedText>
+    </>
+  )
 
   const isVerticalParallelMode = displayMode === 'vertical'
   const nextColumnWidth = columnWidth === 50 ? 75 : columnWidth === 75 ? 100 : 50
@@ -320,19 +317,15 @@ const Header = ({
     },
   ]
 
-  // The read-only header has no version selector, so plan mode offers it from the menu.
-  const planMenuActions: MenuAction[] = [
-    { id: 'version', title: `${t('Changer de version')} (${version})`, image: 'book' },
-    ...getPassagePreviewMenuActions(mainMenuActions),
-  ]
+  // Plan mode keeps the chapter header, bound to its passage: no parallel display.
+  const chapterMenuActions = planPassage
+    ? getPassagePreviewMenuActions(mainMenuActions)
+    : mainMenuActions
 
   const handleMenuAction = (id: string) => {
     switch (id) {
       case 'params':
         onBibleParamsClick()
-        break
-      case 'version':
-        openVersionSelector({ actions, data: getDefaultStore().get(bibleAtom).data })
         break
       case 'parallel':
         if (isParallel) removeAllParallelVersions()
@@ -567,7 +560,7 @@ const Header = ({
             </AnimatedBox>
           </Back>
         ) : null}
-        {hasFocusVerses || planPassage ? (
+        {hasFocusVerses && !planPassage ? (
           <HStack className="overflow-hidden border-continuous flex-1 items-center">
             <Box className="overflow-hidden border-continuous flex-1 pl-[22px]">
               <AnimatedText
@@ -575,7 +568,7 @@ const Header = ({
                 numberOfLines={1}
                 style={[{ flexShrink: 1 }, translateYTransitionStyle]}
               >
-                {`${planPassage ? planReference : focusedReference} - ${version}`}
+                {`${focusedReference} - ${version}`}
               </AnimatedText>
             </Box>
             {strongModeButton}
@@ -585,9 +578,7 @@ const Header = ({
               chapter={chapter}
               version={version}
               accessibilityLabel={t('accessibility.bibleOptions')}
-              actions={
-                planPassage ? planMenuActions : getPassagePreviewMenuActions(mainMenuActions)
-              }
+              actions={getPassagePreviewMenuActions(mainMenuActions)}
               onPressAction={({ nativeEvent }) => handleMenuAction(nativeEvent.event)}
             >
               <AnimatedBox
@@ -597,48 +588,40 @@ const Header = ({
                 <FeatherIcon name="more-vertical" size={18} />
               </AnimatedBox>
             </BibleOptionsMenu>
-            {planPassage && (
-              <TouchableBox
-                className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[32px]"
-                onPress={() => actions.exitPlanMode()}
-                accessibilityRole="button"
-                accessibilityLabel={t('accessibility.exitPlanMode')}
-              >
-                <FeatherIcon name="x" size={20} />
-              </TouchableBox>
-            )}
           </HStack>
         ) : (
           <>
             <HStack className="overflow-hidden border-continuous items-center gap-[3px] pl-[10px]">
               <HStack className="overflow-hidden border-continuous">
-                <BibleSelectorTrigger
-                  kind="book"
-                  data={getDefaultStore().get(bibleAtom).data}
-                  actions={actions}
-                  coverage={coverage}
-                  className="overflow-hidden border-continuous items-center justify-center pl-[12px] pr-[7px] h-[32px]"
-                  onPress={() => {
-                    openBookSelector({
-                      actions,
-                      data: getDefaultStore().get(bibleAtom).data,
-                    })
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel={t('accessibility.chooseBookAndChapter', {
-                    reference: `${t(bookName)} ${chapter}`,
-                  })}
-                >
-                  <AnimatedBox
-                    className="overflow-hidden border-continuous bg-light-grey rounded-tl-[20px] rounded-bl-[20px] absolute left-[0px] bottom-[0px] right-[0px] top-[0px]"
-                    style={opacityTransitionStyle}
-                  />
-                  <AnimatedText className="font-bold text-[14px]" style={translateYTransitionStyle}>
-                    {isSmall
-                      ? truncate(`${t(bookName)} ${chapter}`, 10)
-                      : `${t(bookName)} ${chapter}`}
-                  </AnimatedText>
-                </BibleSelectorTrigger>
+                {planPassage ? (
+                  // The plan bounds the reading, so the passage reads as a label, not a selector.
+                  <Box
+                    className={bookTriggerClassName}
+                    accessibilityLabel={`${t(bookName)} ${chapter}`}
+                  >
+                    {bookTriggerContent}
+                  </Box>
+                ) : (
+                  <BibleSelectorTrigger
+                    kind="book"
+                    data={getDefaultStore().get(bibleAtom).data}
+                    actions={actions}
+                    coverage={coverage}
+                    className={bookTriggerClassName}
+                    onPress={() => {
+                      openBookSelector({
+                        actions,
+                        data: getDefaultStore().get(bibleAtom).data,
+                      })
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('accessibility.chooseBookAndChapter', {
+                      reference: `${t(bookName)} ${chapter}`,
+                    })}
+                  >
+                    {bookTriggerContent}
+                  </BibleSelectorTrigger>
+                )}
               </HStack>
               <BibleSelectorTrigger
                 kind="version"
@@ -730,7 +713,7 @@ const Header = ({
                   chapter={chapter}
                   version={version}
                   accessibilityLabel={t('accessibility.bibleOptions')}
-                  actions={mainMenuActions}
+                  actions={chapterMenuActions}
                   onPressAction={({ nativeEvent }) => handleMenuAction(nativeEvent.event)}
                 >
                   <AnimatedBox
@@ -744,7 +727,7 @@ const Header = ({
                     <FeatherIcon name="more-vertical" size={18} />
                   </AnimatedBox>
                 </BibleOptionsMenu>
-                {focusVerses && focusVerses.length > 0 && (
+                {hasFocusVerses && !planPassage && (
                   <TouchableBox
                     className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[32px]"
                     onPress={() => actions.clearFocusVerses()}

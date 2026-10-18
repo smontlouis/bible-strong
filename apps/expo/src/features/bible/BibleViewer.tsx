@@ -18,8 +18,13 @@ import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
 import { BibleError, BibleLoadingError } from '~helpers/bibleErrors'
 import { usePrevious } from '~helpers/usePrevious'
 import BibleHeader from './BibleHeader'
-import PassageContextButton from './PassageContextButton'
-import { canGoToNextPlanChapter, canGoToPreviousPlanChapter, isInPlanPassage } from './planPassage'
+import PassageContextButton, { PlanPassageBanner } from './PassageContextButton'
+import {
+  canGoToNextPlanChapter,
+  canGoToPreviousPlanChapter,
+  getPlanPassagePosition,
+  isInPlanPassage,
+} from './planPassage'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
@@ -64,6 +69,7 @@ import { useSheet } from '~helpers/useSheet'
 import { toast } from '~helpers/toast'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import verseToReference from '~helpers/verseToReference'
+import { chapterToReference } from '~helpers/chapterToReference'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { RootState } from '~redux/modules/reducer'
 import {
@@ -308,6 +314,17 @@ const BibleViewer = ({
   })
   const contextDisplayMode = getBibleContextDisplayMode(bible.data)
   const isContextFocused = contextDisplayMode === 'focused'
+  // Plan mode names its passage, and where the reader stands when it spans chapters.
+  const planPosition = planPassage && getPlanPassagePosition(planPassage, chapter)
+  const planReference = !planPassage
+    ? ''
+    : focusVerses?.length
+      ? verseToReference({ bookNum: book.Numero, chapterNum: chapter, verses: focusVerses })
+      : `${chapterToReference(
+          `${planPassage.book}|${planPassage.startChapter}${
+            planPassage.endChapter > planPassage.startChapter ? `-${planPassage.endChapter}` : ''
+          }`
+        )}${planPosition ? ` · ${planPosition.current}/${planPosition.total}` : ''}`
   const selectedVersesReference = verseToReference(selectedVerses)
   const { data: coverageData } = useQuery({
     queryKey: resourceQueryKeys.bibleCoverage(version),
@@ -1290,6 +1307,7 @@ const BibleViewer = ({
     parallelColumnWidth,
     parallelDisplayMode,
     focusVerses,
+    inPlan: Boolean(planPassage),
     selectedVerses: viewerPersonalData.selectedVerses,
     highlightedVerses: viewerPersonalData.highlightedVerses,
     notedVerses: viewerPersonalData.notedVerses,
@@ -1489,7 +1507,9 @@ const BibleViewer = ({
     <BibleViewport className="overflow-hidden border-continuous flex-[1] bg-reverse">
       <BibleHeader
         onNavigateToVerse={destination => {
-          if (isContextFocused) actions.clearFocusVerses()
+          // A plan keeps its passage: reaching another verse only opens the whole chapter.
+          if (isContextFocused && planPassage) actions.expandContext()
+          else if (isContextFocused) actions.clearFocusVerses()
           actions.setSelectedVerse(destination)
           setVerseNavigationRequest(request => request + 1)
         }}
@@ -1502,14 +1522,26 @@ const BibleViewer = ({
         hidePersonalBibleData={hidePersonalBibleData}
         coverage={coverageData}
       />
-      {!!focusVerses?.length && !annotationMode.enabled && (
-        <PassageContextButton
-          focused={isContextFocused}
+      {planPassage && !annotationMode.enabled ? (
+        <PlanPassageBanner
+          reference={planReference}
+          focused={focusVerses?.length ? isContextFocused : undefined}
           isFormSheet={isFormSheet}
           onExpand={actions.expandContext}
           onCollapse={actions.collapseContext}
-          onExit={planPassage ? undefined : actions.clearFocusVerses}
+          onExit={actions.exitPlanMode}
         />
+      ) : (
+        !!focusVerses?.length &&
+        !annotationMode.enabled && (
+          <PassageContextButton
+            focused={isContextFocused}
+            isFormSheet={isFormSheet}
+            onExpand={actions.expandContext}
+            onCollapse={actions.collapseContext}
+            onExit={actions.clearFocusVerses}
+          />
+        )
       )}
       {settings.redWordsDisplay && redWordsFailureIsTemporary && (
         <Box className="border-continuous overflow-hidden bg-reverse border-b-[1px] border-border">

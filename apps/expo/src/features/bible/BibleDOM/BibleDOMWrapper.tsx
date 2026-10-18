@@ -254,6 +254,8 @@ export type WebViewProps = {
   expandContext?: () => void
   collapseContext?: () => void
   clearFocusVerses?: () => void
+  /** Plan mode shows its banner under the header, focus or not. */
+  inPlan?: boolean
   // Annotation mode props
   annotationMode?: boolean
   clearSelectionTrigger?: number
@@ -371,6 +373,7 @@ export const BibleDOMWrapper = ({
   chapter,
   isSelectionMode,
   selectedCode,
+  inPlan,
   annotationMode,
   clearSelectionTrigger,
   applyAnnotationTrigger,
@@ -1097,7 +1100,7 @@ export const BibleDOMWrapper = ({
   const TOP_INSET = isFormSheet ? 0 : insets.top
   const headerHeight =
     (isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT) +
-    getPassageContextHeaderHeight(focusVerses, annotationMode)
+    getPassageContextHeaderHeight(focusVerses, annotationMode, inPlan)
   const nativeLayerZIndex = Platform.OS === 'web' ? 0 : -1
   const webInlineScrollStyle =
     Platform.OS === 'web'
@@ -1186,6 +1189,7 @@ export const BibleDOMWrapper = ({
         dispatch={dispatch}
         translations={translations}
         chapterEntityTranslations={chapterEntityTranslations}
+        inPlan={inPlan}
         annotationMode={annotationMode}
         clearSelectionTrigger={clearSelectionTrigger}
         applyAnnotationTrigger={applyAnnotationTrigger}

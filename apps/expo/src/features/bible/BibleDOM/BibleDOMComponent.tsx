@@ -209,6 +209,7 @@ type Props = Pick<
   relationItemsCount: { [key: string]: number }
   relationItemsText: { [key: string]: VerseRelationItem[] }
   annotationRelationItems: Record<string, VerseRelationItem[]>
+  inPlan?: boolean
   // Annotation mode props (uncontrolled - DOM manages local annotation state)
   annotationMode?: boolean
   clearSelectionTrigger?: number
@@ -590,6 +591,7 @@ const LoadedBibleContent = ({
   chapterEntityModuleStatus,
   chapterEntityDownloadState,
   chapterEntityTranslations,
+  inPlan,
   annotationMode,
   clearSelectionTrigger,
   applyAnnotationTrigger,
@@ -1035,7 +1037,7 @@ const LoadedBibleContent = ({
   }, [parallelVerses?.length, parallelColumnWidth, parallelDisplayMode])
 
   const expandedHeaderHeight =
-    HEADER_HEIGHT + getPassageContextHeaderHeight(focusVerses, annotationMode)
+    HEADER_HEIGHT + getPassageContextHeaderHeight(focusVerses, annotationMode, inPlan)
   useEffect(() => {
     if (isFormSheet) return
     if (keepControlsVisible) {
@@ -1108,7 +1110,7 @@ const LoadedBibleContent = ({
   const hasVerses = verses.length > 0
   const headerHeight =
     (isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT) +
-    getPassageContextHeaderHeight(focusVerses, annotationMode)
+    getPassageContextHeaderHeight(focusVerses, annotationMode, inPlan)
   const scrollTargetVerse = getScrollTargetVerse({
     verseToScroll,
     contextDisplayMode,
@@ -1614,7 +1616,7 @@ const VersesRendererContent = ({ settings, dispatch, translations, verses, ...re
 
   const headerHeight =
     (rest.isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT) +
-    getPassageContextHeaderHeight(rest.focusVerses, rest.annotationMode)
+    getPassageContextHeaderHeight(rest.focusVerses, rest.annotationMode, rest.inPlan)
 
   useEffect(() => {
     dispatch({
