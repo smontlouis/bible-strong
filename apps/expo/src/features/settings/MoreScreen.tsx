@@ -118,7 +118,8 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
     setIsCheckingUpdate(true)
     try {
       const result = await Updates.checkForUpdateAsync()
-      if (result.isAvailable) {
+      // A rollback to the embedded JavaScript is not "available", yet it still has to be fetched.
+      if (result.isAvailable || result.isRollBackToEmbedded) {
         toast.info(t('app.updateAvailable'))
         await Updates.fetchUpdateAsync()
         toast.success(t('app.updateReady'))

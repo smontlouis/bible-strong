@@ -82,7 +82,8 @@ const ErrorFallback = ({ error, errorInfo }: ErrorFallbackProps) => {
       }
 
       const check = await Updates.checkForUpdateAsync()
-      return check.isAvailable
+      // A rollback to the embedded JavaScript is not "available", yet it still has to be fetched.
+      return check.isAvailable || check.isRollBackToEmbedded
     },
     staleTime: Infinity,
     ...remoteQueryOptions,

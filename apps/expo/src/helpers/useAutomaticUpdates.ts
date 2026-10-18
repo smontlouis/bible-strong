@@ -25,7 +25,8 @@ export const checkAndApplyAutomaticUpdate = async ({
 }: AutomaticUpdateOptions): Promise<boolean> => {
   const update = await updates.checkForUpdateAsync()
 
-  if (!update.isAvailable) return false
+  // A rollback to the embedded JavaScript is not "available", yet it still has to be fetched.
+  if (!update.isAvailable && !update.isRollBackToEmbedded) return false
 
   notifyAvailable(updateAvailableMessage)
   await updates.fetchUpdateAsync()
