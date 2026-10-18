@@ -22,7 +22,6 @@ const ExploreLayout = () => {
         <Stack.Screen name="dictionary/[language]/[work]/[entryId]/[slug]" />
         <Stack.Screen name="nave-detail" />
         <Stack.Screen name="nave/[language]/[topic]" />
-        <Stack.Screen name="timeline/[language]/index" />
         <Stack.Screen name="timeline/[language]/[slug]" />
         <Stack.Screen name="note" />
         <Stack.Screen name="link" />
