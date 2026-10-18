@@ -1,0 +1,56 @@
+diff --git a/src/components/index.ts b/src/components/index.ts
+index 6fcad21b91dae2d029671aca1a6588a031831236..fab59450da935b11ec10a490764f3d63d165d531 100644
+--- a/src/components/index.ts
++++ b/src/components/index.ts
+@@ -106,6 +106,51 @@ module.exports = {
+     get Appearance() {
+         return require('react-native').Appearance
+     },
++    get AssetRegistry() {
++        return require('react-native').AssetRegistry
++    },
++    get EventEmitter() {
++        return require('react-native').EventEmitter
++    },
++    get PushNotificationIOS() {
++        return require('react-native').PushNotificationIOS
++    },
++    get unstable_DEFAULT_INITIAL_NUM_TO_RENDER() {
++        return require('react-native').unstable_DEFAULT_INITIAL_NUM_TO_RENDER
++    },
++    get unstable_NativeText() {
++        return require('react-native').unstable_NativeText
++    },
++    get unstable_NativeView() {
++        return require('react-native').unstable_NativeView
++    },
++    get unstable_VirtualArray() {
++        return require('react-native').unstable_VirtualArray
++    },
++    get unstable_VirtualColumn() {
++        return require('react-native').unstable_VirtualColumn
++    },
++    get unstable_VirtualColumnGenerator() {
++        return require('react-native').unstable_VirtualColumnGenerator
++    },
++    get unstable_VirtualRow() {
++        return require('react-native').unstable_VirtualRow
++    },
++    get unstable_createVirtualCollectionView() {
++        return require('react-native').unstable_createVirtualCollectionView
++    },
++    get unstable_getScrollParent() {
++        return require('react-native').unstable_getScrollParent
++    },
++    get useAnimatedColor() {
++        return require('react-native').useAnimatedColor
++    },
++    get useAnimatedValueXY() {
++        return require('react-native').useAnimatedValueXY
++    },
++    get usePressability() {
++        return require('react-native').usePressability
++    },
+     get AppRegistry() {
+         return require('react-native').AppRegistry
+     },

@@ -1,5 +1,5 @@
 diff --git a/build/src/export/exportDomComponents.js b/build/src/export/exportDomComponents.js
-index b08f8fc..d8581af 100644
+index b08f8fc7570b3b478be85511dc87868060420738..d8581af2913773e938d9f5e11d415cda212abda4 100644
 --- a/build/src/export/exportDomComponents.js
 +++ b/build/src/export/exportDomComponents.js
 @@ -81,6 +81,20 @@ function _interop_require_default(obj) {
@@ -36,7 +36,7 @@ index b08f8fc..d8581af 100644
      const html = await (0, _serializeHtml.serializeHtmlWithAssets)({
          isExporting: true,
 diff --git a/build/src/start/server/middleware/DomComponentsMiddleware.js b/build/src/start/server/middleware/DomComponentsMiddleware.js
-index 30ec488..8f89a52 100644
+index 30ec48871ef3739092489fc92d9dc919cf6bff23..8f89a524e229e4fe299d6dc15843f45dbcd2ec15 100644
 --- a/build/src/start/server/middleware/DomComponentsMiddleware.js
 +++ b/build/src/start/server/middleware/DomComponentsMiddleware.js
 @@ -137,13 +137,22 @@ function getDomComponentHtml(src, { title } = {}) {

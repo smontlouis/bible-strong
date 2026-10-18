@@ -1,5 +1,5 @@
 diff --git a/build/dom/base.d.ts b/build/dom/base.d.ts
-index 6c093bb..5333b15 100644
+index 6c093bbd086a1865e6c833ff527b7cd720c65934..5333b157ffd57b6c1428341ee6a398fd65499509 100644
 --- a/build/dom/base.d.ts
 +++ b/build/dom/base.d.ts
 @@ -1,3 +1,7 @@
@@ -11,7 +11,7 @@ index 6c093bb..5333b15 100644
   * Get the base URL for the DOM Components HTML
   */
 diff --git a/build/dom/base.js b/build/dom/base.js
-index aa87e34..9e8b33e 100644
+index aa87e345f0b65163cc2a5ab2e6af9736e360113a..9e8b33ecbb044ebcd3cca26f4db2082deb434fb6 100644
 --- a/build/dom/base.js
 +++ b/build/dom/base.js
 @@ -1,5 +1,20 @@
@@ -36,7 +36,7 @@ index aa87e34..9e8b33e 100644
   * Get the base URL for the DOM Components HTML
   */ export function getBaseURL() {
 diff --git a/build/dom/dom-entry.js b/build/dom/dom-entry.js
-index f47c31a..b5cbaaf 100644
+index f47c31a5efa074b849cbdf6eb2354ede1e4f603d..b5cbaaf53953ecc8fc5ca2404c193906dafcee4d 100644
 --- a/build/dom/dom-entry.js
 +++ b/build/dom/dom-entry.js
 @@ -46,11 +46,15 @@ export function registerDOMComponent(AppModule) {
@@ -78,7 +78,7 @@ index f47c31a..b5cbaaf 100644
              ...props,
              ...marshalledProps.props || {},
 diff --git a/build/dom/webview-wrapper.js b/build/dom/webview-wrapper.js
-index 02f713b..76e473f 100644
+index 02f713b7592c68e3cb6db2013b2aee0600a602a8..76e473f380bc2fda9cde59cca35a2b6b91ad313b 100644
 --- a/build/dom/webview-wrapper.js
 +++ b/build/dom/webview-wrapper.js
 @@ -5,7 +5,7 @@
@@ -161,7 +161,7 @@ index 02f713b..76e473f 100644
              dom?.matchContents ? getInjectBodySizeObserverScript() : null,
              dom?.injectedJavaScript,
 diff --git a/src/dom/base.ts b/src/dom/base.ts
-index e53e872..bc2d315 100644
+index e53e872f0c6023392d454d4836c5db9d81978268..bc2d3157be1f0a4fc03c8fdbdd5bd38718209c7d 100644
 --- a/src/dom/base.ts
 +++ b/src/dom/base.ts
 @@ -1,6 +1,27 @@
@@ -193,7 +193,7 @@ index e53e872..bc2d315 100644
  /**
   * Get the base URL for the DOM Components HTML
 diff --git a/src/dom/dom-entry.tsx b/src/dom/dom-entry.tsx
-index b77612d..23f2140 100644
+index b77612db2392507ba5a9f021b88052b55de21851..23f2140becacbf558afc2dba887f418007bbef0a 100644
 --- a/src/dom/dom-entry.tsx
 +++ b/src/dom/dom-entry.tsx
 @@ -66,18 +66,22 @@ export function registerDOMComponent(AppModule: any) {
@@ -242,7 +242,7 @@ index b77612d..23f2140 100644
      return <AppModule {...props} {...(marshalledProps.props || {})} {...proxyActions} />;
    }
 diff --git a/src/dom/webview-wrapper.tsx b/src/dom/webview-wrapper.tsx
-index c9d79a4..bd90b4c 100644
+index c9d79a41e43da2e7e5f668bf0e2ab665bdbf5182..bd90b4c4e3a5f8b93e36c39423802074b3b795be 100644
 --- a/src/dom/webview-wrapper.tsx
 +++ b/src/dom/webview-wrapper.tsx
 @@ -6,7 +6,7 @@
