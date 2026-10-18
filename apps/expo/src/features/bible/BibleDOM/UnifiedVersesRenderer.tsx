@@ -29,7 +29,8 @@ import {
   getAdjacentFocusVerses,
   getFadePosition,
   getFocusVerseNumbers,
-  getParallelVerseRows,
+  getParallelChapterRows,
+  type ParallelChapterRow,
   getTaggedVersesByLastVerse,
   getVersesWithWordAnnotations,
   shouldRenderVerseInFocusedContext,
@@ -311,12 +312,17 @@ export function UnifiedVersesRenderer({
   // Pre-compute which verses have word annotations: O(a*r) once instead of O(n*a*r)
   const versesWithWordAnnotationsByKey = getVersesWithWordAnnotations(wordAnnotations, version)
 
+  const chapterRows: ParallelChapterRow[] =
+    isParallelVerse && !annotationMode
+      ? getParallelChapterRows(verses, parallelVerses, version, interlinearMode)
+      : verses.map(verse => ({ verse, rows: [] }))
+
   return (
     <>
       {!annotationMode && !(isPassagePreview && isContextFocused) && (
         <InlineCommentaryChips chips={inlineCommentaries?.introduction} settings={settings} />
       )}
-      {verses.map((verse, i) => {
+      {chapterRows.map(({ verse, rows: parallelVerse }) => {
         if (verse.Verset == 0) return null
 
         const { Livre, Chapitre, Verset } = verse
@@ -411,10 +417,6 @@ export function UnifiedVersesRenderer({
           : undefined
 
         const isVerseToScroll = !isContextFocused && verseToScroll == Verset
-        const parallelVerse = isParallelVerse
-          ? getParallelVerseRows(i, parallelVerses, verse, version, interlinearMode)
-          : []
-
         const hasWordAnnotations = versesWithWordAnnotationsByKey.has(verseKey)
 
         return (
