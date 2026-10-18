@@ -47,7 +47,7 @@ import {
 } from './canonicalVersePresentation'
 import { getCanonicalBibleNoteLabel, type CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import { isInterlinearModeEnabled, type InterlinearMode } from '~helpers/interlinearDisplayMode'
-import { shouldHighlightOnlyVerseNumber } from './verseRenderingModel'
+import { shouldHighlightOnlyVerseNumber, type ParallelVerseRow } from './verseRenderingModel'
 import { getBibleTextFontSize } from './verseTypography'
 import type { ResolvedPassageMedia } from '../passageMedia'
 import PassageMediaThumbnails from './PassageMediaThumbnails'
@@ -188,6 +188,11 @@ const VerticalVersionTitle = styled('div')<RootStyles>(
     },
   })
 )
+
+// Stands in for the text of a verse a version omits in parallel display
+const MissingVerseText = styled('span')<RootStyles>(({ settings: { theme, colors } }) => ({
+  color: colors[theme].grey,
+}))
 
 // Separator between verse groups in vertical mode
 const VerseGroupSeparator = styled('div')<RootStyles>(({ settings: { theme, colors } }) => ({
@@ -459,12 +464,9 @@ interface Props {
   isSelectedMode: boolean
   isSelectionMode: StudyNavigateBibleType | undefined
   settings: RootState['user']['bible']['settings']
-  parallelVerse?: {
-    version: string
-    verse: TVerse
-    error?: BibleError
-    interlinearMode?: InterlinearMode
-  }[]
+  parallelVerse?: ParallelVerseRow[]
+  // Empty row of a version that omits this verse in parallel display
+  isMissingVerse?: boolean
   isSelected: boolean
   highlightedColor?: keyof RootStyles['settings']['colors'][keyof RootStyles['settings']['colors']]
   annotationNotesCount?: number
@@ -523,6 +525,7 @@ const Verse = ({
   isFocused,
   isParallel,
   isParallelVerse,
+  isMissingVerse = false,
   tag,
   bookmark,
   fadePosition,
@@ -693,6 +696,7 @@ const Verse = ({
                     isFocused={isFocused}
                     tag={isMainVersion ? tag : undefined}
                     isTouched={isTouched}
+                    isMissingVerse={p.isMissing}
                     passageMedia={isMainVersion ? passageMedia : undefined}
                     passageMediaGallerySections={passageMediaGallerySections}
                   />
@@ -765,6 +769,7 @@ const Verse = ({
                 isFocused={isFocused}
                 tag={isMainVersion ? tag : undefined}
                 isTouched={isTouched}
+                isMissingVerse={p.isMissing}
                 passageMedia={isMainVersion ? passageMedia : undefined}
                 passageMediaGallerySections={passageMediaGallerySections}
               />
@@ -867,6 +872,8 @@ const Verse = ({
                 selectedCode={selectedCode}
                 mode={interlinearMode}
               />
+            ) : isMissingVerse ? (
+              <MissingVerseText settings={settings}>—</MissingVerseText>
             ) : (
               text
             )}

@@ -796,8 +796,12 @@ const LoadedBibleContent = ({
     }
   }
 
+  // In parallel display, a row can stand for a verse the version being read omits
+  // (Acts 8:37 in the ESV): its actions all work on that version, so it stays inert.
+  const isVerseMissingFromVersion = (vKey: string) => isParallelVerseMode && !versesMap.has(vKey)
+
   const handleTapVerse = (verseKey: string, position: { x: number; y: number }) => {
-    if (suppressVerseGestures) return
+    if (suppressVerseGestures || isVerseMissingFromVersion(verseKey)) return
 
     if (annotationMode) {
       handleTapVerseAnnotationMode(verseKey, position)
@@ -892,7 +896,7 @@ const LoadedBibleContent = ({
   }
 
   const handleLongPressVerse = (vKey: string) => {
-    if (suppressVerseGestures) return
+    if (suppressVerseGestures || isVerseMissingFromVersion(vKey)) return
     if (annotationMode) return // No long-press action in annotation mode
     if (isSelectionMode) return // No long-press in selection mode
 
