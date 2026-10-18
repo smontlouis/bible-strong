@@ -16,6 +16,7 @@
     "build:ios:dev": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c development -- eas build -p ios --local --profile development --non-interactive",
     "build:ios:dev-sim": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c development -- eas build -p ios --local --profile development-simulator --non-interactive",
     "build:ios:staging": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c staging -- eas build -p ios --local --profile staging --non-interactive",
+    "build:ios:staging-sim": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c staging -- eas build -p ios --local --profile staging-simulator --non-interactive",
     "build:ios:prod": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c production -- eas build -p ios --local --profile production --non-interactive",
     "test:watch": "jest --watchAll",
     "test": "jest",
