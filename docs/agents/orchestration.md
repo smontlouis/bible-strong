@@ -131,6 +131,8 @@ The `/issue` skill (`.claude/skills/issue/`) provides such lanes for Claude Code
 - its own iOS simulator `bs-<slug>`, cloned with `simslim` from the shut-down template `bs-template` (signed in, slim), with the newest dev client from `~/Builds/bible-strong/` installed over it;
 - its own Metro on a dedicated port (8082 and up; 8081 stays with the main checkout).
 
+`~/Builds/bible-strong/` holds iOS simulator dev clients named `bible-strong-dev-<version>-simulator-<sha>.app`; lanes take the most recently built one and warn when the lane's native code has moved since that commit. Nothing fills the folder automatically: after an iOS dev-client build (`yarn expo run:ios`), `node .claude/skills/issue/scripts/lane.mjs save-build` copies the newest build from Xcode's DerivedData there under that name, with the commit of the checkout that built it, and refuses a checkout with uncommitted native changes.
+
 Android lanes (`/issue … --android`) use the PC's shared emulator, so only one Android lane runs at a time. `.claude/skills/issue/scripts/lane.mjs` creates, reports, and removes lanes. The PR targets `master`. UI evidence stays with the agent session and is not attached to the PR.
 
 ## PR Gates

@@ -14,7 +14,9 @@ All lane plumbing goes through one script. Define it once per shell command (it 
 LANE="$(git rev-parse --path-format=absolute --git-common-dir)/../.claude/skills/issue/scripts/lane.mjs"
 ```
 
-Subcommands: `template`, `start`, `worktree`, `install`, `device`, `metro`, `open`, `status`, `stop`, `cleanup`. `node "$LANE"` prints the help. Lane state lives in `~/.cache/bible-strong-issues/<slug>.json` (worktree, branch, `simUdid`, `port`, Metro log).
+Subcommands: `template`, `start`, `worktree`, `install`, `device`, `metro`, `open`, `status`, `stop`, `cleanup`, `save-build`. `node "$LANE"` prints the help. Lane state lives in `~/.cache/bible-strong-issues/<slug>.json` (worktree, branch, `simUdid`, `port`, Metro log).
+
+Dev clients: `device` installs the newest `*simulator*.app` of `~/Builds/bible-strong/` (by build date), named `bible-strong-dev-<version>-simulator-<sha>.app`; the version and sha let it warn when the lane's native code no longer matches. After any iOS dev-client build (`yarn expo run:ios`, in the main checkout or a lane), run `node "$LANE" save-build`: it takes the newest `devBibleStrong.app` of Xcode's DerivedData (or `--from <app>`), finds the checkout and commit that built it, refuses uncommitted native changes, and copies it there under that name. Nothing creates these builds on its own: the folder only holds what was saved.
 
 ## 1. Frame the issue
 
@@ -44,7 +46,7 @@ The user's rule: no code before their go.
 
 - Work in the worktree, following the repo conventions (`AGENTS.md`, nested `AGENTS.md`, your memory notes on eslint-disable and `==`).
 - Use `yarn expo …`, never `npx expo …`.
-- JS changes reach the device through Metro's Fast Refresh. A native change (dependency with native code, config plugin, `app.config.ts`, `apps/expo/modules`) needs a new dev client: stop and tell the user (iOS build recipe in your project memory; Android: `ANDROID_PC_REPO=<worktree> android-pc build && android-pc install`).
+- JS changes reach the device through Metro's Fast Refresh. A native change (dependency with native code, config plugin, `app.config.ts`, `apps/expo/modules`) needs a new dev client: stop and tell the user (iOS build recipe in your project memory; Android: `ANDROID_PC_REPO=<worktree> android-pc build && android-pc install`). Once the change is committed and the iOS build done, `node "$LANE" save-build` keeps it for the next lanes.
 
 ## 5. Test on the device
 

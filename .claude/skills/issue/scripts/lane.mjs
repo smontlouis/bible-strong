@@ -12,6 +12,7 @@
 //   node lane.mjs status [slug]                  état des couloirs
 //   node lane.mjs stop <slug>                    arrête Metro et le tunnel Android
 //   node lane.mjs cleanup <slug> [--force]       stop + supprime simulateur et worktree
+//   node lane.mjs save-build [--from <app>]      range le dernier dev client simulateur dans ~/Builds
 //
 // L'état de chaque couloir vit hors du repo, dans ~/.cache/bible-strong-issues/<slug>.json.
 
@@ -224,6 +225,75 @@ const nativeWarnings = (app, worktree) => {
     )
   }
   return warnings
+}
+
+const DERIVED_DATA = path.join(os.homedir(), 'Library/Developer/Xcode/DerivedData')
+const plistValue = (file, key) => tryRun('plutil', ['-extract', key, 'raw', file])
+
+// Dernier dev client simulateur compilé par Xcode (expo run:ios), tous checkouts confondus.
+const newestDerivedApp = () => {
+  if (!fs.existsSync(DERIVED_DATA)) return null
+  const apps = fs
+    .readdirSync(DERIVED_DATA)
+    .map(name =>
+      path.join(DERIVED_DATA, name, 'Build/Products/Debug-iphonesimulator/devBibleStrong.app')
+    )
+    .filter(file => fs.existsSync(file))
+    .map(file => ({ file, mtime: fs.statSync(file).mtimeMs }))
+    .sort((a, b) => b.mtime - a.mtime)
+  return apps[0]?.file ?? null
+}
+
+// Le checkout qui a produit un .app de DerivedData : son info.plist garde le chemin du workspace.
+const checkoutOfApp = appFile => {
+  const marker = `${path.sep}apps${path.sep}expo${path.sep}ios${path.sep}`
+  const workspace = plistValue(path.join(appFile, '../../../../info.plist'), 'WorkspacePath')
+  return workspace?.includes(marker) ? workspace.slice(0, workspace.indexOf(marker)) : null
+}
+
+// Range le dev client sous le nom que `device` et nativeWarnings savent lire :
+// bible-strong-dev-<version>-simulator-<sha>.app
+const cmdSaveBuild = () => {
+  const appFile = flagValue('--from') ?? newestDerivedApp()
+  if (!appFile || !fs.existsSync(appFile))
+    fail("aucun devBibleStrong.app dans DerivedData : compile d'abord avec `yarn expo run:ios`")
+  if (!appFile.includes('iphonesimulator')) fail(`${appFile} n'est pas un build simulateur`)
+
+  const info = path.join(appFile, 'Info.plist')
+  const bundleId = plistValue(info, 'CFBundleIdentifier')
+  if (bundleId !== IOS_DEV_BUNDLE_ID)
+    fail(`bundle ${bundleId} : on ne range que ${IOS_DEV_BUNDLE_ID}`)
+  const version = plistValue(info, 'CFBundleShortVersionString')
+  if (!version) fail(`version introuvable dans ${info}`)
+
+  const checkout = checkoutOfApp(appFile) ?? mainCheckout
+  const sha = tryRun('git', ['rev-parse', '--short=7', 'HEAD'], { cwd: checkout })
+  if (!sha) fail(`commit introuvable pour ${checkout}`)
+  log(`build de ${checkout} (${sha}), version ${version}`)
+
+  // Le nom promet que le .app correspond au code natif de ce commit : on le vérifie.
+  const dirty = tryRun('git', ['status', '--porcelain', '--', ...NATIVE_PATHS], { cwd: checkout })
+  if (dirty && !flags.has('--force'))
+    fail(`changements natifs non commités, le sha ne décrirait pas ce build :\n${dirty}`)
+  const lastNativeCommit = Number(
+    tryRun('git', ['log', '-1', '--format=%ct', '--', ...NATIVE_PATHS], { cwd: checkout })
+  )
+  // Un build fait avant de commiter ses propres changements natifs passe ici aussi : on avertit.
+  if (lastNativeCommit * 1000 > fs.statSync(appFile).mtimeMs)
+    log("ATTENTION : du code natif a été commité après ce build ; vérifie que le build l'inclut")
+  if (plistValue(path.join(appFile, 'Expo.plist'), 'EXUpdatesCodeSigningCertificate'))
+    log('ATTENTION : ce dev client exige un Metro lancé avec --private-key-path')
+
+  const name = `bible-strong-dev-${version}-simulator-${sha}.app`
+  const target = path.join(BUILDS_DIR, name)
+  if (fs.existsSync(target)) {
+    log(`déjà rangé : ${target}`)
+    return
+  }
+  fs.mkdirSync(BUILDS_DIR, { recursive: true })
+  // ditto garde la date du build, que newestApp utilise pour choisir le plus récent.
+  run('ditto', [appFile, target])
+  log(`rangé : ${target}`)
 }
 
 // ---------- étapes ----------
@@ -533,12 +603,14 @@ const main = async () => {
       return cmdCleanup(requireSlug())
     case 'status':
       return cmdStatus()
+    case 'save-build':
+      return cmdSaveBuild()
     default:
       console.log(
         fs
           .readFileSync(new URL(import.meta.url), 'utf8')
           .split('\n')
-          .slice(1, 16)
+          .slice(1, 17)
           .join('\n')
       )
       process.exit(command ? 1 : 0)
