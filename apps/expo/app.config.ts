@@ -183,9 +183,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       projectId: 'ccb42b86-1286-4ca0-99bd-929b7ce418c1',
     },
   },
+  // Our own update server (Open OTA on Cloudflare), see docs/adr/0085. The address, the channel
+  // and the certificate are native settings: changing any of them needs a new build.
   updates: {
-    url: 'https://u.expo.dev/fdf72b90-346b-11e9-ad9a-255491359311',
+    url: 'https://updates.bible-strong.app/manifest',
     checkAutomatically: 'NEVER',
+    codeSigningCertificate: './certs/certificate.pem',
+    codeSigningMetadata: {
+      keyid: 'main',
+      alg: 'rsa-v1_5-sha256',
+    },
     requestHeaders: {
       'expo-channel-name': process.env.EAS_BUILD_CHANNEL,
     },

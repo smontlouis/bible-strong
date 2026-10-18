@@ -13,9 +13,9 @@ describe('checkAndApplyAutomaticUpdate', () => {
   const updateAvailableMessage = 'update available'
   const updateReadyMessage = 'update ready'
 
-  const createOptions = (isAvailable: boolean) => {
+  const createOptions = (isAvailable: boolean, isRollBackToEmbedded = false) => {
     const updates = {
-      checkForUpdateAsync: jest.fn().mockResolvedValue({ isAvailable }),
+      checkForUpdateAsync: jest.fn().mockResolvedValue({ isAvailable, isRollBackToEmbedded }),
       fetchUpdateAsync: jest.fn().mockResolvedValue({ isNew: true }),
       reloadAsync: jest.fn().mockResolvedValue(undefined),
     }
@@ -51,6 +51,16 @@ describe('checkAndApplyAutomaticUpdate', () => {
     expect(updates.fetchUpdateAsync.mock.invocationCallOrder[0]).toBeLessThan(
       notifyReady.mock.invocationCallOrder[0]
     )
+  })
+
+  it('fetches a rollback to the embedded JavaScript, which the check does not call available', async () => {
+    const { options, updates, notifyReady } = createOptions(false, true)
+
+    await expect(checkAndApplyAutomaticUpdate(options)).resolves.toBe(true)
+
+    expect(updates.fetchUpdateAsync).toHaveBeenCalledTimes(1)
+    expect(notifyReady).toHaveBeenCalledWith(updateReadyMessage)
+    expect(updates.reloadAsync).not.toHaveBeenCalled()
   })
 
   it('does nothing when no update is available', async () => {

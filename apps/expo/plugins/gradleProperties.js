@@ -29,6 +29,10 @@ module.exports = function withCustomPlugin(config) {
     'org.gradle.jvmargs',
     '-Xmx4096m -XX:MaxMetaspaceSize=1024m' //Set data of your choice
   )
+  // Android otherwise leaves the embedded assets inside the APK. After an update, the Bible
+  // reader's page is served from the updates folder and no longer finds the fonts the build
+  // embedded, such as its icons (ADR-0085).
+  config = setGradlePropertiesValue(config, 'EX_UPDATES_COPY_EMBEDDED_ASSETS', 'true')
 
   return config
 }

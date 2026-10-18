@@ -2622,6 +2622,7 @@ __metadata:
     metro: "patch:metro@npm%3A0.87.1#~/.yarn/patches/metro-npm-0.87.1-df856b146b.patch"
     metro-cache: "npm:0.87.1"
     motion: "npm:^13.0.0"
+    open-ota: "npm:0.3.0"
     postinstall-postinstall: "npm:^2.1.0"
     pressto: "npm:^0.6.0"
     prettier: "npm:^3.8.1"
@@ -3326,6 +3327,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@effect/platform-node-shared@npm:4.0.0-rc.112":
+  version: 4.0.0-rc.112
+  resolution: "@effect/platform-node-shared@npm:4.0.0-rc.112"
+  dependencies:
+    "@types/ws": "npm:^8.18.1"
+    ws: "npm:^8.21.3"
+  peerDependencies:
+    effect: ^4.0.0-rc.112
+  checksum: 10c0/25b9dfc1b62a211a5d4c5ff483b7f3cbfe6fe138ac6675cfc519bc1789fd5bf0c4767aa1b01a8923f3f8236ed0f98895ca97c607d8dd4b57237fd49d4ed7ef28
+  languageName: node
+  linkType: hard
+
 "@effect/platform-node-shared@npm:^0.61.1":
   version: 0.61.1
   resolution: "@effect/platform-node-shared@npm:0.61.1"
@@ -3358,6 +3371,20 @@ __metadata:
     "@effect/sql": ^0.52.1
     effect: ^3.22.1
   checksum: 10c0/034655250679d5cf1c6b573c2bacc32128e1de8ecb022181c97835880df0202682b9c51fa7ac417890636402db9ec39e4aec7d7769a21a46f64040761030272e
+  languageName: node
+  linkType: hard
+
+"@effect/platform-node@npm:4.0.0-rc.112":
+  version: 4.0.0-rc.112
+  resolution: "@effect/platform-node@npm:4.0.0-rc.112"
+  dependencies:
+    "@effect/platform-node-shared": "npm:^4.0.0-rc.112"
+    mime: "npm:^4.1.0"
+    undici: "npm:^8.10.0"
+  peerDependencies:
+    effect: ^4.0.0-rc.112
+    redis: ">=5.0.0 <7.0.0"
+  checksum: 10c0/7c70bfe2aac48ccaf98c4301099d42949c57ee96f0c33864c0ed191d42a9cbc53a435b958d0432f773e56d0b060013b7277f3fc3e87e7a4b6c36eb25804c499d
   languageName: node
   linkType: hard
 
@@ -11590,6 +11617,57 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@redis/bloom@npm:6.3.0":
+  version: 6.3.0
+  resolution: "@redis/bloom@npm:6.3.0"
+  peerDependencies:
+    "@redis/client": ^6.3.0
+  checksum: 10c0/359ac93a7b1c4b207f1a2822798c9901e362ec852381823db6a33b3785c51ebc78bb458d38e4947d90e31ff3340543e90888124c113c8b729035d74f4a98c25e
+  languageName: node
+  linkType: hard
+
+"@redis/client@npm:6.3.0":
+  version: 6.3.0
+  resolution: "@redis/client@npm:6.3.0"
+  peerDependencies:
+    "@node-rs/xxhash": ^1.1.0
+    "@opentelemetry/api": ">=1 <2"
+  peerDependenciesMeta:
+    "@node-rs/xxhash":
+      optional: true
+    "@opentelemetry/api":
+      optional: true
+  checksum: 10c0/e194a221d29785e581250d9ec212891c5bb133599cab98db7b985afbc06809c85b6e717b10f86e46033ae5e9bb08d034642484cd87b5e01e538575bbf0956217
+  languageName: node
+  linkType: hard
+
+"@redis/json@npm:6.3.0":
+  version: 6.3.0
+  resolution: "@redis/json@npm:6.3.0"
+  peerDependencies:
+    "@redis/client": ^6.3.0
+  checksum: 10c0/a3509240ca75efa347ea949713eebe79e81387ee9d37e89a06251ff57ec7931fd5b5a1509efce503d023020f95b07750d76d6d2d6dc7869d7dbf268dc9473ce8
+  languageName: node
+  linkType: hard
+
+"@redis/search@npm:6.3.0":
+  version: 6.3.0
+  resolution: "@redis/search@npm:6.3.0"
+  peerDependencies:
+    "@redis/client": ^6.3.0
+  checksum: 10c0/f60974f0448ff79baf4f24479bcba556e65dbb81e3e1b55c2c4eb07a502dfe160aafdaa7aa3bac13d352a394d61dbf67f026a0dcc0904d2068b13f385b57e567
+  languageName: node
+  linkType: hard
+
+"@redis/time-series@npm:6.3.0":
+  version: 6.3.0
+  resolution: "@redis/time-series@npm:6.3.0"
+  peerDependencies:
+    "@redis/client": ^6.3.0
+  checksum: 10c0/417625b51142a65e3eec99ce3ce7411d8e9044189423e6be6ca55d90dd50214361367ef504eae4802c590b34f9f182d8d86887cb75dd2964c09dba57ddd0725a
+  languageName: node
+  linkType: hard
+
 "@redux-devtools/core@npm:^4.1.1":
   version: 4.1.1
   resolution: "@redux-devtools/core@npm:4.1.1"
@@ -14413,6 +14491,15 @@ __metadata:
   version: 8.3.4
   resolution: "@types/uuid@npm:8.3.4"
   checksum: 10c0/b9ac98f82fcf35962317ef7dc44d9ac9e0f6fdb68121d384c88fe12ea318487d5585d3480fa003cf28be86a3bbe213ca688ba786601dce4a97724765eb5b1cf2
+  languageName: node
+  linkType: hard
+
+"@types/ws@npm:^8.18.1":
+  version: 8.18.2
+  resolution: "@types/ws@npm:8.18.2"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/8cf79499d26df06ffc27109fc86f1400371a5932082a4c1269be3f11e22b9e5a403a4ba2c1a3245d5fae420c270571aa833142a3d7fdce8f6cd24a45c52a98e4
   languageName: node
   linkType: hard
 
@@ -18580,6 +18667,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"effect@npm:4.0.0-rc.112":
+  version: 4.0.0-rc.112
+  resolution: "effect@npm:4.0.0-rc.112"
+  dependencies:
+    fast-check: "npm:^4.9.0"
+    msgpackr: "npm:^2.0.5"
+  checksum: 10c0/9cf234f6bc0535cb1fb18cae5ce158c23a4c6484e054d809bab6de16abd742ac131ba83543a3c0a10a194ddf46f2b4257595d0987f7e65e2650ab753dff7a068
+  languageName: node
+  linkType: hard
+
 "electron-to-chromium@npm:^1.5.263":
   version: 1.5.267
   resolution: "electron-to-chromium@npm:1.5.267"
@@ -20670,6 +20767,15 @@ __metadata:
   dependencies:
     pure-rand: "npm:^6.1.0"
   checksum: 10c0/16fcff3c80321ee765e23c3aebd0f6427f175c9c6c1753104ec658970162365dc2d56bda046d815e8f2e90634c07ba7d6f0bcfd327fbd576d98c56a18a9765ed
+  languageName: node
+  linkType: hard
+
+"fast-check@npm:^4.9.0":
+  version: 4.10.2
+  resolution: "fast-check@npm:4.10.2"
+  dependencies:
+    pure-rand: "npm:^8.0.0"
+  checksum: 10c0/ee9329018cc98d7fb3d7e5c944c4c667796b37133cd96aeb8dd1aeba901cf8561c2cc1355ffd54e1a16d262170a04bcfdc335da2e865294166e7bb8d97313f7d
   languageName: node
   linkType: hard
 
@@ -26685,6 +26791,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mime@npm:^4.1.0":
+  version: 4.1.1
+  resolution: "mime@npm:4.1.1"
+  bin:
+    mime: bin/cli.js
+  checksum: 10c0/9e3c421cb727a3f51a683ce5ab4ed182559edd6770113386fe6d560b5d83f800944dd79f40b41b9442b4d73201da32d290b07721c0bac42d12425b8e887acb10
+  languageName: node
+  linkType: hard
+
 "mimic-fn@npm:^1.0.0":
   version: 1.2.0
   resolution: "mimic-fn@npm:1.2.0"
@@ -27086,7 +27201,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"msgpackr-extract@npm:^3.0.2":
+"msgpackr-extract@npm:^3.0.2, msgpackr-extract@npm:^3.0.4":
   version: 3.0.4
   resolution: "msgpackr-extract@npm:3.0.4"
   dependencies:
@@ -27126,6 +27241,18 @@ __metadata:
     msgpackr-extract:
       optional: true
   checksum: 10c0/145a6477ff46ad3154b999ad9f1d80070f50b01f5a12975aad683455fa8968f3e12503d8397a8828bc15fd297da9694fc7b8ae9f21d3df64f559caa10a3a4731
+  languageName: node
+  linkType: hard
+
+"msgpackr@npm:^2.0.5":
+  version: 2.1.0
+  resolution: "msgpackr@npm:2.1.0"
+  dependencies:
+    msgpackr-extract: "npm:^3.0.4"
+  dependenciesMeta:
+    msgpackr-extract:
+      optional: true
+  checksum: 10c0/9fcfd08ab99e2499ccd3e7ae188737ed4f629e326ad89ff6f28f4c29e01d0625f679bebb28509ef8cb160ca0c317680c7153e7493c5b472ef3d6ff4b9eac5771
   languageName: node
   linkType: hard
 
@@ -27726,6 +27853,18 @@ multer@emadalam/multer:
   dependencies:
     mimic-fn: "npm:^2.1.0"
   checksum: 10c0/ffcef6fbb2692c3c40749f31ea2e22677a876daea92959b8a80b521d95cca7a668c884d8b2045d1d8ee7d56796aa405c405462af112a1477594cc63531baeb8f
+  languageName: node
+  linkType: hard
+
+"open-ota@npm:0.3.0":
+  version: 0.3.0
+  resolution: "open-ota@npm:0.3.0"
+  dependencies:
+    "@effect/platform-node": "npm:4.0.0-rc.112"
+    effect: "npm:4.0.0-rc.112"
+  bin:
+    open-ota: dist/cli.js
+  checksum: 10c0/38d8ccc5d603d3d83996987b51fc1ddbd82968e4b671495b0328345118eeec4cecc542f6058aaf27701b61e7e9c00c111fd6416afac640f6685b04bb61ec18da
   languageName: node
   linkType: hard
 
@@ -28942,6 +29081,13 @@ multer@emadalam/multer:
   version: 7.0.1
   resolution: "pure-rand@npm:7.0.1"
   checksum: 10c0/9cade41030f5ec95f5d55a11a71404cd6f46b69becaad892097cd7f58e2c6248cd0a933349ca7d21336ab629f1da42ffe899699b671bc4651600eaf6e57f837e
+  languageName: node
+  linkType: hard
+
+"pure-rand@npm:^8.0.0":
+  version: 8.4.2
+  resolution: "pure-rand@npm:8.4.2"
+  checksum: 10c0/4b2ef2a2e68a258fb311efd26b65305b4865856e28d6b40ff61f7d65bb6a39b4f8ebbcf7dfc843193b3cfe54e7501dbc2c7aba0ecdb97d13cd634db709df83fd
   languageName: node
   linkType: hard
 
@@ -30177,6 +30323,19 @@ multer@emadalam/multer:
     unified: "npm:^11.0.0"
     vfile: "npm:^6.0.0"
   checksum: 10c0/c2ed4c0e8cf8a09aedcd47c5d016d47f6e1ff6c2d4b220e2abaf1b77713bf404756af2ea3ea7999aec5862e8825aff035edceb370c7fd8603a7e9da03bd6987e
+  languageName: node
+  linkType: hard
+
+"redis@npm:^6.2.0":
+  version: 6.3.0
+  resolution: "redis@npm:6.3.0"
+  dependencies:
+    "@redis/bloom": "npm:6.3.0"
+    "@redis/client": "npm:6.3.0"
+    "@redis/json": "npm:6.3.0"
+    "@redis/search": "npm:6.3.0"
+    "@redis/time-series": "npm:6.3.0"
+  checksum: 10c0/9f9d7af35c6ec42cf0084b8db29fdd1e28a10875a0cc992b99d04116533a118be5646e9be7594b95098c63e73d9b555359326b42ea31c0a406094ee623fd065d
   languageName: node
   linkType: hard
 
@@ -33555,6 +33714,13 @@ multer@emadalam/multer:
   version: 7.28.0
   resolution: "undici@npm:7.28.0"
   checksum: 10c0/fe781983a26098795e99bb1f64906cbb7d0bcaa029a26baade007b53ea67f2631d189b8f9671a31f4c8d0cb3773b7559608628ba54452fef51fec90e7c78bb0d
+  languageName: node
+  linkType: hard
+
+"undici@npm:^8.10.0":
+  version: 8.12.1
+  resolution: "undici@npm:8.12.1"
+  checksum: 10c0/8ba448a30f85ec9bffe0065b45b471a578dbb56eafd4162741fd7be3b955672e98fabd7a4ab0703365d5ffc6f1927f4ed1c1221f678aa67af18fb7bc3dfe283b
   languageName: node
   linkType: hard
 
