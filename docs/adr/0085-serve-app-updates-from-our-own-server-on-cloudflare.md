@@ -9,8 +9,8 @@ published any more.
 
 EAS Update bills every reader who downloads an update in a month, on top of a monthly plan, and the
 bill grows with the number of readers. The application only needs a small part of what it offers:
-publish the JavaScript of one runtime for iOS and Android, let readers fetch it from the settings,
-and go back to the previous update or to the JavaScript of the build when one breaks.
+publish the JavaScript of one runtime for iOS and Android, let readers fetch it, and go back to the
+previous update or to the JavaScript of the build when one breaks.
 
 `expo-updates`, the part inside the application, is open source and speaks a public protocol. Any
 server that speaks it can replace EAS. Open OTA is such a server, written for Cloudflare: a Worker
@@ -32,8 +32,15 @@ same export. Open OTA builds its assets exactly as eas-cli does.
 - The application asks `https://updates.bible-strong.app/manifest` on its build channel, and checks
   every manifest against the certificate in `apps/expo/certs`. The private key lives only in the
   fork's ignored `.keys/` folder, in the Worker's secret, and in the password manager.
-- Updates stay manual: the application never checks by itself, and readers fetch one from the
-  settings or from the error screen.
+- The application checks once per launch, after it has started, downloads an available update in
+  the background, and runs it at the next launch. Readers can also check from the settings or from
+  the error screen. `checkAutomatically` stays `NEVER`, so the check never delays the launch.
+- A rollback to the embedded JavaScript is fetched like an update. `expo-updates` reports it as not
+  available, with `isRollBackToEmbedded`, so the three places that check look at both.
+- Android builds copy their embedded assets into the updates folder
+  (`EX_UPDATES_COPY_EMBEDDED_ASSETS`). After an update the reader's pages are served from that
+  folder and load, by relative address, fonts the build embedded; without the copy the reader loses
+  its icons.
 - `yarn update:staging` and `yarn update:production` export both platforms with Expo, then publish
   that export with the `open-ota` CLI and send the source maps to Sentry. The production workflow
   runs only when started by hand.
@@ -52,7 +59,14 @@ same export. Open OTA builds its assets exactly as eas-cli does.
   `@effect/platform-node-shared` and `.yarnrc.yml` adds the `redis` peer it never uses.
 - Publishing must load the environment of its channel, since the manifest carries the public
   configuration the application reads after an update, such as the Resource API address.
-- The dashboard does not count downloads: the deployment cannot mint the analytics token they need
-  with an OAuth login.
-- PR previews still publish to EAS Update; whether a development build that checks signatures can
-  still open them is not verified.
+- A build ignores an update published before its own JavaScript was bundled, because `expo-updates`
+  compares their dates. After a new build, publish again.
+- Every reader who launches the application downloads each update once, about 10 MB of compressed
+  bundle per platform unless a patch applies.
+- On Android, the first launch of a build copies its embedded assets once, which costs storage and
+  a little startup time.
+- EAS Build receives the certificate through an exception in the root `.easignore`, which otherwise
+  drops every `*.pem`.
+- The fork deploys with a Cloudflare API token allowed to create tokens: the deployment mints the
+  analytics token the dashboard's download counts need.
+- PR previews are gone: they published to EAS Update, which builds from runtime 28.0 no longer ask.
