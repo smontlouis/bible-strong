@@ -35,6 +35,8 @@
 *.p8
 *.key
 *.pem
+# The public certificate builds check updates against (ADR-0085); its private key is never here.
+!/apps/expo/certs/certificate.pem
 *.mobileprovision
 keystore.txt
 google-service-account.json
