@@ -86,14 +86,14 @@ const HistoryHomeSection = ({ card = false }: { card?: boolean }) => {
 
   return (
     <Box className="overflow-hidden border-continuous bg-light-grey pt-[16px]">
-      <HStack className="px-[20px] items-center justify-between">
+      <HStack className="px-[40px] items-center justify-between">
         <Text className="text-[12px] font-bold text-grey">{t('history.title')}</Text>
         <SeeAll />
       </HStack>
       <HorizontalControlScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, gap: 8 }}
+        contentContainerStyle={{ paddingHorizontal: 40, paddingTop: 8, gap: 8 }}
       >
         {history.slice(0, PILL_ITEMS).map(item => (
           <Pill key={item.id} item={item} />
