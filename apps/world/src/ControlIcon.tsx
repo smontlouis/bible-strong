@@ -9,6 +9,7 @@ type ControlIconName =
   | 'edit'
   | 'star'
   | 'book'
+  | 'portal'
 
 export function ControlIcon({ name }: { name: ControlIconName }) {
   return (
@@ -48,6 +49,12 @@ export function ControlIcon({ name }: { name: ControlIconName }) {
         <>
           <path d="M12 20h9" />
           <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" />
+        </>
+      )}
+      {name === 'portal' && (
+        <>
+          <path d="M5 21V10a7 7 0 0 1 14 0v11M3 21h18" />
+          <path d="M12 9.5c1.6 0 2.5 1.2 2.5 2.4 0 1.6-1.3 2.6-2.6 2.6-1 0-1.9-.7-1.9-1.8 0-.9.7-1.5 1.5-1.5" />
         </>
       )}
       {name === 'star' && (

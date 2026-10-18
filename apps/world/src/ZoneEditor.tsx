@@ -3,8 +3,10 @@ import L from 'leaflet'
 import '@geoman-io/leaflet-geoman-free'
 import 'leaflet/dist/leaflet.css'
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
-import { WIDTH, HEIGHT, SPAWN, findSafePosition, type NavigationDocument, type Zone } from './world'
+import { SPAWN, findSafePosition, type NavigationDocument, type Point, type Zone } from './world'
 import {
+  ARCHIPELAGO_NAVIGATION,
+  type NavigationSpec,
   parseNavigation,
   upgradeNavigation,
   polygonIsValid,
@@ -51,7 +53,7 @@ const messages = {
     zones: 'Zones',
     local: 'Sauvegarde directe dans le projet · export JSON optionnel',
     importLabel: 'Choisir un fichier de zones',
-    tooMany: 'Limite de 150 zones atteinte.',
+    tooMany: 'Nombre maximal de zones atteint.',
     nameHint: '100 caractères maximum',
   },
   en: {
@@ -88,7 +90,7 @@ const messages = {
     zones: 'Zones',
     local: 'Saved directly to the project · JSON export is optional',
     importLabel: 'Choose a zones file',
-    tooMany: 'Maximum of 150 zones reached.',
+    tooMany: 'Maximum number of zones reached.',
     nameHint: '100 characters maximum',
   },
 }
@@ -101,7 +103,27 @@ type EditorApi = {
   drag: (enabled: boolean) => void
   fit: () => void
 }
+/** The map being edited; the archipelago by default. */
+export type ZoneEditorMap = {
+  spec: NavigationSpec
+  image: string
+  spawn: Point
+  endpoint?: string
+  filename: string
+  /** Runtime form of the document (Valence tiles its walkable zones before testing). */
+  prepare?: (doc: NavigationDocument) => NavigationDocument
+  upgrade?: (doc: NavigationDocument) => NavigationDocument
+  maxZones?: number
+}
+const ARCHIPELAGO_MAP: ZoneEditorMap = {
+  spec: ARCHIPELAGO_NAVIGATION,
+  image: './assets/map/preview.webp',
+  spawn: SPAWN,
+  filename: 'bible-strong-archipelago-zones.json',
+  upgrade: upgradeNavigation,
+}
 type Props = {
+  map?: ZoneEditorMap
   initialSavedFingerprint?: string
   onDraft?: (doc: NavigationDocument) => void
   initial: NavigationDocument
@@ -119,7 +141,17 @@ const style = (kind: Zone['kind'], selected: boolean): L.PathOptions => ({
   weight: selected ? 3 : 1.5,
 })
 
-export default function ZoneEditor({ initial, initialSavedFingerprint, onDraft, language, onTest, onSave }: Props) {
+export default function ZoneEditor({
+  map: target = ARCHIPELAGO_MAP,
+  initial,
+  initialSavedFingerprint,
+  onDraft,
+  language,
+  onTest,
+  onSave,
+}: Props) {
+  const spec = target.spec
+  const limit = target.maxZones ?? 150
   const element = useRef<HTMLDivElement>(null)
   const input = useRef<HTMLInputElement>(null)
   const api = useRef<EditorApi | null>(null)
@@ -173,10 +205,10 @@ export default function ZoneEditor({ initial, initialSavedFingerprint, onDraft, 
       attributionControl: false,
     })
     const bounds: L.LatLngBoundsExpression = [
-      [-HEIGHT, 0],
-      [0, WIDTH],
+      [-spec.height, 0],
+      [0, spec.width],
     ]
-    L.imageOverlay('./assets/map/preview.webp', bounds, {
+    L.imageOverlay(target.image, bounds, {
       interactive: false,
       pmIgnore: true,
     }).addTo(map)
@@ -224,7 +256,7 @@ export default function ZoneEditor({ initial, initialSavedFingerprint, onDraft, 
       const old = draft.current.zones.find(z => z.id === id)
       if (!old) return
       const points = readPoints(layer)
-      if (!polygonIsValid(points)) {
+      if (!polygonIsValid(points, spec)) {
         layer.setLatLngs(toLatLngs(old))
         if (current === id) select(id)
         setStatus('invalid')
@@ -279,7 +311,7 @@ export default function ZoneEditor({ initial, initialSavedFingerprint, onDraft, 
         return
       }
       const points = readPoints(layer)
-      if (!polygonIsValid(points) || draft.current.zones.length >= 150) {
+      if (!polygonIsValid(points, spec) || draft.current.zones.length >= limit) {
         map.removeLayer(layer)
         setStatus('invalid')
         setError(true)
@@ -346,6 +378,8 @@ export default function ZoneEditor({ initial, initialSavedFingerprint, onDraft, 
       map.off('pm:create', createZone)
       map.remove()
     }
+    // The map is fixed for the editor's lifetime.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [commit, editorState.mapLanguage])
 
   useEffect(() => {
@@ -414,7 +448,7 @@ export default function ZoneEditor({ initial, initialSavedFingerprint, onDraft, 
   }, [selectedId, drawing, commit])
   function checked(): NavigationDocument | null {
     try {
-      return parseNavigation(draft.current)
+      return parseNavigation(draft.current, spec)
     } catch {
       setStatus('invalid')
       setError(true)
@@ -424,7 +458,8 @@ export default function ZoneEditor({ initial, initialSavedFingerprint, onDraft, 
   function test() {
     const next = checked()
     if (!next) return
-    if (!findSafePosition(SPAWN, next)) {
+    const runtime = target.prepare?.(next) ?? next
+    if (!findSafePosition(target.spawn, runtime, spec)) {
       setStatus('noSpace')
       setError(true)
       return
@@ -435,7 +470,7 @@ export default function ZoneEditor({ initial, initialSavedFingerprint, onDraft, 
     const next = checked()
     if (!next) return
     try {
-      await saveNavigation(next)
+      await saveNavigation(next, target.endpoint, spec)
       saved.current = navigationFingerprint(next)
       onSave(next)
       setStatus('saved')
@@ -449,11 +484,11 @@ export default function ZoneEditor({ initial, initialSavedFingerprint, onDraft, 
     const next = checked()
     if (!next) return
     const url = URL.createObjectURL(
-      new Blob([serializeNavigation(next)], { type: 'application/json' })
+      new Blob([serializeNavigation(next, spec)], { type: 'application/json' })
     )
     const a = document.createElement('a')
     a.href = url
-    a.download = 'bible-strong-archipelago-zones.json'
+    a.download = target.filename
     a.click()
     setTimeout(() => URL.revokeObjectURL(url), 1000)
   }
@@ -461,7 +496,8 @@ export default function ZoneEditor({ initial, initialSavedFingerprint, onDraft, 
     if (!file) return
     try {
       if (file.size > 1024 * 1024) throw new Error('Too large')
-      const next = upgradeNavigation(parseNavigation(JSON.parse(await file.text())))
+      const parsed = parseNavigation(JSON.parse(await file.text()), spec)
+      const next = target.upgrade?.(parsed) ?? parsed
       commit(next)
       api.current?.rebuild(next)
     } catch {
@@ -487,7 +523,7 @@ export default function ZoneEditor({ initial, initialSavedFingerprint, onDraft, 
           className="allowed-tool"
           aria-pressed={drawing === 'allowed'}
           onClick={() =>
-            doc.zones.length < 150 ? api.current?.draw('allowed') : setStatus('tooMany')
+            doc.zones.length < limit ? api.current?.draw('allowed') : setStatus('tooMany')
           }
         >
           {t.addAllowed}
@@ -496,7 +532,7 @@ export default function ZoneEditor({ initial, initialSavedFingerprint, onDraft, 
           className="blocked-tool"
           aria-pressed={drawing === 'blocked'}
           onClick={() =>
-            doc.zones.length < 150 ? api.current?.draw('blocked') : setStatus('tooMany')
+            doc.zones.length < limit ? api.current?.draw('blocked') : setStatus('tooMany')
           }
         >
           {t.addBlocked}

@@ -11,6 +11,19 @@ import {
 
 export const NAVIGATION_FILE_URL = './navigation/archipelago.json'
 export const NAVIGATION_SAVE_ENDPOINT = '/__study-world/navigation'
+/** The map a navigation document belongs to: its id, its size and its obstacle revisions. */
+export type NavigationSpec = {
+  map: NavigationDocument['map']
+  width: number
+  height: number
+  maxObstacleRevision: number
+}
+export const ARCHIPELAGO_NAVIGATION: NavigationSpec = {
+  map: 'archipelago',
+  width: WIDTH,
+  height: HEIGHT,
+  maxObstacleRevision: DETAIL_OBSTACLE_REVISION,
+}
 export const navigationFingerprint = (d: NavigationDocument) =>
   JSON.stringify([
     d.version,
@@ -21,7 +34,10 @@ export const navigationFingerprint = (d: NavigationDocument) =>
     d.zones.map(z => [z.id, z.name, z.kind, z.points]),
   ])
 
-export function polygonIsValid(points: Polygon): boolean {
+export function polygonIsValid(
+  points: Polygon,
+  bounds: { width: number; height: number } = ARCHIPELAGO_NAVIGATION
+): boolean {
   if (points.length < 3 || points.length > 256) return false
   if (
     points.some(
@@ -29,9 +45,9 @@ export function polygonIsValid(points: Polygon): boolean {
         p.length !== 2 ||
         !p.every(Number.isFinite) ||
         p[0] < 0 ||
-        p[0] > WIDTH ||
+        p[0] > bounds.width ||
         p[1] < 0 ||
-        p[1] > HEIGHT
+        p[1] > bounds.height
     )
   )
     return false
@@ -66,20 +82,23 @@ export function polygonIsValid(points: Polygon): boolean {
   return Math.abs(area) > 2
 }
 
-export function parseNavigation(value: unknown): NavigationDocument {
+export function parseNavigation(
+  value: unknown,
+  spec: NavigationSpec = ARCHIPELAGO_NAVIGATION
+): NavigationDocument {
   if (!value || typeof value !== 'object') throw new Error('Invalid document')
   const d = value as Record<string, unknown>
   if (
     d.version !== 1 ||
-    d.map !== 'archipelago' ||
-    d.width !== WIDTH ||
-    d.height !== HEIGHT ||
+    d.map !== spec.map ||
+    d.width !== spec.width ||
+    d.height !== spec.height ||
     !Array.isArray(d.zones) ||
     d.zones.length > 500 ||
     (d.obstacleRevision !== undefined &&
       (!Number.isInteger(d.obstacleRevision) ||
         (d.obstacleRevision as number) < 1 ||
-        (d.obstacleRevision as number) > DETAIL_OBSTACLE_REVISION))
+        (d.obstacleRevision as number) > spec.maxObstacleRevision))
   )
     throw new Error('Incompatible map')
   const ids = new Set<string>()
@@ -104,16 +123,16 @@ export function parseNavigation(value: unknown): NavigationDocument {
     )
       throw new Error('Invalid points')
     const points = z.points as [number, number][]
-    if (!polygonIsValid(points)) throw new Error('Invalid polygon')
+    if (!polygonIsValid(points, spec)) throw new Error('Invalid polygon')
     ids.add(z.id)
     return { id: z.id, name: z.name.trim(), kind: z.kind, points: points.map(([x, y]) => [x, y]) }
   })
   if (!zones.some(z => z.kind === 'allowed')) throw new Error('No walkable zone')
   return {
     version: 1,
-    map: 'archipelago',
-    width: WIDTH,
-    height: HEIGHT,
+    map: spec.map,
+    width: spec.width,
+    height: spec.height,
     obstacleRevision: (d.obstacleRevision as number | undefined) ?? 1,
     zones,
   }
@@ -149,15 +168,22 @@ export async function loadNavigation(): Promise<{ document: NavigationDocument; 
   }
 }
 
-export function serializeNavigation(document: NavigationDocument) {
-  return JSON.stringify(parseNavigation(document), null, 2) + '\n'
+export function serializeNavigation(
+  document: NavigationDocument,
+  spec: NavigationSpec = ARCHIPELAGO_NAVIGATION
+) {
+  return JSON.stringify(parseNavigation(document, spec), null, 2) + '\n'
 }
 
-export async function saveNavigation(document: NavigationDocument) {
-  const response = await fetch(NAVIGATION_SAVE_ENDPOINT, {
+export async function saveNavigation(
+  document: NavigationDocument,
+  endpoint = NAVIGATION_SAVE_ENDPOINT,
+  spec: NavigationSpec = ARCHIPELAGO_NAVIGATION
+) {
+  const response = await fetch(endpoint, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: serializeNavigation(document),
+    body: serializeNavigation(document, spec),
   })
   if (!response.ok) throw new Error(`Navigation save returned ${response.status}`)
 }

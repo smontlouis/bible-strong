@@ -4,7 +4,7 @@
 // https://www.biblegateway.com/passage/?search=Psalm+39:5&version=LSG;KJV
 export const lexiconCopy = {
   fr: {
-    lexiconUrl: 'https://web.bible-strong.app/strong/h1892?bibleVersion=LSG',
+    lexiconUrl: 'https://bible-strong.app/strong/fr/h1892',
     label: 'LE LEXIQUE',
     close: 'Fermer',
     next: 'Suivant',
@@ -54,7 +54,7 @@ export const lexiconCopy = {
     illustration: 'Un lecteur explore les mots hébreux et grecs avec une loupe',
   },
   en: {
-    lexiconUrl: 'https://web.bible-strong.app/strong/h1892?bibleVersion=KJV',
+    lexiconUrl: 'https://bible-strong.app/strong/en/h1892',
     label: 'THE LEXICON',
     close: 'Close',
     next: 'Next',

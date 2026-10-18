@@ -1,4 +1,3 @@
-import verseToReference from '~helpers/verseToReference'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -12,35 +11,13 @@ import {
 } from 'lucide-react'
 import type { ToolActivity } from '@bible-strong/ai-contract/contract'
 import { ToolTimeline as OfficialToolTimeline } from './components/assistant-ui/elements/tool-timeline'
+import {
+  toolActivityFailed,
+  toolActivityIsSearch,
+  toolActivityKind,
+  toolActivityTarget,
+} from './toolActivity'
 
-function target(tool: ToolActivity): string {
-  try {
-    const args = JSON.parse(tool.request)
-    for (const key of [
-      'reference',
-      'query',
-      'code',
-      'strong',
-      'word',
-      'topic',
-      'name',
-      'entryId',
-    ]) {
-      if (typeof args?.[key] === 'string' && args[key]) return args[key].slice(0, 80)
-    }
-    if (Number.isInteger(args?.book) && Number.isInteger(args?.chapter))
-      return verseToReference({
-        bookNum: args.book,
-        chapterNum: args.chapter,
-        verses: args.start
-          ? [args.start, ...(args.end && args.end !== args.start ? [args.end] : [])]
-          : [],
-      })
-  } catch {
-    /* A bounded preview can end in an ellipsis. */
-  }
-  return tool.name
-}
 export default function ToolTimeline({
   tools,
   running,
@@ -51,19 +28,9 @@ export default function ToolTimeline({
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
   const steps = tools.map(tool => {
-    const search = /search|find|concordance/.test(tool.name)
-    const label = tool.name.includes('strong')
-      ? 'strong'
-      : tool.name.includes('comment')
-        ? 'commentary'
-        : tool.name.includes('passage')
-          ? 'passage'
-          : tool.name.includes('nave')
-            ? 'nave'
-            : tool.name.includes('dictionary')
-              ? 'dictionary'
-              : 'search'
-    const failed = tool.state === 'error' || tool.state === 'interrupted'
+    const search = toolActivityIsSearch(tool)
+    const label = toolActivityKind(tool)
+    const failed = toolActivityFailed(tool)
     const icon = failed
       ? CircleAlertIcon
       : search
@@ -79,7 +46,7 @@ export default function ToolTimeline({
                 : WrenchIcon
     return {
       verb: `${t(`assistant.tools.${label}`)}${failed ? ` · ${t(`assistant.tools.${tool.state}`)}` : ''}`,
-      chip: target(tool),
+      chip: toolActivityTarget(tool),
       icon,
     }
   })

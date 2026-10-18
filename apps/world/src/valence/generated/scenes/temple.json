@@ -1,0 +1,28 @@
+{
+  "id": "temple",
+  "mode": "sprite",
+  "frameRate": 12,
+  "frameCount": 120,
+  "x": 844.57,
+  "y": 166.41,
+  "width": 19.73,
+  "height": 45.7,
+  "depth": 210.91,
+  "pages": [
+    {
+      "key": "page-0",
+      "firstFrame": 0,
+      "frameCount": 120,
+      "width": 2040,
+      "height": 342
+    }
+  ],
+  "shadows": [
+    {
+      "x": 852.8,
+      "y": 210.9,
+      "rx": 6.1,
+      "ry": 1.9
+    }
+  ]
+}

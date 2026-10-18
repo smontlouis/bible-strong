@@ -32,6 +32,16 @@ type Bot = {
   nextReply: number
 }
 
+/** Where bots appear and walk: the central island by default, a town square in Valence. */
+export type CrowdArea = {
+  candidates: (navigation: NavigationDocument) => readonly Point[]
+  walking: (navigation: NavigationDocument) => NavigationDocument
+}
+const CENTRAL_ISLAND: CrowdArea = {
+  candidates: centralSpawnCandidates,
+  walking: navigation => centralNavigation(navigation),
+}
+
 function centralNavigation(navigation: NavigationDocument): NavigationDocument {
   return {
     ...navigation,
@@ -57,12 +67,13 @@ export class StandCrowd {
 
   constructor(
     navigation: NavigationDocument,
-    private random = Math.random
+    private random = Math.random,
+    private area: CrowdArea = CENTRAL_ISLAND
   ) {
     this.navigation = navigation
-    this.walkingNavigation = centralNavigation(navigation)
+    this.walkingNavigation = area.walking(navigation)
     this.pathfinder = new Pathfinder(this.walkingNavigation)
-    this.candidates = centralSpawnCandidates(navigation)
+    this.candidates = area.candidates(navigation)
   }
 
   private pick<T>(values: readonly T[]): T {
@@ -121,9 +132,9 @@ export class StandCrowd {
     this.expireReactions(now)
     if (navigation !== this.navigation) {
       this.navigation = navigation
-      this.walkingNavigation = centralNavigation(navigation)
+      this.walkingNavigation = this.area.walking(navigation)
       this.pathfinder = new Pathfinder(this.walkingNavigation)
-      this.candidates = centralSpawnCandidates(navigation)
+      this.candidates = this.area.candidates(navigation)
       this.remotes.clear()
       this.reactions.clear()
     }

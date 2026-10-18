@@ -100,7 +100,7 @@ export function ComparisonsDiscovery({
                 <h2>{t.more}</h2>
                 <p>{t.possibilities}</p>
                 <a
-                  href="https://web.bible-strong.app/bible-compare-verses?selectedVerses=%7B%2243-1-5%22%3Atrue%7D"
+                  href={`https://bible-strong.app/bible/${language === 'fr' ? 'lsg' : 'kjv'}/john/1/5`}
                   target="_blank"
                   rel="noreferrer"
                 >

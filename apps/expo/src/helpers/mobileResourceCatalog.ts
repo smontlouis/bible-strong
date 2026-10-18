@@ -146,15 +146,37 @@ export const resolveMobileResourceCatalog = (value: unknown): MobileResourceCata
 
 let catalogRequest: Promise<MobileResourceCatalog> | undefined
 let catalogResolved = false
+let catalogFellBack = false
 let resolvedFetcher: typeof fetch | undefined
 
+export interface LoadMobileResourceCatalogOptions {
+  /** How long to wait for the live catalog before keeping the bundled one. */
+  timeoutMs?: number
+  /**
+   * Asks the live catalog again when this session fell back to the bundled one. An installation
+   * needs it: the bundled catalog may name archives no longer published (ADR-0079).
+   */
+  retryFallback?: boolean
+}
+
 export const loadMobileResourceCatalog = (
-  fetcher: typeof fetch = fetch
+  fetcher: typeof fetch = fetch,
+  {
+    timeoutMs = MOBILE_RESOURCE_CATALOG_TIMEOUT_MS,
+    retryFallback = false,
+  }: LoadMobileResourceCatalogOptions = {}
 ): Promise<MobileResourceCatalog> => {
-  if (catalogResolved && resolvedFetcher === fetcher) {
+  const canRetry = retryFallback && catalogFellBack
+  if (catalogResolved && resolvedFetcher === fetcher && !canRetry) {
     return Promise.resolve(MOBILE_RESOURCE_CATALOG)
   }
-  if (catalogRequest) return catalogRequest
+  if (catalogRequest) {
+    if (!retryFallback) return catalogRequest
+    // A shorter request already running may still fall back: ask again once it settles.
+    return catalogRequest.then(catalog =>
+      catalogFellBack ? loadMobileResourceCatalog(fetcher, { timeoutMs, retryFallback }) : catalog
+    )
+  }
 
   const abortController = new AbortController()
   let timeout: ReturnType<typeof setTimeout> | undefined
@@ -162,7 +184,7 @@ export const loadMobileResourceCatalog = (
     timeout = setTimeout(() => {
       abortController.abort()
       reject(new Error('MOBILE_RESOURCE_CATALOG_TIMEOUT'))
-    }, MOBILE_RESOURCE_CATALOG_TIMEOUT_MS)
+    }, timeoutMs)
   })
   catalogRequest = Promise.race([
     fetcher(MOBILE_RESOURCE_CATALOG_URL, {
@@ -182,11 +204,13 @@ export const loadMobileResourceCatalog = (
         throw new Error('MOBILE_RESOURCE_REMOTE_CATALOG_INVALID')
       }
       MOBILE_RESOURCE_CATALOG = resolvedCatalog
+      catalogFellBack = false
       getDefaultStore().set(mobileResourceCatalogAtom, resolvedCatalog)
       return MOBILE_RESOURCE_CATALOG
     })
     .catch(() => {
       MOBILE_RESOURCE_CATALOG = BUNDLED_MOBILE_RESOURCE_CATALOG
+      catalogFellBack = true
       getDefaultStore().set(mobileResourceCatalogAtom, BUNDLED_MOBILE_RESOURCE_CATALOG)
       return BUNDLED_MOBILE_RESOURCE_CATALOG
     })

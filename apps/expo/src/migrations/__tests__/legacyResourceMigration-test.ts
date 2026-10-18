@@ -21,6 +21,7 @@ const createDependencies = (
   overrides: Partial<LegacyResourceMigrationDependencies> = {}
 ): LegacyResourceMigrationDependencies => ({
   inspectEvidence: jest.fn(async () => createEvidence([])),
+  loadReplacementCatalog: jest.fn(async () => {}),
   resolveReplacementPlan: jest.fn(async request => [
     { identity: request, estimatedSize: 10, label: identityKey(request) },
   ]),
@@ -173,6 +174,52 @@ describe('legacyResourceMigration', () => {
 
     expect(dependencies.installReplacement).toHaveBeenCalledTimes(1)
     expect(progress).toHaveBeenCalledWith({ progress: 0.5, message: 'download' })
+  })
+
+  it('loads the live catalog before planning and before installing a replacement', async () => {
+    const operations: string[] = []
+    let ready = false
+    const dependencies = createDependencies({
+      inspectEvidence: jest.fn(async () => createEvidence(['INT'])),
+      loadReplacementCatalog: jest.fn(async stage => {
+        operations.push(`catalog:${stage}`)
+      }),
+      resolveReplacementPlan: jest.fn(async request => {
+        operations.push('plan')
+        return [{ identity: request, estimatedSize: 10, label: identityKey(request) }]
+      }),
+      isReplacementReady: jest.fn(async () => ready),
+      installReplacement: jest.fn(async () => {
+        operations.push('install')
+        ready = true
+      }),
+    })
+    const migration = createLegacyResourceMigration(dependencies)
+    const plan = (await migration.detect(localContext))!
+
+    await migration.executeStep({
+      context: localContext,
+      plan,
+      step: plan.steps[1],
+      reportProgress: jest.fn(),
+    })
+    await migration.executeStep({
+      context: localContext,
+      plan,
+      step: plan.steps[1],
+      reportProgress: jest.fn(),
+    })
+
+    expect(operations).toEqual(['catalog:plan', 'plan', 'catalog:install', 'install'])
+  })
+
+  it('does not wait for the live catalog when no legacy resource is installed', async () => {
+    const dependencies = createDependencies()
+    const migration = createLegacyResourceMigration(dependencies)
+
+    await expect(migration.detect(localContext)).resolves.toBeNull()
+
+    expect(dependencies.loadReplacementCatalog).not.toHaveBeenCalled()
   })
 
   it('fails a step when installation does not produce a compatible replacement', async () => {

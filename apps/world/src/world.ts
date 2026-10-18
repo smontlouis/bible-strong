@@ -2,6 +2,7 @@
 // Geometry uses the 1671 × 941 source image. It is not an isometric tile grid.
 import detailFootprints from './generated/detail-footprints.json'
 import { APP_DOWNLOAD_OBSTACLE } from './app-download'
+import { WORLD_PORTAL_OBSTACLES } from './world-portal'
 export type Point = { x: number; y: number }
 export type Polygon = readonly (readonly [number, number])[]
 export const WIDTH = 1671
@@ -219,7 +220,7 @@ export function inPolygon(point: Point, polygon: Polygon): boolean {
 export type Zone = { id: string; name: string; kind: 'allowed' | 'blocked'; points: Polygon }
 export type NavigationDocument = {
   version: 1
-  map: 'archipelago'
+  map: 'archipelago' | 'valence-1876'
   width: number
   height: number
   obstacleRevision?: number
@@ -256,6 +257,7 @@ export const defaultNavigation: NavigationDocument = {
     ),
     ...detailObstacles,
     APP_DOWNLOAD_OBSTACLE,
+    ...WORLD_PORTAL_OBSTACLES,
   ],
 }
 
@@ -288,12 +290,16 @@ export function canStand(point: Point, navigation = defaultNavigation): boolean 
   )
 }
 
-export function findSafePosition(preferred: Point, navigation: NavigationDocument): Point | null {
+export function findSafePosition(
+  preferred: Point,
+  navigation: NavigationDocument,
+  bounds = { width: WIDTH, height: HEIGHT }
+): Point | null {
   if (canStand(preferred, navigation)) return preferred
   let best: Point | null = null,
     distance = Infinity
-  for (let y = RADIUS; y < HEIGHT; y += 8)
-    for (let x = RADIUS; x < WIDTH; x += 8) {
+  for (let y = RADIUS; y < bounds.height; y += 8)
+    for (let x = RADIUS; x < bounds.width; x += 8) {
       const d = (preferred.x - x) ** 2 + (preferred.y - y) ** 2
       if (d < distance && canStand({ x, y }, navigation)) {
         best = { x, y }

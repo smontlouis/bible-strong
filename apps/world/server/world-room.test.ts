@@ -10,6 +10,12 @@ vi.mock('./games/room', () => ({
 }))
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 vi.mock('./guestbook', () => ({ Guestbook: class {}, routeGuestbook: vi.fn() }))
+vi.mock('./scans', () => ({
+  ScanCounter: class {},
+  SCAN_INSTANCE: 'stands',
+  SCAN_ROUTES: { '/scan': '/valence-1876' },
+  scanReport: vi.fn(),
+}))
 vi.mock('partyserver', () => ({
   Server: class {
     constructor(
@@ -285,4 +291,68 @@ it('never sends presence to sockets that have not joined', async () => {
   await send(c, { type: 'move', pose: { ...pose, x: 320 }, seq: 2 })
   vi.advanceTimersByTime(60)
   expect(lurker.messages).toEqual([])
+})
+it('welcomes Valence 1876 visitors at the station, without Bible games', async () => {
+  Object.defineProperty(room, 'name', { value: 'valence-1876' })
+  const layout = JSON.parse(
+    (await import('node:fs')).readFileSync(new URL('../public/valence-1876/layout.json', import.meta.url), 'utf8')
+  )
+  const c = await join()
+  const welcome = c.messages.find((m: { type: string }) => m.type === 'welcome')
+  const [x, y] = layout.spawn
+  expect(Math.hypot(welcome.spawn.x - x, welcome.spawn.y - y)).toBeLessThan(50)
+  await send(c, { type: 'game', command: { action: 'pause-solo' } })
+  expect(c.messages.some((m: { type: string }) => m.type === 'games' || m.type === 'game-error')).toBe(false)
+  expect(c.readyState).toBe(1)
+})
+it('lets a stand screen watch visitors and their reactions without becoming one', async () => {
+  const visitor = await join()
+  const screen: any = {
+    id: crypto.randomUUID(),
+    readyState: 1,
+    state: null,
+    messages: [],
+    setState(state: unknown) {
+      this.state = structuredClone(state)
+    },
+    send(raw: string) {
+      this.messages.push(JSON.parse(raw))
+    },
+    close(code: number) {
+      this.readyState = 3
+      this.code = code
+      room.onClose(this)
+      connections.delete(this.id)
+    },
+  }
+  connections.set(screen.id, screen)
+  await room.onConnect(screen)
+  await send(screen, { type: 'watch', version: 2 })
+  // It sees who is already here, and is never a player itself.
+  expect(screen.messages[0]).toMatchObject({ type: 'watching', players: [{ id: visitor.state.player.id }] })
+  expect(screen.state.player).toBeNull()
+  // A visitor arriving later does not see the screen.
+  const later = await join()
+  const welcome = later.messages.find((m: any) => m.type === 'welcome')
+  expect(welcome.players.map((p: any) => p.id)).toEqual(
+    expect.not.arrayContaining([screen.id])
+  )
+  expect(welcome.players).toHaveLength(2)
+  // Movement and reactions reach the screen.
+  await send(visitor, { type: 'move', pose: { ...pose, x: 260 }, seq: 1 })
+  vi.advanceTimersByTime(60)
+  expect(screen.messages.some((m: any) => m.type === 'frame' && m.players[0].pose.x === 260)).toBe(true)
+  await send(visitor, { type: 'reaction', reaction: 'hello' })
+  expect(screen.messages.some((m: any) => m.type === 'reaction' && m.id === visitor.state.player.id)).toBe(true)
+  // A screen cannot join afterwards, and stays connected while it keeps pinging.
+  await send(screen, { type: 'join', version: 2, profile, pose })
+  expect(screen.state.player).toBeNull()
+  for (let i = 0; i < 6; i++) {
+    vi.advanceTimersByTime(20_000)
+    await send(screen, { type: 'ping' })
+    await send(visitor, { type: 'ping' })
+    await send(later, { type: 'ping' })
+    await room.onAlarm()
+  }
+  expect(screen.readyState).toBe(1)
 })

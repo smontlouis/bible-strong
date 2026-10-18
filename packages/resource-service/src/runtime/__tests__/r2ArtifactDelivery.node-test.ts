@@ -704,3 +704,94 @@ describe('Encrypted Offline-copy delivery', () => {
     assert.deepEqual(reads, [])
   })
 })
+
+describe('Retired Offline-copy delivery', () => {
+  const retiredFile = 'bibles/bible-old.json.zip'
+  const retiredSha256 = 'd'.repeat(64)
+  const retiredEncryptedFile = 'bibles/bible-old.json.encrypted.zip'
+  const retiredEncryptedSha256 = 'e'.repeat(64)
+  const currentEncryptedFile = 'bibles/bible-lsg.json.encrypted.zip'
+  const currentEncryptedSha256 = 'b'.repeat(64)
+  const previousEncryptedSha256 = 'f'.repeat(64)
+  const resolveKey = createArtifactKeyResolver(
+    {
+      resources: {
+        'bible:LSG': {
+          file: artifactKey,
+          archiveSha256: artifactSha256,
+          encryptedArchive: { file: currentEncryptedFile, sha256: currentEncryptedSha256 },
+        },
+      },
+    },
+    [
+      {
+        file: retiredFile,
+        archiveSha256: retiredSha256,
+        encryptedArchive: { file: retiredEncryptedFile, sha256: retiredEncryptedSha256 },
+      },
+      {
+        file: artifactKey,
+        archiveSha256: 'a'.repeat(64),
+        encryptedArchive: { file: currentEncryptedFile, sha256: previousEncryptedSha256 },
+      },
+    ]
+  )
+  const plainUrl = (file: string, sha256?: string) =>
+    new URL(
+      `https://api.bible-strong.app${R2_ARTIFACT_ROUTE_PREFIX}${file}${sha256 ? `?sha256=${sha256}` : ''}`
+    )
+  const encryptedUrl = (file: string, sha256?: string) =>
+    new URL(
+      `https://api.bible-strong.app${ENCRYPTED_ARCHIVE_ROUTE_PREFIX}${file}${sha256 ? `?sha256=${sha256}` : ''}`
+    )
+
+  it('serves a retired plain file from the immutable key of its published SHA', () => {
+    assert.equal(resolveKey(plainUrl(retiredFile)), `revisions/${retiredSha256}/${retiredFile}`)
+    assert.equal(
+      resolveKey(plainUrl(retiredFile, retiredSha256)),
+      `revisions/${retiredSha256}/${retiredFile}`
+    )
+    assert.equal(resolveKey(plainUrl(retiredFile, 'c'.repeat(64))), undefined)
+  })
+
+  it('serves a retired encrypted copy only for its published SHA', () => {
+    assert.equal(
+      resolveKey(encryptedUrl(retiredEncryptedFile, retiredEncryptedSha256)),
+      `revisions/${retiredEncryptedSha256}/${retiredEncryptedFile}`
+    )
+    assert.equal(resolveKey(encryptedUrl(retiredEncryptedFile)), undefined)
+    assert.equal(resolveKey(encryptedUrl(retiredEncryptedFile, retiredSha256)), undefined)
+  })
+
+  it('keeps serving the previous encrypted copy of a file the catalog still declares', () => {
+    assert.equal(
+      resolveKey(encryptedUrl(currentEncryptedFile, previousEncryptedSha256)),
+      `revisions/${previousEncryptedSha256}/${currentEncryptedFile}`
+    )
+    assert.equal(
+      resolveKey(encryptedUrl(currentEncryptedFile, currentEncryptedSha256)),
+      `revisions/${currentEncryptedSha256}/${currentEncryptedFile}`
+    )
+  })
+
+  it('leaves files the catalog declares on their current keys', () => {
+    assert.equal(resolveKey(plainUrl(artifactKey)), artifactKey)
+  })
+
+  it('serves the BHG archive that 27.2 and earlier compiled in', async () => {
+    const { bucket, reads } = makeBucket()
+    const response = await routeR2ArtifactRequest({
+      request: artifactRequest('bibles/bible-step.json.zip'),
+      bucket,
+      authorize: async () => true,
+    })
+
+    assert.equal(response?.status, 200)
+    assert.deepEqual(reads, [
+      {
+        operation: 'get',
+        key: 'revisions/5d7b283e3e20ec748844acfe46877bae7e4e6045d4e4455116f6218a54b18fd6/bibles/bible-step.json.zip',
+      },
+    ])
+  })
+})

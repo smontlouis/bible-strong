@@ -4,7 +4,11 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import StrongEntityRouteScreen from '../StrongEntityRouteScreen'
 
 let mockRouteParams: { language?: string } = {}
-jest.mock('expo-router', () => ({ useLocalSearchParams: () => mockRouteParams }))
+jest.mock('expo-router', () => ({
+  useLocalSearchParams: () => mockRouteParams,
+  usePathname: () => '/strong-entity',
+  useIsFocused: () => true,
+}))
 
 const mockEntryState = { entry: { stepCode: 'H0175' } }
 

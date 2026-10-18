@@ -254,3 +254,9 @@
     transition: none;
   }
 }
+
+/* The archipelago's invitation fills the bottom: the tour's caption sits under the title. */
+.world-shell .stand-presentation {
+  top: calc(max(24px, env(safe-area-inset-top)) + 72px);
+  bottom: auto;
+}

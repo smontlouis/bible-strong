@@ -112,15 +112,18 @@ export class WorldMultiplayer {
     }
     return fresh
   }
-  private resumeToken: string | undefined = this.readResumeToken()
+  // Read in the constructor: field initializers run before the room parameter is assigned.
+  private resumeToken: string | undefined
   private readResumeToken() {
     try {
-      return sessionStorage.getItem('world-resume-token') || undefined
+      return sessionStorage.getItem(this.resumeKey) || undefined
     } catch {
       return undefined
     }
   }
   private enabled = false
+  /** A stand screen watches the room instead of joining it. */
+  private watching = false
   private heartbeat = window.setInterval(() => {
     if (!this.socket || document.hidden) return
     if (this.id && this.reportedHidden !== document.hidden) this.reportVisibility()
@@ -147,8 +150,18 @@ export class WorldMultiplayer {
         this.connect()
     }
   }
-  constructor() {
+  constructor(private readonly room: string = ROOM) {
+    this.resumeToken = this.readResumeToken()
     document.addEventListener('visibilitychange', this.visibility)
+  }
+  private get resumeKey() {
+    return this.room === ROOM ? 'world-resume-token' : `world-resume-token-${this.room}`
+  }
+
+  /** Follows the room without joining it: a stand screen sees every visitor and is never seen. */
+  watch() {
+    this.watching = true
+    if (!this.socket && !this.destroyed && this.status.state !== 'full' && !this.outdated) this.connect()
   }
 
   update(pose: Pose, profile: AvatarProfile, enabled: boolean, now: number) {
@@ -184,12 +197,12 @@ export class WorldMultiplayer {
     return false
   }
   private connect() {
-    if (this.destroyed || this.superseded || this.outdated || !this.profile || this.socket) return
+    if (this.destroyed || this.superseded || this.outdated || (!this.profile && !this.watching) || this.socket) return
     const host = import.meta.env.VITE_WORLD_MULTIPLAYER_HOST || location.host
     const socket = new PartySocket({
       host,
       party: 'world-room',
-      room: ROOM,
+      room: this.room,
       maxEnqueuedMessages: 0,
       minReconnectionDelay: 1000,
       maxReconnectionDelay: 10_000,
@@ -197,7 +210,13 @@ export class WorldMultiplayer {
     this.socket = socket
     this.status = { state: 'connecting', count: 0 }
     socket.addEventListener('open', () => {
-      if (this.socket !== socket || !this.profile) return
+      if (this.socket !== socket) return
+      if (this.watching) {
+        this.lastReceived = performance.now()
+        this.send({ type: 'watch', version: PROTOCOL_VERSION })
+        return
+      }
+      if (!this.profile) return
       this.seq = 0
       this.lastProfile = JSON.stringify(this.profile)
       this.lastPose = ''
@@ -224,7 +243,7 @@ export class WorldMultiplayer {
       if (message.type === 'reaction') {
         if (
           !document.hidden &&
-          this.id &&
+          (this.id || this.watching) &&
           isReaction(message.reaction) &&
           (message.id === this.id || this.remotes.has(message.id))
         )
@@ -239,14 +258,18 @@ export class WorldMultiplayer {
         this.games.error(message.error)
         return
       }
-      if (message.type === 'welcome') {
+      if (message.type === 'watching') {
+        this.remotes.clear()
+        for (const player of message.players) this.remotes.set(player.id, new RemoteTrack(player, now))
+        this.status = { state: 'online', count: this.remotes.size }
+      } else if (message.type === 'welcome') {
         this.sentActivity = undefined
         this.reactions.clear()
         this.games.connect(message.id)
         this.resumeToken = message.resumeToken
         try {
-          if (this.resumeToken) sessionStorage.setItem('world-resume-token', this.resumeToken)
-          else sessionStorage.removeItem('world-resume-token')
+          if (this.resumeToken) sessionStorage.setItem(this.resumeKey, this.resumeToken)
+          else sessionStorage.removeItem(this.resumeKey)
         } catch {
           /* In-memory resumption still works when storage is unavailable. */
         }
@@ -269,18 +292,18 @@ export class WorldMultiplayer {
         for (const player of message.players)
           if (player.id !== this.id) this.remotes.set(player.id, new RemoteTrack(player, now))
         this.status = { state: 'online', count: this.remotes.size + 1 }
-      } else if ((message.type === 'player' || message.type === 'frame') && this.id) {
+      } else if ((message.type === 'player' || message.type === 'frame') && (this.id || this.watching)) {
         for (const player of message.type === 'frame' ? message.players : [message.player]) {
           if (player.id === this.id) continue
           const existing = this.remotes.get(player.id)
           if (existing) existing.push(player, now)
           else this.remotes.set(player.id, new RemoteTrack(player, now))
         }
-        this.status = { state: 'online', count: this.remotes.size + 1 }
+        this.status = { state: 'online', count: this.remotes.size + (this.id ? 1 : 0) }
       } else if (message.type === 'leave') {
         this.reactions.delete(message.id)
         this.remotes.delete(message.id)
-        if (this.id) this.status = { state: 'online', count: this.remotes.size + 1 }
+        if (this.id || this.watching) this.status = { state: 'online', count: this.remotes.size + (this.id ? 1 : 0) }
       } else if (message.type === 'full') {
         this.disconnect()
         this.status = { state: 'full', count: 0 }
@@ -293,7 +316,7 @@ export class WorldMultiplayer {
         this.superseded = true
         this.resumeToken = undefined
         try {
-          sessionStorage.removeItem('world-resume-token')
+          sessionStorage.removeItem(this.resumeKey)
         } catch {
           /* Storage may be unavailable. */
         }

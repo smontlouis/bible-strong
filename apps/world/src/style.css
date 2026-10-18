@@ -276,6 +276,16 @@ select {
   width: 25px;
   height: 25px;
 }
+/* The portal to Valence 1876 shows the colours of the world it leads to. */
+.discover-button[data-island='portal'] {
+  --bs-button-edge-blue: #5a3b20;
+  border-radius: 4px;
+  background: #8b5e30;
+  color: #fff7e3;
+  box-shadow:
+    0 4px 0 #5a3b20,
+    0 8px 22px rgba(139, 94, 48, 0.45);
+}
 .discover-button[data-visible='true']:hover {
   scale: 1.06;
 }

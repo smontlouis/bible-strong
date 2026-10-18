@@ -1,0 +1,27 @@
+{
+  "id": "vapeur",
+  "mode": "patch",
+  "frameRate": 12,
+  "frameCount": 120,
+  "x": 2.11,
+  "y": 502.11,
+  "width": 235.78,
+  "height": 175.78,
+  "depth": -50,
+  "pages": [
+    {
+      "key": "page-0",
+      "firstFrame": 0,
+      "frameCount": 88,
+      "width": 1920,
+      "height": 1980
+    },
+    {
+      "key": "page-1",
+      "firstFrame": 88,
+      "frameCount": 32,
+      "width": 1920,
+      "height": 720
+    }
+  ]
+}

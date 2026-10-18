@@ -379,3 +379,27 @@ it('keeps preference values fixed for a question even if settings change before 
     },
   })
 })
+it('asks a failed question again under its own identity, so its saved exchange is replaced', async () => {
+  const updates: Conversation[] = []
+  const run = (retryOf?: { id: string }) =>
+    runConversation({
+      conversation: empty,
+      question: 'Explique',
+      context: null,
+      retryOf,
+      controller: new AbortController(),
+      isCurrent: () => true,
+      onUpdate: c => updates.push(c),
+      onProgress: () => {},
+      onError: () => {},
+      request: async (_input, _signal, emit) => {
+        emit({ type: 'done', requestId: 'r', model: 'm', modelCalls: 1, toolCalls: 0 })
+      },
+    })
+  await run()
+  const first = updates.at(-1)!.messages
+  await run(first[0])
+  const retried = updates.at(-1)!.messages
+  expect(retried[0].id).toBe(first[0].id)
+  expect(retried[1].id).not.toBe(first[1].id)
+})

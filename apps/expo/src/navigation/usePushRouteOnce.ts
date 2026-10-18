@@ -1,4 +1,6 @@
+import { useContext } from 'react'
 import { navigateWithPageTransition } from './pageTransition'
+import { PushRouteGateContext } from './pushRouteGate'
 import { useRouter } from 'expo-router'
 import type { HrefObject } from 'expo-router'
 import { getCurrentRouteInfo } from './currentRouteInfo'
@@ -40,6 +42,7 @@ const normalizedParamsEqual = (currentParams: RouteParams, targetParams: RoutePa
 
 export const usePushRouteOnce = () => {
   const router = useRouter()
+  const gate = useContext(PushRouteGateContext)
   const defaultBibleVersion = useDefaultBibleVersion()
   const timelineLanguage = useResourcesLanguageValue().TIMELINE
 
@@ -59,8 +62,10 @@ export const usePushRouteOnce = () => {
       return
     }
 
-    navigateWithPageTransition(normalizedRoute.pathname, () =>
-      router.push(normalizedRoute as HrefObject)
+    gate(() =>
+      navigateWithPageTransition(normalizedRoute.pathname, () =>
+        router.push(normalizedRoute as HrefObject)
+      )
     )
   }
 }

@@ -40,7 +40,8 @@ export function Modal({
     const previous = document.activeElement
     const element = dialog.current!
     element.showModal()
-    initialFocus?.current?.focus()
+    // Focus without scrolling: a long dialog opens at its top, not on its focused button.
+    initialFocus?.current?.focus({ preventScroll: true })
     return () => {
       clearTimeout(closeTimer.current)
       element.close()

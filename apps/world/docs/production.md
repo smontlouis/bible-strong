@@ -25,6 +25,24 @@ Regenerate the asset when changing the destination:
 npx --yes --package qrcode qrcode -t svg -o apps/world/public/assets/world-qr.svg 'https://world.bible-strong.app'
 ```
 
+### Stand scans
+
+Valence 1876's stand (`/valence-1876?stand`) shows a QR code of `https://world.bible-strong.app/scan`.
+The Worker counts the scan in the `ScanCounter` Durable Object and redirects at once to
+`/valence-1876`; the address written under the code stays `/valence-1876`, so typed visits are
+not counted. A scan is a GET; a visitor is a SHA-256 of the network address and the browser
+with a random salt of the day, deleted the next day: no address is stored, and a person counts
+once a day. Days and hours are in Europe/Paris.
+
+The counts are at `https://world.bible-strong.app/admin/scans`, behind the same Access
+application as the guestbook admin (it covers `/admin*`); the page refreshes every minute.
+Another stand gets its own scan address in `SCAN_ROUTES` (`server/scans.ts`). Regenerate the
+Valence code with:
+
+```bash
+npx --yes --package qrcode qrcode -t svg -q 2 -o apps/world/public/valence-1876/qr.svg 'https://world.bible-strong.app/scan'
+```
+
 ## Development tools
 
 Editor controls, panels, the navigation editor chunk, the diagnostic UI and `?debug`

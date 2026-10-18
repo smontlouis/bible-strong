@@ -25,6 +25,7 @@
     "resources:smoke:local": "node scripts/smokeLocalResourcePlatform.mjs",
     "resources:ui:architecture:check": "node scripts/check-resource-ui-architecture.mjs",
     "clean": "rm -rf node_modules && rm -rf $TMPDIR/metro-* && rm -rf $TMPDIR/haste-map-* && yarn install",
+    "clean:ios": "node scripts/clean-ios.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
@@ -62,6 +63,7 @@
   "dependencies": {
     "@alloc/moti": "^54.0.0-beta.8",
     "@assistant-ui/react": "^0.15.21",
+    "@assistant-ui/react-native": "0.1.43",
     "@assistant-ui/react-streamdown": "0.3.16",
     "@babel/plugin-transform-class-properties": "^7.25.9",
     "@babel/plugin-transform-private-methods": "^7.25.9",

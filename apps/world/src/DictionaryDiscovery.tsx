@@ -142,7 +142,7 @@ export function DictionaryDiscovery({
                 <h2>{t.more}</h2>
                 <p>{t.possibilities}</p>
                 <a
-                  href="https://web.bible-strong.app/dictionnaire"
+                  href={`https://bible-strong.app/dictionary/${language}`}
                   target="_blank"
                   rel="noreferrer"
                 >

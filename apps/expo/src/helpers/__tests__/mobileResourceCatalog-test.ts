@@ -129,6 +129,74 @@ describe('mobile resource catalog', () => {
     expect(fetcher).toHaveBeenCalledTimes(1)
   })
 
+  describe('when an installation needs the live catalog', () => {
+    const newerCatalog = {
+      ...BUNDLED_MOBILE_RESOURCE_CATALOG,
+      generatedAt: '2099-01-01T00:00:00.000Z',
+    }
+    const unavailable = () => new Response(null, { status: 503 })
+    const available = () => new Response(JSON.stringify(newerCatalog), { status: 200 })
+
+    afterEach(async () => {
+      jest.useRealTimers()
+      // Later tests read the bundled catalog.
+      await loadMobileResourceCatalog(jest.fn(async () => unavailable()))
+    })
+
+    it('asks the live catalog again after this session fell back', async () => {
+      const fetcher = jest
+        .fn()
+        .mockResolvedValueOnce(unavailable())
+        .mockResolvedValueOnce(available())
+
+      await expect(loadMobileResourceCatalog(fetcher)).resolves.toBe(
+        BUNDLED_MOBILE_RESOURCE_CATALOG
+      )
+      await expect(loadMobileResourceCatalog(fetcher, { retryFallback: true })).resolves.toEqual(
+        newerCatalog
+      )
+      await expect(loadMobileResourceCatalog(fetcher)).resolves.toEqual(newerCatalog)
+      expect(fetcher).toHaveBeenCalledTimes(2)
+    })
+
+    it('waits for a running request before asking again', async () => {
+      let answerFirstRequest: (response: Response) => void = () => {}
+      const fetcher = jest
+        .fn()
+        .mockReturnValueOnce(
+          new Promise<Response>(resolve => {
+            answerFirstRequest = resolve
+          })
+        )
+        .mockResolvedValueOnce(available())
+
+      const startupRequest = loadMobileResourceCatalog(fetcher)
+      const installationRequest = loadMobileResourceCatalog(fetcher, { retryFallback: true })
+      answerFirstRequest(unavailable())
+
+      await expect(startupRequest).resolves.toBe(BUNDLED_MOBILE_RESOURCE_CATALOG)
+      await expect(installationRequest).resolves.toEqual(newerCatalog)
+    })
+
+    it('gives a slow live catalog the time an installation allows', async () => {
+      jest.useFakeTimers()
+      const slowly = () =>
+        new Promise<Response>(resolve => setTimeout(() => resolve(available()), 5_000))
+      const fetcher = jest.fn().mockImplementationOnce(slowly).mockImplementationOnce(slowly)
+
+      const startupRequest = loadMobileResourceCatalog(fetcher)
+      await jest.advanceTimersByTimeAsync(3_000)
+      await expect(startupRequest).resolves.toBe(BUNDLED_MOBILE_RESOURCE_CATALOG)
+
+      const installationRequest = loadMobileResourceCatalog(fetcher, {
+        retryFallback: true,
+        timeoutMs: 15_000,
+      })
+      await jest.advanceTimersByTimeAsync(5_000)
+      await expect(installationRequest).resolves.toEqual(newerCatalog)
+    })
+  })
+
   it('ships Bibles as canonical JSON alone, headings and words of Jesus included (ADR-0066)', () => {
     const nbs = getMobileResourceCatalogEntry('bible:NBS')
     expect(new URL(nbs.url).pathname).toBe('/v1/offline-artifacts/bibles/bible-nbs.json.zip')
