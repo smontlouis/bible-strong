@@ -16,6 +16,7 @@ import Header from '~common/Header'
 import Container from '~common/ui/Container'
 import { usePrevious } from '~helpers/usePrevious'
 import { useComputedPlan, useFireStorage } from '../plan.hooks'
+import { useRecordHistory } from '~features/history/useRecordHistory'
 import DetailsModal from './DetailsModal'
 import Menu from './Menu'
 import SuccessModal from './SuccessModal'
@@ -50,6 +51,9 @@ const PlanScreen = ({
   const { isError, retry } = useReadingContent(id)
   const plan = useComputedPlan(id)
   useAssistantResourceContext(assistantScope, editorialContext(plan))
+  useRecordHistory(
+    plan ? { type: 'plan', planId: id, title: plan.title, subtitle: plan.subTitle } : null
+  )
   const title = plan?.title ?? t('readingPlans.tab')
   const image = plan?.image
   const description = plan?.description

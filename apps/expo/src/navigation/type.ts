@@ -2,6 +2,7 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { EdgeInsets } from 'react-native-safe-area-context'
 import { BibleContextDisplayMode, BibleTab, SelectedVerses, VersionCode } from 'src/state/tabs'
 import { Book } from '~assets/bible_versions/books-desc'
+import type { HistoryFilter } from '~features/history/historyModel'
 import {
   ComputedPlanItem,
   ComputedReadingSlice,
@@ -147,6 +148,13 @@ type TimelineScreenProps = {
 
 type EventScreenProps = {
   slug: string
+  language?: 'fr' | 'en'
+}
+
+type MeditationScreenProps = {
+  collectionId: string
+  readingId?: string
+  date?: string
 }
 
 type ConcordanceScreenProps = {
@@ -201,7 +209,7 @@ export type MainStackProps = {
   Backup: undefined
   AutomaticBackups: undefined
   Pericope: undefined
-  History: undefined
+  History: { filter?: HistoryFilter } | undefined
   Tags: undefined
   Bookmarks: undefined
   Tag: TagScreenProps
@@ -223,6 +231,7 @@ export type MainStackProps = {
   Timeline: TimelineScreenProps
   TimelineHome: undefined
   Event: EventScreenProps
+  Meditation: MeditationScreenProps
   Concordance: ConcordanceScreenProps
   Commentaries: CommentariesScreenProps
   CommentaryLibrary: undefined

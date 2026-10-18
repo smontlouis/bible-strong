@@ -26,6 +26,8 @@ import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { useRecordHistory } from '~features/history/useRecordHistory'
+import { getCommentaryResourceHistoryEntry } from './commentaryResourceHistory'
 import { getDefaultBibleTab, useBibleTabActions } from '~state/tabs'
 import { openCommentaryBookSelector } from './commentaryBookSelector'
 import CommentaryResourceHeaderActions from './CommentaryResourceHeaderActions'
@@ -106,6 +108,7 @@ const CommentaryChapterScreen = ({
   const params = routeParams ?? localParams
   const parsed = parseCommentaryResourceParams(params)
   useAssistantResourceContext('panel', commentaryContext(params))
+  useRecordHistory(getCommentaryResourceHistoryEntry(parsed, undefined, undefined))
   const parsedFocusVerse = Number(params.focusVerse)
   const focusVerse =
     Number.isSafeInteger(parsedFocusVerse) && parsedFocusVerse > 0 ? parsedFocusVerse : undefined

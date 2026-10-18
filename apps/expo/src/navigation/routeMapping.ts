@@ -57,6 +57,7 @@ export const routeMapping: Record<keyof MainStackProps, string> = {
   Timeline: '/timeline',
   TimelineHome: '/timeline-home',
   Event: '/event',
+  Meditation: '/meditation',
   Concordance: '/concordance',
   Commentaries: '/commentaries',
   CommentaryLibrary: '/commentary-library',

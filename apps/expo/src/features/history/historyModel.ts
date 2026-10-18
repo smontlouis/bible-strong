@@ -2,7 +2,8 @@ import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { getHistoryStrongReference } from '~helpers/historyStrongReference'
 
 export const HISTORY_SCHEMA_VERSION = 2 as const
-export const MAX_HISTORY_ITEMS = 50
+// Each type keeps its own quota so a reading session never evicts consulted resources.
+export const MAX_HISTORY_ITEMS_PER_TYPE = 50
 
 type BaseHistoryItem = {
   id: string
@@ -45,7 +46,72 @@ export type HistoryNaveItem = BaseHistoryItem & {
   name_lower: string
 }
 
-export type HistoryItem = HistoryStrongItem | HistoryVerseItem | HistoryWordItem | HistoryNaveItem
+// Titles of user-owned items (study, note) are a fallback: the History reads them live.
+export type HistoryStudyItem = BaseHistoryItem & {
+  type: 'study'
+  studyId: string
+  title: string
+}
+
+export type HistoryNoteItem = BaseHistoryItem & {
+  type: 'note'
+  noteId: string
+  title: string
+  reference?: string
+}
+
+export type HistoryPlanItem = BaseHistoryItem & {
+  type: 'plan'
+  planId: string
+  title: string
+  subtitle?: string
+}
+
+export type HistoryMeditationItem = BaseHistoryItem & {
+  type: 'meditation'
+  collectionId: string
+  readingId: string
+  title: string
+  collectionTitle?: string
+  readingDate?: string
+}
+
+export type HistoryTimelineItem = BaseHistoryItem & {
+  type: 'timeline'
+  slug: string
+  title: string
+  dateLabel?: string
+  language?: ResourceLanguage
+}
+
+export type HistoryCommentaryItem = BaseHistoryItem & {
+  type: 'commentary'
+  /** Verse key, `book-chapter-verse`. */
+  verse: string
+}
+
+export type HistoryCommentaryResourceItem = BaseHistoryItem & {
+  type: 'commentary-resource'
+  projectionId: string
+  book: number
+  chapter: number
+  sectionId?: string
+  title: string
+  passage: string
+}
+
+export type HistoryItem =
+  | HistoryStrongItem
+  | HistoryVerseItem
+  | HistoryWordItem
+  | HistoryNaveItem
+  | HistoryStudyItem
+  | HistoryNoteItem
+  | HistoryPlanItem
+  | HistoryMeditationItem
+  | HistoryTimelineItem
+  | HistoryCommentaryItem
+  | HistoryCommentaryResourceItem
 
 type WithoutHistoryMetadata<T> = T extends HistoryItem ? Omit<T, 'id' | 'schemaVersion'> : never
 
@@ -65,10 +131,49 @@ const optionalLanguage = (value: unknown): ResourceLanguage | undefined =>
 
 const isPositiveInteger = (value: number): boolean => Number.isInteger(value) && value > 0
 
+const optionalPositiveInteger = (value: unknown): number | undefined => {
+  const number = Number(value)
+  return isPositiveInteger(number) ? number : undefined
+}
+
+export const HISTORY_FILTERS = [
+  'all',
+  'bible',
+  'strong',
+  'word',
+  'nave',
+  'commentary',
+  'timeline',
+  'study',
+  'note',
+  'plan',
+] as const
+export type HistoryFilter = (typeof HISTORY_FILTERS)[number]
+
+export const isHistoryFilter = (value: unknown): value is HistoryFilter =>
+  HISTORY_FILTERS.includes(value as HistoryFilter)
+
+const filterTypes: Record<Exclude<HistoryFilter, 'all'>, HistoryItem['type'][]> = {
+  bible: ['verse'],
+  strong: ['strong'],
+  word: ['word'],
+  nave: ['nave'],
+  commentary: ['commentary', 'commentary-resource'],
+  timeline: ['timeline'],
+  study: ['study'],
+  note: ['note'],
+  plan: ['plan', 'meditation'],
+}
+
+export const matchesHistoryFilter = (item: HistoryItem, filter: HistoryFilter): boolean =>
+  filter === 'all' || filterTypes[filter].includes(item.type)
+
+// A chapter is one entry whatever the version or the verse it was opened at;
+// the entry reopens the latest version and verse.
 export const getHistoryItemKey = (item: HistoryItem | HistoryItemInput): string => {
   switch (item.type) {
     case 'verse':
-      return `verse:${Number(item.book)}:${Number(item.chapter)}:${Number(item.verse)}:${item.version}`
+      return `verse:${Number(item.book)}:${Number(item.chapter)}`
     case 'strong': {
       const reference = getHistoryStrongReference(item)
       return reference
@@ -83,6 +188,20 @@ export const getHistoryItemKey = (item: HistoryItem | HistoryItemInput): string 
     }
     case 'nave':
       return `nave:${item.name_lower.trim().toLocaleLowerCase()}`
+    case 'study':
+      return `study:${item.studyId}`
+    case 'note':
+      return `note:${item.noteId}`
+    case 'plan':
+      return `plan:${item.planId}`
+    case 'meditation':
+      return `meditation:${item.collectionId}:${item.readingId}`
+    case 'timeline':
+      return `timeline:${item.slug}`
+    case 'commentary':
+      return `commentary:${item.verse}`
+    case 'commentary-resource':
+      return `commentary-resource:${item.projectionId}:${item.book}:${item.chapter}:${item.sectionId ?? ''}`
   }
 }
 
@@ -145,9 +264,97 @@ const normalizeHistoryItem = (value: unknown, index = 0): HistoryItem | null => 
       if (!name || !nameLower) return null
       return metadata({ type: 'nave', name, name_lower: nameLower, date })
     }
+    case 'study': {
+      const studyId = optionalString(value.studyId)
+      if (!studyId) return null
+      return metadata({ type: 'study', studyId, title: optionalString(value.title) ?? '', date })
+    }
+    case 'note': {
+      const noteId = optionalString(value.noteId)
+      if (!noteId) return null
+      return metadata({
+        type: 'note',
+        noteId,
+        title: optionalString(value.title) ?? '',
+        reference: optionalString(value.reference),
+        date,
+      })
+    }
+    case 'plan': {
+      const planId = optionalString(value.planId)
+      const title = optionalString(value.title)
+      if (!planId || !title) return null
+      return metadata({
+        type: 'plan',
+        planId,
+        title,
+        subtitle: optionalString(value.subtitle),
+        date,
+      })
+    }
+    case 'meditation': {
+      const collectionId = optionalString(value.collectionId)
+      const readingId = optionalString(value.readingId)
+      const title = optionalString(value.title)
+      if (!collectionId || !readingId || !title) return null
+      return metadata({
+        type: 'meditation',
+        collectionId,
+        readingId,
+        title,
+        collectionTitle: optionalString(value.collectionTitle),
+        readingDate: optionalString(value.readingDate),
+        date,
+      })
+    }
+    case 'timeline': {
+      const slug = optionalString(value.slug)
+      const title = optionalString(value.title)
+      if (!slug || !title) return null
+      return metadata({
+        type: 'timeline',
+        slug,
+        title,
+        dateLabel: optionalString(value.dateLabel),
+        language: optionalLanguage(value.language),
+        date,
+      })
+    }
+    case 'commentary': {
+      const verse = optionalString(value.verse)
+      if (!verse || !/^\d+-\d+-\d+$/.test(verse)) return null
+      return metadata({ type: 'commentary', verse, date })
+    }
+    case 'commentary-resource': {
+      const projectionId = optionalString(value.projectionId)
+      const book = optionalPositiveInteger(value.book)
+      const chapter = optionalPositiveInteger(value.chapter)
+      const title = optionalString(value.title)
+      const passage = optionalString(value.passage)
+      if (!projectionId || !book || !chapter || !title || !passage) return null
+      return metadata({
+        type: 'commentary-resource',
+        projectionId,
+        book,
+        chapter,
+        sectionId: optionalString(value.sectionId),
+        title,
+        passage,
+        date,
+      })
+    }
     default:
       return null
   }
+}
+
+const limitHistoryTypes = (history: HistoryItem[]): HistoryItem[] => {
+  const counts: Partial<Record<HistoryItem['type'], number>> = {}
+  return history.filter(item => {
+    const count = (counts[item.type] ?? 0) + 1
+    counts[item.type] = count
+    return count <= MAX_HISTORY_ITEMS_PER_TYPE
+  })
 }
 
 export const migrateHistoryItems = (value: unknown): HistoryItem[] => {
@@ -165,7 +372,7 @@ export const migrateHistoryItems = (value: unknown): HistoryItem[] => {
     migrated.push(item)
   })
 
-  return migrated.slice(0, MAX_HISTORY_ITEMS)
+  return limitHistoryTypes(migrated)
 }
 
 export const addHistoryItem = (history: HistoryItem[], input: HistoryItemInput): HistoryItem[] => {
@@ -177,8 +384,47 @@ export const addHistoryItem = (history: HistoryItem[], input: HistoryItemInput):
   if (!item) return history
 
   const key = getHistoryItemKey(item)
-  return [item, ...history.filter(existing => getHistoryItemKey(existing) !== key)].slice(
-    0,
-    MAX_HISTORY_ITEMS
-  )
+  return limitHistoryTypes([
+    item,
+    ...history.filter(existing => getHistoryItemKey(existing) !== key),
+  ])
+}
+
+export const removeHistoryItem = (history: HistoryItem[], id: string): HistoryItem[] =>
+  history.filter(item => item.id !== id)
+
+export type HistoryDay = {
+  /** Local midnight of the day, in milliseconds. */
+  day: number
+  items: HistoryItem[]
+}
+
+const startOfLocalDay = (time: number) => {
+  const date = new Date(time)
+  date.setHours(0, 0, 0, 0)
+  return date.getTime()
+}
+
+/** Groups items, already ordered from the most recent, by local calendar day. */
+export const groupHistoryByDay = (history: HistoryItem[]): HistoryDay[] => {
+  const days: HistoryDay[] = []
+  history.forEach(item => {
+    const day = startOfLocalDay(item.date)
+    const last = days.at(-1)
+    if (last?.day === day) last.items.push(item)
+    else days.push({ day, items: [item] })
+  })
+  return days
+}
+
+export const getHistoryDayLabel = (
+  day: number,
+  now: number
+): 'today' | 'yesterday' | 'thisYear' | 'older' => {
+  const today = startOfLocalDay(now)
+  const yesterday = new Date(today)
+  yesterday.setDate(yesterday.getDate() - 1)
+  if (day === today) return 'today'
+  if (day === yesterday.getTime()) return 'yesterday'
+  return new Date(day).getFullYear() === new Date(now).getFullYear() ? 'thisYear' : 'older'
 }

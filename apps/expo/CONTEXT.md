@@ -64,7 +64,7 @@
 
 **Tab group** — A persisted collection of Tabs with one active Tab.
 
-**Recently viewed content** — A device-local, bounded list of successfully opened Bible passages and editorial-resource entries. It is independent from Tab persistence and from the Expo Router back stack, and is cleared when the current account session ends.
+**History** — A device-local list of the entities that open in a Tab and that the reader has had on screen: Bible chapters, Strong, dictionary and Nave entries, commentaries, timeline events, Studies, Notes, Reading plans and meditations. It keeps one entry per entity (per chapter whatever its version) and a separate bound per kind; deleted Studies and Notes drop out of it. It is independent from Tab persistence and from the Expo Router back stack, and is cleared when the current account session ends. The home shows its latest entries.
 
 **Guest session** — A period without an authenticated account in which locally created study data belongs to the device user.
 
@@ -75,6 +75,7 @@
 ## Avoid
 
 - Use **Offline copy**, not “offline cache”, for a deliberately installed complete resource.
+- Use **History**, not “recently viewed content”, for the list of consulted chapters and entries.
 - Use **Strong entry**, not “Strong word”, when referring to the lexical object.
 - Use **Relation endpoint**, not “relation item” or “linkable thing”.
 - Use **Bible version** for a readable Bible source; reserve **Resource identity** for publication and delivery lifecycle discussions.

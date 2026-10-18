@@ -34,6 +34,8 @@ import {
   parseCommentaryResourceParams,
 } from './commentaryResourceParams'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { useRecordHistory } from '~features/history/useRecordHistory'
+import { getCommentaryResourceHistoryEntry } from './commentaryResourceHistory'
 const formatRange = (start: number, end: number) => (start === end ? `${start}` : `${start}–${end}`)
 
 const CommentaryResourceTabScreen = ({
@@ -113,6 +115,7 @@ const CommentaryResourceTabScreen = ({
     ? query.data?.sections.find(candidate => candidate.id === tab.data.sectionId)
     : undefined
   useAssistantResourceContext(`tab:${tab.id}`, commentaryContext(tab.data, titleSection))
+  useRecordHistory(getCommentaryResourceHistoryEntry(parsed, tab.data.sectionId, titleSection))
   const titleBookLabel = parsed ? (getBook(parsed.book)?.Nom ?? String(parsed.book)) : undefined
   const desiredTabTitle =
     parsed && titleBookLabel

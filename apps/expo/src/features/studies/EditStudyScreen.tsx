@@ -23,6 +23,7 @@ import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { createStudyEndpoint } from '~features/studyRelations/endpoints'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { useRecordHistory } from '~features/history/useRecordHistory'
 type EditStudyScreenProps = {
   studyAtom?: PrimitiveAtom<StudyTab>
   // Props passed directly (when called from StudiesTabScreen)
@@ -122,6 +123,8 @@ const EditStudyScreen = ({
       setIsFullScreenBible(false)
     }, [setIsFullScreenBible])
   )
+
+  useRecordHistory(currentStudy ? { type: 'study', studyId, title: currentStudy.title } : null)
 
   // Show message if study doesn't exist
   if (studyId === '' || !currentStudy) {
