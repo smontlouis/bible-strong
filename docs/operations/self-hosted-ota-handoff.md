@@ -19,6 +19,8 @@ the change is pull request smontlouis/bible-strong#442.
   JavaScript for both platforms. Nothing was published to `production`.
 - The CI secret `OTA_PUBLISH_TOKEN` is set on the repository. The local token is in
   `apps/expo/.env.local`.
+- The signing key (`~/Projects/bible-strong/open-ota/.keys/private-key.pem`, also the Worker's
+  secret) is backed up in the password manager since 18 October 2026.
 
 ## Verified on 18 October 2026
 
@@ -44,24 +46,21 @@ Found and fixed on the way:
 
 ## Still open
 
-1. **Back up the signing key.** `~/Projects/bible-strong/open-ota/.keys/private-key.pem` only exists
-   on this machine and in the Worker's secret. Losing it means a new build for every reader. Put it
-   in the password manager, if not done yet.
-2. **The EAS "preview" environment holds production values** (`APP_NAME`, `BUNDLE_IDENTIFIER`,
+1. **The EAS "preview" environment holds production values** (`APP_NAME`, `BUNDLE_IDENTIFIER`,
    `EAS_BUILD_CHANNEL=production`, the production Firebase files). The staging profile resolves to
    it, so `yarn build:ios:staging-sim` fails: eas-cli names the Xcode scheme `BibleStrong` from the
    EAS value while the prebuild, run with `.env.staging`, makes `stagingBibleStrong`. Align that
    environment on `.env.staging` or delete those variables from it, then build staging once with
    EAS and check that the channel header says `staging`.
-3. **Delta patches fail at publish** ("0 uploaded, 2 skipped, 10 failed"). Updates still go out as
+2. **Delta patches fail at publish** ("0 uploaded, 2 skipped, 10 failed"). Updates still go out as
    full bundles. Run `open-ota publish --verbose` once to see why.
-4. **Sentry receives 7 of 12 source maps** at each publish. Check which files are skipped.
-5. **The first 28.0 builds made with EAS** should be checked once on a device: an update loads, and
+3. **Sentry receives 7 of 12 source maps** at each publish. Check which files are skipped.
+4. **The first 28.0 builds made with EAS** should be checked once on a device: an update loads, and
    `EXUpdatesURL` and the channel header are as above. The tests ran on local builds.
-6. **The npm CLI declares loose versions.** `open-ota@0.3.0` needs a root `resolutions` pin of
+5. **The npm CLI declares loose versions.** `open-ota@0.3.0` needs a root `resolutions` pin of
    `@effect/platform-node-shared` and a `redis` package extension in `.yarnrc.yml`. Report upstream;
    drop both once a fixed release exists.
-7. **The Open OTA stack runs on beta software**: Alchemy 2.0.0-beta.76 (beta.83 exists) and Effect 4
+6. **The Open OTA stack runs on beta software**: Alchemy 2.0.0-beta.76 (beta.83 exists) and Effect 4
    release candidates. Upgrade the fork deliberately, with a production plan before any deploy.
 
 ## After 28.0 is in the stores
