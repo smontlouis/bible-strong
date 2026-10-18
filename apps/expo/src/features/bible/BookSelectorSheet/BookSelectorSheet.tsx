@@ -2,15 +2,16 @@ import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { DeviceEventEmitter, FlatList } from 'react-native'
+import { DeviceEventEmitter, FlatList, useWindowDimensions } from 'react-native'
 import { useSharedValue } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Book } from '~assets/bible_versions/books-desc'
 import Box from '~common/ui/Box'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { HelpTip } from '~features/tips/HelpTip'
 import { bookSelectorSelectionModeAtom, bookSelectorSortAtom, bookSelectorVersesAtom } from './atom'
-import { itemHeight } from './BookItem'
+import { getBookListScrollOffset } from './bookSelectorScroll'
 import { BookSelectorList } from './BookSelectorList'
 import { BookSelectorParams } from './BookSelectorParams'
 import { BOOK_SELECTION_EVENT, SelectionEvent } from './constants'
@@ -31,6 +32,9 @@ interface BookSelectorSheetProps {
 }
 export { bookSelectorDataAtom } from './state'
 
+// Room taken above the list by the sheet header and its help tip
+const SHEET_HEADER_ALLOWANCE = 120
+
 const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
   const expandedBook = useSharedValue<number | null>(null)
   const [expandedBookNumber, setExpandedBookNumber] = useState<number | null>(null)
@@ -38,6 +42,9 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
   const [gridBook, setGridBook] = useState<Book | null>(null)
   const collapseTimeouts = useRef<Record<number, ReturnType<typeof setTimeout>>>({})
   const flatListRef = useRef<FlatList>(null)
+  const isPresentedRef = useRef(false)
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions()
+  const insets = useSafeAreaInsets()
   const { t } = useTranslation()
   const sort = useAtomValue(bookSelectorSortAtom)
   const isAlphabetical = sort === 'alphabetical'
@@ -46,11 +53,12 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
   const bookSelectorHasVerses = verses === 'with-verses'
   const setTempSelectedBook = useSetAtom(tempSelectedBookAtom)
   const setTempSelectedChapter = useSetAtom(tempSelectedChapterAtom)
+  const bookSelectorState = useAtomValue(bookSelectorDataAtom)
   const {
     actions: bookSelectorActions,
     data: bookSelectorData,
     coverage: providedCoverage,
-  } = useAtomValue(bookSelectorDataAtom)
+  } = bookSelectorState
   const openInNewTab = useOpenInNewTab()
   const verseSheetRef = useRef<SheetRef>(null)
   const selectedVersion = bookSelectorData?.selectedVersion
@@ -136,10 +144,18 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
     return booksArray
   }, [canonId, coverageData?.books, isAlphabetical])
 
-  const initialScrollIndex = data.findIndex(
-    book => book.Numero === (bookSelectorData?.selectedBook.Numero || 1)
-  )
-  const safeInitialScrollIndex = Math.max(initialScrollIndex, 0)
+  const selectedBookNumber = bookSelectorData?.selectedBook.Numero || 1
+  const initialScrollIndex = data.findIndex(book => book.Numero === selectedBookNumber)
+  const selectedBookChapters = coverageData?.chaptersByBook?.[selectedBookNumber]
+  const selectedChapter = bookSelectorData?.selectedChapter ?? 1
+  const initialScrollOffset = getBookListScrollOffset({
+    bookIndex: initialScrollIndex,
+    chapterIndex: selectedBookChapters
+      ? selectedBookChapters.indexOf(selectedChapter)
+      : selectedChapter - 1,
+    windowWidth,
+    viewportHeight: windowHeight - insets.top - SHEET_HEADER_ALLOWANCE,
+  })
   const isGridChapterPicker = selectionMode === 'grid' && gridBook !== null
 
   useEffect(
@@ -148,6 +164,21 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
     },
     []
   )
+
+  // The provider sets a new state right before presenting, even when the tab data is unchanged:
+  // every opening starts on the book being read
+  useEffect(() => {
+    if (isPresentedRef.current || !bookSelectorData) return
+
+    const book = bookSelectorData.selectedBook
+    Object.values(collapseTimeouts.current).forEach(clearTimeout)
+    collapseTimeouts.current = {}
+    expandedBook.set(book.Numero)
+    setExpandedBookNumber(book.Numero)
+    setRenderedChapterBookNumbers([book.Numero])
+    setGridBook(book)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookSelectorState])
 
   const scheduleChapterUnmount = (bookNumber: number) => {
     clearTimeout(collapseTimeouts.current[bookNumber])
@@ -187,14 +218,16 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
         backgroundColor={theme.colors.reverse}
         snapPoints={[1]}
         onPresent={() => {
+          isPresentedRef.current = true
           if (data.length > 0) {
             flatListRef.current?.scrollToOffset({
-              offset: Math.max(0, itemHeight * (safeInitialScrollIndex - 2)),
+              offset: initialScrollOffset,
               animated: false,
             })
           }
         }}
         onDismiss={() => {
+          isPresentedRef.current = false
           expandedBook.set(null)
           setExpandedBookNumber(null)
           setGridBook(null)
@@ -232,7 +265,7 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
         <BookSelectorList
           key={selectedVersion}
           data={data}
-          initialScrollIndex={safeInitialScrollIndex}
+          initialScrollOffset={initialScrollOffset}
           expandedBook={expandedBook}
           bookSelectorData={bookSelectorData}
           flatListRef={flatListRef}

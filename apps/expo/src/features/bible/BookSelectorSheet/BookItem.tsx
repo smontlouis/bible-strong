@@ -10,23 +10,32 @@ import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import AccordionItem from './AccordionItem'
+import {
+  BOOK_ITEM_HEIGHT,
+  getListChapterLayout,
+  LIST_CHAPTER_GAP,
+  LIST_CHAPTER_SIZE,
+  LIST_CHAPTER_VERTICAL_PADDING,
+} from './bookSelectorScroll'
 import { BOOK_SELECTION_EVENT } from './constants'
 interface BookItemProps {
   book: Book
   chapters?: number[]
   isSelected: boolean
+  selectedChapter?: number
   onBookSelect: (book: Book) => void
   expandedBook: SharedValue<number | null>
   shouldRenderChapters: boolean
 }
 
-export const itemHeight = 46
+export const itemHeight = BOOK_ITEM_HEIGHT
 
 const BookItem = memo(
   ({
     book,
     chapters: availableChapters,
     isSelected,
+    selectedChapter,
     onBookSelect,
     expandedBook,
     shouldRenderChapters,
@@ -40,15 +49,9 @@ const BookItem = memo(
       [availableChapters, book]
     )
 
-    const ITEM_WIDTH = 60
-    const ITEM_GAP = 10
-    const MAX_WIDTH = Math.min(500, windowWidth)
-    const PADDING = 0
-
-    const availableWidth = MAX_WIDTH - PADDING * 2
-    const itemsPerRow = Math.floor(availableWidth / (ITEM_WIDTH + ITEM_GAP))
-    const totalItemsWidth = itemsPerRow * ITEM_WIDTH + (itemsPerRow - 1) * ITEM_GAP
-    const horizontalMargin = (MAX_WIDTH - totalItemsWidth) / 2
+    const ITEM_WIDTH = LIST_CHAPTER_SIZE
+    const ITEM_GAP = LIST_CHAPTER_GAP
+    const { maxWidth: MAX_WIDTH, horizontalMargin } = getListChapterLayout(windowWidth)
     const chevronAnimation = useDerivedValue(() => ({
       transform: [{ rotate: isExpanded.get() ? '180deg' : '0deg' }],
     }))
@@ -116,42 +119,59 @@ const BookItem = memo(
                 { gap: ITEM_GAP },
                 {
                   flexWrap: 'wrap',
-                  paddingVertical: 10,
+                  paddingVertical: LIST_CHAPTER_VERTICAL_PADDING,
                   paddingHorizontal: horizontalMargin,
                   maxWidth: MAX_WIDTH,
                   alignSelf: 'center',
                 },
               ]}
             >
-              {chapters.map(chapter => (
-                <TouchableOpacity
-                  key={chapter}
-                  accessibilityLabel={`${t('Chapitre')} ${chapter}`}
-                  accessibilityRole="button"
-                  onPress={() => handleChapterSelect(chapter)}
-                  onLongPress={() => handleLongPressChapterSelect(chapter)}
-                >
-                  <Box
-                    className="overflow-hidden border-continuous bg-opacity5 rounded-[6px] h-[60px] items-center justify-center"
-                    style={{ width: ITEM_WIDTH }}
+              {chapters.map(chapter => {
+                const isSelectedChapter = selectedChapter === chapter
+
+                return (
+                  <TouchableOpacity
+                    key={chapter}
+                    accessibilityLabel={`${t('Chapitre')} ${chapter}`}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: isSelectedChapter }}
+                    onPress={() => handleChapterSelect(chapter)}
+                    onLongPress={() => handleLongPressChapterSelect(chapter)}
                   >
                     <Box
-                      className="overflow-hidden border-continuous"
-                      style={{
-                        position: 'absolute',
-                        inset: 0,
-                        justifyContent: 'center',
-                        display: 'flex',
-                        alignItems: 'center',
-                      }}
+                      className={twMerge(
+                        isSelectedChapter ? 'bg-light-grey' : 'bg-opacity5',
+                        'overflow-hidden border-continuous rounded-[6px] h-[60px] items-center justify-center'
+                      )}
+                      style={{ width: ITEM_WIDTH }}
                     >
-                      <Text className="text-center" style={{ width: ITEM_WIDTH }}>
-                        {chapter}
-                      </Text>
+                      <Box
+                        className="overflow-hidden border-continuous"
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          justifyContent: 'center',
+                          display: 'flex',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <Text
+                          className={twMerge(
+                            isSelectedChapter ? 'text-primary' : 'text-default',
+                            'text-center'
+                          )}
+                          style={{
+                            width: ITEM_WIDTH,
+                            fontWeight: isSelectedChapter ? 'bold' : undefined,
+                          }}
+                        >
+                          {chapter}
+                        </Text>
+                      </Box>
                     </Box>
-                  </Box>
-                </TouchableOpacity>
-              ))}
+                  </TouchableOpacity>
+                )
+              })}
             </HStack>
           </AccordionItem>
         )}
@@ -161,6 +181,7 @@ const BookItem = memo(
   (prevProps, nextProps) => {
     return (
       prevProps.isSelected === nextProps.isSelected &&
+      prevProps.selectedChapter === nextProps.selectedChapter &&
       prevProps.shouldRenderChapters === nextProps.shouldRenderChapters
     )
   }

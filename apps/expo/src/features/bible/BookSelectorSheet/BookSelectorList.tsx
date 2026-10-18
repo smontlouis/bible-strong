@@ -3,7 +3,7 @@ import { FlatList, ScrollView } from 'react-native'
 import { bookSelectorSelectionModeAtom } from './atom'
 import { useAtomValue } from 'jotai/react'
 import { Book } from '~assets/bible_versions/books-desc'
-import BookItem, { itemHeight } from './BookItem'
+import BookItem from './BookItem'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SharedValue } from 'react-native-reanimated'
 import { BibleTab } from 'src/state/tabs'
@@ -12,7 +12,7 @@ import ChapterGrid from './ChapterGrid'
 import { getBookCorpus } from '~helpers/bibleBookCatalog'
 
 interface BookSelectorListProps {
-  initialScrollIndex: number
+  initialScrollOffset: number
   expandedBook: SharedValue<number | null>
   data: Book[]
   bookSelectorData?: BibleTab['data']
@@ -25,7 +25,7 @@ interface BookSelectorListProps {
 }
 export const BookSelectorList = ({
   data,
-  initialScrollIndex,
+  initialScrollOffset,
   expandedBook,
   bookSelectorData,
   flatListRef,
@@ -38,29 +38,34 @@ export const BookSelectorList = ({
   const insets = useSafeAreaInsets()
   const selectionMode = useAtomValue(bookSelectorSelectionModeAtom)
 
-  const renderItem = ({ item: book }: { item: Book }) => (
-    <BookItem
-      book={book}
-      chapters={chaptersByBook?.[book.Numero]}
-      isSelected={book.Numero === bookSelectorData?.selectedBook.Numero}
-      onBookSelect={onBookSelect}
-      expandedBook={expandedBook}
-      shouldRenderChapters={renderedChapterBookNumbers.includes(book.Numero)}
-    />
-  )
+  const renderItem = ({ item: book }: { item: Book }) => {
+    const isSelected = book.Numero === bookSelectorData?.selectedBook.Numero
+
+    return (
+      <BookItem
+        book={book}
+        chapters={chaptersByBook?.[book.Numero]}
+        isSelected={isSelected}
+        selectedChapter={isSelected ? bookSelectorData?.selectedChapter : undefined}
+        onBookSelect={onBookSelect}
+        expandedBook={expandedBook}
+        shouldRenderChapters={renderedChapterBookNumbers.includes(book.Numero)}
+      />
+    )
+  }
 
   useEffect(() => {
     if (data.length === 0) return
     const scrollTimer = setTimeout(() => {
       flatListRef.current?.scrollToOffset({
-        offset: Math.max(0, itemHeight * (initialScrollIndex - 2)),
+        offset: initialScrollOffset,
         animated: false,
       })
     }, 100)
 
     return () => clearTimeout(scrollTimer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.length, initialScrollIndex])
+  }, [data.length, initialScrollOffset])
 
   if (selectionMode === 'grid') {
     if (gridBook) {
