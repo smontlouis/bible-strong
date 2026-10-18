@@ -73,18 +73,29 @@ Found and fixed on the way:
   `BibleStrong` while the build made `stagingBibleStrong`. Those five variables now belong to
   "production" only, like "development", which has none: `.env.staging` decides for staging.
 
+## Known warning: "Uploaded 7 of 12 bundles and sourcemaps"
+
+Each publish ends with this Sentry warning; nothing is lost. `sentry-expo-upload-sourcemaps dist`
+pairs a bundle with its map by file name (`x.js` with `x.js.map`). The two native bundles keep
+matching names, so both go up with their maps. The Bible reader's five DOM scripts and their five
+maps, in `dist/www.bundle`, are renamed after the MD5 of their own content at export, which the
+reader needs to find its pages; a script and its map no longer share a name. The upload then skips
+the five scripts ("Sourcemap … not found") and sends the five maps alone: 2 + 5 = 7 of 12. Each map
+carries the same debug ID as its script, which is what Sentry matches a stack trace against. The
+reader's WebView does not report errors to Sentry today anyway; if it ever does, pair the files by
+debug ID before uploading.
+
 ## Still open
 
-1. **Sentry receives 7 of 12 source maps** at each publish. Check which files are skipped.
-2. **The error screen keeps its spinner** next to "Mise à jour effectuée. Merci de redémarrer
+1. **The error screen keeps its spinner** next to "Mise à jour effectuée. Merci de redémarrer
    l'application." once the update is ready (`apps/expo/src/common/ErrorBoundary.tsx`).
-3. **The production publish workflow** (`.github/workflows/expo-update-production.yml`, by hand
+2. **The production publish workflow** (`.github/workflows/expo-update-production.yml`, by hand
    only) has never run against Open OTA.
-4. **A physical device** has not run a 28.0 build yet: worth one look at the first store build.
-5. **The npm CLI declares loose versions.** `open-ota@0.3.0` needs a root `resolutions` pin of
+3. **A physical device** has not run a 28.0 build yet: worth one look at the first store build.
+4. **The npm CLI declares loose versions.** `open-ota@0.3.0` needs a root `resolutions` pin of
    `@effect/platform-node-shared` and a `redis` package extension in `.yarnrc.yml`. Report upstream;
    drop both once a fixed release exists.
-6. **The Open OTA stack runs on beta software**: Alchemy 2.0.0-beta.76 (beta.83 exists) and Effect 4
+5. **The Open OTA stack runs on beta software**: Alchemy 2.0.0-beta.76 (beta.83 exists) and Effect 4
    release candidates. Upgrade the fork deliberately, with a production plan before any deploy.
 
 ## After 28.0 is in the stores
