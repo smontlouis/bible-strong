@@ -19,6 +19,16 @@ const selection: SelectionRange = {
 }
 
 describe('annotationSession', () => {
+  it('moves the session to the version a parallel selection was made in', () => {
+    const session = enterAnnotationSession('LSG')
+
+    expect(
+      updateAnnotationSelection(session, true, { ...selection, version: 'KJV' })
+    ).toMatchObject({ version: 'KJV', hasSelection: true })
+    expect(updateAnnotationSelection(session, true, selection).version).toBe('LSG')
+    expect(updateAnnotationSelection(session, false, null).version).toBe('LSG')
+  })
+
   it('enters and exits Mode libre for a Bible version', () => {
     expect(enterAnnotationSession('LSG')).toMatchObject({
       enabled: true,

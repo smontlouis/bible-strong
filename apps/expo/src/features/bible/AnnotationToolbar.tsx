@@ -64,6 +64,8 @@ type Props = {
   onRelationsPress?: () => void
   tagsCount?: number
   relationsCount?: number
+  // Parallel reading: the version being annotated
+  version?: string
   isEnabled: boolean
 }
 
@@ -180,6 +182,7 @@ const AnnotationToolbar = ({
   onRelationsPress,
   tagsCount = 0,
   relationsCount = 0,
+  version,
   isEnabled,
 }: Props) => {
   const { t } = useTranslation()
@@ -219,9 +222,19 @@ const AnnotationToolbar = ({
       <SheetView className="pt-[14px]" testID="annotation-toolbar">
         <HStack className="px-[16px] pb-[14px] items-center gap-[8px]">
           <Box className="flex-1 min-w-0 gap-[4px]">
-            <Text className="font-bold text-[18px]" numberOfLines={1}>
-              {t('Mode libre')}
-            </Text>
+            <HStack className="items-center gap-[8px]">
+              <Text className="font-bold text-[18px] flex-shrink" numberOfLines={1}>
+                {t('Mode libre')}
+              </Text>
+              {version && (
+                <Box
+                  className="rounded-[6px] px-[6px] py-[2px] bg-light-grey"
+                  testID="annotation-toolbar-version"
+                >
+                  <Text className="text-[13px] font-bold text-primary">{version}</Text>
+                </Box>
+              )}
+            </HStack>
             <Text className="text-[14px] text-grey" numberOfLines={2}>
               {selectedAnnotation
                 ? verseToReference([selectedAnnotation.verseKey])

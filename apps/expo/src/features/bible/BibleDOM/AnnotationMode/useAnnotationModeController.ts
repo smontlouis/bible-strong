@@ -8,18 +8,19 @@ import { HighlightRect } from './HighlightComponents'
 import { SelectionRange } from './selectionUtils'
 import { useTouchSelection } from './useTouchSelection'
 import { useAnnotationEvents } from './useAnnotationEvents'
+import type { VerseTarget } from './domUtils'
 
 /** Callbacks for gesture handling passed through to touch selection */
 interface AnnotationModeCallbacks {
-  onMouseSelectionStart?: () => boolean
-  /** Called on single tap - receives verseKey and touch position */
-  onTapVerse?: (verseKey: string, position: { x: number; y: number }) => void
-  /** Called on double tap - receives verseKey and touch position */
-  onDoubleTapVerse?: (verseKey: string, position: { x: number; y: number }) => void
+  onMouseSelectionStart?: (verse: VerseTarget) => boolean
+  /** Called on single tap - receives the verse (and its version) and touch position */
+  onTapVerse?: (verse: VerseTarget, position: { x: number; y: number }) => void
+  /** Called on double tap - receives the verse (and its version) and touch position */
+  onDoubleTapVerse?: (verse: VerseTarget, position: { x: number; y: number }) => void
   /** Called on long press */
-  onLongPressVerse?: (verseKey: string) => void
+  onLongPressVerse?: (verse: VerseTarget) => void
   /** Called to notify which verse is currently being touched (for visual feedback) */
-  onTouchedVerseChange?: (verseKey: string | null) => void
+  onTouchedVerseChange?: (verse: VerseTarget | null) => void
   /** Called when tapping on empty space (not on a verse) - useful for clearing selection */
   onTapEmpty?: () => void
   /** Called on horizontal swipe (fast movement) - for chapter navigation */
@@ -36,8 +37,11 @@ interface AnnotationModeTriggers {
 interface UseAnnotationModeControllerProps {
   // Core
   containerRef: RefObject<HTMLDivElement | null>
+  // The element the highlight layer is drawn in
+  highlightOriginRef: RefObject<HTMLDivElement | null>
   annotationMode: boolean | undefined
-  verses: TVerse[]
+  // The verses of every version on screen
+  versesByVersion: Record<string, TVerse[]>
   dispatch: Dispatch
   // Selection state (managed by parent)
   selection: SelectionRange | null
@@ -64,8 +68,9 @@ interface UseAnnotationModeControllerReturn {
 
 export function useAnnotationModeController({
   containerRef,
+  highlightOriginRef,
   annotationMode,
-  verses,
+  versesByVersion,
   dispatch,
   selection,
   setSelection,
@@ -90,9 +95,10 @@ export function useAnnotationModeController({
   // Touch selection hook (handles all gestures)
   const { lastDragEndRef } = useTouchSelection({
     containerRef,
+    highlightOriginRef,
     selection,
     setSelection: fn => setSelection(fn),
-    verses,
+    versesByVersion,
     getTokens,
     getSelectionHandlePositions: () => selectionHandlePositions,
     highlightRects,
@@ -120,7 +126,7 @@ export function useAnnotationModeController({
   useAnnotationEvents({
     selection: annotationMode ? selection : null,
     setSelection,
-    verses,
+    versesByVersion,
     dispatch,
     getTokens,
     clearSelectionTrigger,

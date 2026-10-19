@@ -80,10 +80,11 @@ export function prepareTabGroupForSync(
       const { base64Preview, ...tabWithoutPreview } = tab
 
       if (tabWithoutPreview.type === 'bible') {
+        const { selectedVersesVersion: _selectionVersion, ...data } = tabWithoutPreview.data
         return {
           ...tabWithoutPreview,
           data: {
-            ...tabWithoutPreview.data,
+            ...data,
             selectedVerses: {},
           },
         } as FirestoreTabItem
@@ -159,6 +160,9 @@ export function hydrateTabGroup(
         data: {
           ...firestoreTab.data,
           selectedVerses: localTab.data.selectedVerses,
+          ...(localTab.data.selectedVersesVersion && {
+            selectedVersesVersion: localTab.data.selectedVersesVersion,
+          }),
         },
         base64Preview: localTab.base64Preview,
       } as TabItem

@@ -226,12 +226,18 @@ export const makeLinksByChapterSelector = () =>
     }
   )
 
+/** One Bible version, or every version displayed side by side in parallel reading. */
+export type DisplayedVersions = string | readonly string[]
+
+const isDisplayedVersion = (versions: DisplayedVersions, version: string) =>
+  typeof versions === 'string' ? versions === version : versions.includes(version)
+
 export const makeStudyRelationsByChapterSelector = () =>
   createSelector(
     [
       selectRelations,
       selectWordAnnotations,
-      (_: RootState, bookNumber: number, chapter: number, version?: string) => ({
+      (_: RootState, bookNumber: number, chapter: number, version?: DisplayedVersions) => ({
         prefix: `${bookNumber}-${chapter}-`,
         version,
       }),
@@ -254,7 +260,7 @@ export const makeStudyRelationsByChapterSelector = () =>
           const annotation = wordAnnotations[annotationId]
           return (
             Boolean(annotation) &&
-            (!version || annotation.version === version) &&
+            (!version || isDisplayedVersion(version, annotation.version)) &&
             annotation.ranges.some(range => range.verseKey.startsWith(prefix))
           )
         })
@@ -435,11 +441,12 @@ export const makeStudyRelationIndicatorsByChapterSelector = () =>
 
 // Selector factory for word annotations by chapter and version
 // Note: Word annotations are filtered by version since they're version-specific
+// (every version on screen in parallel reading)
 export const makeWordAnnotationsByChapterSelector = () =>
   createSelector(
     [
       selectWordAnnotations,
-      (_: RootState, bookNumber: number, chapter: number, version: string) => ({
+      (_: RootState, bookNumber: number, chapter: number, version: DisplayedVersions) => ({
         prefix: `${bookNumber}-${chapter}-`,
         version,
       }),
@@ -449,8 +456,8 @@ export const makeWordAnnotationsByChapterSelector = () =>
       // Filter annotations by version and chapter
       for (const annotationId in wordAnnotations) {
         const annotation = wordAnnotations[annotationId]
-        // Only include annotations for the current version
-        if (annotation.version !== version) continue
+        // Only include annotations for the displayed versions
+        if (!isDisplayedVersion(version, annotation.version)) continue
 
         // Check if each range belongs to this chapter
         const hasRangeInChapter = annotation.ranges.some(range => range.verseKey.startsWith(prefix))
@@ -864,11 +871,12 @@ export type CrossVersionAnnotation = {
 
 // Selector factory for finding word annotations in OTHER versions
 // Used to show indicators when viewing one version but annotations exist in another
+// (versions displayed side by side show their own annotations and are left out)
 export const makeWordAnnotationsInOtherVersionsSelector = () =>
   createSelector(
     [
       selectWordAnnotations,
-      (_: RootState, bookNumber: number, chapter: number, currentVersion: string) => ({
+      (_: RootState, bookNumber: number, chapter: number, currentVersion: DisplayedVersions) => ({
         prefix: `${bookNumber}-${chapter}-`,
         currentVersion,
       }),
@@ -878,8 +886,8 @@ export const makeWordAnnotationsInOtherVersionsSelector = () =>
 
       for (const annotationId in wordAnnotations) {
         const annotation = wordAnnotations[annotationId]
-        // Exclude annotations from the current version
-        if (annotation.version === currentVersion) continue
+        // Exclude annotations from the displayed versions
+        if (isDisplayedVersion(currentVersion, annotation.version)) continue
 
         for (const range of annotation.ranges) {
           if (range.verseKey.startsWith(prefix)) {
@@ -936,7 +944,10 @@ export const makeTaggedItemsForVerseSelector = () =>
     [
       selectHighlights,
       selectWordAnnotations,
-      (_: RootState, verseKey: string, currentVersion?: string) => ({ verseKey, currentVersion }),
+      (_: RootState, verseKey: string, currentVersion?: DisplayedVersions) => ({
+        verseKey,
+        currentVersion,
+      }),
     ],
     (highlights, wordAnnotations, { verseKey, currentVersion }): TaggedItem[] => {
       const items: TaggedItem[] = []
@@ -948,7 +959,7 @@ export const makeTaggedItemsForVerseSelector = () =>
       }
 
       Object.values(wordAnnotations).forEach(annotation => {
-        if (currentVersion && annotation.version !== currentVersion) return
+        if (currentVersion && !isDisplayedVersion(currentVersion, annotation.version)) return
         if (!annotation.tags || Object.keys(annotation.tags).length === 0) return
         const firstRange = getWordAnnotationAnchorRange(annotation, 'start')
         if (firstRange?.verseKey === verseKey) {
@@ -979,7 +990,7 @@ export const makeTaggedVersesInChapterSelector = () =>
     [
       selectHighlights,
       selectWordAnnotations,
-      (_: RootState, bookNumber: number, chapter: number, currentVersion: string) => ({
+      (_: RootState, bookNumber: number, chapter: number, currentVersion: DisplayedVersions) => ({
         bookNumber,
         chapter,
         currentVersion,
@@ -1006,7 +1017,7 @@ export const makeTaggedVersesInChapterSelector = () =>
       }
 
       Object.values(wordAnnotations).forEach(annotation => {
-        if (annotation.version !== currentVersion) return
+        if (!isDisplayedVersion(currentVersion, annotation.version)) return
         if (!annotation.tags || Object.keys(annotation.tags).length === 0) return
         const firstRange = getWordAnnotationAnchorRange(annotation, 'start')
         if (!firstRange?.verseKey.startsWith(prefix)) return

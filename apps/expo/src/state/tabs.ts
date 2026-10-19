@@ -29,6 +29,7 @@ import type { PendingBibleModeAcquisition } from '~helpers/bibleModeAcquisition'
 import { migrateLegacyBibleTabData } from '../migrations/legacyBibleVersionMigration'
 import { appLogger } from '~helpers/agentObservability'
 import { useBibleRouteNavigation } from './bibleRouteNavigation'
+import { getSelectedVersesVersion, setSelectedVersesVersion } from './bibleSelectionVersion'
 
 // ============================================================================
 // SHARED BIBLE DOM (single WebView instance for all Bible tabs)
@@ -52,6 +53,8 @@ export type VersionCode = keyof typeof versions
 export type BookName = (typeof books)[number]['Nom']
 export type SelectedVerses = VerseIds
 export type BibleContextDisplayMode = 'focused' | 'fullChapter'
+
+export { getSelectedVersesVersion } from './bibleSelectionVersion'
 
 export const getBibleContextDisplayMode = (data: {
   contextDisplayMode?: BibleContextDisplayMode
@@ -87,6 +90,8 @@ export interface BibleTab extends TabBase {
       selectedVerse: number
     }
     selectedVerses: SelectedVerses
+    /** Parallel reading: the version the verses were selected in. Absent: the main version. */
+    selectedVersesVersion?: VersionCode
     selectionMode: 'grid' | 'list'
     focusVerses?: (string | number)[]
     isSelectionMode: StudyNavigateBibleType | undefined
@@ -1019,17 +1024,25 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
       })
     )
 
-  const selectAllVerses = (ids: VerseIds) => {
+  // Without a version, a selection action keeps the version the selection is in.
+  const selectAllVerses = (ids: VerseIds, version?: VersionCode) => {
     setBibleTab(
       produce(draft => {
         draft.data.selectedVerses = ids
+        if (version) setSelectedVersesVersion(draft.data, version)
       })
     )
   }
 
-  const addSelectedVerse = (id: string) => {
+  const addSelectedVerse = (id: string, version?: VersionCode) => {
     setBibleTab(
       produce(draft => {
+        // A selection stays in one version: a verse of another version starts a new one.
+        if (version && version !== getSelectedVersesVersion(draft.data)) {
+          draft.data.selectedVerses = {}
+          delete draft.data.selectedVersesVersion
+          setSelectedVersesVersion(draft.data, version)
+        }
         draft.data.selectedVerses[id] = true
       })
     )
@@ -1043,12 +1056,13 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     )
   }
 
-  const selectSelectedVerse = (id: string) => {
+  const selectSelectedVerse = (id: string, version?: VersionCode) => {
     setBibleTab(
       produce(draft => {
         draft.data.selectedVerses = {
           [id]: true,
         }
+        if (version) setSelectedVersesVersion(draft.data, version)
       })
     )
   }
@@ -1065,6 +1079,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     setBibleTab(
       produce(draft => {
         draft.data.selectedVerses = {}
+        delete draft.data.selectedVersesVersion
       })
     )
   }
@@ -1096,6 +1111,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
         draft.data.focusVerses = verseNumbers
         draft.data.contextDisplayMode = 'focused'
         draft.data.selectedVerses = {}
+        delete draft.data.selectedVersesVersion
       })
     )
   }
@@ -1110,6 +1126,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
         draft.data.focusVerses = undefined
         draft.data.contextDisplayMode = 'fullChapter'
         draft.data.selectedVerses = {}
+        delete draft.data.selectedVersesVersion
       })
     )
   }
@@ -1121,6 +1138,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
         draft.data.focusVerses = undefined
         draft.data.contextDisplayMode = 'fullChapter'
         draft.data.selectedVerses = {}
+        delete draft.data.selectedVersesVersion
       })
     )
 

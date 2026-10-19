@@ -316,7 +316,7 @@ export function sortVersesToTags(highlightedVerses: HighlightsObj): TaggedVerse[
 export function getAnnotationNotesInfo(
   verses: Verse[],
   wordAnnotations: WebViewProps['wordAnnotations'],
-  version: string
+  version?: string
 ): AnnotationNotesInfo {
   const versesWithAnnotationNotes: Record<string, boolean> = {}
   const annotationNotesCountByVerse: { [key: string]: number } = {}
@@ -328,7 +328,7 @@ export function getAnnotationNotesInfo(
   const { Livre, Chapitre } = verses[0]
 
   Object.values(wordAnnotations).forEach(annotation => {
-    if (annotation.version !== version || !annotation.noteId) return
+    if ((version && annotation.version !== version) || !annotation.noteId) return
 
     annotation.ranges.forEach(range => {
       const [bookStr, chapterStr, verseStr] = range.verseKey.split('-')

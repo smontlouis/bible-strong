@@ -64,7 +64,7 @@ import { SelectionHandles } from './AnnotationMode/SelectionHandles'
 import { useAnnotationModeController } from './AnnotationMode/useAnnotationModeController'
 import { SelectionRange } from './AnnotationMode/selectionUtils'
 import { tokenizeVerseText, WordToken, getWordIndexFromCharOffset } from '~helpers/wordTokenizer'
-import { getCaretInfoFromPoint } from './AnnotationMode/domUtils'
+import { getCaretInfoFromPoint, type VerseTarget } from './AnnotationMode/domUtils'
 // Unified verse renderer
 import { UnifiedVersesRenderer } from './UnifiedVersesRenderer'
 import AnnotationInlineItems from './AnnotationInlineItems'
@@ -163,6 +163,7 @@ type Props = Pick<
   | 'parallelDisplayMode'
   | 'focusVerses'
   | 'selectedVerses'
+  | 'selectedVersesVersion'
   | 'highlightedVerses'
   | 'bookmarkedVerses'
   | 'wordAnnotations'
@@ -182,6 +183,8 @@ type Props = Pick<
   | 'isSelectionMode'
   | 'selectedCode'
   | 'redWords'
+  | 'parallelRedWords'
+  | 'parallelPericopeChapters'
   | 'inlineCommentaries'
   | 'chapterEntities'
   | 'chapterEntitiesLoaded'
@@ -246,28 +249,54 @@ const fadeIn = keyframes`
 `
 
 const RETURN_TO_SELECTED_VERSE_BOTTOM_OFFSET = 250
+// The room a version title leaves at the end of its column before the next title
+const TITLE_EDGE_MARGIN = 10
+// The chapter footer and the tab bar drawn over the bottom of the reader, hidden in full screen
+const READER_FOOTER_OVERLAY_HEIGHT = 100
+
+const setReaderFooterHeight = (isVisible: boolean) => {
+  document.documentElement.style.setProperty(
+    '--footer-height',
+    `${isVisible ? READER_FOOTER_OVERLAY_HEIGHT : 0}px`
+  )
+}
 
 const Container = styled('div')<
-  RootStyles & { rtl: boolean; isParallelVerse: boolean; headerHeight: number }
->(({ settings: { alignContent, theme, colors }, rtl, isParallelVerse, headerHeight }) => ({
-  position: 'relative', // For highlight layer positioning
-  width: '100%',
-  minWidth: 0,
-  maxWidth: isParallelVerse
-    ? 'none'
-    : `${READING_TEXT_MAX_WIDTH + BIBLE_READING_HORIZONTAL_PADDING * 2}px`,
-  boxSizing: 'border-box',
-  margin: '0 auto',
-  padding: '10px 15px',
-  paddingBottom: '300px',
-  textAlign: alignContent,
-  background: colors[theme].reverse,
-  color: colors[theme].default,
-  direction: rtl ? 'rtl' : 'ltr',
-  paddingTop: `${headerHeight + 10}px`,
-  animation: `${fadeIn} 300ms ease-out`,
-  ...(rtl ? { textAlign: 'right' } : {}),
-}))
+  RootStyles & {
+    rtl: boolean
+    isParallelVerse: boolean
+    headerHeight: number
+    $columnsScrollScope?: boolean
+  }
+>(
+  ({
+    settings: { alignContent, theme, colors },
+    rtl,
+    isParallelVerse,
+    headerHeight,
+    $columnsScrollScope,
+  }) => ({
+    // The version titles, outside the columns' scroller, read its scroll timeline
+    ...($columnsScrollScope ? { timelineScope: COLUMNS_SCROLL_TIMELINE } : {}),
+    position: 'relative', // For highlight layer positioning
+    width: '100%',
+    minWidth: 0,
+    maxWidth: isParallelVerse
+      ? 'none'
+      : `${READING_TEXT_MAX_WIDTH + BIBLE_READING_HORIZONTAL_PADDING * 2}px`,
+    boxSizing: 'border-box',
+    margin: '0 auto',
+    padding: '10px 15px',
+    paddingBottom: '300px',
+    textAlign: alignContent,
+    background: colors[theme].reverse,
+    color: colors[theme].default,
+    direction: rtl ? 'rtl' : 'ltr',
+    paddingTop: `${headerHeight + 10}px`,
+    animation: `${fadeIn} 300ms ease-out`,
+    ...(rtl ? { textAlign: 'right' } : {}),
+  })
+)
 
 const RightDirection = styled('div')<RootStyles>(({ settings: { theme, colors } }) => ({
   textAlign: 'right',
@@ -392,15 +421,45 @@ const ProgressBar = styled('div')<RootStyles & { $progress: number }>(
   })
 )
 
-const VersionTitle = styled('div')<RootStyles>(
-  ({ settings: { fontSizeScale, fontFamily, colors, theme } }) => ({
+// Horizontal parallel display: the version titles follow the columns through a scroll timeline
+// of the columns' scroller, run by the browser with the scroll itself. Without it, the header
+// is scrolled from JavaScript, a frame or more behind.
+const COLUMNS_SCROLL_TIMELINE = '--bible-columns'
+
+const canFollowColumnsScroll = () =>
+  typeof CSS !== 'undefined' &&
+  CSS.supports('animation-timeline', COLUMNS_SCROLL_TIMELINE) &&
+  CSS.supports('timeline-scope', COLUMNS_SCROLL_TIMELINE) &&
+  CSS.supports('animation-range', '0px 1px')
+
+// A range far beyond any scroll width: over it, the translation equals the scroll offset.
+const COLUMNS_SCROLL_RANGE = 100000
+
+const followColumnsScroll = keyframes`
+  from { transform: translateX(0); }
+  to { transform: translateX(-${COLUMNS_SCROLL_RANGE}px); }
+`
+
+// A title keeps to the left edge while its column passes, by the distance its column leaves it.
+const keepTitleAtLeftEdge = keyframes`
+  from { transform: translateX(0); }
+  to { transform: translateX(var(--title-travel, 0px)); }
+`
+
+const VersionTitle = styled('div')<RootStyles & { $followsScroll?: boolean }>(
+  ({ settings: { fontSizeScale, fontFamily, colors, theme }, $followsScroll }) => ({
     fontFamily,
     fontWeight: 'bold',
     fontSize: scaleFontSize(16, fontSizeScale),
     position: 'sticky',
     left: 0,
-    // Use CSS variable for translateX - more performant than direct style manipulation
-    transform: 'translateX(var(--translate-x, 0px))',
+    ...($followsScroll
+      ? {
+          animation: `${keepTitleAtLeftEdge} linear both`,
+          animationTimeline: COLUMNS_SCROLL_TIMELINE,
+          animationRange: 'var(--title-range-start, 0px) var(--title-range-end, 0px)',
+        }
+      : {}),
     webkitTouchCallout: 'none',
     mozUserSelect: 'none',
     msUserSelect: 'none',
@@ -431,22 +490,38 @@ const VersionErrorIndicator = styled('span')<RootStyles>(({ settings: { theme, c
   fontSize: '12px',
 }))
 
-const VersionsContainer = styled('div')<{ columnCount: number; columnWidth: number }>(
-  ({ columnCount, columnWidth }) => ({
-    position: 'relative',
-    display: 'flex',
-    paddingTop: '5px',
-    paddingBottom: '10px',
-    // Largeur totale = colonnes * columnWidth vw
-    width: columnCount > 1 ? `${columnCount * columnWidth}vw` : '100%',
-    minWidth: columnCount > 1 ? `${columnCount * columnWidth}vw` : '100%',
-    transition: 'width 0.4s ease-in-out',
-  })
-)
+const VersionsContainer = styled('div')<{
+  columnCount: number
+  columnWidth: number
+  $followsScroll?: boolean
+}>(({ columnCount, columnWidth, $followsScroll }) => ({
+  position: 'relative',
+  display: 'flex',
+  paddingTop: '5px',
+  paddingBottom: '10px',
+  // Largeur totale = colonnes * columnWidth vw
+  width: columnCount > 1 ? `${columnCount * columnWidth}vw` : '100%',
+  minWidth: columnCount > 1 ? `${columnCount * columnWidth}vw` : '100%',
+  transition: 'width 0.4s ease-in-out',
+  ...($followsScroll
+    ? {
+        animation: `${followColumnsScroll} linear both`,
+        animationTimeline: COLUMNS_SCROLL_TIMELINE,
+        animationRange: `0px ${COLUMNS_SCROLL_RANGE}px`,
+      }
+    : {}),
+}))
 
 // Wrapper pour le scroll horizontal (content)
-const HorizontalScrollWrapper = styled('div')<{ columnCount: number }>(({ columnCount }) => ({
+const HorizontalScrollWrapper = styled('div')<{
+  columnCount: number
+  $panYOnly?: boolean
+  $scrollTimeline?: boolean
+}>(({ columnCount, $panYOnly, $scrollTimeline }) => ({
   overflowX: columnCount > 1 ? 'auto' : 'visible',
+  ...($scrollTimeline ? { scrollTimeline: `${COLUMNS_SCROLL_TIMELINE} x` } : {}),
+  // Annotation mode: horizontal moves belong to word selection, the reader scrolls the columns
+  touchAction: $panYOnly ? 'pan-y' : undefined,
   scrollBehavior: 'smooth',
   WebkitOverflowScrolling: 'touch',
   scrollbarWidth: 'none',
@@ -459,20 +534,23 @@ const HorizontalScrollWrapper = styled('div')<{ columnCount: number }>(({ column
 }))
 
 // Wrapper pour le header avec scroll synchronisé (pas de scrollbar visible)
-const HeaderScrollWrapper = styled('div')<{ columnCount: number }>(({ columnCount }) => ({
-  position: 'sticky',
-  top: 'var(--header-height)',
-  zIndex: 2,
-  transition: 'top 0.3s cubic-bezier(.13,.69,.5,.98)',
-  overflowX: columnCount > 1 ? 'auto' : 'visible',
-  scrollbarWidth: 'none',
-  '&::-webkit-scrollbar': { display: 'none' },
-  // Disable pointer events on wrapper to prevent direct scroll, enable on children
-  pointerEvents: columnCount > 1 ? 'none' : 'auto',
-  '& > *': {
-    pointerEvents: 'auto',
-  },
-}))
+const HeaderScrollWrapper = styled('div')<{ columnCount: number; $followsScroll?: boolean }>(
+  ({ columnCount, $followsScroll }) => ({
+    position: 'sticky',
+    top: 'var(--header-height)',
+    zIndex: 2,
+    transition: 'top 0.3s cubic-bezier(.13,.69,.5,.98)',
+    // Following the scroll timeline, the titles move themselves: the header no longer scrolls
+    overflowX: $followsScroll ? 'hidden' : columnCount > 1 ? 'auto' : 'visible',
+    scrollbarWidth: 'none',
+    '&::-webkit-scrollbar': { display: 'none' },
+    // Disable pointer events on wrapper to prevent direct scroll, enable on children
+    pointerEvents: columnCount > 1 ? 'none' : 'auto',
+    '& > *': {
+      pointerEvents: 'auto',
+    },
+  })
+)
 
 // Colonne pour chaque version dans le header
 const VersionTitleColumn = styled('div')<{ columnCount: number; columnWidth: number }>(
@@ -568,6 +646,7 @@ const LoadedBibleContent = ({
   parallelDisplayMode = 'horizontal',
   focusVerses,
   selectedVerses,
+  selectedVersesVersion,
   highlightedVerses,
   bookmarkedVerses,
   wordAnnotations,
@@ -602,6 +681,8 @@ const LoadedBibleContent = ({
   eraseSelectionTrigger,
   selectedAnnotationId,
   redWords,
+  parallelRedWords,
+  parallelPericopeChapters,
   // Pre-computed metadata from native side
   taggedVerses,
   versesWithAnnotationNotes,
@@ -630,66 +711,96 @@ const LoadedBibleContent = ({
       : preferredColumnWidth
 
   // Refs for horizontal scroll sync between header and content
+  const [followsColumnsScroll] = useState(canFollowColumnsScroll)
   const headerScrollRef = useRef<HTMLDivElement>(null)
   const contentScrollRef = useRef<HTMLDivElement>(null)
+  // The verses content: the highlight layer scrolls with it in horizontal parallel display
+  const versesContentRef = useRef<HTMLDivElement>(null)
 
   // Annotation mode state (lifted here to break circular dependency)
   const [selection, setSelection] = useState<SelectionRange | null>(null)
   const [tokensCache] = useState<Map<string, WordToken[]>>(() => new Map())
 
-  // Clear tokens cache and selection when version changes to avoid stale word indices
+  // Every version on screen, the main one first, with its verses
+  const isParallelVerseMode = Boolean(parallelVerses?.length)
+  const displayedVersions = [version, ...(parallelVerses ?? []).map(parallel => parallel.id)]
+  const displayedVersionsKey = displayedVersions.join(',')
+  const versesByVersion: Record<string, TVerse[]> = {
+    ...Object.fromEntries((parallelVerses ?? []).map(parallel => [parallel.id, parallel.verses])),
+    [version]: verses,
+  }
+  const redWordsByVersion = { ...parallelRedWords, [version]: redWords ?? null }
+
+  // Clear tokens cache and selection when versions change to avoid stale word indices
   useEffect(() => {
     tokensCache.clear()
     setSelection(null)
-  }, [version])
+  }, [displayedVersionsKey])
 
-  // Build a Map from verseKey to Verse for O(1) lookups
-  const versesMap = buildVersesMap(verses)
+  // Build a Map from verseKey to Verse for O(1) lookups, for each version
+  const versesMapByVersion = new Map(
+    Object.entries(versesByVersion).map(([versionId, versionVerses]) => [
+      versionId,
+      buildVersesMap(versionVerses),
+    ])
+  )
+  const getVerse = ({ version: verseVersion, verseKey }: VerseTarget) =>
+    versesMapByVersion.get(verseVersion)?.get(verseKey)
 
   // State for touched verse (for visual feedback)
-  const [touchedVerseKey, setTouchedVerseKey] = useState<string | null>(null)
+  const [touchedVerse, setTouchedVerse] = useState<VerseTarget | null>(null)
   const [returnToSelectedVersePosition, setReturnToSelectedVersePosition] = useState<
     'top' | 'bottom' | null
   >(null)
   const annotationInlineContentKey = [
-    version,
+    displayedVersionsKey,
     interlinearMode || '',
     annotationMode ? 'annotation' : 'reading',
     contextDisplayMode || '',
     focusVerses?.join(',') || '',
     settings.textDisplay,
-    ...verses.map(verse => {
-      const verseKey = `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`
-      return [
-        verseKey,
-        verse.TextRevision || verse.Texte,
-        verse.StrongSpans?.length || 0,
-        verse.ReverseInterlinearSpans?.length || 0,
-        verse.InterlinearTokens?.length || 0,
-        JSON.stringify(redWords?.[verseKey] || []),
-      ].join(':')
-    }),
+    parallelDisplayMode,
+    ...Object.entries(versesByVersion).flatMap(([versionId, versionVerses]) =>
+      versionVerses.map(verse => {
+        const verseKey = `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`
+        return [
+          versionId,
+          verseKey,
+          verse.TextRevision || verse.Texte,
+          verse.StrongSpans?.length || 0,
+          verse.ReverseInterlinearSpans?.length || 0,
+          verse.InterlinearTokens?.length || 0,
+          JSON.stringify(redWordsByVersion[versionId]?.[verseKey] || []),
+        ].join(':')
+      })
+    ),
   ].join('|')
 
-  // Tokens getter function with caching
-  // Cache key includes text length and first char to detect content mismatch
-  const getTokens = (verseKey: string, text: string): WordToken[] => {
-    const cacheKey = `${verseKey}:${text.length}:${text.charCodeAt(0) || 0}`
-    if (!tokensCache.has(cacheKey)) {
-      tokensCache.set(cacheKey, tokenizeVerseText(text))
+  // Tokens getter function with caching. Tokens only depend on the text: the same verse
+  // in two versions gets its own tokens.
+  const getTokens = (_verseKey: string, text: string): WordToken[] => {
+    if (!tokensCache.has(text)) {
+      tokensCache.set(text, tokenizeVerseText(text))
     }
-    return tokensCache.get(cacheKey)!
+    return tokensCache.get(text)!
   }
+
+  // Horizontal parallel display scrolls its columns: the highlight layer is drawn inside the
+  // scrolled content so it follows them, everywhere else over the whole reader.
+  const isHorizontalParallelMode = isParallelVerseMode && parallelDisplayMode === 'horizontal'
+  const titlesFollowColumnsScroll = followsColumnsScroll && isHorizontalParallelMode
+  const highlightOriginRef = isHorizontalParallelMode ? versesContentRef : containerRef
 
   // Use shared hook for annotation highlights (with selection support when in annotation mode)
   const { highlightRects, selectionHandlePositions } = useAnnotationHighlights({
-    containerRef,
+    containerRef: highlightOriginRef,
     wordAnnotations,
-    version,
+    versions: displayedVersions,
     book: book.Numero,
     chapter,
-    verses,
+    versesByVersion,
     settings,
+    layoutKey: `${parallelDisplayMode}:${parallelColumnWidth}`,
     contextDisplayMode,
     focusVerses,
     // Pass selection only when in annotation mode
@@ -702,13 +813,30 @@ const LoadedBibleContent = ({
     onAnimationSettled: () => setIsVerseLayoutAnimating(false),
   })
 
-  // Gesture handlers for unified touch selection
-  const hasReverseInterlinear = verses.some(verse => Boolean(verse.ReverseInterlinearSpans?.length))
-  const suppressVerseGestures =
-    shouldSuppressVerseGestures(version, interlinearMode) || hasReverseInterlinear
+  // Gesture handlers for unified touch selection. Interlinear presentations of a version
+  // have their own gestures: the reader leaves them alone, version by version.
+  const versionModes = new Map([
+    [version, interlinearMode],
+    ...(parallelVerses ?? []).map(parallel => [parallel.id, parallel.interlinearMode] as const),
+  ])
+  const hasReverseInterlinear = (versionId: string) =>
+    (versesByVersion[versionId] ?? []).some(verse => Boolean(verse.ReverseInterlinearSpans?.length))
+  const isVersionGestureSuppressed = (versionId: string) =>
+    shouldSuppressVerseGestures(versionId, versionModes.get(versionId)) ||
+    hasReverseInterlinear(versionId)
+  // Words of interlinear presentations cannot be annotated (different DOM structure)
+  const canAnnotateVersion = (versionId: string) =>
+    !isVersionGestureSuppressed(versionId) &&
+    !(
+      versionId === 'BHG' &&
+      (versesByVersion[versionId] ?? []).some(verse => Boolean(verse.InterlinearTokens?.length))
+    )
 
-  const handleTapVerseAnnotationMode = (vKey: string, position: { x: number; y: number }) => {
-    const containerRect = containerRef.current?.getBoundingClientRect()
+  const handleTapVerseAnnotationMode = (
+    target: VerseTarget,
+    position: { x: number; y: number }
+  ) => {
+    const containerRect = highlightOriginRef.current?.getBoundingClientRect()
     if (!containerRect) return
 
     // Check if clicked on an annotation
@@ -744,11 +872,12 @@ const LoadedBibleContent = ({
       return
     }
 
-    // No selection exists -- create one on the clicked word
-    const verse = versesMap.get(vKey)
+    // No selection exists -- create one on the clicked word, in the version tapped
+    if (!canAnnotateVersion(target.version)) return
+    const verse = getVerse(target)
     if (!verse) return
 
-    const tokens = getTokens(vKey, verse.Texte)
+    const tokens = getTokens(target.verseKey, verse.Texte)
     const caretInfo = getCaretInfoFromPoint(position.x, position.y)
     if (!caretInfo) return
 
@@ -756,80 +885,87 @@ const LoadedBibleContent = ({
     if (wordIndex === null) return
 
     setSelection({
-      start: { verseKey: vKey, wordIndex },
-      end: { verseKey: vKey, wordIndex },
+      start: { verseKey: target.verseKey, wordIndex },
+      end: { verseKey: target.verseKey, wordIndex },
+      version: target.version,
     })
   }
 
-  const handleTapVerseSelectionMode = (vKey: string) => {
+  // A tapped verse is selected in the version it was tapped in.
+  const toggleSelectedVerse = (target: VerseTarget) => {
+    dispatch({
+      type: TOGGLE_SELECTED_VERSE,
+      payload: target,
+    }).catch(console.error)
+  }
+
+  const navigateToVerseDetail = (target: VerseTarget) => {
+    const verse = getVerse(target)
+    if (!verse) return
+    dispatch({
+      type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
+      params: { verse, version: target.version },
+    }).catch(console.error)
+  }
+
+  const handleTapVerseSelectionMode = (target: VerseTarget) => {
     if (isSelectionMode?.includes('verse')) {
-      dispatch({
-        type: TOGGLE_SELECTED_VERSE,
-        payload: vKey,
-      }).catch(console.error)
+      toggleSelectedVerse(target)
       return
     }
 
     if (isSelectionMode?.includes('strong')) {
-      const verse = versesMap.get(vKey)
+      const verse = getVerse(target)
       if (verse) {
         dispatch({
           type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
           params: {
             isSelectionMode,
             verse,
+            version: target.version,
           },
         }).catch(console.error)
       }
     }
   }
 
-  const handleTapVerseNormalMode = (vKey: string) => {
+  const handleTapVerseNormalMode = (target: VerseTarget) => {
     const isSelectedMode = Boolean(Object.keys(selectedVerses).length)
     if (isSelectedMode || settings.press === 'longPress') {
-      dispatch({
-        type: TOGGLE_SELECTED_VERSE,
-        payload: vKey,
-      }).catch(console.error)
+      toggleSelectedVerse(target)
     } else {
-      const verse = versesMap.get(vKey)
-      if (verse) {
-        dispatch({
-          type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-          params: { verse },
-        }).catch(console.error)
-      }
+      navigateToVerseDetail(target)
     }
   }
 
-  // In parallel display, a row can stand for a verse the version being read omits
+  // In parallel display, a row can stand for a verse a version omits
   // (Acts 8:37 in the ESV): its actions all work on that version, so it stays inert.
-  const isVerseMissingFromVersion = (vKey: string) => isParallelVerseMode && !versesMap.has(vKey)
+  const isVerseMissingFromVersion = (target: VerseTarget) => !getVerse(target)
 
-  const handleTapVerse = (verseKey: string, position: { x: number; y: number }) => {
-    if (suppressVerseGestures || isVerseMissingFromVersion(verseKey)) return
+  const handleTapVerse = (target: VerseTarget, position: { x: number; y: number }) => {
+    if (isVersionGestureSuppressed(target.version) || isVerseMissingFromVersion(target)) return
 
     if (annotationMode) {
-      handleTapVerseAnnotationMode(verseKey, position)
+      handleTapVerseAnnotationMode(target, position)
       return
     }
 
     if (isSelectionMode) {
-      handleTapVerseSelectionMode(verseKey)
+      handleTapVerseSelectionMode(target)
       return
     }
 
-    handleTapVerseNormalMode(verseKey)
+    handleTapVerseNormalMode(target)
   }
 
-  const handleDoubleTapVerse = (vKey: string, position: { x: number; y: number }) => {
-    if (suppressVerseGestures) return
+  const handleDoubleTapVerse = (target: VerseTarget, position: { x: number; y: number }) => {
+    if (!canAnnotateVersion(target.version)) return
 
     // Find the word at the double-tap position
-    const verse = versesMap.get(vKey)
+    const verse = getVerse(target)
     if (!verse) return
 
-    const tokens = getTokens(vKey, verse.Texte)
+    const tokens = getTokens(target.verseKey, verse.Texte)
     const caretInfo = getCaretInfoFromPoint(position.x, position.y)
 
     let newSelection: SelectionRange | null = null
@@ -837,14 +973,15 @@ const LoadedBibleContent = ({
       const wordIndex = getWordIndexFromCharOffset(tokens, caretInfo.charOffset)
       if (wordIndex !== null) {
         newSelection = {
-          start: { verseKey: vKey, wordIndex },
-          end: { verseKey: vKey, wordIndex },
+          start: { verseKey: target.verseKey, wordIndex },
+          end: { verseKey: target.verseKey, wordIndex },
+          version: target.version,
         }
       }
     }
 
     // Check if double-tap is on an existing annotation
-    const containerRect = containerRef.current?.getBoundingClientRect()
+    const containerRect = highlightOriginRef.current?.getBoundingClientRect()
     const clickedId = containerRect
       ? findClickedAnnotationId(highlightRects, containerRect, position)
       : null
@@ -874,20 +1011,10 @@ const LoadedBibleContent = ({
     // Normal mode: don't enter annotation mode if verses are selected
     if (Object.keys(selectedVerses).length > 0) return
 
-    // Don't enter annotation mode for interlinear views (different DOM structure)
-    if (
-      (version === 'BHG' && verses.some(verse => Boolean(verse.InterlinearTokens?.length))) ||
-      hasReverseInterlinear
-    )
-      return
-
-    // Don't enter annotation mode in parallel verse mode
-    if (isParallelVerseMode) return
-
-    // Enter annotation mode
+    // Enter annotation mode, on the version double-tapped
     dispatch({
       type: ENTER_ANNOTATION_MODE,
-      payload: {},
+      payload: { version: target.version },
     }).catch(console.error)
 
     // If double-tap is on an annotation, select it; otherwise create a selection on the word
@@ -901,37 +1028,38 @@ const LoadedBibleContent = ({
     }
   }
 
-  const handleLongPressVerse = (vKey: string) => {
-    if (suppressVerseGestures || isVerseMissingFromVersion(vKey)) return
+  const handleLongPressVerse = (target: VerseTarget) => {
+    if (isVersionGestureSuppressed(target.version) || isVerseMissingFromVersion(target)) return
     if (annotationMode) return // No long-press action in annotation mode
     if (isSelectionMode) return // No long-press in selection mode
 
     if (settings.press === 'shortPress') {
-      dispatch({
-        type: TOGGLE_SELECTED_VERSE,
-        payload: vKey,
-      }).catch(console.error)
+      toggleSelectedVerse(target)
     } else {
-      const verse = versesMap.get(vKey)
-      if (verse) {
-        dispatch({
-          type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-          params: { verse },
-        }).catch(console.error)
-      }
+      navigateToVerseDetail(target)
     }
   }
 
-  // Check if parallel verse mode (disables horizontal gestures for scroll)
-  const isParallelVerseMode = Boolean(parallelVerses?.length)
-  // Only disable swipe/drag in horizontal parallel mode (vertical mode has no horizontal scroll)
-  const isHorizontalParallelMode = isParallelVerseMode && parallelDisplayMode === 'horizontal'
+  // Horizontal parallel display: in annotation mode, the reader moves the columns itself so
+  // that a slow drag selects words; a quick swipe brings the next column into view.
+  const scrollToAdjacentColumn = (direction: 'left' | 'right') => {
+    const scrollElement = contentScrollRef.current
+    if (!scrollElement) return
+    const columnWidthPx = window.innerWidth * (parallelColumnWidth / 100)
+    const columnIndex = Math.round(scrollElement.scrollLeft / columnWidthPx)
+    const nextIndex = Math.max(
+      0,
+      Math.min(displayedVersions.length - 1, columnIndex + (direction === 'left' ? 1 : -1))
+    )
+    scrollElement.scrollTo({ left: nextIndex * columnWidthPx, behavior: 'smooth' })
+  }
 
   // Annotation mode controller (handles touch selection and annotation events)
   useAnnotationModeController({
     containerRef,
+    highlightOriginRef,
     annotationMode,
-    verses,
+    versesByVersion,
     dispatch,
     selection,
     setSelection,
@@ -945,22 +1073,23 @@ const LoadedBibleContent = ({
       eraseSelectionTrigger,
     },
     callbacks: {
-      onMouseSelectionStart: () => {
+      onMouseSelectionStart: target => {
         if (
-          suppressVerseGestures ||
+          !canAnnotateVersion(target.version) ||
           isSelectionMode ||
-          Object.keys(selectedVerses).length > 0 ||
-          isParallelVerseMode ||
-          (version === 'BHG' && verses.some(verse => Boolean(verse.InterlinearTokens?.length)))
+          Object.keys(selectedVerses).length > 0
         )
           return false
-        dispatch({ type: ENTER_ANNOTATION_MODE, payload: {} }).catch(console.error)
+        dispatch({ type: ENTER_ANNOTATION_MODE, payload: { version: target.version } }).catch(
+          console.error
+        )
         return true
       },
       onTapVerse: handleTapVerse,
       onDoubleTapVerse: handleDoubleTapVerse,
       onLongPressVerse: handleLongPressVerse,
-      onTouchedVerseChange: suppressVerseGestures ? undefined : setTouchedVerseKey,
+      onTouchedVerseChange: target =>
+        setTouchedVerse(target && !isVersionGestureSuppressed(target.version) ? target : null),
       onTapEmpty: () => {
         // In annotation mode, tapping on empty space clears selection
         if (annotationMode) {
@@ -975,9 +1104,11 @@ const LoadedBibleContent = ({
           }
         }
       },
-      // Disable swipe to change chapter in horizontal parallel mode (conflicts with horizontal scroll)
+      // Horizontal parallel mode scrolls its columns instead of changing chapter
       onSwipe: isHorizontalParallelMode
-        ? undefined
+        ? annotationMode
+          ? scrollToAdjacentColumn
+          : undefined
         : direction => {
             dispatch({
               type: direction === 'left' ? SWIPE_LEFT : SWIPE_RIGHT,
@@ -986,8 +1117,9 @@ const LoadedBibleContent = ({
     },
   })
 
-  // Sync horizontal scroll between header and content for parallel versions
-  // Also calculate translateX for each title to make them "sticky" at the left edge
+  // Horizontal parallel display: the version titles follow the columns. With a scroll timeline,
+  // each title only needs the range of scroll over which it keeps to the left edge. Otherwise
+  // the header is scrolled with the columns and each title sticks to the left edge of its column.
   useEffect(() => {
     // Only run when in parallel mode
     const hasParallelVersions = Boolean(parallelVerses?.length)
@@ -997,33 +1129,24 @@ const LoadedBibleContent = ({
     const contentEl = contentScrollRef.current
     if (!headerEl) return
 
-    const columnWidthPx = window.innerWidth * (parallelColumnWidth / 100) // columnWidth vw in pixels
-
-    let rafId: number | null = null
+    if (followsColumnsScroll) {
+      const updateTitleRanges = () => {
+        const columnWidthPx = window.innerWidth * (parallelColumnWidth / 100)
+        headerEl.querySelectorAll<HTMLElement>('[data-version-title]').forEach((titleEl, i) => {
+          const columnStart = i * columnWidthPx
+          const travel = Math.max(0, columnWidthPx - titleEl.offsetWidth - TITLE_EDGE_MARGIN)
+          titleEl.style.setProperty('--title-range-start', `${columnStart}px`)
+          titleEl.style.setProperty('--title-range-end', `${columnStart + travel}px`)
+          titleEl.style.setProperty('--title-travel', `${travel}px`)
+        })
+      }
+      updateTitleRanges()
+      window.addEventListener('resize', updateTitleRanges)
+      return () => window.removeEventListener('resize', updateTitleRanges)
+    }
 
     const handleScroll = () => {
-      const scrollLeft = contentEl?.scrollLeft || document.documentElement.scrollLeft
-      headerEl.scrollLeft = scrollLeft
-
-      const titleRefs = headerEl.querySelectorAll('[data-version-title]')
-      if (titleRefs.length === 0) return
-
-      // Use RAF for smooth transform updates
-      if (rafId) cancelAnimationFrame(rafId)
-      rafId = requestAnimationFrame(() => {
-        titleRefs.forEach((titleEl, i) => {
-          const columnStart = i * columnWidthPx
-          const maxTranslate = columnWidthPx - 100 // Leave some margin for the title width
-
-          // Calculate how much to translate to keep title at left edge
-          let translateX = 0
-          if (scrollLeft > columnStart) {
-            translateX = Math.min(scrollLeft - columnStart - 10, maxTranslate)
-          }
-
-          ;(titleEl as HTMLElement).style.setProperty('--translate-x', `${translateX}px`)
-        })
-      })
+      headerEl.scrollLeft = contentEl?.scrollLeft || document.documentElement.scrollLeft
     }
 
     // Initial call
@@ -1036,9 +1159,8 @@ const LoadedBibleContent = ({
     return () => {
       contentEl?.removeEventListener('scroll', handleScroll)
       document.removeEventListener('scroll', handleScroll)
-      if (rafId) cancelAnimationFrame(rafId)
     }
-  }, [parallelVerses?.length, parallelColumnWidth, parallelDisplayMode])
+  }, [parallelVerses?.length, parallelColumnWidth, parallelDisplayMode, followsColumnsScroll])
 
   const expandedHeaderHeight =
     HEADER_HEIGHT + getPassageContextHeaderHeight(focusVerses, annotationMode, inPlan)
@@ -1046,6 +1168,7 @@ const LoadedBibleContent = ({
     if (isFormSheet) return
     if (keepControlsVisible) {
       document.documentElement.style.setProperty('--header-height', `${expandedHeaderHeight}px`)
+      setReaderFooterHeight(true)
       return
     }
 
@@ -1077,6 +1200,7 @@ const LoadedBibleContent = ({
             type: SWIPE_UP,
           })
           document.documentElement.style.setProperty('--header-height', `${expandedHeaderHeight}px`)
+          setReaderFooterHeight(true)
         }
         reachedBoundaries = true
         return
@@ -1092,6 +1216,7 @@ const LoadedBibleContent = ({
             type: SWIPE_DOWN,
           })
           document.documentElement.style.setProperty('--header-height', `${HEADER_HEIGHT_MIN}px`)
+          setReaderFooterHeight(false)
           canSwipeDown = false
           canSwipeUp = true
         } else if (scrollDiff < 0 && canSwipeUp) {
@@ -1099,6 +1224,7 @@ const LoadedBibleContent = ({
             type: SWIPE_UP,
           })
           document.documentElement.style.setProperty('--header-height', `${expandedHeaderHeight}px`)
+          setReaderFooterHeight(true)
           canSwipeUp = false
           canSwipeDown = true
         }
@@ -1256,6 +1382,38 @@ const LoadedBibleContent = ({
   }
 
   const isHebreu = version === 'BHS' || (version === 'BHG' && Number(verses[0].Livre) < 40)
+  const highlightLayer = !isVerseLayoutAnimating &&
+    (highlightRects.length > 0 || (annotationMode && selection)) && (
+      <HighlightLayer
+        $dimmed={!annotationMode && Object.keys(selectedVerses).length > 0}
+        $overflowVisible={isHorizontalParallelMode}
+      >
+        {highlightRects.map(rect => (
+          <HighlightRectDiv
+            key={rect.id}
+            $top={rect.top}
+            $left={rect.left}
+            $width={rect.width}
+            $height={rect.height}
+            $color={rect.color}
+            $annotationType={rect.annotationType}
+            $isSelected={rect.annotationId === selectedAnnotationId}
+            $isDimmed={rect.isDimmed}
+            $primaryColor={settings.colors[settings.theme].primary}
+            $backgroundColor={settings.colors[settings.theme].reverse}
+            $animationDelay={rect.type === 'annotation' ? getAnimationDelay(rect.id) : 0}
+          />
+        ))}
+        {/* Selection handles - only in annotation mode */}
+        {annotationMode && (
+          <SelectionHandles
+            hasSelection={selection !== null}
+            startPosition={selectionHandlePositions.start}
+            endPosition={selectionHandlePositions.end}
+          />
+        )}
+      </HighlightLayer>
+    )
   const isParallelVerse = Boolean(parallelVerses?.length)
   const parallelVersionTitles = isParallelVerse
     ? extractParallelVersionTitles(parallelVerses, version)
@@ -1279,43 +1437,20 @@ const LoadedBibleContent = ({
             isParallelVerse && (!keepControlsVisible || parallelDisplayMode === 'horizontal')
           }
           headerHeight={headerHeight}
+          $columnsScrollScope={titlesFollowColumnsScroll}
         >
-          {/* Highlight layer for word annotations and selection (disabled in parallel mode) */}
-          {!isVerseLayoutAnimating &&
-            !isParallelVerse &&
-            (highlightRects.length > 0 || (annotationMode && selection)) && (
-              <HighlightLayer $dimmed={!annotationMode && Object.keys(selectedVerses).length > 0}>
-                {highlightRects.map(rect => (
-                  <HighlightRectDiv
-                    key={rect.id}
-                    $top={rect.top}
-                    $left={rect.left}
-                    $width={rect.width}
-                    $height={rect.height}
-                    $color={rect.color}
-                    $annotationType={rect.annotationType}
-                    $isSelected={rect.annotationId === selectedAnnotationId}
-                    $isDimmed={rect.isDimmed}
-                    $primaryColor={settings.colors[settings.theme].primary}
-                    $backgroundColor={settings.colors[settings.theme].reverse}
-                    $animationDelay={rect.type === 'annotation' ? getAnimationDelay(rect.id) : 0}
-                  />
-                ))}
-                {/* Selection handles - only in annotation mode */}
-                {annotationMode && (
-                  <SelectionHandles
-                    hasSelection={selection !== null}
-                    startPosition={selectionHandlePositions.start}
-                    endPosition={selectionHandlePositions.end}
-                  />
-                )}
-              </HighlightLayer>
-            )}
+          {/* Highlight layer for word annotations and selection */}
+          {!isHorizontalParallelMode && highlightLayer}
           {isParallelVerse && parallelDisplayMode === 'horizontal' && (
-            <HeaderScrollWrapper ref={headerScrollRef} columnCount={parallelVersionTitles.length}>
+            <HeaderScrollWrapper
+              ref={headerScrollRef}
+              columnCount={parallelVersionTitles.length}
+              $followsScroll={titlesFollowColumnsScroll}
+            >
               <VersionsContainer
                 columnCount={parallelVersionTitles.length}
                 columnWidth={parallelColumnWidth}
+                $followsScroll={titlesFollowColumnsScroll}
               >
                 {parallelVersionTitles?.map((p, i) => (
                   <VersionTitleColumn
@@ -1328,6 +1463,7 @@ const LoadedBibleContent = ({
                       onClick={() => navigateToVersion(p.id, i)}
                       style={{ paddingLeft: '5px' }}
                       settings={settings}
+                      $followsScroll={titlesFollowColumnsScroll}
                     >
                       {p.id}
                       {p.error && (
@@ -1347,6 +1483,8 @@ const LoadedBibleContent = ({
                 ? parallelVersionTitles.length
                 : 1
             }
+            $panYOnly={isHorizontalParallelMode && Boolean(annotationMode)}
+            $scrollTimeline={titlesFollowColumnsScroll}
           >
             {isHebreu && <RightDirection settings={settings}>Sens de la lecture ←</RightDirection>}
             {!isContextFocused && (
@@ -1368,7 +1506,13 @@ const LoadedBibleContent = ({
                 void onFocusedMetadataPress?.(type, id)
               }}
             />
-            <m.div {...versePositionLayoutProps}>
+            <m.div
+              ref={versesContentRef}
+              style={{ position: 'relative' }}
+              {...versePositionLayoutProps}
+            >
+              {/* Highlight layer drawn inside the columns it marks */}
+              {isHorizontalParallelMode && highlightLayer}
               {/* Unified verse rendering for all modes */}
               <UnifiedVersesRenderer
                 isPassagePreview={Boolean(focusVerses?.length)}
@@ -1377,6 +1521,7 @@ const LoadedBibleContent = ({
                 parallelVerses={parallelVerses}
                 focusVerses={focusVerses}
                 selectedVerses={selectedVerses}
+                selectedVersesVersion={selectedVersesVersion ?? version}
                 highlightedVerses={highlightedVerses}
                 settings={settings}
                 verseToScroll={verseToScroll}
@@ -1384,6 +1529,7 @@ const LoadedBibleContent = ({
                 version={version}
                 interlinearMode={interlinearMode}
                 pericopeChapter={pericopeChapter}
+                parallelPericopeChapters={parallelPericopeChapters}
                 isSelectionMode={isSelectionMode}
                 selectedCode={selectedCode}
                 isHebreu={isHebreu}
@@ -1400,20 +1546,20 @@ const LoadedBibleContent = ({
                 versesWithAnnotationNotes={versesWithAnnotationNotes}
                 navigateToPericope={navigateToPericope}
                 annotationMode={annotationMode}
-                touchedVerseKey={touchedVerseKey}
+                touchedVerse={touchedVerse}
                 taggedVersesInChapter={taggedVersesInChapter}
                 versesWithNonHighlightTags={versesWithNonHighlightTags}
                 columnCount={isParallelVerse ? parallelVersionTitles.length : 1}
                 columnWidth={parallelColumnWidth}
                 parallelDisplayMode={parallelDisplayMode}
-                redWords={redWords}
+                redWordsByVersion={redWordsByVersion}
                 passageMediaAfterVerses={passageMedia.afterVerses}
                 passageMediaGallerySections={passageMediaGallerySections}
               />
               <AnnotationInlineItems
                 wordAnnotations={wordAnnotations}
                 annotationRelationItems={annotationRelationItems}
-                version={version}
+                versions={displayedVersions}
                 settings={settings}
                 annotationMode={annotationMode}
                 contentKey={annotationInlineContentKey}
@@ -1640,6 +1786,7 @@ const VersesRendererContent = ({ settings, dispatch, translations, verses, ...re
   useEffect(() => {
     const reverseColor = settings.colors[settings.theme].reverse
     document.documentElement.style.setProperty('--header-height', `${headerHeight}px`)
+    setReaderFooterHeight(true)
     document.documentElement.style.setProperty('--safe-area-top', `${rest.safeAreaTop ?? 0}px`)
     document.documentElement.style.backgroundColor = reverseColor
     document.body.style.backgroundColor = reverseColor

@@ -104,6 +104,7 @@ import {
   bibleDOMHostLayoutsAtom,
   BibleTab,
   getBibleContextDisplayMode,
+  getSelectedVersesVersion,
   parallelColumnWidthAtom,
   parallelDisplayModeAtom,
   sharedBibleDOMPropsAtom,
@@ -128,6 +129,9 @@ import {
   getDisplayedChapterEntityStrongCodes,
 } from './chapterEntityQueryPlan'
 import { useAnnotationMode, type AnnotationType } from './hooks'
+import { useParallelPericopes } from './hooks/useParallelPericopes'
+import { useParallelRedWords } from './hooks/useParallelRedWords'
+import { useStableList } from '~helpers/useStableList'
 import ResourcesModal from '~features/bible/resources/ResourceModal'
 import {
   getSelectedVerseKeys,
@@ -221,6 +225,7 @@ const BibleViewer = ({
     book: number
     chapter: number
     verse: number
+    version: VersionCode
   } | null>(null)
   const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null)
   const bibleParamsModal = useSheet()
@@ -308,6 +313,8 @@ const BibleViewer = ({
       planPassage,
     },
   } = bible
+  // Parallel reading: verses are selected in one version, whose text every action uses.
+  const selectionVersion = getSelectedVersesVersion(bible.data)
   const hidePersonalBibleData = shouldHideBibleViewerPersonalData({
     version,
     strongMode,
@@ -480,6 +487,20 @@ const BibleViewer = ({
   })
   // Canonical chapters carry their own red words; ignore results cached for a legacy copy.
   const redWords = usesCanonicalPresentation ? null : (redWordsQuery.data ?? null)
+  const parallelPericopeChapters = useParallelPericopes({
+    parallelVerses,
+    book: book.Numero,
+    chapter,
+    enabled: extrasEnabled,
+    resources,
+  })
+  const parallelRedWords = useParallelRedWords({
+    parallelVerses,
+    request: mainChapterRequest,
+    enabled: extrasEnabled && settings.redWordsDisplay,
+    resources,
+    resourceRegistry,
+  })
   const setCommentaryPreview = useSetAtom(previewHistoryAtom)
   const readingCommentaries = getInlineCommentaryResources(
     settings.inlineCommentaries,
@@ -666,6 +687,11 @@ const BibleViewer = ({
   const [displayedBook, setDisplayedBook] = useState(book.Numero)
   const [displayedChapter, setDisplayedChapter] = useState(chapter)
   const [displayedVersion, setDisplayedVersion] = useState(version)
+  // Every version on screen, the main one first: personal data is read for all of them.
+  const displayedVersions = useStableList([
+    displayedVersion,
+    ...parallelVerses.map(parallel => parallel.id),
+  ])
   const passageMedia = contextualInformationDisplay
     ? getPassageMediaForChapter({
         book: displayedBook,
@@ -681,14 +707,21 @@ const BibleViewer = ({
     actions.clearSelectedVerses()
     versesModal.close()
 
-    annotationMode.enterMode(version)
+    annotationMode.enterMode(selectionVersion)
     annotationToolbar.open()
-  }, [actions, versesModal, annotationMode, annotationToolbar, version, hidePersonalBibleData])
+  }, [
+    actions,
+    versesModal,
+    annotationMode,
+    annotationToolbar,
+    selectionVersion,
+    hidePersonalBibleData,
+  ])
 
-  // Handler for entering annotation mode (from double-tap on verse)
-  const handleEnterAnnotationModeFromDoubleTap = () => {
+  // Handler for entering annotation mode (from double-tap on a verse of one of the versions)
+  const handleEnterAnnotationModeFromDoubleTap = (annotatedVersion: VersionCode = version) => {
     if (hidePersonalBibleData) return
-    annotationMode.enterMode(version)
+    annotationMode.enterMode(annotatedVersion)
     annotationToolbar.open()
   }
 
@@ -704,14 +737,14 @@ const BibleViewer = ({
       didOpenInitialAnnotationRef.current ||
       !initialAnnotationId ||
       !initialAnnotation ||
-      initialAnnotation.version !== version ||
+      ![version, ...parallelVersions].includes(initialAnnotation.version) ||
       hidePersonalBibleData
     ) {
       return
     }
 
     didOpenInitialAnnotationRef.current = true
-    annotationMode.enterMode(version)
+    annotationMode.enterMode(initialAnnotation.version)
     annotationMode.handleAnnotationSelected(initialAnnotationId)
     annotationToolbar.open()
   }, [
@@ -720,6 +753,7 @@ const BibleViewer = ({
     hidePersonalBibleData,
     initialAnnotation,
     initialAnnotationId,
+    parallelVersions,
     version,
   ])
 
@@ -792,16 +826,21 @@ const BibleViewer = ({
     }
   }, [annotationMode, annotationRelationCount, t, confirmDeletion])
 
-  // Keep annotation mode's verses reference updated
+  // Keep annotation mode's verses reference updated, for every version that can be annotated
   const { enabled: annotationModeEnabled, setVerses: setAnnotationVerses } = annotationMode
   useEffect(() => {
     if (annotationModeEnabled && verses.length > 0) {
-      setAnnotationVerses(verses)
+      setAnnotationVerses({
+        [version]: verses,
+        ...Object.fromEntries(parallelVerses.map(parallel => [parallel.id, parallel.verses])),
+      })
     }
-  }, [verses, annotationModeEnabled, setAnnotationVerses])
+  }, [verses, parallelVerses, version, annotationModeEnabled, setAnnotationVerses])
 
+  const selectionVerses =
+    parallelVerses.find(parallel => parallel.id === selectionVersion)?.verses ?? verses
   const selectAllVerses = () => {
-    actions.selectAllVerses(selectAllChapterVerses(verses))
+    actions.selectAllVerses(selectAllChapterVerses(selectionVerses))
   }
 
   // Open/close verses modal based on selected verses
@@ -829,7 +868,7 @@ const BibleViewer = ({
   const allLinks = useSelector(selectLinks)
 
   const studyRelationsByChapter = useSelector((state: RootState) =>
-    selectStudyRelationsByChapter(state, displayedBook, displayedChapter, displayedVersion)
+    selectStudyRelationsByChapter(state, displayedBook, displayedChapter, displayedVersions)
   )
   const strongSelectionDOMContextKey = getStrongSelectionDOMContextKey({
     version,
@@ -850,16 +889,17 @@ const BibleViewer = ({
   const previousStrongSelectionDOMContextKey = usePrevious(strongSelectionDOMContextKey)
 
   const wordAnnotationsByChapter = useSelector((state: RootState) =>
-    selectWordAnnotationsByChapter(state, displayedBook, displayedChapter, displayedVersion)
+    selectWordAnnotationsByChapter(state, displayedBook, displayedChapter, displayedVersions)
   )
   const relationCountsByEndpointIdentity = useSelector(selectRelationCountsByEndpointIdentity)
 
   const confirmSelectionAnnotationDeletion = (onConfirm: () => void) => {
-    if (!annotationMode.selection || !annotationMode.version) return
+    const annotatedVersion = annotationMode.selection?.version ?? annotationMode.version
+    if (!annotationMode.selection || !annotatedVersion) return
 
     const impact = getSelectionAnnotationDeletionImpact({
       wordAnnotations: wordAnnotationsByChapter,
-      version: annotationMode.version,
+      version: annotatedVersion,
       start: annotationMode.selection.start,
       end: annotationMode.selection.end,
       relationCountsByEndpointIdentity,
@@ -925,11 +965,11 @@ const BibleViewer = ({
   )
 
   const wordAnnotationsInOtherVersions = useSelector((state: RootState) =>
-    selectWordAnnotationsInOtherVersions(state, displayedBook, displayedChapter, displayedVersion)
+    selectWordAnnotationsInOtherVersions(state, displayedBook, displayedChapter, displayedVersions)
   )
 
   const taggedVersesData = useSelector((state: RootState) =>
-    selectTaggedVersesInChapter(state, displayedBook, displayedChapter, displayedVersion)
+    selectTaggedVersesInChapter(state, displayedBook, displayedChapter, displayedVersions)
   )
   const taggedVersesInChapter = taggedVersesData.counts
   const versesWithNonHighlightTags = taggedVersesData.hasNonHighlightTags
@@ -983,7 +1023,7 @@ const BibleViewer = ({
   }, [actions, book.Numero, chapter, prevBook, prevChapter])
 
   const addHiglightAndOpenQuickTags = (color: string) => {
-    dispatch(addHighlight({ color, selectedVerses, version }))
+    dispatch(addHighlight({ color, selectedVerses, version: selectionVersion }))
   }
 
   const addTag = () => {
@@ -996,11 +1036,11 @@ const BibleViewer = ({
 
   const toggleCreateNote = () => {
     const verseKeys = getSelectedVerseKeys(selectedVerses)
-    openNote({ verseKeys, version })
+    openNote({ verseKeys, version: selectionVersion })
   }
 
   const toggleCreateLink = () => {
-    const params = getSelectedVersesLinkParams(selectedVerses, version)
+    const params = getSelectedVersesLinkParams(selectedVerses, selectionVersion)
     pushRouteOnce({
       pathname: '/link',
       params,
@@ -1008,7 +1048,7 @@ const BibleViewer = ({
   }
 
   const toggleCreateStudyRelation = () => {
-    const endpoint = getSelectedVersesRelationEndpoint(selectedVerses, version)
+    const endpoint = getSelectedVersesRelationEndpoint(selectedVerses, selectionVersion)
     if (!endpoint) return
     setCreateRelationSourceEndpoint(endpoint)
     createRelationModal.open()
@@ -1046,9 +1086,9 @@ const BibleViewer = ({
     openNote({ noteId, verseKeys: verseIds, version })
   }
 
-  const openResourceForVerse = (res: BibleResource, ver: string) => {
+  const openResourceForVerse = (res: BibleResource, ver: string, verseVersion = version) => {
     setResourceModalSelection({
-      selectedVersion: version,
+      selectedVersion: verseVersion,
       selectedVerses: { [ver]: true },
     })
     onChangeResourceType(res)
@@ -1081,7 +1121,7 @@ const BibleViewer = ({
       // Capture verse data immediately when study is selected
       const { title, content } = await getVersesContent({
         verses: selectedVerses,
-        version,
+        version: selectionVersion,
         loadVerseTexts: (versionId, verseKeys) =>
           loadBibleVerseTexts(resources, versionId, verseKeys),
       })
@@ -1089,7 +1129,7 @@ const BibleViewer = ({
       const verseData = {
         title,
         content,
-        version,
+        version: selectionVersion,
         verses: getSelectedVersesStudyPayload(selectedVerses),
       }
 
@@ -1101,7 +1141,7 @@ const BibleViewer = ({
       setPendingVerseData({ studyId, verseData })
       verseFormatModal.open()
     },
-    [resources, selectedVerses, version, verseFormatModal, addVerseToStudy, actions]
+    [resources, selectedVerses, selectionVersion, verseFormatModal, addVerseToStudy, actions]
   )
 
   const handleSelectFormat = useCallback(
@@ -1136,13 +1176,14 @@ const BibleViewer = ({
         book: location.book,
         chapter: location.chapter,
         verse: location.verse,
+        version: selectionVersion,
       })
       setEditingBookmark(null)
       // Use setTimeout to ensure state is updated before presenting
       setTimeout(() => bookmarkModalRef.current?.present(), 0)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedVerses, actions])
+  }, [selectedVerses, selectionVersion, actions])
 
   // Handler for opening bookmark modal from DOM (existing bookmark)
   const handleOpenBookmarkModal = useCallback((bookmark: Bookmark) => {
@@ -1320,6 +1361,7 @@ const BibleViewer = ({
     focusVerses,
     inPlan: Boolean(planPassage),
     selectedVerses: viewerPersonalData.selectedVerses,
+    selectedVersesVersion: selectionVersion,
     highlightedVerses: viewerPersonalData.highlightedVerses,
     notedVerses: viewerPersonalData.notedVerses,
     allNotes: viewerPersonalData.allNotes,
@@ -1332,6 +1374,7 @@ const BibleViewer = ({
     verseToScroll: verse,
     verseNavigationRequest,
     pericopeChapter: getPericopeChapter(pericope, displayedBook, displayedChapter),
+    parallelPericopeChapters,
     passageMedia,
     openNote: hidePersonalBibleData ? undefined : openBibleNote,
     openLink: hidePersonalBibleData ? undefined : openLink,
@@ -1378,6 +1421,7 @@ const BibleViewer = ({
       : handleEnterAnnotationModeFromDoubleTap,
     // Red words
     redWords: settings.redWordsDisplay ? redWords : null,
+    parallelRedWords: settings.redWordsDisplay ? parallelRedWords : undefined,
     inlineCommentaries,
     onOpenInlineCommentary: summary => {
       const chip = [
@@ -1699,14 +1743,12 @@ const BibleViewer = ({
           clearSelectedVerses={actions.clearSelectedVerses}
           selectedVerses={selectedVerses}
           selectAllVerses={selectAllVerses}
-          version={version}
+          version={selectionVersion}
           onAddToStudy={handleOpenAddToStudy}
           onSelectStudy={handleSelectStudy}
           onAddBookmark={handleAddBookmark}
           onPinVerses={handlePinVerses}
-          onEnterAnnotationMode={
-            parallelVersions.length > 0 ? undefined : handleEnterAnnotationMode
-          }
+          onEnterAnnotationMode={handleEnterAnnotationMode}
           focusVerses={focusVerses}
         />
       )}
@@ -1721,7 +1763,7 @@ const BibleViewer = ({
         resourceType={resourceType}
         onChangeResourceType={onChangeResourceType}
         isSelectionMode={isSelectionMode}
-        selectedVersion={resourceModalSelection?.selectedVersion}
+        selectedVersion={resourceModalSelection?.selectedVersion ?? selectionVersion}
         selectedVerses={resourceModalSelection?.selectedVerses}
         onChangeVerse={changeResourceModalVerse}
       />
@@ -1745,7 +1787,7 @@ const BibleViewer = ({
         book={selectedVerseForBookmark?.book ?? editingBookmark?.book}
         chapter={selectedVerseForBookmark?.chapter ?? editingBookmark?.chapter}
         verse={selectedVerseForBookmark?.verse ?? editingBookmark?.verse}
-        version={version}
+        version={selectedVerseForBookmark?.version ?? version}
         existingBookmark={editingBookmark || undefined}
       />
       <AnnotationToolbar
@@ -1766,6 +1808,7 @@ const BibleViewer = ({
         onRelationsPress={handleAnnotationRelationsPress}
         tagsCount={Object.keys(annotationMode.selectedAnnotation?.tags || {}).length}
         relationsCount={annotationRelationCount}
+        version={parallelVersions.length > 0 ? annotationMode.version : undefined}
         isEnabled={annotationMode.enabled && !hidePersonalBibleData}
       />
       <CrossVersionAnnotationsModal
@@ -1779,7 +1822,7 @@ const BibleViewer = ({
       <VerseTagsModal
         ref={verseTagsModal.getRef()}
         verseKey={verseTagsModalKey}
-        version={displayedVersion}
+        version={displayedVersions}
       />
       <CanonicalBibleNoteSheet
         sheetRef={canonicalBibleNoteModal.getRef()}

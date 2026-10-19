@@ -14,6 +14,7 @@ import {
   createAnnotationTextRanges,
 } from './annotationDomText'
 import { subscribeToBibleLayoutChanges } from '../annotationLayoutLifecycle'
+import { findVerseTextElement, findVerseTextElements } from './domUtils'
 
 /**
  * Merges all DOMRects on the same line into single rectangles.
@@ -59,13 +60,17 @@ function mergeRectsOnSameLine(rects: DOMRect[]): DOMRect[] {
 }
 
 interface UseAnnotationHighlightsProps {
+  // The element the highlight layer is drawn in: rects are relative to it
   containerRef: RefObject<HTMLDivElement | null>
   wordAnnotations: WebViewProps['wordAnnotations']
-  version: string
+  // Every version on screen, each showing its own annotations
+  versions: string[]
   book: number
   chapter: number
-  verses: TVerse[]
+  versesByVersion: Record<string, TVerse[]>
   settings: RootStyles['settings']
+  // Changes when the verses are laid out differently (parallel display mode, column width)
+  layoutKey?: string
   contextDisplayMode?: WebViewProps['contextDisplayMode']
   focusVerses?: WebViewProps['focusVerses']
   // Optional: Selection support for annotation mode
@@ -77,6 +82,7 @@ interface UseAnnotationHighlightsProps {
  * Common parameters for calculating highlight rects for a word range within a verse.
  */
 interface CalculateRectsParams {
+  version: string
   verseKey: string
   startWordIndex: number
   endWordIndex: number
@@ -89,15 +95,25 @@ interface CalculateRectsParams {
  * Returns merged rects relative to the container.
  */
 function calculateRectsForWordRange({
+  version,
   verseKey,
   startWordIndex,
   endWordIndex,
   containerRect,
   tokens,
 }: CalculateRectsParams): Array<{ top: number; left: number; width: number; height: number }> {
-  const verseEl = document.getElementById(`verse-text-${verseKey}`)
-  if (!verseEl) return []
+  return findVerseTextElements(version, verseKey).flatMap(verseEl =>
+    calculateRectsInVerseElement(verseEl, startWordIndex, endWordIndex, containerRect, tokens)
+  )
+}
 
+function calculateRectsInVerseElement(
+  verseEl: Element,
+  startWordIndex: number,
+  endWordIndex: number,
+  containerRect: DOMRect,
+  tokens: WordToken[]
+): Array<{ top: number; left: number; width: number; height: number }> {
   // Collect all text nodes to handle canonical Strong references.
   const { fullText, textNodes } = collectAnnotationTextNodes(verseEl)
   if (!fullText || textNodes.length === 0) return []
@@ -143,6 +159,7 @@ function getRectsForSelection(
   verses: TVerse[],
   getTokens: (verseKey: string, text: string) => WordToken[]
 ): HighlightRect[] {
+  const { version } = range
   const rects: HighlightRect[] = []
   const containerRect = containerRef.current?.getBoundingClientRect()
   if (!containerRect) return rects
@@ -169,6 +186,7 @@ function getRectsForSelection(
     const endWordIdx = isLast ? normalizedEnd.wordIndex : wordTokens[wordTokens.length - 1].index
 
     const verseRects = calculateRectsForWordRange({
+      version,
       verseKey,
       startWordIndex: startWordIdx,
       endWordIndex: endWordIdx,
@@ -178,7 +196,7 @@ function getRectsForSelection(
 
     verseRects.forEach((rect, rectIdx) => {
       rects.push({
-        id: `selection-${verseKey}-${rectIdx}`,
+        id: `selection-${version}-${verseKey}-${rectIdx}`,
         top: rect.top,
         left: rect.left,
         width: rect.width,
@@ -202,11 +220,12 @@ const EMPTY_HANDLE_POSITIONS: HandlePositions = { start: null, end: null }
 export function useAnnotationHighlights({
   containerRef,
   wordAnnotations,
-  version,
+  versions,
   book,
   chapter,
-  verses,
+  versesByVersion,
   settings,
+  layoutKey,
   contextDisplayMode,
   focusVerses,
   selection,
@@ -235,6 +254,7 @@ export function useAnnotationHighlights({
   const focusVerseNumbers = getFocusVerseNumbers(focusVerses)
   const isContextFocused = contextDisplayMode === 'focused'
   const focusKey = focusVerses?.join(',') ?? ''
+  const versionsKey = versions.join(',')
 
   useEffect(() => {
     // Only set isPending on chapter/book changes (not annotation or selection changes)
@@ -258,12 +278,13 @@ export function useAnnotationHighlights({
       const containerRect = containerRef.current?.getBoundingClientRect()
       if (!containerRect || !wordAnnotations) return rects
 
-      // Cache tokenization results by verse key to avoid re-tokenizing
-      // when multiple annotations reference the same verse
+      // Cache tokenization results by verse to avoid re-tokenizing
+      // when multiple annotations reference the same verse of a version
       const tokensByVerse = new Map<string, ReturnType<typeof tokenizeVerseText>>()
 
       Object.entries(wordAnnotations).forEach(([annotationId, annotation]) => {
-        if (annotation.version !== version) return
+        const { version } = annotation
+        if (!versions.includes(version)) return
 
         annotation.ranges.forEach((range, rangeIdx) => {
           const { verseKey, startWordIndex, endWordIndex } = range
@@ -273,19 +294,21 @@ export function useAnnotationHighlights({
             focusVerseNumbers,
           })
 
-          let tokens = tokensByVerse.get(verseKey)
+          const verseTokensKey = `${version}:${verseKey}`
+          let tokens = tokensByVerse.get(verseTokensKey)
           if (!tokens) {
-            const verseTextEl = document.getElementById(`verse-text-${verseKey}`)
+            const verseTextEl = findVerseTextElement(version, verseKey)
             if (!verseTextEl) return
 
             const { fullText } = collectAnnotationTextNodes(verseTextEl)
             if (!fullText) return
 
             tokens = tokenizeVerseText(fullText)
-            tokensByVerse.set(verseKey, tokens)
+            tokensByVerse.set(verseTokensKey, tokens)
           }
 
           const verseRects = calculateRectsForWordRange({
+            version,
             verseKey,
             startWordIndex,
             endWordIndex,
@@ -328,7 +351,12 @@ export function useAnnotationHighlights({
 
       // Add selection rects if we have a selection and getTokens function
       if (selection && getTokens) {
-        const selectionRects = getRectsForSelection(containerRef, selection, verses, getTokens)
+        const selectionRects = getRectsForSelection(
+          containerRef,
+          selection,
+          versesByVersion[selection.version] ?? [],
+          getTokens
+        )
         return [...annotationRects, ...selectionRects]
       }
 
@@ -369,13 +397,14 @@ export function useAnnotationHighlights({
       unsubscribeFromLayoutChanges()
     }
   }, [
-    version,
+    versionsKey,
     book,
     chapter,
     annotationKey,
     selection,
-    verses,
+    versesByVersion,
     settings,
+    layoutKey,
     isContextFocused,
     focusKey,
   ])

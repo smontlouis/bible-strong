@@ -135,6 +135,8 @@ import {
   getNumberPayload,
   getStrongRelationSelectionPayload,
   getStringPayload,
+  getPayloadVersion,
+  getVerseSelectionPayload,
   getStudyRelationsModalTarget,
   getToastPayload,
   getVerseIdsPayload,
@@ -214,7 +216,7 @@ export type WebViewProps = {
   chapter: number
   isLoading: boolean
   personalBibleDataEnabled?: boolean
-  addSelectedVerse: (id: string) => void
+  addSelectedVerse: (id: string, version?: VersionCode) => void
   removeSelectedVerse: (id: string) => void
   setSelectedVerse: (selectedVerse: number) => void
   version: VersionCode
@@ -228,6 +230,8 @@ export type WebViewProps = {
 
   focusVerses: (string | number)[] | undefined
   selectedVerses: VerseIds
+  /** The version the selected verses belong to (parallel reading). */
+  selectedVersesVersion?: VersionCode
   highlightedVerses: HighlightsObj
   notedVerses: NotesObj
   allNotes: NotesObj
@@ -240,6 +244,8 @@ export type WebViewProps = {
   verseNavigationRequest?: number
   verseToScroll: number | undefined
   pericopeChapter: PericopeChapter
+  // Section headings of the parallel versions, for the displayed chapter
+  parallelPericopeChapters?: Record<string, PericopeChapter | undefined>
   passageMedia: ResolvedPassageMediaChapter
   openNote?: (noteId: string, verseIds?: string[]) => void
   openLink?: (linkId: string) => void
@@ -250,7 +256,11 @@ export type WebViewProps = {
   goToPrevChapter?: () => void
   goToNextChapter?: () => void
   setUnifiedTagsModal?: (payload: TagsModalPayload) => void
-  onOpenResourceForVerse?: (resourceType: BibleResource, verseKey: string) => void
+  onOpenResourceForVerse?: (
+    resourceType: BibleResource,
+    verseKey: string,
+    version?: VersionCode
+  ) => void
   onOpenBookmarkModal?: (bookmark: Bookmark) => void
   onOpenCanonicalBibleReference?: (osis: string) => void
   expandContext?: () => void
@@ -272,8 +282,13 @@ export type WebViewProps = {
     ranges: { verseKey: string; startWordIndex: number; endWordIndex: number; text: string }[]
     color: string
     type: AnnotationType
+    version?: VersionCode
   }) => void
-  onEraseSelection?: (payload: { start: WordPosition; end: WordPosition }) => void
+  onEraseSelection?: (payload: {
+    start: WordPosition
+    end: WordPosition
+    version?: VersionCode
+  }) => void
   onAnnotationSelected?: (annotationId: string | null) => void
   clearAnnotationSelectionTrigger?: number
   selectedAnnotationId?: string | null
@@ -287,10 +302,12 @@ export type WebViewProps = {
   onOpenCanonicalBibleNote?: (note: CanonicalBibleNote) => void
   onOpenStudyRelationsModal?: (target: StudyRelationsModalTarget) => void
   isFormSheet?: boolean
-  // Enter annotation mode from double-tap
-  onEnterAnnotationMode?: () => void
+  // Enter annotation mode from double-tap, on the version the reader double-tapped
+  onEnterAnnotationMode?: (version?: VersionCode) => void
   // Red words data
   redWords?: Record<string, { start: number; end: number }[]> | null
+  // Red words of the parallel versions, by version
+  parallelRedWords?: Record<string, Record<string, { start: number; end: number }[]> | null>
   inlineCommentaries?: {
     introduction: LabeledCommentaryChip[]
     afterVerses: Record<number, LabeledCommentaryChip[]>
@@ -358,6 +375,7 @@ export const BibleDOMWrapper = ({
   parallelDisplayMode = 'horizontal',
   focusVerses,
   selectedVerses,
+  selectedVersesVersion,
   highlightedVerses,
   notedVerses,
   allNotes,
@@ -418,6 +436,8 @@ export const BibleDOMWrapper = ({
   onEnterAnnotationMode,
   isFormSheet,
   redWords,
+  parallelRedWords,
+  parallelPericopeChapters,
   inlineCommentaries,
   onOpenInlineCommentary,
   chapterEntities,
@@ -578,6 +598,10 @@ export const BibleDOMWrapper = ({
     downloadFailed: t('bible.chapterEntities.downloadFailed'),
     dismiss: t('bible.chapterEntities.dismissAccessibility'),
   }
+  // A version named by the reader, kept only when it is on screen: the main one otherwise.
+  const getDisplayedVersion = (candidate?: string): VersionCode =>
+    parallelVerses.find(parallel => parallel.id === candidate)?.id ?? version
+
   const handleBridgeAction = async (action: BibleDOMBridgeAction) => {
     appLogger.debug('webview', 'bible_dom.dispatch', { actionType: action.type })
     if (__DEV__) console.log('[Bible] DISPATCH:', action.type)
@@ -620,7 +644,11 @@ export const BibleDOMWrapper = ({
         if (!action.params) break
         const { Livre, Chapitre, Verset } = action.params.verse
         if (__DEV__) console.log(`[Bible] ${Livre}-${Chapitre}-${Verset}`)
-        onOpenResourceForVerse?.('strong', `${Livre}-${Chapitre}-${Verset}`)
+        onOpenResourceForVerse?.(
+          'strong',
+          `${Livre}-${Chapitre}-${Verset}`,
+          getDisplayedVersion(action.params.version)
+        )
 
         break
       }
@@ -749,13 +777,15 @@ export const BibleDOMWrapper = ({
         if (Platform.OS === 'ios') {
           Haptics.selectionAsync()
         }
-        const verseId = getStringPayload(action.payload)
-        if (!verseId) break
+        const verseSelection = getVerseSelectionPayload(action.payload)
+        if (!verseSelection) break
+        const { verseKey: verseId } = verseSelection
+        const verseVersion = getDisplayedVersion(verseSelection.version)
 
-        if (selectedVerses[verseId]) {
+        if (selectedVerses[verseId] && verseVersion === (selectedVersesVersion ?? version)) {
           removeSelectedVerse(verseId)
         } else {
-          addSelectedVerse(verseId)
+          addSelectedVerse(verseId, verseVersion)
         }
 
         break
@@ -960,7 +990,7 @@ export const BibleDOMWrapper = ({
       }
 
       case ENTER_ANNOTATION_MODE: {
-        onEnterAnnotationMode?.()
+        onEnterAnnotationMode?.(getDisplayedVersion(getPayloadVersion(action.payload)))
         break
       }
 
@@ -975,18 +1005,20 @@ export const BibleDOMWrapper = ({
 
       case CREATE_ANNOTATION: {
         if (isRecord(action.payload)) {
-          onCreateAnnotation?.(
-            action.payload as Parameters<NonNullable<WebViewProps['onCreateAnnotation']>>[0]
-          )
+          onCreateAnnotation?.({
+            ...(action.payload as Parameters<NonNullable<WebViewProps['onCreateAnnotation']>>[0]),
+            version: getDisplayedVersion(getPayloadVersion(action.payload)),
+          })
         }
         break
       }
 
       case ERASE_SELECTION: {
         if (isRecord(action.payload)) {
-          onEraseSelection?.(
-            action.payload as Parameters<NonNullable<WebViewProps['onEraseSelection']>>[0]
-          )
+          onEraseSelection?.({
+            ...(action.payload as Parameters<NonNullable<WebViewProps['onEraseSelection']>>[0]),
+            version: getDisplayedVersion(getPayloadVersion(action.payload)),
+          })
         }
         break
       }
@@ -1090,10 +1122,10 @@ export const BibleDOMWrapper = ({
 
   // Pre-compute verse metadata on native side (avoids DOM JS thread work)
   const taggedVerses = sortVersesToTags(highlightedVerses)
+  // Word annotations come filtered to the versions on screen: every one of them counts.
   const { versesWithAnnotationNotes, annotationNotesCountByVerse } = getAnnotationNotesInfo(
     versesToSend,
-    wordAnnotations,
-    version
+    wordAnnotations
   )
   const relationsDisplay =
     settings.relationsDisplay ||
@@ -1106,7 +1138,6 @@ export const BibleDOMWrapper = ({
       notes: allNotes,
       links: allLinks,
       wordAnnotations,
-      version,
     }
   )
   const TOP_INSET = isFormSheet ? 0 : insets.top
@@ -1183,6 +1214,7 @@ export const BibleDOMWrapper = ({
         parallelDisplayMode={parallelDisplayMode}
         focusVerses={focusVerses}
         selectedVerses={selectedVerses}
+        selectedVersesVersion={selectedVersesVersion ?? version}
         highlightedVerses={highlightedVerses}
         bookmarkedVerses={bookmarkedVerses}
         wordAnnotations={wordAnnotations}
@@ -1214,6 +1246,8 @@ export const BibleDOMWrapper = ({
         taggedVersesInChapter={taggedVersesInChapter}
         versesWithNonHighlightTags={versesWithNonHighlightTags}
         redWords={redWords}
+        parallelRedWords={parallelRedWords}
+        parallelPericopeChapters={parallelPericopeChapters}
         inlineCommentaries={inlineCommentaries}
         chapterEntities={chapterEntities}
         chapterEntitiesLoaded={chapterEntitiesLoaded}

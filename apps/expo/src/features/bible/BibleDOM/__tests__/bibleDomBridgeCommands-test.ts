@@ -8,11 +8,24 @@ import {
   getStringPayload,
   getStudyRelationsModalTarget,
   getToastPayload,
+  getPayloadVersion,
   getVerseIdsPayload,
+  getVerseSelectionPayload,
   routeBibleDOMBridgeAction,
 } from '../bibleDomBridgeCommands'
 
 describe('Bible DOM bridge', () => {
+  it('reads the verse a reader tapped, with its version in parallel reading', () => {
+    expect(getVerseSelectionPayload('1-1-1')).toEqual({ verseKey: '1-1-1' })
+    expect(getVerseSelectionPayload({ verseKey: '1-1-1', version: 'KJV' })).toEqual({
+      verseKey: '1-1-1',
+      version: 'KJV',
+    })
+    expect(getVerseSelectionPayload({ version: 'KJV' })).toBeUndefined()
+    expect(getPayloadVersion({ version: 'KJV' })).toBe('KJV')
+    expect(getPayloadVersion({})).toBeUndefined()
+  })
+
   it('parses primitive string and number payloads conservatively', () => {
     expect(getStringPayload('note-1')).toBe('note-1')
     expect(getStringPayload({ value: 'note-1' })).toBeUndefined()
