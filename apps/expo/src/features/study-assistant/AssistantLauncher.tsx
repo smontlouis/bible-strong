@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
   AssistantRuntimeProvider,
   ThreadListPrimitive,
@@ -14,7 +13,6 @@ import { type SheetRef } from '~common/sheet'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { storage } from '~helpers/storage'
 import { toast } from '~helpers/toast'
@@ -26,6 +24,7 @@ import { createTabForAssistantAction } from './assistantActions'
 import { assistantAccessible } from './assistantConfig'
 import AssistantComposer from './AssistantComposer'
 import AssistantHistory from './AssistantHistory'
+import AssistantLauncherButton from './AssistantLauncherButton'
 import {
   AssistantSheetContext,
   useAssistantSheet,
@@ -42,8 +41,6 @@ import StrobiAvatar, { type StrobiAnimation } from './StrobiAvatar'
 import { useAssistantOpenRequest } from './useAssistantOpenRequest'
 import { useAssistantSession } from './useAssistantSession'
 import { useReadingContext } from './useReadingContext'
-
-const AVATAR_SIZE = 52
 
 // The same per-account key as the web modal; MMKV plays the part of localStorage.
 const preferences = {
@@ -108,7 +105,6 @@ function SheetHeader() {
 
 function AccountAssistant({ account }: { account: string }) {
   const { t } = useTranslation()
-  const insets = useSafeAreaInsets()
   const liveContext = useReadingContext()
   const openInNewTab = useOpenInNewTab()
   const pushRoute = usePushRouteOnce()
@@ -118,6 +114,9 @@ function AccountAssistant({ account }: { account: string }) {
     [historyOpen, setHistoryOpen] = useState(false)
   const [source, setSource] = useState<StudySource | null>(null)
   const [avatarSleeping, setAvatarSleeping] = useState(false)
+  const [avatarDragged, setAvatarDragged] = useState(false)
+  // Each time the avatar is handled it wakes up and waits again before falling asleep.
+  const [avatarWokenAt, setAvatarWokenAt] = useState(0)
   const [dictationState, setDictationState] = useState<DictationState>('idle')
   const [dictation] = useState(
     () =>
@@ -184,12 +183,18 @@ function AccountAssistant({ account }: { account: string }) {
     },
   })
   useEffect(() => {
-    if (open || !ready) return
+    if (open || !ready || avatarDragged) return
     const sleepTimer = setTimeout(() => setAvatarSleeping(true), 10_000)
     return () => clearTimeout(sleepTimer)
-  }, [open, ready])
+  }, [open, ready, avatarDragged, avatarWokenAt])
   useAssistantOpenRequest(sheet)
-  const avatarAnimation: StrobiAnimation = busy ? 'thinking' : avatarSleeping ? 'sleeping' : 'idle'
+  const avatarAnimation: StrobiAnimation = busy
+    ? 'thinking'
+    : avatarDragged
+      ? 'excited'
+      : avatarSleeping
+        ? 'sleeping'
+        : 'idle'
   const value: AssistantSheet = {
     session,
     liveContext,
@@ -206,23 +211,22 @@ function AccountAssistant({ account }: { account: string }) {
     <AssistantRuntimeProvider runtime={runtime}>
       <AssistantSheetContext.Provider value={value}>
         {ready && !open && (
-          <TouchableBox
-            accessibilityRole="button"
+          <AssistantLauncherButton
+            animation={avatarAnimation}
             accessibilityLabel={t('assistant.modal.open')}
-            activeOpacity={0.7}
             onPress={() => {
               setAvatarSleeping(false)
               sheet.current?.present()
             }}
-            className="absolute right-[14px] items-center justify-center"
-            style={{
-              width: AVATAR_SIZE,
-              height: AVATAR_SIZE,
-              bottom: insets.bottom + TAB_ICON_SIZE + 62,
+            onDragStart={() => {
+              setAvatarSleeping(false)
+              setAvatarDragged(true)
             }}
-          >
-            <StrobiAvatar animation={avatarAnimation} size={AVATAR_SIZE} />
-          </TouchableBox>
+            onDragEnd={() => {
+              setAvatarDragged(false)
+              setAvatarWokenAt(Date.now())
+            }}
+          />
         )}
         {/* Anything inside the sheet that pushes a route lets the sheet close first. */}
         <PushRouteGateContext.Provider value={closeThen}>
