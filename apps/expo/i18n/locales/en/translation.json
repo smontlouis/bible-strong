@@ -644,6 +644,7 @@
   "commentaries.availability.chapterPreview": "Available in this chapter",
   "commentaries.availability.noContentPreview": "No commentary in this chapter.",
   "commentaries.availability.errorPreview": "There was a problem loading this commentary.",
+  "commentaries.availability.offlineCopyRequiredPreview": "Connect to the internet or download this commentary to read it.",
   "commentaries.resource.chooseChapter": "Choose a book and chapter",
   "commentaries.resource.sectionCount": "{{count}} section",
   "commentaries.resource.sectionCount_plural": "{{count}} sections",

@@ -48,7 +48,11 @@ const CommentaryAvailabilityList = ({ items, headerTitle, onManage, onOpen }: Pr
           : item.state === 'chapter'
             ? t('commentaries.availability.chapterPreview')
             : item.state === 'unavailable'
-              ? t('commentaries.availability.errorPreview')
+              ? item.unavailableCause === 'offline-copy-required'
+                ? t('commentaries.availability.offlineCopyRequiredPreview')
+                : item.unavailableCause === 'invalid-offline-copy'
+                  ? t('downloads.invalidCopy')
+                  : t('commentaries.availability.errorPreview')
               : t('commentaries.availability.noContentPreview')
 
         return (
