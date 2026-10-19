@@ -1,35 +1,34 @@
-import HorizontalControlScrollView from '~common/HorizontalControlScrollView'
 import { goBackOrHome } from '~navigation/goBackOrHome'
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
-import { resolveFontFamily } from '~themes/styleValues'
-import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
+import { useTheme } from '~themes/ThemeProvider'
 import Color from 'color'
 import { getAppleReviewing } from '~helpers/getAppleReviewing'
 import React from 'react'
 import { Linking, Platform } from 'react-native'
 import DesktopHome from './DesktopHome'
-import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
+import Box, { TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HomeScrollView } from '~common/ui/ScrollView'
+import Link from '~common/Link'
 import Text from '~common/ui/Text'
-import DonationWidget from './DonationWidget'
-import NaveOfTheDay from './NaveOfTheDay'
 import PlanHome from './PlanHome'
-import MeditationsHome from './MeditationsHome'
-import StrongOfTheDay from './StrongOfTheDay'
-import TheBibleProject from './TheBibleProjectPlan'
-import TimelineWidget from './TimelineWidget'
 import UserWidget, { LoginPrompt } from './UserWidget'
-import WordOfTheDay from './WordOfTheDay'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useTranslation } from 'react-i18next'
-import TryAudibibleWidget from './TryAudibibleWidget'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { Events } from './Events'
+import HomeDiscovery from './HomeDiscovery'
+import HomeExploreGrid from './HomeExploreGrid'
+import HomeHeader from './HomeHeader'
+import HomeOpenSection from './HomeOpenSection'
+import HomeRowCard from './HomeRowCard'
+import * as Icon from '~common/ui/classNameIcons'
+import { Image } from 'expo-image'
+import useLanguage from '~helpers/useLanguage'
+import HomeSectionTitle from './HomeSectionTitle'
 import ProfileStats from '~features/profile/components/ProfileStats'
-import PassageMediaLibraryWidget from './PassageMediaLibraryWidget'
 import HistoryHomeSection from '~features/history/HistoryHomeSection'
 // local react props
 type HomeProps = {
@@ -38,87 +37,70 @@ type HomeProps = {
 }
 
 export const Home = ({ closeHome, inWorkspace = false }: HomeProps) => {
-  const stylingTheme = useStylingTheme()
-
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   const isWide = useResponsiveWorkspace()
   const appleIsReviewing = getAppleReviewing()
+  const lang = useLanguage()
 
   if (Platform.OS === 'web' && isWide) return <DesktopHome />
 
   return (
     <Box className="overflow-hidden border-continuous bg-light-grey flex-[1]">
       <HomeScrollView showsVerticalScrollIndicator={false}>
-        <Events />
+        <HomeHeader />
+        <Box className="pt-[16px]">
+          <Events />
+        </Box>
+        <HomeSectionTitle title={t('home.today')} />
         <UserWidget />
-        <ProfileStats />
-        <LoginPrompt />
-        <HistoryHomeSection />
-        <Box className="overflow-hidden border-continuous pt-[40px] px-[20px]">
-          <Text
-            className="text-[23px] flex-[1]"
-            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-          >
-            {t('Apprendre')}
-          </Text>
-          <PassageMediaLibraryWidget />
-          <HStack className="overflow-hidden border-continuous mt-[12px] h-[174px] gap-[12px] items-stretch">
-            <TheBibleProject />
-            <TimelineWidget />
-          </HStack>
+        <HomeSectionTitle title={t('home.myLibrary')} />
+        <ProfileStats home />
+        <LoginPrompt className="mt-[12px]" />
+        <HomeSectionTitle
+          title={t('home.resume')}
+          action={
+            <Link route="History" className="py-[12px]">
+              <Text className="text-primary text-[13px] font-bold">{t('history.title')}</Text>
+            </Link>
+          }
+        />
+        <HistoryHomeSection headerless />
+        <PlanHome title={t('home.myPlans')} />
+        <HomeOpenSection />
+        <HomeSectionTitle title={t('home.explore')} />
+        <HomeExploreGrid />
+        <Text className="px-[20px] pt-[24px] pb-[10px] text-[16px] font-bold">
+          {t('home.randomWord')}
+        </Text>
+        <HomeDiscovery />
+        <HomeSectionTitle title={t('Aller plus loin')} />
+        <Box className="px-[20px] pb-[32px] gap-[10px]">
+          <HomeRowCard
+            dark
+            href="https://click.audibible.app/5nmN/stephane30"
+            title={t('audibible.try')}
+            description={t('audibible.description')}
+            iconBackground="#FFFFFF"
+            icon={
+              <Image
+                source={require('~assets/images/audibible-icon.png')}
+                accessible={false}
+                style={{ width: 44, height: 44 }}
+              />
+            }
+          />
+          {!appleIsReviewing && (
+            <HomeRowCard
+              href={`https://bible-strong.app/${lang === 'fr' ? 'fr/' : ''}give`}
+              title={t('donation.title')}
+              description={t('donation.description')}
+              iconBackground="rgba(255,118,117,0.14)"
+              icon={<Icon.Feather name="heart" size={22} color="#E05554" />}
+            />
+          )}
         </Box>
-        <Box className="overflow-hidden border-continuous bg-light-grey pt-[40px] px-[20px]">
-          <Text
-            className="text-[23px] flex-[1]"
-            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-          >
-            {t('Étudier')}
-          </Text>
-        </Box>
-        <Box className="overflow-hidden border-continuous bg-light-grey pt-[20px]">
-          <HorizontalControlScrollView
-            horizontal
-            style={{ overflow: 'visible' }}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{
-              flexDirection: 'row',
-              paddingHorizontal: 20,
-              overflow: 'visible',
-            }}
-          >
-            <StrongOfTheDay type="grec" />
-            <StrongOfTheDay type="hebreu" color1="rgba(248,131,121,1)" color2="rgba(255,77,93,1)" />
-            <NaveOfTheDay />
-            <WordOfTheDay color1="#ffd255" color2="#ffbc00" />
-          </HorizontalControlScrollView>
-        </Box>
-        <Box className="overflow-hidden border-continuous bg-light-grey pt-[40px] px-[20px]">
-          <Text
-            className="text-[23px] flex-[1]"
-            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-          >
-            {t('Méditer')}
-          </Text>
-        </Box>
-        <VStack className="overflow-hidden border-continuous gap-[10px]">
-          <Box className="px-[20px] pt-[20px]">
-            <MeditationsHome />
-          </Box>
-          <PlanHome />
-          <TryAudibibleWidget />
-        </VStack>
-
-        <Box className="overflow-hidden border-continuous bg-light-grey px-[20px]">
-          <Text
-            className="text-[23px] flex-[1]"
-            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-          >
-            {t('Aller plus loin')}
-          </Text>
-        </Box>
-        {!appleIsReviewing && <DonationWidget />}
         <Box className="overflow-hidden border-continuous bg-light-grey">
           <Box
             className="overflow-hidden border-continuous bg-reverse flex-row px-[20px] pt-[20px]"

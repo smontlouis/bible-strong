@@ -8,6 +8,7 @@ import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
 import { useTheme } from '~themes/ThemeProvider'
+import { resolveFontFamily } from '~themes/styleValues'
 
 import Link from '~common/Link'
 import Box, { HStack, VStack } from '~common/ui/Box'
@@ -16,7 +17,8 @@ import { toast } from '~helpers/toast'
 import useLogin from '~helpers/useLogin'
 import { RootState } from '~redux/modules/reducer'
 
-const ProfileStats = ({ desktop = false }: { desktop?: boolean }) => {
+/** `home`: no outer inset (aligned with the home section titles) and colored, stacked cards. */
+const ProfileStats = ({ desktop = false, home = false }: { desktop?: boolean; home?: boolean }) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const { isLogged } = useLogin()
@@ -40,7 +42,7 @@ const ProfileStats = ({ desktop = false }: { desktop?: boolean }) => {
   return (
     <Box
       className={
-        desktop
+        desktop || home
           ? ''
           : 'overflow-hidden border-continuous bg-light-grey rounded-[30px] py-[20px] mx-[20px]'
       }
@@ -67,31 +69,51 @@ const ProfileStats = ({ desktop = false }: { desktop?: boolean }) => {
               desktop ? 'flex-1 gap-[12px]' : 'overflow-hidden border-continuous gap-[10px]'
             }
           >
-            <StatCard flat={desktop} route="Highlights">
+            <StatCard flat={desktop} tall={home} route="Highlights">
               <StatValue
                 icon="edit-3"
+                color={home ? theme.colors.secondary : undefined}
                 count={highlights}
                 isLoading={isSyncing(['highlights', 'wordAnnotations'])}
               />
-              <Text className="text-[11px] text-grey" numberOfLines={1}>
+              <Text
+                className={home ? 'text-[12px] text-grey' : 'text-[11px] text-grey'}
+                numberOfLines={1}
+              >
                 {isSyncing(['highlights', 'wordAnnotations']) && highlights === 0
                   ? t('profileStats.syncing')
                   : t('surbrillance', { count: highlights })}
               </Text>
             </StatCard>
 
-            <StatCard flat={desktop} route="Bookmarks">
-              <StatValue icon="bookmark" count={bookmarks} isLoading={isSyncing(['bookmarks'])} />
-              <Text className="text-[11px] text-grey" numberOfLines={1}>
+            <StatCard flat={desktop} tall={home} route="Bookmarks">
+              <StatValue
+                icon="bookmark"
+                color={home ? theme.colors.primary : undefined}
+                count={bookmarks}
+                isLoading={isSyncing(['bookmarks'])}
+              />
+              <Text
+                className={home ? 'text-[12px] text-grey' : 'text-[11px] text-grey'}
+                numberOfLines={1}
+              >
                 {isSyncing(['bookmarks']) && bookmarks === 0
                   ? t('profileStats.syncing')
                   : t('marque-page', { count: bookmarks })}
               </Text>
             </StatCard>
 
-            <StatCard flat={desktop} route="BibleVerseNotes">
-              <StatValue icon="file-text" count={notes} isLoading={isSyncing(['notes'])} />
-              <Text className="text-[11px] text-grey" numberOfLines={1}>
+            <StatCard flat={desktop} tall={home} route="BibleVerseNotes">
+              <StatValue
+                icon="file-text"
+                color={home ? theme.colors.color2 : undefined}
+                count={notes}
+                isLoading={isSyncing(['notes'])}
+              />
+              <Text
+                className={home ? 'text-[12px] text-grey' : 'text-[11px] text-grey'}
+                numberOfLines={1}
+              >
                 {isSyncing(['notes']) && notes === 0
                   ? t('profileStats.syncing')
                   : t('note', { count: notes })}
@@ -107,6 +129,7 @@ const ProfileStats = ({ desktop = false }: { desktop?: boolean }) => {
           >
             <StatCard
               flat={desktop}
+              tall={home}
               {...(isLogged
                 ? { route: 'Studies' as const }
                 : { onPress: () => toast.info(t('study.loginRequired')) })}
@@ -119,26 +142,50 @@ const ProfileStats = ({ desktop = false }: { desktop?: boolean }) => {
                   <Icon.Feather name="lock" size={12} color={theme.colors.grey} />
                 </Box>
               )}
-              <StatValue icon="feather" count={studies} isLoading={isSyncing(['studies'])} />
-              <Text className="text-[11px] text-grey" numberOfLines={1}>
+              <StatValue
+                icon="feather"
+                color={home ? theme.colors.default : undefined}
+                count={studies}
+                isLoading={isSyncing(['studies'])}
+              />
+              <Text
+                className={home ? 'text-[12px] text-grey' : 'text-[11px] text-grey'}
+                numberOfLines={1}
+              >
                 {isSyncing(['studies']) && studies === 0
                   ? t('profileStats.syncing')
                   : t('étude', { count: studies })}
               </Text>
             </StatCard>
 
-            <StatCard flat={desktop} route="BibleVerseLinks">
-              <StatValue icon="link" count={links} isLoading={isSyncing(['links'])} />
-              <Text className="text-[11px] text-grey" numberOfLines={1}>
+            <StatCard flat={desktop} tall={home} route="BibleVerseLinks">
+              <StatValue
+                icon="link"
+                color={home ? '#26A69A' : undefined}
+                count={links}
+                isLoading={isSyncing(['links'])}
+              />
+              <Text
+                className={home ? 'text-[12px] text-grey' : 'text-[11px] text-grey'}
+                numberOfLines={1}
+              >
                 {isSyncing(['links']) && links === 0
                   ? t('profileStats.syncing')
                   : t('lien', { count: links })}
               </Text>
             </StatCard>
 
-            <StatCard flat={desktop} route="Tags">
-              <StatValue icon="tag" count={tags} isLoading={isSyncing(['tags'])} />
-              <Text className="text-[11px] text-grey" numberOfLines={1}>
+            <StatCard flat={desktop} tall={home} route="Tags">
+              <StatValue
+                icon="tag"
+                color={home ? theme.colors.quint : undefined}
+                count={tags}
+                isLoading={isSyncing(['tags'])}
+              />
+              <Text
+                className={home ? 'text-[12px] text-grey' : 'text-[11px] text-grey'}
+                numberOfLines={1}
+              >
                 {isSyncing(['tags']) && tags === 0
                   ? t('profileStats.syncing')
                   : t('étiquette', { count: tags })}
@@ -155,22 +202,39 @@ const StatValue = ({
   icon,
   count,
   isLoading,
+  color,
 }: {
   icon: React.ComponentProps<typeof Icon.Feather>['name']
   count: number
   isLoading: boolean
+  /** Home cards: the icon takes its color and sits above a larger count. */
+  color?: string
 }) => {
   const theme = useTheme()
   const showLoader = isLoading && count === 0
+  const value = showLoader ? (
+    <ActivityIndicator size="small" color={theme.colors.primary} />
+  ) : (
+    <Text
+      className={color ? 'text-[22px] leading-[26px]' : 'font-bold text-[18px]'}
+      style={color ? { fontFamily: resolveFontFamily(theme.fontFamily.title) } : undefined}
+    >
+      {count}
+    </Text>
+  )
+
+  if (color)
+    return (
+      <VStack className="items-start gap-[8px]">
+        <Icon.Feather name={icon} size={20} color={color} />
+        {value}
+      </VStack>
+    )
 
   return (
     <HStack className="overflow-hidden border-continuous items-center gap-[8px]">
       <ChipIcon name={icon} size={18} />
-      {showLoader ? (
-        <ActivityIndicator size="small" color={theme.colors.primary} />
-      ) : (
-        <Text className="font-bold text-[18px]">{count}</Text>
-      )}
+      {value}
     </HStack>
   )
 }
@@ -178,16 +242,19 @@ const StatValue = ({
 const StatCard = (
   componentProps: Omit<UIComponentProps<typeof Link>, 'theme'> & {
     flat?: boolean
+    tall?: boolean
     theme?: AppTheme
     className?: string
   }
 ) => {
-  const { theme: _themeOverride, className, flat = false, ...props } = componentProps
+  const { theme: _themeOverride, className, flat = false, tall = false, ...props } = componentProps
 
   const resolvedClassName = twMerge(
     flat
       ? 'flex-1 bg-reverse p-[12px]'
-      : 'flex-[1] bg-reverse rounded-[12px] p-[12px] elevation-[1]',
+      : tall
+        ? 'flex-[1] bg-reverse rounded-[18px] px-[12px] py-[14px] gap-[8px] elevation-[1]'
+        : 'flex-[1] bg-reverse rounded-[12px] p-[12px] elevation-[1]',
     className
   )
   return (

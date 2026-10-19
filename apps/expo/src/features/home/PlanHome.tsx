@@ -65,7 +65,7 @@ const useGetFirstPlans = () => {
   }, [hasPlan, lang, dispatch])
 }
 
-const PlanHome = ({ compact = false }: { compact?: boolean }) => {
+const PlanHome = ({ compact = false, title }: { compact?: boolean; title?: string }) => {
   const { t } = useTranslation()
   const plans = useComputedPlanItems()
   const participations = useSelector((state: RootState) => state.plan.ongoingPlans)
@@ -102,21 +102,32 @@ const PlanHome = ({ compact = false }: { compact?: boolean }) => {
   }
 
   return (
-    <Box className={compact ? 'gap-[16px]' : 'bg-light-grey px-[20px] pt-[20px] gap-[12px]'}>
+    <Box className={compact ? 'gap-[16px]' : 'bg-light-grey px-[20px] pt-[16px] gap-[4px]'}>
       <Box className="flex-row items-center justify-between gap-[12px]">
-        <Text className="text-default font-bold text-[16px]">{t('readingPlans.yours')}</Text>
+        <Text className="text-default font-bold text-[16px]">
+          {title ?? t('readingPlans.yours')}
+        </Text>
         <Link
           route="Plans"
           className="flex-row items-center gap-[6px] py-[12px]"
           accessibilityLabel={t('readingPlans.explorePlans')}
         >
           <Text className="text-primary text-[13px] font-bold">{t('readingPlans.explore')}</Text>
-          <FeatherIcon name="chevron-right" size={16} color="primary" />
         </Link>
       </Box>
-      {followed.map(({ plan, participation }) => (
-        <FollowedPlanCard key={plan.id} plan={plan} participation={participation} />
-      ))}
+      {compact ? (
+        followed.map(({ plan, participation }) => (
+          <FollowedPlanCard key={plan.id} plan={plan} participation={participation} />
+        ))
+      ) : (
+        <Box className="bg-reverse rounded-[18px] overflow-hidden shadow-[0_2px_7px_rgba(89,131,240,0.1)]">
+          {followed.map(({ plan, participation }, index) => (
+            <Box key={plan.id} className={index ? 'border-t border-border' : undefined}>
+              <FollowedPlanCard plan={plan} participation={participation} row />
+            </Box>
+          ))}
+        </Box>
+      )}
     </Box>
   )
 }

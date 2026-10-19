@@ -29,9 +29,19 @@ const entryKinds = {
   'commentary-resource': 'commentary',
 } as const satisfies Record<HistoryItem['type'], SearchItemType>
 
-export const HistoryEntryIcon = ({ item, size = 36 }: { item: HistoryItem; size?: number }) => {
+/** `bare`: the resource-colored glyph alone, without its tinted square. */
+export const HistoryEntryIcon = ({
+  item,
+  size = 36,
+  bare = false,
+}: {
+  item: HistoryItem
+  size?: number
+  bare?: boolean
+}) => {
   const theme = useTheme()
   const kind = entryKinds[item.type]
+  if (bare) return <SearchTypeIcon type={kind} size={size} />
   return (
     <Box
       className="overflow-hidden border-continuous items-center justify-center shrink-0"

@@ -136,18 +136,25 @@ const StandaloneVerseOfTheDay = ({
         className={
           desktop
             ? 'text-primary font-bold text-[12px] uppercase tracking-[1.5px]'
-            : 'text-grey font-bold text-[14px]'
+            : 'text-grey font-bold text-[12px] uppercase tracking-[1.5px]'
         }
       >
-        {ago}
+        {!desktop && addDay === 0 ? t('dailyReading.title') : ago}
       </Text>
       {navigation}
       <Link
-        size={44}
+        size={desktop ? 44 : undefined}
         onPress={() => router.push('/daily-reading')}
         accessibilityLabel={t('dailyReading.change')}
+        className={desktop ? undefined : 'min-h-[44px] justify-center'}
       >
-        <FeatherIcon name="sliders" size={18} color="grey" />
+        {desktop ? (
+          <FeatherIcon name="sliders" size={18} color="grey" />
+        ) : (
+          <Text className="text-primary font-bold text-[13px]">
+            {t('dailyReading.changeShort')}
+          </Text>
+        )}
       </Link>
     </Box>
   )

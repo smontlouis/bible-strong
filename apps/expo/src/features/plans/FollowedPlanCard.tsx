@@ -13,9 +13,12 @@ import { getPlanResumeDay } from './planProgress'
 const FollowedPlanCard = ({
   plan,
   participation,
+  row = false,
 }: {
   plan: ComputedPlanItem
   participation: OngoingPlan
+  /** Home list row: small cover, title with the day on the right, full-width progress bar. */
+  row?: boolean
 }) => {
   const { t } = useTranslation()
   const image = useFireStorage(plan.image)
@@ -35,6 +38,48 @@ const FollowedPlanCard = ({
         day,
         total,
       })
+
+  if (row)
+    return (
+      <Link
+        route="Plan"
+        params={{ planId: plan.id }}
+        accessibilityLabel={plan.title}
+        accessibilityHint={t('readingPlans.continue')}
+        className="flex-row items-center gap-[12px] px-[16px] py-[12px]"
+      >
+        <Box className="w-[40px] h-[40px] rounded-[10px] bg-light-grey overflow-hidden items-center justify-center">
+          {image ? (
+            <Image
+              source={{ uri: image }}
+              contentFit="cover"
+              accessible={false}
+              style={{ width: '100%', height: '100%' }}
+            />
+          ) : (
+            <FeatherIcon name="book-open" size={18} color="primary" />
+          )}
+        </Box>
+        <Box className="flex-1 min-w-0 gap-[8px]">
+          <Box className="flex-row items-baseline justify-between gap-[8px]">
+            <Text className="flex-1 text-default text-[15px] font-bold" numberOfLines={1}>
+              {plan.title}
+            </Text>
+            <Text className="text-grey text-[12px]" style={{ fontVariant: ['tabular-nums'] }}>
+              {detail}
+            </Text>
+          </Box>
+          <Box
+            accessibilityRole="progressbar"
+            accessibilityLabel={detail}
+            accessibilityValue={{ min: 0, max: total, now: completed }}
+            className="h-[6px] bg-light-grey rounded-full overflow-hidden"
+          >
+            <Box className="h-full bg-primary rounded-full" style={{ width: `${percent}%` }} />
+          </Box>
+        </Box>
+      </Link>
+    )
 
   return (
     <Link

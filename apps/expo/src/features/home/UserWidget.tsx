@@ -71,7 +71,8 @@ const UserWidget = () => {
               justifyContent: 'center',
               overflow: 'visible',
             }}
-            itemSize={Math.max(carouselWidth - 65, 1)}
+            // Same 20px gutter as the other home sections.
+            itemSize={Math.max(carouselWidth - 40, 1)}
             onSnapToItem={setActiveVerseIndex}
             renderItem={({ item: addDay, index }) => (
               <Box
