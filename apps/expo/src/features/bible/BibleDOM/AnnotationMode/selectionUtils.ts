@@ -11,6 +11,8 @@ export interface WordPosition {
 export interface SelectionRange {
   start: WordPosition
   end: WordPosition
+  /** The version the words are selected in: a selection never spans two versions. */
+  version: string
 }
 
 export interface AnnotationRangeData {

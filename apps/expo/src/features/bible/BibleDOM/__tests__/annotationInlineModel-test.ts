@@ -19,7 +19,7 @@ const getKey = (
   getAnnotationInlineAnchorKey({
     wordAnnotations,
     relationItemsByAnnotation,
-    version: 'LSG',
+    versions: ['LSG'],
     relationsAreInline: true,
     tagsAreInline: true,
   })

@@ -10,6 +10,8 @@ export interface WordPosition {
 export interface SelectionRange {
   start: WordPosition
   end: WordPosition
+  /** Parallel reading: the version the words were selected in. */
+  version?: VersionCode
 }
 
 export interface AnnotationApplyTrigger {
@@ -58,6 +60,8 @@ export const updateAnnotationSelection = (
 
   return {
     ...state,
+    // A selection started in another parallel version moves the session there.
+    version: (isValid && selection.version) || state.version,
     hasSelection: !!isValid,
     selection: isValid ? selection : null,
   }

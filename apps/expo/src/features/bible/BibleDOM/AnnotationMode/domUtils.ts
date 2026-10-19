@@ -308,7 +308,7 @@ function findClosestTextNode(
 
 /**
  * Converts a text-node-local character offset to a global offset
- * relative to the verse text element (the [id^="verse-text-"] ancestor).
+ * relative to the verse text element (the [data-verse-text] ancestor).
  *
  * This is needed because inline elements (like red words spans or Strong's refs)
  * split the verse text into multiple DOM text nodes, but the word tokenizer
@@ -317,10 +317,7 @@ function findClosestTextNode(
  * When there is only a single text node (no inline spans), this is a no-op.
  */
 function toGlobalCharOffset(textNode: Text, localOffset: number): number {
-  let verseTextEl: Element | null = textNode.parentElement
-  while (verseTextEl && !(verseTextEl.id && verseTextEl.id.startsWith('verse-text-'))) {
-    verseTextEl = verseTextEl.parentElement
-  }
+  const verseTextEl = textNode.parentElement?.closest('[data-verse-text]')
 
   if (!verseTextEl) return localOffset
 
@@ -336,6 +333,37 @@ function toGlobalCharOffset(textNode: Text, localOffset: number): number {
   }
 
   return localOffset
+}
+
+/**
+ * A verse as the reader shows it: parallel reading shows the same verse key in several versions.
+ */
+export interface VerseTarget {
+  verseKey: string
+  version: string
+}
+
+/** One string per verse of one version, for state that tracks a single touched or tapped verse. */
+export const createVerseCellKey = ({ verseKey, version }: VerseTarget) => `${version}:${verseKey}`
+
+const getVerseTextSelector = (version: string, verseKey: string) =>
+  `[data-verse-text][data-version="${version}"][data-verse-key="${verseKey}"]`
+
+/** The text element of one verse in one version. */
+export function findVerseTextElement(version: string, verseKey: string): Element | null {
+  return document.querySelector(getVerseTextSelector(version, verseKey))
+}
+
+/** Every text element of one verse in one version: parallel reading can show a version twice. */
+export function findVerseTextElements(version: string, verseKey: string): Element[] {
+  return Array.from(document.querySelectorAll(getVerseTextSelector(version, verseKey)))
+}
+
+/** The verse and version a verse text element shows. */
+export function getVerseTarget(verseContainer: Element | null): VerseTarget | null {
+  const verseKey = verseContainer?.getAttribute('data-verse-key')
+  const version = verseContainer?.getAttribute('data-version')
+  return verseKey && version ? { verseKey, version } : null
 }
 
 /**

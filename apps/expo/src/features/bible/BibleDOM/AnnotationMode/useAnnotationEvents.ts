@@ -10,7 +10,7 @@ import { SelectionRange, normalizeRange, buildRangesFromSelection } from './sele
 export interface AnnotationEventsConfig {
   selection: SelectionRange | null
   setSelection: (value: SelectionRange | null) => void
-  verses: TVerse[]
+  versesByVersion: Record<string, TVerse[]>
   dispatch: Dispatch
   getTokens: (verseKey: string, text: string) => WordToken[]
   // Triggers from props
@@ -22,13 +22,35 @@ export interface AnnotationEventsConfig {
 export function useAnnotationEvents({
   selection,
   setSelection,
-  verses,
+  versesByVersion,
   dispatch,
   getTokens,
   clearSelectionTrigger,
   applyAnnotationTrigger,
   eraseSelectionTrigger,
 }: AnnotationEventsConfig): void {
+  // The annotation is saved for the version its words were selected in.
+  const createAnnotation = (selection: SelectionRange, color: string, type: AnnotationType) => {
+    const verses = versesByVersion[selection.version] ?? []
+    const ranges = buildRangesFromSelection(selection, verses, getTokens)
+
+    if (ranges.length > 0) {
+      dispatch({
+        type: 'CREATE_ANNOTATION',
+        payload: { ranges, color, type, version: selection.version },
+      }).catch(console.error)
+    }
+  }
+
+  const eraseSelection = (selection: SelectionRange) => {
+    const { start, end } = normalizeRange(selection, versesByVersion[selection.version] ?? [])
+
+    dispatch({
+      type: 'ERASE_SELECTION',
+      payload: { start, end, version: selection.version },
+    }).catch(console.error)
+  }
+
   // Window event: applyAnnotation
   useEffect(() => {
     const handleApplyAnnotation = (e: Event) => {
@@ -36,40 +58,27 @@ export function useAnnotationEvents({
       if (!selection) return
 
       const { color, type } = customEvent.detail
-      const ranges = buildRangesFromSelection(selection, verses, getTokens)
-
-      if (ranges.length > 0) {
-        dispatch({
-          type: 'CREATE_ANNOTATION',
-          payload: { ranges, color, type },
-        }).catch(console.error)
-      }
+      createAnnotation(selection, color, type)
 
       setSelection(null)
     }
 
     window.addEventListener('applyAnnotation', handleApplyAnnotation)
     return () => window.removeEventListener('applyAnnotation', handleApplyAnnotation)
-  }, [selection, verses, dispatch])
+  }, [selection, versesByVersion, dispatch])
 
   // Window event: eraseSelection
   useEffect(() => {
     const handleEraseSelection = () => {
       if (!selection) return
 
-      const { start, end } = normalizeRange(selection, verses)
-
-      dispatch({
-        type: 'ERASE_SELECTION',
-        payload: { start, end },
-      }).catch(console.error)
-
+      eraseSelection(selection)
       setSelection(null)
     }
 
     window.addEventListener('eraseSelection', handleEraseSelection)
     return () => window.removeEventListener('eraseSelection', handleEraseSelection)
-  }, [selection, verses, dispatch])
+  }, [selection, versesByVersion, dispatch])
 
   // Window event: clearSelection
   useEffect(() => {
@@ -91,15 +100,7 @@ export function useAnnotationEvents({
     if (!selection) return
 
     const { color, type } = applyAnnotationTrigger
-    const ranges = buildRangesFromSelection(selection, verses, getTokens)
-
-    if (ranges.length > 0) {
-      dispatch({
-        type: 'CREATE_ANNOTATION',
-        payload: { ranges, color, type },
-      }).catch(console.error)
-    }
-
+    createAnnotation(selection, color, type)
     setSelection(null)
   }, [applyAnnotationTrigger?.count])
 
@@ -108,13 +109,7 @@ export function useAnnotationEvents({
     if (!eraseSelectionTrigger || eraseSelectionTrigger === 0) return
     if (!selection) return
 
-    const { start, end } = normalizeRange(selection, verses)
-
-    dispatch({
-      type: 'ERASE_SELECTION',
-      payload: { start, end },
-    }).catch(console.error)
-
+    eraseSelection(selection)
     setSelection(null)
   }, [eraseSelectionTrigger])
 }

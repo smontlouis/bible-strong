@@ -19,6 +19,8 @@ export type BibleDOMBridgeAction = {
   params?: {
     verse: Verse
     isSelectionMode?: StudyNavigateBibleType
+    /** Parallel reading: the version of the verse. */
+    version?: string
   }
   bookCode?: string
   chapter?: string | number
@@ -78,6 +80,21 @@ export const getStringPayload = (payload: unknown): string | undefined =>
 
 export const getNumberPayload = (payload: unknown): number | undefined =>
   typeof payload === 'number' ? payload : undefined
+
+/** A verse tapped in the reader, with the version it was tapped in when parallel reading. */
+export const getVerseSelectionPayload = (
+  payload: unknown
+): { verseKey: string; version?: string } | undefined => {
+  if (typeof payload === 'string') return { verseKey: payload }
+  if (!isRecord(payload)) return undefined
+  const verseKey = getStringPayload(payload.verseKey)
+  if (!verseKey) return undefined
+  return { verseKey, version: getStringPayload(payload.version) }
+}
+
+/** The version an annotation-mode payload refers to, when the reader names one. */
+export const getPayloadVersion = (payload: unknown): string | undefined =>
+  isRecord(payload) ? getStringPayload(payload.version) : undefined
 
 export const getStrongRelationSelectionPayload = (
   payload: unknown,

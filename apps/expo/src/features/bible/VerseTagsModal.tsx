@@ -17,7 +17,11 @@ import Text from '~common/ui/Text'
 import { EMPTY_ARRAY } from '~helpers/emptyReferences'
 import verseToReference from '~helpers/verseToReference'
 import { RootState } from '~redux/modules/reducer'
-import { makeTaggedItemsForVerseSelector, TaggedItem } from '~redux/selectors/bible'
+import {
+  makeTaggedItemsForVerseSelector,
+  TaggedItem,
+  type DisplayedVersions,
+} from '~redux/selectors/bible'
 import type { Theme as AppTheme } from '~themes'
 
 const ItemRow = (
@@ -64,7 +68,8 @@ const IconContainer = (
 
 interface VerseTagsModalProps {
   verseKey: string | null
-  version: string
+  // Every version on screen in parallel reading
+  version: DisplayedVersions
 }
 
 const getItemIcon = (type: TaggedItem['type']): 'edit-3' | 'file-text' | 'link' => {

@@ -17,6 +17,7 @@ import { useSelector } from 'react-redux'
 import { isFullScreenBibleAtom } from 'src/state/app'
 import {
   BibleTab,
+  getSelectedVersesVersion,
   parallelColumnWidthAtom,
   parallelDisplayModeAtom,
   useBibleTabActions,
@@ -162,7 +163,10 @@ const Header = ({
   // Check if verses are selected
   const hasSelectedVerses =
     !hidePersonalBibleData && selectedVerses && Object.keys(selectedVerses).length > 0
-  const selectedVersesReference = verseToReference(selectedVerses)
+  // Parallel reading: the selection belongs to one version, named after the reference
+  const selectedVersesReference = isParallel
+    ? `${verseToReference(selectedVerses)} · ${getSelectedVersesVersion(bible.data)}`
+    : verseToReference(selectedVerses)
 
   // Check if current chapter has a bookmark
   const selectBookmarkForChapter = makeSelectBookmarkForChapter()

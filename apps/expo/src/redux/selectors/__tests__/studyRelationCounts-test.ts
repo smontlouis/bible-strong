@@ -7,6 +7,7 @@ import {
   makeTaggedItemsForVerseSelector,
   makeTaggedVersesInChapterSelector,
   makeTagDataSelector,
+  makeWordAnnotationsInOtherVersionsSelector,
   selectRelationCountsByEndpointIdentity,
 } from '../bible'
 import type { RootState } from '~redux/modules/reducer'
@@ -379,6 +380,76 @@ describe('makeWordAnnotationsByChapterSelector', () => {
       text: '',
     })
     expect(result.annotation2).toBeUndefined()
+  })
+})
+
+describe('parallel reading selectors', () => {
+  const createAnnotationState = () =>
+    ({
+      user: {
+        bible: {
+          highlights: {},
+          wordAnnotations: {
+            lsg: {
+              id: 'lsg',
+              version: 'LSG',
+              color: 'color1',
+              type: 'background',
+              date: 1,
+              tags: { tag1: { id: 'tag1', name: 'Foi' } },
+              ranges: [{ verseKey: '1-1-1', startWordIndex: 0, endWordIndex: 1, text: 'a' }],
+            },
+            kjv: {
+              id: 'kjv',
+              version: 'KJV',
+              color: 'color2',
+              type: 'underline',
+              date: 2,
+              tags: { tag1: { id: 'tag1', name: 'Foi' } },
+              ranges: [{ verseKey: '1-1-1', startWordIndex: 2, endWordIndex: 3, text: 'b' }],
+            },
+            frc: {
+              id: 'frc',
+              version: 'FRC97',
+              color: 'color3',
+              type: 'circle',
+              date: 3,
+              ranges: [{ verseKey: '1-1-2', startWordIndex: 0, endWordIndex: 0, text: 'c' }],
+            },
+          },
+        },
+      },
+    }) as unknown as RootState
+
+  it('reads the word annotations of every version on screen', () => {
+    const state = createAnnotationState()
+
+    expect(
+      Object.keys(makeWordAnnotationsByChapterSelector()(state, 1, 1, ['LSG', 'KJV'])).sort()
+    ).toEqual(['kjv', 'lsg'])
+    expect(Object.keys(makeWordAnnotationsByChapterSelector()(state, 1, 1, 'LSG'))).toEqual(['lsg'])
+  })
+
+  it('points to the annotations of versions that are not on screen only', () => {
+    const state = createAnnotationState()
+
+    expect(makeWordAnnotationsInOtherVersionsSelector()(state, 1, 1, ['LSG', 'KJV'])).toEqual({
+      '1-1-2': [{ version: 'FRC97', count: 1 }],
+    })
+    expect(makeWordAnnotationsInOtherVersionsSelector()(state, 1, 1, 'LSG')).toEqual({
+      '1-1-1': [{ version: 'KJV', count: 1 }],
+      '1-1-2': [{ version: 'FRC97', count: 1 }],
+    })
+  })
+
+  it('counts the tagged annotations of every version on screen once per verse', () => {
+    const state = createAnnotationState()
+
+    expect(makeTaggedVersesInChapterSelector()(state, 1, 1, ['LSG', 'KJV']).counts).toEqual({
+      1: 2,
+    })
+    expect(makeTaggedItemsForVerseSelector()(state, '1-1-1', ['LSG', 'KJV'])).toHaveLength(2)
+    expect(makeTaggedItemsForVerseSelector()(state, '1-1-1', 'LSG')).toHaveLength(1)
   })
 })
 
