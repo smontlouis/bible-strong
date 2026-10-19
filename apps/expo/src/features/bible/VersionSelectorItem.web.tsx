@@ -42,7 +42,7 @@ const VersionSelectorItem = ({
       >
         {showSelectionCheckbox && (
           <Box className="overflow-hidden border-continuous w-[42px] items-center justify-center">
-            <Checkbox checked={Boolean(isSelected)} variant="icon" size={22} />
+            <Checkbox checked={Boolean(isSelected)} size={22} />
           </Box>
         )}
         <Box className="overflow-hidden border-continuous flex-[1]">

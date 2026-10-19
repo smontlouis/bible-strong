@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import type { PassageTarget, PassageWidget as Descriptor } from '@bible-strong/ai-contract/contract'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
+import Checkbox from '~common/ui/Checkbox'
 import Text from '~common/ui/Text'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { getBibleVersionVersificationId, getVersions } from '~helpers/bibleVersions'
@@ -150,11 +150,7 @@ export default function PassageWidget({ widget }: { widget: Descriptor }) {
             onPress={() => setDifferences(value => !value)}
             className="flex-row items-center gap-2 py-1"
           >
-            <FeatherIcon
-              name={differences ? 'check-square' : 'square'}
-              size={17}
-              color={differences ? 'primary' : 'grey'}
-            />
+            <Checkbox checked={differences} size={17} />
             <Text className="text-[14px]">{t('assistant.widgets.highlightDifferences')}</Text>
           </TouchableBox>
           {passages.some((p, i) => p.version !== widget.passages[i]?.version) && (

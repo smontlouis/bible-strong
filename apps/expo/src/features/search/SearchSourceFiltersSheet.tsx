@@ -76,12 +76,7 @@ const SearchSourceFiltersSheet = forwardRef<SheetRef, SearchSourceFiltersProps>(
                   accessibilityState={{ checked }}
                   onPress={() => onToggle(type)}
                 >
-                  <Checkbox
-                    className="mr-[12px]"
-                    checked={checked}
-                    fillChecked
-                    checkColor="reverse"
-                  />
+                  <Checkbox className="mr-[12px]" checked={checked} />
                   <SearchTypeIcon type={type} color={checked ? config.color : 'tertiary'} />
                   <Text
                     className={twMerge(

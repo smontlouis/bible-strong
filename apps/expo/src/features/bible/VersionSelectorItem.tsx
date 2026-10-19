@@ -508,7 +508,7 @@ const VersionSelectorItem = ({
 
     return (
       <ActionColumn opacity={disabled ? 0.45 : 1}>
-        <Checkbox checked={Boolean(isSelected)} variant="icon" size={22} />
+        <Checkbox checked={Boolean(isSelected)} size={22} />
       </ActionColumn>
     )
   }

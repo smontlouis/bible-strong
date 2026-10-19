@@ -78,6 +78,7 @@ jest.mock('~common/ui/Container', () => ({
 jest.mock('~common/ui/Button', () => ({ __esModule: true, default: () => null }))
 jest.mock('~common/ui/Text', () => ({ __esModule: true, default: () => null }))
 jest.mock('~common/ui/Icon', () => ({ FeatherIcon: () => null }))
+jest.mock('~common/ui/Radio', () => ({ __esModule: true, default: () => null }))
 jest.mock('~common/ui/PageContent', () => ({ pageContentStyle: {} }))
 beforeAll(() => {
   ;(

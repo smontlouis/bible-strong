@@ -8,13 +8,17 @@ type RadioProps = Omit<BoxProps, 'children'> & {
   size?: number
   selectedColor?: string
   unselectedColor?: string
+  dotColor?: string
 }
 
+// The app's only radio: a drawn circle, filled with a white dot when selected,
+// matching Checkbox. Prefer it to `check-circle` / `circle` icons.
 const Radio = ({
   selected,
   size = 24,
   selectedColor = 'primary',
   unselectedColor = 'tertiary',
+  dotColor = 'white',
   ...boxProps
 }: RadioProps) => {
   const stylingTheme = useStylingTheme()
@@ -26,6 +30,7 @@ const Radio = ({
           width: size,
           height: size,
           borderRadius: size / 2,
+          backgroundColor: resolveThemeColor(stylingTheme, selected ? selectedColor : undefined),
           borderColor: resolveThemeColor(stylingTheme, selected ? selectedColor : unselectedColor),
         },
         boxProps.style,
@@ -42,10 +47,10 @@ const Radio = ({
         <Box
           className="overflow-hidden border-continuous"
           style={{
-            width: size * 0.42,
-            height: size * 0.42,
-            borderRadius: (size * 0.42) / 2,
-            backgroundColor: resolveThemeColor(stylingTheme, selectedColor),
+            width: size * 0.36,
+            height: size * 0.36,
+            borderRadius: (size * 0.36) / 2,
+            backgroundColor: resolveThemeColor(stylingTheme, dotColor),
           }}
         />
       )}
