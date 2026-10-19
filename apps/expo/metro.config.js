@@ -1,4 +1,6 @@
 require('./scripts/generate-theme-css.cjs')
+const crypto = require('crypto')
+const os = require('os')
 const path = require('path')
 const { getSentryExpoConfig } = require('@sentry/react-native/metro')
 
@@ -45,6 +47,21 @@ const styledConfig = withUniwindConfig(config, {
   dtsFile: './src/uniwind-types.d.ts',
   extraThemes: ['default', 'sepia', 'nature', 'sunset', 'black', 'mauve', 'night'],
 })
+
+// One transform cache per checkout. Metro keys a file by its project-relative path and its
+// content, so master and the .claude/worktrees lanes used to share transforms through
+// $TMPDIR/metro-cache. Expo's `use dom` proxies carry their absolute path: master could load
+// a lane's DOM bundle, and a lane's `--clear` emptied master's cache. Uniwind sets the store
+// (it skips CSS outputs): only its directory changes.
+if (styledConfig.cacheStores?.length === 1) {
+  const checkoutId = crypto.createHash('sha1').update(__dirname).digest('hex').slice(0, 8)
+  const checkoutName = path.basename(path.resolve(__dirname, '../..'))
+  const FileStore = styledConfig.cacheStores[0].constructor
+  styledConfig.cacheStores = [
+    new FileStore({ root: path.join(os.tmpdir(), `metro-cache-${checkoutName}-${checkoutId}`) }),
+  ]
+}
+
 // Worklet runtimes only exist on native: a web-only run keeps the plain configuration.
 const webOnly =
   process.argv.includes('--web') ||
