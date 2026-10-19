@@ -8,7 +8,7 @@ import type { BibleError } from '~helpers/bibleErrors'
 import type { ParallelDisplayMode } from 'src/state/tabs'
 import type { PericopeChapter, RootStyles } from './BibleDOMWrapper'
 import InlineCommentaryChips, { type LabeledCommentaryChip } from './InlineCommentaryChips'
-import { PericopeHeaders, getPericopeVerse } from './PericopeHeaders'
+import { PericopeHeaders, getPericopeVerse, hasPericopeHeadings } from './PericopeHeaders'
 import { NAVIGATE_TO_VERSION } from './dispatch'
 import { useDispatch } from './DispatchProvider'
 import { useTranslations } from './TranslationsContext'
@@ -244,20 +244,25 @@ const ParallelVerseRow = ({
   const hasMarkers = hasVerseMarkers(verseContent)
   const hasEndContent = hasVerseEndContent(verseContent) || Boolean(commentaryChips?.length)
 
+  const getCellPericope = (cell: ParallelVerseCell) =>
+    getPericopeVerse(pericopeByVersion[cell.version], verseNumber)
+
   const renderHeadings = (cell: ParallelVerseCell) => (
     <PericopeHeaders
-      pericope={getPericopeVerse(pericopeByVersion[cell.version], verseNumber)}
+      pericope={getCellPericope(cell)}
       headings={cell.verse.Headings}
       settings={settings}
       annotationMode={annotationMode}
       navigateToPericope={navigateToPericope}
+      isCompact={!isVertical}
     />
   )
 
   // Vertical display: the main version's headings open the verse group, above its number.
+  // Horizontal display: headings get a row of their own, above the verse.
   const renderCell = (cell: ParallelVerseCell, index: number) => (
     <>
-      {!(isVertical && index === 0) && renderHeadings(cell)}
+      {isVertical && index > 0 && renderHeadings(cell)}
       {isVertical && (
         <VerticalVersionTitle
           settings={settings}
@@ -365,6 +370,20 @@ const ParallelVerseRow = ({
         marginInlineEnd: -BIBLE_READING_HORIZONTAL_PADDING,
       }}
     >
+      {/* A version's headings would push down its verse alone: they share a row, so that
+          every version starts the verse at the same height */}
+      {cells.some(cell => hasPericopeHeadings(getCellPericope(cell))) && (
+        <div style={{ display: 'flex' }}>
+          {cells.map((cell, index) => (
+            <div
+              key={`${index}:${cell.version}`}
+              style={{ ...columnStyle(index), paddingBlock: 0 }}
+            >
+              {renderHeadings(cell)}
+            </div>
+          ))}
+        </div>
+      )}
       <div style={{ display: 'flex' }}>
         {cells.map((cell, index) => (
           <div key={`${index}:${cell.version}`} style={columnStyle(index)}>

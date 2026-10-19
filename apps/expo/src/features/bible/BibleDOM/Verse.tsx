@@ -727,7 +727,8 @@ const Verse = ({
 
   return (
     <>
-      {paragraphBreakBeforeVerse && <br />}
+      {/* Parallel rows already set each verse apart: a paragraph would only lower one version */}
+      {paragraphBreakBeforeVerse && !isParallelCell && <br />}
       <Wrapper
         settings={settings}
         id={isParallelCell ? undefined : `verset-${verse.Verset}`}

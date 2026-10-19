@@ -4,6 +4,7 @@ import { styled } from 'goober'
 import type { PericopeChapter, RootStyles } from './BibleDOMWrapper'
 import ExternalIcon from './ExternalIcon'
 import { scaleFontSize } from './scaleFontSize'
+import { getCompactHeadingFontSize } from './verseTypography'
 import {
   getCanonicalBibleHeadingReferences,
   type CanonicalBibleHeading,
@@ -12,37 +13,27 @@ import { OPEN_CANONICAL_BIBLE_REFERENCE } from './dispatch'
 import { useDispatch } from './DispatchProvider'
 import { useTranslations } from './TranslationsContext'
 
-const H1 = styled('h1')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
-  fontFamily,
-  fontSize: scaleFontSize(28, fontSizeScale),
-  textAlign: 'start',
-  position: 'relative',
-  zIndex: 1,
-}))
+const pericopeHeading = (tag: 'h1' | 'h2' | 'h3' | 'h4', level: 1 | 2 | 3 | 4, size: number) =>
+  styled(tag)<RootStyles & { $compact?: boolean }>(
+    ({ settings: { fontSizeScale, fontFamily }, $compact }) => ({
+      fontFamily,
+      fontSize: $compact
+        ? getCompactHeadingFontSize(level, fontSizeScale)
+        : scaleFontSize(size, fontSizeScale),
+      ...($compact ? { marginBlock: '0.5em 0.35em' } : {}),
+      textAlign: 'start',
+      position: 'relative',
+      zIndex: 1,
+    })
+  )
 
-const H2 = styled('h2')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
-  fontFamily,
-  fontSize: scaleFontSize(24, fontSizeScale),
-  textAlign: 'start',
-  position: 'relative',
-  zIndex: 1,
-}))
+const H1 = pericopeHeading('h1', 1, 28)
+const H2 = pericopeHeading('h2', 2, 24)
+const H3 = pericopeHeading('h3', 3, 20)
+const H4 = pericopeHeading('h4', 4, 18)
 
-const H3 = styled('h3')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
-  fontFamily,
-  fontSize: scaleFontSize(20, fontSizeScale),
-  textAlign: 'start',
-  position: 'relative',
-  zIndex: 1,
-}))
-
-const H4 = styled('h4')<RootStyles>(({ settings: { fontSizeScale, fontFamily } }) => ({
-  fontFamily,
-  fontSize: scaleFontSize(18, fontSizeScale),
-  textAlign: 'start',
-  position: 'relative',
-  zIndex: 1,
-}))
+export const hasPericopeHeadings = ({ h1, h2, h3, h4 }: ReturnType<typeof getPericopeVerse>) =>
+  Boolean(h1 || h2 || h3 || h4)
 
 export const getPericopeVerse = (pericopeChapter: PericopeChapter | undefined, verse: number) => {
   if (pericopeChapter && pericopeChapter[verse]) {
@@ -62,12 +53,15 @@ export function PericopeHeaders({
   settings,
   annotationMode,
   navigateToPericope,
+  isCompact,
 }: {
   pericope: ReturnType<typeof getPericopeVerse>
   headings?: CanonicalBibleHeading[]
   settings: RootStyles['settings']
   annotationMode?: boolean
   navigateToPericope: () => void
+  // Narrow parallel columns: sizes close to the text, tighter margins
+  isCompact?: boolean
 }): JSX.Element | null {
   const { h1, h2, h3, h4 } = pericope
   const dispatch = useDispatch()
@@ -141,25 +135,45 @@ export function PericopeHeaders({
   return (
     <>
       {h1 && (
-        <H1 settings={settings} data-ignore-verse-touch onClick={stopHeadingClick}>
+        <H1
+          settings={settings}
+          $compact={isCompact}
+          data-ignore-verse-touch
+          onClick={stopHeadingClick}
+        >
           {renderHeadingContent(h1)}
           {!annotationMode && renderExternalButton()}
         </H1>
       )}
       {h2 && (
-        <H2 settings={settings} data-ignore-verse-touch onClick={stopHeadingClick}>
+        <H2
+          settings={settings}
+          $compact={isCompact}
+          data-ignore-verse-touch
+          onClick={stopHeadingClick}
+        >
           {renderHeadingContent(h2)}
           {!annotationMode && renderExternalButton()}
         </H2>
       )}
       {h3 && (
-        <H3 settings={settings} data-ignore-verse-touch onClick={stopHeadingClick}>
+        <H3
+          settings={settings}
+          $compact={isCompact}
+          data-ignore-verse-touch
+          onClick={stopHeadingClick}
+        >
           {renderHeadingContent(h3)}
           {!annotationMode && renderExternalButton()}
         </H3>
       )}
       {h4 && (
-        <H4 settings={settings} data-ignore-verse-touch onClick={stopHeadingClick}>
+        <H4
+          settings={settings}
+          $compact={isCompact}
+          data-ignore-verse-touch
+          onClick={stopHeadingClick}
+        >
           {renderHeadingContent(h4)}
           {!annotationMode && renderExternalButton()}
         </H4>
