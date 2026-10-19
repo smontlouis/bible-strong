@@ -13,6 +13,8 @@ const TEXT_MODE_KINDS: TextModeKind[] = ['strong', 'interlinear']
 // The header's book and version selectors: one chip split into segments by a thin gap
 const SEGMENT_GAP = '3px'
 const SEGMENT_RADIUS = '20px'
+// The interface font of the header's selectors, not the Bible text's
+const INTERFACE_FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
 
 // A segment waits, as the header's button does, while its resources download
 const downloadPulse = keyframes`
@@ -33,8 +35,8 @@ const segmentRadius = (isFirst: boolean, isLast: boolean) =>
   }`
 
 const VersionSegment = styled('div')<RootStyles & { $isLast: boolean; $height: number }>(
-  ({ settings: { fontFamily, colors, theme }, $isLast, $height }) => ({
-    fontFamily,
+  ({ settings: { colors, theme }, $isLast, $height }) => ({
+    fontFamily: INTERFACE_FONT,
     fontWeight: 'bold',
     fontSize: '14px',
     display: 'inline-flex',
