@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { styled } from 'goober'
+import { BIBLE_READING_HORIZONTAL_PADDING } from '~common/readingLayout'
 import type { SelectedCode, StudyNavigateBibleType, Verse as TVerse } from '~common/types'
 import type { BibleError } from '~helpers/bibleErrors'
 import type { ParallelDisplayMode } from 'src/state/tabs'
@@ -360,7 +361,16 @@ const ParallelVerseRow = ({
   })
 
   return (
-    <div id={`verset-${verse.Verset}`} style={{ width: 'max-content' }}>
+    <div
+      id={`verset-${verse.Verset}`}
+      style={{
+        width: 'max-content',
+        // The scroller's end padding, carried by the row: WebKit leaves a scroller's end padding
+        // out of its scroll width. The negative margin keeps engines that count it from doubling it.
+        paddingInlineEnd: BIBLE_READING_HORIZONTAL_PADDING,
+        marginInlineEnd: -BIBLE_READING_HORIZONTAL_PADDING,
+      }}
+    >
       <div style={{ display: 'flex' }}>
         {cells.map((cell, index) => (
           <div key={`${index}:${cell.version}`} style={columnStyle(index)}>

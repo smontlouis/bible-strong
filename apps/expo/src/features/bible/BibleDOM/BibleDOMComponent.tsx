@@ -267,6 +267,7 @@ const Container = styled('div')<
     isParallelVerse: boolean
     headerHeight: number
     $columnsScrollScope?: boolean
+    $scrollsColumns?: boolean
   }
 >(
   ({
@@ -275,6 +276,7 @@ const Container = styled('div')<
     isParallelVerse,
     headerHeight,
     $columnsScrollScope,
+    $scrollsColumns,
   }) => ({
     // The version titles, outside the columns' scroller, read its scroll timeline
     ...($columnsScrollScope ? { timelineScope: COLUMNS_SCROLL_TIMELINE } : {}),
@@ -287,6 +289,8 @@ const Container = styled('div')<
     boxSizing: 'border-box',
     margin: '0 auto',
     padding: '10px 15px',
+    // Scrolled columns keep their margin inside their scroller and run to the screen edges
+    ...($scrollsColumns ? { paddingInline: 0 } : {}),
     paddingBottom: '300px',
     textAlign: alignContent,
     background: colors[theme].reverse,
@@ -517,8 +521,10 @@ const HorizontalScrollWrapper = styled('div')<{
   columnCount: number
   $panYOnly?: boolean
   $scrollTimeline?: boolean
-}>(({ columnCount, $panYOnly, $scrollTimeline }) => ({
+  $scrollsColumns?: boolean
+}>(({ columnCount, $panYOnly, $scrollTimeline, $scrollsColumns }) => ({
   overflowX: columnCount > 1 ? 'auto' : 'visible',
+  paddingInline: $scrollsColumns ? `${BIBLE_READING_HORIZONTAL_PADDING}px` : undefined,
   ...($scrollTimeline ? { scrollTimeline: `${COLUMNS_SCROLL_TIMELINE} x` } : {}),
   // Annotation mode: horizontal moves belong to word selection, the reader scrolls the columns
   touchAction: $panYOnly ? 'pan-y' : undefined,
@@ -537,6 +543,7 @@ const HorizontalScrollWrapper = styled('div')<{
 const HeaderScrollWrapper = styled('div')<{ columnCount: number; $followsScroll?: boolean }>(
   ({ columnCount, $followsScroll }) => ({
     position: 'sticky',
+    paddingInline: `${BIBLE_READING_HORIZONTAL_PADDING}px`,
     top: 'var(--header-height)',
     zIndex: 2,
     transition: 'top 0.3s cubic-bezier(.13,.69,.5,.98)',
@@ -1438,6 +1445,7 @@ const LoadedBibleContent = ({
           }
           headerHeight={headerHeight}
           $columnsScrollScope={titlesFollowColumnsScroll}
+          $scrollsColumns={isHorizontalParallelMode}
         >
           {/* Highlight layer for word annotations and selection */}
           {!isHorizontalParallelMode && highlightLayer}
@@ -1485,6 +1493,7 @@ const LoadedBibleContent = ({
             }
             $panYOnly={isHorizontalParallelMode && Boolean(annotationMode)}
             $scrollTimeline={titlesFollowColumnsScroll}
+            $scrollsColumns={isHorizontalParallelMode}
           >
             {isHebreu && <RightDirection settings={settings}>Sens de la lecture ←</RightDirection>}
             {!isContextFocused && (
