@@ -5,14 +5,35 @@ import { isOfflineModeForced } from './runtimeConfig'
 
 export type ConnectionStatus = 'unknown' | 'offline' | 'internet'
 
+type NetInfoConnection = Pick<NetInfoState, 'isConnected' | 'isInternetReachable'>
+
+/**
+ * Whether a request is worth trying. Only a missing network counts as offline: Android reports an
+ * unvalidated network as unreachable when its connectivity probe is blocked (private DNS, some
+ * VPNs) although requests go through (#406), so reachability never blocks a request.
+ */
 export const connectionStatusFromNetInfo = (
-  state: Pick<NetInfoState, 'isConnected' | 'isInternetReachable'>,
+  state: NetInfoConnection,
   forceOffline = isOfflineModeForced
 ): ConnectionStatus => {
-  if (forceOffline) return 'offline'
-  if (state.isConnected === false || state.isInternetReachable === false) return 'offline'
-  if (state.isConnected === true && state.isInternetReachable === true) return 'internet'
+  if (forceOffline || state.isConnected === false) return 'offline'
+  if (state.isConnected === true) return 'internet'
   return 'unknown'
+}
+
+/** Whether a request that failed without a response should be explained by a lost connection. */
+export const isOfflineFailureFromNetInfo = (
+  state: NetInfoConnection,
+  forceOffline = isOfflineModeForced
+): boolean => forceOffline || state.isConnected === false || state.isInternetReachable === false
+
+export const isLikelyOfflineAfterFailure = async (): Promise<boolean> => {
+  if (isOfflineModeForced) return true
+  try {
+    return isOfflineFailureFromNetInfo(await NetInfo.fetch())
+  } catch {
+    return false
+  }
 }
 
 export const useConnectionStatus = (): ConnectionStatus => {

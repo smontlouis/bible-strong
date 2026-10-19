@@ -64,6 +64,8 @@ type HttpInterlinearBibleResourceAdapterOptions = {
   baseUrl: string
   fetcher?: typeof fetch
   isOnline: () => Promise<boolean>
+  /** Explains a request that failed without a response; defaults to the online gate. */
+  isOfflineFailure?: () => Promise<boolean>
   bibleChapterAdapter: BibleChapterAdapter
   /** Reads BHG online whatever is installed; defaults to `bibleChapterAdapter`. */
   baseChapterAdapter?: Pick<BibleChapterAdapter, 'loadChapter'>
@@ -111,6 +113,7 @@ export const createHttpInterlinearBibleResourceAdapter = ({
   baseUrl,
   fetcher = fetch,
   isOnline,
+  isOfflineFailure = async () => !(await isOnline()),
   bibleChapterAdapter,
   baseChapterAdapter = bibleChapterAdapter,
   timeoutMs = 10_000,
@@ -140,7 +143,7 @@ export const createHttpInterlinearBibleResourceAdapter = ({
     } catch (error) {
       if (error instanceof ResourceAccessError) throw error
       throw new ResourceAccessError(
-        (await isOnline()) ? 'TEMPORARY_UNAVAILABLE' : 'NETWORK_OFFLINE'
+        (await isOfflineFailure()) ? 'NETWORK_OFFLINE' : 'TEMPORARY_UNAVAILABLE'
       )
     } finally {
       clearTimeout(timeout)

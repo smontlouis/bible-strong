@@ -11,6 +11,7 @@ import {
 } from './searchAnalyticsAccess'
 import Constants from 'expo-constants'
 import { onlineManager } from '@tanstack/react-query'
+import { isLikelyOfflineAfterFailure } from '~helpers/useConnection'
 import { createContext, useContext, type ReactNode } from 'react'
 
 import { createBibleContentAccess, type BibleContentAccess } from './bibleContentAccess'
@@ -107,6 +108,7 @@ const bibleChapter = resourceApiBaseUrl
       baseUrl: resourceApiBaseUrl,
       fetcher: resourceApiFetch,
       isOnline,
+      isOfflineFailure: isLikelyOfflineAfterFailure,
     })
   : unavailableHttpBibleChapterAdapter
 
@@ -115,6 +117,7 @@ const detailedStrongLexicon = resourceApiBaseUrl
       baseUrl: resourceApiBaseUrl,
       fetcher: resourceApiFetch,
       isOnline,
+      isOfflineFailure: isLikelyOfflineAfterFailure,
     })
   : unavailableAccess<StrongLexiconAccess>()
 
@@ -124,6 +127,7 @@ const strongLexicon = createLayeredStrongLexiconAccess(
         baseUrl: resourceApiBaseUrl,
         fetcher: resourceApiFetch,
         isOnline,
+        isOfflineFailure: isLikelyOfflineAfterFailure,
         level: 'simple',
       })
     : unavailableAccess<StrongLexiconAccess>(),
@@ -135,6 +139,7 @@ const strongBibleAdapter = resourceApiBaseUrl
       baseUrl: resourceApiBaseUrl,
       fetcher: resourceApiFetch,
       isOnline,
+      isOfflineFailure: isLikelyOfflineAfterFailure,
       bibleChapterAdapter: bibleChapter,
     })
   : unavailableAccess<StrongBibleResourceAdapter>()
@@ -145,6 +150,7 @@ const interlinearBible = resourceApiBaseUrl
       baseUrl: resourceApiBaseUrl,
       fetcher: resourceApiFetch,
       isOnline,
+      isOfflineFailure: isLikelyOfflineAfterFailure,
       bibleChapterAdapter: bibleChapter,
     })
   : unavailableAccess<InterlinearBibleResourceAccess>()
@@ -169,17 +175,33 @@ const bibleSearch = resourceApiBaseUrl
       fetcher: resourceApiFetch,
       versions: [...bibleVersions],
       isOnline,
+      isOfflineFailure: isLikelyOfflineAfterFailure,
     })
   : unavailableAccess<BibleSearchAccess>()
 
 const dictionary = resourceApiBaseUrl
-  ? createHttpDictionaryAccess({ baseUrl: resourceApiBaseUrl, fetcher: resourceApiFetch, isOnline })
+  ? createHttpDictionaryAccess({
+      baseUrl: resourceApiBaseUrl,
+      fetcher: resourceApiFetch,
+      isOnline,
+      isOfflineFailure: isLikelyOfflineAfterFailure,
+    })
   : unavailableAccess<DictionaryAccess>()
 const nave = resourceApiBaseUrl
-  ? createHttpNaveAccess({ baseUrl: resourceApiBaseUrl, fetcher: resourceApiFetch, isOnline })
+  ? createHttpNaveAccess({
+      baseUrl: resourceApiBaseUrl,
+      fetcher: resourceApiFetch,
+      isOnline,
+      isOfflineFailure: isLikelyOfflineAfterFailure,
+    })
   : unavailableAccess<NaveAccess>()
 const timeline = resourceApiBaseUrl
-  ? createHttpTimelineAccess({ baseUrl: resourceApiBaseUrl, fetcher: resourceApiFetch, isOnline })
+  ? createHttpTimelineAccess({
+      baseUrl: resourceApiBaseUrl,
+      fetcher: resourceApiFetch,
+      isOnline,
+      isOfflineFailure: isLikelyOfflineAfterFailure,
+    })
   : unavailableAccess<TimelineAccess>()
 const commentary = resourceApiBaseUrl
   ? createCommentaryAccess({
@@ -188,6 +210,7 @@ const commentary = resourceApiBaseUrl
         baseUrl: resourceApiBaseUrl,
         fetcher: resourceApiFetch,
         isOnline,
+        isOfflineFailure: isLikelyOfflineAfterFailure,
       }),
       isOnline,
     })

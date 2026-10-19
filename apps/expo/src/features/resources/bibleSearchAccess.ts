@@ -43,6 +43,8 @@ type HttpBibleSearchAccessOptions = {
   versions: readonly string[]
   fetcher?: typeof fetch
   isOnline: () => Promise<boolean>
+  /** Explains a request that failed without a response; defaults to the online gate. */
+  isOfflineFailure?: () => Promise<boolean>
   timeoutMs?: number
 }
 
@@ -77,6 +79,7 @@ export const createHttpBibleSearchAccess = ({
   versions,
   fetcher = fetch,
   isOnline,
+  isOfflineFailure = async () => !(await isOnline()),
   timeoutMs = 10_000,
 }: HttpBibleSearchAccessOptions): BibleSearchAccess => {
   const normalizedBaseUrl = normalizeBaseUrl(baseUrl)
@@ -114,7 +117,7 @@ export const createHttpBibleSearchAccess = ({
       if (options.signal?.aborted) throw error
       if (error instanceof ResourceAccessError) throw error
       throw new ResourceAccessError(
-        (await isOnline()) ? 'TEMPORARY_UNAVAILABLE' : 'NETWORK_OFFLINE'
+        (await isOfflineFailure()) ? 'NETWORK_OFFLINE' : 'TEMPORARY_UNAVAILABLE'
       )
     } finally {
       request.dispose()
@@ -165,7 +168,7 @@ export const createHttpBibleSearchAccess = ({
         if (options.signal?.aborted) throw error
         if (error instanceof ResourceAccessError) throw error
         throw new ResourceAccessError(
-          (await isOnline()) ? 'TEMPORARY_UNAVAILABLE' : 'NETWORK_OFFLINE'
+          (await isOfflineFailure()) ? 'NETWORK_OFFLINE' : 'TEMPORARY_UNAVAILABLE'
         )
       } finally {
         request.dispose()

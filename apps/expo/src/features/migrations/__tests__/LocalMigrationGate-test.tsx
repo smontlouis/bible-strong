@@ -69,6 +69,11 @@ jest.mock('~common/ui/Icon', () => ({
     jest.requireActual<typeof import('react')>('react').createElement('FeatherIcon', props),
 }))
 
+let mockLooksOffline = false
+jest.mock('~helpers/useConnection', () => ({
+  isLikelyOfflineAfterFailure: async () => mockLooksOffline,
+}))
+
 jest.mock('../../../migrations/localMigrationRegistry', () => ({
   localMigrationContext: { phase: 'local', scopeId: 'device' },
   localMigrationOrchestrator: {},
@@ -167,7 +172,36 @@ describe('LocalMigrationGate', () => {
     ).IS_REACT_ACT_ENVIRONMENT = true
     backHandler = undefined
     mockBackRemove.mockClear()
+    mockLooksOffline = false
   })
+
+  it.each([
+    ['RESOURCE_DOWNLOAD_HTTP_404', false, 'cloud-off', 'migration.failedServerDescription'],
+    [
+      'RESOURCE_ARCHIVE_SHA256_INVALID',
+      false,
+      'shield-off',
+      'migration.failedIntegrityDescription',
+    ],
+    ['RESOURCE_DOWNLOAD_TIMEOUT', false, 'wifi-off', 'migration.failedDescription'],
+    ['APP_MIGRATION_UNEXPECTED_ERROR', true, 'wifi-off', 'migration.failedDescription'],
+    ['APP_MIGRATION_UNEXPECTED_ERROR', false, 'alert-triangle', 'migration.failedOtherDescription'],
+  ])(
+    'explains a %s failure (offline: %s) with its own message and keeps the code visible',
+    async (errorCode, looksOffline, icon, descriptionKey) => {
+      mockLooksOffline = looksOffline
+      const orchestrator = createFakeOrchestrator({
+        inspections: [migrationSnapshot('failed', { currentStepId: 'install:lsg', errorCode })],
+      })
+
+      const renderer = await renderGate(orchestrator)
+      const texts = renderer.root.findAllByType('Text' as never).map(node => node.props.children)
+
+      expect(renderer.root.findByType('FeatherIcon' as never).props.name).toBe(icon)
+      expect(texts).toContain(descriptionKey)
+      expect(texts).toContain(errorCode)
+    }
+  )
 
   it('continues directly on a clean device', async () => {
     const orchestrator = createFakeOrchestrator({

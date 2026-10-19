@@ -484,6 +484,23 @@ describe('HTTP Bible chapter adapter', () => {
     })
   })
 
+  it('explains a failed request with the failure classifier rather than the online gate', async () => {
+    const load = (isOfflineFailure: boolean) =>
+      createHttpBibleChapterAdapter({
+        baseUrl: 'http://localhost:8787',
+        fetcher: jest.fn().mockRejectedValue(new TypeError('Network request failed')),
+        // The gate let the request through: a connected network with unvalidated reachability.
+        isOnline: async () => true,
+        isOfflineFailure: async () => isOfflineFailure,
+      }).loadChapter('LSG', 1, 1)
+
+    await expect(load(true)).resolves.toEqual({ status: 'unavailable', reason: 'network-offline' })
+    await expect(load(false)).resolves.toEqual({
+      status: 'unavailable',
+      reason: 'temporary-unavailable',
+    })
+  })
+
   it('reports malformed remote content as an integrity outcome', async () => {
     const http = createHttpBibleChapterAdapter({
       baseUrl: 'http://localhost:8787',

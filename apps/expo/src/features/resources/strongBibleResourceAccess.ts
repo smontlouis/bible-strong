@@ -303,6 +303,8 @@ type HttpStrongBibleResourceAdapterOptions = {
   baseUrl: string
   fetcher?: typeof fetch
   isOnline: () => Promise<boolean>
+  /** Explains a request that failed without a response; defaults to the online gate. */
+  isOfflineFailure?: () => Promise<boolean>
   bibleChapterAdapter: BibleChapterAdapter
   timeoutMs?: number
   availabilityStaleTimeMs?: number
@@ -379,6 +381,7 @@ export const createHttpStrongBibleResourceAdapter = ({
   baseUrl,
   fetcher = fetch,
   isOnline,
+  isOfflineFailure = async () => !(await isOnline()),
   bibleChapterAdapter,
   timeoutMs = 10_000,
   availabilityStaleTimeMs = STRONG_BIBLE_AVAILABILITY_STALE_TIME_MS,
@@ -407,7 +410,7 @@ export const createHttpStrongBibleResourceAdapter = ({
     } catch (error) {
       if (error instanceof ResourceAccessError) throw error
       throw new ResourceAccessError(
-        (await isOnline()) ? 'TEMPORARY_UNAVAILABLE' : 'NETWORK_OFFLINE'
+        (await isOfflineFailure()) ? 'NETWORK_OFFLINE' : 'TEMPORARY_UNAVAILABLE'
       )
     } finally {
       clearTimeout(timeout)

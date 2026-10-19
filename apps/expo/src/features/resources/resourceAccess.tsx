@@ -9,6 +9,7 @@ import { commentaryReadingCache } from './commentaryReadingCache'
 import { createContext, useContext, type ReactNode } from 'react'
 import Constants from 'expo-constants'
 import { onlineManager } from '@tanstack/react-query'
+import { isLikelyOfflineAfterFailure } from '~helpers/useConnection'
 import { Platform } from 'react-native'
 import {
   createBibleContentAccess,
@@ -162,6 +163,7 @@ const onlineBibleChapterAdapter = resourceApiBaseUrl
         baseUrl: resourceApiBaseUrl,
         fetcher: resourceApiFetch,
         isOnline: async () => onlineManager.isOnline(),
+        isOfflineFailure: isLikelyOfflineAfterFailure,
       })
     )
   : unavailableHttpBibleChapterAdapter
@@ -179,6 +181,7 @@ const onlineNaveAccess = resourceApiBaseUrl
         baseUrl: resourceApiBaseUrl,
         fetcher: resourceApiFetch,
         isOnline: async () => onlineManager.isOnline(),
+        isOfflineFailure: isLikelyOfflineAfterFailure,
       })
     )
   : unavailableHttpNaveAccess
@@ -197,6 +200,7 @@ const commentaryAccess = createCommentaryAccess({
         baseUrl: resourceApiBaseUrl,
         fetcher: resourceApiFetch,
         isOnline: async () => onlineManager.isOnline(),
+        isOfflineFailure: isLikelyOfflineAfterFailure,
       })
     : undefined,
   isOnline: async () => onlineManager.isOnline(),
@@ -211,6 +215,7 @@ const onlineDictionaryAccess = resourceApiBaseUrl
         baseUrl: resourceApiBaseUrl,
         fetcher: resourceApiFetch,
         isOnline: async () => onlineManager.isOnline(),
+        isOfflineFailure: isLikelyOfflineAfterFailure,
       })
     )
   : unavailableHttpDictionaryAccess
@@ -224,6 +229,7 @@ const onlineStrongBibleAdapter = resourceApiBaseUrl
         baseUrl: resourceApiBaseUrl,
         fetcher: resourceApiFetch,
         isOnline: async () => onlineManager.isOnline(),
+        isOfflineFailure: isLikelyOfflineAfterFailure,
         bibleChapterAdapter,
       })
     )
@@ -246,6 +252,7 @@ const onlineInterlinearBibleAdapter = resourceApiBaseUrl
         baseUrl: resourceApiBaseUrl,
         fetcher: resourceApiFetch,
         isOnline: async () => onlineManager.isOnline(),
+        isOfflineFailure: isLikelyOfflineAfterFailure,
         bibleChapterAdapter,
         baseChapterAdapter: onlineBibleChapterAdapter,
       })
@@ -270,6 +277,7 @@ const detailedStrongLexiconAccess = createHybridStrongLexiconAccess({
           baseUrl: resourceApiBaseUrl,
           fetcher: resourceApiFetch,
           isOnline: async () => onlineManager.isOnline(),
+          isOfflineFailure: isLikelyOfflineAfterFailure,
         })
       )
     : localStrongLexiconAccess,
@@ -286,6 +294,7 @@ const simpleStrongLexiconAccess = createHybridStrongLexiconAccess({
           baseUrl: resourceApiBaseUrl,
           fetcher: resourceApiFetch,
           isOnline: async () => onlineManager.isOnline(),
+          isOfflineFailure: isLikelyOfflineAfterFailure,
           level: 'simple',
         })
       )
@@ -309,6 +318,7 @@ const onlineBibleSearchAccess = resourceApiBaseUrl
         fetcher: resourceApiFetch,
         versions: [...remotelyReadableBibleVersions],
         isOnline: async () => onlineManager.isOnline(),
+        isOfflineFailure: isLikelyOfflineAfterFailure,
       })
     )
   : localBibleSearchAccess
@@ -349,6 +359,7 @@ const onlineTimelineAccess = resourceApiBaseUrl
         baseUrl: resourceApiBaseUrl,
         fetcher: resourceApiFetch,
         isOnline: async () => onlineManager.isOnline(),
+        isOfflineFailure: isLikelyOfflineAfterFailure,
       })
     )
   : localTimelineAccess

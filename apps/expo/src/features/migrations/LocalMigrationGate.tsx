@@ -12,6 +12,7 @@ import { ProgressBar } from '~common/ui/ProgressBar'
 import Text from '~common/ui/Text'
 import { subscribeToHardwareBackPress } from '~helpers/hardwareBackPress'
 import { appLogger } from '~helpers/agentObservability'
+import { isLikelyOfflineAfterFailure } from '~helpers/useConnection'
 import {
   localMigrationContext,
   localMigrationOrchestrator,
@@ -23,6 +24,7 @@ import type {
   MigrationSnapshot,
   MigrationSnapshotListener,
 } from '../../migrations/appMigrationOrchestrator'
+import { getMigrationFailureKind, migrationFailurePresentation } from './migrationFailure'
 type ActiveMigrationSnapshot = Exclude<MigrationSnapshot, { status: 'idle' }>
 
 type GateState =
@@ -36,6 +38,7 @@ interface LocalMigrationGateProps {
   orchestrator?: AppMigrationOrchestrator
   context?: MigrationContext
   prepareInspection?: () => Promise<void>
+  isLikelyOffline?: () => Promise<boolean>
 }
 
 const isTerminal = (snapshot: MigrationSnapshot): boolean =>
@@ -149,6 +152,7 @@ const LocalMigrationGate = ({
   orchestrator = localMigrationOrchestrator,
   context = localMigrationContext,
   prepareInspection = prepareLocalMigrationInspection,
+  isLikelyOffline = isLikelyOfflineAfterFailure,
 }: LocalMigrationGateProps) => {
   const { t, i18n } = useTranslation()
   const [startupDisposition] = useState(() => {
@@ -169,6 +173,27 @@ const LocalMigrationGate = ({
     return { kind: 'checking' }
   })
   const [actionPending, setActionPending] = useState(false)
+  const [looksOffline, setLooksOffline] = useState(false)
+  const failureKey =
+    state.kind === 'blocked' &&
+    (state.snapshot.status === 'failed' ||
+      (state.snapshot.status === 'abandoning-after-failure' && state.snapshot.errorCode))
+      ? (state.snapshot.errorCode ?? '')
+      : undefined
+
+  useEffect(() => {
+    if (failureKey === undefined) return
+    let active = true
+    isLikelyOffline().then(
+      offline => {
+        if (active) setLooksOffline(offline)
+      },
+      () => {}
+    )
+    return () => {
+      active = false
+    }
+  }, [failureKey, isLikelyOffline])
 
   const showSnapshot: MigrationSnapshotListener = snapshot => {
     if (snapshot.status === 'idle') {
@@ -334,6 +359,8 @@ const LocalMigrationGate = ({
   const reclaimedBytes = Number(snapshot.plan.metadata?.reclaimedBytes ?? 0)
   const progress = getOverallProgress(snapshot)
   const currentStep = getCurrentStepLabel(snapshot)
+  const failure =
+    migrationFailurePresentation[getMigrationFailureKind(snapshot.errorCode, looksOffline)]
 
   return (
     <Container className="flex-[1] bg-reverse" isPadding={false} testID="migration-gate">
@@ -359,7 +386,7 @@ const LocalMigrationGate = ({
             style={{ width: 72, height: 72 }}
           >
             <FeatherIcon
-              name={hasFailure ? 'wifi-off' : isWorking ? 'download-cloud' : 'refresh-cw'}
+              name={hasFailure ? failure.icon : isWorking ? 'download-cloud' : 'refresh-cw'}
               size={32}
               color={hasFailure ? 'secondary' : 'primary'}
             />
@@ -374,7 +401,7 @@ const LocalMigrationGate = ({
           </Text>
           <Text className="text-grey mt-[10px] leading-[23px]">
             {hasFailure
-              ? t('migration.failedDescription')
+              ? t(failure.descriptionKey)
               : isWorking
                 ? t('migration.runningDescription')
                 : t('migration.legacyResourcesDescription')}

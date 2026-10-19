@@ -305,6 +305,8 @@ type HttpBibleChapterAdapterOptions = {
   baseUrl: string
   fetcher?: typeof fetch
   isOnline: () => Promise<boolean>
+  /** Explains a request that failed without a response; defaults to the online gate. */
+  isOfflineFailure?: () => Promise<boolean>
   timeoutMs?: number
 }
 
@@ -367,6 +369,7 @@ export const createHttpBibleChapterAdapter = ({
   baseUrl,
   fetcher = fetch,
   isOnline,
+  isOfflineFailure = async () => !(await isOnline()),
   timeoutMs = 10_000,
 }: HttpBibleChapterAdapterOptions): BibleChapterAdapter => {
   const normalizedBaseUrl = normalizeBaseUrl(baseUrl)
@@ -421,7 +424,7 @@ export const createHttpBibleChapterAdapter = ({
     } catch {
       return {
         status: 'unavailable',
-        reason: (await isOnline()) ? 'temporary-unavailable' : 'network-offline',
+        reason: (await isOfflineFailure()) ? 'network-offline' : 'temporary-unavailable',
       }
     } finally {
       clearTimeout(timeout)

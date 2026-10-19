@@ -1209,6 +1209,8 @@ type HttpStrongLexiconAccessOptions = {
   baseUrl: string
   fetcher?: typeof fetch
   isOnline: () => Promise<boolean>
+  /** Explains a request that failed without a response; defaults to the online gate. */
+  isOfflineFailure?: () => Promise<boolean>
   timeoutMs?: number
 }
 
@@ -1231,6 +1233,7 @@ export const createHttpStrongLexiconAccess = ({
   baseUrl,
   fetcher = fetch,
   isOnline,
+  isOfflineFailure = async () => !(await isOnline()),
   timeoutMs = 10_000,
   level = 'detailed',
 }: HttpStrongLexiconAccessOptions): StrongLexiconAccess => {
@@ -1268,7 +1271,7 @@ export const createHttpStrongLexiconAccess = ({
       if (signal?.aborted) throw error
       if (error instanceof ResourceAccessError) throw error
       throw new ResourceAccessError(
-        (await isOnline()) ? 'TEMPORARY_UNAVAILABLE' : 'NETWORK_OFFLINE'
+        (await isOfflineFailure()) ? 'NETWORK_OFFLINE' : 'TEMPORARY_UNAVAILABLE'
       )
     } finally {
       clearTimeout(timeout)

@@ -1,7 +1,7 @@
 import NetInfo from '@react-native-community/netinfo'
 import { focusManager, onlineManager, QueryClient } from '@tanstack/react-query'
 import { AppState, Platform } from 'react-native'
-import { connectionStatusFromNetInfo } from './useConnection'
+import { connectionStatusFromNetInfo, isOfflineFailureFromNetInfo } from './useConnection'
 import { isOfflineModeForced } from './runtimeConfig'
 import { resourceQueryKeys } from './resourceQueryKeys'
 import { refetchResourceOnReconnect } from './resourceQueryRecovery'
@@ -33,11 +33,20 @@ export const configureQueryManagers = () => {
   if (isOfflineModeForced) {
     onlineManager.setOnline(false)
   } else {
-    onlineManager.setEventListener(setOnline =>
-      NetInfo.addEventListener(state => {
-        setOnline(connectionStatusFromNetInfo(state) === 'internet')
+    onlineManager.setEventListener(setOnline => {
+      let unreachable = false
+      return NetInfo.addEventListener(state => {
+        const online = connectionStatusFromNetInfo(state) !== 'offline'
+        const nowUnreachable = isOfflineFailureFromNetInfo(state)
+        const regainedInternet =
+          online && onlineManager.isOnline() && unreachable && !nowUnreachable
+        unreachable = nowUnreachable
+        setOnline(online)
+        // A connected network that regains Internet access never toggles the online state, so
+        // failed resource queries are refetched here as they would be on a reconnection.
+        if (regainedInternet) queryClient.getQueryCache().onOnline()
       })
-    )
+    })
   }
 
   if (Platform.OS !== 'web') {

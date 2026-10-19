@@ -1,4 +1,4 @@
-import { connectionStatusFromNetInfo } from '../useConnection'
+import { connectionStatusFromNetInfo, isOfflineFailureFromNetInfo } from '../useConnection'
 
 jest.mock('../runtimeConfig', () => ({ isOfflineModeForced: false }))
 
@@ -13,18 +13,25 @@ jest.mock('@react-native-community/netinfo', () => ({
 }))
 
 describe('connectionStatusFromNetInfo', () => {
-  it('requires confirmed Internet reachability before reporting an Internet connection', () => {
+  it('tries the network whenever a connection exists, even with unvalidated reachability', () => {
+    // Android reports a working network as unreachable when its connectivity probe is blocked.
     expect(connectionStatusFromNetInfo({ isConnected: true, isInternetReachable: false })).toBe(
-      'offline'
+      'internet'
     )
     expect(connectionStatusFromNetInfo({ isConnected: true, isInternetReachable: null })).toBe(
-      'unknown'
-    )
-    expect(connectionStatusFromNetInfo({ isConnected: null, isInternetReachable: null })).toBe(
-      'unknown'
+      'internet'
     )
     expect(connectionStatusFromNetInfo({ isConnected: true, isInternetReachable: true })).toBe(
       'internet'
+    )
+  })
+
+  it('reports offline only without a connection, and unknown before NetInfo knows', () => {
+    expect(connectionStatusFromNetInfo({ isConnected: false, isInternetReachable: null })).toBe(
+      'offline'
+    )
+    expect(connectionStatusFromNetInfo({ isConnected: null, isInternetReachable: null })).toBe(
+      'unknown'
     )
   })
 
@@ -32,5 +39,25 @@ describe('connectionStatusFromNetInfo', () => {
     expect(
       connectionStatusFromNetInfo({ isConnected: true, isInternetReachable: true }, true)
     ).toBe('offline')
+  })
+})
+
+describe('isOfflineFailureFromNetInfo', () => {
+  it('explains a failed request by a lost connection or unvalidated reachability', () => {
+    expect(isOfflineFailureFromNetInfo({ isConnected: false, isInternetReachable: null })).toBe(
+      true
+    )
+    expect(isOfflineFailureFromNetInfo({ isConnected: true, isInternetReachable: false })).toBe(
+      true
+    )
+    expect(isOfflineFailureFromNetInfo({ isConnected: true, isInternetReachable: null })).toBe(
+      false
+    )
+    expect(isOfflineFailureFromNetInfo({ isConnected: true, isInternetReachable: true })).toBe(
+      false
+    )
+    expect(
+      isOfflineFailureFromNetInfo({ isConnected: true, isInternetReachable: true }, true)
+    ).toBe(true)
   })
 })
