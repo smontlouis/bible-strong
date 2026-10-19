@@ -178,6 +178,28 @@ describe('tabGroupsFirestoreSync', () => {
     })
   })
 
+  it('keeps what the parallel columns of a tab synced by an older application showed', () => {
+    const remoteBibleTab: BibleTab = {
+      ...makeBibleTab(),
+      data: { ...makeBibleTab().data, strongMode: 'visible', parallelVersions: ['KJV', 'BDS'] },
+    }
+    const remote: FirestoreTabGroup = {
+      id: 'group-1',
+      name: 'Group',
+      isDefault: false,
+      tabs: [remoteBibleTab],
+      createdAt: 1,
+      updatedAt: 10,
+    }
+
+    const hydratedBibleTab = hydrateTabGroup(remote).tabs[0] as BibleTab
+
+    expect(hydratedBibleTab.data.parallelTextModes).toEqual([
+      { version: 'KJV', strongMode: 'visible' },
+      { version: 'BDS', strongMode: 'hidden' },
+    ])
+  })
+
   it('clamps the local active tab index when the active tab was deleted remotely', () => {
     const local = makeGroup([makeTab('a'), makeTab('b'), makeTab('c')], 2)
     const remote: FirestoreTabGroup = {

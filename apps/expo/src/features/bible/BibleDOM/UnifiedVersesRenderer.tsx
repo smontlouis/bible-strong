@@ -5,6 +5,7 @@ import { styled } from 'goober'
 import { Bookmark, Verse as TVerse } from '~common/types'
 import { HighlightsObj } from '~redux/modules/user'
 import {
+  ColumnTextModeControls,
   ParallelVerse,
   PericopeChapter,
   RootStyles,
@@ -90,6 +91,8 @@ export interface UnifiedVersesRendererProps {
   columnWidth?: number
   // Display mode for parallel verses (horizontal = side by side, vertical = stacked)
   parallelDisplayMode?: ParallelDisplayMode
+  // Parallel reading: the Strong and interlinear segments of each version's chip, main first
+  columnTextModeControls?: ColumnTextModeControls[]
   // Red words of every version on screen
   redWordsByVersion: Record<string, Record<string, { start: number; end: number }[]> | null>
   passageMediaAfterVerses: ResolvedPassageMediaChapter['afterVerses']
@@ -131,6 +134,7 @@ export function UnifiedVersesRenderer({
   versesWithNonHighlightTags,
   columnWidth = 75,
   parallelDisplayMode = 'horizontal',
+  columnTextModeControls,
   redWordsByVersion,
   passageMediaAfterVerses,
   passageMediaGallerySections,
@@ -245,6 +249,7 @@ export function UnifiedVersesRenderer({
                 verse={verse}
                 cells={parallelVerse}
                 displayMode={parallelDisplayMode}
+                textModeControls={columnTextModeControls}
                 columnWidth={columnWidth}
                 settings={settings}
                 isHebreu={isHebreu}

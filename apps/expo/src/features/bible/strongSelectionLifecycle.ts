@@ -8,6 +8,8 @@ type StrongSelectionDOMContext = {
   interlinearMode?: string
   interlinearLocale?: string
   parallelVersions: readonly string[]
+  /** The Strong and interlinear modes of each parallel version. */
+  parallelTextModes?: readonly unknown[]
   focusVerses?: readonly (string | number)[]
   contextDisplayMode: string
   renderedContentKey: string
@@ -82,6 +84,7 @@ export const getStrongSelectionDOMContextKey = ({
   interlinearMode,
   interlinearLocale,
   parallelVersions,
+  parallelTextModes,
   focusVerses,
   contextDisplayMode,
   renderedContentKey,
@@ -97,6 +100,7 @@ export const getStrongSelectionDOMContextKey = ({
     interlinearMode,
     interlinearLocale,
     parallelVersions,
+    parallelTextModes,
     focusVerses,
     contextDisplayMode,
     renderedContentKey,

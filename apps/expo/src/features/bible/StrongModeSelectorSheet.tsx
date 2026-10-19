@@ -23,6 +23,7 @@ import useLanguage from '~helpers/useLanguage'
 import { downloadItemStatesAtom } from '~state/downloadQueue'
 import { useBibleTabActions, type BibleTab } from '~state/tabs'
 import { getBibleModeAcquisitionPresentation } from '~helpers/bibleModeAcquisition'
+import { getBibleColumnTextModes, type BibleTextModeColumn } from '~helpers/bibleColumnTextModes'
 import BibleDisplayModeCard from './BibleDisplayModeCard'
 import { toast } from '~helpers/toast'
 import { useResourceAccess } from '~features/resources/resourceAccess'
@@ -42,9 +43,17 @@ type Props = {
   sheetRef?: RefObject<SheetRef | null>
   inline?: boolean
   onClose?: () => void
+  /** The column whose mode the sheet sets: 0 is the main version, n the n-th parallel one. */
+  column?: BibleTextModeColumn
 }
 
-const StrongModeSelectorSheet = ({ bibleAtom, sheetRef, inline = false, onClose }: Props) => {
+const StrongModeSelectorSheet = ({
+  bibleAtom,
+  sheetRef,
+  inline = false,
+  onClose,
+  column = 0,
+}: Props) => {
   const { t } = useTranslation()
   const appLanguage = useLanguage()
   const bible = useAtomValue(bibleAtom)
@@ -54,11 +63,13 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef, inline = false, onClose 
   const resourceRegistry = useOfflineResourceRegistry()
   const lexiconModuleId = useStrongIndexLexiconModuleId()
   const downloadStates = useAtomValue(downloadItemStatesAtom)
-  const selectedMode = bible.data.strongMode ?? 'hidden'
-  const version = bible.data.selectedVersion
+  const columnModes = getBibleColumnTextModes(bible.data, column)
+  const selectedMode = columnModes?.strongMode ?? 'hidden'
+  const version = columnModes?.version ?? bible.data.selectedVersion
   const pendingAcquisition =
     bible.data.pendingModeAcquisition?.kind === 'strong' &&
-    bible.data.pendingModeAcquisition.versionId === version
+    bible.data.pendingModeAcquisition.versionId === version &&
+    (bible.data.pendingModeAcquisition.column ?? 0) === column
       ? bible.data.pendingModeAcquisition
       : undefined
   const isHebrew = bible.data.selectedBook.Numero <= 39
@@ -125,7 +136,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef, inline = false, onClose 
       if (bible.data.pendingModeAcquisition) {
         actions.finishBibleModeAcquisition(false)
       }
-      actions.setStrongMode(mode)
+      actions.setStrongMode(mode, column)
       sheetRef?.current?.dismiss()
       onClose?.()
     }
@@ -139,7 +150,8 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef, inline = false, onClose 
         nextAvailableStrongMode(selectedMode, strongAvailable, reverseInterlinearAvailable)
       )
     },
-    !inline && availabilityQuery.isSuccess
+    // The shortcut sets the main version's mode.
+    !inline && column === 0 && availabilityQuery.isSuccess
   )
 
   const requestDownload = (mode: Exclude<StrongMode, 'hidden'>) => {
@@ -162,7 +174,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef, inline = false, onClose 
         interlinearAvailabilities: interlinear,
       })
       if (!plan.items.length) {
-        actions.setStrongMode(mode)
+        actions.setStrongMode(mode, column)
         sheetRef?.current?.dismiss()
         onClose?.()
         return
@@ -170,6 +182,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef, inline = false, onClose 
 
       actions.startBibleModeAcquisition({
         kind: 'strong',
+        column,
         versionId,
         mode,
         interlinearLocale:

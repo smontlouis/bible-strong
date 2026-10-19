@@ -16,6 +16,7 @@ import {
   isInterlinearCapableBibleVersion,
   type InterlinearMode,
 } from '~helpers/interlinearBiblePublications'
+import type { BibleColumnTextModes } from '~helpers/bibleColumnTextModes'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import type {
   BibleChapterData,
@@ -35,25 +36,18 @@ export interface BibleReadingChapterRequest {
   interlinearLocaleAutomatic?: boolean
 }
 
-export interface BibleReadingExtrasRequest extends BibleReadingChapterRequest {
-  parallelVersions: VersionCode[]
-  presentation?: BibleChapterPresentationSource
+export interface BibleReadingParallelRequest {
+  book: number
+  chapter: number
+  /** Each parallel version with its own Strong and interlinear modes. */
+  parallelColumns: readonly BibleColumnTextModes[]
+  /** The locale of a column that names none: the application's. */
+  defaultInterlinearLocale?: ResourceLanguage
 }
 
 export interface BibleReadingMainResult {
   pericope: Pericope
   mainResult: BibleChapterResult<BibleChapterData>
-}
-
-const resolveParallelInterlinearMode = (
-  version: VersionCode,
-  strongMode?: StrongMode,
-  interlinearMode?: InterlinearMode
-): InterlinearMode | undefined => {
-  if (!isInterlinearCapableBibleVersion(version)) return undefined
-  if (strongMode === 'visible') return 'strong'
-  if (strongMode === 'reverse-interlinear') return 'interlinear'
-  return interlinearMode
 }
 
 export const loadBibleReadingMain = async (
@@ -94,37 +88,28 @@ export const loadBibleReadingMain = async (
 }
 
 export const loadBibleReadingParallelVerses = async (
-  {
-    book,
-    chapter,
-    parallelVersions,
-    strongMode,
-    interlinearMode,
-    interlinearLocale,
-    interlinearLocaleAutomatic,
-  }: BibleReadingExtrasRequest,
+  { book, chapter, parallelColumns, defaultInterlinearLocale }: BibleReadingParallelRequest,
   resourceAccess: ResourceAccessRegistry = defaultResourceAccess
 ): Promise<ParallelVerse[]> => {
-  if (!parallelVersions.length) return []
+  if (!parallelColumns.length) return []
 
-  const requests = parallelVersions.map(parallelVersion => {
-    const parallelStrongMode = resolveStrongBibleVersion(parallelVersion, strongMode).strongMode
-    return {
-      book,
-      chapter,
-      version: parallelVersion,
-      strongMode: parallelStrongMode,
-      interlinearMode: resolveParallelInterlinearMode(parallelVersion, strongMode, interlinearMode),
-      interlinearLocale,
-      interlinearLocaleAutomatic,
-    }
-  })
+  const requests = parallelColumns.map(column => ({
+    book,
+    chapter,
+    version: column.version as VersionCode,
+    strongMode: resolveStrongBibleVersion(column.version, column.strongMode).strongMode,
+    interlinearMode: isInterlinearCapableBibleVersion(column.version)
+      ? (column.interlinearMode ?? 'hidden')
+      : undefined,
+    interlinearLocale: column.interlinearLocale ?? defaultInterlinearLocale,
+    interlinearLocaleAutomatic: !column.interlinearLocale,
+  }))
   const parallelResults = resourceAccess.bibleContent.loadChapters
     ? await resourceAccess.bibleContent.loadChapters(requests)
     : await Promise.all(requests.map(request => resourceAccess.bibleContent.loadChapter(request)))
 
   return parallelResults.map((result, index) => {
-    const id = parallelVersions[index]
+    const id = requests[index].version
     if (result.success && result.data) {
       return {
         id,

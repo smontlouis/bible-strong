@@ -65,9 +65,8 @@ import {
 import { downloadItemStatesAtom } from '~state/downloadQueue'
 import { getBibleModeAcquisitionPresentation } from '~helpers/bibleModeAcquisition'
 import InterlinearMark from './InterlinearMark'
-import InterlinearModeSelectorSheet from './InterlinearModeSelectorSheet'
-import StrongModeSelectorSheet from './StrongModeSelectorSheet'
-import { useBibleModeAcquisitionCompletion } from './useBibleModeAcquisitionCompletion'
+import type { BibleTextModeKind } from './BibleTextModeSheets'
+import type { BibleTextModeColumn } from '~helpers/bibleColumnTextModes'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
 interface BibleHeaderProps {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -79,6 +78,8 @@ interface BibleHeaderProps {
   isInTab?: boolean
   coverage?: BibleVersionCoverage
   onNavigateToVerse: (verse: number) => void
+  /** Opens the Strong or interlinear sheet of a column: 0 is the main version. */
+  onOpenTextMode: (kind: BibleTextModeKind, column: BibleTextModeColumn) => void
 }
 
 const Header = ({
@@ -91,6 +92,7 @@ const Header = ({
   isInTab,
   coverage,
   onNavigateToVerse,
+  onOpenTextMode,
 }: BibleHeaderProps) => {
   const router = useRouter()
   const { t } = useTranslation()
@@ -116,8 +118,6 @@ const Header = ({
   // Bookmark ref
   const bookmarkModalRef = useRef<SheetRef>(null)
   const exportSheetRef = useRef<SheetRef>(null)
-  const interlinearModeSheetRef = useRef<SheetRef>(null)
-  const strongModeSheetRef = useRef<SheetRef>(null)
   const bible = useAtomValue(bibleAtom)
   const {
     selectedBook: book,
@@ -141,24 +141,18 @@ const Header = ({
     pendingModeAcquisition,
     downloadStates
   )
+  const isMainColumnAcquisition = (pendingModeAcquisition?.column ?? 0) === 0
   const isInterlinearDownloadVisible =
     interlinearMode === 'hidden' &&
     pendingModeAcquisition?.kind === 'interlinear' &&
+    isMainColumnAcquisition &&
     (acquisitionPresentation.status === 'active' || acquisitionPresentation.status === 'completed')
   const isStrongDownloadVisible =
     strongMode === 'hidden' &&
     pendingModeAcquisition?.kind === 'strong' &&
     pendingModeAcquisition.versionId === version &&
+    isMainColumnAcquisition &&
     (acquisitionPresentation.status === 'active' || acquisitionPresentation.status === 'completed')
-
-  useBibleModeAcquisitionCompletion({
-    acquisition: pendingModeAcquisition,
-    finish: actions.finishBibleModeAcquisition,
-    onSucceeded: acquisition => {
-      const sheetRef = acquisition.kind === 'strong' ? strongModeSheetRef : interlinearModeSheetRef
-      sheetRef.current?.dismiss()
-    },
-  })
 
   // Check if verses are selected
   const hasSelectedVerses =
@@ -360,12 +354,16 @@ const Header = ({
     }
   }
 
-  const strongModeButton = isStrongCapableBibleVersion(version) ? (
+  // Parallel reading: each version sets its own modes, from its chip in the reader.
+  const hasStrongModeButton = !isParallel && isStrongCapableBibleVersion(version)
+  const hasInterlinearModeButton = !isParallel && isInterlinearCapableBibleVersion(version)
+
+  const strongModeButton = hasStrongModeButton ? (
     <DisplayModeTrigger
       kind="strong"
       bibleAtom={bibleAtom}
       className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[40px]"
-      onPress={() => strongModeSheetRef.current?.present()}
+      onPress={() => onOpenTextMode('strong', 0)}
       disabled={isStrongDownloadVisible}
       accessibilityRole="button"
       accessibilityLabel={
@@ -401,12 +399,12 @@ const Header = ({
     </DisplayModeTrigger>
   ) : null
 
-  const interlinearModeButton = isInterlinearCapableBibleVersion(version) ? (
+  const interlinearModeButton = hasInterlinearModeButton ? (
     <DisplayModeTrigger
       kind="interlinear"
       bibleAtom={bibleAtom}
       className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[40px]"
-      onPress={() => interlinearModeSheetRef.current?.present()}
+      onPress={() => onOpenTextMode('interlinear', 0)}
       disabled={isInterlinearDownloadVisible}
       accessibilityRole="button"
       accessibilityLabel={
@@ -771,12 +769,6 @@ const Header = ({
         chapterNumber={chapter}
         version={version}
       />
-      {isInterlinearCapableBibleVersion(version) && (
-        <InterlinearModeSelectorSheet bibleAtom={bibleAtom} sheetRef={interlinearModeSheetRef} />
-      )}
-      {isStrongCapableBibleVersion(version) && (
-        <StrongModeSelectorSheet bibleAtom={bibleAtom} sheetRef={strongModeSheetRef} />
-      )}
       {currentChapterBookmark && (
         <Box className="overflow-hidden border-continuous absolute right-[24px] bottom-[-18px]">
           <BibleBookmarkTrigger

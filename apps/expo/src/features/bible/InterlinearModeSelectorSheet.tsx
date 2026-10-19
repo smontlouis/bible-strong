@@ -36,6 +36,7 @@ import {
   type InterlinearModeAvailabilityState,
 } from './loadInterlinearModeAvailability'
 import { localQueryOptions } from '~helpers/queryOptions'
+import { getBibleColumnTextModes, type BibleTextModeColumn } from '~helpers/bibleColumnTextModes'
 import {
   getOfflineResourceQuerySignal,
   useOfflineResourceRegistry,
@@ -45,6 +46,8 @@ type Props = {
   sheetRef?: RefObject<SheetRef | null>
   inline?: boolean
   onClose?: () => void
+  /** The column whose mode the sheet sets: 0 is the main version, n the n-th parallel one. */
+  column?: BibleTextModeColumn
 }
 
 type AvailabilityByLocale = Partial<Record<ResourceLanguage, InterlinearSidecarAvailability>>
@@ -53,7 +56,13 @@ type DisplayMode = 'hidden' | InterlinearDisplayMode
 const isActiveDownload = (status?: string) =>
   status === 'queued' || status === 'downloading' || status === 'inserting'
 
-const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef, inline = false, onClose }: Props) => {
+const InterlinearModeSelectorSheet = ({
+  bibleAtom,
+  sheetRef,
+  inline = false,
+  onClose,
+  column = 0,
+}: Props) => {
   const stylingTheme = useStylingTheme()
 
   const { t } = useTranslation()
@@ -70,15 +79,17 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef, inline = false, onC
   const englishDownload = useDownloadItemStatus(
     createOfflineCopyId({ kind: 'interlinear-index', versionId: 'BHG', language: 'en' })
   )
-  const selectedMode = normalizeInterlinearMode(bible.data.interlinearMode)
-  const selectedLocale: ResourceLanguage = bible.data.interlinearLocale ?? appLanguage
+  const columnModes = getBibleColumnTextModes(bible.data, column)
+  const selectedMode = normalizeInterlinearMode(columnModes?.interlinearMode)
+  const selectedLocale: ResourceLanguage = columnModes?.interlinearLocale ?? appLanguage
   const isHebrew = bible.data.selectedBook.Numero <= 39
   const originalPreview = isHebrew ? 'אֱלֹהִים' : 'λόγος'
   const transliterationPreview = isHebrew ? 'Elohim bara' : 'logos en'
   const glossPreview = isHebrew ? 'Dieu · H0430' : 'Parole · G3056'
   const serifFontFamily = Platform.OS === 'ios' ? 'Georgia' : 'serif'
   const pendingAcquisition =
-    bible.data.pendingModeAcquisition?.kind === 'interlinear'
+    bible.data.pendingModeAcquisition?.kind === 'interlinear' &&
+    (bible.data.pendingModeAcquisition.column ?? 0) === column
       ? bible.data.pendingModeAcquisition
       : undefined
 
@@ -125,7 +136,7 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef, inline = false, onC
     if (!resolvedAvailability) return
     if (resolvedAvailability.status === 'available') {
       if (modeAfterDownload) {
-        actions.setInterlinearMode(modeAfterDownload, locale)
+        actions.setInterlinearMode(modeAfterDownload, locale, column)
         sheetRef?.current?.dismiss()
         onClose?.()
       }
@@ -136,6 +147,7 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef, inline = false, onC
     if (modeAfterDownload) {
       actions.startBibleModeAcquisition({
         kind: 'interlinear',
+        column,
         mode: modeAfterDownload,
         locale,
         planIds: plan.map(item => item.id),
@@ -149,7 +161,7 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef, inline = false, onC
       if (bible.data.pendingModeAcquisition) {
         actions.finishBibleModeAcquisition(false)
       }
-      actions.setInterlinearMode('hidden', selectedLocale)
+      actions.setInterlinearMode('hidden', selectedLocale, column)
       sheetRef?.current?.dismiss()
       onClose?.()
       return
@@ -164,7 +176,7 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef, inline = false, onC
       resolvedAvailability[preferredLocale]?.status === 'available' ||
       (mayFallback && resolvedAvailability[fallbackLocale]?.status === 'available')
     ) {
-      actions.setInterlinearMode(mode, selectedLocale)
+      actions.setInterlinearMode(mode, selectedLocale, column)
       sheetRef?.current?.dismiss()
       onClose?.()
       return
@@ -176,7 +188,7 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef, inline = false, onC
 
   const selectLocale = (locale: ResourceLanguage) => {
     if (!isAvailable(locale)) return
-    actions.setInterlinearMode(bible.data.interlinearMode ?? 'hidden', locale)
+    actions.setInterlinearMode(columnModes?.interlinearMode ?? 'hidden', locale, column)
   }
 
   const renderLocaleOption = (locale: ResourceLanguage, label: string) => {
