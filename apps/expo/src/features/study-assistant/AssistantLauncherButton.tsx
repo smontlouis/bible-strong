@@ -3,6 +3,7 @@ import * as Haptics from 'expo-haptics'
 import { StyleSheet, View, type LayoutRectangle } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, {
+  interpolateColor,
   useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
@@ -15,10 +16,17 @@ import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import { storage } from '~helpers/storage'
 import StrobiAvatar, { type StrobiAnimation } from './StrobiAvatar'
 
-// The avatar's body fills about 50 pt of its box: the size of Expo's developer tools button.
-const AVATAR_SIZE = 62
-// The body leaves this much of its box empty on each side; edges are measured from the body.
-const BODY_INSET = 6
+// Expo's developer tools button: a 44 pt disc in a 4 pt ring of its colour at half opacity,
+// 52 pt in all, with a soft shadow below it.
+const DISC_SIZE = 44
+const RING_WIDTH = 4
+const BUTTON_SIZE = DISC_SIZE + RING_WIDTH * 2
+// Strobi's body fills about 81% of its drawing: this box gives it the disc's 44 pt.
+const AVATAR_SIZE = 54
+const RING_COLOR = 'rgba(91, 127, 229, 0.5)'
+const IDLE_RING_COLOR = 'rgba(122, 122, 122, 0.5)'
+// Left alone this long, the button fades and greys out until it is touched again.
+const IDLE_AFTER_MS = 5000
 const EDGE_MARGIN = 10
 // Below this distance the touch is a tap, as in Expo's button.
 const DRAG_THRESHOLD = 10
@@ -58,6 +66,8 @@ type Props = {
   onPress: () => void
   onDragStart: () => void
   onDragEnd: () => void
+  /** The button went idle (greyed out) or was touched again. */
+  onIdleChange: (idle: boolean) => void
 }
 
 /**
@@ -71,9 +81,36 @@ export default function AssistantLauncherButton({
   onPress,
   onDragStart,
   onDragEnd,
+  onIdleChange,
 }: Props) {
   const insets = useSafeAreaInsets()
   const [layout, setLayout] = useState<LayoutRectangle | null>(null)
+  const [idle, setIdle] = useState(false)
+  // Each release restarts the wait before the button goes idle.
+  const [releasedAt, setReleasedAt] = useState(0)
+  const [touching, setTouching] = useState(false)
+  const idleProgress = useSharedValue(0)
+
+  useEffect(() => {
+    if (touching) return
+    const timer = setTimeout(() => setIdle(true), IDLE_AFTER_MS)
+    return () => clearTimeout(timer)
+  }, [touching, releasedAt])
+
+  useEffect(() => {
+    idleProgress.set(withTiming(idle ? 1 : 0, { duration: 300 }))
+    onIdleChange(idle)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idle, idleProgress])
+
+  const wake = () => {
+    setTouching(true)
+    setIdle(false)
+  }
+  const release = () => {
+    setTouching(false)
+    setReleasedAt(Date.now())
+  }
 
   const x = useSharedValue(0)
   const y = useSharedValue(0)
@@ -83,10 +120,10 @@ export default function AssistantLauncherButton({
   // Where a snap is heading, until the avatar first reaches it: the moment it lands.
   const landingX = useSharedValue<number | null>(null)
 
-  const minX = insets.left + EDGE_MARGIN - BODY_INSET
-  const maxX = (layout?.width ?? 0) - insets.right - EDGE_MARGIN + BODY_INSET - AVATAR_SIZE
-  const minY = insets.top + EDGE_MARGIN - BODY_INSET
-  const maxY = (layout?.height ?? 0) - insets.bottom - EDGE_MARGIN + BODY_INSET - AVATAR_SIZE
+  const minX = insets.left + EDGE_MARGIN
+  const maxX = (layout?.width ?? 0) - insets.right - EDGE_MARGIN - BUTTON_SIZE
+  const minY = insets.top + EDGE_MARGIN
+  const maxY = (layout?.height ?? 0) - insets.bottom - EDGE_MARGIN - BUTTON_SIZE
 
   // Placed without animation on the first layout and whenever the screen changes size.
   useEffect(() => {
@@ -95,7 +132,7 @@ export default function AssistantLauncherButton({
     // Until it is moved, where it always was: bottom right, above the tab bar.
     const stored = readPosition() ?? {
       side: 'right',
-      y: (layout.height - insets.bottom - TAB_ICON_SIZE - 62 - AVATAR_SIZE - minY) / travel,
+      y: (layout.height - insets.bottom - TAB_ICON_SIZE - 62 - BUTTON_SIZE - minY) / travel,
     }
     x.set(stored.side === 'left' ? minX : maxX)
     y.set(minY + Math.min(Math.max(stored.y, 0), 1) * travel)
@@ -124,21 +161,24 @@ export default function AssistantLauncherButton({
 
   const tap = Gesture.Tap()
     .maxDistance(DRAG_THRESHOLD)
-    .onBegin(() => {
-      'worklet'
-      scale.set(withTiming(0.9, { duration: 100 }))
-    })
     .onEnd(() => {
       'worklet'
       runOnJS(onPress)()
     })
+
+  // The pan sees the whole touch, tap or drag: the button stays pressed until the finger lifts.
+  const pan = Gesture.Pan()
+    .minDistance(DRAG_THRESHOLD)
+    .onBegin(() => {
+      'worklet'
+      scale.set(withTiming(0.9, { duration: 100 }))
+      runOnJS(wake)()
+    })
     .onFinalize(() => {
       'worklet'
       scale.set(withTiming(1, { duration: 100 }))
+      runOnJS(release)()
     })
-
-  const pan = Gesture.Pan()
-    .minDistance(DRAG_THRESHOLD)
     .onStart(() => {
       'worklet'
       landingX.set(null)
@@ -155,7 +195,7 @@ export default function AssistantLauncherButton({
       'worklet'
       const momentumX = event.velocityX * PROJECTION * MOMENTUM_FACTOR
       const momentumY = event.velocityY * PROJECTION * MOMENTUM_FACTOR
-      const centerX = startX.get() + event.translationX + AVATAR_SIZE / 2 + momentumX
+      const centerX = startX.get() + event.translationX + BUTTON_SIZE / 2 + momentumX
       const side: Side = centerX < (layout?.width ?? 0) / 2 ? 'left' : 'right'
       const targetX = side === 'left' ? minX : maxX
       const targetY = Math.min(
@@ -169,7 +209,11 @@ export default function AssistantLauncherButton({
     })
 
   const style = useAnimatedStyle(() => ({
+    opacity: 1 - idleProgress.get() * 0.5,
     transform: [{ translateX: x.get() }, { translateY: y.get() }, { scale: scale.get() }],
+  }))
+  const ringStyle = useAnimatedStyle(() => ({
+    borderColor: interpolateColor(idleProgress.get(), [0, 1], [RING_COLOR, IDLE_RING_COLOR]),
   }))
 
   return (
@@ -190,7 +234,9 @@ export default function AssistantLauncherButton({
             }}
             style={[styles.button, style]}
           >
-            <StrobiAvatar animation={animation} size={AVATAR_SIZE} />
+            <Animated.View style={[styles.ring, ringStyle]} />
+            <View style={styles.disc} />
+            <StrobiAvatar animation={animation} size={AVATAR_SIZE} muted={idle} />
           </Animated.View>
         </GestureDetector>
       )}
@@ -203,9 +249,24 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
+    width: BUTTON_SIZE,
+    height: BUTTON_SIZE,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  ring: {
+    position: 'absolute',
+    width: BUTTON_SIZE,
+    height: BUTTON_SIZE,
+    borderRadius: BUTTON_SIZE / 2,
+    borderWidth: RING_WIDTH,
+  },
+  // Casts Expo's shadow: black at 40%, 8 pt of blur, 4 pt down.
+  disc: {
+    position: 'absolute',
+    width: DISC_SIZE,
+    height: DISC_SIZE,
+    borderRadius: DISC_SIZE / 2,
+    boxShadow: '0px 4px 16px rgba(0, 0, 0, 0.4)',
   },
 })

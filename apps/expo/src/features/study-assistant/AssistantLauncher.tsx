@@ -113,10 +113,9 @@ function AccountAssistant({ account }: { account: string }) {
   const [open, setOpen] = useState(false),
     [historyOpen, setHistoryOpen] = useState(false)
   const [source, setSource] = useState<StudySource | null>(null)
+  // Strobi falls asleep when its button goes idle, and wakes up with it.
   const [avatarSleeping, setAvatarSleeping] = useState(false)
   const [avatarDragged, setAvatarDragged] = useState(false)
-  // Each time the avatar is handled it wakes up and waits again before falling asleep.
-  const [avatarWokenAt, setAvatarWokenAt] = useState(0)
   const [dictationState, setDictationState] = useState<DictationState>('idle')
   const [dictation] = useState(
     () =>
@@ -182,11 +181,6 @@ function AccountAssistant({ account }: { account: string }) {
       session.cancel()
     },
   })
-  useEffect(() => {
-    if (open || !ready || avatarDragged) return
-    const sleepTimer = setTimeout(() => setAvatarSleeping(true), 10_000)
-    return () => clearTimeout(sleepTimer)
-  }, [open, ready, avatarDragged, avatarWokenAt])
   useAssistantOpenRequest(sheet)
   const avatarAnimation: StrobiAnimation = busy
     ? 'thinking'
@@ -214,18 +208,10 @@ function AccountAssistant({ account }: { account: string }) {
           <AssistantLauncherButton
             animation={avatarAnimation}
             accessibilityLabel={t('assistant.modal.open')}
-            onPress={() => {
-              setAvatarSleeping(false)
-              sheet.current?.present()
-            }}
-            onDragStart={() => {
-              setAvatarSleeping(false)
-              setAvatarDragged(true)
-            }}
-            onDragEnd={() => {
-              setAvatarDragged(false)
-              setAvatarWokenAt(Date.now())
-            }}
+            onPress={() => sheet.current?.present()}
+            onIdleChange={setAvatarSleeping}
+            onDragStart={() => setAvatarDragged(true)}
+            onDragEnd={() => setAvatarDragged(false)}
           />
         )}
         {/* Anything inside the sheet that pushes a route lets the sheet close first. */}
