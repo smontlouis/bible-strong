@@ -20,6 +20,7 @@ import ResourceUnavailableView from '~features/resources/ResourceUnavailableView
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { resourceFailureFromAccessError } from '~features/resources/resourceFailure'
 import { getBook } from '~helpers/bibleBookCatalog'
+import { getCommentaryBookLabel } from './commentaryBookLabel'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import { getDefaultBibleTab, type CommentaryResourceTab, useBibleTabActions } from '~state/tabs'
@@ -116,7 +117,7 @@ const CommentaryResourceTabScreen = ({
     : undefined
   useAssistantResourceContext(`tab:${tab.id}`, commentaryContext(tab.data, titleSection))
   useRecordHistory(getCommentaryResourceHistoryEntry(parsed, tab.data.sectionId, titleSection))
-  const titleBookLabel = parsed ? (getBook(parsed.book)?.Nom ?? String(parsed.book)) : undefined
+  const titleBookLabel = parsed ? getCommentaryBookLabel(parsed.book) : undefined
   const desiredTabTitle =
     parsed && titleBookLabel
       ? formatCommentaryResourceTabTitle({
@@ -195,7 +196,7 @@ const CommentaryResourceTabScreen = ({
     sectionIndex !== undefined && sectionIndex >= 0
       ? query.data?.sections[sectionIndex + 1]
       : undefined
-  const bookLabel = getBook(book)?.Nom ?? String(book)
+  const bookLabel = getCommentaryBookLabel(book)
   const passage = section
     ? `${bookLabel} ${chapter}:${formatRange(section.rangeStartVerse, section.rangeEndVerse)}`
     : undefined

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import type { CommentaryCatalogEntry } from '@bible-strong/resource-catalog/commentaries'
 import Box from '~common/ui/Box'
 import SwitchableHTMLView from '~common/SwitchableHTMLView'
-import { getBook } from '~helpers/bibleBookCatalog'
+import { getCommentaryBookLabel } from './commentaryBookLabel'
 import CommentaryRoomIntro from './CommentaryRoomIntro'
 import CommentaryEntryNavigation from './CommentaryEntryNavigation'
 import { commentaryHrefToOsis } from './commentaryResourceParams'
@@ -63,7 +63,7 @@ export default function CommentarySectionCard({
             reference={
               start === 0
                 ? t('commentaries.resource.introduction')
-                : `${getBook(book)?.Nom ?? book} ${chapter}:${start}${end !== start ? `–${end}` : ''}`
+                : `${getCommentaryBookLabel(book)} ${chapter}:${start}${end !== start ? `–${end}` : ''}`
             }
             referenceDisabled={start === 0}
             onReferencePress={() => {

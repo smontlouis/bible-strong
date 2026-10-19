@@ -52,6 +52,7 @@ jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) =>
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: jest.fn() }) }))
 jest.mock('../commentaryResourceParams', () => ({ commentaryHrefToOsis: jest.fn() }))
 jest.mock('../commentaryReferenceNavigation', () => ({ getCommentaryBibleViewRoute: jest.fn() }))
+jest.mock('../commentaryBookLabel', () => ({ getCommentaryBookLabel: () => 'Matthew' }))
 
 import InlineCommentaryReader from '../InlineCommentaryReader'
 

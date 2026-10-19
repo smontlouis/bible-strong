@@ -21,6 +21,7 @@ import ResourceUnavailableView from '~features/resources/ResourceUnavailableView
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { resourceFailureFromAccessError } from '~features/resources/resourceFailure'
 import { getBook } from '~helpers/bibleBookCatalog'
+import { getCommentaryBookLabel } from './commentaryBookLabel'
 import { IS_FORM_SHEET } from '~helpers/constants'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { staticResourceQueryOptions } from '~helpers/queryOptions'
@@ -215,7 +216,7 @@ const CommentaryChapterScreen = ({
   }
 
   const { entry, projection, book, chapter } = parsed
-  const bookLabel = getBook(book)?.Nom ?? String(book)
+  const bookLabel = getCommentaryBookLabel(book)
   const visibleSections = getCommentarySectionsForVerse(query.data?.sections ?? [], focusVerse)
   const chapterContextKey = `${projection.projectionId}:${book}:${chapter}:${focusVerse ?? 'all'}`
   const chapterContextExpanded = expandedChapterContextKey === chapterContextKey
