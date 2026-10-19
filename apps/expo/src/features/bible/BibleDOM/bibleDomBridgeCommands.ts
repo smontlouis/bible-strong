@@ -56,6 +56,8 @@ export const routeBibleDOMBridgeAction = async (
   value: unknown,
   options: {
     personalBibleDataEnabled: boolean
+    /** Versions shown only in interlinear presentations: they hold no personal Bible data. */
+    interlinearReadingVersions?: readonly string[]
     handle(action: BibleDOMBridgeAction): Promise<void>
     rejected?(value: unknown): void
   }
@@ -65,8 +67,14 @@ export const routeBibleDOMBridgeAction = async (
     options.rejected?.(value)
     return 'rejected'
   }
-  if (!options.personalBibleDataEnabled && bridgeCommands.isPersonalBibleDataAction(action.type)) {
-    return 'blocked'
+  if (bridgeCommands.isPersonalBibleDataAction(action.type)) {
+    const actionVersion = getPayloadVersion(action.payload)
+    if (
+      !options.personalBibleDataEnabled ||
+      (actionVersion && options.interlinearReadingVersions?.includes(actionVersion))
+    ) {
+      return 'blocked'
+    }
   }
   await options.handle(action)
   return 'handled'

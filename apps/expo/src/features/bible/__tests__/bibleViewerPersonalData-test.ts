@@ -1,5 +1,6 @@
 import {
   getBibleViewerPersonalData,
+  getInterlinearReadingVersions,
   shouldHideBibleViewerPersonalData,
 } from '../bibleViewerPersonalData'
 import {
@@ -31,39 +32,59 @@ describe('Bible viewer personal data policy', () => {
     'hides personal data in the advanced BHG %s mode',
     interlinearMode => {
       expect(
-        shouldHideBibleViewerPersonalData({
-          version: 'BHG',
-          interlinearMode,
-          strongMode: 'hidden',
-        })
+        shouldHideBibleViewerPersonalData([
+          { version: 'BHG', interlinearMode, strongMode: 'hidden' },
+        ])
       ).toBe(true)
     }
   )
 
   it('hides personal Bible data in reverse interlinear mode for a Strong Bible', () => {
     expect(
-      shouldHideBibleViewerPersonalData({
-        version: 'DBY',
-        interlinearMode: undefined,
-        strongMode: 'reverse-interlinear',
-      })
+      shouldHideBibleViewerPersonalData([
+        { version: 'DBY', interlinearMode: undefined, strongMode: 'reverse-interlinear' },
+      ])
     ).toBe(true)
+  })
+
+  it('keeps personal Bible data while a parallel column shows its text', () => {
+    const columns = [
+      { version: 'DBY', strongMode: 'reverse-interlinear' as const },
+      { version: 'LSG', strongMode: 'hidden' as const },
+    ]
+
+    expect(shouldHideBibleViewerPersonalData(columns)).toBe(false)
+    expect(getInterlinearReadingVersions(columns)).toEqual(['DBY'])
+  })
+
+  it('hides personal Bible data when every parallel column is interlinear', () => {
+    expect(
+      shouldHideBibleViewerPersonalData([
+        { version: 'DBY', strongMode: 'reverse-interlinear' },
+        { version: 'BHG', strongMode: 'hidden', interlinearMode: 'interlinear' },
+      ])
+    ).toBe(true)
+  })
+
+  it('keeps a version shown twice out of the interlinear versions while one column shows its text', () => {
+    expect(
+      getInterlinearReadingVersions([
+        { version: 'DBY', strongMode: 'reverse-interlinear' },
+        { version: 'DBY', strongMode: 'visible' },
+      ])
+    ).toEqual([])
   })
 
   it('keeps personal Bible data in normal text and visible Strong modes', () => {
     expect(
-      shouldHideBibleViewerPersonalData({
-        version: 'BHG',
-        interlinearMode: 'hidden',
-        strongMode: 'hidden',
-      })
+      shouldHideBibleViewerPersonalData([
+        { version: 'BHG', interlinearMode: 'hidden', strongMode: 'hidden' },
+      ])
     ).toBe(false)
     expect(
-      shouldHideBibleViewerPersonalData({
-        version: 'DBY',
-        interlinearMode: undefined,
-        strongMode: 'visible',
-      })
+      shouldHideBibleViewerPersonalData([
+        { version: 'DBY', interlinearMode: undefined, strongMode: 'visible' },
+      ])
     ).toBe(false)
   })
 

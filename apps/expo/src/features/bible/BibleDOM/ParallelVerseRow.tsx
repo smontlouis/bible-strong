@@ -172,6 +172,8 @@ const getParallelErrorMessage = (
 export interface ParallelVerseRowProps {
   verse: TVerse
   cells: ParallelVerseCell[]
+  // Versions shown in an interlinear presentation: their cells show no personal Bible data
+  interlinearReadingVersions: readonly string[]
   displayMode: ParallelDisplayMode
   columnWidth: number
   settings: RootStyles['settings']
@@ -209,6 +211,7 @@ export interface ParallelVerseRowProps {
 const ParallelVerseRow = ({
   verse,
   cells,
+  interlinearReadingVersions,
   displayMode,
   columnWidth,
   settings,
@@ -238,6 +241,9 @@ const ParallelVerseRow = ({
   const isRowDimmed = isSelectedMode && !selectedVersion
   const hasMarkers = hasVerseMarkers(verseContent)
   const hasEndContent = hasVerseEndContent(verseContent) || Boolean(commentaryChips?.length)
+
+  const holdsPersonalData = (cell: ParallelVerseCell) =>
+    !interlinearReadingVersions.includes(cell.version)
 
   const getCellPericope = (cell: ParallelVerseCell) =>
     getPericopeVerse(pericopeByVersion[cell.version], verseNumber)
@@ -296,8 +302,10 @@ const ParallelVerseRow = ({
           isSelected={selectedVersion === cell.version}
           isSelectedMode={isSelectedMode}
           isSelectionMode={isSelectionMode}
-          highlightedColor={highlightedColor}
-          hasWordAnnotations={versionsWithWordAnnotations.has(cell.version)}
+          highlightedColor={holdsPersonalData(cell) ? highlightedColor : undefined}
+          hasWordAnnotations={
+            holdsPersonalData(cell) && versionsWithWordAnnotations.has(cell.version)
+          }
           isVerseToScroll={index === 0 && isVerseToScroll}
           selectedCode={selectedCode}
           isFocused={isFocused}

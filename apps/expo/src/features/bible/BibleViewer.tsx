@@ -156,6 +156,7 @@ import CanonicalBibleNoteSheet from './CanonicalBibleNoteSheet'
 import StrongSelectionSheet from './StrongSelectionSheet'
 import {
   getBibleViewerPersonalData,
+  getInterlinearReadingVersions,
   shouldHideBibleViewerPersonalData,
 } from './bibleViewerPersonalData'
 import {
@@ -319,11 +320,6 @@ const BibleViewer = ({
   } = bible
   // Parallel reading: verses are selected in one version, whose text every action uses.
   const selectionVersion = getSelectedVersesVersion(bible.data)
-  const hidePersonalBibleData = shouldHideBibleViewerPersonalData({
-    version,
-    strongMode,
-    interlinearMode,
-  })
   const contextDisplayMode = getBibleContextDisplayMode(bible.data)
   const isContextFocused = contextDisplayMode === 'focused'
   // Plan mode names its passage, and where the reader stands when it spans chapters.
@@ -444,6 +440,10 @@ const BibleViewer = ({
   }
   // Parallel reading: each version loads with its own Strong and interlinear modes.
   const parallelColumns = getParallelColumnTextModes(bible.data)
+  // Interlinear presentations hold no personal Bible data, column by column (ADR-0030).
+  const viewerColumns = [{ version, strongMode, interlinearMode }, ...parallelColumns]
+  const hidePersonalBibleData = shouldHideBibleViewerPersonalData(viewerColumns)
+  const interlinearReadingVersions = getInterlinearReadingVersions(viewerColumns)
   const extrasEnabled =
     Boolean(mainResult?.success && mainResult.data) && !mainReadingQuery.isPlaceholderData
   const contextualInformationDisplay = isContextualInformationDisplayEnabled(
@@ -779,9 +779,16 @@ const BibleViewer = ({
     }
   })
 
+  // A selection or an annotation session ends when its column turns to an interlinear presentation.
+  const isPersonalStateInInterlinearColumn =
+    (hasSelectedVerses(selectedVerses) && interlinearReadingVersions.includes(selectionVersion)) ||
+    (annotationMode.enabled &&
+      Boolean(annotationMode.version) &&
+      interlinearReadingVersions.includes(annotationMode.version!))
+  const shouldClearPersonalBibleState = hidePersonalBibleData || isPersonalStateInInterlinearColumn
   useEffect(() => {
-    if (hidePersonalBibleData) clearHiddenPersonalBibleState()
-  }, [hidePersonalBibleData])
+    if (shouldClearPersonalBibleState) clearHiddenPersonalBibleState()
+  }, [shouldClearPersonalBibleState])
 
   // Handler for opening annotation note modal
   const handleAnnotationNotePress = useCallback(() => {
@@ -1359,6 +1366,7 @@ const BibleViewer = ({
     chapter,
     isLoading,
     personalBibleDataEnabled: !hidePersonalBibleData,
+    interlinearReadingVersions,
     addSelectedVerse: hidePersonalBibleData ? () => undefined : actions.addSelectedVerse,
     removeSelectedVerse: hidePersonalBibleData ? () => undefined : actions.removeSelectedVerse,
     setSelectedVerse: actions.setSelectedVerse,

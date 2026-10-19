@@ -1,4 +1,4 @@
-import { NAVIGATE_TO_BIBLE_NOTE, NAVIGATE_TO_PERICOPE } from '../dispatch'
+import { NAVIGATE_TO_BIBLE_NOTE, NAVIGATE_TO_PERICOPE, TOGGLE_SELECTED_VERSE } from '../dispatch'
 import {
   decodeBibleDOMBridgeAction,
   getCanonicalBibleNotePayload,
@@ -139,6 +139,26 @@ describe('Bible DOM bridge', () => {
       )
     ).resolves.toBe('blocked')
     expect(handle).not.toHaveBeenCalled()
+  })
+
+  it('blocks personal data commands aimed at a version shown only in an interlinear presentation', async () => {
+    const handle = jest.fn(async () => undefined)
+    const options = { personalBibleDataEnabled: true, interlinearReadingVersions: ['DBY'], handle }
+
+    await expect(
+      routeBibleDOMBridgeAction(
+        { type: TOGGLE_SELECTED_VERSE, payload: { verseKey: '1-2-2', version: 'DBY' } },
+        options
+      )
+    ).resolves.toBe('blocked')
+    expect(handle).not.toHaveBeenCalled()
+
+    const textColumnAction = {
+      type: TOGGLE_SELECTED_VERSE,
+      payload: { verseKey: '1-2-2', version: 'LSG' },
+    }
+    await expect(routeBibleDOMBridgeAction(textColumnAction, options)).resolves.toBe('handled')
+    expect(handle).toHaveBeenCalledWith(textColumnAction)
   })
 
   it('routes a recognized reading command through the injected native handler', async () => {

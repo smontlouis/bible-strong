@@ -792,11 +792,28 @@ const LoadedBibleContent = ({
       }
     : settings
 
+  // Gesture handlers for unified touch selection. Interlinear presentations of a version
+  // have their own gestures: the reader leaves them alone, version by version.
+  const versionModes = new Map([
+    [version, interlinearMode],
+    ...(parallelVerses ?? []).map(parallel => [parallel.id, parallel.interlinearMode] as const),
+  ])
+  const hasReverseInterlinear = (versionId: string) =>
+    (versesByVersion[versionId] ?? []).some(verse => Boolean(verse.ReverseInterlinearSpans?.length))
+  const isVersionGestureSuppressed = (versionId: string) =>
+    shouldSuppressVerseGestures(versionId, versionModes.get(versionId)) ||
+    hasReverseInterlinear(versionId)
+  // Interlinear presentations hold no personal Bible data: their columns show none (ADR-0030).
+  const interlinearReadingVersions = displayedVersions.filter(isVersionGestureSuppressed)
+  const annotatedVersions = displayedVersions.filter(
+    versionId => !interlinearReadingVersions.includes(versionId)
+  )
+
   // Use shared hook for annotation highlights (with selection support when in annotation mode)
   const { highlightRects, selectionHandlePositions } = useAnnotationHighlights({
     containerRef: highlightOriginRef,
     wordAnnotations,
-    versions: displayedVersions,
+    versions: annotatedVersions,
     book: book.Numero,
     chapter,
     versesByVersion,
@@ -814,17 +831,6 @@ const LoadedBibleContent = ({
     onAnimationSettled: () => setIsVerseLayoutAnimating(false),
   })
 
-  // Gesture handlers for unified touch selection. Interlinear presentations of a version
-  // have their own gestures: the reader leaves them alone, version by version.
-  const versionModes = new Map([
-    [version, interlinearMode],
-    ...(parallelVerses ?? []).map(parallel => [parallel.id, parallel.interlinearMode] as const),
-  ])
-  const hasReverseInterlinear = (versionId: string) =>
-    (versesByVersion[versionId] ?? []).some(verse => Boolean(verse.ReverseInterlinearSpans?.length))
-  const isVersionGestureSuppressed = (versionId: string) =>
-    shouldSuppressVerseGestures(versionId, versionModes.get(versionId)) ||
-    hasReverseInterlinear(versionId)
   // Words of interlinear presentations cannot be annotated (different DOM structure)
   const canAnnotateVersion = (versionId: string) =>
     !isVersionGestureSuppressed(versionId) &&
@@ -1547,6 +1553,7 @@ const LoadedBibleContent = ({
                 inlineCommentaries={inlineCommentaries}
                 verses={verses}
                 parallelVerses={parallelVerses}
+                interlinearReadingVersions={interlinearReadingVersions}
                 focusVerses={focusVerses}
                 selectedVerses={selectedVerses}
                 selectedVersesVersion={selectedVersesVersion ?? version}
@@ -1588,7 +1595,7 @@ const LoadedBibleContent = ({
               <AnnotationInlineItems
                 wordAnnotations={wordAnnotations}
                 annotationRelationItems={annotationRelationItems}
-                versions={displayedVersions}
+                versions={annotatedVersions}
                 settings={columnSettings}
                 annotationMode={annotationMode}
                 contentKey={annotationInlineContentKey}

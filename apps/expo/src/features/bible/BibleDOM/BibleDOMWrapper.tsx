@@ -231,6 +231,8 @@ export type WebViewProps = {
   chapter: number
   isLoading: boolean
   personalBibleDataEnabled?: boolean
+  /** Versions shown only in interlinear presentations: they hold no personal Bible data. */
+  interlinearReadingVersions?: string[]
   addSelectedVerse: (id: string, version?: VersionCode) => void
   removeSelectedVerse: (id: string) => void
   setSelectedVerse: (selectedVerse: number) => void
@@ -467,6 +469,7 @@ export const BibleDOMWrapper = ({
   onDisableContextualInformation,
   isLoading,
   personalBibleDataEnabled = true,
+  interlinearReadingVersions,
   error,
 }: WebViewProps) => {
   const keepControlsVisible = useWindowDimensions().width >= 768
@@ -1139,6 +1142,7 @@ export const BibleDOMWrapper = ({
   const dispatch: Dispatch = async action => {
     await routeBibleDOMBridgeAction(action, {
       personalBibleDataEnabled,
+      interlinearReadingVersions,
       handle: handleBridgeAction,
       rejected: value => {
         appLogger.captureError(

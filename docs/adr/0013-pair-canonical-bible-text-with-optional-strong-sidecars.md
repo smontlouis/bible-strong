@@ -51,7 +51,7 @@ annotations, notes, tags, bookmarks, links and study relations are neither rende
 Clear an active verse selection or annotation session when entering the mode, and ignore personal
 data actions that were already in flight. Normal text and Strong-number display retain the standard
 personal-data behavior. Publisher content and editorial comments are not personal Bible data and
-remain available.
+remain available. In parallel reading, ADR-0030 applies this rule column by column.
 
 When a compatible BHG interlinear index supplies the STEP tokens aligned to a Strong span, Strong
 display forwards their contextual morphology into the Strong selection sheet together with the

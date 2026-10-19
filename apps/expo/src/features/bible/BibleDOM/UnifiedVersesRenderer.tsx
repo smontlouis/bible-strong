@@ -50,6 +50,8 @@ export interface UnifiedVersesRendererProps {
   inlineCommentaries?: WebViewProps['inlineCommentaries']
   verses: TVerse[]
   parallelVerses: ParallelVerse[]
+  // Versions shown in an interlinear presentation: their columns show no personal Bible data
+  interlinearReadingVersions?: readonly string[]
   focusVerses: WebViewProps['focusVerses']
   selectedVerses: { [key: string]: boolean }
   // The version the selected verses belong to
@@ -103,6 +105,7 @@ export function UnifiedVersesRenderer({
   inlineCommentaries,
   verses,
   parallelVerses,
+  interlinearReadingVersions = [],
   focusVerses,
   selectedVerses,
   selectedVersesVersion,
@@ -248,6 +251,7 @@ export function UnifiedVersesRenderer({
               <ParallelVerseRow
                 verse={verse}
                 cells={parallelVerse}
+                interlinearReadingVersions={interlinearReadingVersions}
                 displayMode={parallelDisplayMode}
                 textModeControls={columnTextModeControls}
                 columnWidth={columnWidth}
