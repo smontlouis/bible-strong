@@ -14,6 +14,7 @@ import Button from '~common/ui/Button'
 import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
 import { pageContentStyle } from '~common/ui/PageContent'
+import Radio from '~common/ui/Radio'
 import Text from '~common/ui/Text'
 import { useFireStorage } from '~features/plans/plan.hooks'
 import { getEditorialKind } from '~features/plans/readingCalendar'
@@ -80,15 +81,7 @@ const CollectionCard = ({
             if (!selected) void choose()
           }}
         >
-          {pending ? (
-            <ActivityIndicator />
-          ) : (
-            <FeatherIcon
-              name={selected ? 'check-circle' : 'circle'}
-              color={selected ? 'primary' : 'grey'}
-              size={22}
-            />
-          )}
+          {pending ? <ActivityIndicator /> : <Radio selected={selected} size={22} />}
         </Link>
       </Box>
       {error && (
@@ -218,11 +211,7 @@ const DailyReadingSourceScreen = ({ embedded = false }: { embedded?: boolean }) 
               </Box>
               <Text className="text-default text-[16px] flex-1">{t('dailyReading.default')}</Text>
               <Box className="w-[44px] h-[44px] items-center justify-center">
-                <FeatherIcon
-                  name={!selectedId ? 'check-circle' : 'circle'}
-                  color={!selectedId ? 'primary' : 'grey'}
-                  size={22}
-                />
+                <Radio selected={!selectedId} size={22} />
               </Box>
             </Link>
           ) : (

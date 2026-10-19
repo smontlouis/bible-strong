@@ -18,8 +18,19 @@ describe('commentary selection', () => {
     expect(DEFAULT_COMMENTARY_SELECTIONS.en).toEqual(['barnes:en', 'acbc:en', 'mhcc:en'])
   })
 
-  it('never selects more than five commentaries', () => {
-    const selected = ['barnes:fr', 'acbc:fr', 'mhcc:en', 'jfb:en', 'calvin:en'] as const
+  it('never selects more than ten commentaries', () => {
+    const selected = [
+      'barnes:fr',
+      'acbc:fr',
+      'mhcc:en',
+      'jfb:en',
+      'calvin:en',
+      'kd:en',
+      'treasury-david:en',
+      'catena-aurea:en',
+      'abbott:en',
+      'burkitt:en',
+    ] as const
 
     expect(toggleCommentarySelection(selected, 'wesley:en')).toEqual({
       selected,

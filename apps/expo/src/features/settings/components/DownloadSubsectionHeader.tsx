@@ -50,7 +50,7 @@ const DownloadSubsectionHeader = ({
           justifyContent: 'center',
         }}
       >
-        <Checkbox checked={allSelected} variant="icon" size={22} />
+        <Checkbox checked={allSelected} size={22} />
       </TouchableOpacity>
       <TouchableOpacity
         accessibilityLabel={title}

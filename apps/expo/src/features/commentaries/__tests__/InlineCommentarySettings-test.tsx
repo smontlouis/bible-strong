@@ -68,6 +68,32 @@ it('offers only display selection, without download controls or availability des
   expect(mockDispatch).toHaveBeenCalledTimes(1)
 })
 
+it('disables the remaining choices once five commentaries are shown inline', async () => {
+  const { COMMENTARY_CATALOG_BY_ID } = require('@bible-strong/resource-catalog/commentaries')
+  const selected = [...COMMENTARY_CATALOG_BY_ID.values()]
+    .filter(entry => entry.id !== 'egw-writings' && entry.languages.includes('fr'))
+    .slice(0, 6)
+    .map(entry => `${entry.id}:fr`)
+  expect(selected).toHaveLength(6)
+  mockSettings.commentarySelection = selected
+  mockSettings.inlineCommentaries = selected.slice(0, 5)
+  await act(async () => {
+    renderer = create(<InlineCommentarySettings />)
+  })
+  const choices = renderer.root.findAll(
+    node => String(node.type) === 'TouchableBox' && node.props.accessibilityRole === 'checkbox'
+  )
+  const unchecked = choices.filter(node => !node.props.accessibilityState.checked)
+  expect(unchecked.length).toBeGreaterThan(0)
+  expect(unchecked.every(node => node.props.disabled)).toBe(true)
+  expect(JSON.stringify(renderer.toJSON())).toContain('inlineCommentary.limit')
+  expect(
+    choices
+      .filter(node => node.props.accessibilityState.checked)
+      .every(node => !node.props.disabled)
+  ).toBe(true)
+})
+
 it('shows the empty state when the master selection contains only excluded writings', async () => {
   mockSettings.commentarySelection = ['egw-writings:en']
   await act(async () => {

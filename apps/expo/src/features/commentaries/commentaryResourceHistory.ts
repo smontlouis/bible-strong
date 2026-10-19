@@ -1,4 +1,4 @@
-import { getBook } from '~helpers/bibleBookCatalog'
+import { getCommentaryBookLabel } from './commentaryBookLabel'
 import type { parseCommentaryResourceParams } from './commentaryResourceParams'
 
 type ParsedCommentaryResource = NonNullable<ReturnType<typeof parseCommentaryResourceParams>>
@@ -25,6 +25,6 @@ export const getCommentaryResourceHistoryEntry = (
     chapter: parsed.chapter,
     sectionId,
     title: parsed.entry.title,
-    passage: `${getBook(parsed.book)?.Nom ?? parsed.book} ${parsed.chapter}${range}`,
+    passage: `${getCommentaryBookLabel(parsed.book)} ${parsed.chapter}${range}`,
   }
 }

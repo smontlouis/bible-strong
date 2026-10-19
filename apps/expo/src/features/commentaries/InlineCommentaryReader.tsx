@@ -8,7 +8,7 @@ import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { MenuView } from '~common/ui/MenuView'
 import Text from '~common/ui/Text'
-import { getBook } from '~helpers/bibleBookCatalog'
+import { getCommentaryBookLabel } from './commentaryBookLabel'
 import CommentarySectionCard from './CommentarySectionCard'
 import { getCommentaryShare } from './shareCommentary'
 import { resourceShareMenuActions, runResourceShareAction } from '~features/share/resourceShare'
@@ -90,7 +90,7 @@ export default function InlineCommentaryReader({
     query.data && entry && request
       ? getCommentaryShare({
           entry,
-          passage: `${getBook(request.book)?.Nom ?? request.book} ${request.chapter}:${
+          passage: `${getCommentaryBookLabel(request.book)} ${request.chapter}:${
             query.data.section.rangeStartVerse
           }${
             query.data.section.rangeEndVerse !== query.data.section.rangeStartVerse

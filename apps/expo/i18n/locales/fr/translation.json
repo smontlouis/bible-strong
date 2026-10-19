@@ -2221,6 +2221,7 @@
   "inlineCommentary.unavailable": "Certains commentaires ne sont pas disponibles.",
   "inlineCommentary.description": "Afficher les commentaires choisis sous forme de pastilles dans la Bible. Le texte complet est chargé seulement à l’ouverture.",
   "inlineCommentary.download": "Télécharger pour le hors-ligne",
+  "inlineCommentary.limit": "Vous pouvez afficher au maximum {{max}} commentaires dans la Bible.",
   "inlineCommentary.noSelection": "Aucun commentaire sélectionné",
   "inlineCommentary.offlineReady": "Disponible hors ligne",
   "inlineCommentary.onlineOnly": "Connexion nécessaire pour le texte complet",

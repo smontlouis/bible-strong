@@ -68,7 +68,7 @@ const MultipleChoiceFilterModalInner = <T extends string>(
             accessibilityLabel={option.label}
             onPress={() => onToggle(option.value)}
           >
-            <Checkbox className="mr-[12px]" checked={isSelected} fillChecked checkColor="white" />
+            <Checkbox className="mr-[12px]" checked={isSelected} />
             <Text className="flex-[1] text-[16px]">{option.label}</Text>
           </ChoiceRow>
         )

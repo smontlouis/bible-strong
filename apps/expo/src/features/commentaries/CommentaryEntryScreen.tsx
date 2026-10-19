@@ -16,7 +16,7 @@ import FormSheetScreen from '~common/ui/FormSheetScreen'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { resourceFailureFromAccessError } from '~features/resources/resourceFailure'
-import { getBook } from '~helpers/bibleBookCatalog'
+import { getCommentaryBookLabel } from './commentaryBookLabel'
 import { IS_FORM_SHEET } from '~helpers/constants'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import CommentaryResourceHeaderActions from './CommentaryResourceHeaderActions'
@@ -118,7 +118,7 @@ const CommentaryEntryScreen = ({
   const sectionIndex = orderedSections.findIndex(candidate => candidate.id === params.sectionId)
   const previousSection = sectionIndex > 0 ? orderedSections[sectionIndex - 1] : undefined
   const nextSection = sectionIndex >= 0 ? orderedSections[sectionIndex + 1] : undefined
-  const bookLabel = getBook(book)?.Nom ?? String(book)
+  const bookLabel = getCommentaryBookLabel(book)
   const passage = section
     ? `${bookLabel} ${chapter}:${section.rangeStartVerse}${
         section.rangeEndVerse !== section.rangeStartVerse ? `–${section.rangeEndVerse}` : ''

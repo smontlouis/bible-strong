@@ -237,12 +237,7 @@ export const UnifiedTagsModalInstance = ({ item, setItem }: UnifiedTagsModalInst
                   key={tag.id}
                   onPress={() => handleTagPress(tag)}
                 >
-                  <Checkbox
-                    className="mr-[12px]"
-                    checked={isSelected}
-                    fillChecked
-                    checkColor="white"
-                  />
+                  <Checkbox className="mr-[12px]" checked={isSelected} />
                   <Text className="flex-[1] text-[16px]">{tag.name}</Text>
                 </TouchableBox>
               )

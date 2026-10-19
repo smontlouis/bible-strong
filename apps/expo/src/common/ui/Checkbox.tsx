@@ -4,53 +4,27 @@ import { twMerge } from '~common/ui/classNames'
 import Box, { BoxProps } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 
-type CheckboxVariant = 'outline' | 'icon'
-
 type CheckboxProps = Omit<BoxProps, 'children'> & {
   checked: boolean
-  variant?: CheckboxVariant
   size?: number
   iconSize?: number
   checkedColor?: string
   uncheckedColor?: string
   checkColor?: string
-  fillChecked?: boolean
 }
 
+// The app's only checkbox: a drawn square, filled when checked. Prefer it to
+// `check-square` / `square` icons so every list reads the same way.
 const Checkbox = ({
   checked,
-  variant = 'outline',
   size = 24,
   iconSize,
   checkedColor = 'primary',
   uncheckedColor = 'tertiary',
-  checkColor = 'primary',
-  fillChecked = false,
+  checkColor = 'white',
   ...boxProps
 }: CheckboxProps) => {
   const stylingTheme = useStylingTheme()
-
-  if (variant === 'icon') {
-    return (
-      <Box
-        {...boxProps}
-        style={[{ width: size, height: size }, boxProps.style]}
-        className={twMerge(
-          'overflow-hidden border-continuous',
-          twMerge(
-            'overflow-hidden border-continuous items-center justify-center',
-            boxProps.className
-          )
-        )}
-      >
-        <FeatherIcon
-          name={checked ? 'check-square' : 'square'}
-          size={iconSize ?? size}
-          color={checked ? checkedColor : uncheckedColor}
-        />
-      </Box>
-    )
-  }
 
   return (
     <Box
@@ -59,10 +33,7 @@ const Checkbox = ({
         {
           width: size,
           height: size,
-          backgroundColor: resolveThemeColor(
-            stylingTheme,
-            checked && fillChecked ? checkedColor : undefined
-          ),
+          backgroundColor: resolveThemeColor(stylingTheme, checked ? checkedColor : undefined),
           borderColor: resolveThemeColor(stylingTheme, checked ? checkedColor : uncheckedColor),
         },
         boxProps.style,
@@ -76,11 +47,7 @@ const Checkbox = ({
       )}
     >
       {checked && (
-        <FeatherIcon
-          name="check"
-          size={iconSize ?? 14}
-          color={fillChecked ? checkColor : checkedColor}
-        />
+        <FeatherIcon name="check" size={iconSize ?? Math.round(size * 0.6)} color={checkColor} />
       )}
     </Box>
   )

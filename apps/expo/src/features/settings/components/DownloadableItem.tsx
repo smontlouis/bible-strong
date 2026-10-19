@@ -201,7 +201,7 @@ const DownloadableItem = ({
                 transitionDuration: 200,
               }}
             >
-              <Checkbox checked={Boolean(isSelected)} variant="icon" size={22} />
+              <Checkbox checked={Boolean(isSelected)} size={22} />
             </Animated.View>
           )}
 
