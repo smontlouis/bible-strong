@@ -21,6 +21,7 @@ import i18n from '~i18n'
 import { PushRouteGateContext } from '~navigation/pushRouteGate'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { selectUserLoginInfo } from '~redux/selectors/user'
+import { useTheme } from '~themes/ThemeProvider'
 import { createTabForAssistantAction } from './assistantActions'
 import { assistantAccessible } from './assistantConfig'
 import AssistantComposer from './AssistantComposer'
@@ -122,6 +123,7 @@ function SheetHeader() {
 
 function AccountAssistant({ account }: { account: string }) {
   const { t } = useTranslation()
+  const theme = useTheme()
   const liveContext = useReadingContext()
   const openInNewTab = useOpenInNewTab()
   const pushRoute = usePushRouteOnce()
@@ -243,6 +245,8 @@ function AccountAssistant({ account }: { account: string }) {
             ref={sheet}
             // Expo's developer menu: 60% of the screen, then all of it.
             snapPoints={[0.6, 1]}
+            // Opaque: at 60% the reading behind must not show through a blur.
+            backgroundColor={theme.colors.reverse}
             header={<SheetHeader />}
             footer={historyOpen ? undefined : AssistantComposer}
             onOpenChange={setOpen}
