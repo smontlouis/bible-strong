@@ -822,6 +822,7 @@
   "migration.account.failedTitle": "Your synced data could not be updated",
   "migration.account.title": "Updating your synced data",
   "migration.account.failedDescription": "Your local data remains available. Try again when your connection is stable, or continue and retry on a later launch.",
+  "migration.account.failedOtherDescription": "An unexpected error interrupted the update. Your local data remains available. Try again, or continue and retry on a later launch.",
   "migration.account.description": "Your account data is being moved to the current secure storage format. Sync will resume when the update is complete.",
   "migration.progress": "Progress",
   "migration.start": "Update now",

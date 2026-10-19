@@ -49,6 +49,8 @@ jest.mock('~common/ui/Icon', () => ({
     jest.requireActual<typeof import('react')>('react').createElement('FeatherIcon', props),
 }))
 
+jest.mock('~helpers/useConnection', () => ({ isLikelyOfflineAfterFailure: async () => false }))
+
 const activePresentation = (
   status: 'awaiting-confirmation' | 'running' | 'failed',
   overrides: Record<string, unknown> = {}
@@ -126,6 +128,56 @@ describe('AccountMigrationModal', () => {
     expect(renderer.root.findByProps({ testID: 'account-migration-confirm' })).toBeTruthy()
     expect(renderer.root.findAllByProps({ testID: 'account-migration-retry' })).toHaveLength(0)
   })
+
+  it.each([
+    [
+      'FIRESTORE_EMBEDDED_DATA_MIGRATION_FAILED',
+      true,
+      'wifi-off',
+      'migration.account.failedDescription',
+    ],
+    [
+      'APP_MIGRATION_ACCOUNT_INSPECTION_TIMEOUT',
+      false,
+      'wifi-off',
+      'migration.account.failedDescription',
+    ],
+    [
+      'FIRESTORE_EMBEDDED_DATA_MIGRATION_FAILED',
+      false,
+      'alert-triangle',
+      'migration.account.failedOtherDescription',
+    ],
+  ])(
+    'explains a %s failure (offline: %s) with its own message',
+    async (errorCode, looksOffline, icon, descriptionKey) => {
+      let renderer: ReactTestRenderer
+      const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined)
+      await act(async () => {
+        renderer = create(
+          <AccountMigrationModal
+            presentation={
+              { ...activePresentation('failed'), errorCode } as AccountMigrationPresentation
+            }
+            isActionPending={false}
+            onConfirm={jest.fn()}
+            onRetry={jest.fn()}
+            onContinue={jest.fn()}
+            isLikelyOffline={async () => looksOffline}
+          />
+        )
+      })
+      consoleError.mockRestore()
+
+      expect(renderer!.root.findByType('FeatherIcon' as never).props.name).toBe(icon)
+      expect(
+        renderer!.root.findAllByType('Text' as never).map(node => node.props.children)
+      ).toContain(descriptionKey)
+      expect(
+        renderer!.root.findByProps({ testID: 'account-migration-error-code' }).props.children
+      ).toBe(errorCode)
+    }
+  )
 
   it('offers retry and an explicit continuation only after failure', () => {
     const renderer = renderModal(activePresentation('failed'))

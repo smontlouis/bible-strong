@@ -831,6 +831,7 @@
   "migration.account.failedTitle": "Vos données synchronisées n’ont pas pu être mises à jour",
   "migration.account.title": "Mise à jour de vos données synchronisées",
   "migration.account.failedDescription": "Vos données locales restent disponibles. Réessayez lorsque votre connexion est stable, ou continuez et réessayez lors d’un prochain lancement.",
+  "migration.account.failedOtherDescription": "Une erreur inattendue a interrompu la mise à jour. Vos données locales restent disponibles. Réessayez, ou continuez et réessayez lors d’un prochain lancement.",
   "migration.account.description": "Les données de votre compte sont transférées vers le format de stockage sécurisé actuel. La synchronisation reprendra à la fin de la mise à jour.",
   "migration.progress": "Progression",
   "migration.start": "Mettre à jour",

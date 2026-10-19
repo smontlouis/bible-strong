@@ -1,5 +1,6 @@
 import { twMerge } from '~common/ui/classNames'
 
+import { useEffect, useState } from 'react'
 import { Modal, View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import Box, { HStack, VStack } from '~common/ui/Box'
@@ -8,12 +9,15 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { ProgressBar } from '~common/ui/ProgressBar'
 import Text from '~common/ui/Text'
 import type { AccountMigrationPresentation } from '~helpers/useAccountMigrations'
+import { isLikelyOfflineAfterFailure } from '~helpers/useConnection'
+import { getMigrationFailureKind } from './migrationFailure'
 interface AccountMigrationModalProps {
   presentation: AccountMigrationPresentation
   isActionPending: boolean
   onConfirm(): void
   onRetry(): void
   onContinue(): void
+  isLikelyOffline?: () => Promise<boolean>
 }
 
 const getOverallProgress = (presentation: AccountMigrationPresentation): number => {
@@ -47,12 +51,33 @@ const AccountMigrationModal = ({
   onConfirm,
   onRetry,
   onContinue,
+  isLikelyOffline = isLikelyOfflineAfterFailure,
 }: AccountMigrationModalProps) => {
   const { t } = useTranslation()
+  const [looksOffline, setLooksOffline] = useState(false)
+  const failureCode = presentation.kind === 'failed' ? presentation.errorCode : undefined
+
+  useEffect(() => {
+    if (failureCode === undefined) return
+    let active = true
+    isLikelyOffline().then(
+      offline => {
+        if (active) setLooksOffline(offline)
+      },
+      () => {}
+    )
+    return () => {
+      active = false
+    }
+  }, [failureCode, isLikelyOffline])
 
   if (presentation.kind === 'hidden' || presentation.kind === 'checking') return null
 
   const isFailure = presentation.kind === 'failed'
+  // Account migration codes never prove a server or integrity cause, so only a network
+  // failure gets its own message.
+  const isNetworkFailure =
+    isFailure && getMigrationFailureKind(failureCode, looksOffline) === 'network'
   const progress = getOverallProgress(presentation)
   const currentStepLabel = getCurrentStepLabel(presentation)
   const isConfirmation =
@@ -85,7 +110,7 @@ const AccountMigrationModal = ({
             style={{ width: 88, height: 88 }}
           >
             <FeatherIcon
-              name={isFailure ? 'cloud-off' : 'cloud'}
+              name={isFailure ? (isNetworkFailure ? 'wifi-off' : 'alert-triangle') : 'cloud'}
               size={42}
               color={isFailure ? 'secondary' : 'primary'}
             />
@@ -96,7 +121,11 @@ const AccountMigrationModal = ({
           </Text>
           <Text className="text-grey text-center leading-[22px] mb-[26px]">
             {isFailure
-              ? t('migration.account.failedDescription')
+              ? t(
+                  isNetworkFailure
+                    ? 'migration.account.failedDescription'
+                    : 'migration.account.failedOtherDescription'
+                )
               : t('migration.account.description')}
           </Text>
 
