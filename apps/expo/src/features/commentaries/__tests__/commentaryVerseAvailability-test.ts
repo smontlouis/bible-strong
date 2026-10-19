@@ -41,4 +41,23 @@ describe('commentary verse availability', () => {
       null,
     ])
   })
+
+  it('keeps why a resource is unavailable so offline rows can ask for a download', () => {
+    const result = buildCommentaryVerseAvailability({
+      selectedProjectionIds: ['barnes:fr', 'acbc:fr', 'mhcc:en'],
+      verseNumber: 1,
+      commentsByVerse: {},
+      unavailableResources: [
+        { resourceId: 'barnes', language: 'fr', cause: 'offline-copy-required' },
+        { resourceId: 'acbc', language: 'fr', cause: 'invalid-offline-copy' },
+        { resourceId: 'mhcc', language: 'en', cause: 'temporary-unavailable' },
+      ],
+    })
+
+    expect(result.map(item => [item.projectionId, item.state, item.unavailableCause])).toEqual([
+      ['barnes:fr', 'unavailable', 'offline-copy-required'],
+      ['acbc:fr', 'unavailable', 'invalid-offline-copy'],
+      ['mhcc:en', 'unavailable', 'temporary-unavailable'],
+    ])
+  })
 })

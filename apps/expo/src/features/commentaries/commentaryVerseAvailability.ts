@@ -16,6 +16,8 @@ export type CommentaryVerseAvailability = {
   language: CommentaryLanguage
   resourceCode: string
   state: CommentaryVerseAvailabilityState
+  /** Why an `unavailable` resource could not be read, so the row can say what would fix it. */
+  unavailableCause?: CommentaryUnavailableResource['cause']
   comment?: Comment
 }
 
@@ -53,7 +55,7 @@ export const buildCommentaryVerseAvailability = ({
     const entry = COMMENTARY_CATALOG_BY_ID.get(projection.resourceId)
     if (!entry) return []
     const resourceCode = `${entry.publicationId}:${projection.language}`
-    const unavailable = unavailableResources.some(
+    const unavailable = unavailableResources.find(
       resource => resource.resourceId === entry.id && resource.language === projection.language
     )
     const comment = (commentsByVerse[String(verseNumber)] ?? []).find(
@@ -76,6 +78,7 @@ export const buildCommentaryVerseAvailability = ({
             : hasChapterContent
               ? 'chapter'
               : 'no-content',
+        unavailableCause: unavailable?.cause,
         comment,
       },
     ]

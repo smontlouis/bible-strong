@@ -651,6 +651,7 @@
   "commentaries.availability.chapterPreview": "Disponible dans le chapitre",
   "commentaries.availability.noContentPreview": "Aucun commentaire dans ce chapitre.",
   "commentaries.availability.errorPreview": "Un problème est survenu lors du chargement.",
+  "commentaries.availability.offlineCopyRequiredPreview": "Connectez-vous ou téléchargez ce commentaire pour le lire.",
   "commentaries.resource.chooseChapter": "Choisir un livre et un chapitre",
   "commentaries.resource.sectionCount": "{{count}} section",
   "commentaries.resource.sectionCount_plural": "{{count}} sections",
