@@ -557,7 +557,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   }
 
   const verseTextStyle = {
-    fontSize: Number.parseFloat(getBibleTextFontSize(false, fontSizeScale)),
+    fontSize: Number.parseFloat(getBibleTextFontSize(fontSizeScale)),
     lineHeight: Number.parseFloat(scaleLineHeight(24, lineHeightSetting, fontSizeScale)),
   }
   const verseMaxHeight = modalContentHeight ? modalContentHeight * 0.4 : undefined

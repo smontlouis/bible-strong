@@ -283,7 +283,6 @@ const ParallelVerseRow = ({
         </ParallelError>
       ) : (
         <Verse
-          isParallel={!isVertical}
           isParallelCell
           hideNumber={isVertical}
           isHebreu={isHebreu}

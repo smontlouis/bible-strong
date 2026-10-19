@@ -10,18 +10,16 @@ interface Props {
   notesText: NotedVerse[]
   settings: RootState['user']['bible']['settings']
   onClick: (note: NotedVerse) => void
-  isParallel?: boolean
   isDisabled?: boolean
 }
 
-const NotesText = ({ notesText, settings, onClick, isParallel, isDisabled }: Props) => {
+const NotesText = ({ notesText, settings, onClick, isDisabled }: Props) => {
   return (
     <span>
       {notesText.map(note => (
         <InlineItemContainer
           key={note.key}
           settings={settings}
-          isParallel={isParallel}
           onClick={() => onClick(note)}
           isButton
           isDisabled={isDisabled}

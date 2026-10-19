@@ -16,14 +16,12 @@ import UntranslatedStrongMarker from './UntranslatedStrongMarker'
 const StyledReference = styled('span')<
   RootStyles & {
     isSelected: boolean
-    isParallel?: boolean
     isDisabled?: boolean
     $isUntranslated?: boolean
   }
 >(
   ({
     isSelected,
-    isParallel,
     isDisabled,
     $isUntranslated,
     settings: { theme, colors, fontFamily, fontSizeScale, lineHeight },
@@ -32,12 +30,8 @@ const StyledReference = styled('span')<
     ...noSelect,
     color: isSelected ? colors[theme].reverse : colors[theme].primary,
     backgroundColor: isSelected ? colors[theme].primary : 'inherit',
-    fontSize: scaleFontSize(isParallel ? 14 : 16, fontSizeScale),
-    lineHeight: scaleLineHeight(isParallel ? 24 : 30, lineHeight, fontSizeScale),
-    '@media (min-width: 768px)': {
-      fontSize: scaleFontSize(16, fontSizeScale),
-      lineHeight: scaleLineHeight(30, lineHeight, fontSizeScale),
-    },
+    fontSize: scaleFontSize(16, fontSizeScale),
+    lineHeight: scaleLineHeight(30, lineHeight, fontSizeScale),
     boxShadow: isDarkTheme(theme)
       ? `0 0 10px 0 rgba(255, 255, 255, 0.1)`
       : `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
@@ -76,7 +70,6 @@ export const BibleStrongRef = ({
   word,
   chapter,
   verse,
-  isParallel,
   isDisabled,
   selectedCode,
   settings,
@@ -89,7 +82,6 @@ export const BibleStrongRef = ({
   word?: string
   chapter?: string | number
   verse?: string | number
-  isParallel?: boolean
   isDisabled?: boolean
   selectedCode?: SelectedCode | null
   settings: RootState['user']['bible']['settings']
@@ -131,7 +123,6 @@ export const BibleStrongRef = ({
       }
       data-ignore-verse-touch
       isSelected={isSelected}
-      isParallel={isParallel}
       isDisabled={isDisabled}
       $isUntranslated={isUntranslated}
       settings={settings}

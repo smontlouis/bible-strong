@@ -69,7 +69,6 @@ const LinksText = ({ linksText, settings, onClick, isParallel, isDisabled }: Pro
           <InlineItemContainer
             key={link.key}
             settings={settings}
-            isParallel={isParallel}
             onClick={() => onClick(link.id || link.key)}
             isButton
             isDisabled={isDisabled}

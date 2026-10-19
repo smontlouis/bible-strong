@@ -25,26 +25,22 @@ interface Props {
   relationItems: VerseRelationItem[]
   settings: RootState['user']['bible']['settings']
   onClick: (item: VerseRelationItem) => void
-  isParallel?: boolean
   isDisabled?: boolean
 }
 
-const RelationTag = styled('span')<RootStyles & { isParallel?: boolean }>(
-  ({ isParallel, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
+const RelationTag = styled('span')<RootStyles>(
+  ({ settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
     fontFamily,
     padding: '0px 4px',
     borderRadius: '4px',
     color: colors[theme].default,
     backgroundColor: colors[theme].lightGrey,
-    fontSize: scaleFontSize(isParallel ? 10 : 16, fontSizeScale),
-    '@media (min-width: 768px)': {
-      fontSize: scaleFontSize(16, fontSizeScale),
-    },
+    fontSize: scaleFontSize(16, fontSizeScale),
     marginRight: '5px',
     cursor: 'pointer',
     display: 'inline-flex',
     alignItems: 'center',
-    maxWidth: isParallel ? '110px' : '190px',
+    maxWidth: '190px',
     ...noSelect,
 
     '&:active': {
@@ -177,7 +173,7 @@ const RelationIcon = ({
   }
 }
 
-const RelationsText = ({ relationItems, settings, onClick, isParallel, isDisabled }: Props) => {
+const RelationsText = ({ relationItems, settings, onClick, isDisabled }: Props) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const visibleItems = isExpanded ? relationItems : relationItems.slice(0, 3)
   const hiddenCount = relationItems.length - visibleItems.length
@@ -205,7 +201,6 @@ const RelationsText = ({ relationItems, settings, onClick, isParallel, isDisable
         <RelationTag
           key={item.key}
           settings={settings}
-          isParallel={isParallel}
           role={isDisabled ? undefined : 'link'}
           tabIndex={isDisabled ? -1 : 0}
           onKeyDown={(event: React.KeyboardEvent) => {

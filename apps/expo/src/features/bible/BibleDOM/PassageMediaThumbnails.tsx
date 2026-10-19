@@ -14,7 +14,6 @@ import { registerVisibleScrollEffect } from './visibleScrollEffects'
 type Props = RootStyles & {
   items: ResolvedPassageMedia[]
   placement: 'introduction' | 'inline' | 'chapter-resources'
-  isParallel?: boolean
   isDisabled?: boolean
   isCompact?: boolean
   blockMargin?: CSSProperties['margin']
@@ -24,7 +23,6 @@ type Props = RootStyles & {
 const INLINE_THUMBNAIL = {
   height: 25,
   aspectRatio: 1.3,
-  parallelScale: 0.75,
   containerScale: 0.7,
   margin: 2,
 }
@@ -70,7 +68,6 @@ const PassageMediaThumbnails = ({
   items,
   placement,
   settings,
-  isParallel,
   isDisabled = false,
   isCompact = false,
   blockMargin,
@@ -128,8 +125,7 @@ const PassageMediaThumbnails = ({
         ? COMPACT_INTRODUCTION_THUMBNAIL
         : INTRODUCTION_THUMBNAIL
       : CHAPTER_RESOURCES_THUMBNAIL
-  const inlineCardHeight =
-    INLINE_THUMBNAIL.height * (isParallel ? INLINE_THUMBNAIL.parallelScale : 1)
+  const inlineCardHeight = INLINE_THUMBNAIL.height
   const inlineCardWidth = inlineCardHeight * INLINE_THUMBNAIL.aspectRatio
   const cardHeight = isInline
     ? scaleFontSize(inlineCardHeight, settings.fontSizeScale)

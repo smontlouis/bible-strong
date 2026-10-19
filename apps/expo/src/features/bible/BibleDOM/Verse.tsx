@@ -51,17 +51,11 @@ import type { ResolvedPassageMedia } from '../passageMedia'
 import PassageMediaThumbnails from './PassageMediaThumbnails'
 import type { PassageMediaGallerySection } from './passageMediaGallery'
 
-const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
-  ({ isParallel, settings: { fontSizeScale, lineHeight } }) => ({
-    fontSize: getBibleTextFontSize(Boolean(isParallel), fontSizeScale),
-    lineHeight: scaleLineHeight(isParallel ? 26 : 32, lineHeight, fontSizeScale),
-    '@media (min-width: 768px)': {
-      fontSize: getBibleTextFontSize(false, fontSizeScale),
-      lineHeight: scaleLineHeight(32, lineHeight, fontSizeScale),
-    },
-    whiteSpace: 'pre-line',
-  })
-)
+const VerseText = styled('span')<RootStyles>(({ settings: { fontSizeScale, lineHeight } }) => ({
+  fontSize: getBibleTextFontSize(fontSizeScale),
+  lineHeight: scaleLineHeight(32, lineHeight, fontSizeScale),
+  whiteSpace: 'pre-line',
+}))
 
 const NumberText = styled<
   RootStyles & { isFocused?: boolean; highlightBg?: string; highlightColor?: string }
@@ -165,7 +159,6 @@ const getVerseText = ({
   verse,
   version,
   annotationMode,
-  isParallel,
   selectedCode,
   settings,
   redWords,
@@ -175,7 +168,6 @@ const getVerseText = ({
   verse: TVerse
   version: string
   annotationMode: boolean
-  isParallel?: boolean
   selectedCode: SelectedCode | null
   settings: RootState['user']['bible']['settings']
   redWords?: Record<string, { start: number; end: number }[]> | null
@@ -201,7 +193,6 @@ const getVerseText = ({
       version,
       chapter: verse.Chapitre,
       verse: verse.Verset,
-      isParallel,
       isDisabled: annotationMode,
       selectedCode,
       settings,
@@ -227,7 +218,6 @@ const renderCanonicalPresentation = (
     version: string
     chapter: string | number
     verse: string | number
-    isParallel?: boolean
     isDisabled: boolean
     selectedCode: SelectedCode | null
     settings: RootState['user']['bible']['settings']
@@ -252,7 +242,6 @@ const renderCanonicalPresentation = (
           word={node.word}
           chapter={options.chapter}
           verse={options.verse}
-          isParallel={options.isParallel}
           isDisabled={options.isDisabled}
           selectedCode={options.selectedCode}
           settings={options.settings}
@@ -416,7 +405,6 @@ export interface VerseContentProps {
   settings: RootState['user']['bible']['settings']
   isSelectionMode: StudyNavigateBibleType | undefined
   annotationMode?: boolean
-  isParallel?: boolean
   bookmark?: Bookmark
   relationCount?: number
   relationItems?: VerseRelationItem[]
@@ -513,7 +501,6 @@ export const hasVerseMarkers = ({
 export const VersePassageMedia = ({
   settings,
   annotationMode = false,
-  isParallel,
   passageMedia,
   passageMediaGallerySections,
 }: VerseContentProps) =>
@@ -523,7 +510,6 @@ export const VersePassageMedia = ({
       gallerySections={passageMediaGallerySections}
       placement="inline"
       settings={settings}
-      isParallel={isParallel}
       isDisabled={annotationMode}
     />
   ) : null
@@ -534,7 +520,6 @@ export const VerseEndContent = ({
   settings,
   isSelectionMode,
   annotationMode = false,
-  isParallel,
   relationItems,
   tag,
   otherVersionAnnotations,
@@ -576,7 +561,6 @@ export const VerseEndContent = ({
         (settings.relationsDisplay || 'inline') === 'inline' &&
         !isSelectionMode && (
           <RelationsText
-            isParallel={isParallel}
             settings={settings}
             onClick={navigateToRelationItem}
             relationItems={relationItems}
@@ -623,7 +607,6 @@ interface Props {
   isHebreu: boolean
   selectedCode: SelectedCode | null
   isFocused?: boolean
-  isParallel?: boolean
   tag: TaggedVerse | undefined
   bookmark?: Bookmark
   fadePosition?: 'top' | 'bottom'
@@ -660,7 +643,6 @@ const Verse = ({
   selectedCode,
   isSelectedMode,
   isFocused,
-  isParallel,
   isMissingVerse = false,
   isParallelCell = false,
   hideNumber = false,
@@ -686,7 +668,6 @@ const Verse = ({
     verse,
     version,
     annotationMode,
-    isParallel,
     selectedCode,
     settings,
     redWords,
@@ -721,7 +702,6 @@ const Verse = ({
     settings,
     isSelectionMode,
     annotationMode,
-    isParallel,
     bookmark,
     relationCount,
     relationItems,
@@ -788,7 +768,6 @@ const Verse = ({
               verse.InterlinearTokens?.length || 0,
               JSON.stringify(redWords?.[verseKey] || []),
             ].join(':')}
-            isParallel={isParallel}
             settings={settings}
             data-verse-text
             data-version={version}
@@ -796,7 +775,6 @@ const Verse = ({
           >
             {verse.ReverseInterlinearSpans?.length ? (
               <ReverseInterlinearVerse
-                isParallel={Boolean(isParallel)}
                 settings={settings}
                 verse={verse}
                 version={version}

@@ -4,6 +4,7 @@ import { getPassageContextHeaderHeight } from '../passagePreviewPresentation'
 import EntityChipsDOM from '~common/EntityChipsDOM'
 import type { EntityChip } from '~common/entityChips'
 import { READING_TEXT_MAX_WIDTH, BIBLE_READING_HORIZONTAL_PADDING } from '~common/readingLayout'
+import { getParallelColumnFontSizeScale } from './verseTypography'
 import { setup, styled, keyframes } from 'goober'
 import { createGlobalStyles } from 'goober/global'
 import { m } from 'motion/react'
@@ -797,6 +798,13 @@ const LoadedBibleContent = ({
   const isHorizontalParallelMode = isParallelVerseMode && parallelDisplayMode === 'horizontal'
   const titlesFollowColumnsScroll = followsColumnsScroll && isHorizontalParallelMode
   const highlightOriginRef = isHorizontalParallelMode ? versesContentRef : containerRef
+  // What the columns hold reads at the size their width allows
+  const columnSettings = isHorizontalParallelMode
+    ? {
+        ...settings,
+        fontSizeScale: getParallelColumnFontSizeScale(settings.fontSizeScale, preferredColumnWidth),
+      }
+    : settings
 
   // Use shared hook for annotation highlights (with selection support when in annotation mode)
   const { highlightRects, selectionHandlePositions } = useAnnotationHighlights({
@@ -1532,7 +1540,7 @@ const LoadedBibleContent = ({
                 selectedVerses={selectedVerses}
                 selectedVersesVersion={selectedVersesVersion ?? version}
                 highlightedVerses={highlightedVerses}
-                settings={settings}
+                settings={columnSettings}
                 verseToScroll={verseToScroll}
                 contextDisplayMode={contextDisplayMode}
                 version={version}
@@ -1569,7 +1577,7 @@ const LoadedBibleContent = ({
                 wordAnnotations={wordAnnotations}
                 annotationRelationItems={annotationRelationItems}
                 versions={displayedVersions}
-                settings={settings}
+                settings={columnSettings}
                 annotationMode={annotationMode}
                 contentKey={annotationInlineContentKey}
               />

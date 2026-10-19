@@ -229,7 +229,6 @@ export function UnifiedVersesRenderer({
             settings,
             isSelectionMode: annotationMode ? undefined : isSelectionMode,
             annotationMode,
-            isParallel: parallelDisplayMode === 'horizontal',
             bookmark,
             relationCount,
             relationItems,
