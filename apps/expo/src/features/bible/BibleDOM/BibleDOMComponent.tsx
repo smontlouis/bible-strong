@@ -3,7 +3,12 @@
 import { getPassageContextHeaderHeight } from '../passagePreviewPresentation'
 import EntityChipsDOM from '~common/EntityChipsDOM'
 import type { EntityChip } from '~common/entityChips'
-import { READING_TEXT_MAX_WIDTH, BIBLE_READING_HORIZONTAL_PADDING } from '~common/readingLayout'
+import {
+  READING_TEXT_MAX_WIDTH,
+  BIBLE_READING_HORIZONTAL_PADDING,
+  BIBLE_HEADER_PILL_INSET,
+  PARALLEL_COLUMN_GAP,
+} from '~common/readingLayout'
 import { getParallelColumnFontSizeScale } from './verseTypography'
 import { setup, styled, keyframes } from 'goober'
 import { createGlobalStyles } from 'goober/global'
@@ -452,10 +457,11 @@ const keepTitleAtLeftEdge = keyframes`
 `
 
 const VersionTitle = styled('div')<RootStyles & { $followsScroll?: boolean }>(
-  ({ settings: { fontSizeScale, fontFamily, colors, theme }, $followsScroll }) => ({
+  ({ settings: { fontFamily, colors, theme }, $followsScroll }) => ({
     fontFamily,
     fontWeight: 'bold',
-    fontSize: scaleFontSize(16, fontSizeScale),
+    // The pill of the header's book and version selectors
+    fontSize: '14px',
     position: 'sticky',
     left: 0,
     ...($followsScroll
@@ -471,17 +477,15 @@ const VersionTitle = styled('div')<RootStyles & { $followsScroll?: boolean }>(
     khtmlUserSelect: 'none',
     webkitUserSelect: 'none',
     color: colors[theme].default,
-
-    backgroundColor: colors[theme].reverse,
-    boxShadow: isDarkTheme(theme)
-      ? `0 0 10px 0 rgba(255, 255, 255, 0.1)`
-      : `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
-    borderRadius: '8px',
-    paddingInlineEnd: '8px',
-    paddingInlineStart: '4px',
-    paddingBlock: '4px',
-    wordBreak: 'break-word',
-    marginInline: '4px',
+    backgroundColor: colors[theme].lightGrey,
+    borderRadius: '20px',
+    display: 'inline-flex',
+    alignItems: 'center',
+    height: '32px',
+    boxSizing: 'border-box',
+    paddingInlineStart: '12px',
+    paddingInlineEnd: '10px',
+    whiteSpace: 'nowrap',
     cursor: 'pointer',
     '&:active': {
       opacity: 0.6,
@@ -544,7 +548,9 @@ const HorizontalScrollWrapper = styled('div')<{
 const HeaderScrollWrapper = styled('div')<{ columnCount: number; $followsScroll?: boolean }>(
   ({ columnCount, $followsScroll }) => ({
     position: 'sticky',
-    paddingInline: `${BIBLE_READING_HORIZONTAL_PADDING}px`,
+    // The version pills line up under the header's pill, as the text does in single reading
+    paddingInlineStart: `${BIBLE_HEADER_PILL_INSET}px`,
+    paddingInlineEnd: `${BIBLE_READING_HORIZONTAL_PADDING}px`,
     top: 'var(--header-height)',
     zIndex: 2,
     transition: 'top 0.3s cubic-bezier(.13,.69,.5,.98)',
@@ -561,10 +567,15 @@ const HeaderScrollWrapper = styled('div')<{ columnCount: number; $followsScroll?
 )
 
 // Colonne pour chaque version dans le header
+// Distance from one horizontal parallel column to the next
+const getParallelColumnPitch = (columnWidth: number) =>
+  window.innerWidth * (columnWidth / 100) - PARALLEL_COLUMN_GAP
+
 const VersionTitleColumn = styled('div')<{ columnCount: number; columnWidth: number }>(
   ({ columnCount, columnWidth }) => ({
-    width: columnCount > 1 ? `${columnWidth}vw` : '100%',
-    minWidth: columnCount > 1 ? `${columnWidth}vw` : '100%',
+    // The width of the columns below, which leave out the gap the next one opens with
+    width: columnCount > 1 ? `calc(${columnWidth}vw - ${PARALLEL_COLUMN_GAP}px)` : '100%',
+    minWidth: columnCount > 1 ? `calc(${columnWidth}vw - ${PARALLEL_COLUMN_GAP}px)` : '100%',
     transition: 'width 0.4s ease-in-out',
     flexShrink: 0,
     display: 'flex',
@@ -1060,7 +1071,7 @@ const LoadedBibleContent = ({
   const scrollToAdjacentColumn = (direction: 'left' | 'right') => {
     const scrollElement = contentScrollRef.current
     if (!scrollElement) return
-    const columnWidthPx = window.innerWidth * (parallelColumnWidth / 100)
+    const columnWidthPx = getParallelColumnPitch(parallelColumnWidth)
     const columnIndex = Math.round(scrollElement.scrollLeft / columnWidthPx)
     const nextIndex = Math.max(
       0,
@@ -1146,12 +1157,16 @@ const LoadedBibleContent = ({
 
     if (followsColumnsScroll) {
       const updateTitleRanges = () => {
-        const columnWidthPx = window.innerWidth * (parallelColumnWidth / 100)
+        const columnWidthPx = getParallelColumnPitch(parallelColumnWidth)
         headerEl.querySelectorAll<HTMLElement>('[data-version-title]').forEach((titleEl, i) => {
-          const columnStart = i * columnWidthPx
-          const travel = Math.max(0, columnWidthPx - titleEl.offsetWidth - TITLE_EDGE_MARGIN)
-          titleEl.style.setProperty('--title-range-start', `${columnStart}px`)
-          titleEl.style.setProperty('--title-range-end', `${columnStart + travel}px`)
+          // The title reaches the left edge once its own margin in the column has scrolled by
+          const pinStart = i * columnWidthPx + titleEl.offsetLeft
+          const travel = Math.max(
+            0,
+            columnWidthPx - titleEl.offsetLeft - titleEl.offsetWidth - TITLE_EDGE_MARGIN
+          )
+          titleEl.style.setProperty('--title-range-start', `${pinStart}px`)
+          titleEl.style.setProperty('--title-range-end', `${pinStart + travel}px`)
           titleEl.style.setProperty('--title-travel', `${travel}px`)
         })
       }
@@ -1476,8 +1491,9 @@ const LoadedBibleContent = ({
                   >
                     <VersionTitle
                       data-version-title={i}
+                      // Columns after the first open with a gap: each pill keeps to its text
+                      style={{ marginInlineStart: i === 0 ? 0 : PARALLEL_COLUMN_GAP }}
                       onClick={() => navigateToVersion(p.id, i)}
-                      style={{ paddingLeft: '5px' }}
                       settings={settings}
                       $followsScroll={titlesFollowColumnsScroll}
                     >

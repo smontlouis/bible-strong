@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { styled } from 'goober'
-import { BIBLE_READING_HORIZONTAL_PADDING } from '~common/readingLayout'
+import { BIBLE_READING_HORIZONTAL_PADDING, PARALLEL_COLUMN_GAP } from '~common/readingLayout'
 import type { SelectedCode, StudyNavigateBibleType, Verse as TVerse } from '~common/types'
 import type { BibleError } from '~helpers/bibleErrors'
 import type { ParallelDisplayMode } from 'src/state/tabs'
@@ -23,7 +23,6 @@ import Verse, {
 } from './Verse'
 import type { FadePosition, ParallelVerseRow as ParallelVerseCell } from './verseRenderingModel'
 import { scaleFontSize } from './scaleFontSize'
-import { isDarkTheme } from './utils'
 
 type RedWords = Record<string, { start: number; end: number }[]> | null | undefined
 type HighlightColor = keyof RootStyles['settings']['colors'][keyof RootStyles['settings']['colors']]
@@ -44,21 +43,17 @@ const ParallelError = styled('div')<RootStyles>(
   })
 )
 
-// Version title for vertical display mode (matches header VersionTitle style)
+// Version title for vertical display mode, the pill of the header's version selector
 const VerticalVersionTitle = styled('div')<RootStyles>(
-  ({ settings: { fontSizeScale, fontFamily, colors, theme } }) => ({
+  ({ settings: { fontFamily, colors, theme } }) => ({
     fontFamily,
     fontWeight: 'bold',
-    fontSize: scaleFontSize(14, fontSizeScale),
+    fontSize: '14px',
     display: 'inline-block',
     color: colors[theme].default,
-    backgroundColor: colors[theme].reverse,
-    boxShadow: isDarkTheme(theme)
-      ? `0 0 10px 0 rgba(255, 255, 255, 0.1)`
-      : `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
-    borderRadius: '8px',
-    paddingInlineEnd: '8px',
-    paddingInlineStart: '8px',
+    backgroundColor: colors[theme].lightGrey,
+    borderRadius: '20px',
+    paddingInline: '12px',
     paddingBlock: '4px',
     marginTop: '8px',
     marginBottom: '4px',
@@ -351,11 +346,11 @@ const ParallelVerseRow = ({
   }
 
   const columnStyle = (index: number): React.CSSProperties => ({
-    width: `calc(${columnWidth}vw - 10px)`,
+    width: `calc(${columnWidth}vw - ${PARALLEL_COLUMN_GAP}px)`,
     transition: 'width 0.4s ease-in-out',
     flexShrink: 0,
     padding: '5px 5px',
-    paddingLeft: index === 0 ? '0px' : '10px',
+    paddingLeft: index === 0 ? 0 : PARALLEL_COLUMN_GAP,
     boxSizing: 'border-box',
   })
 

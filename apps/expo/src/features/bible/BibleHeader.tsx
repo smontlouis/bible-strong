@@ -222,12 +222,16 @@ const Header = ({
     })
   }
 
-  const bookTriggerClassName =
-    'overflow-hidden border-continuous items-center justify-center pl-[12px] pr-[7px] h-[32px]'
+  // Parallel reading chooses each version in its own column: the book stands alone
+  const bookTriggerClassName = `overflow-hidden border-continuous items-center justify-center pl-[12px] h-[32px] ${
+    isParallel ? 'pr-[12px]' : 'pr-[7px]'
+  }`
   const bookTriggerContent = (
     <>
       <AnimatedBox
-        className="overflow-hidden border-continuous bg-light-grey rounded-tl-[20px] rounded-bl-[20px] absolute left-[0px] bottom-[0px] right-[0px] top-[0px]"
+        className={`overflow-hidden border-continuous bg-light-grey absolute left-[0px] bottom-[0px] right-[0px] top-[0px] ${
+          isParallel ? 'rounded-[20px]' : 'rounded-tl-[20px] rounded-bl-[20px]'
+        }`}
         style={opacityTransitionStyle}
       />
       <AnimatedText className="font-bold text-[14px]" style={translateYTransitionStyle}>
@@ -627,28 +631,30 @@ const Header = ({
                   </BibleSelectorTrigger>
                 )}
               </HStack>
-              <BibleSelectorTrigger
-                kind="version"
-                data={getDefaultStore().get(bibleAtom).data}
-                actions={actions}
-                className="overflow-hidden border-continuous items-center justify-center pl-[7px] pr-[12px] h-[32px]"
-                onPress={() =>
-                  openVersionSelector({
-                    actions,
-                    data: getDefaultStore().get(bibleAtom).data,
-                  })
-                }
-                accessibilityRole="button"
-                accessibilityLabel={t('accessibility.chooseVersion', { version })}
-              >
-                <AnimatedBox
-                  className="overflow-hidden border-continuous bg-light-grey rounded-tr-[20px] rounded-br-[20px] absolute left-[0px] bottom-[0px] right-[0px] top-[0px]"
-                  style={opacityTransitionStyle}
-                />
-                <AnimatedText className="font-bold text-[14px]" style={translateYTransitionStyle}>
-                  {version}
-                </AnimatedText>
-              </BibleSelectorTrigger>
+              {!isParallel && (
+                <BibleSelectorTrigger
+                  kind="version"
+                  data={getDefaultStore().get(bibleAtom).data}
+                  actions={actions}
+                  className="overflow-hidden border-continuous items-center justify-center pl-[7px] pr-[12px] h-[32px]"
+                  onPress={() =>
+                    openVersionSelector({
+                      actions,
+                      data: getDefaultStore().get(bibleAtom).data,
+                    })
+                  }
+                  accessibilityRole="button"
+                  accessibilityLabel={t('accessibility.chooseVersion', { version })}
+                >
+                  <AnimatedBox
+                    className="overflow-hidden border-continuous bg-light-grey rounded-tr-[20px] rounded-br-[20px] absolute left-[0px] bottom-[0px] right-[0px] top-[0px]"
+                    style={opacityTransitionStyle}
+                  />
+                  <AnimatedText className="font-bold text-[14px]" style={translateYTransitionStyle}>
+                    {version}
+                  </AnimatedText>
+                </BibleSelectorTrigger>
+              )}
             </HStack>
 
             <VerseSelectorPopup bibleAtom={bibleAtom} coverage={coverage} preferCoverage>
