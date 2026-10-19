@@ -141,6 +141,35 @@ describe('canonicalVersePresentation', () => {
     expect(visible[0]).toEqual(expect.objectContaining({ kind: 'element', tag: 'small-caps' }))
   })
 
+  it('carries the transliterations of the spans that end on the same word', () => {
+    const nodes = buildCanonicalVersePresentation({
+      text: 'Dieu créa.',
+      startTags: [],
+      layout: [],
+      strongSpans: [
+        {
+          ordinal: 0,
+          startOffset: 0,
+          length: 4,
+          identities: [{ kind: 'strong', code: 'H0430' }],
+          transliteration: 'ʾĕlōhîm',
+        },
+        {
+          ordinal: 1,
+          startOffset: 0,
+          length: 4,
+          identities: [{ kind: 'strong', code: 'H0853' }],
+          transliteration: 'ʾēt',
+        },
+      ],
+    })
+
+    expect(nodes).toContainEqual(
+      expect.objectContaining({ kind: 'strong-reference', transliterations: ['ʾĕlōhîm', 'ʾēt'] })
+    )
+    expect(getCanonicalPresentationText(nodes)).toBe('Dieu créa.')
+  })
+
   it('shows every effective Strong identity attached to a translated span', () => {
     const presentation = buildCanonicalVersePresentation({
       text: 'Then the LORD',

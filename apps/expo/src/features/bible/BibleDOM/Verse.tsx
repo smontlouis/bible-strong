@@ -238,6 +238,7 @@ const renderCanonicalPresentation = (
           version={options.version}
           identities={node.identities}
           morphologies={node.morphologies}
+          transliterations={node.transliterations}
           occurrenceId={`${options.book}:${options.chapter}:${options.verse}:${options.version}:${key}`}
           word={node.word}
           chapter={options.chapter}
@@ -765,6 +766,7 @@ const Verse = ({
               settings.textDisplay,
               verse.TextRevision || verse.Texte,
               verse.StrongSpans?.length || 0,
+              verse.StrongSpans?.filter(span => span.transliteration).length || 0,
               verse.ReverseInterlinearSpans?.length || 0,
               verse.InterlinearTokens?.length || 0,
               JSON.stringify(redWords?.[verseKey] || []),

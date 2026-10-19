@@ -7,13 +7,15 @@ import {
 describe('Bible keyboard actions', () => {
   it('cycles through all available modes in order', () => {
     expect(nextAvailableStrongMode('hidden', true, true)).toBe('visible')
-    expect(nextAvailableStrongMode('visible', true, true)).toBe('reverse-interlinear')
+    expect(nextAvailableStrongMode('visible', true, true)).toBe('transliteration')
+    expect(nextAvailableStrongMode('transliteration', true, true)).toBe('reverse-interlinear')
     expect(nextAvailableStrongMode('reverse-interlinear', true, true)).toBe('hidden')
   })
   it('skips missing resources and returns to text when resources disappear', () => {
     expect(nextAvailableStrongMode('visible', true, false)).toBe('hidden')
     expect(nextAvailableStrongMode('hidden', false, true)).toBe('hidden')
     expect(nextAvailableStrongMode('reverse-interlinear', false, false)).toBe('hidden')
+    expect(nextAvailableStrongMode('transliteration', true, false)).toBe('hidden')
   })
   it('accepts only an existing verse in the current chapter', () => {
     expect(parseVerseDestination(' 18 ', 24)).toBe(18)

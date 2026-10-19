@@ -87,8 +87,8 @@ const normalizeLegacyBibleRoute = (
   const presentation: PublicBiblePresentation =
     strongMode === 'visible'
       ? 'strong'
-      : strongMode === 'reverse-interlinear'
-        ? 'reverse-interlinear'
+      : strongMode === 'transliteration' || strongMode === 'reverse-interlinear'
+        ? strongMode
         : 'text'
   const focusVerses = parseFocusVerses(params.focusVerses)
   const shouldFocus =

@@ -18,12 +18,14 @@ const StyledReference = styled('span')<
     isSelected: boolean
     isDisabled?: boolean
     $isUntranslated?: boolean
+    $isTransliteration?: boolean
   }
 >(
   ({
     isSelected,
     isDisabled,
     $isUntranslated,
+    $isTransliteration,
     settings: { theme, colors, fontFamily, fontSizeScale, lineHeight },
   }) => ({
     fontFamily,
@@ -41,6 +43,8 @@ const StyledReference = styled('span')<
     paddingBlock: '4px',
     wordBreak: 'break-word',
     marginInline: '4px',
+    // A transliteration keeps its own letter case, even inside small caps (DIEU, SEIGNEUR).
+    ...($isTransliteration ? { fontStyle: 'italic', fontVariant: 'normal' } : {}),
     ...($isUntranslated
       ? {
           width: scaleFontSize(24, fontSizeScale),
@@ -66,6 +70,7 @@ export const BibleStrongRef = ({
   version,
   identities,
   morphologies,
+  transliterations,
   occurrenceId,
   word,
   chapter,
@@ -78,6 +83,8 @@ export const BibleStrongRef = ({
   version: string
   identities: StrongIdentity[]
   morphologies?: StrongSelectionMorphology[]
+  /** Shown in place of the codes in the Strong transliteration mode. */
+  transliterations?: string[]
   occurrenceId: string
   word?: string
   chapter?: string | number
@@ -95,6 +102,7 @@ export const BibleStrongRef = ({
     numericReferences.length > 0 &&
     numericReferences.includes(getStrongReferenceNumber(selectedCode?.reference ?? '') ?? '')
   const isUntranslated = !word
+  const transliteration = transliterations?.join(' · ')
   const colors = settings.colors[settings.theme]
 
   const openStrongSelection = (
@@ -125,6 +133,7 @@ export const BibleStrongRef = ({
       isSelected={isSelected}
       isDisabled={isDisabled}
       $isUntranslated={isUntranslated}
+      $isTransliteration={Boolean(transliteration) && !isUntranslated}
       settings={settings}
     >
       {isUntranslated ? (
@@ -133,7 +142,7 @@ export const BibleStrongRef = ({
           backgroundColor={colors.lightPrimary}
         />
       ) : (
-        identities.map(identity => identity.code).join(' · ')
+        transliteration || identities.map(identity => identity.code).join(' · ')
       )}
     </StyledReference>
   )

@@ -51,9 +51,11 @@ const getInheritedColumnTextModes = (
     interlinearMode:
       data.strongMode === 'visible'
         ? 'strong'
-        : data.strongMode === 'reverse-interlinear'
-          ? 'interlinear'
-          : (data.interlinearMode ?? 'hidden'),
+        : data.strongMode === 'transliteration'
+          ? 'transliteration'
+          : data.strongMode === 'reverse-interlinear'
+            ? 'interlinear'
+            : (data.interlinearMode ?? 'hidden'),
     interlinearLocale,
   }
 }

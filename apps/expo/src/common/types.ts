@@ -181,6 +181,8 @@ export interface Verse {
       code: string
     }[]
     morphologies?: import('~helpers/strongSelection').StrongSelectionMorphology[]
+    /** Strong transliteration mode: the original word of the span in Latin letters. */
+    transliteration?: string
   }[]
   ReverseInterlinearSpans?: import('~helpers/reverseInterlinearBible').ReverseInterlinearSpan[]
   InterlinearTokens?: import('~helpers/interlinearBibleSidecar').InterlinearToken[]

@@ -761,6 +761,7 @@ const LoadedBibleContent = ({
           verseKey,
           verse.TextRevision || verse.Texte,
           verse.StrongSpans?.length || 0,
+          verse.StrongSpans?.filter(span => span.transliteration).length || 0,
           verse.ReverseInterlinearSpans?.length || 0,
           verse.InterlinearTokens?.length || 0,
           JSON.stringify(redWordsByVersion[versionId]?.[verseKey] || []),

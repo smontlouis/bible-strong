@@ -35,6 +35,7 @@ describe('getParallelColumnTextModes', () => {
 
   it.each([
     ['reverse-interlinear', undefined, 'interlinear'],
+    ['transliteration', undefined, 'transliteration'],
     ['hidden', 'transliteration', 'transliteration'],
     ['hidden', undefined, 'hidden'],
   ] as const)(

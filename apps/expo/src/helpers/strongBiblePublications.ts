@@ -16,7 +16,7 @@ export {
   type StrongBibleVersionId,
 } from './strongBibleCatalog'
 
-export type StrongMode = 'visible' | 'hidden' | 'reverse-interlinear'
+export type StrongMode = 'visible' | 'hidden' | 'transliteration' | 'reverse-interlinear'
 
 /**
  * Oldest publication schemas this reader understands. They are reader contracts, not

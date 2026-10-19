@@ -42,6 +42,16 @@ describe('public Bible routes', () => {
     })
   })
 
+  it('round-trips Strong transliteration routes', () => {
+    const route = parsePublicBibleRoute('lsg/transliteration/jean/3/16')
+    expect(route).toMatchObject({
+      version: 'LSG',
+      presentation: 'transliteration',
+      passage: { startVerse: 16 },
+    })
+    expect(route && buildPublicBiblePath(route)).toBe('/bible/lsg/transliteration/john/3/16')
+  })
+
   it('normalizes version and book identities when building a route', () => {
     expect(
       buildPublicBiblePath({

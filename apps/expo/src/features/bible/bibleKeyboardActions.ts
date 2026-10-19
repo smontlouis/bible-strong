@@ -7,7 +7,7 @@ export function nextAvailableStrongMode(
 ): StrongMode {
   const modes: StrongMode[] = ['hidden']
   if (strongAvailable) modes.push('visible')
-  if (strongAvailable && interlinearAvailable) modes.push('reverse-interlinear')
+  if (strongAvailable && interlinearAvailable) modes.push('transliteration', 'reverse-interlinear')
   return modes[(modes.indexOf(current) + 1) % modes.length]
 }
 

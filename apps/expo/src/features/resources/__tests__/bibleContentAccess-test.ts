@@ -572,6 +572,107 @@ describe('BibleContentAccess', () => {
     )
   })
 
+  describe('Strong transliteration mode', () => {
+    const createTransliterationDependencies = () => {
+      const dependencies = createDependencies()
+      dependencies.getChapterVerses.mockResolvedValue([
+        { Livre: 43, Chapitre: 3, Verset: 16, Texte: 'For God so loved' },
+      ])
+      const loadStrongBibleChapterSpans = jest.fn().mockResolvedValue({
+        16: [
+          {
+            ordinal: 0,
+            startOffset: 4,
+            length: 3,
+            stepTokenIds: [10, 11],
+            identities: [{ kind: 'strong', code: 'G2316' }],
+          },
+          {
+            ordinal: 1,
+            startOffset: 11,
+            length: 5,
+            identities: [{ kind: 'strong', code: 'G25' }],
+          },
+        ],
+      })
+      const segment = (transliteration: string, code: string) => ({
+        ordinal: 0,
+        startOffset: 0,
+        length: 4,
+        transliteration,
+        lemma: '',
+        morphology: '',
+        gloss: '',
+        identities: [{ kind: 'strong', code }],
+      })
+      const loadInterlinearChapterTokens = jest.fn().mockResolvedValue({
+        16: [
+          {
+            id: 10,
+            ordinal: 0,
+            startOffset: 0,
+            length: 2,
+            // Two segments of one written word are read as one word.
+            segments: [segment('ha.', 'H9009'), segment('sha.Ma.yim', 'H8064')],
+          },
+          {
+            id: 11,
+            ordinal: 1,
+            startOffset: 3,
+            length: 4,
+            segments: [segment('theos', 'G2316')],
+          },
+        ],
+      })
+      return { ...dependencies, loadStrongBibleChapterSpans, loadInterlinearChapterTokens }
+    }
+
+    it('gives each Strong span the transliteration of its aligned original words', async () => {
+      const dependencies = createTransliterationDependencies()
+
+      const result = await loadBibleContentChapter(
+        { book: 43, chapter: 3, version: 'BSB', strongMode: 'transliteration' },
+        dependencies
+      )
+
+      expect(result.success).toBe(true)
+      if (!result.success) return
+      expect(result.data.kind).toBe('strong')
+      const [aligned, unaligned] = result.data.verses[0]?.StrongSpans ?? []
+      expect(aligned?.transliteration).toBe('ha.sha.Ma.yim · theos')
+      // Without an aligned word the span keeps only its code.
+      expect(unaligned?.transliteration).toBeUndefined()
+      expect(unaligned?.identities).toEqual([{ kind: 'strong', code: 'G25' }])
+    })
+
+    it('leaves the Strong numbers mode without transliterations', async () => {
+      const dependencies = createTransliterationDependencies()
+
+      const result = await loadBibleContentChapter(
+        { book: 43, chapter: 3, version: 'BSB', strongMode: 'visible' },
+        dependencies
+      )
+
+      expect(result.success).toBe(true)
+      if (!result.success) return
+      expect(
+        result.data.verses[0]?.StrongSpans?.some(span => span.transliteration !== undefined)
+      ).toBe(false)
+    })
+
+    it('fails the chapter when the original words cannot be read', async () => {
+      const dependencies = createTransliterationDependencies()
+      dependencies.loadInterlinearChapterTokens.mockRejectedValue(new Error('offline'))
+
+      const result = await loadBibleContentChapter(
+        { book: 43, chapter: 3, version: 'BSB', strongMode: 'transliteration' },
+        dependencies
+      )
+
+      expect(result.success).toBe(false)
+    })
+  })
+
   it('overlays a Strong Bible with the aligned original text in reverse interlinear mode', async () => {
     const dependencies = createDependencies()
     dependencies.getChapterVerses.mockImplementation(async version =>

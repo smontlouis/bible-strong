@@ -55,8 +55,8 @@ const PublicBibleRoute = () => {
   const strongMode: BibleRouteInput['strongMode'] =
     route.presentation === 'strong'
       ? 'visible'
-      : route.presentation === 'reverse-interlinear'
-        ? 'reverse-interlinear'
+      : route.presentation === 'transliteration' || route.presentation === 'reverse-interlinear'
+        ? route.presentation
         : 'hidden'
 
   return (

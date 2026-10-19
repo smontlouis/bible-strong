@@ -15,7 +15,11 @@ type PublicBibleRouter = {
 }
 
 const presentationForStrongMode = (mode: StrongMode): PublicBiblePresentation =>
-  mode === 'visible' ? 'strong' : mode === 'reverse-interlinear' ? 'reverse-interlinear' : 'text'
+  mode === 'visible'
+    ? 'strong'
+    : mode === 'transliteration' || mode === 'reverse-interlinear'
+      ? mode
+      : 'text'
 
 export const createPublicBibleNavigation = (
   current: PublicBibleRoute,
