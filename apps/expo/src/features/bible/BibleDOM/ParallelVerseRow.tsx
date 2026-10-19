@@ -6,10 +6,11 @@ import { BIBLE_READING_HORIZONTAL_PADDING, PARALLEL_COLUMN_GAP } from '~common/r
 import type { SelectedCode, StudyNavigateBibleType, Verse as TVerse } from '~common/types'
 import type { BibleError } from '~helpers/bibleErrors'
 import type { ParallelDisplayMode } from 'src/state/tabs'
-import type { PericopeChapter, RootStyles } from './BibleDOMWrapper'
+import type { ColumnTextModeControls, PericopeChapter, RootStyles } from './BibleDOMWrapper'
 import InlineCommentaryChips, { type LabeledCommentaryChip } from './InlineCommentaryChips'
 import { PericopeHeaders, getPericopeVerse, hasPericopeHeadings } from './PericopeHeaders'
-import { NAVIGATE_TO_VERSION } from './dispatch'
+import { NAVIGATE_TO_VERSION, OPEN_COLUMN_TEXT_MODE } from './dispatch'
+import VersionChip from './VersionChip'
 import { useDispatch } from './DispatchProvider'
 import { useTranslations } from './TranslationsContext'
 import Verse, {
@@ -43,26 +44,17 @@ const ParallelError = styled('div')<RootStyles>(
   })
 )
 
-// Version title for vertical display mode, the pill of the header's version selector
-const VerticalVersionTitle = styled('div')<RootStyles>(
-  ({ settings: { fontFamily, colors, theme } }) => ({
-    fontFamily,
-    fontWeight: 'bold',
-    fontSize: '14px',
-    display: 'inline-block',
-    color: colors[theme].default,
-    backgroundColor: colors[theme].lightGrey,
-    borderRadius: '20px',
-    paddingInline: '12px',
-    paddingBlock: '4px',
-    marginTop: '8px',
-    marginBottom: '4px',
-    cursor: 'pointer',
-    '&:active': {
-      opacity: 0.6,
-    },
-  })
-)
+// Version title for vertical display mode: the version's chip, before its text
+const VerticalVersionTitle = styled('div')({
+  // Inline, as the pill it replaces: the verse's text follows it
+  display: 'inline-flex',
+  marginTop: '8px',
+  marginBottom: '4px',
+  marginInlineEnd: '6px',
+})
+
+// The vertical title repeats on every verse: a little lower than the column titles
+const VERTICAL_VERSION_CHIP_HEIGHT = 28
 
 // Separator between verse groups in vertical mode
 const VerseGroupSeparator = styled('div')<RootStyles>(({ settings: { theme, colors } }) => ({
@@ -205,6 +197,8 @@ export interface ParallelVerseRowProps {
   // Verse-level content: shown once for the verse, whatever the number of versions
   verseContent: VerseContentProps
   commentaryChips?: readonly LabeledCommentaryChip[]
+  // The Strong and interlinear segments of each version's chip, the main version first
+  textModeControls?: ColumnTextModeControls[]
 }
 
 /**
@@ -235,6 +229,7 @@ const ParallelVerseRow = ({
   versionsWithWordAnnotations,
   verseContent,
   commentaryChips,
+  textModeControls,
 }: ParallelVerseRowProps) => {
   const dispatch = useDispatch()
   const translations = useTranslations()
@@ -264,17 +259,25 @@ const ParallelVerseRow = ({
     <>
       {isVertical && index > 0 && renderHeadings(cell)}
       {isVertical && (
-        <VerticalVersionTitle
-          settings={settings}
-          data-ignore-verse-touch
-          onClick={() => {
-            dispatch({
-              type: NAVIGATE_TO_VERSION,
-              payload: { version: cell.version, index },
-            })
-          }}
-        >
-          {cell.version}
+        <VerticalVersionTitle data-ignore-verse-touch>
+          <VersionChip
+            settings={settings}
+            version={cell.version}
+            controls={textModeControls?.[index]}
+            height={VERTICAL_VERSION_CHIP_HEIGHT}
+            onVersionPress={() => {
+              dispatch({
+                type: NAVIGATE_TO_VERSION,
+                payload: { version: cell.version, index },
+              })
+            }}
+            onTextModePress={kind => {
+              dispatch({
+                type: OPEN_COLUMN_TEXT_MODE,
+                payload: { kind, column: index },
+              })
+            }}
+          />
         </VerticalVersionTitle>
       )}
       {cell.error ? (

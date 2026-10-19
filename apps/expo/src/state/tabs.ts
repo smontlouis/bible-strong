@@ -26,6 +26,15 @@ import { type StrongBibleVersionId, type StrongMode } from '~helpers/strongBible
 import type { InterlinearMode } from '~helpers/interlinearBiblePublications'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import type { PendingBibleModeAcquisition } from '~helpers/bibleModeAcquisition'
+import {
+  materializeParallelTextModes,
+  resetParallelColumnTextModes,
+  setBibleColumnTextModes,
+  applyBibleModeAcquisition,
+  getHiddenColumnTextModes,
+  type BibleColumnTextModes,
+  type BibleTextModeColumn,
+} from '~helpers/bibleColumnTextModes'
 import { migrateLegacyBibleTabData } from '../migrations/legacyBibleVersionMigration'
 import { appLogger } from '~helpers/agentObservability'
 import { useBibleRouteNavigation } from './bibleRouteNavigation'
@@ -84,6 +93,8 @@ export interface BibleTab extends TabBase {
     selectedChapter: number
     selectedVerse: number
     parallelVersions: VersionCode[]
+    /** Parallel reading: the Strong and interlinear modes of each parallel version, by position. */
+    parallelTextModes?: BibleColumnTextModes[]
     temp: {
       selectedBook: Book
       selectedChapter: number
@@ -452,10 +463,12 @@ const migrateTabsToRemovable = (tabs: TabItem[]): TabItem[] => {
     if (tab.type === 'bible') {
       tab = {
         ...tab,
-        data: migrateLegacyBibleTabData(
-          tab.data as BibleTab['data'] & {
-            selectedVersion: string
-          }
+        data: materializeParallelTextModes(
+          migrateLegacyBibleTabData(
+            tab.data as BibleTab['data'] & {
+              selectedVersion: string
+            }
+          )
         ),
       }
     }
@@ -814,11 +827,12 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     )
   }
 
-  const setStrongMode = (strongMode: StrongMode) => {
-    if (routeNavigation) return routeNavigation.changeStrongMode(strongMode)
+  /** Column 0 is the main version, n the n-th parallel version. */
+  const setStrongMode = (strongMode: StrongMode, column: BibleTextModeColumn = 0) => {
+    if (column === 0 && routeNavigation) return routeNavigation.changeStrongMode(strongMode)
     setBibleTab(
       produce(draft => {
-        draft.data.strongMode = strongMode
+        setBibleColumnTextModes(draft.data, column, { strongMode })
         draft.data.pendingModeAcquisition = undefined
       })
     )
@@ -826,13 +840,18 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
 
   const setInterlinearMode = (
     interlinearMode: InterlinearMode,
-    interlinearLocale?: ResourceLanguage
+    interlinearLocale?: ResourceLanguage,
+    column: BibleTextModeColumn = 0
   ) => {
-    if (routeNavigation?.changeInterlinearMode?.(interlinearMode, interlinearLocale)) return
+    if (
+      column === 0 &&
+      routeNavigation?.changeInterlinearMode?.(interlinearMode, interlinearLocale)
+    ) {
+      return
+    }
     setBibleTab(
       produce(draft => {
-        draft.data.interlinearMode = interlinearMode
-        draft.data.interlinearLocale = interlinearLocale
+        setBibleColumnTextModes(draft.data, column, { interlinearMode, interlinearLocale })
         draft.data.pendingModeAcquisition = undefined
       })
     )
@@ -848,8 +867,10 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const finishBibleModeAcquisition = (succeeded: boolean) => {
     const current = getDefaultStore().get(tabAtom).data
     const acquisition = current.pendingModeAcquisition
+    const isMainColumn = (acquisition?.column ?? 0) === 0
     if (
       routeNavigation &&
+      isMainColumn &&
       succeeded &&
       acquisition?.kind === 'strong' &&
       current.selectedVersion === acquisition.versionId
@@ -863,6 +884,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
       return
     }
     if (
+      isMainColumn &&
       succeeded &&
       acquisition?.kind === 'interlinear' &&
       current.selectedVersion === 'BHG' &&
@@ -881,13 +903,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
         draft.data.pendingModeAcquisition = undefined
         if (!succeeded || !acquisition) return
 
-        if (acquisition.kind === 'strong' && draft.data.selectedVersion === acquisition.versionId) {
-          draft.data.strongMode = acquisition.mode
-        }
-        if (acquisition.kind === 'interlinear' && draft.data.selectedVersion === 'BHG') {
-          draft.data.interlinearMode = acquisition.mode
-          draft.data.interlinearLocale = acquisition.locale
-        }
+        applyBibleModeAcquisition(draft.data, acquisition)
       })
     )
   }
@@ -921,16 +937,16 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     setBibleTab(
       produce(draft => {
         if (currentParallelVersions.length === 0) {
-          // Entering parallel mode - restore saved versions
+          // Entering parallel mode - restore saved versions, without their modes
           const savedVersions = store.get(savedParallelVersionsAtom)
-          if (savedVersions.length > 0) {
-            draft.data.parallelVersions = [...savedVersions]
-          } else {
-            draft.data.parallelVersions.push(getDefaultBibleVersion(getLanguage()))
-          }
+          draft.data.parallelVersions =
+            savedVersions.length > 0 ? [...savedVersions] : [getDefaultBibleVersion(getLanguage())]
+          draft.data.parallelTextModes = draft.data.parallelVersions.map(getHiddenColumnTextModes)
         } else {
           // Already in parallel mode - add a version
-          draft.data.parallelVersions.push(getDefaultBibleVersion(getLanguage()))
+          const version = getDefaultBibleVersion(getLanguage())
+          resetParallelColumnTextModes(draft.data, draft.data.parallelVersions.length, version)
+          draft.data.parallelVersions.push(version)
         }
       })
     )
@@ -945,6 +961,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const setParallelVersion = (version: VersionCode, index: number) => {
     setBibleTab(
       produce(draft => {
+        resetParallelColumnTextModes(draft.data, index, version)
         draft.data.parallelVersions[index] = version
       })
     )
@@ -957,6 +974,8 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const removeParallelVersion = (index: number) => {
     setBibleTab(
       produce(draft => {
+        const parallelTextModes = materializeParallelTextModes(draft.data).parallelTextModes ?? []
+        draft.data.parallelTextModes = parallelTextModes.filter((_, i) => i !== index)
         draft.data.parallelVersions = draft.data.parallelVersions.filter((_, i) => i !== index)
       })
     )
@@ -970,6 +989,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     setBibleTab(
       produce(draft => {
         draft.data.parallelVersions = []
+        draft.data.parallelTextModes = []
       })
     )
 

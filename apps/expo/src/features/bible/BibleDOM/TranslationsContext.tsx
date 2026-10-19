@@ -7,6 +7,9 @@ export interface BibleDOMTranslations {
   parallelChapterNotFound: string
   parallelLoadError: string
   exitFocus: string
+  // Parallel column titles: their Strong and interlinear buttons
+  chooseStrongDisplay: string
+  originalTextOptions: string
   // Error/download state
   resourceFailureDetails: Record<ResourceFailurePresentation['detailKey'], string>
   goToDownloads: string

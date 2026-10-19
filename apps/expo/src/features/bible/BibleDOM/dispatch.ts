@@ -16,6 +16,8 @@ export const TOGGLE_SELECTED_VERSE = 'TOGGLE_SELECTED_VERSE'
 export const NAVIGATE_TO_VERSION = 'NAVIGATE_TO_VERSION'
 export const REMOVE_PARALLEL_VERSION = 'REMOVE_PARALLEL_VERSION'
 export const ADD_PARALLEL_VERSION = 'ADD_PARALLEL_VERSION'
+// Payload: { kind: 'strong' | 'interlinear', column } where column 0 is the main version
+export const OPEN_COLUMN_TEXT_MODE = 'OPEN_COLUMN_TEXT_MODE'
 export const SWIPE_LEFT = 'SWIPE_LEFT'
 export const SWIPE_RIGHT = 'SWIPE_RIGHT'
 export const SWIPE_UP = 'SWIPE_UP'

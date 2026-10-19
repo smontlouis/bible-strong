@@ -80,18 +80,18 @@ describe('canonical V4 Bible chapter extras', () => {
     expect(resources.bibleReading.loadPericope).not.toHaveBeenCalled()
   })
 
-  it('loads Strong data for every compatible parallel version', async () => {
+  it('loads each parallel version with its own Strong mode', async () => {
     const resources = createResources()
 
     await loadBibleReadingParallelVerses(
       {
         book: 1,
         chapter: 1,
-        version: 'LSG',
-        parallelVersions: ['KJV', 'BSB'],
-        strongMode: 'visible',
-        interlinearLocale: 'fr',
-        interlinearLocaleAutomatic: true,
+        parallelColumns: [
+          { version: 'KJV', strongMode: 'visible' },
+          { version: 'BSB', strongMode: 'hidden' },
+        ],
+        defaultInterlinearLocale: 'fr',
       },
       resources
     )
@@ -108,14 +108,45 @@ describe('canonical V4 Bible chapter extras', () => {
       book: 1,
       chapter: 1,
       version: 'BSB',
-      strongMode: 'visible',
+      strongMode: 'hidden',
       interlinearLocale: 'fr',
       interlinearLocaleAutomatic: true,
     })
   })
 
+  it('loads the same version twice with different modes', async () => {
+    const resources = createResources()
+
+    await loadBibleReadingParallelVerses(
+      {
+        book: 1,
+        chapter: 1,
+        parallelColumns: [
+          { version: 'LSG', strongMode: 'reverse-interlinear', interlinearLocale: 'en' },
+          { version: 'LSG', strongMode: 'hidden' },
+        ],
+        defaultInterlinearLocale: 'fr',
+      },
+      resources
+    )
+
+    expect(resources.bibleContent.loadChapter).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        version: 'LSG',
+        strongMode: 'reverse-interlinear',
+        interlinearLocale: 'en',
+        interlinearLocaleAutomatic: false,
+      })
+    )
+    expect(resources.bibleContent.loadChapter).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ version: 'LSG', strongMode: 'hidden' })
+    )
+  })
+
   it.each(['visible', 'reverse-interlinear'] as const)(
-    'loads plain text for a parallel Bible without the requested %s capability',
+    'loads plain text for a parallel Bible without the %s capability',
     async strongMode => {
       const resources = createResources()
 
@@ -123,11 +154,8 @@ describe('canonical V4 Bible chapter extras', () => {
         {
           book: 1,
           chapter: 1,
-          version: 'LSG',
-          parallelVersions: ['BDS'],
-          strongMode,
-          interlinearLocale: 'fr',
-          interlinearLocaleAutomatic: true,
+          parallelColumns: [{ version: 'BDS', strongMode }],
+          defaultInterlinearLocale: 'fr',
         },
         resources
       )
@@ -154,9 +182,7 @@ describe('canonical V4 Bible chapter extras', () => {
       {
         book: 1,
         chapter: 1,
-        version: 'DBY',
-        parallelVersions: ['LSG'],
-        strongMode: 'visible',
+        parallelColumns: [{ version: 'LSG', strongMode: 'visible' }],
       },
       resources
     )
@@ -172,16 +198,14 @@ describe('canonical V4 Bible chapter extras', () => {
     )
   })
 
-  it('does not apply the main interlinear presentation to parallel Bible versions', async () => {
+  it('does not apply an interlinear mode to a Bible without interlinear', async () => {
     const resources = createResources()
 
     await loadBibleReadingParallelVerses(
       {
         book: 1,
         chapter: 1,
-        version: 'BHG',
-        parallelVersions: ['BDS'],
-        interlinearMode: 'interlinear',
+        parallelColumns: [{ version: 'BDS', interlinearMode: 'interlinear' }],
       },
       resources
     )
@@ -202,9 +226,7 @@ describe('canonical V4 Bible chapter extras', () => {
       {
         book: 1,
         chapter: 1,
-        version: 'BHG',
-        parallelVersions: ['BHG'],
-        interlinearMode: 'interlinear',
+        parallelColumns: [{ version: 'BHG', interlinearMode: 'interlinear' }],
       },
       resources
     )
@@ -215,42 +237,25 @@ describe('canonical V4 Bible chapter extras', () => {
     expect(result[0]).toEqual(
       expect.objectContaining({
         id: 'BHG',
+        interlinearMode: 'interlinear',
         error: expect.objectContaining({ type: 'RESOURCE_UNAVAILABLE' }),
       })
     )
   })
 
-  it.each([
-    ['visible', 'strong'],
-    ['reverse-interlinear', 'interlinear'],
-  ] as const)(
-    'uses the BHG %s presentation in parallel mode',
-    async (strongMode, expectedInterlinearMode) => {
-      const resources = createResources()
+  it('loads a BHG column without its interlinear mode as plain original text', async () => {
+    const resources = createResources()
 
-      const result = await loadBibleReadingParallelVerses(
-        {
-          book: 1,
-          chapter: 1,
-          version: 'LSG',
-          parallelVersions: ['BHG'],
-          strongMode,
-        },
-        resources
-      )
+    const result = await loadBibleReadingParallelVerses(
+      { book: 1, chapter: 1, parallelColumns: [{ version: 'BHG' }] },
+      resources
+    )
 
-      expect(resources.bibleContent.loadChapter).toHaveBeenCalledWith(
-        expect.objectContaining({
-          version: 'BHG',
-          strongMode: 'hidden',
-          interlinearMode: expectedInterlinearMode,
-        })
-      )
-      expect(result[0]).toEqual(
-        expect.objectContaining({ interlinearMode: expectedInterlinearMode })
-      )
-    }
-  )
+    expect(resources.bibleContent.loadChapter).toHaveBeenCalledWith(
+      expect.objectContaining({ version: 'BHG', strongMode: 'hidden', interlinearMode: 'hidden' })
+    )
+    expect(result[0]).toEqual(expect.objectContaining({ interlinearMode: 'hidden' }))
+  })
 
   it('groups plain parallel versions through the batch chapter access', async () => {
     const resources = createResources()
@@ -263,8 +268,7 @@ describe('canonical V4 Bible chapter extras', () => {
       {
         book: 1,
         chapter: 1,
-        version: 'LSG',
-        parallelVersions: ['KJV', 'BSB'],
+        parallelColumns: [{ version: 'KJV' }, { version: 'BSB' }],
       },
       resources
     )

@@ -1,6 +1,7 @@
 import type { BibleTab, VersionCode } from '~state/tabs'
 import { resolveStrongBibleVersion } from './strongBiblePublications'
 import { isInterlinearCapableBibleVersion } from './interlinearBiblePublications'
+import { materializeParallelTextModes } from './bibleColumnTextModes'
 
 export const selectBibleTabVersion = (
   data: BibleTab['data'],
@@ -8,7 +9,8 @@ export const selectBibleTabVersion = (
 ): BibleTab['data'] => {
   const resolved = resolveStrongBibleVersion(selectedVersion)
   return {
-    ...data,
+    // The parallel columns keep their modes when the main version and its modes change.
+    ...materializeParallelTextModes(data),
     selectedVersion: resolved.versionId as VersionCode,
     strongMode: resolved.strongMode,
     interlinearMode: isInterlinearCapableBibleVersion(resolved.versionId) ? 'hidden' : undefined,

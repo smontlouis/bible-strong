@@ -28,12 +28,13 @@ import {
 } from './BibleDOMWrapper'
 import { BibleError } from '~helpers/bibleErrors'
 import { getBibleDOMErrorPresentation } from './bibleDOMErrorPresentation'
-import ChevronDownIcon from './ChevronDownIcon'
+import VersionChip from './VersionChip'
 import {
   ENTER_ANNOTATION_MODE,
   DOWNLOAD_BIBLE_VERSION,
   NAVIGATE_TO_PERICOPE,
   NAVIGATE_TO_VERSION,
+  OPEN_COLUMN_TEXT_MODE,
   SWIPE_LEFT,
   SWIPE_RIGHT,
   SWIPE_DOWN,
@@ -167,6 +168,7 @@ type Props = Pick<
   | 'parallelVerses'
   | 'parallelColumnWidth'
   | 'parallelDisplayMode'
+  | 'columnTextModeControls'
   | 'focusVerses'
   | 'selectedVerses'
   | 'selectedVersesVersion'
@@ -456,47 +458,18 @@ const keepTitleAtLeftEdge = keyframes`
   to { transform: translateX(var(--title-travel, 0px)); }
 `
 
-const VersionTitle = styled('div')<RootStyles & { $followsScroll?: boolean }>(
-  ({ settings: { fontFamily, colors, theme }, $followsScroll }) => ({
-    fontFamily,
-    fontWeight: 'bold',
-    // The pill of the header's book and version selectors
-    fontSize: '14px',
-    position: 'sticky',
-    left: 0,
-    ...($followsScroll
-      ? {
-          animation: `${keepTitleAtLeftEdge} linear both`,
-          animationTimeline: COLUMNS_SCROLL_TIMELINE,
-          animationRange: 'var(--title-range-start, 0px) var(--title-range-end, 0px)',
-        }
-      : {}),
-    webkitTouchCallout: 'none',
-    mozUserSelect: 'none',
-    msUserSelect: 'none',
-    khtmlUserSelect: 'none',
-    webkitUserSelect: 'none',
-    color: colors[theme].default,
-    backgroundColor: colors[theme].lightGrey,
-    borderRadius: '20px',
-    display: 'inline-flex',
-    alignItems: 'center',
-    height: '32px',
-    boxSizing: 'border-box',
-    paddingInlineStart: '12px',
-    paddingInlineEnd: '10px',
-    whiteSpace: 'nowrap',
-    cursor: 'pointer',
-    '&:active': {
-      opacity: 0.6,
-    },
-  })
-)
-
-const VersionErrorIndicator = styled('span')<RootStyles>(({ settings: { theme, colors } }) => ({
-  color: colors[theme].quart,
-  marginLeft: '4px',
-  fontSize: '12px',
+// A column's title: its version chip, kept to the left edge while its column passes
+const VersionTitleGroup = styled('div')<{ $followsScroll?: boolean }>(({ $followsScroll }) => ({
+  position: 'sticky',
+  left: 0,
+  display: 'inline-flex',
+  ...($followsScroll
+    ? {
+        animation: `${keepTitleAtLeftEdge} linear both`,
+        animationTimeline: COLUMNS_SCROLL_TIMELINE,
+        animationRange: 'var(--title-range-start, 0px) var(--title-range-end, 0px)',
+      }
+    : {}),
 }))
 
 const VersionsContainer = styled('div')<{
@@ -663,6 +636,7 @@ const LoadedBibleContent = ({
   parallelVerses,
   parallelColumnWidth: preferredColumnWidth = 75,
   parallelDisplayMode = 'horizontal',
+  columnTextModeControls,
   focusVerses,
   selectedVerses,
   selectedVersesVersion,
@@ -1143,6 +1117,10 @@ const LoadedBibleContent = ({
     },
   })
 
+  const columnTextModeControlsKey = columnTextModeControls
+    ?.map(controls => `${controls.strong ? 'S' : ''}${controls.interlinear ? 'I' : ''}`)
+    .join(',')
+
   // Horizontal parallel display: the version titles follow the columns. With a scroll timeline,
   // each title only needs the range of scroll over which it keeps to the left edge. Otherwise
   // the header is scrolled with the columns and each title sticks to the left edge of its column.
@@ -1190,7 +1168,14 @@ const LoadedBibleContent = ({
       contentEl?.removeEventListener('scroll', handleScroll)
       document.removeEventListener('scroll', handleScroll)
     }
-  }, [parallelVerses?.length, parallelColumnWidth, parallelDisplayMode, followsColumnsScroll])
+    // The title ranges depend on each title's width, which its mode buttons change.
+  }, [
+    parallelVerses?.length,
+    parallelColumnWidth,
+    parallelDisplayMode,
+    followsColumnsScroll,
+    columnTextModeControlsKey,
+  ])
 
   const expandedHeaderHeight =
     HEADER_HEIGHT + getPassageContextHeaderHeight(focusVerses, annotationMode, inPlan)
@@ -1411,6 +1396,13 @@ const LoadedBibleContent = ({
     })
   }
 
+  const openColumnTextMode = (kind: 'strong' | 'interlinear', column: number) => {
+    dispatch({
+      type: OPEN_COLUMN_TEXT_MODE,
+      payload: { kind, column },
+    })
+  }
+
   const isHebreu = version === 'BHS' || (version === 'BHG' && Number(verses[0].Livre) < 40)
   const highlightLayer = !isVerseLayoutAnimating &&
     (highlightRects.length > 0 || (annotationMode && selection)) && (
@@ -1489,20 +1481,22 @@ const LoadedBibleContent = ({
                     columnCount={parallelVersionTitles.length}
                     columnWidth={parallelColumnWidth}
                   >
-                    <VersionTitle
+                    <VersionTitleGroup
                       data-version-title={i}
                       // Columns after the first open with a gap: each pill keeps to its text
                       style={{ marginInlineStart: i === 0 ? 0 : PARALLEL_COLUMN_GAP }}
-                      onClick={() => navigateToVersion(p.id, i)}
-                      settings={settings}
                       $followsScroll={titlesFollowColumnsScroll}
                     >
-                      {p.id}
-                      {p.error && (
-                        <VersionErrorIndicator settings={settings}>⚠</VersionErrorIndicator>
-                      )}
-                      <ChevronDownIcon style={{ marginLeft: 4 }} />
-                    </VersionTitle>
+                      <VersionChip
+                        settings={settings}
+                        version={p.id}
+                        hasError={Boolean(p.error)}
+                        controls={columnTextModeControls?.[i]}
+                        withChevron
+                        onVersionPress={() => navigateToVersion(p.id, i)}
+                        onTextModePress={kind => openColumnTextMode(kind, i)}
+                      />
+                    </VersionTitleGroup>
                   </VersionTitleColumn>
                 ))}
               </VersionsContainer>
@@ -1585,6 +1579,7 @@ const LoadedBibleContent = ({
                 columnCount={isParallelVerse ? parallelVersionTitles.length : 1}
                 columnWidth={parallelColumnWidth}
                 parallelDisplayMode={parallelDisplayMode}
+                columnTextModeControls={columnTextModeControls}
                 redWordsByVersion={redWordsByVersion}
                 passageMediaAfterVerses={passageMedia.afterVerses}
                 passageMediaGallerySections={passageMediaGallerySections}

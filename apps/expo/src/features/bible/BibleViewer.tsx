@@ -120,6 +120,9 @@ import {
 } from './BibleDOM/BibleDOMWrapper'
 import BibleParamsModal from './BibleParamsModal'
 import { loadBibleReadingParallelVerses, loadBibleReadingRedWords } from './bibleReadingChapter'
+import { getParallelColumnTextModes } from '~helpers/bibleColumnTextModes'
+import BibleTextModeSheets, { type BibleTextModeSheetsHandle } from './BibleTextModeSheets'
+import { getColumnTextModeControls } from './columnTextModeControls'
 import { getCanonicalChapterPericope } from '~helpers/canonicalBibleHeadings'
 import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
 import BibleFooter from './footer/BibleFooter'
@@ -221,6 +224,7 @@ const BibleViewer = ({
   const setUnifiedTagsModal = useUnifiedTagsModal()
   const [selectedCode, setSelectedCodeState] = useState<SelectedCode | null>(null)
   const bookmarkModalRef = useRef<SheetRef>(null)
+  const textModeSheetsRef = useRef<BibleTextModeSheetsHandle>(null)
   const [selectedVerseForBookmark, setSelectedVerseForBookmark] = useState<{
     book: number
     chapter: number
@@ -436,9 +440,10 @@ const BibleViewer = ({
     interlinearMode,
     interlinearLocale: interlinearLocale ?? lang,
     interlinearLocaleAutomatic: !interlinearLocale,
-    parallelVersions,
     presentation: mainChapterData?.presentation,
   }
+  // Parallel reading: each version loads with its own Strong and interlinear modes.
+  const parallelColumns = getParallelColumnTextModes(bible.data)
   const extrasEnabled =
     Boolean(mainResult?.success && mainResult.data) && !mainReadingQuery.isPlaceholderData
   const contextualInformationDisplay = isContextualInformationDisplayEnabled(
@@ -448,13 +453,19 @@ const BibleViewer = ({
     queryKey: resourceQueryKeys.bibleParallel({
       book: book.Numero,
       chapter,
-      versions: parallelVersions,
-      strongMode,
-      interlinearMode,
-      interlinearLocale: interlinearLocale ?? lang,
-      interlinearLocaleAutomatic: !interlinearLocale,
+      columns: parallelColumns,
+      defaultInterlinearLocale: lang,
     }),
-    queryFn: () => loadBibleReadingParallelVerses(extrasRequest, resources),
+    queryFn: () =>
+      loadBibleReadingParallelVerses(
+        {
+          book: book.Numero,
+          chapter,
+          parallelColumns,
+          defaultInterlinearLocale: lang,
+        },
+        resources
+      ),
     enabled: extrasEnabled,
     staleTime: Infinity,
     ...localQueryOptions,
@@ -878,6 +889,7 @@ const BibleViewer = ({
     interlinearMode,
     interlinearLocale: interlinearLocale ?? lang,
     parallelVersions,
+    parallelTextModes: parallelColumns,
     focusVerses,
     contextDisplayMode,
     renderedContentKey: strongSelectionRenderedContentKey,
@@ -1358,6 +1370,11 @@ const BibleViewer = ({
     parallelVerses,
     parallelColumnWidth,
     parallelDisplayMode,
+    columnTextModeControls: parallelVersions.length
+      ? getColumnTextModeControls(bible.data)
+      : undefined,
+    openColumnTextMode: (kind: 'strong' | 'interlinear', column: number) =>
+      textModeSheetsRef.current?.open(kind, column),
     focusVerses,
     inPlan: Boolean(planPassage),
     selectedVerses: viewerPersonalData.selectedVerses,
@@ -1578,7 +1595,9 @@ const BibleViewer = ({
         annotationModeEnabled={annotationMode.enabled && !hidePersonalBibleData}
         hidePersonalBibleData={hidePersonalBibleData}
         coverage={coverageData}
+        onOpenTextMode={(kind, column) => textModeSheetsRef.current?.open(kind, column)}
       />
+      <BibleTextModeSheets bibleAtom={bibleAtom} ref={textModeSheetsRef} />
       {planPassage && !annotationMode.enabled ? (
         <PlanPassageBanner
           reference={planReference}

@@ -4,20 +4,27 @@ import type { StrongBibleVersionId, StrongMode } from '~helpers/strongBiblePubli
 import { getInterlinearLocalePriority } from '~helpers/interlinearDisplayMode'
 import { getDownloadItemProgress, type DownloadItemState } from '~state/downloadQueue'
 
-export type PendingBibleModeAcquisition =
-  | {
-      kind: 'strong'
-      versionId: StrongBibleVersionId
-      mode: Exclude<StrongMode, 'hidden'>
-      interlinearLocale?: ResourceLanguage
-      planIds: string[]
-    }
-  | {
-      kind: 'interlinear'
-      mode: InterlinearDisplayMode
-      locale: ResourceLanguage
-      planIds: string[]
-    }
+type BibleModeAcquisitionTarget = {
+  /** The column the reader acted on: 0 (or absent) is the main version, n the n-th parallel one. */
+  column?: number
+}
+
+export type PendingBibleModeAcquisition = BibleModeAcquisitionTarget &
+  (
+    | {
+        kind: 'strong'
+        versionId: StrongBibleVersionId
+        mode: Exclude<StrongMode, 'hidden'>
+        interlinearLocale?: ResourceLanguage
+        planIds: string[]
+      }
+    | {
+        kind: 'interlinear'
+        mode: InterlinearDisplayMode
+        locale: ResourceLanguage
+        planIds: string[]
+      }
+  )
 
 export type BibleModeAcquisitionPresentation = {
   status: 'idle' | 'active' | 'completed' | 'failed'

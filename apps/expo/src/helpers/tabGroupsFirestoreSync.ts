@@ -1,4 +1,4 @@
-import { TabGroup, TabItem } from '~state/tabs'
+import { BibleTab, TabGroup, TabItem } from '~state/tabs'
 import { clampTabIndex, compareTabGroupOrder } from '~state/tabWorkspace'
 import {
   writeToSubcollection,
@@ -8,6 +8,7 @@ import {
   SubcollectionChangeCallback,
 } from './firestoreSubcollections'
 import { storage } from './storage'
+import { materializeParallelTextModes } from './bibleColumnTextModes'
 import type { FirestoreSyncIntent, SerializableDocument } from './firestoreSyncOutbox'
 
 const MIGRATION_KEY = 'tabGroups_migratedToFirestore'
@@ -149,7 +150,12 @@ export function hydrateTabGroup(
   firestoreGroup: FirestoreTabGroup,
   localGroup?: TabGroup
 ): TabGroup {
-  const tabs = firestoreGroup.tabs.map(firestoreTab => {
+  const tabs = firestoreGroup.tabs.map(remoteTab => {
+    // A tab written by an application older than per-column modes keeps what its columns showed.
+    const firestoreTab =
+      remoteTab.type === 'bible'
+        ? { ...remoteTab, data: materializeParallelTextModes(remoteTab.data as BibleTab['data']) }
+        : remoteTab
     // Preserve state that is intentionally local-only and therefore absent
     // from (or cleared in) the Firestore representation.
     const localTab = localGroup?.tabs.find(t => t.id === firestoreTab.id)

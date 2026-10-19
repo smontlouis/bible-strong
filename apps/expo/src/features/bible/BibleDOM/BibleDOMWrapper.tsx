@@ -56,6 +56,7 @@ import {
   HEADER_HEIGHT,
 } from '~features/app-switcher/utils/constants'
 import { HelpTip } from '~features/tips/HelpTip'
+import { resetParallelColumnTextModes } from '~helpers/bibleColumnTextModes'
 import { appLogger } from '~helpers/agentObservability'
 import { BibleError } from '~helpers/bibleErrors'
 import type { InterlinearMode } from '~helpers/interlinearDisplayMode'
@@ -107,6 +108,7 @@ import {
   NAVIGATE_TO_VERSE_LINKS,
   NAVIGATE_TO_VERSE_STUDY_RELATIONS,
   NAVIGATE_TO_VERSION,
+  OPEN_COLUMN_TEXT_MODE,
   OPEN_BOOKMARK_MODAL,
   OPEN_CANONICAL_BIBLE_NOTE,
   OPEN_CANONICAL_BIBLE_REFERENCE,
@@ -169,6 +171,19 @@ export type ParallelVerse = {
   interlinearMode?: InterlinearMode
 }
 
+/** A Strong or interlinear button of a parallel column title. */
+export type ColumnTextModeControl = {
+  active: boolean
+  /** Its resources are being downloaded for this column. */
+  downloading: boolean
+}
+
+/** The text-mode buttons of one parallel column; a version without the mode has none. */
+export type ColumnTextModeControls = {
+  strong?: ColumnTextModeControl
+  interlinear?: ColumnTextModeControl
+}
+
 export type TaggedVerse = {
   lastVerse: string
   tags: Tag[]
@@ -227,6 +242,9 @@ export type WebViewProps = {
   parallelVerses: ParallelVerse[]
   parallelColumnWidth?: ParallelColumnWidth
   parallelDisplayMode?: ParallelDisplayMode
+  /** Parallel reading: the Strong and interlinear buttons of each column, 0 being the main one. */
+  columnTextModeControls?: ColumnTextModeControls[]
+  openColumnTextMode?: (kind: 'strong' | 'interlinear', column: number) => void
 
   focusVerses: (string | number)[] | undefined
   selectedVerses: VerseIds
@@ -373,6 +391,8 @@ export const BibleDOMWrapper = ({
   parallelVerses,
   parallelColumnWidth = 75,
   parallelDisplayMode = 'horizontal',
+  columnTextModeControls,
+  openColumnTextMode,
   focusVerses,
   selectedVerses,
   selectedVersesVersion,
@@ -550,6 +570,8 @@ export const BibleDOMWrapper = ({
     parallelChapterNotFound: t('bible.error.parallelChapterNotFound'),
     parallelLoadError: t('bible.error.parallelLoadError'),
     exitFocus: t('tab.exitFocus'),
+    chooseStrongDisplay: t('Choisir l’affichage de la Bible Strong'),
+    originalTextOptions: t('Options du texte original'),
     resourceFailureDetails: {
       'Référence introuvable': t('Référence introuvable'),
       'app.youAreOffline': t('app.youAreOffline'),
@@ -750,6 +772,8 @@ export const BibleDOMWrapper = ({
               getDefaultStore().set(
                 bibleAtom,
                 produce(draft => {
+                  // A column taking a new version starts without any text mode.
+                  resetParallelColumnTextModes(draft.data, index, version)
                   draft.data.parallelVersions[index] = version
                 })
               ),
@@ -766,6 +790,13 @@ export const BibleDOMWrapper = ({
       }
       case ADD_PARALLEL_VERSION: {
         addParallelVersion?.()
+        break
+      }
+      case OPEN_COLUMN_TEXT_MODE: {
+        if (!isRecord(action.payload)) break
+        const { kind, column } = action.payload
+        if ((kind !== 'strong' && kind !== 'interlinear') || typeof column !== 'number') break
+        openColumnTextMode?.(kind, column)
         break
       }
       case OPEN_STRONG_SELECTION: {
@@ -1212,6 +1243,7 @@ export const BibleDOMWrapper = ({
         parallelVerses={parallelVerses}
         parallelColumnWidth={parallelColumnWidth}
         parallelDisplayMode={parallelDisplayMode}
+        columnTextModeControls={columnTextModeControls}
         focusVerses={focusVerses}
         selectedVerses={selectedVerses}
         selectedVersesVersion={selectedVersesVersion ?? version}
