@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as Haptics from 'expo-haptics'
 import { StyleSheet, View, type LayoutRectangle } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
@@ -27,6 +27,11 @@ const RING_COLOR = 'rgba(91, 127, 229, 0.5)'
 const IDLE_RING_COLOR = 'rgba(122, 122, 122, 0.5)'
 // Left alone this long, the button fades and greys out until it is touched again.
 const IDLE_AFTER_MS = 5000
+// While the assistant is open, the button slips 60 pt out toward its edge and fades, quickly,
+// then comes back with a small bounce: the springs of Expo's button window.
+const HIDE_OFFSET = 60
+const HIDE_SPRING = { duration: 300, dampingRatio: 0.8 }
+const SHOW_SPRING = { duration: 500, dampingRatio: 0.6 }
 const EDGE_MARGIN = 10
 // Below this distance the touch is a tap, as in Expo's button.
 const DRAG_THRESHOLD = 10
@@ -62,6 +67,8 @@ const savePosition = (side: Side, y: number) => {
 
 type Props = {
   animation: StrobiAnimation
+  /** Out of the way while the assistant's sheet is up. */
+  hidden: boolean
   accessibilityLabel: string
   onPress: () => void
   onDragStart: () => void
@@ -77,6 +84,7 @@ type Props = {
  */
 export default function AssistantLauncherButton({
   animation,
+  hidden,
   accessibilityLabel,
   onPress,
   onDragStart,
@@ -115,6 +123,31 @@ export default function AssistantLauncherButton({
   const x = useSharedValue(0)
   const y = useSharedValue(0)
   const scale = useSharedValue(1)
+  const hideOffset = useSharedValue(0)
+  const visibility = useSharedValue(1)
+  const shownOnce = useRef(false)
+
+  useEffect(() => {
+    // The first render places it as it is; only later changes slide it.
+    if (!shownOnce.current) {
+      shownOnce.current = true
+      return
+    }
+    // Out toward the side it rests on, back from there.
+    const direction = x.get() + BUTTON_SIZE / 2 > (layout?.width ?? 0) / 2 ? 1 : -1
+    if (hidden) {
+      hideOffset.set(withSpring(direction * HIDE_OFFSET, HIDE_SPRING))
+      visibility.set(withSpring(0, HIDE_SPRING))
+      return
+    }
+    hideOffset.set(direction * HIDE_OFFSET)
+    hideOffset.set(withSpring(0, SHOW_SPRING))
+    visibility.set(withSpring(1, SHOW_SPRING))
+    // Back on screen, it is awake and waits again before going idle.
+    setIdle(false)
+    setReleasedAt(Date.now())
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hidden])
   const startX = useSharedValue(0)
   const startY = useSharedValue(0)
   // Where a snap is heading, until the avatar first reaches it: the moment it lands.
@@ -209,8 +242,12 @@ export default function AssistantLauncherButton({
     })
 
   const style = useAnimatedStyle(() => ({
-    opacity: 1 - idleProgress.get() * 0.5,
-    transform: [{ translateX: x.get() }, { translateY: y.get() }, { scale: scale.get() }],
+    opacity: Math.min(Math.max(visibility.get(), 0), 1) * (1 - idleProgress.get() * 0.5),
+    transform: [
+      { translateX: x.get() + hideOffset.get() },
+      { translateY: y.get() },
+      { scale: scale.get() },
+    ],
   }))
   const ringStyle = useAnimatedStyle(() => ({
     borderColor: interpolateColor(idleProgress.get(), [0, 1], [RING_COLOR, IDLE_RING_COLOR]),
@@ -225,6 +262,9 @@ export default function AssistantLauncherButton({
       {layout && (
         <GestureDetector gesture={Gesture.Race(pan, tap)}>
           <Animated.View
+            pointerEvents={hidden ? 'none' : 'auto'}
+            accessibilityElementsHidden={hidden}
+            importantForAccessibility={hidden ? 'no-hide-descendants' : 'auto'}
             accessible
             accessibilityRole="button"
             accessibilityLabel={accessibilityLabel}

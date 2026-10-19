@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
+import Animated, { FadeOut, withSpring, withTiming } from 'react-native-reanimated'
 import {
   AssistantRuntimeProvider,
   ThreadListPrimitive,
@@ -43,6 +44,18 @@ import { useAssistantSession } from './useAssistantSession'
 import { useReadingContext } from './useReadingContext'
 
 // The same per-account key as the web modal; MMKV plays the part of localStorage.
+// Strobi lands in the sheet's header: it grows in with the bounce its button comes back with.
+const strobiLanding = () => {
+  'worklet'
+  return {
+    initialValues: { opacity: 0, transform: [{ scale: 0.5 }] },
+    animations: {
+      opacity: withTiming(1, { duration: 200 }),
+      transform: [{ scale: withSpring(1, { duration: 500, dampingRatio: 0.6 }) }],
+    },
+  }
+}
+
 const preferences = {
   getItem: (key: string) => storage.getString(key) ?? null,
   setItem: (key: string, value: string) => storage.set(key, value),
@@ -71,7 +84,11 @@ function SheetHeader() {
         </TouchableBox>
       ) : (
         <Box className="h-[44px] w-[40px] items-center justify-center">
-          {open && <StrobiAvatar animation={busy ? 'thinking' : 'excited'} size={34} />}
+          {open && (
+            <Animated.View entering={strobiLanding} exiting={FadeOut.duration(150)}>
+              <StrobiAvatar animation={busy ? 'thinking' : 'excited'} size={34} />
+            </Animated.View>
+          )}
         </Box>
       )}
       <Text
@@ -116,6 +133,8 @@ function AccountAssistant({ account }: { account: string }) {
   // Strobi falls asleep when its button goes idle, and wakes up with it.
   const [avatarSleeping, setAvatarSleeping] = useState(false)
   const [avatarDragged, setAvatarDragged] = useState(false)
+  // The floating button leaves as the sheet starts rising and comes back as it starts closing.
+  const [launcherHidden, setLauncherHidden] = useState(false)
   const [dictationState, setDictationState] = useState<DictationState>('idle')
   const [dictation] = useState(
     () =>
@@ -204,11 +223,15 @@ function AccountAssistant({ account }: { account: string }) {
   return (
     <AssistantRuntimeProvider runtime={runtime}>
       <AssistantSheetContext.Provider value={value}>
-        {ready && !open && (
+        {ready && (
           <AssistantLauncherButton
             animation={avatarAnimation}
             accessibilityLabel={t('assistant.modal.open')}
-            onPress={() => sheet.current?.present()}
+            hidden={launcherHidden}
+            onPress={() => {
+              setLauncherHidden(true)
+              sheet.current?.present()
+            }}
             onIdleChange={setAvatarSleeping}
             onDragStart={() => setAvatarDragged(true)}
             onDragEnd={() => setAvatarDragged(false)}
@@ -218,11 +241,15 @@ function AccountAssistant({ account }: { account: string }) {
         <PushRouteGateContext.Provider value={closeThen}>
           <Sheet
             ref={sheet}
-            snapPoints={[1]}
+            // Expo's developer menu: 60% of the screen, then all of it.
+            snapPoints={[0.6, 1]}
             header={<SheetHeader />}
             footer={historyOpen ? undefined : AssistantComposer}
             onOpenChange={setOpen}
+            onPresentStart={() => setLauncherHidden(true)}
+            onDismissStart={() => setLauncherHidden(false)}
             onDismiss={() => {
+              setLauncherHidden(false)
               setSource(null)
               const action = afterClose.current
               afterClose.current = null

@@ -109,6 +109,8 @@ export type SheetProps = {
   onClose?: () => void
   onDismiss?: () => void
   onDismissStart?: () => void
+  /** The sheet starts rising, before `onPresent` and `onOpenChange(true)`. */
+  onPresentStart?: () => void
   onOpenChange?: (isOpen: boolean) => void
   onPresent?: () => void
 }
@@ -227,6 +229,7 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
     onClose,
     onDismiss,
     onDismissStart,
+    onPresentStart,
     onOpenChange,
     onPresent,
     scrollableOptions,
@@ -325,6 +328,7 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
         }
         detached={detached}
         detachedOffset={detachedOffset}
+        onWillPresent={() => onPresentStart?.()}
         onDidPresent={() => {
           lifecycleStateRef.current = 'presented'
           onOpenChange?.(true)
