@@ -18,6 +18,8 @@ interface NewTabItemProps {
   description?: string
   hero?: boolean
   compact?: boolean
+  /** Dense phone presentation: `tile` stacks icon and text, `inline` sets them side by side. */
+  variant?: 'card' | 'tile' | 'inline'
 }
 
 const useOpenTabByType = ({ type, newAtom }: NewTabItemProps) => {
@@ -41,17 +43,73 @@ const NewTabItem = ({
   description,
   hero = false,
   compact = false,
+  variant = 'card',
 }: NewTabItemProps) => {
   const { t } = useTranslation()
   const { onPress } = useOpenTabByType({ type, newAtom, onPlanPress })
   const isLibraryResource =
     type === 'strong' || type === 'nave' || type === 'dictionary' || type === 'commentary'
   const iconSize = hero ? (Platform.OS === 'web' ? 64 : 40) : isLibraryResource ? 34 : 28
+  const label = title ?? t(`tabs.${type}`)
+
+  if (hero && variant === 'tile') {
+    return (
+      <TouchableBox
+        testID={`new-tab-tool-${type}`}
+        accessibilityLabel={label}
+        accessibilityHint={description}
+        activeOpacity={0.7}
+        className="relative overflow-hidden border-continuous bg-reverse shadow-[0_2px_7px_rgba(89,131,240,0.1)] rounded-[18px] px-[20px] py-[20px] min-h-[120px] justify-center gap-[4px]"
+        onPress={onPress}
+      >
+        <Text className="text-[28px] leading-[34px] font-medium">{label}</Text>
+        {description ? (
+          <Text className="text-[14px] leading-[19px] text-tertiary max-w-[170px]">
+            {description}
+          </Text>
+        ) : null}
+        <Image
+          source={require('~assets/images/new-tab/bible-reader.webp')}
+          accessible={false}
+          pointerEvents="none"
+          contentFit="contain"
+          contentPosition="bottom right"
+          style={{ position: 'absolute', right: 0, bottom: 0, width: 150, height: 112 }}
+        />
+      </TouchableBox>
+    )
+  }
+
+  if (variant !== 'card') {
+    const isTile = variant === 'tile'
+    return (
+      <TouchableBox
+        testID={`new-tab-tool-${type}`}
+        accessibilityLabel={label}
+        accessibilityHint={description}
+        activeOpacity={0.7}
+        className={
+          isTile
+            ? 'flex-1 border-continuous bg-reverse shadow-[0_2px_7px_rgba(89,131,240,0.1)] rounded-[16px] px-[12px] py-[14px] min-h-[92px] gap-[8px]'
+            : 'flex-1 border-continuous flex-row items-center bg-reverse shadow-[0_2px_7px_rgba(89,131,240,0.1)] rounded-[16px] px-[12px] py-[10px] min-h-[64px] gap-[10px]'
+        }
+        onPress={onPress}
+      >
+        <TabIcon type={type} size={isLibraryResource ? 28 : 26} />
+        <Box className="flex-1 min-w-0 gap-[2px]">
+          <Text className="text-[15px] leading-[19px] font-medium">{label}</Text>
+          {description ? (
+            <Text className="text-[12px] leading-[16px] text-tertiary">{description}</Text>
+          ) : null}
+        </Box>
+      </TouchableBox>
+    )
+  }
 
   return (
     <TouchableBox
       testID={`new-tab-tool-${type}`}
-      accessibilityLabel={title ?? t(`tabs.${type}`)}
+      accessibilityLabel={label}
       accessibilityHint={description}
       activeOpacity={0.7}
       className={
@@ -80,7 +138,7 @@ const NewTabItem = ({
         <TabIcon type={type} size={iconSize} />
         <Box className="flex-1 min-w-0 gap-[6px]">
           <Text className={hero ? 'text-[36px] font-medium' : 'text-[16px] font-medium'}>
-            {title ?? t(`tabs.${type}`)}
+            {label}
           </Text>
           {description ? (
             <Text className="text-[13px] leading-[19px] text-tertiary">{description}</Text>

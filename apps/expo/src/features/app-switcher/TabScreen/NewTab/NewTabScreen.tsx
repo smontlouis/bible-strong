@@ -3,7 +3,7 @@ import { SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import { useAtom } from 'jotai/react'
 import React from 'react'
-import { Platform, ScrollView } from 'react-native'
+import { Platform, ScrollView, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 import Empty from '~common/Empty'
@@ -24,6 +24,9 @@ const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
+  const { width } = useWindowDimensions()
+  // Matches the phone layout of NewTabContent (available width under 660px, native only).
+  const dense = Platform.OS !== 'web' && width < 660
   const { bottomBarHeight } = useBottomBarHeightInTab()
   const [, setTab] = useAtom(newAtom as unknown as PrimitiveAtom<TabItem>)
   const planSelectorRef = React.useRef<SheetRef>(null)
@@ -43,10 +46,11 @@ const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
           contentContainerStyle={{ flexGrow: 1 }}
         >
           <Box
-            className="w-full self-center px-[24px]"
+            className="w-full self-center"
             style={{
               maxWidth: 800,
-              paddingTop: insets.top + 44,
+              paddingHorizontal: dense ? 20 : 24,
+              paddingTop: insets.top + (dense ? 24 : 44),
               paddingBottom: bottomBarHeight + 40,
             }}
           >

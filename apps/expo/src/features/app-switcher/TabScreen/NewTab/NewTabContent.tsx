@@ -13,15 +13,18 @@ import NewTabItem from './NewTabItem'
 import NewTabSearch from './NewTabSearch'
 
 const ITEM_GAP = 14
+const DENSE_GAP = 10
 
 function SectionHeading({
   title,
   image,
   compact,
+  dense = false,
 }: {
   title: string
   image?: ImageSource
   compact: boolean
+  dense?: boolean
 }) {
   const theme = useTheme()
   return (
@@ -47,9 +50,10 @@ function SectionHeading({
           style={{
             position: 'absolute',
             right: 0,
-            bottom: -22,
-            width: compact ? 90 : 126,
-            height: 110,
+            // Dense rows have a card under the image on both sides: keep the overlap small.
+            bottom: dense ? -8 : -22,
+            width: dense ? 78 : compact ? 90 : 126,
+            height: dense ? 84 : 110,
           }}
         />
       )}
@@ -72,15 +76,90 @@ export default function NewTabContent({
   const sideBySide = width >= 860
   const libraryColumns = sideBySide || width >= 580
   const personalColumns = !sideBySide && width >= 580
-  const renderItem = (type: TabItem['type'], title: string, description: string) => (
+  const renderItem = (
+    type: TabItem['type'],
+    title: string,
+    description: string,
+    variant: 'card' | 'tile' | 'inline' = 'card'
+  ) => (
     <NewTabItem
       type={type}
       title={title}
       description={description}
       newAtom={tabAtom}
       onPlanPress={onPlanPress}
+      variant={variant}
     />
   )
+
+  // Phones keep the catalogue to roughly one screen: tighter gaps, three reading tools per row.
+  if (compact && Platform.OS !== 'web') {
+    return (
+      <Box testID="new-tab-content" onLayout={event => setWidth(event.nativeEvent.layout.width)}>
+        <Text
+          accessibilityRole="header"
+          className="mb-[22px] text-[27px] leading-[33px]"
+          style={{ fontFamily: resolveFontFamily(theme.fontFamily.title) }}
+        >
+          {t('newTab.heading')}
+        </Text>
+        <SectionHeading title={t('newTab.reading')} compact />
+        <NewTabItem
+          type="bible"
+          title={t('Bible')}
+          description={t('newTab.bibleDescription')}
+          newAtom={tabAtom}
+          hero
+          variant="tile"
+        />
+        <Box className="flex-row" style={{ gap: DENSE_GAP, marginTop: DENSE_GAP }}>
+          {renderItem('compare', t('tabs.compare'), t('newTab.compareDescription'), 'tile')}
+          {renderItem('plan', t('newTab.plan'), t('newTab.planDescription'), 'tile')}
+          {renderItem('timeline', t('tabs.timeline'), t('newTab.timelineDescription'), 'tile')}
+        </Box>
+        <Box className="mt-[30px]">
+          <SectionHeading
+            title={t('newTab.personal')}
+            compact
+            dense
+            image={require('~assets/images/new-tab/notes-writer.webp')}
+          />
+          <Box className="flex-row" style={{ gap: DENSE_GAP }}>
+            {renderItem('study', t('Études'), t('newTab.studyDescription'), 'inline')}
+            {renderItem('notes', t('tabs.notes'), t('newTab.notesDescription'), 'inline')}
+          </Box>
+        </Box>
+        <Box className="mt-[30px]">
+          <SectionHeading
+            title={t('newTab.library')}
+            compact
+            dense
+            image={require('~assets/images/new-tab/library-reader.webp')}
+          />
+          <Box style={{ gap: DENSE_GAP }}>
+            <Box className="flex-row" style={{ gap: DENSE_GAP }}>
+              {renderItem('strong', t('tabs.strong'), t('newTab.strongDescription'), 'inline')}
+              {renderItem('nave', t('tabs.nave'), t('newTab.naveDescription'), 'inline')}
+            </Box>
+            <Box className="flex-row" style={{ gap: DENSE_GAP }}>
+              {renderItem(
+                'dictionary',
+                t('tabs.dictionary'),
+                t('newTab.dictionaryDescription'),
+                'inline'
+              )}
+              {renderItem(
+                'commentary',
+                t('tabs.commentary'),
+                t('newTab.commentaryDescription'),
+                'inline'
+              )}
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    )
+  }
 
   return (
     <Box
