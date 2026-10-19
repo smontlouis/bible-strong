@@ -40,7 +40,7 @@ export default function FiltersHeader({
   onReset,
   buttonOnly = false,
 }: {
-  title: string
+  title: ReactNode
   children?: ReactNode
   buttonOnly?: boolean
   hasBackButton?: boolean

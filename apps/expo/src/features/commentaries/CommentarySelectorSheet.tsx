@@ -106,7 +106,7 @@ const CommentarySelectorItem = ({
             style={{ opacity: selectionDisabled ? 0.45 : 1 }}
           >
             <Box className="overflow-hidden border-continuous w-[48px] min-h-[48px] items-center justify-center">
-              <Checkbox checked={selected} variant="icon" size={22} />
+              <Checkbox checked={selected} size={22} />
             </Box>
             <Box className="overflow-hidden border-continuous flex-[1]">
               <Text
@@ -155,6 +155,7 @@ const CommentarySelectorSheet = ({ sheetRef, inline = false, onOpenDetails }: Pr
   const [traditions, setTraditions] = React.useState<string[]>([])
   const [currents, setCurrents] = React.useState<string[]>([])
   const [limitReached, setLimitReached] = React.useState(false)
+  const selectionCount = `${selected.length}/${MAX_SELECTED_COMMENTARIES}`
   const [detailsProjection, setDetailsProjection] = React.useState<CommentaryProjection>()
   const searchRef = React.useRef<SheetRef>(null)
   const traditionsRef = React.useRef<SheetRef>(null)
@@ -284,12 +285,21 @@ const CommentarySelectorSheet = ({ sheetRef, inline = false, onOpenDetails }: Pr
         header={
           <>
             {Platform.OS === 'web' && !inline && (
-              <SheetHeader title={t('commentaries.selector.title')} />
+              <SheetHeader title={t('commentaries.selector.title')} subTitle={selectionCount} />
             )}
             <FilterPlacement>
               <FiltersHeader
                 buttonOnly={isWebPanel}
-                title={isWebPanel ? '' : t('commentaries.selector.title')}
+                title={
+                  isWebPanel ? (
+                    ''
+                  ) : (
+                    <>
+                      {t('commentaries.selector.title')}
+                      <Text className="text-tertiary font-normal">{`  ${selectionCount}`}</Text>
+                    </>
+                  )
+                }
                 onReset={() => {
                   setQuery('')
                   setTraditions([])
@@ -352,7 +362,6 @@ const CommentarySelectorSheet = ({ sheetRef, inline = false, onOpenDetails }: Pr
             </FilterPlacement>
             <SelectedCommentariesHeader
               items={selectedProjections}
-              max={MAX_SELECTED_COMMENTARIES}
               onRemove={removeSelection}
               onMove={moveSelection}
               onReorder={reorderSelection}

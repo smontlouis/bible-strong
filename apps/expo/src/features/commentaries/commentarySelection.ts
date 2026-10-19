@@ -3,7 +3,7 @@ import { COMMENTARY_CATALOG_BY_ID } from '@bible-strong/resource-catalog/comment
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { getLanguage } from '~i18n'
 
-export const MAX_SELECTED_COMMENTARIES = 5
+export const MAX_SELECTED_COMMENTARIES = 10
 export const LEGACY_COMMENTARY_SELECTION_STORAGE_KEY = 'commentarySelection.v1'
 
 export type CommentaryProjectionId = `${string}:${ResourceLanguage}`

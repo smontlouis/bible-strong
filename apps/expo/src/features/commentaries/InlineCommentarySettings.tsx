@@ -15,6 +15,7 @@ import {
 import { parseCommentaryProjectionId } from './commentarySelection'
 import {
   isInlineCommentaryEligible,
+  MAX_INLINE_COMMENTARIES,
   normalizeInlineCommentaries,
 } from './inlineCommentarySelection'
 
@@ -28,6 +29,7 @@ export default function InlineCommentarySettings({ onManage }: { onManage?: () =
     settings.inlineCommentaries,
     settings.commentarySelection
   )
+  const limitReached = enabled.length >= MAX_INLINE_COMMENTARIES
   return (
     <>
       <ScrollView style={{ maxHeight: 440 }} keyboardShouldPersistTaps="handled">
@@ -49,12 +51,14 @@ export default function InlineCommentarySettings({ onManage }: { onManage?: () =
           const entry = projection ? COMMENTARY_CATALOG_BY_ID.get(projection.resourceId) : undefined
           if (!projection || !entry) return null
           const checked = enabled.includes(id)
+          const disabled = !checked && limitReached
           return (
-            <HStack key={id} className="items-center">
+            <HStack key={id} className="items-center" style={{ opacity: disabled ? 0.45 : 1 }}>
               <TouchableBox
+                disabled={disabled}
                 accessibilityRole="checkbox"
                 accessibilityLabel={entry.title}
-                accessibilityState={{ checked }}
+                accessibilityState={{ checked, disabled }}
                 onPress={() =>
                   dispatch(
                     setSettingsInlineCommentaries(
@@ -74,6 +78,11 @@ export default function InlineCommentarySettings({ onManage }: { onManage?: () =
             </HStack>
           )
         })}
+        {limitReached && eligibleSelection.length > MAX_INLINE_COMMENTARIES && (
+          <Text className="px-[16px] pb-[16px] text-quart text-[12px]">
+            {t('inlineCommentary.limit', { max: MAX_INLINE_COMMENTARIES })}
+          </Text>
+        )}
         {!eligibleSelection.length && (
           <Box className="p-[16px] gap-[12px]">
             <Text className="text-grey">{t('inlineCommentary.noSelection')}</Text>

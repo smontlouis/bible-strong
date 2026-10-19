@@ -2193,6 +2193,7 @@
   "inlineCommentary.unavailable": "Some commentaries are unavailable.",
   "inlineCommentary.description": "Show selected commentaries as chips in the Bible. Full text loads only when opened.",
   "inlineCommentary.download": "Download for offline reading",
+  "inlineCommentary.limit": "You can show up to {{max}} commentaries in the Bible.",
   "inlineCommentary.noSelection": "No commentaries selected",
   "inlineCommentary.offlineReady": "Available offline",
   "inlineCommentary.onlineOnly": "Connection required for full text",

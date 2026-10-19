@@ -190,7 +190,7 @@
     "react-native-nitro-modules": "^0.37.1",
     "react-native-reanimated": "4.7.0",
     "react-native-reanimated-carousel": "^5.2.0",
-    "react-native-reanimated-dnd": "2.0.0",
+    "react-native-reanimated-dnd": "patch:react-native-reanimated-dnd@npm%3A2.0.0#~/.yarn/patches/react-native-reanimated-dnd-npm-2.0.0-b5a7ddfd0c.patch",
     "react-native-root-siblings": "5.0.1",
     "react-native-safe-area-context": "~5.10.1",
     "react-native-screens": "patch:react-native-screens@npm%3A4.30.0#~/.yarn/patches/react-native-screens-npm-4.30.0-e2241f2fe4.patch",
