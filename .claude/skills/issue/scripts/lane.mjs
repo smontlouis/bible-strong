@@ -595,6 +595,9 @@ const main = async () => {
       cmdOpen(slug)
       const state = readState(slug)
       console.log(`\n[lane] PRÊT\n${JSON.stringify(state, null, 2)}`)
+      console.log(
+        `[lane] Metro :${state.port} · appareil ${state.platform === 'android' ? ANDROID_SERIAL : state.simName} · log ${state.metroLog}`
+      )
       return
     }
     case 'stop':

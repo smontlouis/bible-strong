@@ -32,6 +32,7 @@ Dev clients: `device` installs the newest `*simulator*.app` of `~/Builds/bible-s
 2. Switch the session into it: `EnterWorktree` with `path` = the printed worktree path. From now on every edit happens in the worktree, never in the main checkout (other sessions use it).
 3. Start the rest **in the background** (Bash `run_in_background`): `node "$LANE" start <slug> [--android]`. It is idempotent: the full `yarn install` (several minutes, about 7.5 GB), the simulator clone `bs-<slug>` with the newest dev client from `~/Builds/bible-strong/` installed over it (app data kept), Metro on the first free port from 8082, then the app opened on it. It ends with `[lane] PRÊT` and the state JSON.
 4. Don't wait for it: go to step 3 now. When it finishes, read its output. Every `ATTENTION` line about the dev client (runtime mismatch, native files changed since the build) goes to the user: building a new dev client is their call, never start one unasked.
+5. Once it is ready, give the user the lane's coordinates in your next message: Metro port, device (`simName` or the Android serial) and the Metro log path (the last `[lane] Metro …` line). Then open a tab in their Terminal panel that follows that log: `run_in_terminal` with `tail -n 50 -F <metroLog>` and a title like `Metro :<port> <slug>`, and link the tab. Metro itself stays the detached process the script owns (`lane metro` restarts it, `cleanup` stops it by PID); the tab only reads its log, so closing it changes nothing.
 
 ## 3. Discuss before coding
 
@@ -81,5 +82,6 @@ The lane stays up while the PR is under review (fixes go in the same worktree, t
 After merge, or when the user drops the issue:
 
 - `ExitWorktree` with `action: "keep"`: the script owns the removal.
+- Stop the lane's Metro log tab (`stop_terminal_tab` with `close: true`) if it is still open.
 - `node "$LANE" cleanup <slug>`: stops Metro (and the Android tunnel), deletes `bs-<slug>`, removes the worktree. It refuses a worktree with uncommitted changes: show them to the user, and only pass `--force` if the user says to drop them. The branch is kept.
 - Stop the argent simulator server of the lane's device (`stop-simulator-server` / `stop-all-simulator-servers` with `devices: [<simUdid>]`, never unscoped).
