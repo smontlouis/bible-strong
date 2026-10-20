@@ -2,7 +2,11 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { styled } from 'goober'
-import { BIBLE_READING_HORIZONTAL_PADDING, PARALLEL_COLUMN_GAP } from '~common/readingLayout'
+import {
+  BIBLE_READING_HORIZONTAL_PADDING,
+  PARALLEL_COLUMN_GAP,
+  getParallelColumnsWidth,
+} from '~common/readingLayout'
 import type { SelectedCode, StudyNavigateBibleType, Verse as TVerse } from '~common/types'
 import type { BibleError } from '~helpers/bibleErrors'
 import type { ParallelDisplayMode } from 'src/state/tabs'
@@ -67,17 +71,20 @@ const VerseGroupSeparator = styled('div')<RootStyles>(({ settings: { theme, colo
 
 // Horizontal mode: the verse-level content under a row, kept in view whatever column
 // the reader scrolled to.
-const VerseBand = styled('div')<RootStyles & { $dimmed: boolean }>(({ $dimmed }) => ({
-  position: 'sticky',
-  left: 0,
-  width: 'calc(100vw - 30px)',
-  maxWidth: '100%',
-  boxSizing: 'border-box',
-  paddingBottom: '8px',
-  opacity: $dimmed ? 0.3 : 1,
-  transition: 'opacity 0.3s ease',
-  zIndex: 1,
-}))
+const VerseBand = styled('div')<RootStyles & { $dimmed: boolean; $columnsWidth: string }>(
+  ({ $dimmed, $columnsWidth }) => ({
+    position: 'sticky',
+    left: 0,
+    // No wider than the columns, which it would push past their centred width
+    width: `min(calc(100vw - 30px), ${$columnsWidth})`,
+    maxWidth: '100%',
+    boxSizing: 'border-box',
+    paddingBottom: '8px',
+    opacity: $dimmed ? 0.3 : 1,
+    transition: 'opacity 0.3s ease',
+    zIndex: 1,
+  })
+)
 
 // Vertical mode: the verse number and its markers, kept in view over the stacked versions.
 const VerseGroupHeader = styled('div')<RootStyles & { $dimmed: boolean }>(
@@ -410,7 +417,11 @@ const ParallelVerseRow = ({
         ))}
       </div>
       {(hasMarkers || hasEndContent) && (
-        <VerseBand settings={settings} $dimmed={isRowDimmed}>
+        <VerseBand
+          settings={settings}
+          $dimmed={isRowDimmed}
+          $columnsWidth={getParallelColumnsWidth(cells.length, columnWidth)}
+        >
           {hasMarkers && <VerseMarkers {...verseContent} />}
           {endContent}
         </VerseBand>

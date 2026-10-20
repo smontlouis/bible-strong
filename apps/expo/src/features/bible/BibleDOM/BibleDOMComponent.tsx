@@ -8,6 +8,7 @@ import {
   BIBLE_READING_HORIZONTAL_PADDING,
   BIBLE_HEADER_PILL_INSET,
   PARALLEL_COLUMN_GAP,
+  getParallelColumnsWidth,
 } from '~common/readingLayout'
 import { getParallelColumnFontSizeScale } from './verseTypography'
 import { setup, styled, keyframes } from 'goober'
@@ -482,9 +483,10 @@ const VersionsContainer = styled('div')<{
   display: 'flex',
   paddingTop: '5px',
   paddingBottom: '10px',
-  // Largeur totale = colonnes * columnWidth vw
-  width: columnCount > 1 ? `${columnCount * columnWidth}vw` : '100%',
-  minWidth: columnCount > 1 ? `${columnCount * columnWidth}vw` : '100%',
+  // The width of the columns below, centred above them as they are
+  width: columnCount > 1 ? getParallelColumnsWidth(columnCount, columnWidth) : '100%',
+  minWidth: columnCount > 1 ? getParallelColumnsWidth(columnCount, columnWidth) : '100%',
+  marginInline: 'auto',
   transition: 'width 0.4s ease-in-out',
   ...($followsScroll
     ? {
@@ -494,6 +496,12 @@ const VersionsContainer = styled('div')<{
       }
     : {}),
 }))
+
+// The columns, centred while they leave room on the screen. Wider, they start at the scroller's
+// edge: the block keeps to the scroller's width and the rows overflow it into the scroll.
+const ColumnsBlock = styled('div')<{ $columnsWidth?: string }>(({ $columnsWidth }) =>
+  $columnsWidth ? { width: $columnsWidth, maxWidth: '100%', marginInline: 'auto' } : {}
+)
 
 // Wrapper pour le scroll horizontal (content)
 const HorizontalScrollWrapper = styled('div')<{
@@ -524,7 +532,8 @@ const HeaderScrollWrapper = styled('div')<{ columnCount: number; $followsScroll?
     position: 'sticky',
     // The version pills line up under the header's pill, as the text does in single reading
     paddingInlineStart: `${BIBLE_HEADER_PILL_INSET}px`,
-    paddingInlineEnd: `${BIBLE_READING_HORIZONTAL_PADDING}px`,
+    // As wide inside as the columns' scroller, so the centred titles keep that offset
+    paddingInlineEnd: `${BIBLE_READING_HORIZONTAL_PADDING * 2 - BIBLE_HEADER_PILL_INSET}px`,
     top: 'var(--header-height)',
     zIndex: 2,
     transition: 'top 0.3s cubic-bezier(.13,.69,.5,.98)',
@@ -1524,87 +1533,98 @@ const LoadedBibleContent = ({
             $scrollTimeline={titlesFollowColumnsScroll}
             $scrollsColumns={isHorizontalParallelMode}
           >
-            {isHebreu && <RightDirection settings={settings}>Sens de la lecture ←</RightDirection>}
-            {!isContextFocused && (
-              <PassageMediaThumbnails
-                items={passageMedia.introduction}
-                gallerySections={passageMediaGallerySections}
-                placement="introduction"
-                settings={settings}
-                isDisabled={annotationMode}
-                isCompact={!passageMedia.isIntroductionStartChapter}
-              />
-            )}
-            {/* Keep introduction media at its original scroll origin. Metadata follows it. */}
-            <EntityChipsDOM
-              items={focusedMetadataItems}
-              color={settings.colors[settings.theme].primary}
-              backgroundColor={settings.colors[settings.theme].lightPrimary}
-              onPress={(type, id) => {
-                void onFocusedMetadataPress?.(type, id)
-              }}
-            />
-            <m.div
-              ref={versesContentRef}
-              style={{ position: 'relative' }}
-              {...versePositionLayoutProps}
+            <ColumnsBlock
+              $columnsWidth={
+                isHorizontalParallelMode
+                  ? getParallelColumnsWidth(parallelVersionTitles.length, parallelColumnWidth)
+                  : undefined
+              }
             >
-              {/* Highlight layer drawn inside the columns it marks */}
-              {isHorizontalParallelMode && highlightLayer}
-              {/* Unified verse rendering for all modes */}
-              <UnifiedVersesRenderer
-                isPassagePreview={Boolean(focusVerses?.length)}
-                inlineCommentaries={inlineCommentaries}
-                verses={verses}
-                parallelVerses={parallelVerses}
-                interlinearReadingVersions={interlinearReadingVersions}
-                focusVerses={focusVerses}
-                selectedVerses={selectedVerses}
-                selectedVersesVersion={selectedVersesVersion ?? version}
-                highlightedVerses={highlightedVerses}
-                settings={columnSettings}
-                verseToScroll={verseToScroll}
-                contextDisplayMode={contextDisplayMode}
-                version={version}
-                interlinearMode={interlinearMode}
-                pericopeChapter={pericopeChapter}
-                parallelPericopeChapters={parallelPericopeChapters}
-                isSelectionMode={isSelectionMode}
-                selectedCode={selectedCode}
-                isHebreu={isHebreu}
-                isParallelVerse={
-                  isParallelVerse && (!keepControlsVisible || parallelDisplayMode === 'horizontal')
-                }
-                wordAnnotations={wordAnnotations}
-                wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
-                taggedVerses={taggedVerses}
-                bookmarkedVerses={bookmarkedVerses}
-                annotationNotesCountByVerse={annotationNotesCountByVerse}
-                relationItemsCount={relationItemsCount}
-                relationItemsText={relationItemsText}
-                versesWithAnnotationNotes={versesWithAnnotationNotes}
-                navigateToPericope={navigateToPericope}
-                annotationMode={annotationMode}
-                touchedVerse={touchedVerse}
-                taggedVersesInChapter={taggedVersesInChapter}
-                versesWithNonHighlightTags={versesWithNonHighlightTags}
-                columnCount={isParallelVerse ? parallelVersionTitles.length : 1}
-                columnWidth={parallelColumnWidth}
-                parallelDisplayMode={parallelDisplayMode}
-                columnTextModeControls={columnTextModeControls}
-                redWordsByVersion={redWordsByVersion}
-                passageMediaAfterVerses={passageMedia.afterVerses}
-                passageMediaGallerySections={passageMediaGallerySections}
+              {isHebreu && (
+                <RightDirection settings={settings}>Sens de la lecture ←</RightDirection>
+              )}
+              {!isContextFocused && (
+                <PassageMediaThumbnails
+                  items={passageMedia.introduction}
+                  gallerySections={passageMediaGallerySections}
+                  placement="introduction"
+                  settings={settings}
+                  isDisabled={annotationMode}
+                  isCompact={!passageMedia.isIntroductionStartChapter}
+                />
+              )}
+              {/* Keep introduction media at its original scroll origin. Metadata follows it. */}
+              <EntityChipsDOM
+                items={focusedMetadataItems}
+                color={settings.colors[settings.theme].primary}
+                backgroundColor={settings.colors[settings.theme].lightPrimary}
+                onPress={(type, id) => {
+                  void onFocusedMetadataPress?.(type, id)
+                }}
               />
-              <AnnotationInlineItems
-                wordAnnotations={wordAnnotations}
-                annotationRelationItems={annotationRelationItems}
-                versions={annotatedVersions}
-                settings={columnSettings}
-                annotationMode={annotationMode}
-                contentKey={annotationInlineContentKey}
-              />
-            </m.div>
+              <m.div
+                ref={versesContentRef}
+                style={{ position: 'relative' }}
+                {...versePositionLayoutProps}
+              >
+                {/* Highlight layer drawn inside the columns it marks */}
+                {isHorizontalParallelMode && highlightLayer}
+                {/* Unified verse rendering for all modes */}
+                <UnifiedVersesRenderer
+                  isPassagePreview={Boolean(focusVerses?.length)}
+                  inlineCommentaries={inlineCommentaries}
+                  verses={verses}
+                  parallelVerses={parallelVerses}
+                  interlinearReadingVersions={interlinearReadingVersions}
+                  focusVerses={focusVerses}
+                  selectedVerses={selectedVerses}
+                  selectedVersesVersion={selectedVersesVersion ?? version}
+                  highlightedVerses={highlightedVerses}
+                  settings={columnSettings}
+                  verseToScroll={verseToScroll}
+                  contextDisplayMode={contextDisplayMode}
+                  version={version}
+                  interlinearMode={interlinearMode}
+                  pericopeChapter={pericopeChapter}
+                  parallelPericopeChapters={parallelPericopeChapters}
+                  isSelectionMode={isSelectionMode}
+                  selectedCode={selectedCode}
+                  isHebreu={isHebreu}
+                  isParallelVerse={
+                    isParallelVerse &&
+                    (!keepControlsVisible || parallelDisplayMode === 'horizontal')
+                  }
+                  wordAnnotations={wordAnnotations}
+                  wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
+                  taggedVerses={taggedVerses}
+                  bookmarkedVerses={bookmarkedVerses}
+                  annotationNotesCountByVerse={annotationNotesCountByVerse}
+                  relationItemsCount={relationItemsCount}
+                  relationItemsText={relationItemsText}
+                  versesWithAnnotationNotes={versesWithAnnotationNotes}
+                  navigateToPericope={navigateToPericope}
+                  annotationMode={annotationMode}
+                  touchedVerse={touchedVerse}
+                  taggedVersesInChapter={taggedVersesInChapter}
+                  versesWithNonHighlightTags={versesWithNonHighlightTags}
+                  columnCount={isParallelVerse ? parallelVersionTitles.length : 1}
+                  columnWidth={parallelColumnWidth}
+                  parallelDisplayMode={parallelDisplayMode}
+                  columnTextModeControls={columnTextModeControls}
+                  redWordsByVersion={redWordsByVersion}
+                  passageMediaAfterVerses={passageMedia.afterVerses}
+                  passageMediaGallerySections={passageMediaGallerySections}
+                />
+                <AnnotationInlineItems
+                  wordAnnotations={wordAnnotations}
+                  annotationRelationItems={annotationRelationItems}
+                  versions={annotatedVersions}
+                  settings={columnSettings}
+                  annotationMode={annotationMode}
+                  contentKey={annotationInlineContentKey}
+                />
+              </m.div>
+            </ColumnsBlock>
           </HorizontalScrollWrapper>
           <ChapterEntities
             entities={chapterEntities}
