@@ -102,9 +102,19 @@ const links = (role: string) =>
   renderer.root.findAll(
     node => String(node.type) === 'Link' && node.props.accessibilityRole === role
   )
+/** Leaves the plan for an element's page, and lets that page settle over it. */
+const leave = () =>
+  act(() => {
+    mockLeave()
+    jest.runOnlyPendingTimers()
+  })
+beforeEach(() => {
+  jest.useFakeTimers()
+})
 afterEach(() => {
   act(() => renderer.unmount())
   jest.clearAllMocks()
+  jest.useRealTimers()
 })
 it('continues legacy progress with the first element of the next day', () => {
   render({ id: 'plan', status: 'Progress', readingSlices: { one: 'Completed' } })
@@ -113,7 +123,7 @@ it('continues legacy progress with the first element of the next day', () => {
   act(() => button.props.onPress())
   expect(mockStart).not.toHaveBeenCalled()
   expect(mockRead).not.toHaveBeenCalled()
-  act(() => mockLeave())
+  leave()
   expect(mockRead).toHaveBeenCalledWith({
     planId: 'plan',
     readingSliceId: 'two',
@@ -135,7 +145,7 @@ it('continues legacy progress with the first element of the next day', () => {
 it('continues a day with its next unread element, identified by its place when it has no id', () => {
   render(followed)
   act(() => renderer.root.find(node => String(node.type) === 'Button').props.onPress())
-  act(() => mockLeave())
+  leave()
   expect(mockRead).toHaveBeenCalledWith({
     planId: 'plan',
     readingSliceId: 'two',
@@ -157,7 +167,7 @@ it('starts a new plan today and opens day one even after browsing another day', 
   expect(button.props.children).toBe('readingPlans.start')
   act(() => button.props.onPress())
   expect(mockStart).toHaveBeenCalledWith({ planId: 'plan', startDate: '2026-09-14' })
-  act(() => mockLeave())
+  leave()
   expect(mockRead).toHaveBeenCalledWith({
     planId: 'plan',
     readingSliceId: 'one',
@@ -204,9 +214,23 @@ it('opens an element on its own page and marks it as read once the plan is left'
   expect(mockPush).toHaveBeenCalledWith({ pathname: '/plan-entity', params: element })
   expect(mockRead).not.toHaveBeenCalled()
   act(() => mockLeave())
-  act(() => mockLeave())
+  expect(mockRead).not.toHaveBeenCalled()
+  act(() => jest.advanceTimersByTime(500))
+  leave()
   expect(mockRead).toHaveBeenCalledTimes(1)
   expect(mockRead).toHaveBeenCalledWith(element)
+})
+it('still marks an opened element as read when the plan goes away before its page settles', () => {
+  render(followed)
+  act(() => links('link')[2].props.onPress())
+  act(() => mockLeave())
+  act(() => renderer.unmount())
+  expect(mockRead).toHaveBeenCalledWith({
+    planId: 'plan',
+    readingSliceId: 'two',
+    entitySliceId: 'two-c',
+  })
+  render(followed)
 })
 it('shows every element of a completed day as read', () => {
   render(followed, 'one')

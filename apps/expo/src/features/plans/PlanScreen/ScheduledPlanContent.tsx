@@ -94,18 +94,35 @@ const ScheduledPlanContent = ({ plan, initialReadingSliceId }: Props) => {
     return `${month}\n${current.getDate()}`
   }
   // Opening is reading. The element is ticked once its page covers the plan, so that a day
-  // completed this way is celebrated on the way back, not while leaving.
+  // completed this way is celebrated on the way back, not while leaving. A sheet leaves the
+  // plan in view while it rises, so the tick waits for it to settle.
   const navigation = useNavigation()
   const openedEntity = useRef<Parameters<typeof markEntitySliceAsRead>[0] | null>(null)
-  useEffect(
-    () =>
-      navigation.addListener('blur', () => {
-        if (!openedEntity.current) return
-        dispatch(markEntitySliceAsRead(openedEntity.current))
-        openedEntity.current = null
-      }),
-    [navigation, dispatch]
-  )
+  useEffect(() => {
+    const pending = new Map<
+      ReturnType<typeof setTimeout>,
+      Parameters<typeof markEntitySliceAsRead>[0]
+    >()
+    const unsubscribe = navigation.addListener('blur', () => {
+      const location = openedEntity.current
+      if (!location) return
+      openedEntity.current = null
+      const timer = setTimeout(() => {
+        pending.delete(timer)
+        dispatch(markEntitySliceAsRead(location))
+      }, 500)
+      pending.set(timer, location)
+    })
+    return () => {
+      unsubscribe()
+      // Leaving the plan for good must not lose an element that was opened.
+      pending.forEach((location, timer) => {
+        clearTimeout(timer)
+        dispatch(markEntitySliceAsRead(location))
+      })
+      pending.clear()
+    }
+  }, [navigation, dispatch])
   const openEntity = (day: ComputedReadingSlice, slice: EntitySlice, index: number) => {
     const location = {
       planId: plan.id,
