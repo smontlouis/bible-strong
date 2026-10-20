@@ -14,6 +14,7 @@ import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
 import type { TagsObj } from '~common/types'
 import Box, { HStack } from '~common/ui/Box'
 import { Chip } from '~common/ui/NewChip'
+import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import { getBook } from '~helpers/bibleBookCatalog'
 import formatVerseContent from '~helpers/formatVerseContent'
@@ -126,7 +127,9 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
             {t('Il y a {{formattedDate}}', { formattedDate })}
           </DateText>
         </Box>
-        <Text className="text-[14px] mb-[15px]">{`...${item.text}...`}</Text>
+        <Paragraph className="mb-[15px]" scale={-2}>
+          {`...${item.text}...`}
+        </Paragraph>
       </TouchableOpacity>
       {item.tags && Object.keys(item.tags).length > 0 && (
         <EntityChipList tags={item.tags as TagsObj} />
