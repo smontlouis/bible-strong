@@ -1,7 +1,7 @@
 # Titres de péricope avant le verset 1 dans les Bibles anglaises SWORD
 
-Date : 20 octobre 2026. Correction de l'extraction et régénération locale ;
-rien n'a été importé, téléversé ni activé en production.
+Date : 20 octobre 2026. Correction de l'extraction, régénération et
+publication en production le même jour.
 
 ## Symptôme
 
@@ -81,19 +81,32 @@ Gn 1 « The Creation » puis « (John 1:1–5; Hebrews 11:1–3) » ; Ps 1 « BO
   `StrongCodes`, `FrenchLexemes` identiques ; seuls `textRevision`,
   `textSha256`, `strongRevision` et `baseStrongRevision` changent.
 
-## Ce qu'il reste à faire (hors de Resource Studio)
+## Publication (20 octobre 2026)
 
-1. Téléverser les sources de texte et les artefacts, puis mettre à jour
-   `config/ordinary-bible-sources.json` et `config/mobile-resource-inventory.json`.
-2. Importer et activer les bundles `bible:BSB`, `bible:RV1895` puis
-   `bible-strong:BSB`, `bible-strong:RV1895` (Resource service).
-3. Les annotations de mots suivent la migration de l'ADR-0013 ; le texte des
-   versets étant inchangé, le réalignement est immédiat.
-4. Appariement des sidecars : `restampStrongSidecarText` comparait des
-   révisions (`presentationRestampedFromTextRevision`, figée au premier
-   re-tamponnage). Une fois la nouvelle source adoptée, la reconstruction des
-   bundles Strong aurait refusé BSB et RV1895 alors que leurs textes de verset
-   n'ont pas changé. Le sidecar enregistre désormais l'empreinte des seuls
-   textes de verset (`verseTextSha256`) ; quand elle est présente, elle seule
-   décide de l'appariement. Les sidecars sans empreinte gardent l'ancienne
-   règle et la reçoivent au prochain re-tamponnage.
+1. Sources de texte téléversées dans R2 sous leur clé `sources/<sha256>/` et
+   nommées par `config/ordinary-bible-sources.json` ; bundles Bible
+   reconstruits sans override.
+2. Les quatre bundles dans R2 (`resources:r2:publish-changed:prod`), catalogue
+   mobile corrigé (`r2ArtifactSources catalog-patch`), copies hors ligne
+   chiffrées recréées (`resources:offline:encrypt:prod`), inventaire adopté.
+3. Import et activation dans Neon : `bible-text:BSB`, `bible-text:RV1895`,
+   `strong-bible-index:BSB`, `strong-bible-index:RV1895`.
+4. Worker déployé (le cache de l'API est conservé ; ces quatre ressources ont
+   de nouvelles clés). Vérifié : `/health`, catalogue hors ligne, lectures
+   `/v1/bibles/BSB/books/51/chapters/2` (« Absent in Body, Present in
+   Spirit » puis le renvoi), Genèse 1, Matthieu 5, RV1895 Ps 42, et lecture
+   Strong des deux Bibles appariée aux nouvelles révisions.
+5. Pages du site rafraîchies : `/bible/bsb`, `/bible/rv1895` et leurs dossiers
+   `strong` et `reverse-interlinear`.
+
+Les annotations de mots suivent la migration de l'ADR-0013 ; le texte des
+versets étant inchangé, le réalignement est immédiat.
+
+Appariement des sidecars : `restampStrongSidecarText` comparait des
+révisions (`presentationRestampedFromTextRevision`, figée au premier
+re-tamponnage). Une fois la nouvelle source adoptée, la reconstruction des
+bundles Strong aurait refusé BSB et RV1895 alors que leurs textes de verset
+n'ont pas changé. Le sidecar enregistre désormais l'empreinte des seuls
+textes de verset (`verseTextSha256`) ; quand elle est présente, elle seule
+décide de l'appariement. Les sidecars sans empreinte gardent l'ancienne
+règle et la reçoivent au prochain re-tamponnage.
