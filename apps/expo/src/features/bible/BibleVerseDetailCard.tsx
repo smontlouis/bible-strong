@@ -499,7 +499,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   if (error) {
     if (error === 'STRONG_VERSE_NOT_INDEXED') {
       return (
-        <Container>
+        <Container className="bg-canvas">
           <Empty
             iconElement={
               <FeatherIcon name="book-open" size={36} color={getUniverseColor('bible')} />
@@ -512,7 +512,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
 
     if (error === 'STRONG_BIBLE_UNAVAILABLE') {
       return (
-        <Container>
+        <Container className="bg-canvas">
           <Empty
             iconElement={
               <FeatherIcon name="book-open" size={36} color={getUniverseColor('bible')} />

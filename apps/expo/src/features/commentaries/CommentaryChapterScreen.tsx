@@ -198,7 +198,7 @@ const CommentaryChapterScreen = ({
 
   if (!parsed) {
     return (
-      <FormSheetScreen isFormSheet={IS_FORM_SHEET}>
+      <FormSheetScreen className="bg-canvas" isFormSheet={IS_FORM_SHEET}>
         <ResourceUnavailableView
           title={t('commentaries.resource.invalid')}
           failure={{ cause: 'not-found', recoveries: [] }}
@@ -236,7 +236,7 @@ const CommentaryChapterScreen = ({
   }
 
   return (
-    <FormSheetScreen isFormSheet={IS_FORM_SHEET}>
+    <FormSheetScreen className="bg-canvas" isFormSheet={IS_FORM_SHEET}>
       <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
         <Header
           hasBackButton={IS_FORM_SHEET ? canGoBackInStack : true}

@@ -304,7 +304,8 @@ consumer needs JavaScript values. See ADR-0040 for the Bible DOM boundary.
 
 Pages, cards, rows, radii and shadows follow the chapter « The app » of
 `../../design-system/project/README.md` (ADR-0086). A hub or settings page sits on
-`bg-canvas` with its content in `ListSection`, `ListRow` and `Card`; a continuous list
+`bg-canvas`, set on its root `Container`, `SafeAreaBox` or `FormSheetScreen`, with its content
+in `ListSection`, `ListRow` and `Card`; a continuous list
 runs full width on the page ground. Take radii from `radii` and the one shadow from
 `floatingShadow` in `~common/ui/surfaces`. `yarn agents:styles:check` refuses new
 departures; when a change removes some, lower `scripts/agents-surface-baseline.json`

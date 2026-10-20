@@ -58,7 +58,7 @@ Icons are outline icons from Lucide, in the colour of the text beside them. Smal
 The app shares the site's shape and depth, not its palette. Its eight themes live in `apps/expo/src/themes/`, and every rule below holds in each of them.
 
 - **Three levels.** `canvas` is the ground of a page. `surface` is a card on the canvas. `surfaceRaised` is what floats above the page: a sheet, a popover, a floating bar. The surface is the lighter one in every theme, dark ones included; take each palette's values, never derive one level from another.
-- **Two kinds of page.** A hub or a settings page (home, More, profile, FAQ, downloads, theme, plans) sits on `canvas`, its content grouped in cards. A continuous list (lexicon, dictionary, topics, notes, highlights, bookmarks, history, search results) runs full width on the page ground, `background`, with no card.
+- **Two kinds of page.** A hub or a settings page (home, More, profile, FAQ, downloads, theme, plans) sits on `canvas`, its content grouped in cards. A continuous list (lexicon, dictionary, topics, notes, highlights, bookmarks, history, search results) runs full width on the page ground, `background`, with no card. The page's root container (`Container`, `SafeAreaBox`, `FormSheetScreen`) carries that ground, so the status bar and the space above the tab bar follow it.
 - **A card's edge is its contrast.** A card in the flow takes no border and no shadow. Rows, in a card or in a list, are split by a `separator` hairline that starts where the row's text starts.
 - **A border carries a meaning**: a text field, a selected item, a drop zone in dashes. It never outlines a card.
 - **One shadow**, `floatingShadow`, and only for what floats: a floating button or bar, a popover, a tab preview.

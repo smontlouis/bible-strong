@@ -291,11 +291,11 @@ const ResourcesModal = ({
   }
 
   const theme = useTheme()
-  const Container = inline ? ResourceSidebarContent : Sheet
+  const ResourceShell = inline ? ResourceSidebarContent : Sheet
 
   return (
     <>
-      <Container
+      <ResourceShell
         ref={resourceModalRef}
         snapPoints={[1]}
         footer={footerRenderer}
@@ -330,7 +330,7 @@ const ResourcesModal = ({
             />
           </View>
         )}
-      </Container>
+      </ResourceShell>
       <CompareVersionSelectorSheet sheetRef={compareVersionSelectorRef} />
       <CommentarySelectorSheet sheetRef={commentarySelectorRef} />
       <StrongBibleSourceSheet

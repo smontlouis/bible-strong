@@ -190,7 +190,7 @@ const StudiesScreen = ({
     queryState
   )
   return (
-    <FormSheetScreen isFormSheet={isFormSheet}>
+    <FormSheetScreen className="bg-canvas" isFormSheet={isFormSheet}>
       <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
         <FiltersHeader
           title={t('Études')}

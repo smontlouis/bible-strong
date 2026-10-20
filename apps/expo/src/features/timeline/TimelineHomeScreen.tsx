@@ -62,7 +62,7 @@ const TimelineHomeScreen = ({
   }
 
   return (
-    <FormSheetScreen isFormSheet={isFormSheet}>
+    <FormSheetScreen className="bg-canvas" isFormSheet={isFormSheet}>
       <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
         <Header
           hasBackButton={showBackButton}

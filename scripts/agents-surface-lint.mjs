@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
 // Keeps the Expo app on its surface rules (design-system/project/README.md, "The app"):
-// corner radii from one scale, and one shared shadow for what floats. Existing departures are
-// frozen per file in agents-surface-baseline.json and may only go down.
+// corner radii from one scale, one shared shadow for what floats, and a page that uses the canvas
+// gives it to its root container. Existing departures are frozen per file in
+// agents-surface-baseline.json and may only go down.
 
 import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
@@ -16,6 +17,9 @@ const classRadiusPattern = /\brounded(?:-[tblrsexy]{1,2})?-\[(\d+(?:\.\d+)?)px\]
 const styleRadiusPattern =
   /\bborder(?:Top|Bottom)?(?:Left|Right|Start|End)?Radius:\s*(\d+(?:\.\d+)?)\b/g
 const shadowPattern = /\bshadowColor\s*:|\belevation\s*:\s*\d|\bshadow-\[|\bboxShadow\s*:/g
+const canvasPattern = /\bbg-canvas\b|backgroundColor="canvas"|\bbg="canvas"|\bcolors\.canvas\b/
+const rootWrapperPattern = /<(FormSheetScreen|Container|SafeAreaBox)\b([^>]*)>/g
+const kinds = ['radius', 'shadow', 'ground']
 
 const git = args => {
   const result = spawnSync('git', args, { encoding: 'utf8' })
@@ -48,9 +52,19 @@ const sourceFiles = git([
   )
 
 const countFile = file => {
-  const lines = readFileSync(file, 'utf8').split('\n')
+  const source = readFileSync(file, 'utf8')
+  const lines = source.split('\n')
   if (lines.some(line => exceptionPattern.test(line))) return null
-  const found = { radius: [], shadow: [] }
+  const found = { radius: [], shadow: [], ground: [] }
+  // A root wrapper left on the white default while the page inside is on the canvas shows a white
+  // status bar and a white band above the tab bar.
+  if (canvasPattern.test(source)) {
+    for (const match of source.matchAll(rootWrapperPattern)) {
+      if (/\bbg-canvas\b/.test(match[2])) continue
+      const line = source.slice(0, match.index).split('\n').length
+      found.ground.push({ line, text: lines[line - 1] })
+    }
+  }
   lines.forEach((text, index) => {
     for (const pattern of [classRadiusPattern, styleRadiusPattern]) {
       for (const match of text.matchAll(pattern)) {
@@ -69,16 +83,16 @@ const increases = []
 for (const file of sourceFiles) {
   const found = countFile(file)
   if (!found) continue
-  const counts = { radius: found.radius.length, shadow: found.shadow.length }
-  if (counts.radius || counts.shadow) current[file] = counts
-  for (const kind of ['radius', 'shadow']) {
+  const counts = Object.fromEntries(kinds.map(kind => [kind, found[kind].length]))
+  if (kinds.some(kind => counts[kind])) current[file] = counts
+  for (const kind of kinds) {
     const allowed = baseline[file]?.[kind] ?? 0
     if (counts[kind] > allowed) increases.push({ file, kind, allowed, found: found[kind] })
   }
 }
 
 const stale = Object.entries(baseline).flatMap(([file, counts]) =>
-  ['radius', 'shadow'].flatMap(kind => {
+  kinds.flatMap(kind => {
     const count = current[file]?.[kind] ?? 0
     return count < (counts[kind] ?? 0) ? [{ file, kind, allowed: counts[kind], count }] : []
   })
@@ -109,6 +123,10 @@ if (increases.length > 0) {
   console.error(
     '\nRadii come from the scale 4, 8, 12, 16, 24 or rounded-full (see radii in ' +
       `${sharedSurfacesFile}). A shadow is only for what floats: use floatingShadow from the same file.`
+  )
+  console.error(
+    'A page that uses the canvas gives it to its root Container, SafeAreaBox or FormSheetScreen ' +
+      '(className="bg-canvas"), so the status bar and the space above the tab bar follow it.'
   )
   console.error(
     'A file with a genuine exception (the Bible DOM halo, a drawn illustration) states it with ' +

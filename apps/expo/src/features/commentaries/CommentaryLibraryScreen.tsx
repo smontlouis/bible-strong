@@ -149,7 +149,7 @@ const CommentaryLibraryScreen = () => {
   }
 
   return (
-    <FormSheetScreen isFormSheet={false}>
+    <FormSheetScreen className="bg-canvas" isFormSheet={false}>
       <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
         <FiltersHeader
           title={t('Commentaires')}

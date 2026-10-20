@@ -169,7 +169,7 @@ const CommentaryResourceTabScreen = ({
 
   if (!parsed) {
     return (
-      <FormSheetScreen isFormSheet={false}>
+      <FormSheetScreen className="bg-canvas" isFormSheet={false}>
         <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
           <Header title={t('Commentaires')} />
           <ResourceUnavailableView
@@ -201,7 +201,7 @@ const CommentaryResourceTabScreen = ({
     ? `${bookLabel} ${chapter}:${formatRange(section.rangeStartVerse, section.rangeEndVerse)}`
     : undefined
   return (
-    <FormSheetScreen isFormSheet={false}>
+    <FormSheetScreen className="bg-canvas" isFormSheet={false}>
       <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
         <Header
           title={entry.author}
