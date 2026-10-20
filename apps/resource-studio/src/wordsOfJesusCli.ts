@@ -261,7 +261,9 @@ async function verifySources(args: Args, options: WordsOfJesusSourceOptions) {
         sourceVersion: text.sourceLocation,
         sourceSha256: text.sourceSha256,
         bible: text.legacyBible,
-        ...(pericope ? { pericope: pericope.pericope } : {}),
+        ...(pericope
+          ? { pericope: pericope.pericope, pericopeRepairs: pericope.repairs }
+          : {}),
         ...(redWords ? { redWords: redWords.redWords } : {})
       }).textRevision;
     }

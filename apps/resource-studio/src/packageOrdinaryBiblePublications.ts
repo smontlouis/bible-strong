@@ -27,6 +27,7 @@ import {
   buildBibleResourcePublication,
   type BibleResourcePublicationManifest
 } from "./packageResourcePublication.js";
+import { liftCanonicalHeadingNotes } from "./canonicalHeadingNotes.js";
 import { verifyCanonicalBiblePublication } from "./strongBibleMobilePublication.js";
 import type { CanonicalBiblePublication } from "./strongBibleMobilePublication.js";
 import { applyWordsOfJesus } from "./wordsOfJesus.js";
@@ -271,6 +272,8 @@ export async function buildOrdinaryBiblePublications(options: {
         const appliesPericope =
           pericope !== undefined &&
           (!text.canonicalSource || text.publication.headingCount === 0);
+        if (pericope?.repairs.length && !appliesPericope)
+          throw new Error(`legacy-pericope-repairs-not-applied:${resourceId}`);
         if (pericope && appliesPericope) {
           provenanceSources.push({
             role: "pericope",
@@ -280,15 +283,27 @@ export async function buildOrdinaryBiblePublications(options: {
         }
         canonical = text.canonicalSource
           ? appliesPericope
-            ? applyLegacyPericope(text.publication, pericope!.pericope)
+            ? applyLegacyPericope(
+                text.publication,
+                pericope!.pericope,
+                pericope!.repairs
+              )
             : text.publication
           : buildCanonicalBibleFromLegacy({
               versionId: metadata.id,
               sourceVersion: textSourceUrl,
               sourceSha256: text.sourceSha256,
               bible: text.legacyBible,
-              ...(pericope ? { pericope: pericope.pericope } : {})
+              ...(pericope
+                ? {
+                    pericope: pericope.pericope,
+                    pericopeRepairs: pericope.repairs
+                  }
+                : {})
             });
+        const withHeadingNotes = canonical;
+        canonical = liftCanonicalHeadingNotes(canonical);
+        const liftsHeadingNotes = canonical !== withHeadingNotes;
         if (wordsOfJesus) {
           canonical = applyWordsOfJesus(canonical, wordsOfJesus).publication;
           const datasetPath = wordsOfJesusDatasetPath(root, metadata.id);
@@ -302,7 +317,8 @@ export async function buildOrdinaryBiblePublications(options: {
         // Bibles never had side files.
         if (
           deliversSourceAsOfflineCopy({
-            gainsPresentation: Boolean(wordsOfJesus) || appliesPericope,
+            gainsPresentation:
+              Boolean(wordsOfJesus) || appliesPericope || liftsHeadingNotes,
             sourceIsDeliverable: text.sourceIsDeliverable,
             sourceSha256: text.sourceSha256,
             deliveredContentSha256:

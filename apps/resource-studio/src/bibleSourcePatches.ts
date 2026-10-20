@@ -359,6 +359,68 @@ export function parseProviderChapterHtml(html: string): Record<string, string> {
   return verses;
 }
 
+/** A run of a provider heading: its own text, or one of its notes. */
+export type ProviderHeadingSegment =
+  | { kind: "text"; text: string }
+  | {
+      kind: "note";
+      /** What the reader sees in place of the note (`#`). */
+      label: string;
+      /** The reference the note names (`38.21 `), when it names one. */
+      anchor: string;
+      /** The note's own parts, in order, as the provider classes them. */
+      parts: Array<{ className: string; text: string }>;
+    };
+
+/**
+ * Headings of one provider chapter that carry notes, each as the runs of text
+ * and notes it is read in. The historical pericope files flattened such a
+ * heading into one string, its notes inline behind their label; these runs
+ * say where each note starts and ends.
+ */
+export function parseProviderChapterHeadingNotes(
+  html: string
+): ProviderHeadingSegment[][] {
+  const segmentsOf = (element: HtmlElement): ProviderHeadingSegment[] =>
+    element.children.flatMap((child): ProviderHeadingSegment[] => {
+      if (typeof child === "string") return [{ kind: "text", text: child }];
+      if (!hasClass(child, "note")) return segmentsOf(child);
+      const elements = child.children.filter(
+        (part): part is HtmlElement => typeof part !== "string"
+      );
+      const label = elements.find((part) => hasClass(part, "label"));
+      const body = elements.find((part) => hasClass(part, "body"));
+      const parts = (body?.children ?? []).map((part) =>
+        typeof part === "string"
+          ? { className: "", text: part }
+          : { className: part.classes[0] ?? "", text: textOf(part, false) }
+      );
+      return [
+        {
+          kind: "note",
+          label: label ? textOf(label, false) : "",
+          anchor: parts
+            .filter((part) => part.className === "fr")
+            .map((part) => part.text)
+            .join(""),
+          parts: parts.filter((part) => part.className !== "fr")
+        }
+      ];
+    });
+  return descendants(parseHtml(html))
+    .filter(
+      (element) =>
+        element.tag === "div" &&
+        !closest(element, (ancestor) => hasClass(ancestor, "note")) &&
+        !descendants(element).some((child) => child.tag === "div") &&
+        descendants(element, { skipNotes: true }).some((child) =>
+          hasClass(child, "heading")
+        )
+    )
+    .map(segmentsOf)
+    .filter((segments) => segments.some((segment) => segment.kind === "note"));
+}
+
 const collapseVerseText = (text: string) =>
   text
     .replace(/\u00a0/g, " ")

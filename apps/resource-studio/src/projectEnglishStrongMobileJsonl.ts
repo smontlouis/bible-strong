@@ -406,9 +406,7 @@ export function projectSwordOsisMarkup(
       const strongCodes = [
         ...new Set(
           sourceCodes.map((value) =>
-            eStrongCodes.includes(value)
-              ? value.replace(/[a-z]+$/u, "")
-              : value
+            eStrongCodes.includes(value) ? value.replace(/[a-z]+$/u, "") : value
           )
         )
       ];
@@ -416,9 +414,7 @@ export function projectSwordOsisMarkup(
       if (emitted) {
         strongOccurrenceCount += 1;
         text += `<w strong="${strongCodes.join(" ")}"${
-          eStrongCodes.length > 0
-            ? ` estrong="${eStrongCodes.join(" ")}"`
-            : ""
+          eStrongCodes.length > 0 ? ` estrong="${eStrongCodes.join(" ")}"` : ""
         }>`;
         if (tag.type === "self") text += "</w>";
       }
@@ -550,6 +546,77 @@ function restoreSeparatorsBeforeExcludedMarkup(markup: string): {
     }
   }
   return { markup: output, restoredSeparatorCount };
+}
+
+/**
+ * Lifts the notes out of the markup of a canonical heading, whose text would
+ * otherwise read them inline (`…Sheminith.Sheminith is probably…`). The
+ * heading keeps its title alone, with a separator restored where a note sat
+ * between two words; each note comes back in the markup verse notes use.
+ * Returns `undefined` when the heading has no note.
+ */
+export function liftHeadingNotes(
+  markup: string
+): { text: string; markup: string; notes: string[] } | undefined {
+  const tokens = markup.match(/<[^>]*>|[^<]+/gu) ?? [];
+  const noteDepthAt: number[] = [];
+  let depth = 0;
+  for (const token of tokens) {
+    const tag = token.startsWith("<") ? parseTag(token) : null;
+    if (token.startsWith("<") && !tag)
+      throw new Error(`heading-note-invalid-tag:${token}`);
+    if (tag?.name === "note" && tag.type === "open") depth += 1;
+    noteDepthAt.push(depth);
+    if (tag?.name === "note" && tag.type === "close") depth -= 1;
+    if (depth < 0) throw new Error("heading-note-unbalanced");
+  }
+  if (depth !== 0) throw new Error("heading-note-unbalanced");
+  if (!noteDepthAt.some((value) => value > 0)) return undefined;
+
+  const visibleAt = tokens.map(
+    (token, index) => !token.startsWith("<") && noteDepthAt[index] === 0
+  );
+  const nextVisibleCharacter = new Array<string>(tokens.length + 1).fill("");
+  for (let index = tokens.length - 1; index >= 0; index -= 1) {
+    nextVisibleCharacter[index] = visibleAt[index]
+      ? decodeTextEntities(tokens[index]!).charAt(0)
+      : nextVisibleCharacter[index + 1]!;
+  }
+
+  let text = "";
+  let output = "";
+  let note = "";
+  const notes: string[] = [];
+  for (const [index, token] of tokens.entries()) {
+    if (noteDepthAt[index] === 0) {
+      output += token;
+      if (visibleAt[index]) text += decodeTextEntities(token);
+      continue;
+    }
+    const tag = token.startsWith("<") ? parseTag(token)! : null;
+    const opensNote =
+      tag?.name === "note" && tag.type === "open" && noteDepthAt[index] === 1;
+    if (opensNote) {
+      if (
+        needsSeparatorAcrossExcludedMarkup(
+          text.slice(-2),
+          nextVisibleCharacter[index + 1]!
+        )
+      ) {
+        text += " ";
+        output += " ";
+      }
+      note = token;
+      continue;
+    }
+    if (tag?.name === "note") {
+      note += token;
+      if (tag.type === "close" && noteDepthAt[index] === 1) notes.push(note);
+      continue;
+    }
+    note += tag ? projectNoteTag(tag) : token;
+  }
+  return { text, markup: output, notes };
 }
 
 function needsSeparatorAcrossExcludedMarkup(

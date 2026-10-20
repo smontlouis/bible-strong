@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 
-import { buildCanonicalBibleFromLegacy } from "../src/legacyBiblePublication.js";
+import {
+  buildCanonicalBibleFromLegacy,
+  hashHeadingText
+} from "../src/legacyBiblePublication.js";
 import {
   getOrdinaryBibleCanon,
   parseOrdinaryBiblePublicationArgs
@@ -48,6 +51,131 @@ describe("ordinary Bible publication", () => {
       ]
     });
     assert.equal(verifyCanonicalBiblePublication(publication).verseCount, 1);
+  });
+
+  it("applies a reviewed heading repair and tags its references", () => {
+    const scope = "Ch. 1 to 15:21. (Ge 15:13, 14. Ps 105:23-39; 106:7-12.)";
+    const repair = {
+      op: "retype" as const,
+      ref: "2-1-1",
+      level: "h2" as const,
+      expect: hashHeadingText(scope),
+      kind: "parallel" as const,
+      type: "scope",
+      references: [
+        { text: "Ge 15:13, 14", osisRef: "Gen.15.13-Gen.15.14" },
+        { text: "Ps 105:23-39", osisRef: "Ps.105.23-Ps.105.39" },
+        { text: "106:7-12", osisRef: "Ps.106.7-Ps.106.12" }
+      ],
+      evidence: "fixture"
+    };
+    const build = (pericopeRepairs: (typeof repair)[]) =>
+      buildCanonicalBibleFromLegacy({
+        versionId: "TEST",
+        sourceVersion: "fixture",
+        sourceSha256: "a".repeat(64),
+        bible: { 2: { 1: { 1: "Text" } } },
+        pericope: {
+          2: { 1: { 1: { h1: "Major", h2: scope, h3: "Section" } } }
+        },
+        pericopeRepairs
+      });
+
+    const headings = build([repair]).verses["2"]?.["1"]?.["1"]?.headings;
+    assert.deepEqual(headings?.[1], {
+      offset: 0,
+      order: 1,
+      kind: "parallel",
+      type: "scope",
+      text: scope,
+      markup:
+        '<h2>Ch. 1 to 15:21. (<reference osisRef="Gen.15.13-Gen.15.14">Ge 15:13, 14</reference>. ' +
+        '<reference osisRef="Ps.105.23-Ps.105.39">Ps 105:23-39</reference>; ' +
+        '<reference osisRef="Ps.106.7-Ps.106.12">106:7-12</reference>.)</h2>'
+    });
+    assert.equal(headings?.[0]?.kind, "pericope");
+    assert.equal(headings?.[2]?.kind, "pericope");
+
+    assert.throws(
+      () => build([{ ...repair, expect: "0".repeat(16) }]),
+      /legacy-pericope-repair-anchor-mismatch:2-1-1:h2/u
+    );
+    assert.throws(
+      () => build([{ ...repair, level: "h4" }]),
+      /legacy-pericope-repair-unused:2-1-1:h4/u
+    );
+    assert.throws(
+      () =>
+        build([
+          {
+            ...repair,
+            references: [{ text: "Ex 1:1", osisRef: "Exod.1.1" }]
+          }
+        ]),
+      /legacy-pericope-repair-reference-missing:Ex 1:1/u
+    );
+  });
+
+  it("lifts the notes a heading was flattened with into notes of their verses", () => {
+    // Title, a note naming verse 3, the rest of the title, then a note holding two.
+    const heading =
+      "Who sang#3.3 Heb spoke. to the Lord, at last \u00a0?#tn First.sn Second.";
+    const firstNote = heading.indexOf("#3.3");
+    const secondNote = heading.indexOf("#tn");
+    const build = (remove: Array<[number, number]>) =>
+      buildCanonicalBibleFromLegacy({
+        versionId: "TEST",
+        sourceVersion: "fixture",
+        sourceSha256: "a".repeat(64),
+        bible: { 19: { 3: { 1: "First", 2: "Second", 3: "Third" } } },
+        pericope: { 19: { 3: { 1: { h3: heading } } } },
+        redWords: { "19-3-1": [{ start: 0, end: 0 }] },
+        pericopeRepairs: [
+          {
+            op: "notes",
+            ref: "19-3-1",
+            level: "h3",
+            expect: hashHeadingText(heading),
+            remove,
+            notes: [
+              { at: [firstNote + 5, firstNote + 15], verse: "3" },
+              { at: [secondNote + 4, secondNote + 10], verse: "1" },
+              { at: [secondNote + 13, heading.length], verse: "1" }
+            ],
+            provider: { url: "fixture", sha256: "b".repeat(64) },
+            evidence: "fixture"
+          }
+        ]
+      });
+
+    const publication = build([
+      [firstNote, firstNote + 15],
+      [secondNote, heading.length]
+    ]);
+    const verses = publication.verses["19"]!["3"]!;
+    assert.deepEqual(verses["1"]!.headings[0], {
+      offset: 0,
+      order: 0,
+      kind: "pericope",
+      type: "section",
+      text: "Who sang to the Lord, at last\u00a0?",
+      markup: "<h3>Who sang to the Lord, at last\u00a0?</h3>"
+    });
+    // After the words of Jesus opening there, before the first word.
+    assert.deepEqual(verses["1"]!.notes, [
+      { offset: 0, order: 1, kind: "note", markup: "<note>First.</note>" },
+      { offset: 0, order: 2, kind: "note", markup: "<note>Second.</note>" }
+    ]);
+    assert.deepEqual(verses["3"]!.notes, [
+      { offset: 0, order: 0, kind: "note", markup: "<note>Heb spoke.</note>" }
+    ]);
+    assert.equal(publication.noteCount, 3);
+    assert.equal(verifyCanonicalBiblePublication(publication).verseCount, 3);
+
+    assert.throws(
+      () => build([[secondNote, heading.length]]),
+      /legacy-pericope-repair-span-invalid:19-3-1:h3/u
+    );
   });
 
   it("publishes a block of combined verses under its first verse number", () => {

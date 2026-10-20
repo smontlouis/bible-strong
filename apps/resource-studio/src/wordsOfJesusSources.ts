@@ -16,7 +16,9 @@ import {
 } from "./bibleSourceRepairs.js";
 import {
   buildCanonicalBibleFromLegacy,
-  legacyBibleHasOnlyPlainVerseKeys
+  legacyBibleHasOnlyPlainVerseKeys,
+  type LegacyPericopeRepair,
+  type LegacyPericopeRepairSet
 } from "./legacyBiblePublication.js";
 import { downloadR2Object, isR2Location } from "./r2ArtifactSources.js";
 import type { CanonicalBiblePublication } from "./strongBibleMobilePublication.js";
@@ -224,15 +226,47 @@ export async function loadBibleText(
   };
 }
 
-/** Historical pericopes of a Bible, when its sources declare them. */
+export const LEGACY_PERICOPE_REPAIRS_PATH =
+  "config/ordinary-bible-pericope-repairs.json";
+
+export async function readLegacyPericopeRepairs(root: string): Promise<{
+  schemaVersion: 1;
+  bibles: Record<string, LegacyPericopeRepairSet>;
+}> {
+  const repairs = JSON.parse(
+    await readFile(path.join(root, LEGACY_PERICOPE_REPAIRS_PATH), "utf8")
+  ) as { schemaVersion: 1; bibles: Record<string, LegacyPericopeRepairSet> };
+  if (repairs.schemaVersion !== 1 || !repairs.bibles)
+    throw new Error("legacy-pericope-repairs-invalid");
+  return repairs;
+}
+
+/**
+ * Historical pericopes of a Bible, when its sources declare them, with the
+ * reviewed repairs of their headings. Fails when the pericopes are not the
+ * ones the repairs were reviewed against.
+ */
 export async function loadBiblePericope(
   versionId: string,
   options: WordsOfJesusSourceOptions
 ): Promise<
-  { location: string; sha256: string; pericope: unknown } | undefined
+  | {
+      location: string;
+      sha256: string;
+      pericope: unknown;
+      repairs: LegacyPericopeRepair[];
+    }
+  | undefined
 > {
   const { pericope } = await bibleSources(versionId, options.root);
-  if (!pericope) return undefined;
+  const repairSet = (await readLegacyPericopeRepairs(options.root)).bibles[
+    versionId
+  ];
+  if (!pericope) {
+    if (repairSet)
+      throw new Error(`legacy-pericope-repairs-without-pericope:${versionId}`);
+    return undefined;
+  }
   const filePath = await fetchCached(
     options.root,
     pericope.sourceUrl,
@@ -240,10 +274,14 @@ export async function loadBiblePericope(
   );
   if (!filePath) throw new Error(`bible-source-missing:${pericope.sourceUrl}`);
   const raw = await readSourceEntry(filePath, pericope.entry);
+  const pericopeSha256 = sha256(raw);
+  if (repairSet && repairSet.pericopeSha256 !== pericopeSha256)
+    throw new Error(`legacy-pericope-repairs-source-mismatch:${versionId}`);
   return {
     location: pericope.sourceUrl,
-    sha256: sha256(raw),
-    pericope: JSON.parse(raw)
+    sha256: pericopeSha256,
+    pericope: JSON.parse(raw),
+    repairs: repairSet?.repairs ?? []
   };
 }
 

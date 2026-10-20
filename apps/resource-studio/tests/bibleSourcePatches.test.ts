@@ -12,6 +12,7 @@ import {
   editionProviderFile,
   parseLevigilantChapter,
   parseOsisChapter,
+  parseProviderChapterHeadingNotes,
   parseProviderChapterHtml,
   patchedSourceLocation,
   publishedTextSourceUrl,
@@ -690,5 +691,27 @@ describe("Bible source patches", () => {
           assert.match(key, /^\d+$/u);
       }
     }
+  });
+});
+
+describe("provider headings with notes", () => {
+  it("reads a heading as runs of text and notes, the note anchor apart", () => {
+    const html =
+      '<div class="chapter ch38"><div class="s1"><span class="bd"><span class="heading">Les comptes</span></span>' +
+      '<span class="note f"><span class="label">#</span><span class=" body"><span class="fr"><span class="heading">38.21 </span></span>' +
+      '<span class="ft"><span class="heading">En h&#233;breu.</span></span></span></span></div>' +
+      '<div class="s1"><span class="heading">Sans note</span></div>' +
+      '<div class="p"><span class="verse v1"><span class="content">Texte</span></span></div></div>';
+    assert.deepEqual(parseProviderChapterHeadingNotes(html), [
+      [
+        { kind: "text", text: "Les comptes" },
+        {
+          kind: "note",
+          label: "#",
+          anchor: "38.21 ",
+          parts: [{ className: "ft", text: "En hébreu." }]
+        }
+      ]
+    ]);
   });
 });

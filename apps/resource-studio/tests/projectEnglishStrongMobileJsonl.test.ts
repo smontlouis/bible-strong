@@ -4,7 +4,9 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { test } from "node:test";
 
+import { liftCanonicalHeadingNotes } from "../src/canonicalHeadingNotes.js";
 import {
+  liftHeadingNotes,
   projectEnglishStrongMobileJsonl,
   projectSwordOsisMarkup
 } from "../src/projectEnglishStrongMobileJsonl.js";
@@ -416,4 +418,66 @@ test("projects chapter-prelude section titles and drops chapter labels", async (
       [1, "parallel", " (Revelation 3:14–22) "]
     ]
   );
+});
+
+test("a psalm superscription keeps its title and gives its notes to verse 1", () => {
+  assert.equal(liftHeadingNotes("<title>A Psalm</title>"), undefined);
+  // CrossWire Darby glues the words around its note.
+  assert.deepEqual(
+    liftHeadingNotes(
+      '<title type="psalm">the man of<note placement="foot"><reference type="annotateRef">90.0 </reference>Elohim</note>God.</title>'
+    ),
+    {
+      text: "the man of God.",
+      markup: '<title type="psalm">the man of God.</title>',
+      notes: [
+        '<note placement="foot"><ref type="annotateRef" data-osis-tag="reference">90.0 </ref>Elohim</note>'
+      ]
+    }
+  );
+
+  const publication = {
+    applicationVersionId: "TEST",
+    textRevision: "test-old",
+    textSha256: "old",
+    noteCount: 1,
+    verses: {
+      "19": {
+        "6": {
+          "1": {
+            text: "O LORD",
+            startTags: [],
+            layout: [{ offset: 0, order: 0, type: "open", tag: "l" }],
+            notes: [
+              { offset: 2, order: 1, kind: "note", markup: "<note>a</note>" }
+            ],
+            headings: [
+              {
+                offset: 0,
+                order: 0,
+                kind: "heading",
+                type: "psalm",
+                text: "According to Sheminith.Sheminith is a term. A Psalm.",
+                markup:
+                  '<title type="psalm">According to Sheminith.<note placement="foot"><hi type="italic">Sheminith</hi> is a term.</note> A Psalm.</title>'
+              }
+            ]
+          }
+        }
+      }
+    }
+  } as unknown as Parameters<typeof liftCanonicalHeadingNotes>[0];
+  const lifted = liftCanonicalHeadingNotes(publication);
+  const verse = lifted.verses["19"]!["6"]!["1"]!;
+  assert.equal(verse.headings[0]!.text, "According to Sheminith. A Psalm.");
+  assert.deepEqual(verse.notes.at(-1), {
+    offset: 0,
+    order: 1,
+    kind: "note",
+    markup:
+      '<note placement="foot"><i type="italic" data-osis-tag="hi">Sheminith</i> is a term.</note>'
+  });
+  assert.equal(lifted.noteCount, 2);
+  assert.notEqual(lifted.textRevision, publication.textRevision);
+  assert.equal(liftCanonicalHeadingNotes(lifted), lifted);
 });

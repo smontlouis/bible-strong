@@ -134,7 +134,7 @@ async function requestOnce(options: {
  * Reads one provider answer from the cache, or requests it once from the
  * public chapter endpoint.
  */
-async function providerAnswer(options: {
+export async function providerAnswer(options: {
   cacheDir: string;
   versionId: number;
   reference: string;
