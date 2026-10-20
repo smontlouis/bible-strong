@@ -32,6 +32,7 @@ const ExploreLayout = () => {
         <Stack.Screen name="pericope" />
         <Stack.Screen name="passage-media-player" />
         <Stack.Screen name="passage-resources" />
+        <Stack.Screen name="plan-entity" />
       </Stack>
     </ModalRouteFrame>
   )

@@ -53,8 +53,13 @@ sélectionné, chacun avec une case lu / non lu et un chevron :
 - un **texte**, une **image** ou une **vidéo** ouvre sa propre page (`/plan-entity`) ;
 - un **titre** sert d'intertitre dans la liste.
 
+Les pages d'un élément et le lecteur Bible vivent dans la même pile, celle de la feuille
+Explore (`app/(explore)/`) : sur iOS, les éléments d'un jour s'ouvrent tous dans la même
+feuille ; sur le Web large, dans le panneau de droite.
+
 Chaque élément se termine par « Voir la suite », qui ouvre l'élément suivant du jour à sa
-place : revenir en arrière ramène toujours à la page du plan. Dans le lecteur Bible, la
+place, dans la même feuille, quel que soit son type : revenir en arrière ramène toujours à
+la page du plan. Dans le lecteur Bible, la
 carte attend le dernier chapitre du passage. Le dernier élément propose « Terminer la
 journée », qui marque le jour comme lu et revient au plan, où il est fêté.
 

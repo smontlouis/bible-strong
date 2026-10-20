@@ -9,13 +9,14 @@ import { PLAN_READING_HORIZONTAL_PADDING, READING_TEXT_MAX_WIDTH } from '~common
 import { type SheetRef } from '~common/sheet'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
-import Container from '~common/ui/Container'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import ScrollView from '~common/ui/ScrollView'
 import { useReadingContent } from '~features/daily-reading/useDailyMeditation'
 import { editorialContext } from '~features/study-assistant/editorialContext'
 import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import { goBackOrHome } from '~navigation/goBackOrHome'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { getEntitySliceTitle } from './entitySliceTitle'
 import { useComputedPlan } from './plan.hooks'
 import { getEntitySliceKey } from './planProgress'
@@ -24,8 +25,15 @@ import Slice from './PlanSliceScreen/Slice'
 import PlanDayStepCard from './PlanDayStepCard'
 import { usePlanDayStep } from './usePlanDayStep'
 
-/** The page of one text, image or video of a plan day. Passages open the Bible reader instead. */
-const PlanEntityScreen = () => {
+type PlanEntityScreenProps = {
+  isFormSheet?: boolean
+}
+
+/**
+ * The page of one text, image or video of a plan day. Passages open the Bible reader instead.
+ * It shares the reader's sheet, so « Voir la suite » moves between them in place.
+ */
+const PlanEntityScreen = ({ isFormSheet = false }: PlanEntityScreenProps) => {
   const {
     planId = '',
     readingSliceId = '',
@@ -45,11 +53,18 @@ const PlanEntityScreen = () => {
   useAssistantResourceContext('panel', editorialContext(plan, reading))
   const dayStep = usePlanDayStep(slice ? { planId, readingSliceId, entitySliceId } : undefined)
   const goBack = () => goBackOrHome(router)
+  const canGoBackInStack = useCanGoBackInStack()
+  // In the sheet, an element opened from the plan is closed by the sheet itself.
+  const hasBackButton = isFormSheet ? canGoBackInStack : true
 
   if (!plan || !slice) {
     return (
-      <Container>
-        <Header hasBackButton title={t('readingPlans.tab')} onCustomBackPress={goBack} />
+      <FormSheetScreen isFormSheet={isFormSheet}>
+        <Header
+          hasBackButton={hasBackButton}
+          title={t('readingPlans.tab')}
+          onCustomBackPress={goBack}
+        />
         {isError || plan ? (
           <>
             <Empty message={t('dailyReading.unavailableReading')} />
@@ -68,14 +83,14 @@ const PlanEntityScreen = () => {
         ) : (
           <Loading />
         )}
-      </Container>
+      </FormSheetScreen>
     )
   }
 
   return (
-    <Container>
+    <FormSheetScreen isFormSheet={isFormSheet}>
       <Header
-        hasBackButton
+        hasBackButton={hasBackButton}
         title={getEntitySliceTitle(slice, t)}
         onCustomBackPress={goBack}
         rightComponent={
@@ -107,7 +122,7 @@ const PlanEntityScreen = () => {
         )}
       </ScrollView>
       <ParamsModal paramsModalRef={paramsModalRef} />
-    </Container>
+    </FormSheetScreen>
   )
 }
 
