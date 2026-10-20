@@ -119,7 +119,11 @@ import {
   type StudyRelationsModalTarget,
 } from './BibleDOM/BibleDOMWrapper'
 import BibleParamsModal from './BibleParamsModal'
-import { loadBibleReadingParallelVerses, loadBibleReadingRedWords } from './bibleReadingChapter'
+import {
+  getDisplayedParallelVerses,
+  loadBibleReadingParallelVerses,
+  loadBibleReadingRedWords,
+} from './bibleReadingChapter'
 import { getParallelColumnTextModes } from '~helpers/bibleColumnTextModes'
 import BibleTextModeSheets, { type BibleTextModeSheetsHandle } from './BibleTextModeSheets'
 import { getColumnTextModeControls } from './columnTextModeControls'
@@ -134,7 +138,7 @@ import {
 import { useAnnotationMode, type AnnotationType } from './hooks'
 import { useParallelPericopes } from './hooks/useParallelPericopes'
 import { useParallelRedWords } from './hooks/useParallelRedWords'
-import { useStableList } from '~helpers/useStableList'
+import { useStableList, useStableValue } from '~helpers/useStableList'
 import ResourcesModal from '~features/bible/resources/ResourceModal'
 import {
   getSelectedVerseKeys,
@@ -449,7 +453,8 @@ const BibleViewer = ({
   const contextualInformationDisplay = isContextualInformationDisplayEnabled(
     settings.contextualInformationDisplay
   )
-  const { data: parallelVerses = [] } = useQuery({
+  // The parallel versions load once the main one is shown, so that it shows as soon as it can
+  const parallelReadingQuery = useQuery({
     queryKey: resourceQueryKeys.bibleParallel({
       book: book.Numero,
       chapter,
@@ -468,8 +473,37 @@ const BibleViewer = ({
       ),
     enabled: extrasEnabled,
     staleTime: Infinity,
+    // While the main version still shows the previous chapter, so do its parallel versions
+    placeholderData: keepPreviousData,
     ...localQueryOptions,
   })
+  // The reader is parallel from its first frame: columns not loaded for this chapter wait
+  // in placeholders. Everything else only works on the columns that hold this chapter.
+  const nextDisplayedParallelVerses = getDisplayedParallelVerses({
+    columns: parallelColumns,
+    loadedVerses: parallelReadingQuery.data,
+    isLoadedForChapter:
+      !parallelReadingQuery.isPlaceholderData && !mainReadingQuery.isPlaceholderData,
+    mainVerses: verses,
+  })
+  // The same lists while the same columns hold the same data: they are not sent to the reader again
+  const displayedParallelVersesKey = JSON.stringify([
+    parallelReadingQuery.dataUpdatedAt,
+    parallelReadingQuery.isPlaceholderData,
+    nextDisplayedParallelVerses.map(parallel => [
+      parallel.id,
+      parallel.interlinearMode,
+      Boolean(parallel.isLoading),
+    ]),
+  ])
+  const displayedParallelVerses = useStableValue(
+    nextDisplayedParallelVerses,
+    displayedParallelVersesKey
+  )
+  const parallelVerses = useStableValue(
+    nextDisplayedParallelVerses.filter(parallel => !parallel.isLoading),
+    displayedParallelVersesKey
+  )
   const redWordsAvailabilityQuery = useQuery({
     queryKey: [
       ...resourceQueryKeys.bibleRedWords(version),
@@ -701,7 +735,7 @@ const BibleViewer = ({
   // Every version on screen, the main one first: personal data is read for all of them.
   const displayedVersions = useStableList([
     displayedVersion,
-    ...parallelVerses.map(parallel => parallel.id),
+    ...displayedParallelVerses.map(parallel => parallel.id),
   ])
   const passageMedia = contextualInformationDisplay
     ? getPassageMediaForChapter({
@@ -1375,7 +1409,7 @@ const BibleViewer = ({
     contextDisplayMode,
     isSelectionMode: viewerPersonalData.isSelectionMode,
     verses,
-    parallelVerses,
+    parallelVerses: displayedParallelVerses,
     parallelColumnWidth,
     parallelDisplayMode,
     columnTextModeControls: parallelVersions.length

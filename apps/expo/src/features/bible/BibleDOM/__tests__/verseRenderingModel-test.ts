@@ -211,6 +211,23 @@ describe('verseRenderingModel', () => {
     })
   })
 
+  it('marks the cells of a version still loading instead of calling its verses missing', () => {
+    const rows = getParallelChapterRows(
+      chapter([1, 2], 'NKJV'),
+      [{ id: 'NET', verses: [], isLoading: true }],
+      'NKJV'
+    )
+
+    expect(rows.map(row => row.verse.Verset)).toEqual([1, 2])
+    expect(rows[1].rows[1]).toEqual({
+      version: 'NET',
+      verse: { Livre: 44, Chapitre: 8, Verset: 2, Texte: '' },
+      error: undefined,
+      interlinearMode: undefined,
+      isLoading: true,
+    })
+  })
+
   it('keeps a row for a verse the primary version omits', () => {
     const rows = getParallelChapterRows(
       chapter([36, 38, 39, 40], 'ESV'),

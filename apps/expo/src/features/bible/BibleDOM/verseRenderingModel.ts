@@ -124,6 +124,8 @@ export type ParallelVerseRow = {
   interlinearMode?: InterlinearMode
   // The version has no such verse (e.g. Acts 8:37 in the ESV)
   isMissing?: boolean
+  // The version's chapter is still loading
+  isLoading?: boolean
 }
 
 export type ParallelChapterRow = {
@@ -204,14 +206,14 @@ export const getParallelChapterRows = (
       },
     ]
 
-    parallelVerses.forEach(({ id, error, interlinearMode }, index) => {
+    parallelVerses.forEach(({ id, error, interlinearMode, isLoading }, index) => {
       const parallelVerse = parallelVersesByNumber[index].get(key)
       rows.push({
         version: id,
         verse: parallelVerse || createMissingVerse(anchor),
         error,
         ...getParallelVerseModeProps({ version: id, interlinearMode }),
-        ...(parallelVerse || error ? {} : { isMissing: true }),
+        ...(isLoading ? { isLoading: true } : parallelVerse || error ? {} : { isMissing: true }),
       })
     })
 

@@ -243,8 +243,9 @@ const ParallelVerseRow = ({
   const hasMarkers = hasVerseMarkers(verseContent)
   const hasEndContent = hasVerseEndContent(verseContent) || Boolean(commentaryChips?.length)
 
+  // A column still loading shows none until its text is there
   const holdsPersonalData = (cell: ParallelVerseCell) =>
-    !interlinearReadingVersions.includes(cell.version)
+    !cell.isLoading && !interlinearReadingVersions.includes(cell.version)
 
   const getCellPericope = (cell: ParallelVerseCell) =>
     getPericopeVerse(pericopeByVersion[cell.version], verseNumber)
@@ -299,6 +300,7 @@ const ParallelVerseRow = ({
           verse={cell.verse}
           version={cell.version}
           column={index}
+          loadingPlaceholderText={cell.isLoading ? verse.Texte : undefined}
           interlinearMode={cell.interlinearMode}
           settings={settings}
           isSelected={selectedVersion === cell.version}

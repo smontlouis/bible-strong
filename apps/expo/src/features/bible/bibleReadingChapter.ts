@@ -87,6 +87,14 @@ export const loadBibleReadingMain = async (
   }
 }
 
+// Interlinear-capable versions always carry a mode: hidden unless the column turned it on
+const getParallelColumnInterlinearMode = (
+  column: Pick<BibleColumnTextModes, 'version' | 'interlinearMode'>
+) =>
+  isInterlinearCapableBibleVersion(column.version)
+    ? (column.interlinearMode ?? 'hidden')
+    : undefined
+
 export const loadBibleReadingParallelVerses = async (
   { book, chapter, parallelColumns, defaultInterlinearLocale }: BibleReadingParallelRequest,
   resourceAccess: ResourceAccessRegistry = defaultResourceAccess
@@ -98,9 +106,7 @@ export const loadBibleReadingParallelVerses = async (
     chapter,
     version: column.version as VersionCode,
     strongMode: resolveStrongBibleVersion(column.version, column.strongMode).strongMode,
-    interlinearMode: isInterlinearCapableBibleVersion(column.version)
-      ? (column.interlinearMode ?? 'hidden')
-      : undefined,
+    interlinearMode: getParallelColumnInterlinearMode(column),
     interlinearLocale: column.interlinearLocale ?? defaultInterlinearLocale,
     interlinearLocaleAutomatic: !column.interlinearLocale,
   }))
@@ -126,6 +132,46 @@ export const loadBibleReadingParallelVerses = async (
     }
   })
 }
+
+type BibleChapterLocation = Pick<ParallelVerse['verses'][number], 'Livre' | 'Chapitre'>
+
+const isSameChapter = (a: BibleChapterLocation, b: BibleChapterLocation) =>
+  Number(a.Livre) === Number(b.Livre) && Number(a.Chapitre) === Number(b.Chapitre)
+
+/**
+ * The parallel columns the reader shows, from the tab's settings rather than from what has
+ * loaded: the reader is parallel from its first frame. A column whose verses are not those of
+ * the chapter shown (still loading, or left from the previous chapter) is marked loading, so
+ * two chapters are never shown side by side.
+ */
+export const getDisplayedParallelVerses = ({
+  columns,
+  loadedVerses,
+  isLoadedForChapter,
+  mainVerses,
+}: {
+  columns: readonly Pick<BibleColumnTextModes, 'version' | 'interlinearMode'>[]
+  loadedVerses: readonly ParallelVerse[] | undefined
+  // The loaded columns were fetched for the chapter the main version shows
+  isLoadedForChapter: boolean
+  mainVerses: readonly BibleChapterLocation[]
+}): ParallelVerse[] =>
+  columns.map((column, index) => {
+    const loaded = loadedVerses?.[index]
+    const mainVerse = mainVerses[0]
+    const loadedVerse = loaded?.verses[0]
+    const showsMainChapter =
+      mainVerse && loadedVerse ? isSameChapter(mainVerse, loadedVerse) : isLoadedForChapter
+
+    if (loaded?.id === column.version && showsMainChapter) return loaded
+
+    return {
+      id: column.version as VersionCode,
+      verses: [],
+      interlinearMode: getParallelColumnInterlinearMode(column),
+      isLoading: true,
+    }
+  })
 
 export const loadBibleReadingRedWords = async (
   {

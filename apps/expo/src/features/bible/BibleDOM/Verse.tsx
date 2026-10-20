@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { styled } from 'goober'
+import { keyframes, styled } from 'goober'
 
 import {
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
@@ -147,6 +147,26 @@ const Wrapper = styled('span')<
 // Stands in for the text of a verse a version omits in parallel display
 const MissingVerseText = styled('span')<RootStyles>(({ settings: { theme, colors } }) => ({
   color: colors[theme].grey,
+}))
+
+const loadingPulse = keyframes`
+  from { opacity: 1; }
+  to { opacity: 0.5; }
+`
+
+// A version still loading: the text of the main version, invisible, gives its lines their shape
+const LoadingVerseText = styled('span')<RootStyles>(({ settings: { theme, colors } }) => ({
+  color: 'transparent',
+  backgroundColor: colors[theme].border,
+  borderRadius: '4px',
+  boxDecorationBreak: 'clone',
+  WebkitBoxDecorationBreak: 'clone',
+  userSelect: 'none',
+  WebkitUserSelect: 'none',
+  animation: `${loadingPulse} 0.9s ease-in-out infinite alternate`,
+  '@media (prefers-reduced-motion: reduce)': {
+    animation: 'none',
+  },
 }))
 
 const DARK_THEMES = new Set(['dark', 'black', 'mauve', 'night'])
@@ -593,6 +613,8 @@ interface Props {
   settings: RootState['user']['bible']['settings']
   // Empty row of a version that omits this verse in parallel display
   isMissingVerse?: boolean
+  // Parallel display: the version's chapter is still loading, the cell shows this text's shape
+  loadingPlaceholderText?: string
   // One version of a parallel row: the row carries the verse anchor and the verse-level content
   isParallelCell?: boolean
   // Vertical parallel display: the verse group header shows the number
@@ -648,6 +670,7 @@ const Verse = ({
   isSelectedMode,
   isFocused,
   isMissingVerse = false,
+  loadingPlaceholderText,
   isParallelCell = false,
   hideNumber = false,
   tag,
@@ -798,6 +821,10 @@ const Verse = ({
                 selectedCode={selectedCode}
                 mode={interlinearMode}
               />
+            ) : loadingPlaceholderText !== undefined ? (
+              <LoadingVerseText settings={settings} aria-hidden>
+                {loadingPlaceholderText || '—'}
+              </LoadingVerseText>
             ) : isMissingVerse ? (
               <MissingVerseText settings={settings}>—</MissingVerseText>
             ) : (

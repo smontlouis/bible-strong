@@ -1,4 +1,5 @@
 import {
+  getDisplayedParallelVerses,
   loadBibleReadingMain,
   loadBibleReadingParallelVerses,
   loadBibleReadingRedWords,
@@ -275,5 +276,101 @@ describe('canonical V4 Bible chapter extras', () => {
 
     expect(resources.bibleContent.loadChapters).toHaveBeenCalledTimes(1)
     expect(resources.bibleContent.loadChapter).not.toHaveBeenCalled()
+  })
+})
+
+describe('parallel columns shown by the reader', () => {
+  const verses = (Chapitre: number, prefix: string) => [
+    { Livre: 45, Chapitre, Verset: 1, Texte: `${prefix} ${Chapitre}:1` },
+    { Livre: 45, Chapitre, Verset: 2, Texte: `${prefix} ${Chapitre}:2` },
+  ]
+  const columns = [{ version: 'NET' }, { version: 'KJV' }]
+  const loading = (id: string) => ({ id, verses: [], interlinearMode: undefined, isLoading: true })
+
+  it('shows every column of the tab before any has loaded', () => {
+    expect(
+      getDisplayedParallelVerses({
+        columns,
+        loadedVerses: undefined,
+        isLoadedForChapter: false,
+        mainVerses: verses(2, 'NKJV'),
+      })
+    ).toEqual([loading('NET'), loading('KJV')])
+  })
+
+  it('shows the columns loaded for the chapter of the main version', () => {
+    const loadedVerses = [
+      { id: 'NET' as const, verses: verses(2, 'NET') },
+      { id: 'KJV' as const, verses: verses(2, 'KJV') },
+    ]
+
+    expect(
+      getDisplayedParallelVerses({
+        columns,
+        loadedVerses,
+        isLoadedForChapter: true,
+        mainVerses: verses(2, 'NKJV'),
+      })
+    ).toEqual(loadedVerses)
+  })
+
+  it('keeps the previous chapter in columns while the main version still shows it', () => {
+    const loadedVerses = [{ id: 'NET' as const, verses: verses(1, 'NET') }]
+
+    expect(
+      getDisplayedParallelVerses({
+        columns: [{ version: 'NET' }],
+        loadedVerses,
+        isLoadedForChapter: false,
+        mainVerses: verses(1, 'NKJV'),
+      })
+    ).toEqual(loadedVerses)
+  })
+
+  it('never shows a column of another chapter next to the main version', () => {
+    expect(
+      getDisplayedParallelVerses({
+        columns: [{ version: 'NET' }],
+        loadedVerses: [{ id: 'NET', verses: verses(1, 'NET') }],
+        isLoadedForChapter: false,
+        mainVerses: verses(2, 'NKJV'),
+      })
+    ).toEqual([loading('NET')])
+  })
+
+  it('waits for a column whose version changed', () => {
+    expect(
+      getDisplayedParallelVerses({
+        columns: [{ version: 'KJV' }],
+        loadedVerses: [{ id: 'NET', verses: verses(2, 'NET') }],
+        isLoadedForChapter: true,
+        mainVerses: verses(2, 'NKJV'),
+      })
+    ).toEqual([loading('KJV')])
+  })
+
+  it('shows a column that failed only once it failed for this chapter', () => {
+    const failed = {
+      id: 'NET' as const,
+      verses: [],
+      error: { type: 'UNKNOWN_ERROR' as const, version: 'NET', book: 45, chapter: 2, message: '' },
+    }
+
+    expect(
+      getDisplayedParallelVerses({
+        columns: [{ version: 'NET' }],
+        loadedVerses: [failed],
+        isLoadedForChapter: true,
+        mainVerses: verses(2, 'NKJV'),
+      })
+    ).toEqual([failed])
+    expect(
+      getDisplayedParallelVerses({
+        columns: [{ version: 'NET' }],
+        loadedVerses: [failed],
+        isLoadedForChapter: false,
+        mainVerses: verses(2, 'NKJV'),
+      })
+    ).toEqual([loading('NET')])
   })
 })

@@ -169,6 +169,8 @@ export type ParallelVerse = {
   verses: Verse[]
   error?: BibleError
   interlinearMode?: InterlinearMode
+  // Not loaded yet for the chapter shown: the column holds a placeholder
+  isLoading?: boolean
 }
 
 /** A Strong or interlinear button of a parallel column title. */
@@ -207,15 +209,17 @@ const books = booksJson as Record<string, string[]>
 /**
  * Prevents rapid empty→loaded prop updates on the Expo DOM bridge.
  * Skips updates when loading with no verses, so the DOM component
- * only receives the real data once it's ready.
+ * only receives the real data once it's ready. The parallel versions travel
+ * with the verses they sit next to: the reader never pairs a chapter with
+ * the columns of another.
  */
-function useStabilizedVerses(verses: Verse[], isLoading: boolean) {
-  const [stable, setStable] = useState<Verse[]>(verses)
+function useStabilizedVerses(verses: Verse[], parallelVerses: ParallelVerse[], isLoading: boolean) {
+  const [stable, setStable] = useState({ verses, parallelVerses })
 
   useEffect(() => {
     if (isLoading && verses.length === 0) return
-    setStable(verses)
-  }, [verses, isLoading])
+    setStable({ verses, parallelVerses })
+  }, [verses, parallelVerses, isLoading])
 
   return stable
 }
@@ -542,7 +546,11 @@ export const BibleDOMWrapper = ({
         }
       : undefined
 
-  const stableVerses = useStabilizedVerses(verses, isLoading)
+  const { verses: stableVerses, parallelVerses: stableParallelVerses } = useStabilizedVerses(
+    verses,
+    parallelVerses,
+    isLoading
+  )
 
   useEffect(
     () => () => {
@@ -1244,7 +1252,7 @@ export const BibleDOMWrapper = ({
           },
         }}
         verses={versesToSend}
-        parallelVerses={parallelVerses}
+        parallelVerses={stableParallelVerses}
         parallelColumnWidth={parallelColumnWidth}
         parallelDisplayMode={parallelDisplayMode}
         columnTextModeControls={columnTextModeControls}
