@@ -181,6 +181,8 @@ export default {
   'strong.transliteration': 'Transliteration',
   'bible.readChapter': 'Read all of {chapter}',
   'bible.chapterNav': 'Previous and next chapters',
+  'bible.chapter': 'Chapter',
+  'bible.psalm': 'Psalm',
   'strong.concordance.all': 'See every occurrence',
   'strong.concordance.title': 'Concordance',
   'strong.concordance.back': 'Back to the definition',

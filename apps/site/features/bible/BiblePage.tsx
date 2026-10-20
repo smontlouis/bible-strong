@@ -23,6 +23,50 @@ const ALTERNATE_VERSION = { fr: 'KJV', en: 'LSG' } as const
 // A layout effect has nothing to do while the page is rendered on the server.
 const useBrowserLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect
 
+const PSALMS = 19
+const EYEBROW = 'resource-muted block text-sm font-medium uppercase tracking-[0.14em]'
+
+/**
+ * Opens a chapter as the app does: the book's name on its first chapter, the chapter number
+ * on the others. The heading still reads as the full reference.
+ */
+const ChapterOpening = ({
+  bookName,
+  chapter,
+  numberLabel,
+  isPsalm,
+  hasOneChapter,
+  versionName,
+}: {
+  bookName: string
+  chapter: number
+  numberLabel: string
+  isPsalm: boolean
+  hasOneChapter: boolean
+  versionName: string
+}) => (
+  <header className="select-none text-center">
+    {chapter === 1 ? (
+      <h1 className="font-serif text-4xl font-normal leading-tight md:text-5xl">
+        {bookName}
+        <span className="mx-auto mt-5 block h-0.5 w-7 rounded-full bg-[var(--resource-accent)]" />
+        {hasOneChapter ? (
+          <span className="sr-only"> 1</span>
+        ) : (
+          <span className={`${EYEBROW} mt-3 font-sans`}> {numberLabel} 1</span>
+        )}
+      </h1>
+    ) : (
+      <h1 className="font-normal">
+        <span className={EYEBROW}>{isPsalm ? numberLabel : bookName}</span>{' '}
+        <span className="mt-1 block font-serif text-6xl leading-none md:text-7xl">{chapter}</span>
+        <span className="mx-auto mt-5 block h-0.5 w-7 rounded-full bg-[var(--resource-accent)]" />
+      </h1>
+    )}
+    <p className="resource-muted mt-4 text-sm">{versionName}</p>
+  </header>
+)
+
 /**
  * One aligned unit. A direct interlinear stacks the original word, its transliteration and
  * its gloss; a reverse interlinear stacks the translation and the original words behind it.
@@ -66,6 +110,7 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
   const articleRef = useRef<HTMLElement>(null)
   const { versionId, presentation, language, book, chapter, passage, gloss } = page
   const version = findBibleVersion(versionId)
+  const versionName = version ? bibleVersionName(version, language) : versionId
   const bookName = bibleBookName(book, language)
   const location = { versionId, presentation, book, chapter, gloss }
   // The commentaries shown in the text follow the reader along the links of the page.
@@ -121,15 +166,27 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
       subHeader={<BibleNavBar page={page} onCommentariesChange={rememberPlace} />}
     >
       <article ref={articleRef}>
-        <header>
-          <p className="resource-muted text-sm font-medium uppercase tracking-[0.14em]">
-            {version ? bibleVersionName(version, language) : versionId}
-          </p>
-          <h1 className="mt-3 font-serif text-4xl leading-tight md:text-5xl">
-            {bookName} {chapter}
-            {passageLabel}
-          </h1>
-        </header>
+        {passage ? (
+          <header>
+            <p className="resource-muted text-sm font-medium uppercase tracking-[0.14em]">
+              {versionName}
+            </p>
+            <h1 className="mt-3 font-serif text-4xl leading-tight md:text-5xl">
+              {bookName} {chapter}
+              {passageLabel}
+            </h1>
+          </header>
+        ) : (
+          <ChapterOpening
+            bookName={bookName}
+            chapter={chapter}
+            numberLabel={book === PSALMS ? t('bible.psalm') : t('bible.chapter')}
+            isPsalm={book === PSALMS}
+            // A book of one chapter goes straight on to the next book
+            hasOneChapter={chapter === 1 && page.next?.book !== book}
+            versionName={versionName}
+          />
+        )}
 
         {page.html !== undefined ? (
           <div
