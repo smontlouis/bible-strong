@@ -604,6 +604,8 @@ interface Props {
   relationCount?: number
   relationItems?: VerseRelationItem[]
   version: string
+  // Parallel reading: the column the version is shown in, since a version can be shown twice
+  column?: number
   interlinearMode?: InterlinearMode
   isHebreu: boolean
   selectedCode: SelectedCode | null
@@ -639,6 +641,7 @@ const Verse = ({
   relationItems,
   isSelectionMode,
   version,
+  column,
   interlinearMode,
   isHebreu,
   selectedCode,
@@ -775,6 +778,7 @@ const Verse = ({
             data-verse-text
             data-version={version}
             data-verse-key={verseKey}
+            data-column={column}
           >
             {verse.ReverseInterlinearSpans?.length ? (
               <ReverseInterlinearVerse

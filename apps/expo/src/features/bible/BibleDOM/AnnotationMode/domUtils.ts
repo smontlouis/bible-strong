@@ -336,37 +336,6 @@ function toGlobalCharOffset(textNode: Text, localOffset: number): number {
 }
 
 /**
- * A verse as the reader shows it: parallel reading shows the same verse key in several versions.
- */
-export interface VerseTarget {
-  verseKey: string
-  version: string
-}
-
-/** One string per verse of one version, for state that tracks a single touched or tapped verse. */
-export const createVerseCellKey = ({ verseKey, version }: VerseTarget) => `${version}:${verseKey}`
-
-const getVerseTextSelector = (version: string, verseKey: string) =>
-  `[data-verse-text][data-version="${version}"][data-verse-key="${verseKey}"]`
-
-/** The text element of one verse in one version. */
-export function findVerseTextElement(version: string, verseKey: string): Element | null {
-  return document.querySelector(getVerseTextSelector(version, verseKey))
-}
-
-/** Every text element of one verse in one version: parallel reading can show a version twice. */
-export function findVerseTextElements(version: string, verseKey: string): Element[] {
-  return Array.from(document.querySelectorAll(getVerseTextSelector(version, verseKey)))
-}
-
-/** The verse and version a verse text element shows. */
-export function getVerseTarget(verseContainer: Element | null): VerseTarget | null {
-  const verseKey = verseContainer?.getAttribute('data-verse-key')
-  const version = verseContainer?.getAttribute('data-version')
-  return verseKey && version ? { verseKey, version } : null
-}
-
-/**
  * Walks up the DOM tree to find the verse container element (with data-verse-key attribute).
  */
 export function findVerseContainer(element: Element | null): Element | null {

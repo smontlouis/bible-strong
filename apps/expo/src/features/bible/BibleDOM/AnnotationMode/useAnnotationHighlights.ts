@@ -14,7 +14,7 @@ import {
   createAnnotationTextRanges,
 } from './annotationDomText'
 import { subscribeToBibleLayoutChanges } from '../annotationLayoutLifecycle'
-import { findVerseTextElement, findVerseTextElements } from './domUtils'
+import { findVerseTextElement, findVerseTextElements } from './verseTargets'
 
 /**
  * Merges all DOMRects on the same line into single rectangles.
@@ -83,6 +83,8 @@ interface UseAnnotationHighlightsProps {
  */
 interface CalculateRectsParams {
   version: string
+  // Parallel reading: only the verse shown in this column, when a version is shown twice
+  column?: number
   verseKey: string
   startWordIndex: number
   endWordIndex: number
@@ -96,13 +98,14 @@ interface CalculateRectsParams {
  */
 function calculateRectsForWordRange({
   version,
+  column,
   verseKey,
   startWordIndex,
   endWordIndex,
   containerRect,
   tokens,
 }: CalculateRectsParams): Array<{ top: number; left: number; width: number; height: number }> {
-  return findVerseTextElements(version, verseKey).flatMap(verseEl =>
+  return findVerseTextElements(version, verseKey, column).flatMap(verseEl =>
     calculateRectsInVerseElement(verseEl, startWordIndex, endWordIndex, containerRect, tokens)
   )
 }
@@ -159,7 +162,7 @@ function getRectsForSelection(
   verses: TVerse[],
   getTokens: (verseKey: string, text: string) => WordToken[]
 ): HighlightRect[] {
-  const { version } = range
+  const { version, column } = range
   const rects: HighlightRect[] = []
   const containerRect = containerRef.current?.getBoundingClientRect()
   if (!containerRect) return rects
@@ -187,6 +190,7 @@ function getRectsForSelection(
 
     const verseRects = calculateRectsForWordRange({
       version,
+      column,
       verseKey,
       startWordIndex: startWordIdx,
       endWordIndex: endWordIdx,
@@ -196,7 +200,7 @@ function getRectsForSelection(
 
     verseRects.forEach((rect, rectIdx) => {
       rects.push({
-        id: `selection-${version}-${verseKey}-${rectIdx}`,
+        id: `selection-${version}-${column ?? ''}-${verseKey}-${rectIdx}`,
         top: rect.top,
         left: rect.left,
         width: rect.width,

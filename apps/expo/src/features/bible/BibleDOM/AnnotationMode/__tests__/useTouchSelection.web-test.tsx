@@ -8,19 +8,13 @@ import type { WordToken } from '~helpers/wordTokenizer'
 import type { SelectionRange } from '../selectionUtils'
 import { useTouchSelection, type TouchSelectionCallbacks } from '../useTouchSelection'
 
-// Two parallel columns: LSG under x < 100, KJV beyond. Each column starts a word at 0 and 6.
+// Two parallel columns: the first under x < 100, the second beyond. Each column starts a word
+// at 0 and 6.
 jest.mock('../domUtils', () => ({
-  createVerseCellKey: ({ verseKey, version }: { verseKey: string; version: string }) =>
-    `${version}:${verseKey}`,
-  getVerseTarget: (element: Element | null) => {
-    const verseKey = element?.getAttribute('data-verse-key')
-    const version = element?.getAttribute('data-version')
-    return verseKey && version ? { verseKey, version } : null
-  },
   findVerseContainer: (element: Element | null) => element?.closest('[data-verse-key]') ?? null,
   getCaretInfoFromPoint: (x: number) => ({
     charOffset: x % 100 < 50 ? 0 : 6,
-    targetElement: globalThis.document.querySelector(`[data-version="${x < 100 ? 'LSG' : 'KJV'}"]`),
+    targetElement: globalThis.document.querySelectorAll('[data-verse-text]')[x < 100 ? 0 : 1],
   }),
   isIgnoredVerseTouchTarget: () => false,
 }))
@@ -47,10 +41,13 @@ const Harness = ({
   annotationMode,
   callbacks,
   onSelectionChange,
+  sameVersionColumns = false,
 }: {
   annotationMode: boolean
   callbacks: TouchSelectionCallbacks
   onSelectionChange?: (selection: SelectionRange | null) => void
+  // LSG shown in both parallel columns instead of LSG and KJV
+  sameVersionColumns?: boolean
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const [selection, setSelectionState] = useState<SelectionRange | null>(null)
@@ -72,6 +69,19 @@ const Harness = ({
     annotationMode,
     callbacks,
   })
+
+  if (sameVersionColumns) {
+    return (
+      <div ref={containerRef}>
+        <span data-verse-text data-version="LSG" data-verse-key="1-1-1" data-column="0">
+          Au commencement
+        </span>
+        <span data-verse-text data-version="LSG" data-verse-key="1-1-1" data-column="1">
+          Au commencement
+        </span>
+      </div>
+    )
+  }
 
   return (
     <div ref={containerRef}>
@@ -238,6 +248,77 @@ describe('Web mouse gestures for Bible annotations', () => {
       start: { verseKey: '1-1-1', wordIndex: 0 },
       end: { verseKey: '1-1-1', wordIndex: 1 },
       version: 'LSG',
+    })
+  })
+
+  it('keeps a selection in the column it started in when another column shows the same version', () => {
+    const onSelectionChange = jest.fn()
+    act(() => {
+      root.render(
+        <Harness
+          annotationMode
+          callbacks={{}}
+          onSelectionChange={onSelectionChange}
+          sameVersionColumns
+        />
+      )
+    })
+    const target = host.querySelector('[data-column="0"]')!
+
+    act(() => {
+      target.dispatchEvent(
+        new MouseEvent('mousedown', { bubbles: true, button: 0, clientX: 10, clientY: 10 })
+      )
+      window.dispatchEvent(
+        new MouseEvent('mousemove', { bubbles: true, buttons: 1, clientX: 70, clientY: 10 })
+      )
+      window.dispatchEvent(
+        new MouseEvent('mousemove', { bubbles: true, buttons: 1, clientX: 110, clientY: 10 })
+      )
+      window.dispatchEvent(
+        new MouseEvent('mouseup', { bubbles: true, button: 0, clientX: 110, clientY: 10 })
+      )
+    })
+
+    expect(onSelectionChange).toHaveBeenLastCalledWith({
+      start: { verseKey: '1-1-1', wordIndex: 0 },
+      end: { verseKey: '1-1-1', wordIndex: 1 },
+      version: 'LSG',
+      column: 0,
+    })
+  })
+
+  it('starts a selection in the column it is dragged from', () => {
+    const onSelectionChange = jest.fn()
+    act(() => {
+      root.render(
+        <Harness
+          annotationMode
+          callbacks={{}}
+          onSelectionChange={onSelectionChange}
+          sameVersionColumns
+        />
+      )
+    })
+    const target = host.querySelector('[data-column="1"]')!
+
+    act(() => {
+      target.dispatchEvent(
+        new MouseEvent('mousedown', { bubbles: true, button: 0, clientX: 110, clientY: 10 })
+      )
+      window.dispatchEvent(
+        new MouseEvent('mousemove', { bubbles: true, buttons: 1, clientX: 170, clientY: 10 })
+      )
+      window.dispatchEvent(
+        new MouseEvent('mouseup', { bubbles: true, button: 0, clientX: 170, clientY: 10 })
+      )
+    })
+
+    expect(onSelectionChange).toHaveBeenLastCalledWith({
+      start: { verseKey: '1-1-1', wordIndex: 0 },
+      end: { verseKey: '1-1-1', wordIndex: 1 },
+      version: 'LSG',
+      column: 1,
     })
   })
 

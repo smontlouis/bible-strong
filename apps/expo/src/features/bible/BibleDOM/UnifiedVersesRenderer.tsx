@@ -29,7 +29,7 @@ import {
   getVersesWithWordAnnotations,
   shouldRenderVerseInFocusedContext,
 } from './verseRenderingModel'
-import type { VerseTarget } from './AnnotationMode/domUtils'
+import type { VerseTarget } from './AnnotationMode/verseTargets'
 import type { ResolvedPassageMediaChapter } from '../passageMedia'
 import type { PassageMediaGallerySection } from './passageMediaGallery'
 
@@ -205,8 +205,8 @@ export function UnifiedVersesRenderer({
         const relationCount = relationItemsCount[Verset]
         const relationItems = relationItemsText[Verset]
         const otherVersionAnnotations = wordAnnotationsInOtherVersions?.[verseKey]
-        const touchedVersion = touchedVerse?.verseKey === verseKey ? touchedVerse.version : null
-        const isTouched = touchedVersion === version
+        const touchedCell = touchedVerse?.verseKey === verseKey ? touchedVerse : null
+        const isTouched = touchedCell?.version === version
         const selectedVersion = selectedVerses[verseKey] ? selectedVersesVersion : null
 
         // Parallel reading, reading and annotation alike: every version of the verse.
@@ -262,7 +262,7 @@ export function UnifiedVersesRenderer({
                 annotationMode={Boolean(annotationMode)}
                 isSelectedMode={!annotationMode && hasSelectedVerses}
                 selectedVersion={annotationMode ? null : selectedVersion}
-                touchedVersion={touchedVersion}
+                touchedCell={touchedCell}
                 highlightedColor={
                   highlight?.color as
                     | keyof RootStyles['settings']['colors'][keyof RootStyles['settings']['colors']]

@@ -3,14 +3,13 @@ import { Verse as TVerse } from '~common/types'
 import { WordToken, getWordIndexFromCharOffset } from '~helpers/wordTokenizer'
 import { SelectionRange, WordPosition } from './selectionUtils'
 import { HighlightRect } from './HighlightComponents'
+import { findVerseContainer, getCaretInfoFromPoint, isIgnoredVerseTouchTarget } from './domUtils'
 import {
   createVerseCellKey,
-  findVerseContainer,
-  getCaretInfoFromPoint,
   getVerseTarget,
-  isIgnoredVerseTouchTarget,
+  isSameVerseColumn,
   type VerseTarget,
-} from './domUtils'
+} from './verseTargets'
 import { getDOMScrollTarget, scrollDOMBy } from '../domScroll'
 
 // Drag selection constants
@@ -34,8 +33,8 @@ interface VelocitySample {
   x: number
 }
 
-/** A word under the finger, in the version it is shown in. */
-type WordTarget = WordPosition & { version: string }
+/** A word under the finger, in the version and parallel column it is shown in. */
+type WordTarget = WordPosition & Pick<VerseTarget, 'version' | 'column'>
 
 interface TouchState {
   startPos: { x: number; y: number }
@@ -125,10 +124,14 @@ interface Position {
   y: number
 }
 
-const createSelection = ({ version, ...start }: WordTarget, end: WordPosition): SelectionRange => ({
-  start,
+const toVerseTarget = ({ verseKey, version, column }: WordTarget): VerseTarget =>
+  column === undefined ? { verseKey, version } : { verseKey, version, column }
+
+const createSelection = (start: WordTarget, end: WordPosition): SelectionRange => ({
+  start: { verseKey: start.verseKey, wordIndex: start.wordIndex },
   end: { verseKey: end.verseKey, wordIndex: end.wordIndex },
-  version,
+  version: start.version,
+  ...(start.column === undefined ? {} : { column: start.column }),
 })
 
 export function useTouchSelection({
@@ -183,7 +186,7 @@ export function useTouchSelection({
     versesByVersion,
   ])
 
-  // Get word position at a given screen coordinate, in the version shown there
+  // Get word position at a given screen coordinate, in the version and column shown there
   const getWordAtPoint = (clientX: number, clientY: number): WordTarget | null => {
     const caretInfo = getCaretInfoFromPoint(clientX, clientY)
     if (!caretInfo) return null
@@ -202,7 +205,7 @@ export function useTouchSelection({
 
     if (wordIndex === null) return null
 
-    return { verseKey, wordIndex, version }
+    return { ...verseTarget, wordIndex }
   }
 
   // Get the verse at a given screen coordinate (without word index)
@@ -255,17 +258,18 @@ export function useTouchSelection({
     autoScrollRef.current = requestAnimationFrame(scroll)
   }
 
-  // Update selection during drag. A selection never leaves the version it started in:
-  // words of another column are ignored.
-  const updateSelectionDuringDrag = ({ version, ...wordPos }: WordTarget) => {
+  // Update selection during drag. A selection never leaves the column it started in:
+  // words of another column are ignored, even when it shows the same version.
+  const updateSelectionDuringDrag = (word: WordTarget) => {
     const touchState = touchStateRef.current
+    const wordPos = { verseKey: word.verseKey, wordIndex: word.wordIndex }
 
     setSelectionRef.current(prev => {
       if (!prev) {
-        if (!touchState.startWord || touchState.startWord.version !== version) return null
+        if (!touchState.startWord || !isSameVerseColumn(touchState.startWord, word)) return null
         return createSelection(touchState.startWord, wordPos)
       }
-      if (prev.version !== version) return prev
+      if (!isSameVerseColumn(prev, word)) return prev
 
       if (touchState.dragHandle === 'start') {
         return { ...prev, start: wordPos }
@@ -347,7 +351,7 @@ export function useTouchSelection({
       const wordPos = getWordAtPoint(touch.clientX, touch.clientY)
       touchState.startWord = wordPos
       touchState.startVerse = wordPos
-        ? { verseKey: wordPos.verseKey, version: wordPos.version }
+        ? toVerseTarget(wordPos)
         : getVerseAtPoint(touch.clientX, touch.clientY)
 
       if (touchState.startVerse) {
@@ -582,7 +586,7 @@ export function useTouchSelection({
       const wordPos = getWordAtPoint(e.clientX, e.clientY)
       touchState.startWord = wordPos
       touchState.startVerse = wordPos
-        ? { verseKey: wordPos.verseKey, version: wordPos.version }
+        ? toVerseTarget(wordPos)
         : getVerseAtPoint(e.clientX, e.clientY)
 
       if (!touchState.startVerse) return
@@ -648,10 +652,7 @@ export function useTouchSelection({
       if (
         touchState.startWord &&
         (annotationModeRef.current ||
-          callbacksRef.current.onMouseSelectionStart?.({
-            verseKey: touchState.startWord.verseKey,
-            version: touchState.startWord.version,
-          }))
+          callbacksRef.current.onMouseSelectionStart?.(toVerseTarget(touchState.startWord)))
       ) {
         touchState.isDragging = true
         suppressMouseClickUntil = Date.now() + 700
@@ -659,7 +660,8 @@ export function useTouchSelection({
         callbacksRef.current.onDragStart?.()
         const startWord = touchState.startWord
         const pointedWord = getWordAtPoint(e.clientX, e.clientY)
-        const currentWord = pointedWord?.version === startWord.version ? pointedWord : startWord
+        const currentWord =
+          pointedWord && isSameVerseColumn(pointedWord, startWord) ? pointedWord : startWord
         setSelectionRef.current(() => createSelection(startWord, currentWord))
         return
       }

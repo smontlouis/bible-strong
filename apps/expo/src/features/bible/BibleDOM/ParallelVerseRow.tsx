@@ -7,6 +7,7 @@ import type { SelectedCode, StudyNavigateBibleType, Verse as TVerse } from '~com
 import type { BibleError } from '~helpers/bibleErrors'
 import type { ParallelDisplayMode } from 'src/state/tabs'
 import type { ColumnTextModeControls, PericopeChapter, RootStyles } from './BibleDOMWrapper'
+import type { VerseTarget } from './AnnotationMode/verseTargets'
 import InlineCommentaryChips, { type LabeledCommentaryChip } from './InlineCommentaryChips'
 import { PericopeHeaders, getPericopeVerse, hasPericopeHeadings } from './PericopeHeaders'
 import { NAVIGATE_TO_VERSION, OPEN_COLUMN_TEXT_MODE } from './dispatch'
@@ -185,8 +186,8 @@ export interface ParallelVerseRowProps {
   isSelectedMode: boolean
   // The version this verse is selected in, if it is
   selectedVersion: string | null
-  // The version of this verse under the reader's finger, if any
-  touchedVersion: string | null
+  // This verse under the reader's finger, in the version and column touched, if any
+  touchedCell: VerseTarget | null
   highlightedColor?: HighlightColor
   isVerseToScroll: boolean
   isFocused?: boolean
@@ -221,7 +222,7 @@ const ParallelVerseRow = ({
   annotationMode,
   isSelectedMode,
   selectedVersion,
-  touchedVersion,
+  touchedCell,
   highlightedColor,
   isVerseToScroll,
   isFocused,
@@ -297,6 +298,7 @@ const ParallelVerseRow = ({
           isHebreu={isHebreu}
           verse={cell.verse}
           version={cell.version}
+          column={index}
           interlinearMode={cell.interlinearMode}
           settings={settings}
           isSelected={selectedVersion === cell.version}
@@ -311,7 +313,10 @@ const ParallelVerseRow = ({
           isFocused={isFocused}
           fadePosition={fadePosition}
           tag={undefined}
-          isTouched={touchedVersion === cell.version}
+          isTouched={
+            touchedCell?.version === cell.version &&
+            (touchedCell.column === undefined || touchedCell.column === index)
+          }
           isMissingVerse={cell.isMissing}
           annotationMode={annotationMode}
           redWords={redWordsByVersion[cell.version]}

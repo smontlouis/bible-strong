@@ -8,7 +8,7 @@ import { HighlightRect } from './HighlightComponents'
 import { SelectionRange } from './selectionUtils'
 import { useTouchSelection } from './useTouchSelection'
 import { useAnnotationEvents } from './useAnnotationEvents'
-import type { VerseTarget } from './domUtils'
+import type { VerseTarget } from './verseTargets'
 
 /** Callbacks for gesture handling passed through to touch selection */
 interface AnnotationModeCallbacks {

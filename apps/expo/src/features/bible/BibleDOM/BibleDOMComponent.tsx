@@ -71,7 +71,8 @@ import { SelectionHandles } from './AnnotationMode/SelectionHandles'
 import { useAnnotationModeController } from './AnnotationMode/useAnnotationModeController'
 import { SelectionRange } from './AnnotationMode/selectionUtils'
 import { tokenizeVerseText, WordToken, getWordIndexFromCharOffset } from '~helpers/wordTokenizer'
-import { getCaretInfoFromPoint, type VerseTarget } from './AnnotationMode/domUtils'
+import { getCaretInfoFromPoint } from './AnnotationMode/domUtils'
+import type { VerseTarget } from './AnnotationMode/verseTargets'
 // Unified verse renderer
 import { UnifiedVersesRenderer } from './UnifiedVersesRenderer'
 import AnnotationInlineItems from './AnnotationInlineItems'
@@ -842,6 +843,14 @@ const LoadedBibleContent = ({
       (versesByVersion[versionId] ?? []).some(verse => Boolean(verse.InterlinearTokens?.length))
     )
 
+  // One word selected in the column of the version it was touched in
+  const createWordSelection = (target: VerseTarget, wordIndex: number): SelectionRange => ({
+    start: { verseKey: target.verseKey, wordIndex },
+    end: { verseKey: target.verseKey, wordIndex },
+    version: target.version,
+    ...(target.column === undefined ? {} : { column: target.column }),
+  })
+
   const handleTapVerseAnnotationMode = (
     target: VerseTarget,
     position: { x: number; y: number }
@@ -894,11 +903,7 @@ const LoadedBibleContent = ({
     const wordIndex = getWordIndexFromCharOffset(tokens, caretInfo.charOffset)
     if (wordIndex === null) return
 
-    setSelection({
-      start: { verseKey: target.verseKey, wordIndex },
-      end: { verseKey: target.verseKey, wordIndex },
-      version: target.version,
-    })
+    setSelection(createWordSelection(target, wordIndex))
   }
 
   // A tapped verse is selected in the version it was tapped in.
@@ -982,11 +987,7 @@ const LoadedBibleContent = ({
     if (caretInfo) {
       const wordIndex = getWordIndexFromCharOffset(tokens, caretInfo.charOffset)
       if (wordIndex !== null) {
-        newSelection = {
-          start: { verseKey: target.verseKey, wordIndex },
-          end: { verseKey: target.verseKey, wordIndex },
-          version: target.version,
-        }
+        newSelection = createWordSelection(target, wordIndex)
       }
     }
 
