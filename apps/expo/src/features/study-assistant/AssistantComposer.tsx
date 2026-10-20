@@ -9,6 +9,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useTheme } from '~themes/ThemeProvider'
 import { assistantAvailable } from './assistantConfig'
+import AssistantComposerInput from './AssistantComposerInput'
 import { useAssistantSheet } from './assistantSheetContext'
 import { contextCaption } from './MessageRenderer'
 
@@ -132,7 +133,7 @@ export default function AssistantComposer() {
       style={{ marginBottom: 0, paddingBottom: keyboardVisible ? 8 : insets.bottom + 4 }}
     >
       <ComposerPrimitive.Root className="border-border bg-reverse rounded-[22px] border px-2 pb-2 pt-1">
-        <ComposerPrimitive.Input
+        <AssistantComposerInput
           multiline
           maxLength={4000}
           placeholder={t('assistant.modal.placeholder')}
