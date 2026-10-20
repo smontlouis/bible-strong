@@ -195,5 +195,12 @@ scripts/google-service-account.json
 # Agent worktrees. EAS Build copies everything the .gitignore files do not exclude.
 /.claude/worktrees/
 
+# Agent screenshots and reports
+/.claude/screenshots/
+/.claude/reports/
+
+# Local Wrangler and Miniflare state in any workspace
+.wrangler/
+
 # Generated video exports
 *.mp4
