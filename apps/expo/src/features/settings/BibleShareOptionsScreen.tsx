@@ -5,7 +5,7 @@ import { Platform, ScrollView } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import Header from '~common/Header'
-import Box, { TouchableBox } from '~common/ui/Box'
+import Box, { TouchableBox, usePageBottomInset } from '~common/ui/Box'
 import Card from '~common/ui/Card'
 import { twMerge } from '~common/ui/classNames'
 import ListSection, { ListSectionTitle } from '~common/ui/ListSection'
@@ -51,6 +51,7 @@ const BibleShareOptionsScreen = ({ inline = false }: { inline?: boolean }) => {
   const theme = useTheme()
   const typography = useReadingTypography()
   const isWeb = Platform.OS === 'web'
+  const bottomInset = usePageBottomInset()
   const { hasVerseNumbers, hasInlineVerses, hasQuotes } = useShareOptions()
   const { data: message = '' } = useQuery({
     placeholderData: keepPreviousData,
@@ -175,7 +176,12 @@ const BibleShareOptionsScreen = ({ inline = false }: { inline?: boolean }) => {
   return (
     <Container className="bg-canvas">
       <Header hasBackButton title={t('bible.settings.shareOptions')} />
-      <ScrollView contentContainerStyle={[pageContentStyle, { paddingTop: 20, paddingBottom: 20 }]}>
+      <ScrollView
+        contentContainerStyle={[
+          pageContentStyle,
+          { paddingTop: 20, paddingBottom: 20 + bottomInset },
+        ]}
+      >
         <ListSection>{rows}</ListSection>
         <Box className="mx-[20px] mb-[22px]">
           <ListSectionTitle>{t('Aperçu')}</ListSectionTitle>

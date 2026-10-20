@@ -63,7 +63,7 @@ const OnBoardingSlides = ({
   } = useLayoutSize()
 
   return (
-    <SafeAreaBox className="overflow-hidden border-continuous">
+    <SafeAreaBox reserveBottom className="overflow-hidden border-continuous">
       <Box
         className="overflow-hidden border-continuous items-center justify-center flex-[1]"
         ref={carouselContainerRef}

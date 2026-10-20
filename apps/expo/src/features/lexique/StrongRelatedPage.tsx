@@ -2,7 +2,7 @@ import { pageContentStyle } from '~common/ui/PageContent'
 import React from 'react'
 import { ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { VStack } from '~common/ui/Box'
+import { VStack, usePageBottomInset } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
 import { StrongEditorialSection, StrongEyebrow, StrongLexicalRelationCard } from './StrongDetailUI'
@@ -16,6 +16,7 @@ type Props = {
 
 const StrongRelatedPage = ({ entry, readingTypography, onOpenStrong }: Props) => {
   const { t } = useTranslation()
+  const bottomInset = usePageBottomInset()
   const { relatedWords } = splitStrongLexicalRelations(entry.relations)
   const groups = [
     { id: 'identity' as const, title: t('strongLexicon.variants') },
@@ -27,7 +28,7 @@ const StrongRelatedPage = ({ entry, readingTypography, onOpenStrong }: Props) =>
       style={{ flex: 1 }}
       contentContainerStyle={[
         pageContentStyle,
-        { maxWidth: 600, paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 },
+        { maxWidth: 600, paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 + bottomInset },
       ]}
     >
       <StrongEyebrow>

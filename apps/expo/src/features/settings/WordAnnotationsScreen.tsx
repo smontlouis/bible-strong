@@ -16,7 +16,7 @@ import ColorFilterModal from '~common/ColorFilterModal'
 import FiltersHeader from '~common/FiltersHeader'
 import type { SheetRef } from '~common/sheet'
 import Border from '~common/ui/Border'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import { ListSectionTitle } from '~common/ui/ListSection'
 import { getAnnotationGroupVerseKey } from '~features/entityListQuery/wordAnnotationsQuery'
@@ -198,6 +198,7 @@ const EmptyText = (
 const WordAnnotationsScreen = () => {
   const { t } = useTranslation()
   const pushRouteOnce = usePushRouteOnce()
+  const bottomInset = usePageBottomInset()
   const [queryState, setQueryState] = useAtom(wordAnnotationsListQueryAtom)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const colorModalRef = useRef<SheetRef>(null)
@@ -426,7 +427,7 @@ const WordAnnotationsScreen = () => {
     if (queryState.view === 'verse') {
       return (
         <FlatList
-          contentContainerStyle={pageContentStyle}
+          contentContainerStyle={[pageContentStyle, { paddingBottom: 16 + bottomInset }]}
           data={groupedByVerse}
           keyExtractor={item => item.verseKey}
           renderItem={({ item }) => (
@@ -444,7 +445,7 @@ const WordAnnotationsScreen = () => {
     if (queryState.view === 'date') {
       return (
         <FlatList
-          contentContainerStyle={pageContentStyle}
+          contentContainerStyle={[pageContentStyle, { paddingBottom: 16 + bottomInset }]}
           data={groupedByDate}
           keyExtractor={item => item.date}
           renderItem={({ item }) => (
@@ -462,7 +463,7 @@ const WordAnnotationsScreen = () => {
     // Flat list
     return (
       <FlatList
-        contentContainerStyle={pageContentStyle}
+        contentContainerStyle={[pageContentStyle, { paddingBottom: 16 + bottomInset }]}
         data={annotationsList}
         keyExtractor={item => item.id}
         renderItem={({ item, index }) => renderAnnotationRow(item, index)}

@@ -8,7 +8,7 @@ import Loading from '~common/Loading'
 import MultipleChoiceFilterModal from '~common/MultipleChoiceFilterModal'
 import SearchFilterModal from '~common/SearchFilterModal'
 import { type SheetRef } from '~common/sheet'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import { twMerge } from '~common/ui/classNames'
 import { ListSeparator } from '~common/ui/ListSection'
 import Container from '~common/ui/Container'
@@ -384,6 +384,7 @@ const DownloadsScreen = () => {
   const lang = useLanguage()
   const resources = useResourceAccess()
   const isConnected = useConnection()
+  const bottomInset = usePageBottomInset()
   const searchRef = React.useRef<SheetRef>(null)
   const statusRef = React.useRef<SheetRef>(null)
   const languageRef = React.useRef<SheetRef>(null)
@@ -822,7 +823,7 @@ const DownloadsScreen = () => {
           sections={displaySections}
           keyExtractor={(item: DisplayDownloadItem) => item.occurrenceKey}
           stickySectionHeadersEnabled={false}
-          contentContainerStyle={{ paddingTop: 16, paddingBottom: 100 }}
+          contentContainerStyle={{ paddingTop: 16, paddingBottom: 100 + bottomInset }}
           ListHeaderComponent={
             <>
               <StorageSummaryCard />

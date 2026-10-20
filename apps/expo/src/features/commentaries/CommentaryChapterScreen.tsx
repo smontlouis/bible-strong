@@ -12,7 +12,7 @@ import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import ScrollView from '~common/ui/ScrollView'
-import Box, { TouchableBox } from '~common/ui/Box'
+import Box, { TouchableBox, usePageBottomInset } from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -110,6 +110,7 @@ const CommentaryChapterScreen = ({
   const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
   const canGoBackInStack = useCanGoBackInStack()
+  const bottomInset = usePageBottomInset()
   const { openBookSelector } = useBookAndVersionSelector()
   const [selectorAtom] = React.useState(() => {
     const initial = getDefaultBibleTab()
@@ -276,7 +277,7 @@ const CommentaryChapterScreen = ({
         />
         <ScrollView
           backgroundColor="canvas"
-          contentContainerStyle={{ maxWidth: 600, padding: 18, paddingBottom: 40 }}
+          contentContainerStyle={{ maxWidth: 600, padding: 18, paddingBottom: 40 + bottomInset }}
         >
           <CommentaryRoomIntro entry={entry} language={projection.language} />
 

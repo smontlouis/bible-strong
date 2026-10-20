@@ -11,6 +11,7 @@ import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme, useTheme } from '~themes/ThemeProvider'
+import { usePageBottomInset } from './Box'
 import { pageContentStyle } from './PageContent'
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -105,7 +106,7 @@ const AppScrollView = ({
   ...props
 }: AppScrollViewProps) => {
   const orientation = useDeviceOrientation()
-  const insets = useSafeAreaInsets()
+  const bottomInset = usePageBottomInset()
 
   return (
     <ScrollView
@@ -115,7 +116,7 @@ const AppScrollView = ({
       contentContainerStyle={{
         ...(!props.horizontal && pageContentStyle),
         paddingTop: 20,
-        paddingBottom: 10 + insets.bottom,
+        paddingBottom: 10 + bottomInset,
         ...StyleSheet.flatten(contentContainerStyle),
       }}
     >

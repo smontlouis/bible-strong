@@ -11,7 +11,7 @@ import Header from '~common/Header'
 import LexiqueIcon from '~common/LexiqueIcon'
 import NaveIcon from '~common/NaveIcon'
 import Container from '~common/ui/Container'
-import Box, { HStack, VStack } from '~common/ui/Box'
+import Box, { HStack, VStack, usePageBottomInset } from '~common/ui/Box'
 import Card from '~common/ui/Card'
 import IconTile, { ICON_TILE_SIZE } from '~common/ui/IconTile'
 import { ListSectionTitle, ListSeparator } from '~common/ui/ListSection'
@@ -236,6 +236,7 @@ const ResourceRow = ({
 const ResourceLanguageScreen = () => {
   const { t, i18n } = useTranslation()
   const dispatch = useDispatch()
+  const bottomInset = usePageBottomInset()
 
   const [resourcesLanguages, setResourcesLanguages] = useAtom(resourcesLanguageAtom)
   const currentAppLang = i18n.language as ResourceLanguage
@@ -268,7 +269,7 @@ const ResourceLanguageScreen = () => {
       <ScrollView
         backgroundColor="canvas"
         style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 40 + bottomInset }}
       >
         {/* Hero App Language Section */}
         <AppLanguageSection

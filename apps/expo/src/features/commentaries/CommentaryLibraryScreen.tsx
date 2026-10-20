@@ -10,10 +10,9 @@ import React from 'react'
 import { Platform, SectionList, TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import FiltersHeader from '~common/FiltersHeader'
 import { type SheetRef } from '~common/sheet'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import { twMerge } from '~common/ui/classNames'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -101,7 +100,7 @@ const CommentaryLibraryItem = ({
 const CommentaryLibraryScreen = () => {
   const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
-  const insets = useSafeAreaInsets()
+  const bottomInset = usePageBottomInset()
   const detailsRef = React.useRef<SheetRef>(null)
   const selectedCommentaries = useSelector(
     (state: RootState) => state.user.bible.settings.commentarySelection
@@ -229,7 +228,7 @@ const CommentaryLibraryScreen = () => {
           keyExtractor={item => createCommentaryProjectionId(item.entry.id, item.language)}
           contentContainerStyle={[
             pageContentStyle,
-            { paddingTop: 16, paddingBottom: insets.bottom + 20 },
+            { paddingTop: 16, paddingBottom: bottomInset + 20 },
           ]}
           renderSectionHeader={({ section }) => (
             <ListSectionTitle className="mx-[24px]">{section.title}</ListSectionTitle>

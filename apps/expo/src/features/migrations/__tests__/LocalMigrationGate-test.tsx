@@ -38,7 +38,13 @@ jest.mock('~common/ui/Box', () => {
   const React = jest.requireActual<typeof import('react')>('react')
   const Component = ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
     React.createElement('Box', props, children)
-  return { __esModule: true, default: Component, HStack: Component, VStack: Component }
+  return {
+    __esModule: true,
+    default: Component,
+    HStack: Component,
+    VStack: Component,
+    usePageBottomInset: () => 0,
+  }
 })
 
 jest.mock('~common/ui/Container', () => {

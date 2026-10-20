@@ -9,7 +9,7 @@ import React, { useRef, useState } from 'react'
 import { ScrollView, type ScrollView as ScrollViewType } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import Loading from '~common/Loading'
-import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
+import Box, { HStack, TouchableBox, VStack, usePageBottomInset } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import ConcordanceVerse from '~features/bible/ConcordanceVerse'
 import ListenToStrong, { hasStrongAudio } from '~features/bible/ListenStrong'
@@ -201,6 +201,7 @@ const StrongDetailMainPage = ({
 
   const { t, i18n } = useTranslation()
   const scrollRef = useRef<ScrollViewType>(null)
+  const bottomInset = usePageBottomInset()
   const [storedLevel, setStoredLevel] = useAtom(strongDefinitionLevelAtom)
   const [contextDisclosure, setContextDisclosure] = useState<{ key: string; expanded: boolean }>()
   const [anchorOffsets, setAnchorOffsets] = useState<Partial<Record<Anchor, number>>>({})
@@ -268,7 +269,11 @@ const StrongDetailMainPage = ({
       ref={scrollRef}
       style={{ flex: 1 }}
       stickyHeaderIndices={[1]}
-      contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 0, paddingBottom: 90 }}
+      contentContainerStyle={{
+        paddingHorizontal: 20,
+        paddingTop: 0,
+        paddingBottom: 90 + bottomInset,
+      }}
     >
       <VStack
         className="border-continuous overflow-hidden mx-[-20px] px-[20px] pt-[28px] pb-[24px] gap-[11px] border-b-[1px] border-border"

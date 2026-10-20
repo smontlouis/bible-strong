@@ -143,7 +143,9 @@ const EditStudyScreen = ({
   }
 
   return (
-    <FormSheetScreen isFormSheet={isFormSheet}>
+    // The editor keeps its own scroll and keyboard handling: the page stays above the home indicator
+    // and the tab bar.
+    <FormSheetScreen isFormSheet={isFormSheet} reserveBottom>
       {studyAtom && <TabTitleUpdater studyAtom={studyAtom} title={currentStudy.title} />}
       <EditStudyHeader
         isReadOnly={isReadOnly}

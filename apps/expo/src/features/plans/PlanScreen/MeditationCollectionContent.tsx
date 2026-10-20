@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next'
 import type { ComputedPlan, ComputedReadingSlice, Plan } from '~common/types'
 import Link from '~common/Link'
 import Border from '~common/ui/Border'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -37,6 +37,7 @@ const MeditationCollectionContent = ({ plan, onReadingSlicePress }: Props) => {
   const today = useLocalReadingDate()
   const cover = useFireStorage(plan.image)
   const scroll = useRef<ScrollView>(null)
+  const bottomInset = usePageBottomInset()
   const columnY = useRef(0)
   const listY = useRef(0)
   const rowY = useRef<Record<string, number>>({})
@@ -96,7 +97,12 @@ const MeditationCollectionContent = ({ plan, onReadingSlicePress }: Props) => {
     <ScrollView
       ref={scroll}
       onLayout={event => setWidth(event.nativeEvent.layout.width)}
-      contentContainerStyle={{ width: '100%', maxWidth: 1180, alignSelf: 'center' }}
+      contentContainerStyle={{
+        width: '100%',
+        maxWidth: 1180,
+        alignSelf: 'center',
+        paddingBottom: bottomInset,
+      }}
     >
       <Box
         className={

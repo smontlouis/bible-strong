@@ -23,6 +23,7 @@ jest.mock('~common/ui/Box', () => ({
   HStack: 'HStack',
   VStack: 'VStack',
   TouchableBox: 'TouchableBox',
+  usePageBottomInset: () => 0,
 }))
 jest.mock('~common/ui/Icon', () => ({ FeatherIcon: 'FeatherIcon' }))
 jest.mock('~common/Loading', () => 'Loading')

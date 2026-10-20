@@ -7,7 +7,7 @@ import Link from '~common/Link'
 import Loading from '~common/Loading'
 import { PLAN_READING_HORIZONTAL_PADDING, READING_TEXT_MAX_WIDTH } from '~common/readingLayout'
 import { type SheetRef } from '~common/sheet'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -42,6 +42,7 @@ const PlanEntityScreen = ({ isFormSheet = false }: PlanEntityScreenProps) => {
   const { t } = useTranslation()
   const router = useRouter()
   const paramsModalRef = React.useRef<SheetRef>(null)
+  const bottomInset = usePageBottomInset()
   const { isError, retry } = useReadingContent(planId)
   const plan = useComputedPlan(planId)
   const reading = plan?.sections
@@ -111,7 +112,7 @@ const PlanEntityScreen = ({ isFormSheet = false }: PlanEntityScreenProps) => {
           alignSelf: 'center',
           maxWidth: READING_TEXT_MAX_WIDTH + PLAN_READING_HORIZONTAL_PADDING * 2,
           paddingTop: 24,
-          paddingBottom: 32,
+          paddingBottom: 32 + bottomInset,
         }}
       >
         <Slice {...slice} planLanguage={plan.lang} />

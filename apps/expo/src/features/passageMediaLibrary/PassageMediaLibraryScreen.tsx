@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { SectionList, useWindowDimensions } from 'react-native'
 import Header from '~common/Header'
-import Box, { SafeAreaBox, VStack } from '~common/ui/Box'
+import Box, { SafeAreaBox, usePageBottomInset, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import {
   getPassageMediaLibrary,
@@ -62,6 +62,7 @@ const PassageMediaLibraryScreen = () => {
   const router = useRouter()
   const language = useLanguage()
   const { width: windowWidth } = useWindowDimensions()
+  const bottomInset = usePageBottomInset()
   const episodes = getHowToReadTheBibleEpisodes(getPassageMediaLibrary({ language }))
   const contentWidth = Math.min(windowWidth, 760)
   const thumbnailWidth = Math.min(176, Math.max(128, (contentWidth - 40) * 0.38))
@@ -89,7 +90,6 @@ const PassageMediaLibraryScreen = () => {
         keyExtractor={item => item.editionId}
         stickySectionHeadersEnabled={false}
         showsVerticalScrollIndicator={false}
-        contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={[
           pageContentStyle,
           {
@@ -98,7 +98,7 @@ const PassageMediaLibraryScreen = () => {
             alignSelf: 'center',
             paddingHorizontal: 20,
             paddingTop: 24,
-            paddingBottom: 48,
+            paddingBottom: 48 + bottomInset,
           },
         ]}
         ListHeaderComponent={

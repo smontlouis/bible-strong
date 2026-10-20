@@ -3,7 +3,7 @@ import React from 'react'
 import { ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import Empty from '~common/Empty'
-import { VStack } from '~common/ui/Box'
+import { VStack, usePageBottomInset } from '~common/ui/Box'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
 import { StrongEditorialHtml, StrongEyebrow } from './StrongDetailUI'
 type Props = {
@@ -14,6 +14,7 @@ type Props = {
 
 const StrongDictionaryPage = ({ entry, onOpenBibleReference, onOpenStrong }: Props) => {
   const { t } = useTranslation()
+  const bottomInset = usePageBottomInset()
   const resource = entry.resources[0]
   if (!resource) {
     return <Empty message={t('strongDetail.dictionary.unavailable')} />
@@ -24,7 +25,7 @@ const StrongDictionaryPage = ({ entry, onOpenBibleReference, onOpenStrong }: Pro
       style={{ flex: 1 }}
       contentContainerStyle={[
         pageContentStyle,
-        { maxWidth: 600, paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 },
+        { maxWidth: 600, paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 + bottomInset },
       ]}
     >
       <VStack className="overflow-hidden border-continuous gap-[14px]">

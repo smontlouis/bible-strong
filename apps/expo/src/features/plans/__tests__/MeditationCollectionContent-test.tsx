@@ -23,7 +23,11 @@ jest.mock('~features/daily-reading/useDailyMeditation', () => ({
 }))
 jest.mock('~features/daily-reading/ReadingDatePicker', () => 'DatePicker')
 jest.mock('~common/Link', () => 'Link')
-jest.mock('~common/ui/Box', () => 'Box')
+jest.mock('~common/ui/Box', () => ({
+  __esModule: true,
+  default: 'Box',
+  usePageBottomInset: () => 0,
+}))
 jest.mock('~common/ui/Text', () => 'Text')
 jest.mock('~common/ui/Button', () => 'Button')
 jest.mock('~common/ui/Icon', () => ({ FeatherIcon: 'Icon' }))

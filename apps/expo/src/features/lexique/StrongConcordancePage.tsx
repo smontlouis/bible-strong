@@ -6,7 +6,7 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { LegendList } from '@legendapp/list'
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
+import Box, { HStack, TouchableBox, VStack, usePageBottomInset } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import ConcordanceVerse from '~features/bible/ConcordanceVerse'
 import { useResourceAccess } from '~features/resources/resourceAccess'
@@ -61,6 +61,7 @@ const StrongConcordancePage = ({
 }: Props) => {
   const { t, i18n } = useTranslation()
   const resources = useResourceAccess()
+  const bottomInset = usePageBottomInset()
   const [selectedLemmaId, setSelectedLemmaId] = useState<number>()
   const request = {
     currentVersionId,
@@ -174,7 +175,7 @@ const StrongConcordancePage = ({
       recycleItems
       contentContainerStyle={[
         pageContentStyle,
-        { maxWidth: 600, paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 },
+        { maxWidth: 600, paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 + bottomInset },
       ]}
       keyExtractor={verse => `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`}
       onEndReached={() => {

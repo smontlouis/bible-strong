@@ -46,6 +46,7 @@ jest.mock('~common/Link', () => ({
 jest.mock('~common/ui/Box', () => ({
   __esModule: true,
   default: ({ children }: React.PropsWithChildren) => children,
+  usePageBottomInset: () => 0,
 }))
 jest.mock('~common/ui/Button', () => ({
   __esModule: true,

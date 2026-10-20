@@ -9,7 +9,7 @@ import { useEntityListQueryFilters } from '~common/EntityListQueryFilters'
 import type { EntityListSort } from '~features/entityListQuery/entityListQuery'
 import Link from '~common/Link'
 import Border from '~common/ui/Border'
-import Box, { VStack } from '~common/ui/Box'
+import Box, { usePageBottomInset, VStack } from '~common/ui/Box'
 import FlatList from '~common/ui/FlatList'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -79,6 +79,7 @@ const BookmarksScreen = ({ isFormSheet = false }: BookmarksScreenProps) => {
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : true
   const bookmarks = useSelector(selectSortedBookmarks)
+  const bottomInset = usePageBottomInset()
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<EntityListSort>('newest')
   const queryFilters = useEntityListQueryFilters({
@@ -131,7 +132,7 @@ const BookmarksScreen = ({ isFormSheet = false }: BookmarksScreenProps) => {
               <BookmarkItem item={item} onNavigate={handleNavigate} />
             )}
             keyExtractor={(item: Bookmark) => item.id}
-            contentContainerStyle={{ paddingBottom: 70 }}
+            contentContainerStyle={{ paddingBottom: 70 + bottomInset }}
           />
         ) : (
           <Empty

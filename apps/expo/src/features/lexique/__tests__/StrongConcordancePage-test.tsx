@@ -30,6 +30,7 @@ jest.mock('~common/ui/Box', () => ({
   HStack: 'HStack',
   VStack: 'VStack',
   TouchableBox: 'TouchableBox',
+  usePageBottomInset: () => 0,
 }))
 jest.mock('~features/bible/ConcordanceVerse', () => 'ConcordanceVerse')
 const entry: StrongLexiconEntry = {

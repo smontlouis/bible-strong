@@ -18,7 +18,7 @@ import LexiqueIcon from '~common/LexiqueIcon'
 import Link, { LinkProps } from '~common/Link'
 import NaveIcon from '~common/NaveIcon'
 import { type SheetRef } from '~common/sheet'
-import Box, { SafeAreaBox } from '~common/ui/Box'
+import Box, { SafeAreaBox, usePageBottomInset } from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import ListSection, { ListRow } from '~common/ui/ListSection'
 import ScrollView from '~common/ui/ScrollView'
@@ -85,6 +85,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
   const router = useRouter()
   const { isLogged, user, logout } = useLogin()
   const theme = useTheme()
+  const bottomInset = usePageBottomInset()
   const deleteAccountModalRef = useRef<SheetRef>(null)
   const contactDeveloperRef = useRef<SheetRef>(null)
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false)
@@ -155,7 +156,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
         style={{ flex: 1 }}
         contentContainerStyle={{
           paddingTop: 16,
-          paddingBottom: 20,
+          paddingBottom: 20 + bottomInset,
           backgroundColor: theme.colors.canvas,
         }}
       >

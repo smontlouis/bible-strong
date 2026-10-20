@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import type { ComputedPlan, ComputedReadingSlice, EntitySlice } from '~common/types'
 import Link from '~common/Link'
 import Border from '~common/ui/Border'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Card from '~common/ui/Card'
 import Text from '~common/ui/Text'
@@ -61,6 +61,7 @@ const ScheduledPlanContent = ({ plan, initialReadingSliceId }: Props) => {
   const desktop = Platform.OS === 'web' && width >= 800
   const today = useLocalReadingDate()
   const params = useLocalSearchParams<{ date?: string }>()
+  const bottomInset = usePageBottomInset()
   const readings = plan.sections.flatMap(section => section.data)
   const [chosenDay, setChosenDay] = useState<number | null>(
     () => readings.findIndex(item => item.id === initialReadingSliceId) + 1 || null
@@ -167,7 +168,7 @@ const ScheduledPlanContent = ({ plan, initialReadingSliceId }: Props) => {
       onLayout={event => setWidth(event.nativeEvent.layout.width)}
       contentContainerStyle={[
         pageContentStyle,
-        { maxWidth: 1000, padding: desktop ? 32 : 20, paddingBottom: 48 },
+        { maxWidth: 1000, padding: desktop ? 32 : 20, paddingBottom: 48 + bottomInset },
       ]}
     >
       <Box className="gap-[28px]">

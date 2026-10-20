@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import Link from '~common/Link'
 import type { OnlinePlan } from '~common/types'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Card from '~common/ui/Card'
 import { ListSectionTitle } from '~common/ui/ListSection'
@@ -108,6 +108,7 @@ const ReadingPlanCard = ({ plan, active }: { plan: OnlinePlan; active: boolean }
 const ReadingPlansScreen = ({ filters }: { filters: ReadingPlanFilters }) => {
   const { t } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
+  const bottomInset = usePageBottomInset()
   const online = useSelector((state: RootState) => state.plan.onlinePlans)
   const local = useSelector((state: RootState) => state.plan.myPlans)
   const ongoing = useSelector((state: RootState) => state.plan.ongoingPlans)
@@ -126,7 +127,7 @@ const ReadingPlansScreen = ({ filters }: { filters: ReadingPlanFilters }) => {
     <ScrollView
       contentContainerStyle={[
         pageContentStyle,
-        { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 48 },
+        { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 48 + bottomInset },
       ]}
     >
       {!!active.length && (

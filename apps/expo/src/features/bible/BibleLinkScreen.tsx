@@ -35,7 +35,7 @@ import { useTranslation } from 'react-i18next'
 import EntityChipList from '~common/EntityChipList'
 import Header from '~common/Header'
 import { VerseIds } from '~common/types'
-import Box, { VStack } from '~common/ui/Box'
+import Box, { usePageBottomInset, VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Fab from '~common/ui/Fab'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
@@ -152,6 +152,7 @@ const BibleLinkScreen = () => {
   const openEntityRelations = useOpenEntityRelations()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const keyboardHeight = useKeyboardState(state => state.height)
+  const bottomInset = usePageBottomInset()
 
   useEffect(() => {
     if (currentLink) {
@@ -270,7 +271,8 @@ const BibleLinkScreen = () => {
   const playerHeight = (playerWidth * 9) / 16
 
   return (
-    <FormSheetScreen isFormSheet={isFormSheet}>
+    // While editing, the page keeps its bottom save bar above the home indicator.
+    <FormSheetScreen isFormSheet={isFormSheet} reserveBottom={isEditing}>
       <Box className="overflow-hidden border-continuous flex-[1]">
         <Header
           hasBackButton={hasBackButton}
@@ -336,7 +338,7 @@ const BibleLinkScreen = () => {
             contentContainerStyle={[
               pageContentStyle,
               {
-                paddingBottom: isEditing ? FOOTER_HEIGHT + keyboardHeight + 20 : 0,
+                paddingBottom: isEditing ? FOOTER_HEIGHT + keyboardHeight + 20 : bottomInset,
               },
             ]}
           >

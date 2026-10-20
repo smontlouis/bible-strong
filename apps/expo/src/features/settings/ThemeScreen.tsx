@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import Header from '~common/Header'
 import { LinkBox } from '~common/Link'
-import Box, { HStack, SafeAreaBox } from '~common/ui/Box'
+import Box, { HStack, SafeAreaBox, usePageBottomInset } from '~common/ui/Box'
 import Circle from '~common/ui/Circle'
 import ListSection from '~common/ui/ListSection'
 import ScrollView from '~common/ui/ScrollView'
@@ -26,6 +26,7 @@ const ChoiceRow = ({ children }: { children: ReactNode }) => (
 const ThemeScreen = () => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
+  const bottomInset = usePageBottomInset()
 
   const preferredColorScheme = useSelector(
     (state: RootState) => state.user.bible.settings.preferredColorScheme
@@ -43,7 +44,10 @@ const ThemeScreen = () => {
   return (
     <SafeAreaBox className="overflow-hidden border-continuous bg-canvas">
       <Header hasBackButton title={t('settings.theme')} />
-      <ScrollView backgroundColor="canvas" contentContainerStyle={{ paddingBottom: 20 }}>
+      <ScrollView
+        backgroundColor="canvas"
+        contentContainerStyle={{ paddingBottom: 20 + bottomInset }}
+      >
         <ListSection title={t('Mode')}>
           <ChoiceRow>
             <Text className="text-[15px]">

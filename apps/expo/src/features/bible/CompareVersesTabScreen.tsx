@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import ContextualMenu from '~common/ContextualPanel/ContextualMenu'
 import verseToReference from '~helpers/verseToReference'
 import Header from '~common/Header'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import ScrollView from '~common/ui/ScrollView'
 import { produce } from 'immer'
@@ -61,6 +61,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
   const openInNewTab = useOpenInNewTab()
   // The site compares versions on the page of a verse; the reader's own version names it.
   const shareUrl = getVersesShareUrl(Object.keys(selectedVerses), useDefaultBibleVersion())
+  const bottomInset = usePageBottomInset()
   useEffect(() => {
     setTitle(`${t('Comparer')} ${title}`)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -147,7 +148,9 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
           </Box>
         }
       />
-      <ScrollView contentContainerStyle={{ maxWidth: 600, paddingBottom: 20, flexGrow: 1 }}>
+      <ScrollView
+        contentContainerStyle={{ maxWidth: 600, paddingBottom: 20 + bottomInset, flexGrow: 1 }}
+      >
         <CompareCard
           selectedVerses={selectedVerses}
           strongMode={strongMode}

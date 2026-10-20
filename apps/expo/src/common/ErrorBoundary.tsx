@@ -8,7 +8,7 @@ import { toast } from '~helpers/toast'
 import * as Updates from 'expo-updates'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { remoteQueryOptions } from '~helpers/queryOptions'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
@@ -73,6 +73,7 @@ type ErrorFallbackProps = {
 const ErrorFallback = ({ error, errorInfo }: ErrorFallbackProps) => {
   const { t } = useTranslation()
   const { logout } = useLogin()
+  const bottomInset = usePageBottomInset()
 
   const updateCheck = useQuery({
     queryKey: ['errorBoundaryUpdate'],
@@ -135,7 +136,7 @@ Date: ${new Date().toISOString()}
 
   return (
     <Container>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: bottomInset }}>
         <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center px-[20px] py-[40px]">
           <Icon.Feather name="alert-triangle" size={80} color="#DC2626" />
 

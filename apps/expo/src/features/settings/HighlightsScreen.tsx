@@ -11,7 +11,7 @@ import Empty from '~common/Empty'
 import FiltersHeader from '~common/FiltersHeader'
 import ColorFilterModal from '~common/ColorFilterModal'
 import TypeFilterModal from '~common/TypeFilterModal'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
@@ -61,6 +61,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
   const dispatch = useDispatch()
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : true
+  const bottomInset = usePageBottomInset()
   const highlightsObj = useSelector(selectHighlightsObj)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const setColorChangeModal = useSetAtom(colorChangeModalAtom)
@@ -520,7 +521,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
         {/* Content */}
         {unifiedItems.length ? (
           <FlatList
-            contentContainerStyle={pageContentStyle}
+            contentContainerStyle={[pageContentStyle, { paddingBottom: 16 + bottomInset }]}
             data={unifiedItems}
             keyExtractor={item =>
               item.type === 'highlight'

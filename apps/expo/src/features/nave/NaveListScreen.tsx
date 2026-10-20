@@ -175,7 +175,9 @@ const NaveListScreen = ({
   }
 
   return (
-    <FormSheetScreen isFormSheet={isFormSheet}>
+    // The letter bar sits fixed under the list: while it shows, the page stays above the home
+    // indicator and the tab bar.
+    <FormSheetScreen isFormSheet={isFormSheet} reserveBottom={!searchValue}>
       <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         <FiltersHeader
           hasBackButton={showBackButton}

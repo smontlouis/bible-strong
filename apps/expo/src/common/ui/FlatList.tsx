@@ -7,8 +7,8 @@ import {
   StyleSheet,
   ViewStyle,
 } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { twMerge } from '~common/ui/classNames'
+import { usePageBottomInset } from './Box'
 
 import useDeviceOrientation, { Orientation } from '~helpers/useDeviceOrientation'
 import type { Theme as AppTheme } from '~themes'
@@ -65,11 +65,11 @@ const AnimatedFlatList = <T,>({
   ref,
   ...props
 }: AnimatedFlatListProps<T>) => {
-  const insets = useSafeAreaInsets()
+  const bottomInset = usePageBottomInset()
   const orientation = useDeviceOrientation()
   const style = {
     ...pageContentStyle,
-    paddingBottom: 10 + insets.bottom,
+    paddingBottom: 10 + bottomInset,
     ...StyleSheet.flatten(contentContainerStyle),
   }
 

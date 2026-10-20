@@ -11,7 +11,7 @@ import Header from '~common/Header'
 import { LinkBox } from '~common/Link'
 import SearchInput from '~common/SearchInput'
 import Border from '~common/ui/Border'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { ListSectionTitle } from '~common/ui/ListSection'
 import Paragraph from '~common/ui/Paragraph'
@@ -69,6 +69,7 @@ const TimelineSearchScreen = () => {
   const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
   const resources = useResourceAccess()
+  const bottomInset = usePageBottomInset()
   const language = useAtomValue(resourcesLanguageAtom).TIMELINE
   const [searchValue, setSearchValue] = useState('')
   const debouncedSearchValue = useDebounce(searchValue, 250)
@@ -137,7 +138,11 @@ const TimelineSearchScreen = () => {
           keyboardDismissMode={IS_FORM_SHEET ? 'interactive' : 'on-drag'}
           keyboardShouldPersistTaps="handled"
           contentInsetAdjustmentBehavior="automatic"
-          contentContainerStyle={[pageContentStyle, { flexGrow: 1 }]}
+          // In the iOS form sheet, the automatic content inset already clears the home indicator.
+          contentContainerStyle={[
+            pageContentStyle,
+            { flexGrow: 1, paddingBottom: IS_FORM_SHEET ? 0 : bottomInset },
+          ]}
           ItemSeparatorComponent={TimelineSearchSeparator}
           ListHeaderComponent={
             results.length > 0 ? (

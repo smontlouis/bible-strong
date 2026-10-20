@@ -4,7 +4,7 @@ import { Linking, ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import Empty from '~common/Empty'
 import Loading from '~common/Loading'
-import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
+import Box, { HStack, TouchableBox, VStack, usePageBottomInset } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import type {
@@ -43,6 +43,7 @@ const StrongEntityPage = ({
   onOpenEntityRelation,
 }: Props) => {
   const { t } = useTranslation()
+  const bottomInset = usePageBottomInset()
   if (loading) return <Loading message={t('Chargement...')} />
   if (!entity) {
     return <Empty message={t('strongDetail.entity.unavailable')} />
@@ -56,7 +57,7 @@ const StrongEntityPage = ({
       style={{ flex: 1 }}
       contentContainerStyle={[
         pageContentStyle,
-        { maxWidth: 600, paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 },
+        { maxWidth: 600, paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 + bottomInset },
       ]}
     >
       <StrongEntitySummaryCard

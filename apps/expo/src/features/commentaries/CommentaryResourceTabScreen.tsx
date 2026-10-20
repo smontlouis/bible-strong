@@ -11,7 +11,7 @@ import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import ScrollView from '~common/ui/ScrollView'
-import Box, { TouchableBox } from '~common/ui/Box'
+import Box, { TouchableBox, usePageBottomInset } from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -47,6 +47,7 @@ const CommentaryResourceTabScreen = ({
   const pushRouteOnce = usePushRouteOnce()
   const [tab, setTab] = useAtom(commentaryAtom)
   const scrollRef = React.useRef<React.ComponentRef<typeof ScrollView>>(null)
+  const bottomInset = usePageBottomInset()
   const parsed = parseCommentaryResourceParams({
     projectionId: tab.data?.projectionId,
     book: String(tab.data?.book ?? ''),
@@ -250,7 +251,11 @@ const CommentaryResourceTabScreen = ({
             <ScrollView
               ref={scrollRef}
               backgroundColor="canvas"
-              contentContainerStyle={{ maxWidth: 600, padding: 18, paddingBottom: 32 }}
+              contentContainerStyle={{
+                maxWidth: 600,
+                padding: 18,
+                paddingBottom: 32 + bottomInset,
+              }}
             >
               <CommentarySectionCard
                 entry={entry}
@@ -277,7 +282,7 @@ const CommentaryResourceTabScreen = ({
           <ScrollView
             stickyHeaderIndices={[1]}
             backgroundColor="canvas"
-            contentContainerStyle={{ maxWidth: 600, padding: 18, paddingBottom: 32 }}
+            contentContainerStyle={{ maxWidth: 600, padding: 18, paddingBottom: 32 + bottomInset }}
           >
             <CommentaryRoomIntro entry={entry} language={projection.language} />
 

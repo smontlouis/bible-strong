@@ -11,7 +11,7 @@ import Loading from '~common/Loading'
 import StylizedHTMLView from '~common/SwitchableHTMLView'
 import { getCommentaryShare } from './shareCommentary'
 import ScrollView from '~common/ui/ScrollView'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import Card from '~common/ui/Card'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
@@ -56,6 +56,7 @@ const CommentaryEntryScreen = ({
   const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
   const canGoBackInStack = useCanGoBackInStack()
+  const bottomInset = usePageBottomInset()
   const scrollRef = React.useRef<React.ComponentRef<typeof ScrollView>>(null)
   const query = useQuery({
     queryKey: [
@@ -176,7 +177,7 @@ const CommentaryEntryScreen = ({
           <ScrollView
             ref={scrollRef}
             backgroundColor="canvas"
-            contentContainerStyle={{ maxWidth: 600, padding: 18, paddingBottom: 44 }}
+            contentContainerStyle={{ maxWidth: 600, padding: 18, paddingBottom: 44 + bottomInset }}
           >
             <CommentaryRoomIntro
               compact

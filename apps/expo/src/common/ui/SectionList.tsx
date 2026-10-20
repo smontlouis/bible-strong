@@ -8,8 +8,8 @@ import {
   View,
   ViewStyle,
 } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { twMerge } from '~common/ui/classNames'
+import { usePageBottomInset } from './Box'
 
 import useDeviceOrientation, { Orientation } from '~helpers/useDeviceOrientation'
 import type { Theme as AppTheme } from '~themes'
@@ -66,10 +66,10 @@ const AnimatedSectionList = <T, S = unknown>({
   ref?: React.Ref<RNSectionList<T, S>>
 }) => {
   const orientation = useDeviceOrientation()
-  const insets = useSafeAreaInsets()
+  const bottomInset = usePageBottomInset()
   const style = {
     ...pageContentStyle,
-    paddingBottom: 10 + insets.bottom,
+    paddingBottom: 10 + bottomInset,
     ...StyleSheet.flatten(contentContainerStyle),
   }
 

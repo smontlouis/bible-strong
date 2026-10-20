@@ -11,7 +11,7 @@ import { useLocalSearchParams } from 'expo-router'
 import { useSelector } from 'react-redux'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Text from '~common/ui/Text'
 import { useResourceAccess } from '~features/resources/resourceAccess'
@@ -97,6 +97,7 @@ const ConcordanceScreen = () => {
   const isFormSheet = IS_FORM_SHEET
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : true
+  const bottomInset = usePageBottomInset()
 
   // Parse params from URL strings
   const strongReference = params.strongReference ? JSON.parse(params.strongReference) : {}
@@ -139,7 +140,7 @@ const ConcordanceScreen = () => {
       {isPending && <Loading />}
       {isSuccess && (
         <FlatList
-          contentContainerStyle={pageContentStyle}
+          contentContainerStyle={[pageContentStyle, { paddingBottom: 16 + bottomInset }]}
           style={{ marginTop: 5, padding: 20 }}
           removeClippedSubviews
           data={data}

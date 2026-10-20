@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next'
 import Header from '~common/Header'
 import ContextualMenu from '~common/ContextualPanel/ContextualMenu'
 import Link from '~common/Link'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
@@ -73,6 +73,7 @@ export const MeditationReader = ({
   const { t } = useTranslation()
   const router = useRouter()
   const paramsSheet = useRef<SheetRef>(null)
+  const bottomInset = usePageBottomInset()
   const changeDate = (next: string) => {
     if (onDateChange) onDateChange(next)
     else router.setParams({ date: next, readingId: undefined })
@@ -148,7 +149,7 @@ export const MeditationReader = ({
           maxWidth: wide ? 940 : READING_TEXT_MAX_WIDTH + 40,
           alignSelf: 'center',
           padding: wide ? 32 : 20,
-          paddingBottom: 64,
+          paddingBottom: 64 + bottomInset,
         }}
       >
         <Box className={wide ? 'flex-row items-start gap-[40px]' : 'gap-[28px]'}>

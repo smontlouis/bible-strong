@@ -32,7 +32,7 @@ import {
   getSearchResultsPresentation,
   type SearchResultsSnapshot,
 } from './searchResultsPresentation'
-import Box, { HStack, TouchableBox } from '~common/ui/Box'
+import Box, { HStack, TouchableBox, usePageBottomInset } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
@@ -141,6 +141,7 @@ const SQLiteSearchScreen = ({
   const { t, i18n } = useTranslation()
   const theme = useTheme()
   const keyboardFooterBottom = useKeyboardFooterBottom(SEARCH_ALPHABET_FOOTER_HEIGHT)
+  const bottomInset = usePageBottomInset()
   const openCatalogTab = useOpenInNewTab()
   const openStudyObject = useOpenStudyObject()
   const resources = useResourceAccess()
@@ -803,6 +804,8 @@ const SQLiteSearchScreen = ({
   const shouldRenderSearchList = searchModel.shouldRenderSearchList
   const alphabetFooterInset = browseAlphabet ? SEARCH_ALPHABET_FOOTER_HEIGHT : 0
   const listBottomInset = alphabetFooterInset + keyboardFooterBottom
+  // The page runs under the home indicator and the tab bar: the list's end clears them too.
+  const listFooterHeight = listBottomInset + bottomInset
 
   const renderBrowseDatabaseState = () => {
     if (browseItemType === 'strong' && (strongAvailabilityQuery.isError || strongQuery.isError)) {
@@ -1135,10 +1138,10 @@ const SQLiteSearchScreen = ({
               backgroundColor: theme.colors.reverse,
             }}
             ListFooterComponent={
-              listBottomInset ? (
+              listFooterHeight ? (
                 <Box
                   className="overflow-hidden border-continuous"
-                  style={{ height: listBottomInset }}
+                  style={{ height: listFooterHeight }}
                 />
               ) : null
             }
@@ -1193,10 +1196,10 @@ const SQLiteSearchScreen = ({
             backgroundColor: theme.colors.reverse,
           }}
           ListFooterComponent={
-            listBottomInset ? (
+            listFooterHeight ? (
               <Box
                 className="overflow-hidden border-continuous"
-                style={{ height: listBottomInset }}
+                style={{ height: listFooterHeight }}
               />
             ) : null
           }
@@ -1357,7 +1360,7 @@ const SQLiteSearchScreen = ({
       {browseAlphabet ? (
         <Box
           className="overflow-hidden border-continuous absolute left-[0px] right-[0px] bg-reverse"
-          style={{ bottom: keyboardFooterBottom }}
+          style={{ bottom: keyboardFooterBottom, paddingBottom: bottomInset }}
         >
           {browseAlphabet}
         </Box>
