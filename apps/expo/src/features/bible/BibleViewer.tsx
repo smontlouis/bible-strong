@@ -111,7 +111,7 @@ import {
   useBibleTabActions,
   VersionCode,
 } from '../../state/tabs'
-import AnnotationToolbar from './AnnotationToolbar'
+import BibleSelectionSheet from './BibleSelectionSheet'
 import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
 import {
   BibleDOMWrapper,
@@ -150,7 +150,6 @@ import {
   hasSelectedVerses,
   selectAllChapterVerses,
 } from './selectedVersesActions'
-import SelectedVersesModal from './SelectedVersesModal'
 import { getBibleDOMDestination } from './SharedBibleDOM'
 import BibleDOMPortalHost from './BibleDOMPortalHost'
 import { shouldUseSharedBibleDOM } from './sharedBibleDOMPlatform'
@@ -239,12 +238,12 @@ const BibleViewer = ({
   const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null)
   const bibleParamsModal = useSheet()
   const resourceModal = useSheet()
-  const versesModal = useSheet()
+  // Selected verses, then the words dragged from them or double tapped: one sheet shows both
+  const selectionSheet = useSheet()
   const createRelationModal = useSheet()
 
   // Annotation mode
   const annotationMode = useAnnotationMode()
-  const annotationToolbar = useSheet()
   // Desktop: the verse the free mode started from, where its menu opens until words are chosen.
   const [annotationEntryVerseKey, setAnnotationEntryVerseKey] = useState<string>()
   const didOpenInitialAnnotationRef = useRef(false)
@@ -756,19 +755,16 @@ const BibleViewer = ({
     if (hidePersonalBibleData) return
     if (hasSelectedVerses(selectedVerses)) {
       actions.clearSelectedVerses()
-      versesModal.close()
     }
     setAnnotationEntryVerseKey(verseKey)
     annotationMode.enterMode(annotatedVersion)
-    annotationToolbar.open()
   }
 
   // Handler for exiting annotation mode
   const handleExitAnnotationMode = useCallback(() => {
     // exitMode will auto-save pending annotations
     annotationMode.exitMode()
-    annotationToolbar.close()
-  }, [annotationMode, annotationToolbar])
+  }, [annotationMode])
 
   useEffect(() => {
     if (
@@ -784,10 +780,8 @@ const BibleViewer = ({
     didOpenInitialAnnotationRef.current = true
     annotationMode.enterMode(initialAnnotation.version)
     annotationMode.handleAnnotationSelected(initialAnnotationId)
-    annotationToolbar.open()
   }, [
     annotationMode,
-    annotationToolbar,
     hidePersonalBibleData,
     initialAnnotation,
     initialAnnotationId,
@@ -799,10 +793,8 @@ const BibleViewer = ({
     if (hasSelectedVerses(selectedVerses)) {
       actions.clearSelectedVerses()
     }
-    versesModal.close()
     if (annotationMode.enabled) {
       annotationMode.exitMode()
-      annotationToolbar.close()
     }
   })
 
@@ -888,14 +880,16 @@ const BibleViewer = ({
     actions.selectAllVerses(selectAllChapterVerses(selectionVerses))
   }
 
-  // Open/close verses modal based on selected verses
+  // The selection sheet is up while verses are selected or words annotated. Going from one to the
+  // other keeps it up: only its content changes.
+  const isAnnotating = annotationMode.enabled && !hidePersonalBibleData
   useEffect(() => {
-    if (hasSelectedVerses(selectedVerses)) {
-      versesModal.open()
+    if ((!hidePersonalBibleData && hasSelectedVerses(selectedVerses)) || isAnnotating) {
+      selectionSheet.open()
     } else {
-      versesModal.close()
+      selectionSheet.close()
     }
-  }, [selectedVerses, versesModal])
+  }, [selectedVerses, isAnnotating, hidePersonalBibleData, selectionSheet])
 
   // Use displayed values for selectors to keep annotations in sync with verses
   const highlightedVersesByChapter = useSelector((state: RootState) =>
@@ -1784,35 +1778,6 @@ const BibleViewer = ({
           />
         </FooterInSheetProvider>
       )}
-      {!hidePersonalBibleData && (
-        <SelectedVersesModal
-          ref={versesModal.getRef()}
-          isSelectionMode={isSelectionMode}
-          selectedVerseHighlightColor={selectedVerseHighlightColor}
-          onChangeResourceType={val => {
-            setResourceModalSelection(null)
-            onChangeResourceType(val)
-            resourceModal.open()
-          }}
-          onCreateNoteClick={toggleCreateNote}
-          onCreateLinkClick={toggleCreateLink}
-          onCreateStudyRelationClick={toggleCreateStudyRelation}
-          addHighlight={addHiglightAndOpenQuickTags}
-          addTag={addTag}
-          removeHighlight={() => {
-            dispatch(removeHighlight({ selectedVerses }))
-          }}
-          clearSelectedVerses={actions.clearSelectedVerses}
-          selectedVerses={selectedVerses}
-          selectAllVerses={selectAllVerses}
-          version={selectionVersion}
-          onAddToStudy={handleOpenAddToStudy}
-          onSelectStudy={handleSelectStudy}
-          onAddBookmark={handleAddBookmark}
-          onPinVerses={handlePinVerses}
-          focusVerses={focusVerses}
-        />
-      )}
       <CreateEntityRelationModal
         ref={createRelationModal.getRef()}
         sourceEndpoint={createRelationSourceEndpoint}
@@ -1851,28 +1816,61 @@ const BibleViewer = ({
         version={selectedVerseForBookmark?.version ?? version}
         existingBookmark={editingBookmark || undefined}
       />
-      <AnnotationToolbar
-        ref={annotationToolbar.getRef()}
-        hasSelection={annotationMode.hasSelection}
-        selection={annotationMode.selection}
-        onApplyAnnotation={handleApplyAnnotation}
-        onClearSelection={annotationMode.clearSelection}
-        onEraseAnnotations={handleEraseAnnotations}
-        onClose={handleExitAnnotationMode}
-        selectedAnnotation={annotationMode.selectedAnnotation}
-        onChangeAnnotationColor={annotationMode.changeAnnotationColor}
-        onChangeAnnotationType={annotationMode.changeAnnotationType}
-        onDeleteAnnotation={handleDeleteAnnotation}
-        onClearAnnotationSelection={annotationMode.clearAnnotationSelection}
-        onNotePress={handleAnnotationNotePress}
-        onTagsPress={handleAnnotationTagsPress}
-        onRelationsPress={handleAnnotationRelationsPress}
-        tagsCount={Object.keys(annotationMode.selectedAnnotation?.tags || {}).length}
-        relationsCount={annotationRelationCount}
-        version={parallelVersions.length > 0 ? annotationMode.version : undefined}
-        annotatedVersion={annotationMode.version}
-        entryVerseKey={annotationEntryVerseKey}
-        isEnabled={annotationMode.enabled && !hidePersonalBibleData}
+      <BibleSelectionSheet
+        ref={selectionSheet.getRef()}
+        isAnnotating={isAnnotating}
+        verses={
+          hidePersonalBibleData
+            ? null
+            : {
+                isSelectionMode,
+                selectedVerseHighlightColor,
+                onChangeResourceType: val => {
+                  setResourceModalSelection(null)
+                  onChangeResourceType(val)
+                  resourceModal.open()
+                },
+                onCreateNoteClick: toggleCreateNote,
+                onCreateLinkClick: toggleCreateLink,
+                onCreateStudyRelationClick: toggleCreateStudyRelation,
+                addHighlight: addHiglightAndOpenQuickTags,
+                addTag,
+                removeHighlight: () => {
+                  dispatch(removeHighlight({ selectedVerses }))
+                },
+                clearSelectedVerses: actions.clearSelectedVerses,
+                selectedVerses,
+                selectAllVerses,
+                version: selectionVersion,
+                onAddToStudy: handleOpenAddToStudy,
+                onSelectStudy: handleSelectStudy,
+                onAddBookmark: handleAddBookmark,
+                onPinVerses: handlePinVerses,
+                focusVerses,
+              }
+        }
+        annotation={{
+          hasSelection: annotationMode.hasSelection,
+          selection: annotationMode.selection,
+          onApplyAnnotation: handleApplyAnnotation,
+          onClearSelection: annotationMode.clearSelection,
+          onEraseAnnotations: handleEraseAnnotations,
+          onClose: handleExitAnnotationMode,
+          selectedAnnotation: annotationMode.selectedAnnotation,
+          onChangeAnnotationColor: annotationMode.changeAnnotationColor,
+          onChangeAnnotationType: annotationMode.changeAnnotationType,
+          onDeleteAnnotation: handleDeleteAnnotation,
+          onClearAnnotationSelection: annotationMode.clearAnnotationSelection,
+          onNotePress: handleAnnotationNotePress,
+          onTagsPress: handleAnnotationTagsPress,
+          onRelationsPress: handleAnnotationRelationsPress,
+          tagsCount: Object.keys(annotationMode.selectedAnnotation?.tags || {}).length,
+          relationsCount: annotationRelationCount,
+          version: parallelVersions.length > 0 ? annotationMode.version : undefined,
+          annotatedVersion: annotationMode.version,
+          entryVerseKey: annotationEntryVerseKey,
+          isEnabled: isAnnotating,
+        }}
       />
       <CrossVersionAnnotationsModal
         sheetRef={crossVersionModal.getRef()}

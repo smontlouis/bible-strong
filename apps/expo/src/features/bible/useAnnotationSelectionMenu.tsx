@@ -1,10 +1,9 @@
 import { useSetAtom } from 'jotai/react'
-import { useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ColorCircleGrid from '~common/ColorCircleGrid'
 import type { PanelNavigation, PanelScreen } from '~common/ContextualPanel/types'
 import { useEntityTagsScreen } from '~common/ContextualPanel/useEntityTagsScreen'
-import type { SheetRef } from '~common/sheet'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -17,29 +16,36 @@ import {
   type AnnotationToolbarProps,
 } from './AnnotationControls'
 import AnnotationPreview from './AnnotationPreview'
+import {
+  BIBLE_SELECTION_MENU_WIDTH,
+  type BibleSelectionMenuContent,
+} from './bibleSelectionMenuContent'
 import ActionItem from './SelectedVersesModal/components/ActionItem'
 import {
   SelectionMenuContext,
   type SelectionMenu as SelectionMenuValue,
 } from './SelectedVersesModal/selectionMenuContext'
-import VerseMenu, { isEditableTarget, type VerseMenuTarget } from './VerseMenu.web'
+import { isEditableTarget, type VerseMenuTarget } from './VerseMenu.web'
 
-const ANNOTATION_MENU_WIDTH = 288
-
-/** Keys of the desktop free mode menu, shown beside each action. */
+/** Keys of the desktop annotation menu, shown beside each action. */
 const ANNOTATION_SHORTCUTS = { note: 'N', tags: 'T', relations: 'R' } as const
+
+// Its screens are named apart from those of the selected verses, which the menu showed before
+const TAGS_SCREEN = 'annotation-tags'
 
 type AnchorVerse = Omit<VerseMenuTarget, 'version'>
 
 /**
- * The desktop form of the free mode sheet: a menu beside the verse being annotated (see
- * VerseMenu). It opens with the mode, at the verse the mode started from, then follows the words
- * the reader selects or the annotation they open. Its own button ends the mode; Escape lets go
- * of the selected words, then of the selected annotation, then ends the mode.
+ * The annotation tools in the desktop selection menu, beside the verse being annotated. They open
+ * at the verse annotation mode started from, then follow the words the reader selects or the
+ * annotation they open. The menu's own button ends the mode; Escape lets go of the selected words,
+ * then of the selected annotation, then ends the mode.
  */
-export default function AnnotationMenu(props: AnnotationToolbarProps) {
+export default function useAnnotationSelectionMenu(
+  props: Omit<AnnotationToolbarProps, 'ref'>,
+  isShown: boolean
+): BibleSelectionMenuContent {
   const {
-    ref,
     hasSelection,
     selection,
     onEraseAnnotations,
@@ -63,11 +69,11 @@ export default function AnnotationMenu(props: AnnotationToolbarProps) {
   const setColorPickerModal = useSetAtom(colorPickerModalAtom)
   const tools = useAnnotationTools(props)
   const navigation = useRef<PanelNavigation | null>(null)
-  const [isOpen, setOpen] = useState(false)
-  const [isRequested, setRequested] = useState(false)
+  const isOpen = useRef(false)
   const tags = useEntityTagsScreen('wordAnnotations', selectedAnnotation?.id ?? '')
 
-  // The menu stays by the last words or annotation chosen once they are let go of.
+  // The menu stays by the last words or annotation chosen once they are let go of, until the mode
+  // ends.
   const current: AnchorVerse | undefined = selectedAnnotation
     ? { verseKey: selectedAnnotation.verseKey }
     : selection
@@ -75,6 +81,7 @@ export default function AnnotationMenu(props: AnnotationToolbarProps) {
       : undefined
   const [lastAnchor, setLastAnchor] = useState<AnchorVerse | undefined>(current)
   if (current && current.verseKey !== lastAnchor?.verseKey) setLastAnchor(current)
+  if (!isEnabled && lastAnchor) setLastAnchor(undefined)
   const anchor = current ?? lastAnchor ?? { verseKey: entryVerseKey }
   const target: VerseMenuTarget = {
     ...anchor,
@@ -82,34 +89,8 @@ export default function AnnotationMenu(props: AnnotationToolbarProps) {
   }
 
   const menu: SelectionMenuValue = {
-    openScreen: name => navigation.current?.open(name),
+    openScreen: name => navigation.current?.open(name === 'tags' ? TAGS_SCREEN : name),
   }
-
-  useImperativeHandle(ref, (): SheetRef => {
-    const present = () => setRequested(true)
-    const dismiss = () => {
-      setRequested(false)
-      setLastAnchor(undefined)
-    }
-    return {
-      present,
-      presentAt: present,
-      resizeTo: () => {},
-      dismiss,
-      dismissThen: action => {
-        dismiss()
-        action()
-      },
-      close: dismiss,
-      forceClose: dismiss,
-    }
-  })
-
-  // A session started before the window grew to the desktop width opens the menu at once.
-  useEffect(() => {
-    if (isEnabled) setRequested(true)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   // The tags screen belongs to one annotation: choosing another one comes back to the tools.
   useEffect(() => {
@@ -125,7 +106,7 @@ export default function AnnotationMenu(props: AnnotationToolbarProps) {
       : undefined
 
   useEffect(() => {
-    if (!isRequested) return
+    if (!isShown) return
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.isComposing || isEditableTarget(event.target)) return
       if (event.key === 'Escape') {
@@ -135,7 +116,7 @@ export default function AnnotationMenu(props: AnnotationToolbarProps) {
         else onClose()
         return
       }
-      if (!isOpen || event.metaKey || event.ctrlKey || event.altKey || event.repeat) return
+      if (!isOpen.current || event.metaKey || event.ctrlKey || event.altKey || event.repeat) return
       if (event.key === 'Delete' || event.key === 'Backspace') {
         if (!erase || !isEnabled) return
         event.preventDefault()
@@ -165,7 +146,7 @@ export default function AnnotationMenu(props: AnnotationToolbarProps) {
   const screens: Record<string, PanelScreen> = {
     actions: {
       title: t('Annotation'),
-      width: ANNOTATION_MENU_WIDTH,
+      width: BIBLE_SELECTION_MENU_WIDTH,
       headerRight: (
         <>
           {erase && (
@@ -274,7 +255,7 @@ export default function AnnotationMenu(props: AnnotationToolbarProps) {
         )
       },
     },
-    tags: {
+    [TAGS_SCREEN]: {
       ...tags.screen,
       width: 320,
       headerContent: (
@@ -290,22 +271,17 @@ export default function AnnotationMenu(props: AnnotationToolbarProps) {
     },
   }
 
-  return (
-    <VerseMenu
-      isRequested={isRequested}
-      target={target}
-      accessibilityLabel={t('Annotation')}
-      initialScreen="actions"
-      width={ANNOTATION_MENU_WIDTH}
-      screens={screens}
-      onOpenChange={open => {
-        setOpen(open)
-        if (open) return
-        navigation.current = null
-        tags.reset()
-      }}
-      // Escape inside the menu ends the mode, as its own button does.
-      onClose={onClose}
-    />
-  )
+  return {
+    target,
+    accessibilityLabel: t('Annotation'),
+    screens,
+    onOpenChange: open => {
+      isOpen.current = open
+      if (open) return
+      navigation.current = null
+      tags.reset()
+    },
+    // Escape inside the menu ends the mode, as its own button does.
+    onClose,
+  }
 }

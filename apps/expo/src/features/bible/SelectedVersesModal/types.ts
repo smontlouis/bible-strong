@@ -52,5 +52,6 @@ export interface SelectedVersesModalProps {
   onSelectStudy?: (studyId: string, format: 'inline' | 'block') => Promise<void>
   onAddBookmark: () => void
   onPinVerses: () => void
+  onExportPassage: () => void
   focusVerses?: (string | number)[]
 }
