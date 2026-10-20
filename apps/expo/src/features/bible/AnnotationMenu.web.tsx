@@ -96,6 +96,10 @@ export default function AnnotationMenu(props: AnnotationToolbarProps) {
       presentAt: present,
       resizeTo: () => {},
       dismiss,
+      dismissThen: action => {
+        dismiss()
+        action()
+      },
       close: dismiss,
       forceClose: dismiss,
     }

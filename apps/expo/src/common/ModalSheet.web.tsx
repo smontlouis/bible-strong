@@ -51,6 +51,10 @@ export default function ModalSheet({
       presentAt: present,
       resizeTo: () => {},
       dismiss: close,
+      dismissThen: action => {
+        close()
+        action()
+      },
       close,
       forceClose: close,
     }

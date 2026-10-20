@@ -43,6 +43,10 @@ export default function PassageResourcesScreen() {
       resizeTo: () => {},
       close,
       dismiss: close,
+      dismissThen: action => {
+        close()
+        action()
+      },
       forceClose: close,
     }
   })

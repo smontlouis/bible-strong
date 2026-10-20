@@ -65,6 +65,10 @@ export default function StrongSelectionContainer({
     presentAt: present,
     resizeTo: () => {},
     dismiss: close,
+    dismissThen: action => {
+      close()
+      action()
+    },
     close,
     forceClose: close,
   }))

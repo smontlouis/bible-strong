@@ -119,7 +119,11 @@ const createRenderer = (inPanel = false) => {
     act(() => {
       renderer = create(
         <PanelNavigationContext.Provider
-          value={inPanel ? { open: jest.fn(), back: jest.fn(), close: jest.fn() } : null}
+          value={
+            inPanel
+              ? { open: jest.fn(), back: jest.fn(), close: jest.fn(), closeThen: jest.fn() }
+              : null
+          }
         >
           <VersionCatalogList
             sections={sections}

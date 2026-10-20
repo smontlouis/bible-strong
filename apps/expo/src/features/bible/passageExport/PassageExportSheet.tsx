@@ -168,6 +168,7 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
       presentAt: snapPoint => sheetRef.current?.presentAt(snapPoint),
       resizeTo: snapPoint => sheetRef.current?.resizeTo(snapPoint),
       dismiss: () => sheetRef.current?.dismiss(),
+      dismissThen: action => sheetRef.current?.dismissThen(action),
       close: () => sheetRef.current?.close(),
       forceClose: () => sheetRef.current?.forceClose(),
     }))

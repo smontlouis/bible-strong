@@ -107,6 +107,10 @@ jest.mock('~common/sheet', () => {
         presentAt: () => onPresent?.(),
         resizeTo: jest.fn(),
         dismiss: () => onDismiss?.(),
+        dismissThen: action => {
+          onDismiss?.()
+          action()
+        },
         close: () => onDismiss?.(),
         forceClose: () => onDismiss?.(),
       }))

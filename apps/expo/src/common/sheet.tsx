@@ -51,6 +51,12 @@ export type SheetRef = {
   presentAt: (snapPoint: SheetSnapPoint) => void
   resizeTo: (snapPoint: SheetSnapPoint) => void
   dismiss: () => void
+  /**
+   * Dismisses the sheet, then runs `action` once it is gone (at once when it is already closed).
+   * Use it for anything that presents another screen: on iOS a route presented while the sheet
+   * is still on screen or closing collides with it and leaves the app unresponsive.
+   */
+  dismissThen: (action: () => void) => void
   close: () => void
   forceClose: () => void
 }
@@ -238,6 +244,7 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
   const { height } = useWindowDimensions()
   const sheetRef = React.useRef<TrueSheet>(null)
   const lifecycleStateRef = React.useRef<SheetLifecycleState>('dismissed')
+  const afterDismissRef = React.useRef<(() => void) | null>(null)
   const detents = getDetents(snapPoints)
   const initialDetentIndex = initialSnapPoint ? findSnapPointIndex(detents, initialSnapPoint) : 0
   const scrollable = !detents.includes('auto')
@@ -249,6 +256,12 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
   const renderedFooter = footer
     ? React.createElement(footer as React.ComponentType<SheetFooterProps>)
     : undefined
+
+  const runAfterDismiss = () => {
+    const action = afterDismissRef.current
+    afterDismissRef.current = null
+    action?.()
+  }
 
   React.useImperativeHandle(ref, () => {
     const present = (command: 'present' | 'presentAt', index: number) => {
@@ -276,6 +289,8 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
         () => sheetRef.current?.dismiss(),
         () => {
           lifecycleStateRef.current = previousState
+          // The native sheet is not there to close: nothing stands in the action's way.
+          runAfterDismiss()
         }
       )
     }
@@ -288,6 +303,14 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
           sheetRef.current?.resize(findSnapPointIndex(detents, snapPoint))
         ),
       dismiss: () => dismiss('dismiss'),
+      dismissThen: action => {
+        if (lifecycleStateRef.current === 'dismissed') {
+          action()
+          return
+        }
+        afterDismissRef.current = action
+        dismiss('dismiss')
+      },
       close: () => dismiss('close'),
       forceClose: () => dismiss('forceClose'),
     }
@@ -343,6 +366,7 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
           onOpenChange?.(false)
           onClose?.()
           onDismiss?.()
+          runAfterDismiss()
         }}
       >
         {children}

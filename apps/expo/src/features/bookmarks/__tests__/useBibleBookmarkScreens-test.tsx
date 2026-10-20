@@ -34,7 +34,14 @@ it.each([undefined, 7])('creates a bookmark at the requested location (verse %s)
   })
   act(() => {
     form = create(
-      <>{panel.screens['bookmark-create'].content({ close, open: jest.fn(), back: jest.fn() })}</>
+      <>
+        {panel.screens['bookmark-create'].content({
+          close,
+          closeThen: jest.fn(),
+          open: jest.fn(),
+          back: jest.fn(),
+        })}
+      </>
     )
   })
   act(() => form!.root.findByType('BookmarkForm' as React.ElementType).props.onSave())

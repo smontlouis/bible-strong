@@ -62,6 +62,11 @@ export function usePanelNavigation({
         setHistory(current => current.slice(0, -1))
       },
       close,
+      // Web panels close at once; the native panel waits for its sheet (see index.tsx).
+      closeThen: (action: () => void) => {
+        close()
+        action()
+      },
     },
   }
 }

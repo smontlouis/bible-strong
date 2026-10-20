@@ -42,8 +42,7 @@ export default function BookmarkOptionsPanel({
                 icon="book-open"
                 label={t('Voir dans la Bible')}
                 onPress={() => {
-                  nav.close()
-                  onNavigate()
+                  nav.closeThen(onNavigate)
                 }}
               />
               <PanelAction

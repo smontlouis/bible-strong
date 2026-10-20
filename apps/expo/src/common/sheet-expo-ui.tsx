@@ -182,6 +182,10 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
       resizeTo: snapPoint =>
         sheetRef.current?.snapToIndex(findSnapPointIndex(snapPoints, snapPoint)),
       dismiss: () => dismiss(),
+      dismissThen: action => {
+        dismiss()
+        action()
+      },
       close: () => dismiss(),
       forceClose: () => dismiss(true),
     }

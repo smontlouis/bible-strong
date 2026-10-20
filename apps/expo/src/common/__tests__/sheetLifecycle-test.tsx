@@ -118,4 +118,45 @@ describe('Sheet lifecycle commands', () => {
 
     expect(mockNativeDismiss).toHaveBeenCalledTimes(2)
   })
+  it('runs the action only once the native sheet has dismissed', () => {
+    const action = jest.fn()
+    act(() => mockNativeSheetProps.onDidPresent())
+    act(() => sheetRef.current?.dismissThen(action))
+
+    expect(mockNativeDismiss).toHaveBeenCalledTimes(1)
+    expect(action).not.toHaveBeenCalled()
+
+    act(() => mockNativeSheetProps.onDidDismiss())
+    expect(action).toHaveBeenCalledTimes(1)
+  })
+
+  it('runs the action at once when the sheet is already closed', () => {
+    const action = jest.fn()
+    act(() => sheetRef.current?.dismissThen(action))
+
+    expect(mockNativeDismiss).not.toHaveBeenCalled()
+    expect(action).toHaveBeenCalledTimes(1)
+  })
+
+  it('waits for a dismissal already under way', () => {
+    const action = jest.fn()
+    act(() => mockNativeSheetProps.onDidPresent())
+    act(() => mockNativeSheetProps.onWillDismiss())
+    act(() => sheetRef.current?.dismissThen(action))
+
+    expect(action).not.toHaveBeenCalled()
+    act(() => mockNativeSheetProps.onDidDismiss())
+    expect(action).toHaveBeenCalledTimes(1)
+  })
+
+  it('runs the action when the native dismiss command rejects', async () => {
+    const action = jest.fn()
+    act(() => mockNativeSheetProps.onDidPresent())
+    mockNativeDismiss.mockRejectedValueOnce(new Error('No sheet found with tag 42'))
+
+    act(() => sheetRef.current?.dismissThen(action))
+    await act(async () => {})
+
+    expect(action).toHaveBeenCalledTimes(1)
+  })
 })

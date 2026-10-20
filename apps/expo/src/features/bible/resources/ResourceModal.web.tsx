@@ -50,6 +50,10 @@ export default function ResourceModal(props: ResourceModalProps) {
       presentAt: present,
       resizeTo: () => {},
       dismiss,
+      dismissThen: action => {
+        dismiss()
+        action()
+      },
       close: dismiss,
       forceClose: dismiss,
     }

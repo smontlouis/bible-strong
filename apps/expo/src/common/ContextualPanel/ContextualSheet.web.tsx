@@ -70,6 +70,10 @@ export default function ContextualSheet({
       presentAt: present,
       resizeTo: () => {},
       dismiss,
+      dismissThen: action => {
+        dismiss()
+        action()
+      },
       close: dismiss,
       forceClose: dismiss,
     }

@@ -4,6 +4,11 @@ export type PanelNavigation = {
   open: (screen: string) => void
   back: () => void
   close: () => void
+  /**
+   * Closes the panel, then runs `action` once it is gone. Use it for an action that presents
+   * another screen (a route, a tab): on iOS the native sheet must be off screen first.
+   */
+  closeThen: (action: () => void) => void
   openScreen?: (screen: PanelScreen) => void
 }
 export type PanelScreen = {
