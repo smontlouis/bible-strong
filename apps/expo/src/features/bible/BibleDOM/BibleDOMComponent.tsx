@@ -13,7 +13,7 @@ import {
 import { getParallelColumnFontSizeScale } from './verseTypography'
 import { setup, styled, keyframes } from 'goober'
 import { createGlobalStyles } from 'goober/global'
-import { m } from 'motion/react'
+import { m, useReducedMotion } from 'motion/react'
 import Feather from '@expo/vector-icons/Feather'
 import { domMax, LazyMotion } from 'motion/react'
 import React, { useEffect, useState, useRef } from 'react'
@@ -81,6 +81,8 @@ import { isDarkTheme } from './utils'
 import { getScrollTargetVerse } from './verseRenderingModel'
 import { shouldSuppressVerseGestures } from '~helpers/interlinearDisplayMode'
 import ChapterEntities from './ChapterEntities'
+import ChapterOpening from './ChapterOpening'
+import { getOverlayLayoutTransition } from './overlayStagger'
 import PlanDayStepCard, { type PlanDayStepView } from './PlanDayStepCard'
 import PassageMediaThumbnails from './PassageMediaThumbnails'
 import { getPassageMediaGalleryItems, getPassageMediaGallerySections } from './passageMediaGallery'
@@ -698,6 +700,7 @@ const LoadedBibleContent = ({
 }: Props) => {
   // Ref for highlight layer
   const containerRef = useRef<HTMLDivElement>(null)
+  const shouldReduceMotion = useReducedMotion()
   const [parallelViewportWidth, setParallelViewportWidth] = useState(0)
   useEffect(() => {
     if (!keepControlsVisible) return
@@ -1522,6 +1525,47 @@ const LoadedBibleContent = ({
               </VersionsContainer>
             </HeaderScrollWrapper>
           )}
+          {/* The chapter opens above its featured introduction and below secondary media, which
+              stay at the very top. Both keep their place in the tree and swap by order, so the
+              media morph and the opening slides when the chapter changes. */}
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {!isContextFocused && (
+              <div
+                style={
+                  isHorizontalParallelMode
+                    ? { paddingInline: `${BIBLE_READING_HORIZONTAL_PADDING}px` }
+                    : undefined
+                }
+              >
+                <PassageMediaThumbnails
+                  items={passageMedia.introduction}
+                  gallerySections={passageMediaGallerySections}
+                  placement="introduction"
+                  settings={settings}
+                  isDisabled={annotationMode}
+                  isCompact={!passageMedia.isIntroductionStartChapter}
+                />
+              </div>
+            )}
+            {/* A passage shown for itself (plan, context, focus) opens on its verses */}
+            {!focusVerses?.length && !inPlan && (
+              <m.div
+                layout="position"
+                layoutDependency={passageMedia.isIntroductionStartChapter}
+                transition={{ layout: getOverlayLayoutTransition(shouldReduceMotion) }}
+                style={{ order: passageMedia.isIntroductionStartChapter ? -1 : 1 }}
+              >
+                <ChapterOpening
+                  settings={settings}
+                  book={book}
+                  chapter={chapter}
+                  bookName={translations.chapterOpening.bookName}
+                  chapterLabel={translations.chapterOpening.chapter}
+                  psalmLabel={translations.chapterOpening.psalm}
+                />
+              </m.div>
+            )}
+          </div>
           <HorizontalScrollWrapper
             ref={contentScrollRef}
             columnCount={
@@ -1543,17 +1587,7 @@ const LoadedBibleContent = ({
               {isHebreu && (
                 <RightDirection settings={settings}>Sens de la lecture ←</RightDirection>
               )}
-              {!isContextFocused && (
-                <PassageMediaThumbnails
-                  items={passageMedia.introduction}
-                  gallerySections={passageMediaGallerySections}
-                  placement="introduction"
-                  settings={settings}
-                  isDisabled={annotationMode}
-                  isCompact={!passageMedia.isIntroductionStartChapter}
-                />
-              )}
-              {/* Keep introduction media at its original scroll origin. Metadata follows it. */}
+              {/* Introduction media sit above the columns, at the original scroll origin */}
               <EntityChipsDOM
                 items={focusedMetadataItems}
                 color={settings.colors[settings.theme].primary}

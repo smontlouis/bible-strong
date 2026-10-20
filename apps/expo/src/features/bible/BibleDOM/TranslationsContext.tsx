@@ -32,6 +32,12 @@ export interface BibleDOMTranslations {
     passages: string
     chapterResources: string
   }
+  // Opening of the chapter, above the text
+  chapterOpening: {
+    bookName: string
+    chapter: string
+    psalm: string
+  }
 }
 
 const TranslationsContext = createContext<BibleDOMTranslations | null>(null)

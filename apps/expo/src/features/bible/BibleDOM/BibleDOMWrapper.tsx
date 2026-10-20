@@ -611,6 +611,11 @@ export const BibleDOMWrapper = ({
       passages: t('bible.passageMedia.sections.passages'),
       chapterResources: t('bible.passageMedia.sections.chapterResources'),
     },
+    chapterOpening: {
+      bookName: t(book.Nom),
+      chapter: t('Chapitre'),
+      psalm: t('Psaume'),
+    },
   }
   const chapterEntityTranslations = {
     title: t('bible.chapterEntities.title'),
