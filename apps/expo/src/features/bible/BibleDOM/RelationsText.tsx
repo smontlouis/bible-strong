@@ -1,6 +1,6 @@
+import { personalContentIcons } from '~common/personalContent'
 import { resolveUniverseColors } from '~themes/universeColors'
 import Feather from '@expo/vector-icons/Feather'
-import Ionicons from '@expo/vector-icons/Ionicons'
 import { useState } from 'react'
 import { styled } from 'goober'
 import { RootState } from '~redux/modules/reducer'
@@ -152,11 +152,11 @@ const RelationIcon = ({
 
   switch (item.targetType) {
     case 'note':
-      return <Ionicons color={color} name="document-text-outline" size={16} />
+      return <Feather color={color} name={personalContentIcons.notes} size={16} />
     case 'externalLink':
-      return <Feather color={color} name="link" size={16} />
+      return <Feather color={color} name={personalContentIcons.links} size={16} />
     case 'study':
-      return <Feather color={color} name="edit-3" size={16} />
+      return <Feather color={color} name={personalContentIcons.study} size={16} />
     case 'strong':
       return <SvgMaskIcon source={relationSvgSources.strong} color={color} />
     case 'nave':
@@ -164,7 +164,7 @@ const RelationIcon = ({
     case 'dictionary':
       return <SvgMaskIcon source={relationSvgSources.dictionary} color={color} />
     case 'annotation':
-      return <Feather color={color} name="edit-3" size={16} />
+      return <Feather color={color} name={personalContentIcons.highlights} size={16} />
     case 'word':
       return <Feather color={color} name="type" size={16} />
     case 'verse':

@@ -1,4 +1,7 @@
 import { useTranslation } from 'react-i18next'
+import { resolveUniverseColors } from '~themes/universeColors'
+import { useTheme } from '~themes/ThemeProvider'
+import { personalContentIcons } from '~common/personalContent'
 import ContextualPanel from '~common/ContextualPanel'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -12,12 +15,22 @@ export default function AddToStudyAction({ onPress, onSelect, reference }: AddTo
   const { t } = useTranslation()
   const menu = useSelectionMenu()
   const study = useAddToStudyScreens({ onSelect, reference })
+  const theme = useTheme()
+  const tintColor = resolveUniverseColors(theme.colors, 'study').foreground
   if (!study.available)
-    return <ActionItem name="feather" label={t('study.addToStudy')} onPress={onPress} />
+    return (
+      <ActionItem
+        name={personalContentIcons.study}
+        tintColor={tintColor}
+        label={t('study.addToStudy')}
+        onPress={onPress}
+      />
+    )
   if (menu)
     return (
       <ActionItem
-        name="feather"
+        name={personalContentIcons.study}
+        tintColor={tintColor}
         label={t('study.addToStudy')}
         onPress={() => menu.openScreen('study')}
         nested
@@ -32,7 +45,7 @@ export default function AddToStudyAction({ onPress, onSelect, reference }: AddTo
       trigger={
         <Box className="items-center py-2 gap-2 w-[70px]">
           <Box className="items-center justify-center bg-light-grey rounded-[16px] w-[48px] h-[48px]">
-            <FeatherIcon name="feather" size={20} color="primary" />
+            <FeatherIcon name={personalContentIcons.study} size={20} color={tintColor} />
           </Box>
           <Text className="text-[10px]">{t('study.addToStudy')}</Text>
         </Box>

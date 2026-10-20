@@ -1,5 +1,8 @@
 import AddToStudyAction from '~features/studies/AddToStudyAction'
 import { useTranslation } from 'react-i18next'
+import { personalContentIcons } from '~common/personalContent'
+import { useTheme } from '~themes/ThemeProvider'
+import { resolveUniverseColors } from '~themes/universeColors'
 import ActionsLayout from './ActionsLayout'
 import ActionItem from './ActionItem'
 import VerseTagsAction from './VerseTagsAction'
@@ -44,19 +47,22 @@ const AnnotateTab = ({
   activeStates,
 }: AnnotateTabProps) => {
   const { t } = useTranslation()
+  const theme = useTheme()
   const { hasBookmark, hasFocus } = activeStates
 
   return (
     <ActionsLayout width={screenWidth}>
       <ActionItem
         name="file-plus"
+        tintColor={resolveUniverseColors(theme.colors, 'notes').foreground}
         label={t('Note')}
         onPress={onCreateNoteClick}
         shortcut={SELECTION_SHORTCUTS.note}
       />
       <VerseTagsAction selectedVerses={selectedVerses} reference={reference} onPress={addTag} />
       <ActionItem
-        name="link"
+        name={personalContentIcons.links}
+        tintColor={resolveUniverseColors(theme.colors, 'links').foreground}
         label={t('Lien')}
         onPress={onCreateLinkClick}
         shortcut={SELECTION_SHORTCUTS.link}

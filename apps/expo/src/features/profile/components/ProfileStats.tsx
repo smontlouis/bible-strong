@@ -9,6 +9,8 @@ import { twMerge } from '~common/ui/classNames'
 import type { Theme as AppTheme } from '~themes'
 import { useTheme } from '~themes/ThemeProvider'
 import { resolveFontFamily } from '~themes/styleValues'
+import { resolveUniverseColors } from '~themes/universeColors'
+import { type PersonalContent, personalContentIcons } from '~common/personalContent'
 
 import Link from '~common/Link'
 import Box, { HStack, VStack } from '~common/ui/Box'
@@ -71,8 +73,8 @@ const ProfileStats = ({ home = false }: { home?: boolean }) => {
           >
             <StatCard tall={home} route="Highlights">
               <StatValue
-                icon="edit-3"
-                color={home ? theme.colors.secondary : undefined}
+                content="highlights"
+                home={home}
                 count={highlights}
                 isLoading={isSyncing(['highlights', 'wordAnnotations'])}
               />
@@ -88,8 +90,8 @@ const ProfileStats = ({ home = false }: { home?: boolean }) => {
 
             <StatCard tall={home} route="Bookmarks">
               <StatValue
-                icon="bookmark"
-                color={home ? theme.colors.primary : undefined}
+                content="bookmarks"
+                home={home}
                 count={bookmarks}
                 isLoading={isSyncing(['bookmarks'])}
               />
@@ -105,8 +107,8 @@ const ProfileStats = ({ home = false }: { home?: boolean }) => {
 
             <StatCard tall={home} route="BibleVerseNotes">
               <StatValue
-                icon="file-text"
-                color={home ? theme.colors.color2 : undefined}
+                content="notes"
+                home={home}
                 count={notes}
                 isLoading={isSyncing(['notes'])}
               />
@@ -142,8 +144,8 @@ const ProfileStats = ({ home = false }: { home?: boolean }) => {
                 </Box>
               )}
               <StatValue
-                icon="feather"
-                color={home ? theme.colors.default : undefined}
+                content="study"
+                home={home}
                 count={studies}
                 isLoading={isSyncing(['studies'])}
               />
@@ -159,8 +161,8 @@ const ProfileStats = ({ home = false }: { home?: boolean }) => {
 
             <StatCard tall={home} route="BibleVerseLinks">
               <StatValue
-                icon="link"
-                color={home ? '#26A69A' : undefined}
+                content="links"
+                home={home}
                 count={links}
                 isLoading={isSyncing(['links'])}
               />
@@ -175,12 +177,7 @@ const ProfileStats = ({ home = false }: { home?: boolean }) => {
             </StatCard>
 
             <StatCard tall={home} route="Tags">
-              <StatValue
-                icon="tag"
-                color={home ? theme.colors.quint : undefined}
-                count={tags}
-                isLoading={isSyncing(['tags'])}
-              />
+              <StatValue content="tags" home={home} count={tags} isLoading={isSyncing(['tags'])} />
               <Text
                 className={home ? 'text-[12px] text-grey' : 'text-[11px] text-grey'}
                 numberOfLines={1}
@@ -198,18 +195,20 @@ const ProfileStats = ({ home = false }: { home?: boolean }) => {
 }
 
 const StatValue = ({
-  icon,
+  content,
   count,
   isLoading,
-  color,
+  home,
 }: {
-  icon: React.ComponentProps<typeof Icon.Feather>['name']
+  content: PersonalContent
   count: number
   isLoading: boolean
   /** Home cards: the icon takes its color and sits above a larger count. */
-  color?: string
+  home: boolean
 }) => {
   const theme = useTheme()
+  const icon = personalContentIcons[content]
+  const color = home ? resolveUniverseColors(theme.colors, content).foreground : undefined
   const showLoader = isLoading && count === 0
   const value = showLoader ? (
     <ActivityIndicator size="small" color={theme.colors.primary} />

@@ -1,5 +1,6 @@
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { getUniverseColor } from '~themes/universeColors'
 import distanceInWords from 'date-fns/formatDistance'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
@@ -11,6 +12,7 @@ import DictionnaryIcon from '~common/DictionnaryIcon'
 import EntityChipList from '~common/EntityChipList'
 import LexiqueIcon from '~common/LexiqueIcon'
 import NaveIcon from '~common/NaveIcon'
+import { personalContentIcons } from '~common/personalContent'
 import type { TagsObj } from '~common/types'
 import Border from '~common/ui/Border'
 import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
@@ -276,13 +278,18 @@ export const SectionIcon = ({ sectionId }: { sectionId: string }) => {
     case 'words':
       return <DictionnaryIcon size={20} />
     case 'highlights':
-      return <FeatherIcon name="edit-3" size={18} color="color1" />
     case 'notes':
-      return <FeatherIcon name="file-text" size={18} color="color2" />
     case 'links':
-      return <FeatherIcon name="link" size={18} color="tertiary" />
-    case 'studies':
-      return <FeatherIcon name="feather" size={18} color="quart" />
+    case 'studies': {
+      const content = sectionId === 'studies' ? 'study' : sectionId
+      return (
+        <FeatherIcon
+          name={personalContentIcons[content]}
+          size={18}
+          color={getUniverseColor(content)}
+        />
+      )
+    }
     default:
       return null
   }

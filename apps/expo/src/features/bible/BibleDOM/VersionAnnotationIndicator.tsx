@@ -4,6 +4,8 @@ import { scaleFontSize } from './scaleFontSize'
 import { isDarkTheme } from './utils'
 import { InlineItemContainer, InlineItemIconWrapper, InlineItemText } from './InlineItem'
 import Feather from '@expo/vector-icons/Feather'
+import { personalContentIcons } from '~common/personalContent'
+import { resolveUniverseColors } from '~themes/universeColors'
 
 /**
  * Discrete indicator showing when annotations exist in other Bible versions
@@ -47,7 +49,11 @@ const VersionAnnotationIndicator = ({ versions, settings, onClick, isDisabled }:
   return (
     <InlineItemContainer settings={settings} onClick={onClick} isButton isDisabled={isDisabled}>
       <InlineItemIconWrapper settings={settings}>
-        <Feather color={settings.colors[settings.theme].secondary} name="edit-3" size={16} />
+        <Feather
+          color={resolveUniverseColors(settings.colors[settings.theme], 'highlights').foreground}
+          name={personalContentIcons.highlights}
+          size={16}
+        />
       </InlineItemIconWrapper>
       <InlineItemText
         settings={settings}

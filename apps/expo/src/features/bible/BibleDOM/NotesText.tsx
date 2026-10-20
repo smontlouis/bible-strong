@@ -3,7 +3,9 @@ import truncate from './truncate'
 import { scaleFontSize } from './scaleFontSize'
 import { RootState } from '~redux/modules/reducer'
 import { NotedVerse, RootStyles } from './BibleDOMWrapper'
-import Ionicons from '@expo/vector-icons/Ionicons'
+import Feather from '@expo/vector-icons/Feather'
+import { personalContentIcons } from '~common/personalContent'
+import { resolveUniverseColors } from '~themes/universeColors'
 import { InlineItemContainer, InlineItemIconWrapper, InlineItemText } from './InlineItem'
 
 interface Props {
@@ -25,9 +27,9 @@ const NotesText = ({ notesText, settings, onClick, isDisabled }: Props) => {
           isDisabled={isDisabled}
         >
           <InlineItemIconWrapper settings={settings}>
-            <Ionicons
-              color={settings.colors[settings.theme].quart}
-              name="document-text-outline"
+            <Feather
+              color={resolveUniverseColors(settings.colors[settings.theme], 'notes').foreground}
+              name={personalContentIcons.notes}
               size={16}
             />
           </InlineItemIconWrapper>

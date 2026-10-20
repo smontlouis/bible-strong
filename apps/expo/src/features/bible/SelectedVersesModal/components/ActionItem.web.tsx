@@ -35,7 +35,7 @@ export default function ActionItem(props: ActionItemProps) {
           contentFit="contain"
         />
       ) : name ? (
-        <FeatherIcon name={name} size={MENU_ICON_SIZE} color={color ?? 'tertiary'} />
+        <FeatherIcon name={name} size={MENU_ICON_SIZE} color={color ?? tintColor ?? 'tertiary'} />
       ) : null}
       {/* The chevron follows the label: it says the action opens more, the key stays apart */}
       <Box className="flex-1 flex-row items-baseline gap-[6px] min-w-0">

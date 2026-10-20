@@ -31,3 +31,19 @@ it('shares identity across search, tab and relation vocabulary', () => {
   expect(getUniverseColor('externalLink')).toBe(getUniverseColor('links'))
   expect(getUniverseColor('reference')).toBe(getUniverseColor('references'))
 })
+
+const personalContents = ['highlights', 'bookmarks', 'notes', 'study', 'links', 'tags'] as const
+
+it.each([colors, darkColors])('keeps what the reader makes apart in each palette', palette => {
+  const foregrounds = personalContents.map(
+    content => resolveUniverseColors(palette, content).foreground
+  )
+  expect(new Set(foregrounds).size).toBe(personalContents.length)
+  expect(foregrounds).not.toContain(palette.primary)
+})
+
+it('counts a word annotation as a highlight', () => {
+  expect(getUniverseColor('annotation')).toBe(getUniverseColor('highlights'))
+  expect(getUniverseColor('bookmark')).toBe(getUniverseColor('bookmarks'))
+  expect(getUniverseColor('tag')).toBe(getUniverseColor('tags'))
+})

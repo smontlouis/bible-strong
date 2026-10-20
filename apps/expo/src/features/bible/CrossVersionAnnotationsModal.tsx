@@ -8,6 +8,8 @@ import { SheetHeader, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import { personalContentIcons } from '~common/personalContent'
+import { getUniverseColor } from '~themes/universeColors'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { Chip } from '~common/ui/NewChip'
 import Text from '~common/ui/Text'
@@ -173,7 +175,11 @@ const CrossVersionAnnotationsModal = ({
         <ItemRow key={versionData.version}>
           <ItemButton activeOpacity={0.7} onPress={() => handleOpenBibleView(versionData.version)}>
             <IconContainer>
-              <FeatherIcon name="edit-3" size={18} color="secondary" />
+              <FeatherIcon
+                name={personalContentIcons.highlights}
+                size={18}
+                color={getUniverseColor('highlights')}
+              />
             </IconContainer>
             <Box className="overflow-hidden border-continuous flex-[1]">
               <HStack className="overflow-hidden border-continuous gap-[10px] items-center">

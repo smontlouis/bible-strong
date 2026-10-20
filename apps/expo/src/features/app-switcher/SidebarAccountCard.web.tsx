@@ -1,8 +1,9 @@
-import { useRef, type ComponentProps } from 'react'
+import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import ContextualPanel from '~common/ContextualPanel'
 import type { PanelScreen } from '~common/ContextualPanel/types'
 import PanelAction from '~common/ContextualPanel/PanelAction'
+import { type PersonalContent, personalContentIcons } from '~common/personalContent'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -12,22 +13,21 @@ import { toast } from '~helpers/toast'
 import useLogin from '~helpers/useLogin'
 import { routeMapping } from '~navigation/routeMapping'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import { colorWithOpacity } from '~themes/colorValues'
+import { resolveUniverseColors } from '~themes/universeColors'
 import { useTheme } from '~themes/ThemeProvider'
 import { WORKSPACE_SIDEBAR_WIDTH } from './utils/useResponsiveWorkspace'
 
 const personalResources = [
-  { route: 'Highlights', label: 'Surbrillances', icon: 'edit-3', color: 'primary' },
-  { route: 'Bookmarks', label: 'Marque-pages', icon: 'bookmark', color: 'secondary' },
-  { route: 'BibleVerseNotes', label: 'Notes', icon: 'file-text', color: 'color2' },
-  { route: 'Studies', label: 'Études', icon: 'feather', color: 'tertiary' },
-  { route: 'BibleVerseLinks', label: 'Liens', icon: 'link', color: 'secondary' },
-  { route: 'Tags', label: 'Étiquettes', icon: 'tag', color: 'quint' },
+  { route: 'Highlights', label: 'Surbrillances', content: 'highlights' },
+  { route: 'Bookmarks', label: 'Marque-pages', content: 'bookmarks' },
+  { route: 'BibleVerseNotes', label: 'Notes', content: 'notes' },
+  { route: 'Studies', label: 'Études', content: 'study' },
+  { route: 'BibleVerseLinks', label: 'Liens', content: 'links' },
+  { route: 'Tags', label: 'Étiquettes', content: 'tags' },
 ] as const satisfies readonly {
   route: keyof typeof routeMapping
   label: string
-  icon: ComponentProps<typeof FeatherIcon>['name']
-  color: string
+  content: PersonalContent
 }[]
 
 export default function SidebarAccountCard({
@@ -73,33 +73,40 @@ export default function SidebarAccountCard({
       hideHeader: true,
       content: navigation => (
         <Box className="gap-[2px]">
-          {personalResources.map(resource => (
-            <TouchableBox
-              key={resource.route}
-              accessibilityRole="button"
-              className="flex-row items-center gap-[10px] min-h-[42px] px-[8px] py-[5px] rounded-[8px] hover:bg-light-grey"
-              onPress={() => {
-                navigation.close()
-                if (resource.route === 'Studies' && !isLogged) {
-                  toast.info(t('study.loginRequired'))
-                  return
-                }
-                push({ pathname: routeMapping[resource.route] })
-                onSelectContent?.()
-              }}
-            >
-              <Box
-                className="w-[28px] h-[28px] rounded-[7px] items-center justify-center"
-                style={{ backgroundColor: colorWithOpacity(theme.colors[resource.color], 0.12) }}
+          {personalResources.map(resource => {
+            const color = resolveUniverseColors(theme.colors, resource.content)
+            return (
+              <TouchableBox
+                key={resource.route}
+                accessibilityRole="button"
+                className="flex-row items-center gap-[10px] min-h-[42px] px-[8px] py-[5px] rounded-[8px] hover:bg-light-grey"
+                onPress={() => {
+                  navigation.close()
+                  if (resource.route === 'Studies' && !isLogged) {
+                    toast.info(t('study.loginRequired'))
+                    return
+                  }
+                  push({ pathname: routeMapping[resource.route] })
+                  onSelectContent?.()
+                }}
               >
-                <FeatherIcon name={resource.icon} size={16} color={resource.color} />
-              </Box>
-              <Text className="flex-1 text-[13px]">{t(resource.label)}</Text>
-              {resource.route === 'Studies' && !isLogged && (
-                <FeatherIcon name="lock" size={12} color="grey" />
-              )}
-            </TouchableBox>
-          ))}
+                <Box
+                  className="w-[28px] h-[28px] rounded-[7px] items-center justify-center"
+                  style={{ backgroundColor: color.background }}
+                >
+                  <FeatherIcon
+                    name={personalContentIcons[resource.content]}
+                    size={16}
+                    color={color.foreground}
+                  />
+                </Box>
+                <Text className="flex-1 text-[13px]">{t(resource.label)}</Text>
+                {resource.route === 'Studies' && !isLogged && (
+                  <FeatherIcon name="lock" size={12} color="grey" />
+                )}
+              </TouchableBox>
+            )
+          })}
           <Box className="h-px bg-border my-[5px] mx-[8px]" />
           <PanelAction
             label={isLogged ? t('workspace.profile') : t('Se connecter')}

@@ -1,4 +1,6 @@
 import { useTranslation } from 'react-i18next'
+import { getUniverseColor, resolveUniverseColors } from '~themes/universeColors'
+import { personalContentIcons } from '~common/personalContent'
 import ContextualPanel from '~common/ContextualPanel'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -15,10 +17,12 @@ import type { VerseBookmarkActionProps } from './VerseBookmarkAction'
 export default function VerseBookmarkAction(props: VerseBookmarkActionProps) {
   const menu = useSelectionMenu()
   const { t } = useTranslation()
+  const theme = useTheme()
   if (menu)
     return (
       <ActionItem
-        name="bookmark"
+        name={personalContentIcons.bookmarks}
+        tintColor={resolveUniverseColors(theme.colors, 'bookmarks').foreground}
         label={t('Marque-page')}
         onPress={() => menu.openScreen('bookmark')}
         disabled={props.disabled || !getSelectedVersesBookmarkLocation(props.selectedVerses)}
@@ -49,7 +53,8 @@ function VerseBookmarkPanel({
   if (disabled || !location)
     return (
       <ActionItem
-        name="bookmark"
+        name={personalContentIcons.bookmarks}
+        tintColor={resolveUniverseColors(theme.colors, 'bookmarks').foreground}
         label={t('Marque-page')}
         onPress={onPress}
         disabled
@@ -73,7 +78,11 @@ function VerseBookmarkPanel({
               ...(isActive ? { boxShadow: `inset 0 0 0 2px ${theme.colors.primary}` } : {}),
             }}
           >
-            <FeatherIcon name="bookmark" size={ICON_SIZE} color="primary" />
+            <FeatherIcon
+              name={personalContentIcons.bookmarks}
+              size={ICON_SIZE}
+              color={getUniverseColor('bookmarks')}
+            />
           </Box>
           <Text className="text-[10px] text-center">{t('Marque-page')}</Text>
         </Box>
