@@ -1,6 +1,6 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import type { LayoutChangeEvent, TextStyle } from 'react-native'
-import * as NativeUI from 'react-native'
+import { TouchableOpacity, View } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
@@ -16,10 +16,7 @@ type SelectableProps = {
 export type StrongVerseTextStyle = Pick<TextStyle, 'fontSize' | 'lineHeight' | 'fontFamily'>
 
 const StyledView = (
-  componentProps: Omit<
-    UIComponentProps<typeof NativeUI.TouchableOpacity>,
-    keyof SelectableProps | 'theme'
-  > &
+  componentProps: Omit<UIComponentProps<typeof TouchableOpacity>, keyof SelectableProps | 'theme'> &
     Omit<SelectableProps, 'theme'> & { theme?: AppTheme; className?: string }
 ) => {
   const contextTheme = useAppTheme()
@@ -31,24 +28,21 @@ const StyledView = (
     className
   )
   return (
-    <NativeUI.TouchableOpacity
+    <TouchableOpacity
       {...props}
       className={resolvedClassName}
       style={
         [
           { backgroundColor: isSelected ? theme.colors.primary : theme.colors.lightPrimary },
           props.style,
-        ] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']
+        ] as UIComponentProps<typeof TouchableOpacity>['style']
       }
     />
   )
 }
 
 const StyledCircle = (
-  componentProps: Omit<
-    UIComponentProps<typeof NativeUI.TouchableOpacity>,
-    keyof SelectableProps | 'theme'
-  > &
+  componentProps: Omit<UIComponentProps<typeof TouchableOpacity>, keyof SelectableProps | 'theme'> &
     Omit<SelectableProps, 'theme'> & { theme?: AppTheme; className?: string }
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
@@ -58,12 +52,12 @@ const StyledCircle = (
     className
   )
   return (
-    <NativeUI.TouchableOpacity
+    <TouchableOpacity
       {...props}
       className={resolvedClassName}
       style={
         [{ borderRadius: 25 / 2 }, props.style] as UIComponentProps<
-          typeof NativeUI.TouchableOpacity
+          typeof TouchableOpacity
         >['style']
       }
     />
@@ -72,7 +66,7 @@ const StyledCircle = (
 
 const StyledInsideCircle = (
   componentProps: Omit<
-    UIComponentProps<typeof NativeUI.View>,
+    UIComponentProps<typeof View>,
     keyof (SelectableProps & { isConcordance?: boolean }) | 'theme'
   > &
     Omit<SelectableProps & { isConcordance?: boolean }, 'theme'> & {
@@ -86,7 +80,7 @@ const StyledInsideCircle = (
   const { isSelected, isConcordance } = props
   const resolvedClassName = twMerge('items-center justify-center', className)
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
       style={
@@ -101,7 +95,7 @@ const StyledInsideCircle = (
               isSelected || isConcordance ? theme.colors.primary : theme.colors.lightPrimary,
           },
           props.style,
-        ] as UIComponentProps<typeof NativeUI.View>['style']
+        ] as UIComponentProps<typeof View>['style']
       }
     />
   )

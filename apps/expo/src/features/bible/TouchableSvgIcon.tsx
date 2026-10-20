@@ -1,6 +1,6 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { ComponentType } from 'react'
-import * as NativeUI from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
@@ -17,7 +17,7 @@ type SvgIconComponentProps = {
 }
 
 const Touchable = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.TouchableOpacity>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof TouchableOpacity>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -27,12 +27,12 @@ const Touchable = (
   const { disabled } = props
   const resolvedClassName = twMerge('flex-[1] items-center justify-center', className)
   return (
-    <NativeUI.TouchableOpacity
+    <TouchableOpacity
       {...props}
       className={resolvedClassName}
       style={
         [{ opacity: disabled ? 0.3 : 1 }, props.style] as UIComponentProps<
-          typeof NativeUI.TouchableOpacity
+          typeof TouchableOpacity
         >['style']
       }
     />

@@ -2,8 +2,7 @@ import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import distanceInWords from 'date-fns/formatDistance'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
-import * as NativeUI from 'react-native'
-import { TouchableOpacity } from 'react-native'
+import { TouchableOpacity, Text as NativeText } from 'react-native'
 import HighlightOptions from '~common/HighlightOptions'
 import { twMerge } from '~common/ui/classNames'
 
@@ -30,7 +29,7 @@ import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import type { CustomColor, HighlightType } from '~redux/modules/user'
 
 const DateText = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.Text>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof NativeText>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -39,10 +38,10 @@ const DateText = (
 
   const resolvedClassName = twMerge('text-tertiary', className)
   return (
-    <NativeUI.Text
+    <NativeText
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.Text>['style']}
+      style={[props.style] as UIComponentProps<typeof NativeText>['style']}
     />
   )
 }

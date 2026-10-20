@@ -1,8 +1,7 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import * as NativeUI from 'react-native'
-import { FlatList } from 'react-native'
+import { FlatList, Platform, Text as NativeText, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import { twMerge } from '~common/ui/classNames'
 
@@ -36,7 +35,7 @@ import {
 } from '~state/entityListFilters'
 
 const TabContainer = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -48,17 +47,17 @@ const TabContainer = (
     className
   )
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      style={[props.style] as UIComponentProps<typeof View>['style']}
     />
   )
 }
 
 const Tab = (
   componentProps: Omit<
-    UIComponentProps<typeof NativeUI.TouchableOpacity>,
+    UIComponentProps<typeof TouchableOpacity>,
     keyof { active: boolean } | 'theme'
   > &
     Omit<{ active: boolean }, 'theme'> & { theme?: AppTheme; className?: string }
@@ -69,24 +68,21 @@ const Tab = (
   const { active } = props
   const resolvedClassName = twMerge('py-[12px] px-[16px] border-b-[2px]', className)
   return (
-    <NativeUI.TouchableOpacity
+    <TouchableOpacity
       {...props}
       className={resolvedClassName}
       style={
         [
           { borderBottomColor: active ? theme.colors.primary : 'transparent' },
           props.style,
-        ] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']
+        ] as UIComponentProps<typeof TouchableOpacity>['style']
       }
     />
   )
 }
 
 const TabText = (
-  componentProps: Omit<
-    UIComponentProps<typeof NativeUI.Text>,
-    keyof { active: boolean } | 'theme'
-  > &
+  componentProps: Omit<UIComponentProps<typeof NativeText>, keyof { active: boolean } | 'theme'> &
     Omit<{ active: boolean }, 'theme'> & { theme?: AppTheme; className?: string }
 ) => {
   const contextTheme = useAppTheme()
@@ -95,7 +91,7 @@ const TabText = (
   const { active } = props
   const resolvedClassName = twMerge('text-[14px]', className)
   return (
-    <NativeUI.Text
+    <NativeText
       {...props}
       className={resolvedClassName}
       style={
@@ -105,14 +101,14 @@ const TabText = (
             color: active ? theme.colors.primary : theme.colors.tertiary,
           },
           props.style,
-        ] as UIComponentProps<typeof NativeUI.Text>['style']
+        ] as UIComponentProps<typeof NativeText>['style']
       }
     />
   )
 }
 
 const AnnotationCard = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.TouchableOpacity>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof TouchableOpacity>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -124,16 +120,16 @@ const AnnotationCard = (
     className
   )
   return (
-    <NativeUI.TouchableOpacity
+    <TouchableOpacity
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']}
+      style={[props.style] as UIComponentProps<typeof TouchableOpacity>['style']}
     />
   )
 }
 
 const AnnotationText = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.Text>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof NativeText>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -142,16 +138,16 @@ const AnnotationText = (
 
   const resolvedClassName = twMerge('text-[16px] text-default mb-[8px]', className)
   return (
-    <NativeUI.Text
+    <NativeText
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.Text>['style']}
+      style={[props.style] as UIComponentProps<typeof NativeText>['style']}
     />
   )
 }
 
 const AnnotationMeta = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.Text>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof NativeText>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -160,16 +156,16 @@ const AnnotationMeta = (
 
   const resolvedClassName = twMerge('text-[13px] text-tertiary', className)
   return (
-    <NativeUI.Text
+    <NativeText
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.Text>['style']}
+      style={[props.style] as UIComponentProps<typeof NativeText>['style']}
     />
   )
 }
 
 const EmptyState = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -178,16 +174,16 @@ const EmptyState = (
 
   const resolvedClassName = twMerge('flex-[1] justify-center items-center p-[32px]', className)
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      style={[props.style] as UIComponentProps<typeof View>['style']}
     />
   )
 }
 
 const EmptyText = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.Text>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof NativeText>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -196,10 +192,10 @@ const EmptyText = (
 
   const resolvedClassName = twMerge('text-[16px] text-tertiary text-center', className)
   return (
-    <NativeUI.Text
+    <NativeText
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.Text>['style']}
+      style={[props.style] as UIComponentProps<typeof NativeText>['style']}
     />
   )
 }
@@ -232,7 +228,7 @@ const WordAnnotationsScreen = () => {
     selected: T,
     onSelect: (value: T) => void
   ) =>
-    NativeUI.Platform.OS === 'web'
+    Platform.OS === 'web'
       ? choices.map(choice => ({
           key: String(choice.value),
           label: choice.label,

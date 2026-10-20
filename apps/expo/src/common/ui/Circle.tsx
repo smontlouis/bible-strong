@@ -1,5 +1,5 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
-import * as NativeUI from 'react-native'
+import { View } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
@@ -7,7 +7,7 @@ import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
 const Circle = (
   componentProps: Omit<
-    UIComponentProps<typeof NativeUI.View>,
+    UIComponentProps<typeof View>,
     | keyof {
         isSelected: boolean
         color: string
@@ -30,7 +30,7 @@ const Circle = (
   const { isSelected, color, size } = props
   const resolvedClassName = twMerge('border-[2px] ml-[10px]', className)
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
       style={
@@ -43,7 +43,7 @@ const Circle = (
             borderColor: isSelected ? theme.colors.primary : theme.colors.opacity5,
           },
           props.style,
-        ] as UIComponentProps<typeof NativeUI.View>['style']
+        ] as UIComponentProps<typeof View>['style']
       }
     />
   )

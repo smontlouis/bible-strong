@@ -8,7 +8,7 @@ import * as Icon from '~common/ui/classNameIcons'
 import { appleAuth, AppleButton } from '@invertase/react-native-apple-authentication'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useState } from 'react'
-import * as NativeUI from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
@@ -26,7 +26,7 @@ import { Theme } from '~themes'
 
 const SocialButton = (
   componentProps: Omit<
-    UIComponentProps<typeof NativeUI.TouchableOpacity>,
+    UIComponentProps<typeof TouchableOpacity>,
     keyof { color?: string } | 'theme'
   > &
     Omit<{ color?: string }, 'theme'> & { theme?: AppTheme; className?: string }
@@ -40,12 +40,12 @@ const SocialButton = (
     className
   )
   return (
-    <NativeUI.TouchableOpacity
+    <TouchableOpacity
       {...props}
       className={resolvedClassName}
       style={
         [{ backgroundColor: color || theme.colors.reverse }, props.style] as UIComponentProps<
-          typeof NativeUI.TouchableOpacity
+          typeof TouchableOpacity
         >['style']
       }
     />

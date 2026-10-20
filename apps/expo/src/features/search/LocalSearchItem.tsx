@@ -2,7 +2,7 @@ import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
-import * as NativeUI from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import Paragraph from '~common/ui/Paragraph'
@@ -10,7 +10,7 @@ import Text from '~common/ui/Text'
 import type { Theme as AppTheme } from '~themes'
 
 const Container = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.TouchableOpacity>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof TouchableOpacity>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -19,10 +19,10 @@ const Container = (
 
   const resolvedClassName = twMerge('pt-[15px] pb-[20px] border-b-[1px] border-b-border', className)
   return (
-    <NativeUI.TouchableOpacity
+    <TouchableOpacity
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']}
+      style={[props.style] as UIComponentProps<typeof TouchableOpacity>['style']}
     />
   )
 }

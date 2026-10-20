@@ -1,6 +1,5 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
-import * as NativeUI from 'react-native'
 import {
   SectionList as RNSectionList,
   SectionListProps,
@@ -20,7 +19,7 @@ import { pageContentStyle } from './PageContent'
 
 const SectionList = (
   componentProps: Omit<
-    UIComponentProps<typeof NativeUI.SectionList>,
+    UIComponentProps<typeof RNSectionList>,
     keyof { theme?: Theme; orientation: Orientation } | 'theme'
   > &
     Omit<{ theme?: Theme; orientation: Orientation }, 'theme'> & {
@@ -37,7 +36,7 @@ const SectionList = (
     className
   )
   return (
-    <NativeUI.SectionList
+    <RNSectionList
       {...props}
       className={resolvedClassName}
       style={
@@ -52,7 +51,7 @@ const SectionList = (
             }),
           },
           props.style,
-        ] as UIComponentProps<typeof NativeUI.SectionList>['style']
+        ] as UIComponentProps<typeof RNSectionList>['style']
       }
     />
   )

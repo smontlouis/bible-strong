@@ -1,7 +1,6 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
-import * as NativeUI from 'react-native'
-import { ActivityIndicator, StyleProp, ViewStyle } from 'react-native'
+import { ActivityIndicator, StyleProp, ViewStyle, View } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
@@ -14,7 +13,7 @@ import useTimeout from '~helpers/useTimeout'
 import { Theme } from '~themes'
 
 const Container = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -23,10 +22,10 @@ const Container = (
 
   const resolvedClassName = twMerge('flex-[1] items-center justify-center min-h-[300px]', className)
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      style={[props.style] as UIComponentProps<typeof View>['style']}
     />
   )
 }

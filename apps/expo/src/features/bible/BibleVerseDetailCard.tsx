@@ -4,7 +4,6 @@ import { getUniverseColor } from '~themes/universeColors'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { useEffect, useRef, useState } from 'react'
-import * as NativeUI from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
@@ -24,7 +23,7 @@ import StrongCard from './StrongCard'
 import BibleVerseDetailFooter from './BibleVerseDetailFooter'
 
 import { useTranslation } from 'react-i18next'
-import { FlatList, ScrollView } from 'react-native'
+import { FlatList, ScrollView, Platform, type ScrollViewProps, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useSelector } from 'react-redux'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
@@ -71,7 +70,7 @@ const WEB_STRONG_CARD_MAX_WIDTH = 250
 const WEB_STRONG_CARD_MAX_HEIGHT = 600
 
 const VersetWrapper = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -83,10 +82,10 @@ const VersetWrapper = (
     className
   )
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      style={[props.style] as UIComponentProps<typeof View>['style']}
     />
   )
 }
@@ -110,7 +109,7 @@ const NumberText = (
 }
 
 const StyledVerse = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -119,10 +118,10 @@ const StyledVerse = (
 
   const resolvedClassName = twMerge('pl-[0px] pr-[10px] mb-[5px] flex-row', className)
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      style={[props.style] as UIComponentProps<typeof View>['style']}
     />
   )
 }
@@ -213,7 +212,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   const [currentStrongCardIndex, setCurrentStrongCardIndex] = useState(0)
   const [modalContentHeight, setModalContentHeight] = useState(0)
   const [modalContentWidth, setModalContentWidth] = useState(0)
-  const isWeb = NativeUI.Platform.OS === 'web'
+  const isWeb = Platform.OS === 'web'
   const itemWidth = isWeb
     ? Math.max(1, Math.min(WEB_STRONG_CARD_MAX_WIDTH, modalContentWidth - 40))
     : nativeItemWidth
@@ -691,6 +690,6 @@ const BibleVerseDetailCard: React.FC<Props> = ({
 
 export default BibleVerseDetailCard
 
-const renderStrongCardsScrollView = (props: NativeUI.ScrollViewProps) => (
+const renderStrongCardsScrollView = (props: ScrollViewProps) => (
   <HorizontalControlScrollView {...props} />
 )

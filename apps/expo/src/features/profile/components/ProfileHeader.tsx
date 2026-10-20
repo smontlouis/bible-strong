@@ -3,7 +3,7 @@ import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import * as NativeUI from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import { useDispatch } from 'react-redux'
 import { twMerge } from '~common/ui/classNames'
 
@@ -118,7 +118,7 @@ const ProfileHeader = () => {
 }
 
 const EditButton = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.TouchableOpacity>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof TouchableOpacity>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -127,16 +127,16 @@ const EditButton = (
 
   const resolvedClassName = twMerge('p-[5px]', className)
   return (
-    <NativeUI.TouchableOpacity
+    <TouchableOpacity
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']}
+      style={[props.style] as UIComponentProps<typeof TouchableOpacity>['style']}
     />
   )
 }
 
 const WarningButton = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.TouchableOpacity>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof TouchableOpacity>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -145,10 +145,10 @@ const WarningButton = (
 
   const resolvedClassName = twMerge('p-[2px]', className)
   return (
-    <NativeUI.TouchableOpacity
+    <TouchableOpacity
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']}
+      style={[props.style] as UIComponentProps<typeof TouchableOpacity>['style']}
     />
   )
 }

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
-import * as NativeUI from 'react-native'
+import { View } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
@@ -28,7 +28,7 @@ import type { VersionCode } from '~state/tabs'
 import CompareStrongVerseText from './CompareStrongVerseText'
 
 const Container = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -37,10 +37,10 @@ const Container = (
 
   const resolvedClassName = twMerge('p-[20px] border-t-border border-t-[1px]', className)
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      style={[props.style] as UIComponentProps<typeof View>['style']}
     />
   )
 }

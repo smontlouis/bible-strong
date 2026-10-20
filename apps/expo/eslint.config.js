@@ -34,6 +34,17 @@ module.exports = [
       'react-hooks/refs': 'off',
       'react-hooks/set-state-in-effect': 'off',
       'react-hooks/use-memo': 'off',
+      // On web, Uniwind only swaps in its className-aware components for named imports, which
+      // babel-plugin-react-native-web points at react-native-web/dist/exports/<Name>. A namespace
+      // import goes through react-native-web's index and drops every className.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "ImportDeclaration[source.value='react-native'] > ImportNamespaceSpecifier",
+          message:
+            "Import React Native components by name: on web, `import * as X from 'react-native'` bypasses Uniwind and ignores className.",
+        },
+      ],
     },
   },
   {

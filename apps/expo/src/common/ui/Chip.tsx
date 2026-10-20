@@ -1,6 +1,5 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
-import * as NativeUI from 'react-native'
-import { TouchableOpacity } from 'react-native'
+import { TouchableOpacity, View } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
@@ -13,7 +12,7 @@ interface StyledChipProps {
 }
 
 const StyledChip = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, keyof StyledChipProps | 'theme'> &
+  componentProps: Omit<UIComponentProps<typeof View>, keyof StyledChipProps | 'theme'> &
     Omit<StyledChipProps, 'theme'> & { theme?: AppTheme; className?: string }
 ) => {
   const contextTheme = useAppTheme()
@@ -25,7 +24,7 @@ const StyledChip = (
     className
   )
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
       style={
@@ -41,7 +40,7 @@ const StyledChip = (
             }),
           },
           props.style,
-        ] as UIComponentProps<typeof NativeUI.View>['style']
+        ] as UIComponentProps<typeof View>['style']
       }
     />
   )

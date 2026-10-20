@@ -1,8 +1,7 @@
 import { useAtomValue } from 'jotai'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
-import * as NativeUI from 'react-native'
-import { ActivityIndicator, Linking, Modal } from 'react-native'
+import { ActivityIndicator, Linking, Modal, View } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
@@ -18,7 +17,7 @@ import type { SubcollectionName } from '~helpers/firestoreSubcollections'
 import { Theme } from '~themes'
 
 const ModalContent = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, keyof { theme: Theme } | 'theme'> &
+  componentProps: Omit<UIComponentProps<typeof View>, keyof { theme: Theme } | 'theme'> &
     Omit<{ theme: Theme }, 'theme'> & { theme?: AppTheme; className?: string }
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
@@ -28,16 +27,16 @@ const ModalContent = (
     className
   )
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      style={[props.style] as UIComponentProps<typeof View>['style']}
     />
   )
 }
 
 const IconContainer = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, keyof { theme: Theme } | 'theme'> &
+  componentProps: Omit<UIComponentProps<typeof View>, keyof { theme: Theme } | 'theme'> &
     Omit<{ theme: Theme }, 'theme'> & { theme?: AppTheme; className?: string }
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
@@ -47,16 +46,16 @@ const IconContainer = (
     className
   )
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      style={[props.style] as UIComponentProps<typeof View>['style']}
     />
   )
 }
 
 const ErrorBox = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, keyof { theme: Theme } | 'theme'> &
+  componentProps: Omit<UIComponentProps<typeof View>, keyof { theme: Theme } | 'theme'> &
     Omit<{ theme: Theme }, 'theme'> & { theme?: AppTheme; className?: string }
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
@@ -66,16 +65,16 @@ const ErrorBox = (
     className
   )
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      style={[props.style] as UIComponentProps<typeof View>['style']}
     />
   )
 }
 
 const Backdrop = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -84,10 +83,10 @@ const Backdrop = (
 
   const resolvedClassName = twMerge('flex-[1] bg-[rgba(0,0,0,0.9)]', className)
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      style={[props.style] as UIComponentProps<typeof View>['style']}
     />
   )
 }

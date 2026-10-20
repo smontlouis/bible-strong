@@ -1,6 +1,6 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
-import * as NativeUI from 'react-native'
+import { View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { twMerge } from '~common/ui/classNames'
 
@@ -23,10 +23,7 @@ import {
 import type { Theme as AppTheme } from '~themes'
 
 const RowContainer = (
-  componentProps: Omit<
-    UIComponentProps<typeof NativeUI.View>,
-    keyof { border?: boolean } | 'theme'
-  > &
+  componentProps: Omit<UIComponentProps<typeof View>, keyof { border?: boolean } | 'theme'> &
     Omit<{ border?: boolean }, 'theme'> & { theme?: AppTheme; className?: string }
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
@@ -37,12 +34,12 @@ const RowContainer = (
     className
   )
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
       style={
         [{ borderBottomWidth: border ? 1 : 0 }, props.style] as UIComponentProps<
-          typeof NativeUI.View
+          typeof View
         >['style']
       }
     />

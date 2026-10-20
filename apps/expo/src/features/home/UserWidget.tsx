@@ -2,7 +2,7 @@ import * as Icon from '@expo/vector-icons'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import * as NativeUI from 'react-native'
+import { View } from 'react-native'
 import { Carousel } from 'react-native-reanimated-carousel'
 import { twMerge } from '~common/ui/classNames'
 
@@ -18,7 +18,7 @@ import { VISIBLE_VERSE_OF_THE_DAY_OFFSETS } from './verseOfTheDayPolicy'
 const visibleVerseOffsets = [...VISIBLE_VERSE_OF_THE_DAY_OFFSETS]
 
 const Container = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -27,10 +27,10 @@ const Container = (
 
   const resolvedClassName = twMerge('bg-light-grey pt-[20px] pb-[0px] overflow-visible', className)
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      style={[props.style] as UIComponentProps<typeof View>['style']}
     />
   )
 }

@@ -1,6 +1,5 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
-import * as NativeUI from 'react-native'
 import {
   FlatListProps,
   FlatList as RNFlatList,
@@ -22,10 +21,7 @@ type StyledFlatListProps = {
 }
 
 const FlatList = (
-  componentProps: Omit<
-    UIComponentProps<typeof NativeUI.FlatList>,
-    keyof StyledFlatListProps | 'theme'
-  > &
+  componentProps: Omit<UIComponentProps<typeof RNFlatList>, keyof StyledFlatListProps | 'theme'> &
     Omit<StyledFlatListProps, 'theme'> & { theme?: AppTheme; className?: string }
 ) => {
   const contextTheme = useAppTheme()
@@ -37,7 +33,7 @@ const FlatList = (
     className
   )
   return (
-    <NativeUI.FlatList
+    <RNFlatList
       {...props}
       className={resolvedClassName}
       style={
@@ -54,7 +50,7 @@ const FlatList = (
             }),
           },
           props.style,
-        ] as UIComponentProps<typeof NativeUI.FlatList>['style']
+        ] as UIComponentProps<typeof RNFlatList>['style']
       }
     />
   )

@@ -1,13 +1,12 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
-import * as NativeUI from 'react-native'
-import { TextInputProps } from 'react-native'
+import { TextInputProps, TextInput } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
 import { useTheme } from '~themes/ThemeProvider'
 
 const StyledTextArea = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.TextInput>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof TextInput>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -19,10 +18,10 @@ const StyledTextArea = (
     className
   )
   return (
-    <NativeUI.TextInput
+    <TextInput
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.TextInput>['style']}
+      style={[props.style] as UIComponentProps<typeof TextInput>['style']}
     />
   )
 }

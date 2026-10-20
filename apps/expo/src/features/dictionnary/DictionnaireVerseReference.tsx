@@ -1,5 +1,5 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
-import * as NativeUI from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
@@ -13,10 +13,7 @@ interface SelectedProps {
 }
 
 const StyledView = (
-  componentProps: Omit<
-    UIComponentProps<typeof NativeUI.TouchableOpacity>,
-    keyof SelectedProps | 'theme'
-  > &
+  componentProps: Omit<UIComponentProps<typeof TouchableOpacity>, keyof SelectedProps | 'theme'> &
     Omit<SelectedProps, 'theme'> & { theme?: AppTheme; className?: string }
 ) => {
   const contextTheme = useAppTheme()
@@ -28,14 +25,14 @@ const StyledView = (
     className
   )
   return (
-    <NativeUI.TouchableOpacity
+    <TouchableOpacity
       {...props}
       className={resolvedClassName}
       style={
         [
           { backgroundColor: isSelected ? theme.colors.secondary : theme.colors.lightSecondary },
           props.style,
-        ] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']
+        ] as UIComponentProps<typeof TouchableOpacity>['style']
       }
     />
   )

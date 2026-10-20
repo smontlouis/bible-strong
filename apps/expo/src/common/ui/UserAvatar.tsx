@@ -1,5 +1,5 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
-import * as NativeUI from 'react-native'
+import { Image } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 import GeneratedUserAvatar from './GeneratedUserAvatar'
 
@@ -27,7 +27,7 @@ const UserAvatar = ({ size = 60, photoURL, displayName, email }: UserAvatarProps
 }
 
 const AvatarImage = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.Image>, keyof { size: number } | 'theme'> &
+  componentProps: Omit<UIComponentProps<typeof Image>, keyof { size: number } | 'theme'> &
     Omit<{ size: number }, 'theme'> & { theme?: AppTheme; className?: string }
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
@@ -35,12 +35,12 @@ const AvatarImage = (
   const { size } = props
   const resolvedClassName = twMerge('bg-light-grey', className)
   return (
-    <NativeUI.Image
+    <Image
       {...props}
       className={resolvedClassName}
       style={
         [{ width: size, height: size, borderRadius: size / 2 }, props.style] as UIComponentProps<
-          typeof NativeUI.Image
+          typeof Image
         >['style']
       }
     />

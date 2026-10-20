@@ -1,8 +1,7 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import * as NativeUI from 'react-native'
-import { TouchableOpacity } from 'react-native'
+import { TouchableOpacity, View } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import { SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
@@ -36,7 +35,7 @@ const TypeRow = (
 }
 
 const SectionHeader = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -45,10 +44,10 @@ const SectionHeader = (
 
   const resolvedClassName = twMerge('p-[16px] pb-[8px] bg-light-grey', className)
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      style={[props.style] as UIComponentProps<typeof View>['style']}
     />
   )
 }

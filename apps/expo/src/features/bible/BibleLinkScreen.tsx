@@ -7,8 +7,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { useEffect, useState } from 'react'
-import * as NativeUI from 'react-native'
-import { ActivityIndicator, Dimensions, Image, Linking, ScrollView } from 'react-native'
+import { ActivityIndicator, Dimensions, Image, Linking, ScrollView, TextInput } from 'react-native'
 import {
   KeyboardAvoidingView,
   KeyboardStickyView,
@@ -59,7 +58,7 @@ import { unifiedTagsModalAtom } from '~state/app'
 const FOOTER_HEIGHT = 64
 
 const StyledTextInput = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.TextInput>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof TextInput>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -71,10 +70,10 @@ const StyledTextInput = (
     className
   )
   return (
-    <NativeUI.TextInput
+    <TextInput
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.TextInput>['style']}
+      style={[props.style] as UIComponentProps<typeof TextInput>['style']}
     />
   )
 }

@@ -1,8 +1,7 @@
 import * as Icon from '~common/ui/classNameIcons'
 import { useQuery } from '@tanstack/react-query'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
-import * as NativeUI from 'react-native'
-import { FlatList, TouchableOpacity } from 'react-native'
+import { FlatList, TouchableOpacity, View } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import { pageContentStyle } from '~common/ui/PageContent'
@@ -26,7 +25,7 @@ import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import type { RootState } from '~redux/modules/reducer'
 
 const OccurencesNumber = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -38,10 +37,10 @@ const OccurencesNumber = (
     className
   )
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      style={[props.style] as UIComponentProps<typeof View>['style']}
     />
   )
 }

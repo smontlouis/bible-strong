@@ -1,6 +1,6 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
-import * as NativeUI from 'react-native'
+import { View } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
@@ -46,10 +46,7 @@ import TouchableIcon from './TouchableIcon'
 import TouchableSvgIcon from './TouchableSvgIcon'
 
 export const HalfContainer = (
-  componentProps: Omit<
-    UIComponentProps<typeof NativeUI.View>,
-    keyof { border?: boolean } | 'theme'
-  > &
+  componentProps: Omit<UIComponentProps<typeof View>, keyof { border?: boolean } | 'theme'> &
     Omit<{ border?: boolean }, 'theme'> & { theme?: AppTheme; className?: string }
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
@@ -60,13 +57,13 @@ export const HalfContainer = (
     className
   )
   return (
-    <NativeUI.View
+    <View
       {...props}
       testID="bible-params-row"
       className={resolvedClassName}
       style={
         [{ borderBottomWidth: border ? 1 : 0 }, props.style] as UIComponentProps<
-          typeof NativeUI.View
+          typeof View
         >['style']
       }
     />

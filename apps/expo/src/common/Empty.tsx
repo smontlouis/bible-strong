@@ -1,7 +1,7 @@
 import { Image, ImageSource } from 'expo-image'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
-import * as NativeUI from 'react-native'
+import { type View, ViewProps } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import Box from '~common/ui/Box'
@@ -11,7 +11,7 @@ import type { Theme as AppTheme } from '~themes'
 import { useTheme } from '~themes/ThemeProvider'
 
 const Container = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -23,12 +23,12 @@ const Container = (
     <Box
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      style={[props.style] as UIComponentProps<typeof View>['style']}
     />
   )
 }
 
-interface Props extends NativeUI.ViewProps {
+interface Props extends ViewProps {
   className?: string
   message: string
   illustration?: ImageSource

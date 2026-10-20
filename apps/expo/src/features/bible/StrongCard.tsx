@@ -1,8 +1,7 @@
 import { resolveThemeColor, colorWithOpacity } from '~themes/colorValues'
 import { useTheme as useStylingTheme, Theme } from '~themes/ThemeProvider'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
-import * as NativeUI from 'react-native'
-import { ScrollView } from 'react-native'
+import { ScrollView, View } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
@@ -29,7 +28,7 @@ import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import type { StrongVerseContext } from './strongResourceCardContext'
 
 const TitleBorder = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -38,16 +37,16 @@ const TitleBorder = (
 
   const resolvedClassName = twMerge('mt-[10px] w-[35px] h-[3px] bg-primary', className)
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      style={[props.style] as UIComponentProps<typeof View>['style']}
     />
   )
 }
 
 const ViewItem = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -56,10 +55,10 @@ const ViewItem = (
 
   const resolvedClassName = twMerge('mt-[15px]', className)
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      style={[props.style] as UIComponentProps<typeof View>['style']}
     />
   )
 }

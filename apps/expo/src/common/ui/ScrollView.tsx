@@ -1,7 +1,12 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
-import * as NativeUI from 'react-native'
-import { ScrollViewProps, StyleProp, StyleSheet, ViewStyle } from 'react-native'
+import {
+  ScrollViewProps,
+  StyleProp,
+  StyleSheet,
+  ViewStyle,
+  ScrollView as NativeScrollView,
+} from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
@@ -18,7 +23,7 @@ type StyledScrollViewProps = {
 
 const ScrollView = (
   componentProps: Omit<
-    UIComponentProps<typeof NativeUI.ScrollView>,
+    UIComponentProps<typeof NativeScrollView>,
     keyof StyledScrollViewProps | 'theme'
   > &
     Omit<StyledScrollViewProps, 'theme'> & { theme?: AppTheme; className?: string }
@@ -29,7 +34,7 @@ const ScrollView = (
   const { orientation, backgroundColor } = props
   const resolvedClassName = twMerge('ml-auto mr-auto w-[100%]', className)
   return (
-    <NativeUI.ScrollView
+    <NativeScrollView
       {...props}
       className={resolvedClassName}
       style={
@@ -46,7 +51,7 @@ const ScrollView = (
             }),
           },
           props.style,
-        ] as UIComponentProps<typeof NativeUI.ScrollView>['style']
+        ] as UIComponentProps<typeof NativeScrollView>['style']
       }
     />
   )

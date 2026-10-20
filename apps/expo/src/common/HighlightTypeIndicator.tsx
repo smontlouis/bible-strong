@@ -1,7 +1,6 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
-import * as NativeUI from 'react-native'
-import { View } from 'react-native'
+import { View, TouchableOpacity } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import Text from '~common/ui/Text'
@@ -10,7 +9,7 @@ import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme, useTheme } from '~themes/ThemeProvider'
 
 const Touchable = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.TouchableOpacity>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof TouchableOpacity>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -19,17 +18,17 @@ const Touchable = (
 
   const resolvedClassName = twMerge('items-center justify-center', className)
   return (
-    <NativeUI.TouchableOpacity
+    <TouchableOpacity
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']}
+      style={[props.style] as UIComponentProps<typeof TouchableOpacity>['style']}
     />
   )
 }
 
 const CircleContainer = (
   componentProps: Omit<
-    UIComponentProps<typeof NativeUI.View>,
+    UIComponentProps<typeof View>,
     keyof { color: string; size: number; isSelected?: boolean } | 'theme'
   > &
     Omit<{ color: string; size: number; isSelected?: boolean }, 'theme'> & {
@@ -43,7 +42,7 @@ const CircleContainer = (
   const { color, size, isSelected } = props
   const resolvedClassName = twMerge('overflow-visible', className)
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
       style={
@@ -60,7 +59,7 @@ const CircleContainer = (
             }),
           },
           props.style,
-        ] as UIComponentProps<typeof NativeUI.View>['style']
+        ] as UIComponentProps<typeof View>['style']
       }
     />
   )
@@ -68,7 +67,7 @@ const CircleContainer = (
 
 const TextContainer = (
   componentProps: Omit<
-    UIComponentProps<typeof NativeUI.View>,
+    UIComponentProps<typeof View>,
     keyof { size: number; isSelected?: boolean } | 'theme'
   > &
     Omit<{ size: number; isSelected?: boolean }, 'theme'> & { theme?: AppTheme; className?: string }
@@ -79,7 +78,7 @@ const TextContainer = (
   const { size, isSelected } = props
   const resolvedClassName = twMerge('items-center justify-center', className)
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
       style={
@@ -96,7 +95,7 @@ const TextContainer = (
             }),
           },
           props.style,
-        ] as UIComponentProps<typeof NativeUI.View>['style']
+        ] as UIComponentProps<typeof View>['style']
       }
     />
   )

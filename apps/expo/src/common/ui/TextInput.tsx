@@ -1,7 +1,6 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
-import * as NativeUI from 'react-native'
-import { TextInputProps as RNTextInputProps } from 'react-native'
+import { TextInputProps as RNTextInputProps, TextInput } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import Box from '~common/ui/Box'
@@ -15,10 +14,7 @@ interface StyledTextInputProps {
 }
 
 const StyledTextInput = (
-  componentProps: Omit<
-    UIComponentProps<typeof NativeUI.TextInput>,
-    keyof StyledTextInputProps | 'theme'
-  > &
+  componentProps: Omit<UIComponentProps<typeof TextInput>, keyof StyledTextInputProps | 'theme'> &
     Omit<StyledTextInputProps, 'theme'> & { theme?: AppTheme; className?: string }
 ) => {
   const { theme: themeOverride, className, ...props } = componentProps
@@ -31,7 +27,7 @@ const StyledTextInput = (
     className
   )
   return (
-    <NativeUI.TextInput
+    <TextInput
       {...props}
       className={resolvedClassName}
       style={resolveTextTypography(theme.fontFamily.text, [

@@ -2,7 +2,7 @@ import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme, Theme, useTheme } from '~themes/ThemeProvider'
 import * as Icon from '~common/ui/classNameIcons'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
-import * as NativeUI from 'react-native'
+import { TouchableOpacity, View } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 import truncHTML from 'trunc-html'
 
@@ -52,7 +52,7 @@ const Container = (
 }
 
 const TitleBorder = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -61,16 +61,16 @@ const TitleBorder = (
 
   const resolvedClassName = twMerge('mt-[10px] w-[35px] h-[3px] bg-secondary', className)
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      style={[props.style] as UIComponentProps<typeof View>['style']}
     />
   )
 }
 
 const ViewItem = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -79,16 +79,16 @@ const ViewItem = (
 
   const resolvedClassName = twMerge('mt-[15px]', className)
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      style={[props.style] as UIComponentProps<typeof View>['style']}
     />
   )
 }
 
 const OpenStrongIcon = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.TouchableOpacity>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof TouchableOpacity>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -97,10 +97,10 @@ const OpenStrongIcon = (
 
   const resolvedClassName = twMerge('pt-[5px] flex-row items-center', className)
   return (
-    <NativeUI.TouchableOpacity
+    <TouchableOpacity
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']}
+      style={[props.style] as UIComponentProps<typeof TouchableOpacity>['style']}
     />
   )
 }

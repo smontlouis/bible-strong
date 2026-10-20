@@ -1,5 +1,5 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
-import * as NativeUI from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
@@ -11,7 +11,7 @@ import Text from '~common/ui/Text'
 
 const TabItem = (
   componentProps: Omit<
-    UIComponentProps<typeof NativeUI.TouchableOpacity>,
+    UIComponentProps<typeof TouchableOpacity>,
     keyof { isRouteActive?: boolean } | 'theme'
   > &
     Omit<{ isRouteActive?: boolean }, 'theme'> & { theme?: AppTheme; className?: string }
@@ -25,7 +25,7 @@ const TabItem = (
     className
   )
   return (
-    <NativeUI.TouchableOpacity
+    <TouchableOpacity
       {...props}
       className={resolvedClassName}
       style={
@@ -39,7 +39,7 @@ const TabItem = (
             }),
           },
           props.style,
-        ] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']
+        ] as UIComponentProps<typeof TouchableOpacity>['style']
       }
     />
   )

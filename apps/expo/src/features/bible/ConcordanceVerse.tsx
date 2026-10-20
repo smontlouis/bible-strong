@@ -1,7 +1,7 @@
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
-import * as NativeUI from 'react-native'
+import { TouchableOpacity, View } from 'react-native'
 import type { TextStyle } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
@@ -16,7 +16,7 @@ import type { TFunction } from 'react-i18next'
 import type { Verse } from '~common/types'
 
 const VerseText = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.View>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -25,16 +25,16 @@ const VerseText = (
 
   const resolvedClassName = twMerge('flex-[1] flex-wrap items-start flex-row', className)
   return (
-    <NativeUI.View
+    <View
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.View>['style']}
+      style={[props.style] as UIComponentProps<typeof View>['style']}
     />
   )
 }
 
 const Container = (
-  componentProps: Omit<UIComponentProps<typeof NativeUI.TouchableOpacity>, 'theme'> & {
+  componentProps: Omit<UIComponentProps<typeof TouchableOpacity>, 'theme'> & {
     theme?: AppTheme
     className?: string
   }
@@ -43,10 +43,10 @@ const Container = (
 
   const resolvedClassName = twMerge('pt-[10px] pb-[10px] border-b-[1px] border-b-border', className)
   return (
-    <NativeUI.TouchableOpacity
+    <TouchableOpacity
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']}
+      style={[props.style] as UIComponentProps<typeof TouchableOpacity>['style']}
     />
   )
 }

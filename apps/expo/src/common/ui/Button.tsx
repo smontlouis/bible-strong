@@ -1,12 +1,13 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
-import * as NativeUI from 'react-native'
 import {
   AccessibilityState,
   ActivityIndicator,
   StyleProp,
   TouchableOpacityProps,
   ViewStyle,
+  type Text as NativeText,
+  TouchableOpacity,
 } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
@@ -90,10 +91,7 @@ const buttonStyles = ({
 })
 
 const WrapperButton = (
-  componentProps: Omit<
-    UIComponentProps<typeof NativeUI.TouchableOpacity>,
-    keyof Partial<Props> | 'theme'
-  > &
+  componentProps: Omit<UIComponentProps<typeof TouchableOpacity>, keyof Partial<Props> | 'theme'> &
     Omit<Partial<Props>, 'theme'> & { theme?: AppTheme; className?: string }
 ) => {
   const contextTheme = useAppTheme()
@@ -102,12 +100,12 @@ const WrapperButton = (
 
   const resolvedClassName = twMerge('', className)
   return (
-    <NativeUI.TouchableOpacity
+    <TouchableOpacity
       {...props}
       className={resolvedClassName}
       style={
         [buttonStyles({ ...props, theme }), props.style] as UIComponentProps<
-          typeof NativeUI.TouchableOpacity
+          typeof TouchableOpacity
         >['style']
       }
     />
@@ -146,7 +144,7 @@ const WrapperLink = (
 
 const TextButton = (
   componentProps: Omit<
-    UIComponentProps<typeof NativeUI.Text>,
+    UIComponentProps<typeof NativeText>,
     keyof { theme?: Theme; small?: boolean; reverse?: boolean } | 'theme'
   > &
     Omit<{ theme?: Theme; small?: boolean; reverse?: boolean }, 'theme'> & {
@@ -172,7 +170,7 @@ const TextButton = (
             }),
           },
           props.style,
-        ] as UIComponentProps<typeof NativeUI.Text>['style']
+        ] as UIComponentProps<typeof NativeText>['style']
       }
     />
   )

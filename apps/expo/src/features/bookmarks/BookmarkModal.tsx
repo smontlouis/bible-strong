@@ -1,7 +1,7 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import * as NativeUI from 'react-native'
+import { Platform, TouchableOpacity } from 'react-native'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { useDispatch, useSelector } from 'react-redux'
 import type { ColorFormatsObject } from 'reanimated-color-picker'
@@ -35,7 +35,7 @@ const DEFAULT_BOOKMARK_COLOR = '#cc0000'
 
 const BookmarkListItem = (
   componentProps: Omit<
-    UIComponentProps<typeof NativeUI.TouchableOpacity>,
+    UIComponentProps<typeof TouchableOpacity>,
     keyof { isSelected?: boolean } | 'theme'
   > &
     Omit<{ isSelected?: boolean }, 'theme'> & { theme?: AppTheme; className?: string }
@@ -49,7 +49,7 @@ const BookmarkListItem = (
     className
   )
   return (
-    <NativeUI.TouchableOpacity
+    <TouchableOpacity
       {...props}
       className={resolvedClassName}
       style={
@@ -59,7 +59,7 @@ const BookmarkListItem = (
             borderWidth: isSelected ? 2 : 0,
           },
           props.style,
-        ] as UIComponentProps<typeof NativeUI.TouchableOpacity>['style']
+        ] as UIComponentProps<typeof TouchableOpacity>['style']
       }
     />
   )
@@ -231,7 +231,7 @@ const BookmarkModal = ({
 
   const handleDelete = async () => {
     if (!existingBookmark) return
-    if (NativeUI.Platform.OS === 'web') handleClose()
+    if (Platform.OS === 'web') handleClose()
     if (
       await confirm({
         title: t('Attention'),
