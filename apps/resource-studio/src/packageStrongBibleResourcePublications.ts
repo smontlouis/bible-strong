@@ -123,6 +123,32 @@ const sha256 = (value: string | Buffer) =>
 const SANITIZED_REVERSE_BUILDER_VERSION =
   "reverse-interlinear-mobile-sanitized@9";
 
+const numericKeys = (record: object) =>
+  Object.keys(record).sort((left, right) => Number(left) - Number(right));
+
+/**
+ * Digest of the verse texts alone. Strong word offsets index these texts, so
+ * any revision with the same digest can carry the same sidecar, whatever
+ * headings, words of Jesus or notes separate it from the one it was built on.
+ */
+export const hashCanonicalVerseTexts = (
+  publication: Pick<CanonicalBiblePublication, "verses">
+): string => {
+  const hash = createHash("sha256");
+  for (const book of numericKeys(publication.verses)) {
+    const chapters = publication.verses[book]!;
+    for (const chapter of numericKeys(chapters)) {
+      const verses = chapters[chapter]!;
+      for (const verse of numericKeys(verses)) {
+        hash.update(
+          `${JSON.stringify([Number(book), Number(chapter), Number(verse), verses[verse]!.text])}\n`
+        );
+      }
+    }
+  }
+  return hash.digest("hex");
+};
+
 const assertSameVerseTexts = (
   paired: Pick<CanonicalBiblePublication, "verses">,
   current: Pick<CanonicalBiblePublication, "verses">
@@ -156,6 +182,11 @@ const assertSameVerseTexts = (
  * was added. Word offsets stay valid, so only the text identity and the
  * revisions derived from it are rewritten. Returns the previous text revision,
  * or `undefined` when the sidecar already matches.
+ *
+ * The sidecar records the digest of the verse texts it indexes
+ * (`verseTextSha256`). Once present, it alone decides whether `pairedCanonical`
+ * fits, so a source revision that only gains presentation keeps the sidecar.
+ * Older sidecars fall back to the revision they were built or re-paired from.
  */
 export async function restampStrongSidecarText(options: {
   sqlitePath: string;
@@ -175,12 +206,15 @@ export async function restampStrongSidecarText(options: {
   ) {
     return undefined;
   }
-  // Either the sidecar was built against the paired text, or it was already
-  // re-paired from that text for an earlier presentation.
+  const verseTextSha256 = hashCanonicalVerseTexts(options.pairedCanonical);
+  // Either the sidecar indexes the same verse texts, or (before it recorded
+  // them) it was built against the paired text or re-paired from it.
   if (
-    metadata.textSha256 !== options.pairedCanonical.textSha256 &&
-    metadata.presentationRestampedFromTextRevision !==
-      options.pairedCanonical.textRevision
+    metadata.verseTextSha256
+      ? metadata.verseTextSha256 !== verseTextSha256
+      : metadata.textSha256 !== options.pairedCanonical.textSha256 &&
+        metadata.presentationRestampedFromTextRevision !==
+          options.pairedCanonical.textRevision
   ) {
     throw new Error("strong-publication-restamp-source-mismatch");
   }
@@ -204,6 +238,7 @@ export async function restampStrongSidecarText(options: {
     textRevision: options.canonical.textRevision,
     textSha256,
     strongRevision,
+    verseTextSha256,
     presentationRestampedFromTextRevision:
       metadata.presentationRestampedFromTextRevision ?? metadata.textRevision!
   };

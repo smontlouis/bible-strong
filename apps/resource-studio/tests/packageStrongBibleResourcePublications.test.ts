@@ -212,3 +212,144 @@ test("rejects an ordinary Bible dependency with a different text identity", asyn
     /resource-publication-canonical-integrity-mismatch/
   );
 });
+
+async function writeBibleBundle(
+  root: string,
+  name: string,
+  verse: typeof bibleVerse
+) {
+  const sha = createHash("sha256")
+    .update(`${JSON.stringify([1, 1, 1, verse])}\n`)
+    .digest("hex");
+  const canonical = {
+    format: "bible-strong-canonical-bible",
+    schemaVersion: 4,
+    applicationVersionId: "LSG",
+    datasetId: "LSG",
+    sourceVersion: "SG1910",
+    textRevision: `lsg-${sha.slice(0, 20)}`,
+    textSha256: sha,
+    sourceSha256,
+    verseCount: 1,
+    noteCount: 0,
+    headingCount: verse.headings.length,
+    verses: { "1": { "1": { "1": verse } } }
+  };
+  const canonicalPath = path.join(root, `${name}.json`);
+  await writeFile(canonicalPath, `${JSON.stringify(canonical)}\n`);
+  const bundleDir = path.join(root, name);
+  await buildBibleResourcePublication({
+    canonicalPath,
+    outputDir: bundleDir,
+    identity: { versionId: "LSG", language: "fr" },
+    rights: {
+      holder: "Public domain",
+      termsReference: "fixture",
+      attribution: "LSG fixture",
+      online: true,
+      offline: true
+    },
+    deliveryCapabilities: { onlineAccess: true, offlineDownload: true },
+    canon: { id: "protestant-66", orderedBooks: [1] },
+    versification: "fixture",
+    generatedAt: "2026-08-16T00:00:00.000Z"
+  });
+  return { canonical, bundleDir };
+}
+
+const withHeading = (text: string) => ({
+  ...bibleVerse,
+  headings: [
+    {
+      offset: 0,
+      order: 0,
+      kind: "pericope",
+      type: "",
+      text,
+      markup: `<title>${text}</title>`
+    }
+  ]
+});
+
+test("keeps a re-paired sidecar when its source only gains presentation", async (t) => {
+  const root = await mkdtemp(path.join(tmpdir(), "strong-resource-restamp-"));
+  t.after(async () => rm(root, { recursive: true, force: true }));
+  const fixture = await makeFixture(root);
+  const builtOn = JSON.parse(
+    await readFile(path.join(root, "bible-source.json"), "utf8")
+  );
+  const publish = (
+    sourceArchivePath: string,
+    pairedCanonical: unknown,
+    bibleBundleDir: string,
+    outputName: string
+  ) =>
+    buildStrongBibleResourcePublication({
+      sourceArchivePath,
+      sourceUrl: "https://assets.invalid/bible-lsg-strong.sqlite.zip",
+      sourceEntry: "bible-lsg-strong.sqlite",
+      bibleBundleDir,
+      outputDir: path.join(root, outputName),
+      versionId: "LSG",
+      datasetId: "LSG",
+      language: "fr",
+      attribution: "Public Domain",
+      rightsReviewedAt: "2026-08-16",
+      generatedAt: "2026-08-16T00:00:00.000Z",
+      pairedCanonical: pairedCanonical as never
+    });
+
+  // 1. Words of Jesus or a heading added at publication: re-paired once.
+  const first = await writeBibleBundle(
+    root,
+    "first",
+    withHeading("Au commencement")
+  );
+  const repaired = await publish(
+    fixture.archivePath,
+    builtOn,
+    first.bundleDir,
+    "strong-first"
+  );
+  assert.equal(
+    repaired.manifest.dependencies.bible.revision,
+    first.canonical.textRevision
+  );
+  const repairedArchive = path.join(
+    repaired.outputDir,
+    repaired.manifest.offlineArtifact.path
+  );
+
+  // 2. The source itself now carries the heading: its revision is new, its
+  // verse texts are not, so the re-paired sidecar still fits.
+  const adoptedSource = (
+    await writeBibleBundle(root, "adopted", withHeading("Création"))
+  ).canonical;
+  const second = await writeBibleBundle(
+    root,
+    "second",
+    withHeading("La Création")
+  );
+  const result = await publish(
+    repairedArchive,
+    adoptedSource,
+    second.bundleDir,
+    "strong-second"
+  );
+  assert.equal(
+    result.manifest.dependencies.bible.revision,
+    second.canonical.textRevision
+  );
+  await assert.doesNotReject(
+    validateStrongBibleResourcePublication(result.outputDir)
+  );
+
+  // A source whose verse text differs never fits.
+  const changed = (
+    await writeBibleBundle(root, "changed", { ...bibleVerse, text: "Dieux" })
+  ).canonical;
+  await assert.rejects(
+    publish(repairedArchive, changed, second.bundleDir, "strong-changed"),
+    /strong-publication-restamp-source-mismatch/
+  );
+});

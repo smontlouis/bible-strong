@@ -89,9 +89,11 @@ Gn 1 « The Creation » puis « (John 1:1–5; Hebrews 11:1–3) » ; Ps 1 « BO
    `bible-strong:BSB`, `bible-strong:RV1895` (Resource service).
 3. Les annotations de mots suivent la migration de l'ADR-0013 ; le texte des
    versets étant inchangé, le réalignement est immédiat.
-4. Piège : les sidecars re-tamponnés gardent
-   `presentationRestampedFromTextRevision` sur l'ancienne source
-   (`bsb-a80fae…`, `rv1895-d5ba11…`). Une fois la nouvelle source adoptée dans
-   `config/ordinary-bible-sources.json`, `yarn resources:publication:strong-bibles`
-   refusera ces sidecars (`strong-publication-restamp-source-mismatch`) tant
-   qu'il apparie avec la source configurée.
+4. Appariement des sidecars : `restampStrongSidecarText` comparait des
+   révisions (`presentationRestampedFromTextRevision`, figée au premier
+   re-tamponnage). Une fois la nouvelle source adoptée, la reconstruction des
+   bundles Strong aurait refusé BSB et RV1895 alors que leurs textes de verset
+   n'ont pas changé. Le sidecar enregistre désormais l'empreinte des seuls
+   textes de verset (`verseTextSha256`) ; quand elle est présente, elle seule
+   décide de l'appariement. Les sidecars sans empreinte gardent l'ancienne
+   règle et la reçoivent au prochain re-tamponnage.
