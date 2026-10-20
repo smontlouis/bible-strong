@@ -81,7 +81,14 @@ LSG, NASB1995, NASB2020, RLT.
    dans R2 (`resources:r2:publish-changed:prod`), copies hors ligne chiffrées
    recréées (`resources:offline:encrypt:prod`).
 3. Import et activation dans Neon des 13 `bible-text` et 6
-   `strong-bible-index`.
+   `strong-bible-index` ; inventaire adopté.
+4. Worker déployé (version `4fe4222e`). Vérifié en lecture : LSG Ex 1:1
+   (`parallel`/`scope`), NEG79 Gn 15:1, BDS Ex 38:1 (« Les comptes ») et sa
+   note au v. 21, NET Ps 18, BSB Ps 6, DARBY Ps 90, FRC97 Jb 26:5, et l'index
+   Strong LSG apparié à `lsg-73efd3ba244d460ecd27`.
+5. Dossiers du site rafraîchis : `/bible/<version>` des 13 Bibles, et
+   `strong`, `reverse-interlinear` des 6 index Strong. Le site n'affiche pas
+   les titres de péricope ; rien n'y change à l'œil.
 
 ## Sur la 27.2
 
