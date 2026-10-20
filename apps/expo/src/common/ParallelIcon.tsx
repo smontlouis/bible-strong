@@ -1,22 +1,24 @@
 import * as React from 'react'
 import { withTheme } from '~themes/ThemeProvider'
-import Svg, { Path, SvgProps } from 'react-native-svg'
+import Svg, { Line, Rect, SvgProps } from 'react-native-svg'
 import { Theme } from '~themes'
+
+// Two columns side by side: a rounded frame split down the middle.
 function SvgComponent({ color, theme, ...props }: { color?: string; theme: Theme } & SvgProps) {
   const iconColor =
     (color ? theme.colors[color as keyof typeof theme.colors] : undefined) || theme.colors.primary
 
   return (
-    <Svg width={22} height={22} viewBox="0 0 24 24" {...props}>
-      <Path
-        fillRule="evenodd"
-        fill={iconColor}
-        d="M3 17.44C3 18.3 3.9 19 5 19h3c.55 0 1-.45 1-1s-.45-1-1-1H5.25c-.14 0-.25-.11-.25-.25v-9.5c0-.14.11-.25.25-.25H8c.55 0 1-.45 1-1s-.45-1-1-1H5c-1.1 0-2 .7-2 1.56v10.88zm18 0c0 .86-.9 1.56-2 1.56h-3c-.55 0-1-.45-1-1s.45-1 1-1h2.75c.14 0 .25-.11.25-.25v-9.5c0-.14-.11-.25-.25-.25H16c-.55 0-1-.45-1-1s.45-1 1-1h3c1.1 0 2 .7 2 1.56v10.88zM13 19V5c0-.55-.45-1-1-1s-1 .45-1 1v14c0 .55.45 1 1 1s1-.45 1-1zm0 0"
-      />
-      <Path
-        fillRule="evenodd"
-        fill={iconColor}
-        d="M7 8h2c.55 0 1 .45 1 1s-.45 1-1 1H7c-.55 0-1-.45-1-1s.45-1 1-1zm8 0h2c.55 0 1 .45 1 1s-.45 1-1 1h-2c-.55 0-1-.45-1-1s.45-1 1-1zm-8 3h2c.55 0 1 .45 1 1s-.45 1-1 1H7c-.55 0-1-.45-1-1s.45-1 1-1zm8 0h2c.55 0 1 .45 1 1s-.45 1-1 1h-2c-.55 0-1-.45-1-1s.45-1 1-1zm-8 3h2c.55 0 1 .45 1 1s-.45 1-1 1H7c-.55 0-1-.45-1-1s.45-1 1-1zm8 0h2c.55 0 1 .45 1 1s-.45 1-1 1h-2c-.55 0-1-.45-1-1s.45-1 1-1zm0 0"
+    <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" {...props}>
+      <Rect x={3} y={4.5} width={18} height={15} rx={4.5} stroke={iconColor} strokeWidth={2} />
+      <Line
+        x1={12}
+        y1={4.5}
+        x2={12}
+        y2={19.5}
+        stroke={iconColor}
+        strokeWidth={2}
+        strokeLinecap="round"
       />
     </Svg>
   )
