@@ -163,7 +163,7 @@ describe('VersionCatalogList', () => {
     const renderer = createRenderer()
     const list = renderer.root.findByType('SectionList' as never)
 
-    expect(list.props.initialNumToRender).toBe(44)
+    expect(list.props.initialNumToRender).toBe(12)
     expect(list.props.getItemLayout(undefined, 48)).toEqual({
       index: 48,
       length: 72,
@@ -225,7 +225,7 @@ describe('VersionCatalogList', () => {
     const standalone = createRenderer()
     const standaloneList = standalone.root.findByType('SectionList' as never)
     expect(standaloneList.props.style).toBeUndefined()
-    expect(standaloneList.props.initialNumToRender).toBe(44)
+    expect(standaloneList.props.initialNumToRender).toBe(12)
     act(() => {
       panel.unmount()
       standalone.unmount()

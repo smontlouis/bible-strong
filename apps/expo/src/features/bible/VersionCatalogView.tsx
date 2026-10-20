@@ -346,15 +346,15 @@ export const VersionCatalogList = ({
   const listHeightRef = React.useRef(0)
   const previousScrollToTopKeyRef = React.useRef(scrollToTopKey)
   const revealRequestKey = `${revealKey}:${revealVersionId ?? ''}`
-  const [revealState, setRevealState] = React.useState({
-    requestKey: revealRequestKey,
-    pending: Boolean(revealVersionId),
-  })
-  if (revealState.requestKey !== revealRequestKey) {
-    setRevealState({ requestKey: revealRequestKey, pending: Boolean(revealVersionId) })
+  // The last request revealed: a ref, so that revealing does not render every row again
+  const revealedRequestKeyRef = React.useRef<string | null>(null)
+  const isRevealPending = () =>
+    Boolean(revealVersionId) && revealedRequestKeyRef.current !== revealRequestKey
+  const markRevealed = () => {
+    revealedRequestKeyRef.current = revealRequestKey
   }
-  const pendingReveal =
-    revealState.requestKey === revealRequestKey ? revealState.pending : Boolean(revealVersionId)
+  // Bumped only when SectionList could not reach the row, to try again once it is laid out
+  const [revealRetry, setRevealRetry] = React.useState(0)
 
   React.useEffect(() => {
     if (scrollToTopKey === undefined) return
@@ -369,23 +369,25 @@ export const VersionCatalogList = ({
   }, [scrollToTopKey])
 
   React.useEffect(() => {
-    if (!pendingReveal || !revealVersionId || listHeightRef.current <= 0) return
+    if (!isRevealPending() || !revealVersionId || listHeightRef.current <= 0) return
 
-    const frame = scheduleCatalogVersionReveal(listRef.current, sections, revealVersionId, () =>
-      setRevealState({ requestKey: revealRequestKey, pending: false })
+    const frame = scheduleCatalogVersionReveal(
+      listRef.current,
+      sections,
+      revealVersionId,
+      markRevealed
     )
 
     return () => {
       if (frame !== null) cancelAnimationFrame(frame)
     }
-  }, [pendingReveal, revealRequestKey, revealVersionId, sections])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revealRequestKey, revealRetry, revealVersionId, sections])
 
   function revealSelectedVersion() {
-    if (!pendingReveal || !revealVersionId || listHeightRef.current <= 0) return
+    if (!isRevealPending() || !revealVersionId || listHeightRef.current <= 0) return
 
-    scheduleCatalogVersionReveal(listRef.current, sections, revealVersionId, () =>
-      setRevealState({ requestKey: revealRequestKey, pending: false })
-    )
+    scheduleCatalogVersionReveal(listRef.current, sections, revealVersionId, markRevealed)
   }
 
   return (
@@ -400,7 +402,8 @@ export const VersionCatalogList = ({
       stickySectionHeadersEnabled
       sections={sections}
       keyExtractor={item => item.id}
-      initialNumToRender={isWebPanel ? 8 : 44}
+      // About a screen of rows: the sheet waits for them before it opens
+      initialNumToRender={isWebPanel ? 8 : 12}
       maxToRenderPerBatch={isWebPanel ? 8 : undefined}
       windowSize={isWebPanel ? 3 : undefined}
       getItemLayout={(_, index) => ({
@@ -414,7 +417,8 @@ export const VersionCatalogList = ({
       }}
       onContentSizeChange={revealSelectedVersion}
       onScrollToIndexFailed={({ averageItemLength, index }) => {
-        setRevealState({ requestKey: revealRequestKey, pending: Boolean(revealVersionId) })
+        revealedRequestKeyRef.current = null
+        setRevealRetry(retry => retry + 1)
         listRef.current?.getScrollResponder()?.scrollTo({
           animated: false,
           y: (averageItemLength || ESTIMATED_CATALOG_ROW_HEIGHT) * index,

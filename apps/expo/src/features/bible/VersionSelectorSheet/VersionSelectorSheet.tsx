@@ -55,6 +55,12 @@ const VersionSelectorSheet = ({ sheetRef }: VersionSelectorSheetProps) => {
     }
   }
 
+  // Defined once: a new function per row would render every row again
+  const openOfflineDetails = (version: Version & { displayName?: string }) => {
+    setOfflineDetailsVersion(version)
+    requestAnimationFrame(() => offlineDetailsRef.current?.present())
+  }
+
   const selectedVersion =
     parallelVersionIndex === undefined
       ? data?.selectedVersion
@@ -78,7 +84,8 @@ const VersionSelectorSheet = ({ sheetRef }: VersionSelectorSheetProps) => {
         }
         snapPoints={[1]}
         backgroundColor={theme.colors.reverse}
-        onPresent={() => {
+        // Prepared on closing: on opening, rendering the list again would delay every row
+        onDismiss={() => {
           versionCatalog.resetSearch()
           setRevealKey(current => current + 1)
         }}
@@ -99,11 +106,7 @@ const VersionSelectorSheet = ({ sheetRef }: VersionSelectorSheetProps) => {
               version={item}
               isSelected={item.id === selectedVersion}
               showStrongIndex
-              strongCollapseKey={revealKey}
-              onOpenOfflineDetails={version => {
-                setOfflineDetailsVersion(version)
-                requestAnimationFrame(() => offlineDetailsRef.current?.present())
-              }}
+              onOpenOfflineDetails={openOfflineDetails}
             />
           )}
         />
