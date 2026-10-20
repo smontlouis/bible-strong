@@ -9,6 +9,7 @@ import type { Theme as AppTheme } from '~themes'
 import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { Book } from '~assets/bible_versions/books-desc'
 import Empty from '~common/Empty'
 import Link from '~common/Link'
@@ -113,6 +114,7 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
   const params = useLocalSearchParams<{ book?: string; version?: string }>()
   const version = (params.version || defaultVersion) as VersionCode
   const hasBackButton = isFormSheet ? canGoBackInStack : true
+  const insets = useSafeAreaInsets()
 
   const initialBookNumber = params.book ? Number(params.book) : 1
   const [book, setBook] = useState<Book>(() => getBook(initialBookNumber) || getBook(1)!)
@@ -246,7 +248,11 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
             </Box>
           </ScrollView>
         )}
-        <Box className="overflow-hidden border-continuous bg-reverse flex-row px-[20px] py-[10px] justify-between">
+        {/* The iOS sheet reaches the bottom edge; outside it, Container already pads the inset. */}
+        <Box
+          className="overflow-hidden border-continuous bg-reverse flex-row px-[20px] py-[10px] justify-between"
+          style={isFormSheet ? { paddingBottom: Math.max(insets.bottom, 10) } : undefined}
+        >
           {previousBook && (
             <Link onPress={() => setBook(previousBook)}>
               <StyledIcon name="arrow-left" size={30} />
