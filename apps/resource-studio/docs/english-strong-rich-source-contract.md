@@ -31,6 +31,13 @@ when present:
 - divine-name spans, notes, cross-references, variants, milestones, and every
   original element attribute.
 
+SWORD stores everything that precedes verse 1 of a chapter (chapter milestone,
+section title, chapter introduction) in a separate verse-0 entry. Verse 1
+carries that entry verbatim as `chapterPrelude`; its titles are placed first in
+the verse's `headings`, marked `sourceEntry: "chapterPrelude"`. The projection
+keeps them, except chapter-number labels (`type="chapter"` in KJV and RLT,
+`subType="x-Chapter"` in NASB), which the reader already displays.
+
 The source fragment remains authoritative. The structured heading projection is
 an index, not a replacement for that fragment. Unknown elements are counted in
 the manifest and are never silently discarded.

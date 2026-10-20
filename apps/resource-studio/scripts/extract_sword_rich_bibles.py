@@ -23,8 +23,6 @@ from pathlib import Path
 from typing import Any
 from xml.etree import ElementTree
 
-from pysword.modules import SwordModules
-
 
 CATALOG_FORMAT = "bible-strong-sword-source-catalog"
 OUTPUT_FORMAT = "bible-strong-rich-source-jsonl"
@@ -73,6 +71,7 @@ PERICOPE_TYPES = {
     "chapter",
     "sub",
 }
+CHAPTER_PRELUDE_SOURCE = "chapterPrelude"
 
 
 @dataclass(frozen=True)
@@ -222,6 +221,31 @@ def extract_headings(fragment: str) -> tuple[list[dict[str, Any]], bool]:
     return headings, well_formed
 
 
+def read_chapter_prelude(bible: Any, testament: str, book_name: str, chapter: int) -> str:
+    """Return the SWORD chapter-heading entry (verse 0) of one chapter.
+
+    `get_iter` only yields verses 1..N. SWORD stores everything that precedes
+    verse 1 (chapter milestone, section title, introductions) in the entry
+    immediately before it, which pysword exposes only through its index API.
+    """
+    indices = bible.get_structure().ref_to_indicies(
+        books=[book_name], chapters=[chapter], verses=[1]
+    )
+    return bible._text_for_index(testament, indices[testament][0] - 1) or ""
+
+
+def merge_chapter_prelude(
+    prelude: str, headings: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Place the chapter-heading titles before the titles of verse 1."""
+    prelude_headings, _ = extract_headings(prelude)
+    merged = [
+        {**heading, "sourceEntry": CHAPTER_PRELUDE_SOURCE}
+        for heading in prelude_headings
+    ] + headings
+    return [{**heading, "order": order} for order, heading in enumerate(merged)]
+
+
 def update_inventory(
     fragment: str,
     headings: list[dict[str, Any]],
@@ -265,6 +289,8 @@ def update_inventory(
 
 
 def extract_source(source: Source, archive_path: Path, output_root: Path) -> dict:
+    from pysword.modules import SwordModules
+
     modules = SwordModules(paths=[str(archive_path)])
     metadata = modules.parse_modules()
     if source.module_name not in metadata:
@@ -280,6 +306,9 @@ def extract_source(source: Source, archive_path: Path, output_root: Path) -> dic
     tag_counts: Counter[str] = Counter()
     attribute_counts: Counter[str] = Counter()
     feature_counts: Counter[str] = Counter()
+    prelude_tag_counts: Counter[str] = Counter()
+    prelude_heading_type_counts: Counter[str] = Counter()
+    chapter_prelude_count = 0
     book_summaries = []
     verse_count = 0
     canonical_verse_count = 0
@@ -308,8 +337,27 @@ def extract_source(source: Source, archive_path: Path, output_root: Path) -> dic
                             f"{book.osis_name}.{chapter}: "
                             f"{len(fragments)} != {expected_verse_count}"
                         )
+                    prelude = read_chapter_prelude(
+                        bible, testament, book.name, chapter
+                    )
+                    if prelude.strip():
+                        chapter_prelude_count += 1
+                        for match in TAG_PATTERN.finditer(prelude):
+                            prelude_tag_counts[match.group(1)] += 1
                     for verse, fragment in enumerate(fragments, start=1):
                         headings, parsed = extract_headings(fragment)
+                        if verse == 1:
+                            headings = merge_chapter_prelude(prelude, headings)
+                            for heading in headings:
+                                if heading.get("sourceEntry") == CHAPTER_PRELUDE_SOURCE:
+                                    prelude_heading_type_counts[
+                                        heading["type"]
+                                        + (
+                                            f"/{heading['subType']}"
+                                            if "subType" in heading
+                                            else ""
+                                        )
+                                    ] += 1
                         if not parsed:
                             parse_failure_count += 1
                             if len(parse_failure_refs) < 25:
@@ -339,6 +387,11 @@ def extract_source(source: Source, archive_path: Path, output_root: Path) -> dic
                             "chapter": chapter,
                             "verse": verse,
                             "text": fragment,
+                            **(
+                                {"chapterPrelude": prelude}
+                                if verse == 1 and prelude.strip()
+                                else {}
+                            ),
                             **({"headings": headings} if headings else {}),
                         }
                         output.write(
@@ -402,6 +455,11 @@ def extract_source(source: Source, archive_path: Path, output_root: Path) -> dic
         "featureCounts": dict(sorted(feature_counts.items())),
         "tagCounts": dict(sorted(tag_counts.items())),
         "attributeCounts": dict(sorted(attribute_counts.items())),
+        "chapterPreludeCount": chapter_prelude_count,
+        "chapterPreludeHeadingTypeCounts": dict(
+            sorted(prelude_heading_type_counts.items())
+        ),
+        "chapterPreludeTagCounts": dict(sorted(prelude_tag_counts.items())),
         "books": book_summaries,
     }
     manifest_path = output_dir / "manifest.json"

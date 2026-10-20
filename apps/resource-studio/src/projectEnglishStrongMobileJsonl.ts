@@ -31,6 +31,8 @@ interface RichSourceHeading {
   isPericope: boolean;
   text: string;
   sourceMarkup: string;
+  /** "chapterPrelude" when the title comes from SWORD's verse-0 entry. */
+  sourceEntry?: "chapterPrelude";
 }
 
 interface RichSourceVerse {
@@ -46,6 +48,8 @@ interface RichSourceVerse {
   chapter: number;
   verse: number;
   text: string;
+  /** Exact SWORD verse-0 entry of the chapter, carried by verse 1. */
+  chapterPrelude?: string;
   headings?: RichSourceHeading[];
 }
 
@@ -59,6 +63,8 @@ export interface EnglishStrongJsonlProjectionSummary {
   verseCount: number;
   headingCount: number;
   pericopeCount: number;
+  chapterHeadingCount: number;
+  droppedChapterLabelCount: number;
   redLetterSpanCount: number;
   noteCount: number;
   restoredSeparatorCount: number;
@@ -142,6 +148,8 @@ async function projectSource(
   let verseCount = 0;
   let headingCount = 0;
   let pericopeCount = 0;
+  let chapterHeadingCount = 0;
+  let droppedChapterLabelCount = 0;
   let redLetterSpanCount = 0;
   let noteCount = 0;
   let restoredSeparatorCount = 0;
@@ -173,7 +181,15 @@ async function projectSource(
           source.id === "nasb1995" || source.id === "nasb2020"
       });
       const lemmaProjection = enrichEnglishStrongMarkup(projection.text);
-      const headings = (sourceVerse.headings ?? []).map(projectHeading);
+      const sourceHeadings = sourceVerse.headings ?? [];
+      const keptHeadings = sourceHeadings.filter(
+        (heading) => !isChapterLabel(heading)
+      );
+      droppedChapterLabelCount += sourceHeadings.length - keptHeadings.length;
+      chapterHeadingCount += keptHeadings.filter(
+        ({ sourceEntry }) => sourceEntry === "chapterPrelude"
+      ).length;
+      const headings = keptHeadings.map(projectHeading);
       const verse: StrongBibleJsonlVerse = {
         ref: sourceVerse.ref,
         version: source.moduleName,
@@ -222,6 +238,8 @@ async function projectSource(
     verseCount,
     headingCount,
     pericopeCount,
+    chapterHeadingCount,
+    droppedChapterLabelCount,
     redLetterSpanCount,
     noteCount,
     restoredSeparatorCount,
@@ -252,11 +270,28 @@ function validateRichSourceVerse(
   }
 }
 
-function projectHeading(heading: RichSourceHeading): StrongBibleJsonlHeading {
+/**
+ * KJV and RLT (`type="chapter"`) and NASB (`subType="x-Chapter"`) title every
+ * chapter with its number ("CHAPTER 1."). The reader already shows chapter
+ * numbers, so these labels are not editorial headings.
+ */
+export function isChapterLabel(
+  heading: Pick<RichSourceHeading, "type" | "subType">
+): boolean {
+  return (
+    heading.type.toLocaleLowerCase() === "chapter" ||
+    heading.subType?.toLocaleLowerCase() === "x-chapter"
+  );
+}
+
+function projectHeading(
+  heading: RichSourceHeading,
+  order: number
+): StrongBibleJsonlHeading {
   const normalizedType = heading.type.toLocaleLowerCase();
   return {
     offset: 0,
-    order: heading.order,
+    order,
     kind: heading.isPericope
       ? "pericope"
       : normalizedType === "parallel"

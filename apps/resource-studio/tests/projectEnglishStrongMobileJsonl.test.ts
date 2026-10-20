@@ -290,3 +290,130 @@ test("projects canonical verses and headings while excluding supplemental books"
     '<title type="section">Creation</title>'
   );
 });
+
+test("projects chapter-prelude section titles and drops chapter labels", async (t) => {
+  const root = await mkdtemp(path.join(tmpdir(), "english-chapter-prelude-"));
+  t.after(async () => rm(root, { recursive: true, force: true }));
+  const sourceDir = path.join(root, "rich", "test");
+  await import("node:fs/promises").then(({ mkdir }) =>
+    mkdir(sourceDir, { recursive: true })
+  );
+  await writeFile(
+    path.join(root, "catalog.json"),
+    `${JSON.stringify({
+      format: "bible-strong-sword-source-catalog",
+      schemaVersion: 1,
+      sources: [
+        {
+          id: "test",
+          applicationVersionId: "TEST",
+          datasetId: "TEST",
+          moduleName: "Test"
+        }
+      ]
+    })}\n`
+  );
+  const verse = (
+    ref: string,
+    book: number,
+    chapter: number,
+    fields: Record<string, unknown>
+  ) => ({
+    format: "bible-strong-rich-source-jsonl",
+    schemaVersion: 1,
+    ref,
+    version: "Test",
+    applicationVersionId: "TEST",
+    datasetId: "TEST",
+    canon: "protestant-66",
+    book,
+    bookId: ref.split(".")[0],
+    chapter,
+    verse: 1,
+    ...fields
+  });
+  const records = [
+    // NASB: the prelude only carries the chapter number.
+    verse("Gen.1.1", 1, 1, {
+      chapterPrelude:
+        '<chapter osisID="Gen.1" sID="gen2"/><title subType="x-Chapter" type="sub">CHAPTER 1</title> ',
+      text: "In the beginning",
+      headings: [
+        {
+          order: 0,
+          type: "sub",
+          subType: "x-Chapter",
+          isPericope: true,
+          text: "CHAPTER 1",
+          sourceMarkup:
+            '<title subType="x-Chapter" type="sub">CHAPTER 1</title>',
+          sourceEntry: "chapterPrelude"
+        }
+      ]
+    }),
+    // BSB Colossians 2: section title in the prelude, parallel in verse 1.
+    verse("Col.2.1", 51, 2, {
+      chapterPrelude:
+        '<chapter n="2" osisID="Col.2" sID="Col.2"/><div eID="gen9" type="x-p"/> <title>Absent in Body, Present in Spirit</title> ',
+      text: '<title type="parallel"> (<reference osisRef="Rev.3.14-Rev.3.22" type="parallel">Revelation 3:14–22</reference>) </title> I want you to know',
+      headings: [
+        {
+          order: 0,
+          type: "unspecified",
+          isPericope: true,
+          text: "Absent in Body, Present in Spirit",
+          sourceMarkup: "<title>Absent in Body, Present in Spirit</title>",
+          sourceEntry: "chapterPrelude"
+        },
+        {
+          order: 1,
+          type: "parallel",
+          isPericope: false,
+          text: " (Revelation 3:14–22) ",
+          sourceMarkup:
+            '<title type="parallel"> (<reference osisRef="Rev.3.14-Rev.3.22" type="parallel">Revelation 3:14–22</reference>) </title>'
+        }
+      ]
+    })
+  ];
+  await writeFile(
+    path.join(sourceDir, "bible-test-source-rich.jsonl"),
+    `${records.map((record) => JSON.stringify(record)).join("\n")}\n`
+  );
+  const [summary] = await projectEnglishStrongMobileJsonl({
+    root,
+    catalogPath: path.join(root, "catalog.json"),
+    richSourceRoot: path.join(root, "rich"),
+    outputRoot: path.join(root, "output")
+  });
+  assert.equal(summary?.headingCount, 2);
+  assert.equal(summary?.pericopeCount, 1);
+  assert.equal(summary?.chapterHeadingCount, 1);
+  assert.equal(summary?.droppedChapterLabelCount, 1);
+  const [genesis, colossians] = (
+    await readFile(path.join(root, "output", "bible-test-strong.jsonl"), "utf8")
+  )
+    .trim()
+    .split("\n")
+    .map((line) => JSON.parse(line));
+  assert.equal(genesis.text, "In the beginning");
+  assert.equal(genesis.headings, undefined);
+  assert.equal(colossians.text, "I want you to know");
+  assert.deepEqual(
+    colossians.headings.map(
+      ({
+        order,
+        kind,
+        text
+      }: {
+        order: number;
+        kind: string;
+        text: string;
+      }) => [order, kind, text]
+    ),
+    [
+      [0, "pericope", "Absent in Body, Present in Spirit"],
+      [1, "parallel", " (Revelation 3:14–22) "]
+    ]
+  );
+});
