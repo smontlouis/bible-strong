@@ -127,34 +127,21 @@ const StandaloneVerseOfTheDay = ({
     ? 'flex-1 p-[24px] pb-[12px]'
     : 'overflow-hidden border-continuous px-[20px] rounded-[30px] bg-reverse py-[20px]'
   const cardStyle = desktop ? style : { height: VERSE_CARD_HEIGHT }
+  // The day navigation of the wide Web home wraps below the label when the card is narrow.
   const dayHeader = (
     <Box
-      dataSet={desktop ? { 'home-verse-header': '' } : undefined}
-      className="flex-row items-center justify-between gap-[12px]"
+      className={`flex-row items-center justify-between gap-[12px] ${desktop ? 'flex-wrap' : ''}`}
     >
-      <Text
-        className={
-          desktop
-            ? 'text-primary font-bold text-[12px] uppercase tracking-[1.5px]'
-            : 'text-grey font-bold text-[12px] uppercase tracking-[1.5px]'
-        }
-      >
-        {!desktop && addDay === 0 ? t('dailyReading.title') : ago}
+      <Text className="text-grey font-bold text-[12px] uppercase tracking-[1.5px]">
+        {addDay === 0 ? t('dailyReading.title') : ago}
       </Text>
       {navigation}
       <Link
-        size={desktop ? 44 : undefined}
         onPress={() => router.push('/daily-reading')}
         accessibilityLabel={t('dailyReading.change')}
-        className={desktop ? undefined : 'min-h-[44px] justify-center'}
+        className="min-h-[44px] justify-center"
       >
-        {desktop ? (
-          <FeatherIcon name="sliders" size={18} color="grey" />
-        ) : (
-          <Text className="text-primary font-bold text-[13px]">
-            {t('dailyReading.changeShort')}
-          </Text>
-        )}
+        <Text className="text-primary font-bold text-[13px]">{t('dailyReading.changeShort')}</Text>
       </Link>
     </Box>
   )

@@ -68,17 +68,10 @@ const DailyMeditationCard = ({
       style={desktop ? style : { height: 280 }}
     >
       <Box
-        dataSet={desktop ? { 'home-verse-header': '' } : undefined}
-        className="flex-row items-center justify-between gap-[12px]"
+        className={`flex-row items-center justify-between gap-[12px] ${desktop ? 'flex-wrap' : ''}`}
       >
-        <Text
-          className={
-            desktop
-              ? 'text-primary font-bold text-[12px] uppercase tracking-[1.5px]'
-              : 'text-grey font-bold text-[12px] uppercase tracking-[1.5px]'
-          }
-        >
-          {!desktop && addDay === 0
+        <Text className="text-grey font-bold text-[12px] uppercase tracking-[1.5px]">
+          {addDay === 0
             ? t('dailyReading.meditationOfTheDay')
             : dayLabels[-addDay]
               ? t(dayLabels[-addDay])
@@ -87,17 +80,12 @@ const DailyMeditationCard = ({
         {navigation}
         <Link
           onPress={() => router.push('/daily-reading')}
-          size={desktop ? 44 : undefined}
           accessibilityLabel={t('dailyReading.change')}
-          className={desktop ? undefined : 'min-h-[44px] justify-center'}
+          className="min-h-[44px] justify-center"
         >
-          {desktop ? (
-            <FeatherIcon name="sliders" size={18} color="grey" />
-          ) : (
-            <Text className="text-primary font-bold text-[13px]">
-              {t('dailyReading.changeShort')}
-            </Text>
-          )}
+          <Text className="text-primary font-bold text-[13px]">
+            {t('dailyReading.changeShort')}
+          </Text>
         </Link>
       </Box>
       {opening ? (

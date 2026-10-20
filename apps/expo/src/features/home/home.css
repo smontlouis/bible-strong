@@ -1,0 +1,65 @@
+/* Web-only home styles, loaded by homeStyles.web.ts. Column counts come from the measured
+   home width (homeLayout.tsx), not from CSS, so native and Web share the same layout code. */
+
+.bs-home-verse-height {
+  box-shadow: 0 2px 7px rgba(89, 131, 240, 0.1);
+  overflow: hidden;
+  border-radius: 30px;
+  transition: height 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.bs-home-verse-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.bs-home-verse-fade {
+  animation: bs-home-verse-in 240ms ease-out;
+}
+
+@keyframes bs-home-verse-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Only the displayed entry remounts; card geometry and controls stay stable. */
+.bs-home-discovery-fade {
+  animation: bs-home-discovery-fade-in 220ms ease-out;
+}
+
+@keyframes bs-home-discovery-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bs-home-verse-height {
+    transition: none;
+  }
+  .bs-home-verse-fade,
+  .bs-home-discovery-fade {
+    animation: none;
+  }
+}
+
+.bs-home-shortcut {
+  flex-shrink: 0;
+  padding: 4px 7px;
+  border-radius: 6px;
+  background: var(--color-light-grey);
+  color: var(--color-grey);
+  font:
+    12px system-ui,
+    sans-serif;
+  white-space: nowrap;
+}

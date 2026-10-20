@@ -14,7 +14,6 @@ import {
 import type { HistoryItem } from './historyModel'
 
 const PILL_ITEMS = 6
-const CARD_ITEMS = 4
 
 const SeeAll = () => {
   const { t } = useTranslation()
@@ -25,11 +24,14 @@ const SeeAll = () => {
   )
 }
 
-const Pill = ({ item }: { item: HistoryItem }) => {
+/** `stretch`: grid cell of the wide home, filling its column instead of capping its width. */
+const Pill = ({ item, stretch = false }: { item: HistoryItem; stretch?: boolean }) => {
   const { title, subtitle } = useHistoryEntryText(item)
   return (
     <HistoryEntryLink item={item} accessibilityLabel={`${title}, ${subtitle}`}>
-      <HStack className="overflow-hidden border-continuous h-[56px] px-[14px] rounded-[14px] bg-reverse items-center gap-[10px] max-w-[200px]">
+      <HStack
+        className={`overflow-hidden border-continuous h-[56px] px-[14px] rounded-[14px] bg-reverse items-center gap-[10px] ${stretch ? '' : 'max-w-[200px]'}`}
+      >
         <HistoryEntryIcon item={item} size={18} bare />
         <VStack className="shrink min-w-0">
           <Text className="text-[14px] font-bold" numberOfLines={1}>
@@ -46,55 +48,45 @@ const Pill = ({ item }: { item: HistoryItem }) => {
   )
 }
 
-const CardRow = ({ item }: { item: HistoryItem }) => {
-  const { title, subtitle } = useHistoryEntryText(item)
-  return (
-    <HistoryEntryLink item={item} accessibilityLabel={`${title}, ${subtitle}`}>
-      <HStack className="items-center gap-[10px]">
-        <HistoryEntryIcon item={item} size={28} />
-        <VStack className="flex-1 min-w-0">
-          <Text className="text-[13px] font-bold" numberOfLines={1}>
-            {title}
-          </Text>
-          {subtitle ? (
-            <Text className="text-[11px] text-grey" numberOfLines={1}>
-              {subtitle}
-            </Text>
-          ) : null}
-        </VStack>
-      </HStack>
-    </HistoryEntryLink>
-  )
+/** History entries the home can still open. */
+export const useHomeHistory = () => {
+  const isAvailable = useIsHistoryEntryAvailable()
+  return useAtomValue(historyAtom).filter(isAvailable)
 }
 
-/** Latest History entries on the home: a row of pills, or a small card in the desktop aside. */
-/** `headerless`: the home section title already carries the link to the full History. */
+/**
+ * Latest History entries on the home: a row of pills, or a grid of `columns` when the wide home
+ * places them beside the plans. `headerless`: the home section title carries the History link.
+ */
 const HistoryHomeSection = ({
-  card = false,
   headerless = false,
+  columns,
 }: {
-  card?: boolean
   headerless?: boolean
+  columns?: number
 }) => {
   const { t } = useTranslation()
-  const isAvailable = useIsHistoryEntryAvailable()
-  const history = useAtomValue(historyAtom).filter(isAvailable)
+  const history = useHomeHistory()
 
   if (!history.length) return null
 
-  if (card) {
+  if (columns) {
+    const items = history.slice(0, PILL_ITEMS)
+    const rows = Array.from({ length: Math.ceil(items.length / columns) }, (_, row) =>
+      items.slice(row * columns, (row + 1) * columns)
+    )
     return (
-      <Box className="bg-reverse rounded-[20px] p-[16px] gap-[12px] shadow-[0_2px_7px_rgba(89,131,240,0.1)]">
-        <HStack className="items-center justify-between">
-          <Text className="font-bold text-[14px]">{t('history.title')}</Text>
-          <SeeAll />
-        </HStack>
-        <VStack className="gap-[10px]">
-          {history.slice(0, CARD_ITEMS).map(item => (
-            <CardRow key={item.id} item={item} />
-          ))}
-        </VStack>
-      </Box>
+      <VStack className="gap-[8px]">
+        {rows.map(row => (
+          <HStack key={row[0].id} className="gap-[8px]">
+            {Array.from({ length: columns }, (_, index) => (
+              <Box key={row[index]?.id ?? index} className="flex-1 min-w-0">
+                {row[index] && <Pill item={row[index]} stretch />}
+              </Box>
+            ))}
+          </HStack>
+        ))}
+      </VStack>
     )
   }
 

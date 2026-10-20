@@ -1,68 +1,77 @@
-# Home layouts
+# Home
 
-`HomeScreen` keeps the existing layout on native platforms and Web windows below
-768 CSS pixels. From 768 pixels on Web, `DesktopHome.web.tsx` renders a two-column dashboard
-home inside the existing workspace navigation. Its illustrations are bundled in
-`src/assets/images/home/illustrations/`. Surface colors derive from the active
-theme; personal library counters keep neutral icons. The main column contains the
-daily verse, counters, three learning cards. The right
-column contains bookmark resume, direct access to meditation collections, the current plan and Audibible.
-The compact home exposes the same meditation access in its “Méditer” section, separately from reading plans.
-Both use `/daily-reading` to browse collections without changing the selected daily-reading source. A 2 × 2 resource
-discovery grid sits below the learning cards in the main column. The reference is
-`output/imagegen/expo-web-home-2026-09-10/01-tableau-de-bord.png`.
+One composition (`HomeScreen.tsx`) for every platform and size. A phone, an iPad and a
+desktop browser show the same sections in the same order; a wider column only lays their rows
+out differently. There is no separate desktop home.
 
-The desktop daily verse uses the existing `VerseOfTheDay` data, sharing and image
-actions. Previous/next buttons and directly selectable day indicators expose the
-same five days as the compact carousel. Full verse text can expand the hero.
-The resource discovery grid presents Hebrew, Greek, Nave and dictionary entries
-on neutral surfaces with official framed resource icons and neutral text and
-actions. Hebrew and Greek share the Strong icon and its blue.
-Cards use a compact grid: category and icon-only shuffle share a 36px header
-row in normal flow, above a centered entry (100px fixed). Strong entries show
-only the original word and its translation; Nave and dictionary entries have no subtitle. The top-left icon
-and label open the resource; the center opens the entry, and shuffle remains independent. Existing
-queries and failure handling are retained through the widgets’ optional
-`discovery` presentation. The grid uses two columns, and one below 560px of main-column allocation. Only DesktopHome uses this presentation;
-NewTabContent keeps its existing design.
+## Groups and parts
 
-## Available-width layout
+Four groups carry large titles (`HomeSectionTitle`). Parts inside a group carry small titles
+(`HomeSubsectionTitle`), and groups are spaced more widely than parts, so the page reads as
+four blocks rather than a list of equal sections.
 
-`desktop-home.css` is imported only by the Web entry point. The named `home`
-inline-size container measures the actual allocation after the workspace sidebar
-and route panel. Below 1040px it stacks the two dashboard columns; below 760px it
-also stacks the header and secondary cards. The nested `home-main` container
-controls counters, learning cards and random tools independently of window size.
-The DOM/components stay mounted across these changes.
+1. **Header**: date, greeting, and the avatar to the profile. On the wide Web home the
+   sidebar already shows the account, so the command-palette search (`HomeSearch.web.tsx`,
+   ⌘K / Ctrl K) takes the avatar's place and wraps below the greeting in a narrow column.
+2. **Aujourd’hui**: the verse or meditation of the day. Touch screens swipe the five days in a
+   carousel (`UserWidget`). The wide Web home pages through the same days with previous/next
+   buttons and dots, shows the full text and animates the card height
+   (`HomeToday.web.tsx`, `AnimatedVerseHeight.web.tsx`).
+3. **Ma bibliothèque**, what belongs to the reader: the six counters, the sign-in prompt,
+   then the work in progress as parts (`HomeResumeSection`): **Reprendre** (latest History
+   entries, hidden while the history is empty) and **Mes plans** (followed reading plans, or
+   an invitation to the catalogue). « À découvrir » only joins real plans, since the
+   invitation already opens the catalogue.
+4. **Explorer**, what the app offers. Its title action, **Nouvel onglet**, adds an empty tab
+   and switches to it, like the sidebar button. Below it, without a title, one shortcut per
+   tab type of the new tab (`HomeOpenSection`), each opening the same scoped search
+   (ADR-0045); then the four illustrated cards (`HomeExploreGrid`); then the **Un mot au
+   hasard** part with random Greek, Hebrew, Nave and dictionary entries (`HomeDiscovery`).
+5. **Aller plus loin**: Audibible and donation rows (`HomeGoFurther`).
+6. **Footer** (`HomeFooter`): Follow and FAQ buttons on a raised panel for touch layouts; a
+   row of links with the app download on the wide Web home.
 
-The daily verse uses `selectFontFamily`, the same current reading-font preference
-as the Bible (not the legacy `bible.settings.fontFamily` field). On Web its text
-fades in when the resolved verse changes; `AnimatedVerseHeight` observes intrinsic
-content and transitions the outer height so following content moves with it.
-Both transitions respect `prefers-reduced-motion`. Day controls stay mounted.
+## Width-driven layout
 
-Browser regression scenario (CSS container layout needs a real browser, not Jest):
+`homeLayout.tsx` measures the home column and gives each section the content width between
+the gutters of 20 points. Sections choose their columns from that width, so the sidebar, a
+route panel, an iPad split view or a rotation are all handled the same way. On Web the column
+is read before the first paint, so grids never flash at the wrong count.
 
-1. At a 1440px viewport, open Home and use Resume reading to open the right panel.
-2. Show the left sidebar. The home allocation is about 680px: one dashboard column,
-   three counters per row, two discovery cards per row; no clipped counts or controls.
-3. At 1400px, learning cards become horizontal image/text rows in a single column.
-4. Hide/show the sidebar with the panel open. Random words and the selected day
-   must stay unchanged; the columns adjust to the new allocation.
-5. Close the panel: the original two-column desktop design returns. Below the
-   768px viewport gate, the existing compact home still renders.
+The column is capped at the general page width (`PAGE_CONTENT_MAX_WIDTH`, 830 points), like
+the other pages of the workspace. A wider column left a large empty band beside the daily
+verse, whose text stops at a reading width.
 
-Resume reading opens the current location and stored version of the latest
-**added** bookmark, selected using `createdAt`, falling back to `date` for older
-records. New bookmarks capture creation time; moving a legacy bookmark preserves
-its known date before updating its activity date. Historic creation dates already
-overwritten by older clients cannot be reconstructed. With no bookmarks, the
-action opens the Bible without overriding the default location or version.
+| Content width | Change                                                                                |
+| ------------- | ------------------------------------------------------------------------------------- |
+| < 620         | Phone layout: shortcuts and random words scroll horizontally                          |
+| ≥ 620         | Shortcuts in two rows of five, random words in two columns, partner rows side by side |
+| ≥ 680         | The six counters on a single row                                                      |
+| ≥ 720         | The four Explorer cards and the four random words on a single row each                |
+| ≥ 760         | Reprendre and Mes plans side by side, the history as a two-column grid                |
+| ≥ 780         | All ten shortcuts on a single row, in cells without gaps                              |
 
-Random discovery refreshes refetch the current query, retaining its entry while
-loading. The shuffle control is disabled during that request. The content row
-keeps its fixed height across loading, success and failure states.
+`HomeGrid` lays out equal cells inside the gutters; cells stay in one parent, so a column
+change re-wraps them without remounting their content (random words keep their entry).
 
-Changed discovery words fade in over 220ms. Only the inner entry content is
-keyed by its original word and translation/title; links and shuffle controls
-stay mounted. The opacity animation respects `prefers-reduced-motion`.
+## Details kept from earlier designs
+
+- The daily verse uses `selectFontFamily`, the same reading-font preference as the Bible. On
+  Web its text fades in when the resolved verse changes. Both transitions respect
+  `prefers-reduced-motion`.
+- Random entries are drawn at random, not per day; each card has its own shuffle button, which
+  refetches its query while keeping the current entry, and is disabled during the request.
+  Only the entry remounts when the word changes, which fades it in over 220ms on Web.
+- `home.css`, loaded on Web only through `homeStyles.web.ts`, holds those animations and the
+  shortcut key style. Column counts never come from CSS.
+
+Browser regression scenario (the measured layout needs a real browser, not Jest):
+
+1. At a 1440px viewport, open Home: one centred column of 830px, counters on one row,
+   Reprendre beside Mes plans when the history has entries, ten shortcuts on one row with
+   every label whole, four Explorer cards and four random words.
+2. Narrow the window to 1024px: Reprendre and Mes plans stack, the shortcuts take two rows,
+   random words and the selected day stay unchanged.
+3. Open a route panel or hide the sidebar: the sections follow the new column width.
+4. Below the 768px viewport gate, the carousel replaces the day buttons and the footer
+   buttons replace the links.

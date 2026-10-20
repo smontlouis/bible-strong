@@ -16,12 +16,20 @@ import Text from '~common/ui/Text'
 import { toast } from '~helpers/toast'
 import useLogin from '~helpers/useLogin'
 import { RootState } from '~redux/modules/reducer'
+import { useHomeLayout } from '~features/home/homeLayout'
 
-/** `home`: no outer inset (aligned with the home section titles) and colored, stacked cards. */
-const ProfileStats = ({ desktop = false, home = false }: { desktop?: boolean; home?: boolean }) => {
+/** Home content width from which the six cards fit on a single row. */
+const HOME_SINGLE_ROW_CONTENT = 680
+
+/**
+ * `home`: no outer inset (aligned with the home section titles) and colored cards, on two rows
+ * of three or, when the home is wide enough, a single row of six.
+ */
+const ProfileStats = ({ home = false }: { home?: boolean }) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const { isLogged } = useLogin()
+  const singleRow = useHomeLayout().content >= HOME_SINGLE_ROW_CONTENT && home
 
   const highlights = useSelector(
     (state: RootState) =>
@@ -42,34 +50,26 @@ const ProfileStats = ({ desktop = false, home = false }: { desktop?: boolean; ho
   return (
     <Box
       className={
-        desktop || home
+        home
           ? ''
           : 'overflow-hidden border-continuous bg-light-grey rounded-[30px] py-[20px] mx-[20px]'
       }
     >
-      <VStack
-        className={
-          desktop ? 'gap-[12px]' : 'overflow-hidden border-continuous gap-[10px] px-[20px]'
-        }
-      >
+      <VStack className="overflow-hidden border-continuous gap-[10px] px-[20px]">
         {sync?.isLoading && (
           <HStack className="overflow-hidden border-continuous items-center gap-[8px]">
             <ActivityIndicator size="small" color={theme.colors.primary} />
             <Text className="text-[12px] text-grey">{t('profileStats.syncingData')}</Text>
           </HStack>
         )}
-        <Box
-          dataSet={desktop ? { 'home-stats-grid': '' } : undefined}
-          style={desktop ? { backgroundColor: theme.colors.border } : undefined}
-          className={desktop ? 'flex-row gap-[12px]' : 'gap-[10px]'}
-        >
+        <Box className={singleRow ? 'flex-row gap-[10px]' : 'gap-[10px]'}>
           <HStack
-            dataSet={desktop ? { 'home-stats-group': '' } : undefined}
-            className={
-              desktop ? 'flex-1 gap-[12px]' : 'overflow-hidden border-continuous gap-[10px]'
-            }
+            className={twMerge(
+              'overflow-hidden border-continuous gap-[10px]',
+              singleRow && 'flex-1'
+            )}
           >
-            <StatCard flat={desktop} tall={home} route="Highlights">
+            <StatCard tall={home} route="Highlights">
               <StatValue
                 icon="edit-3"
                 color={home ? theme.colors.secondary : undefined}
@@ -86,7 +86,7 @@ const ProfileStats = ({ desktop = false, home = false }: { desktop?: boolean; ho
               </Text>
             </StatCard>
 
-            <StatCard flat={desktop} tall={home} route="Bookmarks">
+            <StatCard tall={home} route="Bookmarks">
               <StatValue
                 icon="bookmark"
                 color={home ? theme.colors.primary : undefined}
@@ -103,7 +103,7 @@ const ProfileStats = ({ desktop = false, home = false }: { desktop?: boolean; ho
               </Text>
             </StatCard>
 
-            <StatCard flat={desktop} tall={home} route="BibleVerseNotes">
+            <StatCard tall={home} route="BibleVerseNotes">
               <StatValue
                 icon="file-text"
                 color={home ? theme.colors.color2 : undefined}
@@ -122,13 +122,12 @@ const ProfileStats = ({ desktop = false, home = false }: { desktop?: boolean; ho
           </HStack>
 
           <HStack
-            dataSet={desktop ? { 'home-stats-group': '' } : undefined}
-            className={
-              desktop ? 'flex-1 gap-[12px]' : 'overflow-hidden border-continuous gap-[10px]'
-            }
+            className={twMerge(
+              'overflow-hidden border-continuous gap-[10px]',
+              singleRow && 'flex-1'
+            )}
           >
             <StatCard
-              flat={desktop}
               tall={home}
               {...(isLogged
                 ? { route: 'Studies' as const }
@@ -158,7 +157,7 @@ const ProfileStats = ({ desktop = false, home = false }: { desktop?: boolean; ho
               </Text>
             </StatCard>
 
-            <StatCard flat={desktop} tall={home} route="BibleVerseLinks">
+            <StatCard tall={home} route="BibleVerseLinks">
               <StatValue
                 icon="link"
                 color={home ? '#26A69A' : undefined}
@@ -175,7 +174,7 @@ const ProfileStats = ({ desktop = false, home = false }: { desktop?: boolean; ho
               </Text>
             </StatCard>
 
-            <StatCard flat={desktop} tall={home} route="Tags">
+            <StatCard tall={home} route="Tags">
               <StatValue
                 icon="tag"
                 color={home ? theme.colors.quint : undefined}
@@ -241,20 +240,17 @@ const StatValue = ({
 
 const StatCard = (
   componentProps: Omit<UIComponentProps<typeof Link>, 'theme'> & {
-    flat?: boolean
     tall?: boolean
     theme?: AppTheme
     className?: string
   }
 ) => {
-  const { theme: _themeOverride, className, flat = false, tall = false, ...props } = componentProps
+  const { theme: _themeOverride, className, tall = false, ...props } = componentProps
 
   const resolvedClassName = twMerge(
-    flat
-      ? 'flex-1 bg-reverse p-[12px]'
-      : tall
-        ? 'flex-[1] bg-reverse rounded-[18px] px-[12px] py-[14px] gap-[8px] elevation-[1]'
-        : 'flex-[1] bg-reverse rounded-[12px] p-[12px] elevation-[1]',
+    tall
+      ? 'flex-[1] bg-reverse rounded-[18px] px-[12px] py-[14px] gap-[8px] elevation-[1]'
+      : 'flex-[1] bg-reverse rounded-[12px] p-[12px] elevation-[1]',
     className
   )
   return (
@@ -263,7 +259,7 @@ const StatCard = (
       className={resolvedClassName}
       style={
         [
-          !flat && {
+          {
             shadowColor: 'rgb(89,131,240)',
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.08,

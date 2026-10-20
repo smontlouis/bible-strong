@@ -7,11 +7,14 @@ import { useComputedPlanItems } from '~features/plans/plan.hooks'
 import useLanguage from '~helpers/useLanguage'
 import type { MainStackProps } from '~navigation/type'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { HomeGrid, useHomeLayout } from './homeLayout'
 
 /** Tinted area of a card; the illustration is taller, so the head rises above the card. */
 const TINT_HEIGHT = 86
 const ART_HEIGHT = 120
 const OVERFLOW = ART_HEIGHT - TINT_HEIGHT
+/** Content width from which the four cards share a single row. */
+const SINGLE_ROW_CONTENT = 720
 
 type ExploreCard = {
   id: string
@@ -27,9 +30,10 @@ type ExploreCard = {
   link: Pick<LinkProps<keyof MainStackProps>, 'route' | 'params' | 'onPress'>
 }
 
-/** Editorial entries of the compact home, all in the same card: image, title, one-line hint. */
+/** Editorial entries of the home, all in the same card: image, title, one-line hint. */
 const HomeExploreGrid = () => {
   const { t } = useTranslation()
+  const { content } = useHomeLayout()
   const lang = useLanguage()
   const pushRoute = usePushRouteOnce()
   const plans = useComputedPlanItems()
@@ -80,9 +84,10 @@ const HomeExploreGrid = () => {
 
   return (
     // The illustrations rise above their tinted area, so rows leave room for the overflow.
-    <Box
-      className="flex-row flex-wrap px-[20px]"
-      style={{ columnGap: 12, rowGap: 12 + OVERFLOW, paddingTop: OVERFLOW }}
+    <HomeGrid
+      columns={content >= SINGLE_ROW_CONTENT ? 4 : 2}
+      rowGap={12 + OVERFLOW}
+      style={{ paddingTop: OVERFLOW }}
     >
       {cards.map(card => (
         <Link
@@ -91,7 +96,6 @@ const HomeExploreGrid = () => {
           accessibilityLabel={card.title}
           accessibilityHint={card.description}
           className="rounded-[18px] bg-reverse shadow-[0_2px_7px_rgba(89,131,240,0.1)]"
-          style={{ width: '48%', flexGrow: 1 }}
         >
           {card.art ? (
             <Box
@@ -135,7 +139,7 @@ const HomeExploreGrid = () => {
           </Box>
         </Link>
       ))}
-    </Box>
+    </HomeGrid>
   )
 }
 

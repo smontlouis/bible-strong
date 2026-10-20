@@ -2,18 +2,11 @@ import { goBackOrHome } from '~navigation/goBackOrHome'
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 import { useTheme } from '~themes/ThemeProvider'
 import Color from 'color'
-import { getAppleReviewing } from '~helpers/getAppleReviewing'
 import React from 'react'
-import { Linking, Platform } from 'react-native'
-import DesktopHome from './DesktopHome'
 import Box, { TouchableBox } from '~common/ui/Box'
-import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HomeScrollView } from '~common/ui/ScrollView'
-import Link from '~common/Link'
-import Text from '~common/ui/Text'
-import PlanHome from './PlanHome'
-import UserWidget, { LoginPrompt } from './UserWidget'
+import { LoginPrompt } from './UserWidget'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -21,129 +14,60 @@ import { useRouter } from 'expo-router'
 import { Events } from './Events'
 import HomeDiscovery from './HomeDiscovery'
 import HomeExploreGrid from './HomeExploreGrid'
+import HomeFooter from './HomeFooter'
+import HomeGoFurther from './HomeGoFurther'
 import HomeHeader from './HomeHeader'
-import HomeOpenSection from './HomeOpenSection'
-import HomeRowCard from './HomeRowCard'
-import * as Icon from '~common/ui/classNameIcons'
-import { Image } from 'expo-image'
-import useLanguage from '~helpers/useLanguage'
+import HomeOpenSection, { NewTabLink } from './HomeOpenSection'
+import HomeResumeSection from './HomeResumeSection'
 import HomeSectionTitle from './HomeSectionTitle'
+import HomeSubsectionTitle from './HomeSubsectionTitle'
+import HomeToday from './HomeToday'
+import { HomeLayout } from './homeLayout'
+import './homeStyles'
 import ProfileStats from '~features/profile/components/ProfileStats'
-import HistoryHomeSection from '~features/history/HistoryHomeSection'
+
 // local react props
 type HomeProps = {
   closeHome: () => void
   inWorkspace?: boolean
 }
 
+/**
+ * One home for every size: the sections a phone stacks are the ones a wide window shows, in the
+ * same order, each laying out its rows from the measured column width (see homeLayout.tsx).
+ * Four groups with large titles: what today brings, what is mine (counters, then my work in
+ * progress as small parts), what the app offers, and partners. Parts inside a group get small
+ * titles so they read as belonging to it.
+ */
 export const Home = ({ closeHome, inWorkspace = false }: HomeProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
-  const isWide = useResponsiveWorkspace()
-  const appleIsReviewing = getAppleReviewing()
-  const lang = useLanguage()
-
-  if (Platform.OS === 'web' && isWide) return <DesktopHome />
 
   return (
     <Box className="overflow-hidden border-continuous bg-light-grey flex-[1]">
       <HomeScrollView showsVerticalScrollIndicator={false}>
-        <HomeHeader />
-        <Box className="pt-[16px]">
-          <Events />
-        </Box>
-        <HomeSectionTitle title={t('home.today')} />
-        <UserWidget />
-        <HomeSectionTitle title={t('home.myLibrary')} />
-        <ProfileStats home />
-        <LoginPrompt className="mt-[12px]" />
-        <HomeSectionTitle
-          title={t('home.resume')}
-          action={
-            <Link route="History" className="py-[12px]">
-              <Text className="text-primary text-[13px] font-bold">{t('history.title')}</Text>
-            </Link>
-          }
-        />
-        <HistoryHomeSection headerless />
-        <PlanHome title={t('home.myPlans')} />
-        <HomeOpenSection />
-        <HomeSectionTitle title={t('home.explore')} />
-        <HomeExploreGrid />
-        <Text className="px-[20px] pt-[24px] pb-[10px] text-[16px] font-bold">
-          {t('home.randomWord')}
-        </Text>
-        <HomeDiscovery />
-        <HomeSectionTitle title={t('Aller plus loin')} />
-        <Box className="px-[20px] pb-[32px] gap-[10px]">
-          <HomeRowCard
-            dark
-            href="https://click.audibible.app/5nmN/stephane30"
-            title={t('audibible.try')}
-            description={t('audibible.description')}
-            iconBackground="#FFFFFF"
-            icon={
-              <Image
-                source={require('~assets/images/audibible-icon.png')}
-                accessible={false}
-                style={{ width: 44, height: 44 }}
-              />
-            }
-          />
-          {!appleIsReviewing && (
-            <HomeRowCard
-              href={`https://bible-strong.app/${lang === 'fr' ? 'fr/' : ''}give`}
-              title={t('donation.title')}
-              description={t('donation.description')}
-              iconBackground="rgba(255,118,117,0.14)"
-              icon={<Icon.Feather name="heart" size={22} color="#E05554" />}
-            />
-          )}
-        </Box>
-        <Box className="overflow-hidden border-continuous bg-light-grey">
-          <Box
-            className="overflow-hidden border-continuous bg-reverse flex-row px-[20px] pt-[20px]"
-            style={[
-              { paddingBottom: insets.bottom + 100 },
-              { borderTopLeftRadius: 30, borderTopRightRadius: 30 },
-            ]}
-          >
-            <Box className="overflow-hidden border-continuous flex-[1]">
-              <Button
-                color="#3b5998"
-                onPress={() => Linking.openURL('https://www.facebook.com/fr.bible.strong')}
-                leftIcon={
-                  <FeatherIcon
-                    name="facebook"
-                    size={20}
-                    color="white"
-                    style={{ marginRight: 10 }}
-                  />
-                }
-              >
-                {t('Suivre')}
-              </Button>
-            </Box>
-            <Box className="overflow-hidden border-continuous w-[20px]" />
-            <Box className="overflow-hidden border-continuous flex-[1]">
-              <Button
-                color="#2ecc71"
-                route="FAQ"
-                leftIcon={
-                  <FeatherIcon
-                    name="help-circle"
-                    size={20}
-                    color="white"
-                    style={{ marginRight: 10 }}
-                  />
-                }
-              >
-                {t('FAQ')}
-              </Button>
-            </Box>
+        <HomeLayout>
+          <HomeHeader />
+          <Box className="pt-[16px]">
+            <Events />
           </Box>
-        </Box>
+          <HomeSectionTitle title={t('home.today')} />
+          <HomeToday />
+          <HomeSectionTitle title={t('home.myLibrary')} />
+          <ProfileStats home />
+          <LoginPrompt className="mt-[12px]" />
+          <HomeResumeSection />
+          <HomeSectionTitle title={t('home.explore')} action={<NewTabLink />} />
+          <HomeOpenSection />
+          <Box className="h-[16px]" />
+          <HomeExploreGrid />
+          <HomeSubsectionTitle title={t('home.randomWord')} className="pt-[16px] pb-[4px]" />
+          <HomeDiscovery />
+          <HomeSectionTitle title={t('Aller plus loin')} />
+          <HomeGoFurther />
+          <HomeFooter />
+        </HomeLayout>
       </HomeScrollView>
       {!inWorkspace && (
         <Box

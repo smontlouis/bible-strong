@@ -4,11 +4,14 @@ import Text from '~common/ui/Text'
 import { useTheme } from '~themes/ThemeProvider'
 import { resolveFontFamily } from '~themes/styleValues'
 
-/** Section title of the compact home, with an optional action on the right. */
+/**
+ * Title of a home group (« Aujourd’hui », « Ma bibliothèque », « Explorer »…), with an optional
+ * action on the right. Groups are spaced more widely than the parts inside them.
+ */
 const HomeSectionTitle = ({ title, action }: { title: string; action?: ReactNode }) => {
   const theme = useTheme()
   return (
-    <Box className="flex-row items-center justify-between gap-[12px] px-[20px] pt-[32px] pb-[12px]">
+    <Box className="flex-row items-center justify-between gap-[12px] px-[20px] pt-[40px] pb-[12px]">
       <Text
         accessibilityRole="header"
         className="shrink text-[23px]"
