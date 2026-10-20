@@ -4,9 +4,28 @@ import { useEntityTagsScreen } from '~common/ContextualPanel/useEntityTagsScreen
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
+import { useSelectionMenu } from '../selectionMenuContext'
+import { SELECTION_SHORTCUTS } from '../selectionShortcuts'
+import ActionItem from './ActionItem'
 import type { VerseTagsActionProps } from './VerseTagsAction'
 
-export default function VerseTagsAction({ selectedVerses, reference }: VerseTagsActionProps) {
+export default function VerseTagsAction(props: VerseTagsActionProps) {
+  const menu = useSelectionMenu()
+  const { t } = useTranslation()
+  if (menu)
+    return (
+      <ActionItem
+        name="tag"
+        label={t('Tag')}
+        onPress={() => menu.openScreen('tags')}
+        shortcut={SELECTION_SHORTCUTS.tag}
+        nested
+      />
+    )
+  return <VerseTagsPanel {...props} />
+}
+
+function VerseTagsPanel({ selectedVerses, reference }: VerseTagsActionProps) {
   const { t } = useTranslation()
   const tags = useEntityTagsScreen('highlights', selectedVerses)
   return (

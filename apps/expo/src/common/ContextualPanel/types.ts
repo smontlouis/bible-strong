@@ -29,6 +29,26 @@ export type ContextualPanelProps = {
   onClose?: () => void
   onOpen?: () => void
   /** Web adapter for existing imperative launchers. */
-  controllerRef?: Ref<{ present: () => void; dismiss: () => void }>
+  controllerRef?: Ref<PanelController>
   anchorRef?: RefObject<HTMLElement | null>
+  /** Web: side of the anchor the popover opens on (default bottom). */
+  placement?: PanelPlacement
+  /** Web: open on that side even when it lacks room, rather than flipping to the other. */
+  noFlip?: boolean
+  /** Web: the page stays usable while the panel is open; only the panel closes itself. */
+  nonModal?: boolean
 }
+export type PanelController = {
+  /** Toggles the panel. */
+  present: () => void
+  dismiss: () => void
+  /** Opens the panel, or leaves it open. */
+  open?: () => void
+}
+export type PanelPlacement =
+  | 'bottom'
+  | 'bottom start'
+  | 'top'
+  | 'top start'
+  | 'right top'
+  | 'left top'

@@ -3,6 +3,7 @@ import { useTheme } from '~themes/ThemeProvider'
 import { useTranslation } from 'react-i18next'
 import ActionsLayout from './ActionsLayout'
 import ActionItem from './ActionItem'
+import { SELECTION_SHORTCUTS } from '../selectionShortcuts'
 interface StudyTabProps {
   screenWidth: number
   showStrongDetail: () => void
@@ -56,6 +57,7 @@ const StudyTab = ({
         label={t('Références')}
         onPress={onOpenReferences}
         disabled={moreThanOneVerseSelected}
+        shortcut={SELECTION_SHORTCUTS.references}
       />
       <ActionItem
         svgSource={require('~assets/images/tab-icons/comment.svg')}
@@ -64,7 +66,12 @@ const StudyTab = ({
         onPress={openCommentariesScreen}
         disabled={moreThanOneVerseSelected}
       />
-      <ActionItem name="layers" label={t('Comparer')} onPress={compareVerses} />
+      <ActionItem
+        name="layers"
+        label={t('Comparer')}
+        onPress={compareVerses}
+        shortcut={SELECTION_SHORTCUTS.compare}
+      />
     </ActionsLayout>
   )
 }

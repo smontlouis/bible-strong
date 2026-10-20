@@ -15,6 +15,9 @@ import TouchableIcon from '../TouchableIcon'
 import AnnotateTab from './components/AnnotateTab'
 import ShareTab from './components/ShareTab'
 import SelectionGroups from './components/SelectionGroups'
+import SelectionMenuTabs from './components/SelectionMenuTabs'
+import SelectionMenu from './SelectionMenu'
+import useSelectionMenuLayout from './useSelectionMenuLayout'
 import StudyTab from './components/StudyTab'
 import VersesModalFooter from './components/VersesModalFooter'
 import { TABS } from './constants'
@@ -103,6 +106,98 @@ const SelectedVersesModal = ({
 
   const onClose = () => {
     clearSelectedVerses()
+  }
+
+  const showsMenu = useSelectionMenuLayout() && !isSelectionMode
+  if (showsMenu) {
+    const tabs = [
+      <AnnotateTab
+        key="annotate"
+        version={version}
+        selectedVerses={selectedVerses}
+        screenWidth={SELECTION_GROUP_WIDTH}
+        onCreateNoteClick={onCreateNoteClick}
+        addTag={addTag}
+        onCreateLinkClick={onCreateLinkClick}
+        onCreateStudyRelationClick={onCreateStudyRelationClick}
+        onAddBookmark={onAddBookmark}
+        onAddToStudy={onAddToStudy}
+        onSelectStudy={onSelectStudy}
+        reference={selectedVersesTitle}
+        onPinVerses={onPinVerses}
+        onEnterAnnotationMode={onEnterAnnotationMode}
+        moreThanOneVerseSelected={moreThanOneVerseSelected}
+        activeStates={activeStates}
+      />,
+      <StudyTab
+        key="study"
+        screenWidth={SELECTION_GROUP_WIDTH}
+        showStrongDetail={showStrongDetail}
+        showDictionaryDetail={showDictionaryDetail}
+        onOpenNave={onOpenNave}
+        onOpenReferences={onOpenReferences}
+        openCommentariesScreen={openCommentariesScreen}
+        compareVerses={compareVerses}
+        moreThanOneVerseSelected={moreThanOneVerseSelected}
+      />,
+      <ShareTab
+        key="share"
+        screenWidth={SELECTION_GROUP_WIDTH}
+        copyToClipboard={copyToClipboard}
+        shareVerse={shareVerse}
+        exportPassage={() => exportSheetRef.current?.present()}
+        selectAllVerses={selectAllVerses}
+      />,
+    ]
+    return (
+      <>
+        <SelectionMenu
+          ref={ref}
+          reference={selectedVersesTitle}
+          selectedVerses={selectedVerses}
+          version={version}
+          onSelectStudy={onSelectStudy}
+          onClose={onClose}
+          shortcuts={{
+            note: onCreateNoteClick,
+            tag: menu => menu.openScreen('tags'),
+            link: onCreateLinkClick,
+            bookmark: moreThanOneVerseSelected ? undefined : menu => menu.openScreen('bookmark'),
+            focus: onPinVerses,
+            freeMode: onEnterAnnotationMode,
+            references: moreThanOneVerseSelected ? undefined : onOpenReferences,
+            compare: compareVerses,
+            copy: copyToClipboard,
+          }}
+          header={
+            <>
+              <Box className="px-[10px] pt-[4px] pb-[6px]">
+                <ColorCirclesBar
+                  compact
+                  selectedVerseHighlightColor={selectedVerseHighlightColor}
+                  addHighlight={addHighlight}
+                  removeHighlight={removeHighlight}
+                  onClose={close}
+                />
+              </Box>
+              <SelectionMenuTabs
+                labels={[t('tabs.annotate'), t('tabs.study'), t('tabs.share')]}
+                activeIndex={activeTabIndex}
+                onChange={setActiveTabIndex}
+              />
+            </>
+          }
+        >
+          {tabs[activeTabIndex] ?? tabs[0]}
+        </SelectionMenu>
+        <PassageExportSheet
+          ref={exportSheetRef}
+          sourceType="selection"
+          selectedVerses={selectedVerses}
+          version={version}
+        />
+      </>
+    )
   }
 
   return (

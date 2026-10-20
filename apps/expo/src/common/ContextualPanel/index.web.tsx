@@ -27,6 +27,7 @@ export default function ContextualPanel(props: ContextualPanelProps) {
   useImperativeHandle(props.controllerRef, () => ({
     present: () => (panel.isOpen ? panel.navigation.close() : panel.present()),
     dismiss: panel.navigation.close,
+    open: panel.present,
   }))
   return (
     <Popover
@@ -50,8 +51,12 @@ export default function ContextualPanel(props: ContextualPanelProps) {
       )}
       <Popover.Content
         triggerRef={props.anchorRef}
-        shouldCloseOnInteractOutside={element => !props.anchorRef?.current?.contains(element)}
-        placement="bottom"
+        shouldCloseOnInteractOutside={element =>
+          !props.nonModal && !props.anchorRef?.current?.contains(element)
+        }
+        isNonModal={props.nonModal}
+        placement={props.placement ?? 'bottom'}
+        shouldFlip={!props.noFlip}
         offset={8}
         className="bs-filter-popover"
         style={{

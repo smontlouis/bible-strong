@@ -7,10 +7,30 @@ import { useTheme } from '~themes/ThemeProvider'
 import { useBibleBookmarkScreens } from '~features/bookmarks/useBibleBookmarkScreens'
 import { getSelectedVersesBookmarkLocation } from '~features/bible/selectedVersesActions'
 import { ACTION_ITEM_WIDTH, ICON_BOX_SIZE, ICON_SIZE } from '../constants'
+import { useSelectionMenu } from '../selectionMenuContext'
+import { SELECTION_SHORTCUTS } from '../selectionShortcuts'
 import ActionItem from './ActionItem'
 import type { VerseBookmarkActionProps } from './VerseBookmarkAction'
 
-export default function VerseBookmarkAction({
+export default function VerseBookmarkAction(props: VerseBookmarkActionProps) {
+  const menu = useSelectionMenu()
+  const { t } = useTranslation()
+  if (menu)
+    return (
+      <ActionItem
+        name="bookmark"
+        label={t('Marque-page')}
+        onPress={() => menu.openScreen('bookmark')}
+        disabled={props.disabled || !getSelectedVersesBookmarkLocation(props.selectedVerses)}
+        isActive={props.isActive}
+        shortcut={SELECTION_SHORTCUTS.bookmark}
+        nested
+      />
+    )
+  return <VerseBookmarkPanel {...props} />
+}
+
+function VerseBookmarkPanel({
   selectedVerses,
   version,
   disabled,

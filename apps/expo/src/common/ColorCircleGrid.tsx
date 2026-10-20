@@ -27,6 +27,8 @@ interface ColorCircleGridProps {
    * - 'scroll': Horizontal ScrollView with dynamic width (like ColorCirclesBar)
    * - 'grid': Flex wrap grid
    */
+  /** Grid layout: which side the circles gather on. */
+  gridAlign?: 'start' | 'end'
   layout?: 'scroll' | 'grid'
   /**
    * For scroll layout: padding applied to container
@@ -49,12 +51,15 @@ const ColorCircleGrid = ({
   layout = 'scroll',
   scrollPadding,
   itemHeight = 60,
+  gridAlign = 'end',
 }: ColorCircleGridProps) => {
   const { t } = useTranslation()
 
   if (layout === 'grid') {
     return (
-      <HStack className="border-continuous overflow-visible gap-[8px] flex-wrap justify-end">
+      <HStack
+        className={`border-continuous overflow-visible gap-[8px] flex-wrap ${gridAlign === 'start' ? 'justify-start' : 'justify-end'}`}
+      >
         {colors.map((color, index) => (
           <HighlightTypeIndicator
             key={color.key}

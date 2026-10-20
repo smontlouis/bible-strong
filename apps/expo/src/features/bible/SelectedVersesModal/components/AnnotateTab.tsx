@@ -6,6 +6,7 @@ import VerseTagsAction from './VerseTagsAction'
 import VerseBookmarkAction from './VerseBookmarkAction'
 import type { VerseIds } from '~common/types'
 import type { VerseActiveStates } from '../types'
+import { SELECTION_SHORTCUTS } from '../selectionShortcuts'
 
 interface AnnotateTabProps {
   selectedVerses: VerseIds
@@ -47,9 +48,19 @@ const AnnotateTab = ({
 
   return (
     <ActionsLayout width={screenWidth}>
-      <ActionItem name="file-plus" label={t('Note')} onPress={onCreateNoteClick} />
+      <ActionItem
+        name="file-plus"
+        label={t('Note')}
+        onPress={onCreateNoteClick}
+        shortcut={SELECTION_SHORTCUTS.note}
+      />
       <VerseTagsAction selectedVerses={selectedVerses} reference={reference} onPress={addTag} />
-      <ActionItem name="link" label={t('Lien')} onPress={onCreateLinkClick} />
+      <ActionItem
+        name="link"
+        label={t('Lien')}
+        onPress={onCreateLinkClick}
+        shortcut={SELECTION_SHORTCUTS.link}
+      />
       <ActionItem name="git-merge" label={t('Relation')} onPress={onCreateStudyRelationClick} />
       <VerseBookmarkAction
         selectedVerses={selectedVerses}
@@ -59,13 +70,20 @@ const AnnotateTab = ({
         isActive={hasBookmark}
       />
       <AddToStudyAction onPress={onAddToStudy} onSelect={onSelectStudy} reference={reference} />
-      <ActionItem name="crosshair" label={t('Focus')} onPress={onPinVerses} isActive={hasFocus} />
+      <ActionItem
+        name="crosshair"
+        label={t('Focus')}
+        onPress={onPinVerses}
+        isActive={hasFocus}
+        shortcut={SELECTION_SHORTCUTS.focus}
+      />
       {onEnterAnnotationMode && (
         <ActionItem
           name="edit-2"
           label={t('Mode libre')}
           onPress={onEnterAnnotationMode}
           variant="emphasized"
+          shortcut={SELECTION_SHORTCUTS.freeMode}
         />
       )}
     </ActionsLayout>
