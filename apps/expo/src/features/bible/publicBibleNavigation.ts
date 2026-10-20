@@ -31,7 +31,18 @@ export const createPublicBibleNavigation = (
   replaceWithChapter: (book, chapter) => {
     router.replace(buildPublicBiblePath({ ...current, book, chapter, passage: undefined }))
   },
-  changeVersion: version => {
+  changeVersion: (version, options) => {
+    if (options?.interlinear && isPublicBiblePresentationSupported(version, 'interlinear')) {
+      router.replace(
+        buildPublicBiblePath({
+          ...current,
+          version,
+          presentation: 'interlinear',
+          glossLanguage: options.interlinearLocale ?? current.glossLanguage,
+        })
+      )
+      return
+    }
     const presentation = isPublicBiblePresentationSupported(version, current.presentation)
       ? current.presentation
       : 'text'

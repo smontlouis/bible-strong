@@ -77,7 +77,9 @@ const prepareCatalog = (
       if (!normalizedQuery) return true
 
       return normalizeSearchText(
-        [version.id, version.name, version.name_en].filter(Boolean).join(' ')
+        [version.id, version.name, version.name_en, ...(version.searchKeywords ?? [])]
+          .filter(Boolean)
+          .join(' ')
       ).includes(normalizedQuery)
     })
     .map(version => ({
@@ -112,14 +114,16 @@ export const getVersionCatalogSections = ({
       groupedVersions.set(version.language, [...languageVersions, version])
       return groupedVersions
     }, new Map<BibleVersionLanguage, VersionCatalogItem[]>())
+    // The Hebrew and Greek Bible sits just before the Greek versions
+    const sortLabel = (language: BibleVersionLanguage) =>
+      labels.languages[language === 'he-grc' ? 'grc' : language]
     const languages = [...versionsByLanguage.keys()].sort((left, right) => {
-      if (left === 'he-grc') return -1
-      if (right === 'he-grc') return 1
       if (left === uiLanguage) return -1
       if (right === uiLanguage) return 1
-      return labels.languages[left].localeCompare(labels.languages[right], uiLanguage, {
-        sensitivity: 'base',
-      })
+      return (
+        sortLabel(left).localeCompare(sortLabel(right), uiLanguage, { sensitivity: 'base' }) ||
+        Number(right === 'he-grc') - Number(left === 'he-grc')
+      )
     })
 
     return languages.map(language => ({

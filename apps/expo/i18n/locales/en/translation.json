@@ -464,6 +464,8 @@
   "Mot": "Word",
   "Nave": "Nave",
   "versionSelector.interlinearAttribution": "Interlinear data created by STEPBible.org.",
+  "versionSelector.interlinearDescription": "Original text, with an interlinear reading in French or English.",
+  "versionSelector.openInterlinear": "Open in interlinear",
   "downloads.interlinearIndexName": "Interlinear index",
   "Interlinéaire": "Interlinear",
   "Affichage du texte": "Text display",

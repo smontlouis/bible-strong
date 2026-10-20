@@ -470,6 +470,8 @@
   "Mot": "Mot",
   "Nave": "Nave",
   "versionSelector.interlinearAttribution": "Données interlinéaires créées par STEPBible.org.",
+  "versionSelector.interlinearDescription": "Texte original, avec lecture interlinéaire en français ou en anglais.",
+  "versionSelector.openInterlinear": "Ouvrir en interlinéaire",
   "downloads.interlinearIndexName": "Index interlinéaire",
   "Interlinéaire": "Interlinéaire",
   "Affichage du texte": "Affichage du texte",

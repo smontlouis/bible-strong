@@ -5,7 +5,7 @@ import BookSelectorSheet, {
   bookSelectorDataAtom,
 } from '~features/bible/BookSelectorSheet/BookSelectorSheet'
 import VersionSelectorSheet from '../VersionSelectorSheet/VersionSelectorSheet'
-import { versionSelectorDataAtom } from '../VersionSelectorSheet/state'
+import { versionSelectorDataAtom, type VersionSelectorActions } from '../VersionSelectorSheet/state'
 import { useSetAtom } from 'jotai/react'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
 
@@ -24,7 +24,7 @@ interface BookSelectorContextType {
     data,
     parallelVersionIndex,
   }: {
-    actions: Pick<BibleTabActions, 'setSelectedVersion' | 'setParallelVersion'>
+    actions: VersionSelectorActions
     data: BibleTab['data']
     parallelVersionIndex?: number
   }) => void
@@ -64,7 +64,7 @@ export const BookSelectorSheetProvider = ({ children }: { children: React.ReactN
     data,
     parallelVersionIndex,
   }: {
-    actions: Pick<BibleTabActions, 'setSelectedVersion' | 'setParallelVersion'>
+    actions: VersionSelectorActions
     data: BibleTab['data']
     parallelVersionIndex?: number
   }) => {

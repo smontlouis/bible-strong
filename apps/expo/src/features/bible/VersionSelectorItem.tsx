@@ -31,7 +31,7 @@ import {
 import type { StrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
 import StrongMark from './StrongMark'
 import { isInterlinearCapableBibleVersion } from '~helpers/interlinearBiblePublications'
-import InterlinearMark from './InterlinearMark'
+import InterlinearShortcut from './InterlinearShortcut'
 import { getDownloadItemProgress } from '~state/downloadQueue'
 import { useResourcePublicationStatus } from '~helpers/useResourcePublicationStatus'
 import { getBibleRelatedPublicationResources } from '~helpers/bibleRelatedPublications'
@@ -131,6 +131,7 @@ const VersionIdentity = ({
   strongAttribution,
   showInterlinearCapability,
   interlinearAttribution,
+  interlinearShortcut,
 }: {
   version: Version & { displayName?: string }
   color: string
@@ -146,10 +147,14 @@ const VersionIdentity = ({
   strongAttribution?: string
   showInterlinearCapability?: boolean
   interlinearAttribution?: string
+  /** Opens the version straight in interlinear, under the line that says it can. */
+  interlinearShortcut?: React.ReactNode
 }) => {
+  const { t } = useTranslation()
   const stylingTheme = useStylingTheme()
   return (
-    <Box className="overflow-hidden border-continuous flex-[1]">
+    // Visible overflow: the interlinear button's shadow goes past the column
+    <Box className="overflow-visible border-continuous flex-[1]">
       <Text
         className="text-[12px] opacity-[0.5] font-bold"
         style={{ color: resolveThemeColor(stylingTheme, color) || stylingTheme.colors.default }}
@@ -173,12 +178,12 @@ const VersionIdentity = ({
             <StrongMark highlighted={highlightStrong} passive />
           </Box>
         )}
-        {showCapabilities && showInterlinearCapability && (
-          <Box className="overflow-hidden border-continuous ml-[5px]">
-            <InterlinearMark passive />
-          </Box>
-        )}
       </HStack>
+      {showCapabilities && showInterlinearCapability && (
+        <Text className="text-[13px] leading-[18px] text-tertiary mt-[2px]">
+          {t('versionSelector.interlinearDescription')}
+        </Text>
+      )}
       {showPublicationDetails && (
         <Text
           className="text-[10px]"
@@ -210,6 +215,11 @@ const VersionIdentity = ({
           {interlinearAttribution}
         </Text>
       )}
+      {showCapabilities && showInterlinearCapability && interlinearShortcut && (
+        <Box className="overflow-visible border-continuous mt-[10px] mb-[6px]">
+          {interlinearShortcut}
+        </Box>
+      )}
     </Box>
   )
 }
@@ -226,6 +236,8 @@ export interface Props {
   showStrongIndex?: boolean
   selectionRequirement?: 'bible' | 'strong'
   onOpenOfflineDetails?: (version: Version & { displayName?: string }) => void
+  /** Offers to open an interlinear-capable version straight in interlinear. */
+  onOpenInterlinear?: (id: VersionCode) => void
 }
 
 const VersionSelectorItem = ({
@@ -240,6 +252,7 @@ const VersionSelectorItem = ({
   showStrongIndex,
   selectionRequirement = 'bible',
   onOpenOfflineDetails,
+  onOpenInterlinear,
 }: Props) => {
   const { t } = useTranslation()
   const confirmDeletion = useConfirmDialog()
@@ -414,11 +427,15 @@ const VersionSelectorItem = ({
       : undefined
     : versionNeedsDownload
   const isUnavailableOffline = selectionNeedsDownload === true && !isConnected
+  const interlinearShortcut =
+    onOpenInterlinear && showInterlinearCapability && !isUnavailableOffline ? (
+      <InterlinearShortcut onPress={() => onOpenInterlinear(version.id)} />
+    ) : undefined
 
   if (onOpenOfflineDetails) {
     return (
       <VersionItemContainer needsUpdate={needsUpdate} selected={isSelected}>
-        <Box className="overflow-hidden border-continuous flex-[1] flex-row items-center">
+        <Box className="overflow-visible border-continuous flex-[1] flex-row items-center">
           <TouchableOpacity
             style={{ flex: 1 }}
             disabled={isUnavailableOffline}
@@ -430,9 +447,20 @@ const VersionSelectorItem = ({
                 ? { checked: Boolean(isSelected), disabled: isUnavailableOffline }
                 : { disabled: isUnavailableOffline }
             }
+            // The row is one element for screen readers: its interlinear button becomes an action
+            accessibilityActions={
+              interlinearShortcut
+                ? [{ name: 'openInterlinear', label: t('versionSelector.openInterlinear') }]
+                : undefined
+            }
+            onAccessibilityAction={event => {
+              if (event.nativeEvent.actionName === 'openInterlinear') {
+                onOpenInterlinear?.(version.id)
+              }
+            }}
           >
             <Box
-              className="overflow-hidden border-continuous flex-[1] flex-row items-center"
+              className="overflow-visible border-continuous flex-[1] flex-row items-center"
               style={{ opacity: isUnavailableOffline ? 0.45 : 1 }}
             >
               {renderSelectionCheckbox()}
@@ -445,6 +473,7 @@ const VersionSelectorItem = ({
                 showStrongCapability={showStrongCapability}
                 highlightStrong={isSelected}
                 showInterlinearCapability={showInterlinearCapability}
+                interlinearShortcut={interlinearShortcut}
               />
               {isLoading ? (
                 <Box className="overflow-hidden border-continuous w-[30px] items-center justify-center">
@@ -511,6 +540,7 @@ const VersionSelectorItem = ({
                 strongVersionId ? t(getStrongBibleAttributionKey(strongVersionId)) : undefined
               }
               showInterlinearCapability={showInterlinearCapability}
+              interlinearShortcut={interlinearShortcut}
               interlinearAttribution={
                 isInterlinearCapableBibleVersion(version.id)
                   ? t('versionSelector.interlinearAttribution')
@@ -611,6 +641,7 @@ const VersionSelectorItem = ({
             strongVersionId ? t(getStrongBibleAttributionKey(strongVersionId)) : undefined
           }
           showInterlinearCapability={showInterlinearCapability}
+          interlinearShortcut={interlinearShortcut}
           interlinearAttribution={
             isInterlinearCapableBibleVersion(version.id)
               ? t('versionSelector.interlinearAttribution')

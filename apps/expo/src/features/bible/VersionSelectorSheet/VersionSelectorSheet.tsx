@@ -55,6 +55,22 @@ const VersionSelectorSheet = ({ sheetRef }: VersionSelectorSheetProps) => {
     }
   }
 
+  const setSelectedVersionInInterlinear = actions?.setSelectedVersionInInterlinear
+  // The reader offers the interlinear only to its main version, read without parallel columns
+  const canOpenInterlinear =
+    Boolean(setSelectedVersionInInterlinear) &&
+    parallelVersionIndex === undefined &&
+    !data?.parallelVersions?.length
+  const handleInterlinearSelect = (vers: VersionCode) => {
+    if (!setSelectedVersionInInterlinear) return
+    sheetRef.current?.dismiss()
+    setSelectedVersionInInterlinear(vers)
+    setBookSelectorData(current => ({
+      ...current,
+      data: current.data ? { ...current.data, selectedVersion: vers } : current.data,
+    }))
+  }
+
   // Defined once: a new function per row would render every row again
   const openOfflineDetails = (version: Version & { displayName?: string }) => {
     setOfflineDetailsVersion(version)
@@ -106,6 +122,7 @@ const VersionSelectorSheet = ({ sheetRef }: VersionSelectorSheetProps) => {
               version={item}
               isSelected={item.id === selectedVersion}
               showStrongIndex
+              onOpenInterlinear={canOpenInterlinear ? handleInterlinearSelect : undefined}
               onOpenOfflineDetails={openOfflineDetails}
             />
           )}

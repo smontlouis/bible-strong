@@ -74,6 +74,14 @@ function VersionPanel({
                       actions.setSelectedVersion(version)
                       nav.close()
                     }}
+                    onOpenInterlinear={
+                      data.parallelVersions?.length
+                        ? undefined
+                        : version => {
+                            actions.setSelectedVersionInInterlinear(version)
+                            nav.close()
+                          }
+                    }
                     onOpenOfflineDetails={version => {
                       setDetails(version)
                       requestAnimationFrame(() => detailsRef.current?.present())

@@ -35,6 +35,17 @@ describe('public Bible navigation', () => {
     expect(replace).toHaveBeenCalledWith('/bible/nbs/john/3/16')
   })
 
+  it('opens a version straight in its interlinear display when it has one', () => {
+    const navigation = createPublicBibleNavigation(current, { push, replace })
+
+    navigation.changeVersion('BHG', { interlinear: true, interlinearLocale: 'en' })
+    expect(replace).toHaveBeenLastCalledWith('/bible/bhg/interlinear/en/john/3/16')
+
+    // A translation has no interlinear display: it opens as it would without the option
+    navigation.changeVersion('NBS', { interlinear: true, interlinearLocale: 'en' })
+    expect(replace).toHaveBeenLastCalledWith('/bible/nbs/john/3/16')
+  })
+
   it.each([
     ['hidden', '/bible/lsg/john/3/16'],
     ['visible', '/bible/lsg/strong/john/3/16'],

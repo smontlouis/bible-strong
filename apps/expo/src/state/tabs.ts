@@ -824,6 +824,27 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     )
   }
 
+  /**
+   * Switches the main version to an interlinear-capable Bible shown in interlinear at once. The
+   * glosses keep the language chosen in the tab, or follow the language of the application.
+   */
+  const setSelectedVersionInInterlinear = (selectedVersion: VersionCode) => {
+    if (routeNavigation) {
+      // A public interlinear address names its gloss language
+      const interlinearLocale = getDefaultStore().get(tabAtom).data.interlinearLocale
+      return routeNavigation.changeVersion(selectedVersion, {
+        interlinear: true,
+        interlinearLocale: interlinearLocale ?? getLanguage(),
+      })
+    }
+    setBibleTab(
+      produce(draft => {
+        draft.data = selectBibleTabVersion(draft.data, selectedVersion)
+        setBibleColumnTextModes(draft.data, 0, { interlinearMode: 'interlinear' })
+      })
+    )
+  }
+
   /** Column 0 is the main version, n the n-th parallel version. */
   const setStrongMode = (strongMode: StrongMode, column: BibleTextModeColumn = 0) => {
     if (column === 0 && routeNavigation) return routeNavigation.changeStrongMode(strongMode)
@@ -1221,6 +1242,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
 
   return {
     setSelectedVersion,
+    setSelectedVersionInInterlinear,
     setStrongMode,
     setInterlinearMode,
     setSelectedBook,
