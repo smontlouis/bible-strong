@@ -434,7 +434,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
           </MenuSection>
         )}
 
-        <Box className="overflow-hidden border-continuous px-[34px] mb-[22px]">
+        <Box className="overflow-hidden border-continuous px-[24px] mb-[22px]">
           <LinkItem
             style={{ paddingVertical: 8, paddingHorizontal: 0 }}
             href={
