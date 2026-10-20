@@ -13,7 +13,7 @@ import type { PanelScreen } from './types'
 import type { VerseIds } from '~common/types'
 
 export function useEntityTagsScreen(
-  entity: 'studies' | 'links' | 'highlights',
+  entity: 'studies' | 'links' | 'highlights' | 'wordAnnotations',
   id: string | VerseIds
 ) {
   const { t } = useTranslation()

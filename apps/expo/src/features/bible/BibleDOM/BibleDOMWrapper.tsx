@@ -325,7 +325,8 @@ export type WebViewProps = {
   onOpenStudyRelationsModal?: (target: StudyRelationsModalTarget) => void
   isFormSheet?: boolean
   // Enter annotation mode from double-tap, on the version the reader double-tapped
-  onEnterAnnotationMode?: (version?: VersionCode) => void
+  /** The verse touched to enter the mode, where the desktop menu opens. */
+  onEnterAnnotationMode?: (version?: VersionCode, verseKey?: string) => void
   // Red words data
   redWords?: Record<string, { start: number; end: number }[]> | null
   // Red words of the parallel versions, by version
@@ -1035,7 +1036,10 @@ export const BibleDOMWrapper = ({
       }
 
       case ENTER_ANNOTATION_MODE: {
-        onEnterAnnotationMode?.(getDisplayedVersion(getPayloadVersion(action.payload)))
+        onEnterAnnotationMode?.(
+          getDisplayedVersion(getPayloadVersion(action.payload)),
+          isRecord(action.payload) ? getStringPayload(action.payload.verseKey) : undefined
+        )
         break
       }
 

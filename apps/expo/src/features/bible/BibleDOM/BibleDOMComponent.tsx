@@ -1037,7 +1037,7 @@ const LoadedBibleContent = ({
     // Enter annotation mode, on the version double-tapped
     dispatch({
       type: ENTER_ANNOTATION_MODE,
-      payload: { version: target.version },
+      payload: { version: target.version, verseKey: target.verseKey },
     }).catch(console.error)
 
     // If double-tap is on an annotation, select it; otherwise create a selection on the word
@@ -1103,9 +1103,10 @@ const LoadedBibleContent = ({
           Object.keys(selectedVerses).length > 0
         )
           return false
-        dispatch({ type: ENTER_ANNOTATION_MODE, payload: { version: target.version } }).catch(
-          console.error
-        )
+        dispatch({
+          type: ENTER_ANNOTATION_MODE,
+          payload: { version: target.version, verseKey: target.verseKey },
+        }).catch(console.error)
         return true
       },
       onTapVerse: handleTapVerse,

@@ -245,6 +245,8 @@ const BibleViewer = ({
   // Annotation mode
   const annotationMode = useAnnotationMode()
   const annotationToolbar = useSheet()
+  // Desktop: the verse the free mode started from, where its menu opens until words are chosen.
+  const [annotationEntryVerseKey, setAnnotationEntryVerseKey] = useState<string>()
   const didOpenInitialAnnotationRef = useRef(false)
   const initialAnnotation = useSelector((state: RootState) =>
     initialAnnotationId ? state.user.bible.wordAnnotations[initialAnnotationId] : undefined
@@ -748,6 +750,8 @@ const BibleViewer = ({
   // Handler for entering annotation mode (from SelectedVersesModal)
   const handleEnterAnnotationMode = useCallback(() => {
     if (hidePersonalBibleData) return
+    const selectedVerseKeys = Object.keys(selectedVerses)
+    setAnnotationEntryVerseKey(selectedVerseKeys[selectedVerseKeys.length - 1])
     // Clear selected verses and close the modal
     actions.clearSelectedVerses()
     versesModal.close()
@@ -760,12 +764,17 @@ const BibleViewer = ({
     annotationMode,
     annotationToolbar,
     selectionVersion,
+    selectedVerses,
     hidePersonalBibleData,
   ])
 
   // Handler for entering annotation mode (from double-tap on a verse of one of the versions)
-  const handleEnterAnnotationModeFromDoubleTap = (annotatedVersion: VersionCode = version) => {
+  const handleEnterAnnotationModeFromDoubleTap = (
+    annotatedVersion: VersionCode = version,
+    verseKey?: string
+  ) => {
     if (hidePersonalBibleData) return
+    setAnnotationEntryVerseKey(verseKey)
     annotationMode.enterMode(annotatedVersion)
     annotationToolbar.open()
   }
@@ -1870,6 +1879,8 @@ const BibleViewer = ({
         tagsCount={Object.keys(annotationMode.selectedAnnotation?.tags || {}).length}
         relationsCount={annotationRelationCount}
         version={parallelVersions.length > 0 ? annotationMode.version : undefined}
+        annotatedVersion={annotationMode.version}
+        entryVerseKey={annotationEntryVerseKey}
         isEnabled={annotationMode.enabled && !hidePersonalBibleData}
       />
       <CrossVersionAnnotationsModal
