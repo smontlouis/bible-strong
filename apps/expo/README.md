@@ -83,6 +83,17 @@ yarn workspace @bible-strong/expo build:ios:staging        # internal testing
 yarn workspace @bible-strong/expo build:ios:prod           # production
 ```
 
+These are local EAS builds. A staging or production build also needs values that are not in git, which `dotenv` loads from two local files:
+
+| File | Variables |
+|------|-----------|
+| `.env` | `SENTRY_AUTH_TOKEN`, `EXPO_PUBLIC_DEEPL_AUTH_KEY`, `YOUTUBE_API_KEY` |
+| `.env.local` | `BIBLE_STRONG_ARCHIVE_KEYS` (offline-copy master keys, ADR-0065) |
+
+On a machine without these files, export the variables instead, and only those: an exported variable overrides the value `.env.production` sets. Without `BIBLE_STRONG_ARCHIVE_KEYS` the build still succeeds, but the app cannot decrypt the offline copies of protected Bibles. Check that the build log prints `[bible-strong-archive] Offline-copy key versions: 1` (or later versions), not `none`.
+
+When the project folder is not a git checkout, set `EAS_NO_VCS=1` and `EAS_PROJECT_ROOT` to the repository root; otherwise EAS takes `apps/expo` for the root, leaves the workspace out and runs Yarn 1.
+
 ## Web runtime
 
 The Web runtime is online-only: Bible content, search, and reference resources are read through the Resource service API, and there is no onboarding, local SQLite, or offline download. It is served from `web.bible-strong.app` and is separate from the public site in [`apps/site`](../site/README.md).
