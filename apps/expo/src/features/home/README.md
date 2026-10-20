@@ -19,9 +19,11 @@ four blocks rather than a list of equal sections.
    (`HomeToday.web.tsx`, `AnimatedVerseHeight.web.tsx`).
 3. **Ma bibliothèque**, what belongs to the reader: the six counters, the sign-in prompt,
    then the work in progress as parts (`HomeResumeSection`): **Reprendre** (latest History
-   entries, hidden while the history is empty) and **Mes plans** (followed reading plans, or
-   an invitation to the catalogue). « À découvrir » only joins real plans, since the
-   invitation already opens the catalogue.
+   entries, hidden while the history is empty; « Tout voir » opens the full History) and
+   **Mes plans** (followed reading plans, or an invitation to the catalogue). « À découvrir »
+   leads to the catalogue, not to all the reader's plans, so it keeps its own wording; it
+   only joins real plans, since the invitation already opens the catalogue. Title actions are
+   verbs, never a second noun beside the title.
 4. **Explorer**, what the app offers. Its title action, **Nouvel onglet**, adds an empty tab
    and switches to it, like the sidebar button. Below it, without a title, one shortcut per
    tab type of the new tab (`HomeOpenSection`), each opening the same scoped search

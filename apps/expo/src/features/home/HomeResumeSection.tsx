@@ -29,8 +29,12 @@ const HomeResumeSection = () => {
         title={t('home.resume')}
         className={titleClassName}
         action={
-          <Link route="History" className="py-[12px]">
-            <Text className="text-primary text-[13px] font-bold">{t('history.title')}</Text>
+          <Link
+            route="History"
+            accessibilityLabel={`${t('history.seeAll')} · ${t('history.title')}`}
+            className="py-[12px]"
+          >
+            <Text className="text-primary text-[13px] font-bold">{t('history.seeAll')}</Text>
           </Link>
         }
       />
