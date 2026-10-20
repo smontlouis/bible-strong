@@ -1,4 +1,12 @@
 @import "tw-shimmer";
+
+/* macOS browsers thicken text with their default smoothing; grayscale smoothing draws the
+   fonts at their designed weight, as native apps do. Other platforms ignore it. */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 * {
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
