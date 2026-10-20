@@ -164,7 +164,8 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
     <FormSheetScreen isFormSheet={isFormSheet}>
       <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         <PericopeHeader hasBackButton={hasBackButton} title={`${t('Péricopes')} ${version}`} />
-        {availabilityQuery.isPending ? (
+        {availabilityQuery.isPending ||
+        (availabilityQuery.data?.status === 'available' && pericopeQuery.isPending) ? (
           <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center">
             <Loading message={t('Chargement...')} />
           </Box>
