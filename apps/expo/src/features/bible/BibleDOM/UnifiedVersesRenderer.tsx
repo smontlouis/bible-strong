@@ -149,9 +149,6 @@ export function UnifiedVersesRenderer({
   // Calculate adjacent verses for fade effect in focused context mode
   const adjacentVerses = getAdjacentFocusVerses(focusVersesNumeric)
 
-  // Pre-compute whether verses are selected (avoids Object.keys() per iteration)
-  const hasSelectedVerses = Object.keys(selectedVerses).length > 0
-
   // Pre-compute tagged verses lookup: O(m) once instead of O(n*m) per verse
   const taggedVersesByLastVerse = getTaggedVersesByLastVerse(taggedVerses)
 
@@ -260,7 +257,6 @@ export function UnifiedVersesRenderer({
                 selectedCode={annotationMode ? null : selectedCode}
                 isSelectionMode={annotationMode ? undefined : isSelectionMode}
                 annotationMode={Boolean(annotationMode)}
-                isSelectedMode={!annotationMode && hasSelectedVerses}
                 selectedVersion={annotationMode ? null : selectedVersion}
                 touchedCell={touchedCell}
                 highlightedColor={
@@ -308,7 +304,6 @@ export function UnifiedVersesRenderer({
                 verse={verse}
                 settings={settings}
                 isSelected={false}
-                isSelectedMode={false}
                 isSelectionMode={undefined}
                 highlightedColor={undefined}
                 annotationNotesCount={annotationNotesCount}
@@ -375,7 +370,6 @@ export function UnifiedVersesRenderer({
               verse={verse}
               settings={settings}
               isSelected={isSelected}
-              isSelectedMode={hasSelectedVerses}
               isSelectionMode={isSelectionMode}
               highlightedColor={highlightedColor}
               annotationNotesCount={annotationNotesCount}

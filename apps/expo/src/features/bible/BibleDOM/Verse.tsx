@@ -115,11 +115,9 @@ const CanonicalNoteButton = styled('button')<RootStyles & { isDisabled?: boolean
 
 const Wrapper = styled('span')<
   RootStyles & {
-    isSelectedMode?: boolean
-    isSelected?: boolean
     fadePosition?: 'top' | 'bottom'
   }
->(({ settings: { textDisplay, theme, colors }, isSelectedMode, isSelected, fadePosition }) => ({
+>(({ settings: { textDisplay }, fadePosition }) => ({
   display: textDisplay,
   transition: 'opacity 0.3s ease',
   position: 'relative',
@@ -129,11 +127,6 @@ const Wrapper = styled('span')<
         marginBottom: '5px',
         contentVisibility: 'auto',
         containIntrinsicSize: 'auto 80px',
-      }
-    : {}),
-  ...(isSelectedMode && !isSelected
-    ? {
-        opacity: 0.3,
       }
     : {}),
   ...(fadePosition
@@ -608,7 +601,6 @@ export const hasVerseEndContent = ({
 
 interface Props {
   verse: TVerse
-  isSelectedMode: boolean
   isSelectionMode: StudyNavigateBibleType | undefined
   settings: RootState['user']['bible']['settings']
   // Empty row of a version that omits this verse in parallel display
@@ -667,7 +659,6 @@ const Verse = ({
   interlinearMode,
   isHebreu,
   selectedCode,
-  isSelectedMode,
   isFocused,
   isMissingVerse = false,
   loadingPlaceholderText,
@@ -759,8 +750,6 @@ const Verse = ({
       <Wrapper
         settings={settings}
         id={isParallelCell ? undefined : `verset-${verse.Verset}`}
-        isSelectedMode={isSelectedMode}
-        isSelected={isSelected}
         fadePosition={fadePosition}
       >
         <ContainerText

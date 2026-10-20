@@ -71,24 +71,20 @@ const VerseGroupSeparator = styled('div')<RootStyles>(({ settings: { theme, colo
 
 // Horizontal mode: the verse-level content under a row, kept in view whatever column
 // the reader scrolled to.
-const VerseBand = styled('div')<RootStyles & { $dimmed: boolean; $columnsWidth: string }>(
-  ({ $dimmed, $columnsWidth }) => ({
-    position: 'sticky',
-    left: 0,
-    // No wider than the columns, which it would push past their centred width
-    width: `min(calc(100vw - 30px), ${$columnsWidth})`,
-    maxWidth: '100%',
-    boxSizing: 'border-box',
-    paddingBottom: '8px',
-    opacity: $dimmed ? 0.3 : 1,
-    transition: 'opacity 0.3s ease',
-    zIndex: 1,
-  })
-)
+const VerseBand = styled('div')<RootStyles & { $columnsWidth: string }>(({ $columnsWidth }) => ({
+  position: 'sticky',
+  left: 0,
+  // No wider than the columns, which it would push past their centred width
+  width: `min(calc(100vw - 30px), ${$columnsWidth})`,
+  maxWidth: '100%',
+  boxSizing: 'border-box',
+  paddingBottom: '8px',
+  zIndex: 1,
+}))
 
 // Vertical mode: the verse number and its markers, kept in view over the stacked versions.
-const VerseGroupHeader = styled('div')<RootStyles & { $dimmed: boolean }>(
-  ({ settings: { theme, colors, fontSizeScale }, $dimmed }) => ({
+const VerseGroupHeader = styled('div')<RootStyles>(
+  ({ settings: { theme, colors, fontSizeScale } }) => ({
     position: 'sticky',
     top: 'var(--header-height)',
     zIndex: 2,
@@ -99,8 +95,7 @@ const VerseGroupHeader = styled('div')<RootStyles & { $dimmed: boolean }>(
     paddingBlock: '6px',
     backgroundColor: colors[theme].reverse,
     fontSize: scaleFontSize(14, fontSizeScale),
-    opacity: $dimmed ? 0.3 : 1,
-    transition: 'opacity 0.3s ease, top 0.3s cubic-bezier(.13,.69,.5,.98)',
+    transition: 'top 0.3s cubic-bezier(.13,.69,.5,.98)',
   })
 )
 
@@ -120,11 +115,7 @@ const GroupNumber = styled('span')<RootStyles & { $bg?: string; $color?: string 
 )
 
 /** Sticks to the bottom of the screen while the reader goes through the verse's versions. */
-const StickyVerseEnd = ({
-  settings,
-  isDimmed,
-  children,
-}: RootStyles & { isDimmed: boolean; children: React.ReactNode }) => {
+const StickyVerseEnd = ({ settings, children }: RootStyles & { children: React.ReactNode }) => {
   const ref = useRef<HTMLDivElement>(null)
   const [isSticky, setIsSticky] = useState(true)
 
@@ -150,12 +141,11 @@ const StickyVerseEnd = ({
       style={{
         position: isSticky ? 'sticky' : 'static',
         bottom: 'var(--footer-height, 0px)',
-        transition: 'opacity 0.3s ease, bottom 0.3s cubic-bezier(.13,.69,.5,.98)',
+        transition: 'bottom 0.3s cubic-bezier(.13,.69,.5,.98)',
         zIndex: 2,
         paddingBlock: '6px',
         backgroundColor: colors[theme].reverse,
         borderTop: isSticky ? `1px solid ${colors[theme].border}` : undefined,
-        opacity: isDimmed ? 0.3 : 1,
       }}
     >
       {children}
@@ -189,8 +179,6 @@ export interface ParallelVerseRowProps {
   selectedCode: SelectedCode | null
   isSelectionMode: StudyNavigateBibleType | undefined
   annotationMode: boolean
-  // Some verse of the chapter is selected
-  isSelectedMode: boolean
   // The version this verse is selected in, if it is
   selectedVersion: string | null
   // This verse under the reader's finger, in the version and column touched, if any
@@ -227,7 +215,6 @@ const ParallelVerseRow = ({
   selectedCode,
   isSelectionMode,
   annotationMode,
-  isSelectedMode,
   selectedVersion,
   touchedCell,
   highlightedColor,
@@ -246,7 +233,6 @@ const ParallelVerseRow = ({
   const translations = useTranslations()
   const isVertical = displayMode === 'vertical'
   const verseNumber = Number(verse.Verset)
-  const isRowDimmed = isSelectedMode && !selectedVersion
   const hasMarkers = hasVerseMarkers(verseContent)
   const hasEndContent = hasVerseEndContent(verseContent) || Boolean(commentaryChips?.length)
 
@@ -311,7 +297,6 @@ const ParallelVerseRow = ({
           interlinearMode={cell.interlinearMode}
           settings={settings}
           isSelected={selectedVersion === cell.version}
-          isSelectedMode={isSelectedMode}
           isSelectionMode={isSelectionMode}
           highlightedColor={holdsPersonalData(cell) ? highlightedColor : undefined}
           hasWordAnnotations={
@@ -351,7 +336,7 @@ const ParallelVerseRow = ({
     return (
       <div id={`verset-${verse.Verset}`}>
         {cells[0] && renderHeadings(cells[0])}
-        <VerseGroupHeader settings={settings} $dimmed={isRowDimmed}>
+        <VerseGroupHeader settings={settings}>
           <GroupNumber
             settings={settings}
             $bg={numberHighlight.show ? numberHighlight.bg : undefined}
@@ -365,11 +350,7 @@ const ParallelVerseRow = ({
           // A version can be shown twice: columns are keyed by position
           <div key={`${index}:${cell.version}`}>{renderCell(cell, index)}</div>
         ))}
-        {hasEndContent && (
-          <StickyVerseEnd settings={settings} isDimmed={isRowDimmed}>
-            {endContent}
-          </StickyVerseEnd>
-        )}
+        {hasEndContent && <StickyVerseEnd settings={settings}>{endContent}</StickyVerseEnd>}
         <VerseGroupSeparator settings={settings} />
       </div>
     )
@@ -419,7 +400,6 @@ const ParallelVerseRow = ({
       {(hasMarkers || hasEndContent) && (
         <VerseBand
           settings={settings}
-          $dimmed={isRowDimmed}
           $columnsWidth={getParallelColumnsWidth(cells.length, columnWidth)}
         >
           {hasMarkers && <VerseMarkers {...verseContent} />}

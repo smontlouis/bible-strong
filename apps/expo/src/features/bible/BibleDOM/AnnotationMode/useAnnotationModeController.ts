@@ -15,6 +15,10 @@ interface AnnotationModeCallbacks {
   onMouseSelectionStart?: (verse: VerseTarget) => boolean
   /** Called on single tap - receives the verse (and its version) and touch position */
   onTapVerse?: (verse: VerseTarget, position: { x: number; y: number }) => void
+  /** Whether a tap on this verse waits to rule out a double tap */
+  shouldWaitForDoubleTap?: (verse: VerseTarget) => boolean
+  /** Called when a tap is held back to rule out a double tap, before onTapVerse */
+  onTapVerseHeld?: (verse: VerseTarget) => void
   /** Called on double tap - receives the verse (and its version) and touch position */
   onDoubleTapVerse?: (verse: VerseTarget, position: { x: number; y: number }) => void
   /** Called on long press */
@@ -85,6 +89,8 @@ export function useAnnotationModeController({
   const {
     onMouseSelectionStart,
     onTapVerse,
+    shouldWaitForDoubleTap,
+    onTapVerseHeld,
     onDoubleTapVerse,
     onLongPressVerse,
     onTouchedVerseChange,
@@ -106,6 +112,8 @@ export function useAnnotationModeController({
     callbacks: {
       onMouseSelectionStart,
       onTapVerse,
+      shouldWaitForDoubleTap,
+      onTapVerseHeld,
       onDoubleTapVerse,
       onLongPressVerse,
       onDragStart: () => {

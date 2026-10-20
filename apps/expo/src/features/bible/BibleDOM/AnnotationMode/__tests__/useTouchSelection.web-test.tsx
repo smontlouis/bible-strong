@@ -419,4 +419,85 @@ describe('Web mouse gestures for Bible annotations', () => {
       expect(onSelectionChange).not.toHaveBeenCalled()
     }
   )
+
+  const click = (target: Element, clientX: number, type: 'click' | 'dblclick' = 'click') =>
+    target.dispatchEvent(new MouseEvent(type, { bubbles: true, button: 0, clientX, clientY: 10 }))
+
+  it('holds a tap while a double tap could follow, then reports it', () => {
+    const onTapVerse = jest.fn()
+    const onTapVerseHeld = jest.fn()
+    act(() => {
+      root.render(<Harness annotationMode={false} callbacks={{ onTapVerse, onTapVerseHeld }} />)
+    })
+    const target = host.querySelector('[data-version="LSG"]')!
+
+    act(() => click(target, 10))
+    expect(onTapVerseHeld).toHaveBeenCalledWith({ verseKey: '1-1-1', version: 'LSG' })
+    expect(onTapVerse).not.toHaveBeenCalled()
+
+    act(() => jest.advanceTimersByTime(200))
+    expect(onTapVerse).toHaveBeenCalledWith({ verseKey: '1-1-1', version: 'LSG' }, { x: 10, y: 10 })
+  })
+
+  it('reports a tap at once where a double tap could do nothing', () => {
+    const onTapVerse = jest.fn()
+    const onTapVerseHeld = jest.fn()
+    act(() => {
+      root.render(
+        <Harness
+          annotationMode={false}
+          callbacks={{ onTapVerse, onTapVerseHeld, shouldWaitForDoubleTap: () => false }}
+        />
+      )
+    })
+
+    act(() => click(host.querySelector('[data-version="LSG"]')!, 10))
+
+    expect(onTapVerse).toHaveBeenCalledTimes(1)
+    expect(onTapVerseHeld).not.toHaveBeenCalled()
+  })
+
+  it('reports a held tap when another verse is tapped, instead of losing it', () => {
+    const onTapVerse = jest.fn()
+    act(() => {
+      root.render(<Harness annotationMode={false} callbacks={{ onTapVerse }} />)
+    })
+
+    act(() => {
+      click(host.querySelector('[data-version="LSG"]')!, 10)
+      jest.advanceTimersByTime(50)
+      click(host.querySelector('[data-version="KJV"]')!, 110)
+    })
+    expect(onTapVerse).toHaveBeenCalledTimes(1)
+    expect(onTapVerse).toHaveBeenLastCalledWith(
+      { verseKey: '1-1-1', version: 'LSG' },
+      { x: 10, y: 10 }
+    )
+
+    act(() => jest.advanceTimersByTime(200))
+    expect(onTapVerse).toHaveBeenCalledTimes(2)
+    expect(onTapVerse).toHaveBeenLastCalledWith(
+      { verseKey: '1-1-1', version: 'KJV' },
+      { x: 110, y: 10 }
+    )
+  })
+
+  it('reports a double click without the taps that made it', () => {
+    const onTapVerse = jest.fn()
+    const onDoubleTapVerse = jest.fn()
+    act(() => {
+      root.render(<Harness annotationMode={false} callbacks={{ onTapVerse, onDoubleTapVerse }} />)
+    })
+    const target = host.querySelector('[data-version="LSG"]')!
+
+    act(() => {
+      click(target, 10)
+      click(target, 10)
+      click(target, 10, 'dblclick')
+      jest.advanceTimersByTime(250)
+    })
+
+    expect(onDoubleTapVerse).toHaveBeenCalledTimes(1)
+    expect(onTapVerse).not.toHaveBeenCalled()
+  })
 })

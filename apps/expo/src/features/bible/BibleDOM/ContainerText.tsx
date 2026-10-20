@@ -3,6 +3,7 @@ import { convertHex } from './convertHex'
 import { RootStyles } from './BibleDOMWrapper'
 import { HIGHLIGHT_BACKGROUND_OPACITY, getContrastTextColor } from '../../../helpers/highlightUtils'
 import { isDarkTheme, noSelect } from './utils'
+import { TEXT_SELECTION_COLOR } from './AnnotationMode/selectionUtils'
 
 export type HighlightType = 'background' | 'textColor' | 'underline'
 
@@ -112,15 +113,19 @@ export const ContainerText = styled('span')<
       highlightStyles = getHighlightStyles(hex, type, theme)
     }
   }
+  // A selected verse takes the background of selected words, laid over its highlight. Being an
+  // image, the selection layer shows at once instead of following the background transition.
+  const selectionLayer = `linear-gradient(${TEXT_SELECTION_COLOR}, ${TEXT_SELECTION_COLOR})`
   return {
     fontFamily,
     transition: 'background 0.3s ease, color 0.3s ease',
-    background: highlightStyles.background,
+    background: isSelected
+      ? `${selectionLayer}, ${highlightStyles.background}`
+      : highlightStyles.background,
     borderRadius: highlightStyles.borderRadius,
     color: highlightStyles.color,
     padding: '4px',
     WebkitBoxDecorationBreak: 'clone',
-    borderBottom: isSelected ? `2px dashed ${colors[theme]['default']}` : 'none',
     ...noSelect,
     ...(isVerseToScroll
       ? {

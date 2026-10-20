@@ -74,6 +74,7 @@ import { SelectionRange } from './AnnotationMode/selectionUtils'
 import { tokenizeVerseText, WordToken, getWordIndexFromCharOffset } from '~helpers/wordTokenizer'
 import { getCaretInfoFromPoint } from './AnnotationMode/domUtils'
 import type { VerseTarget } from './AnnotationMode/verseTargets'
+import { useOptimisticVerseSelection } from './optimisticVerseSelection'
 // Unified verse renderer
 import { UnifiedVersesRenderer } from './UnifiedVersesRenderer'
 import AnnotationInlineItems from './AnnotationInlineItems'
@@ -114,7 +115,6 @@ const forwardProps = [
   'highlightBg',
   'highlightColor',
   'redColor',
-  'isSelectedMode',
   'fadePosition',
   'isButton',
   'isDisabled',
@@ -755,6 +755,13 @@ const LoadedBibleContent = ({
 
   // State for touched verse (for visual feedback)
   const [touchedVerse, setTouchedVerse] = useState<VerseTarget | null>(null)
+  // The selection the native side holds, with the taps it has not sent back yet
+  const verseSelection = useOptimisticVerseSelection({
+    selectedVerses,
+    selectedVersesVersion: selectedVersesVersion ?? version,
+  })
+  const { shownSelection } = verseSelection
+  const decidedSelectedVerses = verseSelection.decidedSelection.selectedVerses
   const [returnToSelectedVersePosition, setReturnToSelectedVersePosition] = useState<
     'top' | 'bottom' | null
   >(null)
@@ -920,6 +927,7 @@ const LoadedBibleContent = ({
 
   // A tapped verse is selected in the version it was tapped in.
   const toggleSelectedVerse = (target: VerseTarget) => {
+    verseSelection.showSentToggle(target)
     dispatch({
       type: TOGGLE_SELECTED_VERSE,
       payload: target,
@@ -957,8 +965,7 @@ const LoadedBibleContent = ({
   }
 
   const handleTapVerseNormalMode = (target: VerseTarget) => {
-    const isSelectedMode = Boolean(Object.keys(selectedVerses).length)
-    if (isSelectedMode || settings.press === 'longPress') {
+    if (doesTapToggleVerse(target)) {
       toggleSelectedVerse(target)
     } else {
       navigateToVerseDetail(target)
@@ -968,6 +975,27 @@ const LoadedBibleContent = ({
   // In parallel display, a row can stand for a verse a version omits
   // (Acts 8:37 in the ESV): its actions all work on that version, so it stays inert.
   const isVerseMissingFromVersion = (target: VerseTarget) => !getVerse(target)
+
+  // Whether a tap selects or unselects this verse, rather than opening or annotating it
+  const doesTapToggleVerse = (target: VerseTarget) =>
+    !isVersionGestureSuppressed(target.version) &&
+    !isVerseMissingFromVersion(target) &&
+    !annotationMode &&
+    (isSelectionMode
+      ? Boolean(isSelectionMode.includes('verse'))
+      : Object.keys(decidedSelectedVerses).length > 0 || settings.press === 'longPress')
+
+  // Whether a double tap on this verse would do anything (see handleDoubleTapVerse). Where it
+  // would not, a tap is acted on at once instead of waiting to rule one out.
+  const canDoubleTapVerse = (target: VerseTarget) =>
+    canAnnotateVersion(target.version) &&
+    !isVerseMissingFromVersion(target) &&
+    (annotationMode || Object.keys(decidedSelectedVerses).length === 0)
+
+  // The tap waits to rule out a double tap: show the verse selected already
+  const handleTapVerseHeld = (target: VerseTarget) => {
+    if (doesTapToggleVerse(target)) verseSelection.showHeldToggle(target)
+  }
 
   const handleTapVerse = (target: VerseTarget, position: { x: number; y: number }) => {
     if (isVersionGestureSuppressed(target.version) || isVerseMissingFromVersion(target)) return
@@ -986,6 +1014,8 @@ const LoadedBibleContent = ({
   }
 
   const handleDoubleTapVerse = (target: VerseTarget, position: { x: number; y: number }) => {
+    // The first tap of a double tap only selects a word, not the verse it showed selected
+    verseSelection.discardHeldToggles()
     if (!canAnnotateVersion(target.version)) return
 
     // Find the word at the double-tap position
@@ -1032,7 +1062,7 @@ const LoadedBibleContent = ({
     }
 
     // Normal mode: don't enter annotation mode if verses are selected
-    if (Object.keys(selectedVerses).length > 0) return
+    if (Object.keys(decidedSelectedVerses).length > 0) return
 
     // Enter annotation mode, on the version double-tapped
     dispatch({
@@ -1100,7 +1130,7 @@ const LoadedBibleContent = ({
         if (
           !canAnnotateVersion(target.version) ||
           isSelectionMode ||
-          Object.keys(selectedVerses).length > 0
+          Object.keys(decidedSelectedVerses).length > 0
         )
           return false
         dispatch({
@@ -1110,6 +1140,8 @@ const LoadedBibleContent = ({
         return true
       },
       onTapVerse: handleTapVerse,
+      shouldWaitForDoubleTap: canDoubleTapVerse,
+      onTapVerseHeld: handleTapVerseHeld,
       onDoubleTapVerse: handleDoubleTapVerse,
       onLongPressVerse: handleLongPressVerse,
       onTouchedVerseChange: target =>
@@ -1430,10 +1462,7 @@ const LoadedBibleContent = ({
   const isHebreu = version === 'BHS' || (version === 'BHG' && Number(verses[0].Livre) < 40)
   const highlightLayer = !isVerseLayoutAnimating &&
     (highlightRects.length > 0 || (annotationMode && selection)) && (
-      <HighlightLayer
-        $dimmed={!annotationMode && Object.keys(selectedVerses).length > 0}
-        $overflowVisible={isHorizontalParallelMode}
-      >
+      <HighlightLayer $overflowVisible={isHorizontalParallelMode}>
         {highlightRects.map(rect => (
           <HighlightRectDiv
             key={rect.id}
@@ -1613,8 +1642,8 @@ const LoadedBibleContent = ({
                   parallelVerses={parallelVerses}
                   interlinearReadingVersions={interlinearReadingVersions}
                   focusVerses={focusVerses}
-                  selectedVerses={selectedVerses}
-                  selectedVersesVersion={selectedVersesVersion ?? version}
+                  selectedVerses={shownSelection.selectedVerses}
+                  selectedVersesVersion={shownSelection.selectedVersesVersion}
                   highlightedVerses={highlightedVerses}
                   settings={columnSettings}
                   verseToScroll={verseToScroll}

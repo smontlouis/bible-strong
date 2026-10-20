@@ -5,7 +5,12 @@ import { Verse as TVerse } from '~common/types'
 import { getTokenByWordIndex, tokenizeVerseText, WordToken } from '~helpers/wordTokenizer'
 import { RootStyles, WebViewProps } from '../BibleDOMWrapper'
 import { AnnotationType, HighlightRect } from './HighlightComponents'
-import { SelectionRange, normalizeRange, getVersesBetween } from './selectionUtils'
+import {
+  SelectionRange,
+  TEXT_SELECTION_COLOR,
+  normalizeRange,
+  getVersesBetween,
+} from './selectionUtils'
 import { usePrevious } from '~helpers/usePrevious'
 import { getFocusVerseNumbers, isVerseDimmedInFocusedContext } from '../verseRenderingModel'
 import {
@@ -205,7 +210,7 @@ function getRectsForSelection(
         left: rect.left,
         width: rect.width,
         height: rect.height,
-        color: 'rgba(0, 122, 255, 0.3)',
+        color: TEXT_SELECTION_COLOR,
         type: 'selection',
       })
     })

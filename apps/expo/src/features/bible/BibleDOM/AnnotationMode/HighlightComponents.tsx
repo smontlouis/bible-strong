@@ -64,8 +64,8 @@ function createMarkerGradient(colorStr: string, intensity: number = 1): string {
 
 // $overflowVisible: drawn inside horizontally scrolled columns wider than the layer,
 // which their scroll container clips instead.
-export const HighlightLayer = styled('div')<{ $dimmed?: boolean; $overflowVisible?: boolean }>(
-  ({ $dimmed, $overflowVisible }) => ({
+export const HighlightLayer = styled('div')<{ $overflowVisible?: boolean }>(
+  ({ $overflowVisible }) => ({
     position: 'absolute',
     top: 0,
     left: 0,
@@ -74,8 +74,6 @@ export const HighlightLayer = styled('div')<{ $dimmed?: boolean; $overflowVisibl
     zIndex: 0,
     pointerEvents: 'none',
     overflow: $overflowVisible ? 'visible' : 'hidden',
-    opacity: $dimmed ? 0.3 : 1,
-    transition: 'opacity 0.3s ease',
   })
 )
 

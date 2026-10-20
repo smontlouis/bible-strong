@@ -46,16 +46,23 @@ interface TouchState {
   dragHandle: 'start' | 'end' | null
   // Unified gesture state
   longPressTimer: ReturnType<typeof setTimeout> | null
-  lastTapTime: number
-  // The verse of one version tapped last (double taps need the same verse of the same version)
-  lastTapCellKey: string | null
   longPressFired: boolean
   // Swipe detection state
   startTime: number
   velocitySamples: VelocitySample[]
 }
 
-const INITIAL_TOUCH_STATE: Omit<TouchState, 'longPressTimer' | 'lastTapTime' | 'lastTapCellKey'> = {
+/** A tap held back until a second tap on the same verse can no longer make it a double tap */
+interface HeldTap {
+  verse: VerseTarget
+  position: Position
+  // The verse of one version tapped (double taps need the same verse of the same version)
+  cellKey: string
+  endedAt: number
+  timer: ReturnType<typeof setTimeout>
+}
+
+const INITIAL_TOUCH_STATE: Omit<TouchState, 'longPressTimer'> = {
   startPos: { x: 0, y: 0 },
   startWord: null,
   startVerse: null,
@@ -70,7 +77,7 @@ const INITIAL_TOUCH_STATE: Omit<TouchState, 'longPressTimer' | 'lastTapTime' | '
 
 /**
  * Resets the mutable touch state fields that should be cleared between gestures.
- * Does NOT reset lastTapTime/lastTapCellKey (needed for double-tap detection across gestures).
+ * A held tap lives outside it: double taps are detected across gestures.
  */
 function resetTouchState(state: TouchState): void {
   state.isDragging = false
@@ -87,6 +94,13 @@ function resetTouchState(state: TouchState): void {
 export interface TouchSelectionCallbacks {
   /** Called on single tap - receives the verse and touch position for word-level selection */
   onTapVerse?: (verse: VerseTarget, position: { x: number; y: number }) => void
+  /**
+   * Whether a tap on this verse waits to see if a second one follows. Without a double tap
+   * that could do anything there, the tap is reported at once. Defaults to waiting.
+   */
+  shouldWaitForDoubleTap?: (verse: VerseTarget) => boolean
+  /** Called when a tap is held back to rule out a double tap, before onTapVerse */
+  onTapVerseHeld?: (verse: VerseTarget) => void
   /** Called on double tap - receives the verse and touch position for selecting the word */
   onDoubleTapVerse?: (verse: VerseTarget, position: { x: number; y: number }) => void
   /** Called on long press */
@@ -150,13 +164,11 @@ export function useTouchSelection({
   const touchStateRef = useRef<TouchState>({
     ...INITIAL_TOUCH_STATE,
     longPressTimer: null,
-    lastTapTime: 0,
-    lastTapCellKey: null,
   })
   const autoScrollRef = useRef<number | null>(null)
   const currentTouchPosRef = useRef<Position | null>(null)
   const lastDragEndRef = useRef<number>(0)
-  const singleTapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const heldTapRef = useRef<HeldTap | null>(null)
 
   // Store frequently-changing values in refs so the touch listener effect
   // does not need to tear down and re-attach on every change.
@@ -279,17 +291,52 @@ export function useTouchSelection({
     })
   }
 
-  // Clear timers helper
-  const clearTimers = () => {
+  const clearLongPressTimer = () => {
     const touchState = touchStateRef.current
     if (touchState.longPressTimer) {
       clearTimeout(touchState.longPressTimer)
       touchState.longPressTimer = null
     }
-    if (singleTapTimerRef.current) {
-      clearTimeout(singleTapTimerRef.current)
-      singleTapTimerRef.current = null
+  }
+
+  // Forgets the held tap without reporting it (it became a double tap, or the view went away)
+  const dropHeldTap = () => {
+    const heldTap = heldTapRef.current
+    if (heldTap) clearTimeout(heldTap.timer)
+    heldTapRef.current = null
+  }
+
+  // Reports the held tap now: its delay ran out, or another verse was tapped
+  const releaseHeldTap = () => {
+    const heldTap = heldTapRef.current
+    if (!heldTap) return
+    dropHeldTap()
+    callbacksRef.current.onTapVerse?.(heldTap.verse, heldTap.position)
+  }
+
+  const isDoubleTapOfHeldTap = (cellKey: string, now: number) => {
+    const heldTap = heldTapRef.current
+    return heldTap?.cellKey === cellKey && now - heldTap.endedAt < DOUBLE_TAP_DELAY
+  }
+
+  // A single tap is held back only where a double tap could follow and do something.
+  // A tap on another verse first reports the one still held, so no tap is ever lost.
+  const handleSingleTap = (verse: VerseTarget, position: Position, now: number) => {
+    releaseHeldTap()
+    const cbs = callbacksRef.current
+    if (!(cbs.shouldWaitForDoubleTap?.(verse) ?? true)) {
+      cbs.onTapVerse?.(verse, position)
+      return
     }
+
+    heldTapRef.current = {
+      verse,
+      position,
+      cellKey: createVerseCellKey(verse),
+      endedAt: now,
+      timer: setTimeout(releaseHeldTap, DOUBLE_TAP_DELAY),
+    }
+    cbs.onTapVerseHeld?.(verse)
   }
 
   // Calculate average velocity from recent samples
@@ -325,7 +372,7 @@ export function useTouchSelection({
       const touchState = touchStateRef.current
       const cbs = callbacksRef.current
 
-      clearTimers()
+      clearLongPressTimer()
 
       const now = Date.now()
 
@@ -515,32 +562,11 @@ export function useTouchSelection({
       if (!touchState.isDragging && !touchState.hasMoved && !touchState.longPressFired) {
         const verse = touchState.startVerse
         if (verse) {
-          const cellKey = createVerseCellKey(verse)
-          if (
-            touchState.lastTapCellKey === cellKey &&
-            now - touchState.lastTapTime < DOUBLE_TAP_DELAY
-          ) {
-            // Double-tap detected
-            if (singleTapTimerRef.current) {
-              clearTimeout(singleTapTimerRef.current)
-              singleTapTimerRef.current = null
-            }
-            const doubleTapPosition = { ...touchState.startPos }
-            touchState.lastTapTime = 0
-            touchState.lastTapCellKey = null
-            cbs.onDoubleTapVerse?.(verse, doubleTapPosition)
+          if (isDoubleTapOfHeldTap(createVerseCellKey(verse), now)) {
+            dropHeldTap()
+            cbs.onDoubleTapVerse?.(verse, { ...touchState.startPos })
           } else {
-            // Potential single tap - defer to allow double-tap detection
-            const tapPosition = { ...touchState.startPos }
-            touchState.lastTapTime = now
-            touchState.lastTapCellKey = cellKey
-            singleTapTimerRef.current = setTimeout(() => {
-              if (touchState.lastTapCellKey === cellKey) {
-                callbacksRef.current.onTapVerse?.(verse, tapPosition)
-                touchState.lastTapCellKey = null
-              }
-              singleTapTimerRef.current = null
-            }, DOUBLE_TAP_DELAY)
+            handleSingleTap(verse, { ...touchState.startPos }, now)
           }
         } else {
           cbs.onTapEmpty?.()
@@ -551,13 +577,10 @@ export function useTouchSelection({
     }
 
     const handleTouchCancel = () => {
-      clearTimers()
+      clearLongPressTimer()
       callbacksRef.current.onTouchedVerseChange?.(null)
 
-      const touchState = touchStateRef.current
-      resetTouchState(touchState)
-      touchState.lastTapTime = 0
-      touchState.lastTapCellKey = null
+      resetTouchState(touchStateRef.current)
 
       stopAutoScroll()
       currentTouchPosRef.current = null
@@ -571,7 +594,7 @@ export function useTouchSelection({
       const cbs = callbacksRef.current
       const now = Date.now()
 
-      clearTimers()
+      clearLongPressTimer()
       mouseIsDown = true
       touchState.startPos = { x: e.clientX, y: e.clientY }
       touchState.isDragging = false
@@ -718,12 +741,10 @@ export function useTouchSelection({
         return
       }
 
-      const tapPosition = { x: e.clientX, y: e.clientY }
-      if (singleTapTimerRef.current) clearTimeout(singleTapTimerRef.current)
-      singleTapTimerRef.current = setTimeout(() => {
-        callbacksRef.current.onTapVerse?.(verse, tapPosition)
-        singleTapTimerRef.current = null
-      }, DOUBLE_TAP_DELAY)
+      // The browser reports a double click itself (dblclick): the second click of one only
+      // replaces the tap held by the first, which dblclick then drops.
+      if (isDoubleTapOfHeldTap(createVerseCellKey(verse), Date.now())) dropHeldTap()
+      handleSingleTap(verse, { x: e.clientX, y: e.clientY }, Date.now())
     }
 
     const handleDoubleClick = (e: MouseEvent) => {
@@ -739,10 +760,7 @@ export function useTouchSelection({
       )
       if (!verse) return
 
-      if (singleTapTimerRef.current) {
-        clearTimeout(singleTapTimerRef.current)
-        singleTapTimerRef.current = null
-      }
+      dropHeldTap()
       callbacksRef.current.onDoubleTapVerse?.(verse, { x: e.clientX, y: e.clientY })
     }
 
@@ -770,7 +788,8 @@ export function useTouchSelection({
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('mouseup', handleMouseUp)
       stopAutoScroll()
-      clearTimers()
+      clearLongPressTimer()
+      dropHeldTap()
     }
   }, [])
 
