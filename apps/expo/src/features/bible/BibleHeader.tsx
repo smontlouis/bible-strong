@@ -35,7 +35,6 @@ import Box, {
 import { FormSheetHandle } from '~common/ui/FormSheetScreen'
 import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 import Text, { AnimatedText } from '~common/ui/Text'
-import Progress from '~common/ui/Progress'
 import {
   BIBLE_FORM_SHEET_HEADER_HEIGHT,
   HEADER_HEIGHT,
@@ -62,8 +61,6 @@ import {
   isInterlinearCapableBibleVersion,
   isInterlinearModeEnabled,
 } from '~helpers/interlinearBiblePublications'
-import { downloadItemStatesAtom } from '~state/downloadQueue'
-import { getBibleModeAcquisitionPresentation } from '~helpers/bibleModeAcquisition'
 import InterlinearMark from './InterlinearMark'
 import type { BibleTextModeKind } from './BibleTextModeSheets'
 import type { BibleTextModeColumn } from '~helpers/bibleColumnTextModes'
@@ -129,30 +126,12 @@ const Header = ({
     focusVerses,
     strongMode = 'hidden',
     interlinearMode = 'hidden',
-    pendingModeAcquisition,
     planPassage,
   } = bible.data
   const bookNumber = book.Numero
   const bookName = book.Nom
   const isParallel = parallelVersions.length > 0
   const displayVerses = focusVerses
-  const downloadStates = useAtomValue(downloadItemStatesAtom)
-  const acquisitionPresentation = getBibleModeAcquisitionPresentation(
-    pendingModeAcquisition,
-    downloadStates
-  )
-  const isMainColumnAcquisition = (pendingModeAcquisition?.column ?? 0) === 0
-  const isInterlinearDownloadVisible =
-    interlinearMode === 'hidden' &&
-    pendingModeAcquisition?.kind === 'interlinear' &&
-    isMainColumnAcquisition &&
-    (acquisitionPresentation.status === 'active' || acquisitionPresentation.status === 'completed')
-  const isStrongDownloadVisible =
-    strongMode === 'hidden' &&
-    pendingModeAcquisition?.kind === 'strong' &&
-    pendingModeAcquisition.versionId === version &&
-    isMainColumnAcquisition &&
-    (acquisitionPresentation.status === 'active' || acquisitionPresentation.status === 'completed')
 
   // Check if verses are selected
   const hasSelectedVerses =
@@ -364,38 +343,12 @@ const Header = ({
       bibleAtom={bibleAtom}
       className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[40px]"
       onPress={() => onOpenTextMode('strong', 0)}
-      disabled={isStrongDownloadVisible}
       accessibilityRole="button"
-      accessibilityLabel={
-        isStrongDownloadVisible
-          ? t('Téléchargement en cours')
-          : t('Choisir l’affichage de la Bible Strong')
-      }
-      accessibilityState={{
-        disabled: isStrongDownloadVisible,
-        selected: strongMode !== 'hidden',
-      }}
-      style={[
-        { opacity: isStrongDownloadVisible ? 0.6 : 1 },
-        [
-          { opacity: isStrongDownloadVisible ? 0.6 : 1 },
-          {
-            opacity: fullScreenOpacity,
-            transitionProperty: 'opacity',
-            transitionDuration: 300,
-          },
-        ],
-      ]}
+      accessibilityLabel={t('Choisir l’affichage de la Bible Strong')}
+      accessibilityState={{ selected: strongMode !== 'hidden' }}
+      style={opacityTransitionStyle}
     >
-      {isStrongDownloadVisible ? (
-        <Progress
-          progress={Math.max(acquisitionPresentation.progress, 0.04)}
-          size={22}
-          thickness={2.5}
-        />
-      ) : (
-        <StrongMark highlighted={strongMode !== 'hidden'} />
-      )}
+      <StrongMark highlighted={strongMode !== 'hidden'} />
     </DisplayModeTrigger>
   ) : null
 
@@ -405,29 +358,12 @@ const Header = ({
       bibleAtom={bibleAtom}
       className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[40px]"
       onPress={() => onOpenTextMode('interlinear', 0)}
-      disabled={isInterlinearDownloadVisible}
       accessibilityRole="button"
-      accessibilityLabel={
-        isInterlinearDownloadVisible ? t('Téléchargement en cours') : t('Options du texte original')
-      }
-      accessibilityState={{
-        disabled: isInterlinearDownloadVisible,
-        selected: isInterlinearModeEnabled(interlinearMode),
-      }}
-      style={[
-        { opacity: isInterlinearDownloadVisible ? 0.6 : 1 },
-        [{ opacity: isInterlinearDownloadVisible ? 0.6 : 1 }, opacityTransitionStyle],
-      ]}
+      accessibilityLabel={t('Options du texte original')}
+      accessibilityState={{ selected: isInterlinearModeEnabled(interlinearMode) }}
+      style={opacityTransitionStyle}
     >
-      {isInterlinearDownloadVisible ? (
-        <Progress
-          progress={Math.max(acquisitionPresentation.progress, 0.04)}
-          size={22}
-          thickness={2.5}
-        />
-      ) : (
-        <InterlinearMark highlighted={isInterlinearModeEnabled(interlinearMode)} />
-      )}
+      <InterlinearMark highlighted={isInterlinearModeEnabled(interlinearMode)} />
     </DisplayModeTrigger>
   ) : null
 

@@ -129,15 +129,9 @@ describe('migrateLegacyPersistedReferences', () => {
     expect(groups[0].tabs[0].data).toMatchObject({
       selectedVersion: 'BHG',
       strongMode: 'hidden',
-      interlinearMode: 'hidden',
+      interlinearMode: 'interlinear',
       interlinearLocale: 'en',
       parallelVersions: ['LSG', 'KJV', 'LSG'],
-      pendingModeAcquisition: {
-        kind: 'interlinear',
-        mode: 'interlinear',
-        locale: 'en',
-        planIds: ['bible-interlinear:BHG:en'],
-      },
     })
     expect(groups[0].tabs[1].data).toEqual({
       strongBibleVersionId: 'LSG',
@@ -145,13 +139,7 @@ describe('migrateLegacyPersistedReferences', () => {
     })
     expect(JSON.parse(values.get('tabsAtom')!)[0].data).toMatchObject({
       selectedVersion: 'LSG',
-      strongMode: 'hidden',
-      pendingModeAcquisition: {
-        kind: 'strong',
-        versionId: 'LSG',
-        mode: 'visible',
-        planIds: ['bible-strong:LSG'],
-      },
+      strongMode: 'visible',
     })
     expect(JSON.parse(values.get('savedParallelVersions')!)).toEqual(['BHG', 'BHG', 'KJV'])
   })

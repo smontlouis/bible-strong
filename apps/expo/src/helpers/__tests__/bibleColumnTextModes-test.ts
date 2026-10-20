@@ -1,7 +1,6 @@
 import { produce } from 'immer'
 
 import {
-  applyBibleModeAcquisition,
   getBibleColumnTextModes,
   getParallelColumnTextModes,
   materializeParallelTextModes,
@@ -10,8 +9,6 @@ import {
   type BibleColumnTextModesData,
 } from '../bibleColumnTextModes'
 import { getColumnTextModeControls } from '~features/bible/columnTextModeControls'
-
-jest.mock('~state/downloadQueue', () => ({ getDownloadItemProgress: jest.fn() }))
 
 const legacyTab = (
   overrides: Partial<BibleColumnTextModesData> = {}
@@ -142,79 +139,6 @@ describe('resetParallelColumnTextModes', () => {
   })
 })
 
-describe('applyBibleModeAcquisition', () => {
-  it('turns Strong on in the column the reader acted on', () => {
-    const data = legacyTab({
-      selectedVersion: 'BDS',
-      strongMode: 'hidden',
-      parallelVersions: ['LSG'],
-    })
-
-    const next = produce(data, draft => {
-      applyBibleModeAcquisition(draft, {
-        kind: 'strong',
-        column: 1,
-        versionId: 'LSG',
-        mode: 'visible',
-        planIds: [],
-      })
-    })
-
-    expect(next.strongMode).toBe('hidden')
-    expect(getBibleColumnTextModes(next, 1)?.strongMode).toBe('visible')
-  })
-
-  it('turns interlinear on in a parallel BHG column', () => {
-    const data = legacyTab({ strongMode: 'hidden', parallelVersions: ['KJV', 'BHG'] })
-
-    const next = produce(data, draft => {
-      applyBibleModeAcquisition(draft, {
-        kind: 'interlinear',
-        column: 2,
-        mode: 'transliteration',
-        locale: 'fr',
-        planIds: [],
-      })
-    })
-
-    expect(getBibleColumnTextModes(next, 2)).toEqual(
-      expect.objectContaining({ interlinearMode: 'transliteration', interlinearLocale: 'fr' })
-    )
-    expect(getBibleColumnTextModes(next, 1)?.interlinearMode).toBeUndefined()
-  })
-
-  it('ignores a download for a column that no longer holds its version', () => {
-    const data = legacyTab({ strongMode: 'hidden', parallelVersions: ['KJV'] })
-
-    const next = produce(data, draft => {
-      applyBibleModeAcquisition(draft, {
-        kind: 'strong',
-        column: 1,
-        versionId: 'LSG',
-        mode: 'visible',
-        planIds: [],
-      })
-    })
-
-    expect(getBibleColumnTextModes(next, 1)?.strongMode).toBe('hidden')
-  })
-
-  it('applies an acquisition saved without a column to the main version', () => {
-    const data = legacyTab({ strongMode: 'hidden', parallelVersions: [] })
-
-    const next = produce(data, draft => {
-      applyBibleModeAcquisition(draft, {
-        kind: 'strong',
-        versionId: 'LSG',
-        mode: 'reverse-interlinear',
-        planIds: [],
-      })
-    })
-
-    expect(next.strongMode).toBe('reverse-interlinear')
-  })
-})
-
 describe('getColumnTextModeControls', () => {
   it('gives each column the buttons its version supports', () => {
     const controls = getColumnTextModeControls({
@@ -227,19 +151,8 @@ describe('getColumnTextModeControls', () => {
         { version: 'LSG', strongMode: 'visible' },
         { version: 'BHG', strongMode: 'hidden', interlinearMode: 'hidden' },
       ],
-      pendingModeAcquisition: {
-        kind: 'interlinear',
-        column: 2,
-        mode: 'interlinear',
-        locale: 'fr',
-        planIds: [],
-      },
     })
 
-    expect(controls).toEqual([
-      {},
-      { strong: { active: true, downloading: false } },
-      { interlinear: { active: false, downloading: true } },
-    ])
+    expect(controls).toEqual([{}, { strong: { active: true } }, { interlinear: { active: false } }])
   })
 })

@@ -2,7 +2,6 @@ import type { ResourceLanguage } from './databaseTypes'
 import type { InterlinearMode } from './interlinearDisplayMode'
 import { isInterlinearCapableBibleVersion } from './interlinearBiblePublications'
 import { resolveStrongBibleVersion, type StrongMode } from './strongBiblePublications'
-import type { PendingBibleModeAcquisition } from './bibleModeAcquisition'
 
 /**
  * The text modes of one column of a Bible tab: Strong and interlinear.
@@ -132,29 +131,4 @@ export const resetParallelColumnTextModes = (
 ): void => {
   data.parallelTextModes = materializeParallelTextModes(data).parallelTextModes ?? []
   data.parallelTextModes[index] = getHiddenColumnTextModes(version)
-}
-
-/**
- * A finished download turns its mode on in the column the reader acted on, in place (an immer
- * draft), provided that column still holds the version the mode was asked for.
- */
-export const applyBibleModeAcquisition = (
-  data: BibleColumnTextModesData,
-  acquisition: PendingBibleModeAcquisition
-): void => {
-  const column = acquisition.column ?? 0
-  const columnVersion = getBibleColumnTextModes(data, column)?.version
-  if (acquisition.kind === 'strong' && columnVersion === acquisition.versionId) {
-    setBibleColumnTextModes(data, column, { strongMode: acquisition.mode })
-  }
-  if (
-    acquisition.kind === 'interlinear' &&
-    columnVersion &&
-    isInterlinearCapableBibleVersion(columnVersion)
-  ) {
-    setBibleColumnTextModes(data, column, {
-      interlinearMode: acquisition.mode,
-      interlinearLocale: acquisition.locale,
-    })
-  }
 }

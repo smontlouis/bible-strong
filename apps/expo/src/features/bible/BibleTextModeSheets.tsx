@@ -6,10 +6,9 @@ import type { SheetRef } from '~common/sheet'
 import { isInterlinearCapableBibleVersion } from '~helpers/interlinearBiblePublications'
 import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
 import type { BibleTextModeColumn } from '~helpers/bibleColumnTextModes'
-import { useBibleTabActions, type BibleTab } from '~state/tabs'
+import type { BibleTab } from '~state/tabs'
 import InterlinearModeSelectorSheet from './InterlinearModeSelectorSheet'
 import StrongModeSelectorSheet from './StrongModeSelectorSheet'
-import { useBibleModeAcquisitionCompletion } from './useBibleModeAcquisitionCompletion'
 
 export type BibleTextModeKind = 'strong' | 'interlinear'
 
@@ -26,23 +25,13 @@ type Props = {
 /** The Strong and interlinear sheets of a Bible tab, opened from the header or a column title. */
 const BibleTextModeSheets = ({ bibleAtom, ref }: Props) => {
   const bible = useAtomValue(bibleAtom)
-  const actions = useBibleTabActions(bibleAtom)
   const strongModeSheetRef = useRef<SheetRef>(null)
   const interlinearModeSheetRef = useRef<SheetRef>(null)
   const [requestedColumn, setRequestedColumn] = useState<BibleTextModeColumn>(0)
-  const { selectedVersion, parallelVersions, pendingModeAcquisition } = bible.data
+  const { selectedVersion, parallelVersions } = bible.data
   const versions = [selectedVersion, ...parallelVersions]
   // Out of parallel reading, or once its column is gone, the sheets set the main version's modes.
   const column = requestedColumn < versions.length ? requestedColumn : 0
-
-  useBibleModeAcquisitionCompletion({
-    acquisition: pendingModeAcquisition,
-    finish: actions.finishBibleModeAcquisition,
-    onSucceeded: acquisition => {
-      const sheetRef = acquisition.kind === 'strong' ? strongModeSheetRef : interlinearModeSheetRef
-      sheetRef.current?.dismiss()
-    },
-  })
 
   useImperativeHandle(ref, () => ({
     open: (kind, nextColumn) => {

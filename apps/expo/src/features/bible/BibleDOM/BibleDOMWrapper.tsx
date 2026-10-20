@@ -176,8 +176,6 @@ export type ParallelVerse = {
 /** A Strong or interlinear button of a parallel column title. */
 export type ColumnTextModeControl = {
   active: boolean
-  /** Its resources are being downloaded for this column. */
-  downloading: boolean
 }
 
 /** The text-mode buttons of one parallel column; a version without the mode has none. */

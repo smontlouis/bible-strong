@@ -12,25 +12,18 @@ import { SheetHeader, SheetView, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
-import Progress from '~common/ui/Progress'
 import Text from '~common/ui/Text'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import { createInterlinearSidecarDownloadPlan } from '~helpers/downloadItemFactory'
-import { downloadManager } from '~helpers/downloadManager'
 import {
   normalizeInterlinearMode,
   type InterlinearDisplayMode,
 } from '~helpers/interlinearBiblePublications'
 import type { InterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
-import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import useLanguage from '~helpers/useLanguage'
-import { downloadItemStatesAtom, getDownloadItemProgress } from '~state/downloadQueue'
 import { useBibleTabActions, type BibleTab } from '~state/tabs'
-import { getBibleModeAcquisitionPresentation } from '~helpers/bibleModeAcquisition'
 import BibleDisplayModeCard from './BibleDisplayModeCard'
-import { createOfflineCopyId } from '~helpers/offlineCopyId'
+import OfflineCopiesLink from './OfflineCopiesLink'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import useConnection from '~helpers/useConnection'
 import {
   loadInterlinearModeAvailability,
   type InterlinearModeAvailabilityState,
@@ -53,9 +46,6 @@ type Props = {
 type AvailabilityByLocale = Partial<Record<ResourceLanguage, InterlinearSidecarAvailability>>
 type DisplayMode = 'hidden' | InterlinearDisplayMode
 
-const isActiveDownload = (status?: string) =>
-  status === 'queued' || status === 'downloading' || status === 'inserting'
-
 const InterlinearModeSelectorSheet = ({
   bibleAtom,
   sheetRef,
@@ -70,15 +60,7 @@ const InterlinearModeSelectorSheet = ({
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
   const resources = useResourceAccess()
-  const isConnected = useConnection()
   const resourceRegistry = useOfflineResourceRegistry()
-  const downloadStates = useAtomValue(downloadItemStatesAtom)
-  const frenchDownload = useDownloadItemStatus(
-    createOfflineCopyId({ kind: 'interlinear-index', versionId: 'BHG', language: 'fr' })
-  )
-  const englishDownload = useDownloadItemStatus(
-    createOfflineCopyId({ kind: 'interlinear-index', versionId: 'BHG', language: 'en' })
-  )
   const columnModes = getBibleColumnTextModes(bible.data, column)
   const selectedMode = normalizeInterlinearMode(columnModes?.interlinearMode)
   const selectedLocale: ResourceLanguage = columnModes?.interlinearLocale ?? appLanguage
@@ -87,11 +69,6 @@ const InterlinearModeSelectorSheet = ({
   const transliterationPreview = isHebrew ? 'Elohim bara' : 'logos en'
   const glossPreview = isHebrew ? 'Dieu · H0430' : 'Parole · G3056'
   const serifFontFamily = Platform.OS === 'ios' ? 'Georgia' : 'serif'
-  const pendingAcquisition =
-    bible.data.pendingModeAcquisition?.kind === 'interlinear' &&
-    (bible.data.pendingModeAcquisition.column ?? 0) === column
-      ? bible.data.pendingModeAcquisition
-      : undefined
 
   const availabilityQuery = useQuery<InterlinearModeAvailabilityState>({
     queryKey: [
@@ -106,61 +83,17 @@ const InterlinearModeSelectorSheet = ({
         versionId: 'BHG',
         language: 'en',
       }),
-      englishDownload?.status,
-      frenchDownload?.status,
     ],
     queryFn: () =>
       loadInterlinearModeAvailability(resources.lexiconBible.getInterlinearAvailability),
     ...localQueryOptions,
   })
   const availability: AvailabilityByLocale = availabilityQuery.data ?? {}
-  const availabilityFailed = availabilityQuery.isError
-
-  const getDownload = (locale: ResourceLanguage) =>
-    locale === 'fr' ? frenchDownload : englishDownload
 
   const isAvailable = (locale: ResourceLanguage) => availability[locale]?.status === 'available'
 
-  const requestDownload = async (
-    locale: ResourceLanguage,
-    _modeLabel: string,
-    modeAfterDownload?: InterlinearDisplayMode,
-    knownAvailability?: InterlinearSidecarAvailability
-  ) => {
-    if (Platform.OS === 'web') return
-    if (!isConnected || availabilityFailed) return
-    const resolvedAvailability =
-      knownAvailability ??
-      availability[locale] ??
-      (await resources.lexiconBible.getInterlinearAvailability(locale).catch(() => undefined))
-    if (!resolvedAvailability) return
-    if (resolvedAvailability.status === 'available') {
-      if (modeAfterDownload) {
-        actions.setInterlinearMode(modeAfterDownload, locale, column)
-        sheetRef?.current?.dismiss()
-        onClose?.()
-      }
-      return
-    }
-
-    const plan = createInterlinearSidecarDownloadPlan(locale, resolvedAvailability.status)
-    if (modeAfterDownload) {
-      actions.startBibleModeAcquisition({
-        kind: 'interlinear',
-        column,
-        mode: modeAfterDownload,
-        locale,
-        planIds: plan.map(item => item.id),
-      })
-    }
-    downloadManager.enqueue(plan)
-  }
-
   const selectMode = async (mode: DisplayMode) => {
     if (mode === 'hidden') {
-      if (bible.data.pendingModeAcquisition) {
-        actions.finishBibleModeAcquisition(false)
-      }
       actions.setInterlinearMode('hidden', selectedLocale, column)
       sheetRef?.current?.dismiss()
       onClose?.()
@@ -179,11 +112,7 @@ const InterlinearModeSelectorSheet = ({
       actions.setInterlinearMode(mode, selectedLocale, column)
       sheetRef?.current?.dismiss()
       onClose?.()
-      return
     }
-
-    // Selecting a display mode never starts an Offline-copy transfer.
-    // The dedicated acquisition control remains visible on the unavailable card.
   }
 
   const selectLocale = (locale: ResourceLanguage) => {
@@ -194,34 +123,18 @@ const InterlinearModeSelectorSheet = ({
   const renderLocaleOption = (locale: ResourceLanguage, label: string) => {
     const selected = selectedLocale === locale
     const available = isAvailable(locale)
-    const localeDownload = getDownload(locale)
-    const downloading = isActiveDownload(localeDownload?.status)
 
     if (Platform.OS === 'web' && !available) return null
 
     return (
       <Pressable
-        accessibilityRole={available ? 'button' : undefined}
-        accessibilityState={{
-          selected,
-          disabled: availabilityFailed || downloading || (!available && !isConnected),
-        }}
+        accessibilityRole="button"
+        accessibilityState={{ selected, disabled: !available }}
         accessibilityLabel={
-          available
-            ? label
-            : t('Télécharger l’index interlinéaire {{language}}', { language: label })
+          available ? label : `${label}. ${t('bibleDisplayMode.connectionRequired')}`
         }
-        disabled={availabilityFailed || downloading || (!available && !isConnected)}
-        onPress={() =>
-          available
-            ? selectLocale(locale)
-            : requestDownload(
-                locale,
-                `${t('Interlinéaire')} ${label}`,
-                undefined,
-                availability[locale]
-              )
-        }
+        disabled={!available}
+        onPress={() => selectLocale(locale)}
         style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.72 : 1 })}
       >
         <Box
@@ -232,7 +145,7 @@ const InterlinearModeSelectorSheet = ({
               'overflow-hidden border-continuous flex-[1] flex-row items-center justify-center gap-[7px]'
             )
           )}
-          style={{ opacity: available || downloading ? 1 : 0.65 }}
+          style={{ opacity: available ? 1 : 0.65 }}
         >
           <Text
             className={twMerge(
@@ -242,48 +155,25 @@ const InterlinearModeSelectorSheet = ({
           >
             {label}
           </Text>
-          {!available &&
-            (downloading && localeDownload ? (
-              <Progress
-                progress={Math.max(getDownloadItemProgress(localeDownload), 0.04)}
-                size={18}
-                thickness={2.2}
-              />
-            ) : (
-              <FeatherIcon
-                name={isConnected ? 'download-cloud' : 'wifi-off'}
-                size={18}
-                color="default"
-              />
-            ))}
+          {!available && <FeatherIcon name="wifi-off" size={16} color="grey" />}
         </Box>
       </Pressable>
     )
   }
 
-  const hasLoadedAvailability = availabilityQuery.isSuccess
   const preferredAvailable = isAvailable(selectedLocale)
   const fallbackLocale: ResourceLanguage = selectedLocale === 'fr' ? 'en' : 'fr'
   const fallbackAvailable = isAvailable(fallbackLocale)
-  const interlinearDownloadRequired =
-    Platform.OS !== 'web' && hasLoadedAvailability && !preferredAvailable
-  const fallbackCapableDownloadRequired =
-    Platform.OS !== 'web' && hasLoadedAvailability && !preferredAvailable && !fallbackAvailable
-  const getModeDownloadState = (mode: InterlinearDisplayMode) => {
-    const acquisition = pendingAcquisition?.mode === mode ? pendingAcquisition : undefined
-    const presentation = getBibleModeAcquisitionPresentation(acquisition, downloadStates)
-    return {
-      downloading: Boolean(acquisition) && presentation.status !== 'failed',
-      progress: presentation.progress,
-    }
+  // Read online or from an Offline copy: a mode is only out of reach offline, without its copy
+  const hasCheckedAvailability = !availabilityQuery.isPending
+  const interlinearUnavailable = hasCheckedAvailability && !preferredAvailable
+  // Strong and transliteration may fall back on the other gloss language
+  const fallbackCapableUnavailable =
+    hasCheckedAvailability && !preferredAvailable && !fallbackAvailable
+  const close = () => {
+    sheetRef?.current?.dismiss()
+    onClose?.()
   }
-  const interlinearDownloadState = getModeDownloadState('interlinear')
-  const strongDownloadState = getModeDownloadState('strong')
-  const transliterationDownloadState = getModeDownloadState('transliteration')
-  const downloadLabel = (mode: string) =>
-    isConnected
-      ? t('Télécharger les ressources pour {{mode}}', { mode })
-      : t('resource.action.connectionRequired')
 
   const Container = inline ? InlineDisplayModeContent : Sheet
   return (
@@ -307,21 +197,9 @@ const InterlinearModeSelectorSheet = ({
             label={t('Interlinéaire')}
             description={t('Mot par mot')}
             selected={selectedMode === 'interlinear'}
-            disabled={Platform.OS === 'web' && !preferredAvailable}
+            unavailable={interlinearUnavailable}
+            unavailableLabel={t('bibleDisplayMode.connectionRequired')}
             onPress={() => selectMode('interlinear')}
-            downloadRequired={interlinearDownloadRequired}
-            downloadDisabled={!isConnected || availabilityFailed}
-            downloading={interlinearDownloadState.downloading}
-            downloadProgress={interlinearDownloadState.progress}
-            downloadAccessibilityLabel={downloadLabel(t('Interlinéaire'))}
-            onDownloadPress={() =>
-              requestDownload(
-                selectedLocale,
-                t('Interlinéaire'),
-                'interlinear',
-                availability[selectedLocale]
-              )
-            }
           >
             <Box
               className="overflow-hidden border-continuous self-center"
@@ -343,16 +221,9 @@ const InterlinearModeSelectorSheet = ({
             label={t('Strong')}
             description={t('Texte + numéros')}
             selected={selectedMode === 'strong'}
-            disabled={Platform.OS === 'web' && !preferredAvailable && !fallbackAvailable}
+            unavailable={fallbackCapableUnavailable}
+            unavailableLabel={t('bibleDisplayMode.connectionRequired')}
             onPress={() => selectMode('strong')}
-            downloadRequired={fallbackCapableDownloadRequired}
-            downloadDisabled={!isConnected || availabilityFailed}
-            downloading={strongDownloadState.downloading}
-            downloadProgress={strongDownloadState.progress}
-            downloadAccessibilityLabel={downloadLabel(t('Strong'))}
-            onDownloadPress={() =>
-              requestDownload(selectedLocale, t('Strong'), 'strong', availability[selectedLocale])
-            }
           >
             <Box className="overflow-hidden border-continuous flex-row items-center justify-center gap-[7px]">
               <Text className="text-[25px]" style={{ fontFamily: serifFontFamily }}>
@@ -367,21 +238,9 @@ const InterlinearModeSelectorSheet = ({
             label={t('Translittération')}
             description={t('Caractères latins')}
             selected={selectedMode === 'transliteration'}
-            disabled={Platform.OS === 'web' && !preferredAvailable && !fallbackAvailable}
+            unavailable={fallbackCapableUnavailable}
+            unavailableLabel={t('bibleDisplayMode.connectionRequired')}
             onPress={() => selectMode('transliteration')}
-            downloadRequired={fallbackCapableDownloadRequired}
-            downloadDisabled={!isConnected || availabilityFailed}
-            downloading={transliterationDownloadState.downloading}
-            downloadProgress={transliterationDownloadState.progress}
-            downloadAccessibilityLabel={downloadLabel(t('Translittération'))}
-            onDownloadPress={() =>
-              requestDownload(
-                selectedLocale,
-                t('Translittération'),
-                'transliteration',
-                availability[selectedLocale]
-              )
-            }
           >
             <Text
               className="text-[20px] leading-[26px] text-center"
@@ -406,6 +265,9 @@ const InterlinearModeSelectorSheet = ({
               {renderLocaleOption('en', 'EN')}
             </Box>
           </Box>
+        )}
+        {(interlinearUnavailable || fallbackCapableUnavailable) && (
+          <OfflineCopiesLink onPress={close} />
         )}
       </SheetView>
     </Container>

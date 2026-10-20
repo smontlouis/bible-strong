@@ -403,10 +403,7 @@ describe('study relation reducer', () => {
               data: expect.objectContaining({
                 selectedVersion: 'LSG',
                 parallelVersions: ['KJV', 'BHG'],
-                pendingModeAcquisition: expect.objectContaining({
-                  kind: 'strong',
-                  versionId: 'LSG',
-                }),
+                strongMode: 'visible',
               }),
             }),
           ]),

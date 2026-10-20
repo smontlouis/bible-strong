@@ -8,11 +8,8 @@ type PersistedBibleTabData = {
   interlinearMode?: string
   interlinearLocale?: string
   parallelVersions?: string[]
-  pendingModeAcquisition?: {
-    kind: string
-    versionId?: string
-    [key: string]: unknown
-  }
+  /** A mode download the reader asked for: no longer used, dropped on load. */
+  pendingModeAcquisition?: unknown
   entityReference?: {
     preferredVersion?: string
     [key: string]: unknown
@@ -36,33 +33,24 @@ export const migrateLegacyParallelVersions = (versions: readonly string[]): stri
 export const migrateLegacyBibleTabData = <T extends PersistedBibleTabData>(data: T): T => {
   const legacyVersion = data.selectedVersion
   const selectedVersion = migrateLegacyBibleVersionId(legacyVersion)
-  const hasLegacyModeAcquisition = isLegacyBibleVersionId(legacyVersion)
+  // Strong and interlinear modes read their resources online or from an Offline copy: nothing
+  // is downloaded to turn one on, so a pending download is dropped.
+  const { pendingModeAcquisition: _pendingModeAcquisition, ...current } = data
   const migrated = {
-    ...data,
+    ...current,
     selectedVersion,
     parallelVersions: migrateLegacyParallelVersions(data.parallelVersions ?? []),
   } as PersistedBibleTabData
 
+  // A legacy Strong or interlinear Bible keeps its presentation on the version that replaces it
   if (legacyVersion === 'LSGS' || legacyVersion === 'KJVS') {
-    migrated.strongMode = 'hidden'
-    migrated.pendingModeAcquisition = {
-      kind: 'strong',
-      versionId: selectedVersion,
-      mode: 'visible',
-      planIds: [`bible-strong:${selectedVersion}`],
-    }
+    migrated.strongMode = 'visible'
   }
 
   if (legacyVersion === 'INT' || legacyVersion === 'INT_EN') {
     migrated.strongMode = 'hidden'
-    migrated.interlinearMode = 'hidden'
+    migrated.interlinearMode = 'interlinear'
     migrated.interlinearLocale = legacyVersion === 'INT' ? 'fr' : 'en'
-    migrated.pendingModeAcquisition = {
-      kind: 'interlinear',
-      mode: 'interlinear',
-      locale: migrated.interlinearLocale,
-      planIds: [`bible-interlinear:BHG:${migrated.interlinearLocale}`],
-    }
   }
 
   if (data.strongBibleSourceVersionId) {
@@ -71,19 +59,6 @@ export const migrateLegacyBibleTabData = <T extends PersistedBibleTabData>(data:
       sourceVersionId === 'LSG' || sourceVersionId === 'KJV'
         ? sourceVersionId
         : data.strongBibleSourceVersionId
-  }
-
-  if (
-    !hasLegacyModeAcquisition &&
-    data.pendingModeAcquisition?.kind === 'strong' &&
-    data.pendingModeAcquisition.versionId
-  ) {
-    const pendingVersionId = migrateLegacyBibleVersionId(data.pendingModeAcquisition.versionId)
-    migrated.pendingModeAcquisition = {
-      ...data.pendingModeAcquisition,
-      versionId: pendingVersionId,
-      planIds: [`bible-strong:${pendingVersionId}`],
-    }
   }
 
   if (data.entityReference?.preferredVersion) {

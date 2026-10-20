@@ -1,4 +1,5 @@
 import React from 'react'
+import { FeatherIcon } from '~common/ui/Icon'
 import BibleDisplayModeCard from '../BibleDisplayModeCard'
 jest.mock('~themes/ThemeProvider', () => ({
   useTheme: () => jest.requireActual('../../../../test/themeFixture').themeFixture,
@@ -50,137 +51,70 @@ jest.mock('~common/ui/Icon', () => {
   }
 })
 
-jest.mock('~common/ui/Progress', () => {
-  const ReactModule = jest.requireActual<typeof import('react')>('react')
-  return {
-    __esModule: true,
-    default: (props: Record<string, unknown>) => ReactModule.createElement('Progress', props),
-  }
-})
-
-type CardPressableProps = {
+type CardProps = {
   accessibilityLabel?: string
+  accessibilityState?: { selected?: boolean; disabled?: boolean }
   children?: React.ReactNode
   disabled?: boolean
   onPress?: () => void
 }
 
-const getCardPressables = (
-  card: React.ReactElement<{ children: React.ReactNode }>
-): React.ReactElement<CardPressableProps>[] =>
-  React.Children.toArray(card.props.children) as React.ReactElement<CardPressableProps>[]
+type Element = React.ReactElement<{ children?: React.ReactNode; name?: string }>
+
+const renderCard = (props: Partial<Parameters<typeof BibleDisplayModeCard>[0]> = {}) =>
+  BibleDisplayModeCard({
+    label: 'Strong',
+    description: 'Texte + numéros',
+    selected: false,
+    onPress: jest.fn(),
+    children: <span>Aperçu</span>,
+    ...props,
+  }) as React.ReactElement<CardProps>
+
+/** Every element under the card, depth first. */
+const flatten = (node: React.ReactNode): Element[] =>
+  React.Children.toArray(node).flatMap(child =>
+    React.isValidElement(child)
+      ? [child as Element, ...flatten((child as Element).props.children)]
+      : []
+  )
+
+const texts = (card: React.ReactElement<CardProps>) =>
+  flatten(card.props.children)
+    .map(element => element.props.children)
+    .filter((child): child is string => typeof child === 'string')
 
 describe('BibleDisplayModeCard', () => {
-  it('keeps selection and Offline acquisition as separate actions', () => {
+  it('selects its mode when pressed', () => {
     const onPress = jest.fn()
-    const onDownloadPress = jest.fn()
-    const [selectionPressable, downloadPressable] = getCardPressables(
-      BibleDisplayModeCard({
-        label: 'Strong',
-        description: 'Texte + numéros',
-        selected: false,
-        onPress,
-        downloadRequired: true,
-        downloadAccessibilityLabel: 'Télécharger les ressources pour Strong',
-        onDownloadPress,
-        children: <span>Aperçu</span>,
-      })
-    )
+    const card = renderCard({ onPress })
 
-    expect(selectionPressable!.props.accessibilityLabel).toBe('Strong. Texte + numéros')
-    expect(downloadPressable!.props.accessibilityLabel).toBe(
-      'Télécharger les ressources pour Strong'
-    )
-    expect(selectionPressable!.props.disabled).toBe(true)
-
-    if (!selectionPressable!.props.disabled) selectionPressable!.props.onPress?.()
-    downloadPressable!.props.onPress?.()
-
-    expect(onDownloadPress).toHaveBeenCalledTimes(1)
-    expect(onPress).not.toHaveBeenCalled()
-  })
-
-  it('selects an installed mode when its card is pressed', () => {
-    const onPress = jest.fn()
-    const onDownloadPress = jest.fn()
-    const [pressable] = getCardPressables(
-      BibleDisplayModeCard({
-        label: 'Strong',
-        description: 'Texte + numéros',
-        selected: false,
-        onPress,
-        onDownloadPress,
-        children: <span>Aperçu</span>,
-      })
-    )
-
-    pressable!.props.onPress?.()
+    card.props.onPress?.()
 
     expect(onPress).toHaveBeenCalledTimes(1)
-    expect(onDownloadPress).not.toHaveBeenCalled()
+    expect(card.props.disabled).toBe(false)
   })
 
-  it('temporarily disables the whole card while preparing its download', () => {
-    const card = BibleDisplayModeCard({
-      label: 'Strong',
-      description: 'Texte + numéros',
-      selected: false,
-      onPress: jest.fn(),
-      downloadRequired: true,
-      downloading: true,
-      downloadProgress: 0.42,
-      onDownloadPress: jest.fn(),
-      children: <span>Aperçu</span>,
-    })
-    const [pressable, downloadPressable] = getCardPressables(card)
-    const content = pressable!.props.children as React.ReactElement<{ children: React.ReactNode }>
-    const downloadIndicator = React.Children.toArray(content.props.children).at(
-      -1
-    ) as React.ReactElement<{ children: React.ReactElement<{ progress: number }> }>
+  it('marks the selected mode with a check', () => {
+    const card = renderCard({ selected: true })
+    const icons = flatten(card.props.children).filter(element => element.type === FeatherIcon)
 
-    expect(pressable!.props.disabled).toBe(true)
-    expect(downloadPressable!.props.disabled).toBe(true)
-    expect(downloadIndicator.props.children.props.progress).toBe(0.42)
+    expect(card.props.accessibilityState).toEqual({ selected: true, disabled: false })
+    expect(icons.map(icon => icon.props.name)).toEqual(['check'])
   })
 
-  it('disables Offline acquisition while keeping its intent visible', () => {
-    const [selectionPressable, downloadPressable] = getCardPressables(
-      BibleDisplayModeCard({
-        label: 'Strong',
-        description: 'Texte + numéros',
-        selected: false,
-        onPress: jest.fn(),
-        downloadRequired: true,
-        downloadDisabled: true,
-        downloadAccessibilityLabel: 'Reconnectez-vous pour télécharger Strong',
-        onDownloadPress: jest.fn(),
-        children: <span>Aperçu</span>,
-      })
-    )
+  it('keeps an unavailable mode out of reach and says why', () => {
+    const card = renderCard({ unavailable: true, unavailableLabel: 'Connexion requise' })
 
-    expect(selectionPressable!.props.disabled).toBe(true)
-    expect(downloadPressable!.props.disabled).toBe(true)
+    expect(card.props.disabled).toBe(true)
+    expect(card.props.accessibilityLabel).toBe('Strong. Texte + numéros. Connexion requise')
+    expect(texts(card)).toContain('Connexion requise')
   })
 
-  it('keeps progress in place of the list radio while a confirmed download is active', () => {
-    const card = BibleDisplayModeCard({
-      layout: 'list',
-      label: 'Strong',
-      description: 'Texte + numéros',
-      selected: false,
-      onPress: jest.fn(),
-      downloadRequired: false,
-      downloading: true,
-      downloadProgress: 0.42,
-      onDownloadPress: jest.fn(),
-      children: <span>Aperçu</span>,
-    })
-    const [pressable] = getCardPressables(card)
-    const content = pressable!.props.children as React.ReactElement<{ children: React.ReactNode }>
-    const downloadIndicator = React.Children.toArray(content.props.children).at(
-      0
-    ) as React.ReactElement<{ children: React.ReactElement<{ progress?: number }> }>
+  it('offers no download', () => {
+    const card = renderCard({ unavailable: true, unavailableLabel: 'Connexion requise' })
+    const icons = flatten(card.props.children).filter(element => element.type === FeatherIcon)
 
-    expect(downloadIndicator.props.children.props.progress).toBe(0.42)
+    expect(icons.map(icon => icon.props.name)).toEqual(['wifi-off'])
   })
 })

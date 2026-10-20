@@ -25,12 +25,10 @@ import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
 import { type StrongBibleVersionId, type StrongMode } from '~helpers/strongBiblePublications'
 import type { InterlinearMode } from '~helpers/interlinearBiblePublications'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import type { PendingBibleModeAcquisition } from '~helpers/bibleModeAcquisition'
 import {
   materializeParallelTextModes,
   resetParallelColumnTextModes,
   setBibleColumnTextModes,
-  applyBibleModeAcquisition,
   getHiddenColumnTextModes,
   type BibleColumnTextModes,
   type BibleTextModeColumn,
@@ -88,7 +86,6 @@ export interface BibleTab extends TabBase {
     strongBibleSourceVersionId?: StrongBibleVersionId
     interlinearMode?: InterlinearMode
     interlinearLocale?: ResourceLanguage
-    pendingModeAcquisition?: PendingBibleModeAcquisition
     selectedBook: Book
     selectedChapter: number
     selectedVerse: number
@@ -833,7 +830,6 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     setBibleTab(
       produce(draft => {
         setBibleColumnTextModes(draft.data, column, { strongMode })
-        draft.data.pendingModeAcquisition = undefined
       })
     )
   }
@@ -852,58 +848,6 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     setBibleTab(
       produce(draft => {
         setBibleColumnTextModes(draft.data, column, { interlinearMode, interlinearLocale })
-        draft.data.pendingModeAcquisition = undefined
-      })
-    )
-  }
-
-  const startBibleModeAcquisition = (acquisition: PendingBibleModeAcquisition) =>
-    setBibleTab(
-      produce(draft => {
-        draft.data.pendingModeAcquisition = acquisition
-      })
-    )
-
-  const finishBibleModeAcquisition = (succeeded: boolean) => {
-    const current = getDefaultStore().get(tabAtom).data
-    const acquisition = current.pendingModeAcquisition
-    const isMainColumn = (acquisition?.column ?? 0) === 0
-    if (
-      routeNavigation &&
-      isMainColumn &&
-      succeeded &&
-      acquisition?.kind === 'strong' &&
-      current.selectedVersion === acquisition.versionId
-    ) {
-      setBibleTab(
-        produce(draft => {
-          draft.data.pendingModeAcquisition = undefined
-        })
-      )
-      routeNavigation.changeStrongMode(acquisition.mode)
-      return
-    }
-    if (
-      isMainColumn &&
-      succeeded &&
-      acquisition?.kind === 'interlinear' &&
-      current.selectedVersion === 'BHG' &&
-      routeNavigation?.changeInterlinearMode?.(acquisition.mode, acquisition.locale)
-    ) {
-      setBibleTab(
-        produce(draft => {
-          draft.data.pendingModeAcquisition = undefined
-        })
-      )
-      return
-    }
-    setBibleTab(
-      produce(draft => {
-        const acquisition = draft.data.pendingModeAcquisition
-        draft.data.pendingModeAcquisition = undefined
-        if (!succeeded || !acquisition) return
-
-        applyBibleModeAcquisition(draft.data, acquisition)
       })
     )
   }
@@ -1279,8 +1223,6 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     setSelectedVersion,
     setStrongMode,
     setInterlinearMode,
-    startBibleModeAcquisition,
-    finishBibleModeAcquisition,
     setSelectedBook,
     setSelectedChapter,
     setSelectedVerse,

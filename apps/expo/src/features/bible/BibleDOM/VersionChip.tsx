@@ -1,7 +1,7 @@
 'use dom'
 
 import React from 'react'
-import { keyframes, styled } from 'goober'
+import { styled } from 'goober'
 import type { ColumnTextModeControls, RootStyles } from './BibleDOMWrapper'
 import ChevronDownIcon from './ChevronDownIcon'
 import { INTERFACE_FONT } from './interfaceFont'
@@ -14,12 +14,6 @@ const TEXT_MODE_KINDS: TextModeKind[] = ['strong', 'interlinear']
 // The header's book and version selectors: one chip split into segments by a thin gap
 const SEGMENT_GAP = '3px'
 const SEGMENT_RADIUS = '20px'
-
-// A segment waits, as the header's button does, while its resources download
-const downloadPulse = keyframes`
-  from { opacity: 0.35; }
-  to { opacity: 0.8; }
-`
 
 const Chip = styled('div')({
   display: 'inline-flex',
@@ -59,8 +53,8 @@ const VersionSegment = styled('div')<RootStyles & { $isLast: boolean; $height: n
 )
 
 const ModeSegment = styled('button')<
-  RootStyles & { $active: boolean; $downloading: boolean; $isLast: boolean; $height: number }
->(({ settings: { colors, theme }, $active, $downloading, $isLast, $height }) => ({
+  RootStyles & { $active: boolean; $isLast: boolean; $height: number }
+>(({ settings: { colors, theme }, $active, $isLast, $height }) => ({
   appearance: 'none',
   border: 'none',
   margin: 0,
@@ -82,10 +76,8 @@ const ModeSegment = styled('button')<
   webkitTouchCallout: 'none',
   webkitUserSelect: 'none',
   userSelect: 'none',
-  cursor: $downloading ? 'default' : 'pointer',
-  ...($downloading
-    ? { animation: `${downloadPulse} 0.8s ease-in-out infinite alternate` }
-    : { '&:active': { opacity: 0.6 } }),
+  cursor: 'pointer',
+  '&:active': { opacity: 0.6 },
 }))
 
 const ErrorIndicator = styled('span')<RootStyles>(({ settings: { theme, colors } }) => ({
@@ -140,7 +132,6 @@ const VersionChip = ({
             type="button"
             settings={settings}
             $active={control.active}
-            $downloading={control.downloading}
             $isLast={index === kinds.length - 1}
             $height={height}
             aria-pressed={control.active}
@@ -149,7 +140,6 @@ const VersionChip = ({
                 ? translations.chooseStrongDisplay
                 : translations.originalTextOptions
             }
-            disabled={control.downloading}
             onClick={() => onTextModePress(kind)}
           >
             {kind === 'strong' ? 'S' : 'I'}

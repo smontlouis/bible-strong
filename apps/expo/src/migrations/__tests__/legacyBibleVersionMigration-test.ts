@@ -6,70 +6,39 @@ import {
 
 describe('legacy Bible version migration', () => {
   it.each([
-    [
-      'LSGS',
-      {
-        selectedVersion: 'LSG',
-        strongMode: 'hidden',
-        pendingModeAcquisition: {
-          kind: 'strong',
-          versionId: 'LSG',
-          mode: 'visible',
-          planIds: ['bible-strong:LSG'],
-        },
-      },
-    ],
-    [
-      'KJVS',
-      {
-        selectedVersion: 'KJV',
-        strongMode: 'hidden',
-        pendingModeAcquisition: {
-          kind: 'strong',
-          versionId: 'KJV',
-          mode: 'visible',
-          planIds: ['bible-strong:KJV'],
-        },
-      },
-    ],
+    ['LSGS', { selectedVersion: 'LSG', strongMode: 'visible', interlinearMode: 'hidden' }],
+    ['KJVS', { selectedVersion: 'KJV', strongMode: 'visible', interlinearMode: 'hidden' }],
     [
       'INT',
       {
         selectedVersion: 'BHG',
-        interlinearMode: 'hidden',
+        strongMode: 'hidden',
+        interlinearMode: 'interlinear',
         interlinearLocale: 'fr',
-        pendingModeAcquisition: {
-          kind: 'interlinear',
-          mode: 'interlinear',
-          locale: 'fr',
-          planIds: ['bible-interlinear:BHG:fr'],
-        },
       },
     ],
     [
       'INT_EN',
       {
         selectedVersion: 'BHG',
-        interlinearMode: 'hidden',
-        interlinearLocale: 'en',
-        pendingModeAcquisition: {
-          kind: 'interlinear',
-          mode: 'interlinear',
-          locale: 'en',
-          planIds: ['bible-interlinear:BHG:en'],
-        },
-      },
-    ],
-  ])('maps the persisted %s identity to its canonical resource', (selectedVersion, expected) => {
-    expect(
-      migrateLegacyBibleTabData({
-        selectedVersion,
         strongMode: 'hidden',
         interlinearMode: 'interlinear',
+        interlinearLocale: 'en',
+      },
+    ],
+  ])(
+    'keeps the presentation of the persisted %s on its canonical resource',
+    (selectedVersion, expected) => {
+      const migrated = migrateLegacyBibleTabData({
+        selectedVersion,
+        strongMode: 'hidden',
+        interlinearMode: 'hidden',
         parallelVersions: [],
       })
-    ).toMatchObject(expected)
-  })
+      expect(migrated).toMatchObject(expected)
+      expect(migrated).not.toHaveProperty('pendingModeAcquisition')
+    }
+  )
 
   it('canonicalizes parallel versions while preserving every occurrence', () => {
     expect(migrateLegacyParallelVersions(['LSGS', 'INT', 'INT_EN', 'KJVS', 'LSG'])).toEqual([
@@ -81,26 +50,19 @@ describe('legacy Bible version migration', () => {
     ])
   })
 
-  it('regenerates pending acquisition IDs when the selected Bible is already canonical', () => {
-    expect(
-      migrateLegacyBibleTabData({
-        selectedVersion: 'LSG',
-        pendingModeAcquisition: {
-          kind: 'strong',
-          versionId: 'LSGS',
-          mode: 'visible',
-          planIds: ['bible:LSGS', 'bible-strong:LSGS'],
-        },
-      })
-    ).toMatchObject({
+  it('drops a pending mode download left by an earlier version', () => {
+    const migrated = migrateLegacyBibleTabData({
       selectedVersion: 'LSG',
+      strongMode: 'hidden',
       pendingModeAcquisition: {
         kind: 'strong',
-        versionId: 'LSG',
+        versionId: 'LSGS',
         mode: 'visible',
-        planIds: ['bible-strong:LSG'],
+        planIds: ['bible:LSGS', 'bible-strong:LSGS'],
       },
     })
+    expect(migrated).toMatchObject({ selectedVersion: 'LSG', strongMode: 'hidden' })
+    expect(migrated).not.toHaveProperty('pendingModeAcquisition')
   })
 
   it('removes legacy resources from the queue during final migration cleanup', () => {

@@ -223,6 +223,7 @@ const sanitizeTab = (tab: EligibleGuestAdoptionTab): GuestAdoptionTab => {
   const { base64Preview: _base64Preview, ...accountOwnedTab } = tab
 
   if (accountOwnedTab.type === 'bible') {
+    // A tab saved by an earlier version may still hold a pending mode download
     const {
       pendingModeAcquisition: _pendingModeAcquisition,
       focusVerses: _focusVerses,
@@ -230,7 +231,7 @@ const sanitizeTab = (tab: EligibleGuestAdoptionTab): GuestAdoptionTab => {
       entityReference: _entityReference,
       temp: _temp,
       ...accountOwnedData
-    } = accountOwnedTab.data
+    } = accountOwnedTab.data as typeof accountOwnedTab.data & { pendingModeAcquisition?: unknown }
 
     return removeUndefined({
       ...accountOwnedTab,

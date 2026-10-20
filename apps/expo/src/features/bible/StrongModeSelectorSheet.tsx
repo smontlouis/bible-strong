@@ -11,23 +11,16 @@ import { SheetHeader, SheetView, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { downloadManager } from '~helpers/downloadManager'
-import { createStrongLexiconModuleDownloadItem } from '~helpers/downloadItemFactory'
-import { createStrongModeDownloadPlan } from '~helpers/strongModeDownloadPlan'
 import {
   isStrongCapableBibleVersion,
   type StrongBibleVersionId,
   type StrongMode,
 } from '~helpers/strongBiblePublications'
 import useLanguage from '~helpers/useLanguage'
-import { downloadItemStatesAtom } from '~state/downloadQueue'
 import { useBibleTabActions, type BibleTab } from '~state/tabs'
-import { getBibleModeAcquisitionPresentation } from '~helpers/bibleModeAcquisition'
 import { getBibleColumnTextModes, type BibleTextModeColumn } from '~helpers/bibleColumnTextModes'
 import BibleDisplayModeCard from './BibleDisplayModeCard'
-import { toast } from '~helpers/toast'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import useConnection from '~helpers/useConnection'
 import {
   loadStrongModeAvailability,
   type StrongModeAvailabilityState,
@@ -37,7 +30,7 @@ import {
   getOfflineResourceQuerySignal,
   useOfflineResourceRegistry,
 } from '~features/resources/useOfflineResourceRegistry'
-import { useStrongIndexLexiconModuleId } from '~features/resources/useStrongIndexLexicon'
+import OfflineCopiesLink from './OfflineCopiesLink'
 type Props = {
   bibleAtom: PrimitiveAtom<BibleTab>
   sheetRef?: RefObject<SheetRef | null>
@@ -59,19 +52,10 @@ const StrongModeSelectorSheet = ({
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
   const resources = useResourceAccess()
-  const isConnected = useConnection()
   const resourceRegistry = useOfflineResourceRegistry()
-  const lexiconModuleId = useStrongIndexLexiconModuleId()
-  const downloadStates = useAtomValue(downloadItemStatesAtom)
   const columnModes = getBibleColumnTextModes(bible.data, column)
   const selectedMode = columnModes?.strongMode ?? 'hidden'
   const version = columnModes?.version ?? bible.data.selectedVersion
-  const pendingAcquisition =
-    bible.data.pendingModeAcquisition?.kind === 'strong' &&
-    bible.data.pendingModeAcquisition.versionId === version &&
-    (bible.data.pendingModeAcquisition.column ?? 0) === column
-      ? bible.data.pendingModeAcquisition
-      : undefined
   const isHebrew = bible.data.selectedBook.Numero <= 39
   const originalPreview = isHebrew ? 'אֱלֹהִים' : 'θεός'
   const translationPreview = appLanguage === 'fr' ? 'Dieu' : 'God'
@@ -109,23 +93,16 @@ const StrongModeSelectorSheet = ({
     ...localQueryOptions,
   })
   const availability = availabilityQuery.data ?? { interlinear: [] }
-  const availabilityFailed = availabilityQuery.isError
 
   const strongAvailable = availability.strong?.status === 'available'
   const installedInterlinear = availability.interlinear.find(
     ({ availability: sidecarAvailability }) => sidecarAvailability.status === 'available'
   )
   const reverseInterlinearAvailable = strongAvailable && Boolean(installedInterlinear)
-
-  const getModeDownloadPresentation = (mode: Exclude<StrongMode, 'hidden'>) => {
-    return getBibleModeAcquisitionPresentation(
-      pendingAcquisition?.mode === mode ? pendingAcquisition : undefined,
-      downloadStates
-    )
-  }
-  const strongDownloadPresentation = getModeDownloadPresentation('visible')
-  const transliterationDownloadPresentation = getModeDownloadPresentation('transliteration')
-  const reverseInterlinearDownloadPresentation = getModeDownloadPresentation('reverse-interlinear')
+  // Read online or from an Offline copy: a mode is only out of reach offline, without its copy
+  const hasCheckedAvailability = !availabilityQuery.isPending
+  const strongUnavailable = hasCheckedAvailability && !strongAvailable
+  const reverseInterlinearUnavailable = hasCheckedAvailability && !reverseInterlinearAvailable
 
   const selectMode = (mode: StrongMode) => {
     if (!isStrongCapableBibleVersion(version)) return
@@ -135,9 +112,6 @@ const StrongModeSelectorSheet = ({
       ((mode === 'transliteration' || mode === 'reverse-interlinear') &&
         reverseInterlinearAvailable)
     ) {
-      if (bible.data.pendingModeAcquisition) {
-        actions.finishBibleModeAcquisition(false)
-      }
       actions.setStrongMode(mode, column)
       sheetRef?.current?.dismiss()
       onClose?.()
@@ -156,71 +130,10 @@ const StrongModeSelectorSheet = ({
     !inline && column === 0 && availabilityQuery.isSuccess
   )
 
-  const requestDownload = (mode: Exclude<StrongMode, 'hidden'>) => {
-    if (Platform.OS === 'web') return
-    if (!isConnected || availabilityFailed) return
-    if (!isStrongCapableBibleVersion(version)) return
-    try {
-      const strong = availability.strong
-      if (!strong) throw new Error('STRONG_AVAILABILITY_UNAVAILABLE')
-      // Every mode but Strong numbers reads the original words of the interlinear.
-      const needsInterlinear = mode !== 'visible'
-      const interlinear = needsInterlinear ? availability.interlinear : []
-      if (needsInterlinear && !interlinear.length) {
-        throw new Error('INTERLINEAR_AVAILABILITY_UNAVAILABLE')
-      }
-
-      const versionId = version as StrongBibleVersionId
-      const plan = createStrongModeDownloadPlan({
-        mode,
-        versionId,
-        strongAvailability: strong,
-        interlinearAvailabilities: interlinear,
-      })
-      if (!plan.items.length) {
-        actions.setStrongMode(mode, column)
-        sheetRef?.current?.dismiss()
-        onClose?.()
-        return
-      }
-
-      actions.startBibleModeAcquisition({
-        kind: 'strong',
-        column,
-        versionId,
-        mode,
-        interlinearLocale: needsInterlinear ? plan.preferredInterlinearLocale : undefined,
-        planIds: plan.items.map(item => item.id),
-      })
-      // The lexicon comes with a Strong index, without holding back the display mode.
-      downloadManager.enqueue([
-        ...plan.items,
-        ...(lexiconModuleId && strong.status !== 'available'
-          ? [createStrongLexiconModuleDownloadItem(lexiconModuleId)]
-          : []),
-      ])
-    } catch {
-      toast.error(t('resource.action.temporarilyUnavailable'))
-    }
+  const close = () => {
+    sheetRef?.current?.dismiss()
+    onClose?.()
   }
-
-  const hasLoadedAvailability = availabilityQuery.isSuccess && Boolean(availability.strong)
-  const strongDownloadRequired = Platform.OS !== 'web' && hasLoadedAvailability && !strongAvailable
-  const reverseInterlinearDownloadRequired =
-    Platform.OS !== 'web' && hasLoadedAvailability && !reverseInterlinearAvailable
-  const strongDownloading =
-    pendingAcquisition?.mode === 'visible' && strongDownloadPresentation.status !== 'failed'
-  const transliterationDownloading =
-    pendingAcquisition?.mode === 'transliteration' &&
-    transliterationDownloadPresentation.status !== 'failed'
-  const reverseInterlinearDownloading =
-    pendingAcquisition?.mode === 'reverse-interlinear' &&
-    reverseInterlinearDownloadPresentation.status !== 'failed'
-
-  const downloadLabel = (mode: string) =>
-    isConnected
-      ? t('Télécharger les ressources pour {{mode}}', { mode })
-      : t('resource.action.connectionRequired')
 
   const Container = inline ? InlineDisplayModeContent : Sheet
   return (
@@ -239,14 +152,9 @@ const StrongModeSelectorSheet = ({
             label={t('Strong')}
             description={t('Texte + numéros')}
             selected={selectedMode === 'visible'}
-            disabled={Platform.OS === 'web' && !strongAvailable}
+            unavailable={strongUnavailable}
+            unavailableLabel={t('bibleDisplayMode.connectionRequired')}
             onPress={() => selectMode('visible')}
-            downloadRequired={strongDownloadRequired}
-            downloadDisabled={!isConnected || availabilityFailed}
-            downloading={strongDownloading}
-            downloadProgress={strongDownloadPresentation.progress}
-            downloadAccessibilityLabel={downloadLabel(t('Strong'))}
-            onDownloadPress={() => requestDownload('visible')}
           >
             <Box className="overflow-hidden border-continuous flex-row items-center justify-center gap-[7px]">
               <Text className="text-[25px]">{translationPreview}</Text>
@@ -262,14 +170,9 @@ const StrongModeSelectorSheet = ({
             label={t('Translittération')}
             description={t('Texte + mots originaux')}
             selected={selectedMode === 'transliteration'}
-            disabled={Platform.OS === 'web' && !reverseInterlinearAvailable}
+            unavailable={reverseInterlinearUnavailable}
+            unavailableLabel={t('bibleDisplayMode.connectionRequired')}
             onPress={() => selectMode('transliteration')}
-            downloadRequired={reverseInterlinearDownloadRequired}
-            downloadDisabled={!isConnected || availabilityFailed}
-            downloading={transliterationDownloading}
-            downloadProgress={transliterationDownloadPresentation.progress}
-            downloadAccessibilityLabel={downloadLabel(t('Translittération'))}
-            onDownloadPress={() => requestDownload('transliteration')}
           >
             <Box className="overflow-hidden border-continuous flex-row items-center justify-center gap-[7px]">
               <Text className="text-[25px]">{translationPreview}</Text>
@@ -285,14 +188,9 @@ const StrongModeSelectorSheet = ({
             label={t('Interlinéaire inversé')}
             description={t('Traduction puis original')}
             selected={selectedMode === 'reverse-interlinear'}
-            disabled={Platform.OS === 'web' && !reverseInterlinearAvailable}
+            unavailable={reverseInterlinearUnavailable}
+            unavailableLabel={t('bibleDisplayMode.connectionRequired')}
             onPress={() => selectMode('reverse-interlinear')}
-            downloadRequired={reverseInterlinearDownloadRequired}
-            downloadDisabled={!isConnected || availabilityFailed}
-            downloading={reverseInterlinearDownloading}
-            downloadProgress={reverseInterlinearDownloadPresentation.progress}
-            downloadAccessibilityLabel={downloadLabel(t('Interlinéaire inversé'))}
-            onDownloadPress={() => requestDownload('reverse-interlinear')}
           >
             <Box className="overflow-hidden border-continuous items-center self-center">
               <Text className="font-bold text-[16px] leading-[21px]">{translationPreview}</Text>
@@ -305,6 +203,9 @@ const StrongModeSelectorSheet = ({
             </Box>
           </BibleDisplayModeCard>
         </Box>
+        {(strongUnavailable || reverseInterlinearUnavailable) && (
+          <OfflineCopiesLink onPress={close} />
+        )}
       </SheetView>
     </Container>
   )
