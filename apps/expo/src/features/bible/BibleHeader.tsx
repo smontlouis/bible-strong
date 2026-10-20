@@ -263,14 +263,20 @@ const Header = ({
   // The chapter as the public site shows it; a version the site does not serve has no link.
   const chapterShareUrl = getChapterShareUrl(bookNumber, chapter, version)
 
+  // Parallel display sits in the header, unless a back button leaves no room on a phone
+  const hasParallelButton = !planPassage && (isParallel || !(hasBackButton && isSmall))
+
   const mainMenuActions: MenuAction[] = [
-    { id: 'params', title: t('Police et paramêtres'), image: 'textformat' },
-    {
-      id: 'parallel',
-      title: t('Affichage parallèle'),
-      image: 'rectangle.split.2x1',
-      state: isParallel ? 'on' : 'off',
-    },
+    ...(!hasParallelButton
+      ? [
+          {
+            id: 'parallel',
+            title: t('Affichage parallèle'),
+            image: 'rectangle.split.2x1' as const,
+            state: isParallel ? ('on' as const) : ('off' as const),
+          },
+        ]
+      : []),
     { id: 'history', title: t('history.title'), image: 'clock.arrow.circlepath' },
     ...(!hidePersonalBibleData
       ? [
@@ -305,9 +311,6 @@ const Header = ({
 
   const handleMenuAction = (id: string) => {
     switch (id) {
-      case 'params':
-        onBibleParamsClick()
-        break
       case 'parallel':
         if (isParallel) removeAllParallelVersions()
         else addParallelVersion()
@@ -333,39 +336,98 @@ const Header = ({
     }
   }
 
+  // One display segment after the version: the interlinear sheet also offers Strong.
   // Parallel reading: each version sets its own modes, from its chip in the reader.
-  const hasStrongModeButton = !isParallel && isStrongCapableBibleVersion(version)
-  const hasInterlinearModeButton = !isParallel && isInterlinearCapableBibleVersion(version)
+  const textModeKind: BibleTextModeKind | null = isParallel
+    ? null
+    : isInterlinearCapableBibleVersion(version)
+      ? 'interlinear'
+      : isStrongCapableBibleVersion(version)
+        ? 'strong'
+        : null
+  const isTextModeActive =
+    textModeKind === 'interlinear'
+      ? isInterlinearModeEnabled(interlinearMode)
+      : strongMode !== 'hidden'
 
-  const strongModeButton = hasStrongModeButton ? (
-    <DisplayModeTrigger
-      kind="strong"
-      bibleAtom={bibleAtom}
-      className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[40px]"
-      onPress={() => onOpenTextMode('strong', 0)}
+  // After the version in the chip; alone, a whole pill, in focus where the version is a label
+  const renderTextModeSegment = (standalone: boolean) =>
+    textModeKind ? (
+      <DisplayModeTrigger
+        kind={textModeKind}
+        bibleAtom={bibleAtom}
+        className={`overflow-hidden border-continuous items-center justify-center pr-[11px] h-[32px] ${
+          standalone ? 'pl-[11px]' : 'pl-[8px]'
+        }`}
+        onPress={() => onOpenTextMode(textModeKind, 0)}
+        accessibilityRole="button"
+        accessibilityLabel={
+          textModeKind === 'interlinear'
+            ? t('Options du texte original')
+            : t('Choisir l’affichage de la Bible Strong')
+        }
+        accessibilityState={{ selected: isTextModeActive }}
+      >
+        <AnimatedBox
+          className={`overflow-hidden border-continuous bg-light-grey rounded-tr-[20px] rounded-br-[20px] absolute left-[0px] bottom-[0px] right-[0px] top-[0px] ${
+            standalone ? 'rounded-tl-[20px] rounded-bl-[20px]' : ''
+          }`}
+          style={opacityTransitionStyle}
+        />
+        <AnimatedBox style={opacityTransitionStyle}>
+          {textModeKind === 'interlinear' ? (
+            <InterlinearMark highlighted={isTextModeActive} />
+          ) : (
+            <StrongMark highlighted={isTextModeActive} />
+          )}
+        </AnimatedBox>
+      </DisplayModeTrigger>
+    ) : null
+
+  // The version opens its selector, after the book
+  const versionChip = (
+    <>
+      <BibleSelectorTrigger
+        kind="version"
+        data={getDefaultStore().get(bibleAtom).data}
+        actions={actions}
+        className={`overflow-hidden border-continuous items-center justify-center pl-[7px] h-[32px] ${
+          textModeKind ? 'pr-[7px]' : 'pr-[12px]'
+        }`}
+        onPress={() =>
+          openVersionSelector({
+            actions,
+            data: getDefaultStore().get(bibleAtom).data,
+          })
+        }
+        accessibilityRole="button"
+        accessibilityLabel={t('accessibility.chooseVersion', { version })}
+      >
+        <AnimatedBox
+          className={`overflow-hidden border-continuous bg-light-grey absolute left-[0px] bottom-[0px] right-[0px] top-[0px] ${
+            textModeKind ? '' : 'rounded-tr-[20px] rounded-br-[20px]'
+          }`}
+          style={opacityTransitionStyle}
+        />
+        <AnimatedText className="font-bold text-[14px]" style={translateYTransitionStyle}>
+          {version}
+        </AnimatedText>
+      </BibleSelectorTrigger>
+      {renderTextModeSegment(false)}
+    </>
+  )
+
+  const paramsButton = (
+    <AnimatedTouchableBox
+      className="overflow-hidden border-continuous items-center justify-center w-[36px] h-[40px]"
+      onPress={onBibleParamsClick}
       accessibilityRole="button"
-      accessibilityLabel={t('Choisir l’affichage de la Bible Strong')}
-      accessibilityState={{ selected: strongMode !== 'hidden' }}
+      accessibilityLabel={t('Police et paramêtres')}
       style={opacityTransitionStyle}
     >
-      <StrongMark highlighted={strongMode !== 'hidden'} />
-    </DisplayModeTrigger>
-  ) : null
-
-  const interlinearModeButton = hasInterlinearModeButton ? (
-    <DisplayModeTrigger
-      kind="interlinear"
-      bibleAtom={bibleAtom}
-      className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[40px]"
-      onPress={() => onOpenTextMode('interlinear', 0)}
-      accessibilityRole="button"
-      accessibilityLabel={t('Options du texte original')}
-      accessibilityState={{ selected: isInterlinearModeEnabled(interlinearMode) }}
-      style={opacityTransitionStyle}
-    >
-      <InterlinearMark highlighted={isInterlinearModeEnabled(interlinearMode)} />
-    </DisplayModeTrigger>
-  ) : null
+      <Text className="font-bold text-[16px]">Aa</Text>
+    </AnimatedTouchableBox>
+  )
 
   if (annotationModeEnabled) {
     return (
@@ -504,7 +566,7 @@ const Header = ({
         ) : null}
         {hasFocusVerses && !planPassage ? (
           <HStack className="overflow-hidden border-continuous flex-1 items-center">
-            <Box className="overflow-hidden border-continuous flex-1 pl-[22px]">
+            <HStack className="overflow-hidden border-continuous flex-1 min-w-0 items-center gap-[10px] pl-[22px]">
               <AnimatedText
                 className="font-bold text-[14px]"
                 numberOfLines={1}
@@ -512,9 +574,9 @@ const Header = ({
               >
                 {`${focusedReference} - ${version}`}
               </AnimatedText>
-            </Box>
-            {strongModeButton}
-            {interlinearModeButton}
+              {renderTextModeSegment(true)}
+            </HStack>
+            {paramsButton}
             <BibleOptionsMenu
               bookNumber={bookNumber}
               chapter={chapter}
@@ -524,7 +586,7 @@ const Header = ({
               onPressAction={({ nativeEvent }) => handleMenuAction(nativeEvent.event)}
             >
               <AnimatedBox
-                className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[40px]"
+                className="overflow-hidden border-continuous items-center justify-center w-[36px] h-[40px]"
                 style={opacityTransitionStyle}
               >
                 <FeatherIcon name="more-vertical" size={18} />
@@ -565,35 +627,12 @@ const Header = ({
                   </BibleSelectorTrigger>
                 )}
               </HStack>
-              {!isParallel && (
-                <BibleSelectorTrigger
-                  kind="version"
-                  data={getDefaultStore().get(bibleAtom).data}
-                  actions={actions}
-                  className="overflow-hidden border-continuous items-center justify-center pl-[7px] pr-[12px] h-[32px]"
-                  onPress={() =>
-                    openVersionSelector({
-                      actions,
-                      data: getDefaultStore().get(bibleAtom).data,
-                    })
-                  }
-                  accessibilityRole="button"
-                  accessibilityLabel={t('accessibility.chooseVersion', { version })}
-                >
-                  <AnimatedBox
-                    className="overflow-hidden border-continuous bg-light-grey rounded-tr-[20px] rounded-br-[20px] absolute left-[0px] bottom-[0px] right-[0px] top-[0px]"
-                    style={opacityTransitionStyle}
-                  />
-                  <AnimatedText className="font-bold text-[14px]" style={translateYTransitionStyle}>
-                    {version}
-                  </AnimatedText>
-                </BibleSelectorTrigger>
-              )}
+              {!isParallel && versionChip}
             </HStack>
 
             <VerseSelectorPopup bibleAtom={bibleAtom} coverage={coverage} preferCoverage>
               <AnimatedBox
-                className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[100%]"
+                className="overflow-hidden border-continuous items-center justify-center w-[32px] h-[100%]"
                 style={opacityTransitionStyle}
               >
                 <FeatherIcon name="chevrons-down" size={20} style={{ opacity: 0.3 }} />
@@ -629,7 +668,7 @@ const Header = ({
                     }}
                   >
                     <AnimatedBox
-                      className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[40px]"
+                      className="overflow-hidden border-continuous items-center justify-center w-[36px] h-[40px]"
                       style={{
                         opacity: fullScreenOpacity,
                         transitionProperty: 'opacity',
@@ -647,9 +686,19 @@ const Header = ({
                     </AnimatedBox>
                   </MenuView>
                 )}
+                {!isParallel && hasParallelButton && (
+                  <AnimatedTouchableBox
+                    className="overflow-hidden border-continuous items-center justify-center w-[36px] h-[40px]"
+                    onPress={addParallelVersion}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('Affichage parallèle')}
+                    style={opacityTransitionStyle}
+                  >
+                    <ParallelIcon color="default" />
+                  </AnimatedTouchableBox>
+                )}
 
-                {strongModeButton}
-                {interlinearModeButton}
+                {paramsButton}
 
                 {/* Three-dots menu */}
                 <BibleOptionsMenu
@@ -661,7 +710,7 @@ const Header = ({
                   onPressAction={({ nativeEvent }) => handleMenuAction(nativeEvent.event)}
                 >
                   <AnimatedBox
-                    className="overflow-hidden border-continuous items-center justify-center w-[40px] h-[40px]"
+                    className="overflow-hidden border-continuous items-center justify-center w-[36px] h-[40px]"
                     style={{
                       opacity: fullScreenOpacity,
                       transitionProperty: 'opacity',
