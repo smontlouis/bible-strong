@@ -826,10 +826,13 @@ const LoadedBibleContent = ({
     getTokens: annotationMode ? getTokens : undefined,
   })
   const [isVerseLayoutAnimating, setIsVerseLayoutAnimating] = useState(false)
-  const versePositionLayoutProps = createVersePositionLayoutProps({
-    onAnimationStart: () => setIsVerseLayoutAnimating(true),
-    onAnimationSettled: () => setIsVerseLayoutAnimating(false),
-  })
+  const [versePositionLayoutProps] = useState(() =>
+    createVersePositionLayoutProps({
+      getTransform: () => versesContentRef.current?.style.transform,
+      onAnimationStart: () => setIsVerseLayoutAnimating(true),
+      onAnimationSettled: () => setIsVerseLayoutAnimating(false),
+    })
+  )
 
   // Words of interlinear presentations cannot be annotated (different DOM structure)
   const canAnnotateVersion = (versionId: string) =>
