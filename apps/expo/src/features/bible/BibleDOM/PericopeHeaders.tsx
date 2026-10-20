@@ -27,6 +27,22 @@ const pericopeHeading = (tag: 'h1' | 'h2' | 'h3' | 'h4', level: 1 | 2 | 3 | 4, s
     zIndex: 1,
   }))
 
+// A cross-reference to a parallel passage, as the source marks it: a discreet line in the Bible
+// text's font, not a title. Literata ships no italic face, so the browser slants the roman.
+const ParallelReference = styled('p')<RootStyles>(
+  ({ settings: { fontSizeScale, fontFamily, colors, theme } }) => ({
+    fontFamily,
+    fontStyle: 'italic',
+    fontSize: scaleFontSize(15, fontSizeScale),
+    fontWeight: 'normal',
+    color: colors[theme].default,
+    margin: '0.4em 0',
+    textAlign: 'start',
+    position: 'relative',
+    zIndex: 1,
+  })
+)
+
 const H1 = pericopeHeading('h1', 1, 28)
 const H2 = pericopeHeading('h2', 2, 24)
 const H3 = pericopeHeading('h3', 3, 20)
@@ -68,10 +84,13 @@ export function PericopeHeaders({
   const translations = useTranslations()
   if (!h1 && !h2 && !h3 && !h4) return null
 
-  const renderHeadingContent = (text: string) => {
+  const findCanonicalHeading = (text: string) =>
+    headings?.find(heading => heading.text.trim() === text)
+
+  const renderHeadingContent = (text: string, isParallel = false) => {
     if (annotationMode) return text
 
-    const canonicalHeading = headings?.find(heading => heading.text.trim() === text)
+    const canonicalHeading = findCanonicalHeading(text)
     if (!canonicalHeading) return text
 
     const references = getCanonicalBibleHeadingReferences(canonicalHeading)
@@ -89,7 +108,7 @@ export function PericopeHeaders({
               <a
                 href={`#${reference.osis}`}
                 style={{
-                  color: settings.colors[settings.theme].primary,
+                  color: isParallel ? 'inherit' : settings.colors[settings.theme].primary,
                   textDecoration: 'underline',
                 }}
                 onClick={event => {
@@ -128,56 +147,46 @@ export function PericopeHeaders({
       <ExternalIcon style={{ marginLeft: 10, verticalAlign: 'middle' }} />
     </button>
   )
-  const stopHeadingClick = (event: React.MouseEvent<HTMLHeadingElement>) => {
+  const stopHeadingClick = (event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation()
   }
 
+  const levels = [
+    [h1, H1],
+    [h2, H2],
+    [h3, H3],
+    [h4, H4],
+  ] as const
+
   return (
     <>
-      {h1 && (
-        <H1
-          settings={settings}
-          $compact={isCompact}
-          data-ignore-verse-touch
-          onClick={stopHeadingClick}
-        >
-          {renderHeadingContent(h1)}
-          {!annotationMode && renderExternalButton()}
-        </H1>
-      )}
-      {h2 && (
-        <H2
-          settings={settings}
-          $compact={isCompact}
-          data-ignore-verse-touch
-          onClick={stopHeadingClick}
-        >
-          {renderHeadingContent(h2)}
-          {!annotationMode && renderExternalButton()}
-        </H2>
-      )}
-      {h3 && (
-        <H3
-          settings={settings}
-          $compact={isCompact}
-          data-ignore-verse-touch
-          onClick={stopHeadingClick}
-        >
-          {renderHeadingContent(h3)}
-          {!annotationMode && renderExternalButton()}
-        </H3>
-      )}
-      {h4 && (
-        <H4
-          settings={settings}
-          $compact={isCompact}
-          data-ignore-verse-touch
-          onClick={stopHeadingClick}
-        >
-          {renderHeadingContent(h4)}
-          {!annotationMode && renderExternalButton()}
-        </H4>
-      )}
+      {levels.map(([text, Heading], index) => {
+        if (!text) return null
+        if (findCanonicalHeading(text)?.kind === 'parallel') {
+          return (
+            <ParallelReference
+              key={index}
+              settings={settings}
+              data-ignore-verse-touch
+              onClick={stopHeadingClick}
+            >
+              {renderHeadingContent(text, true)}
+            </ParallelReference>
+          )
+        }
+        return (
+          <Heading
+            key={index}
+            settings={settings}
+            $compact={isCompact}
+            data-ignore-verse-touch
+            onClick={stopHeadingClick}
+          >
+            {renderHeadingContent(text)}
+            {!annotationMode && renderExternalButton()}
+          </Heading>
+        )
+      })}
     </>
   )
 }
