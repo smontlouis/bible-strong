@@ -3,6 +3,7 @@ import { Verse as TVerse } from '~common/types'
 import { WordToken, getWordIndexFromCharOffset } from '~helpers/wordTokenizer'
 import { SelectionRange, WordPosition } from './selectionUtils'
 import { HighlightRect } from './HighlightComponents'
+import type { VerseSelectionHandles } from './useAnnotationHighlights'
 import { findVerseContainer, getCaretInfoFromPoint, isIgnoredVerseTouchTarget } from './domUtils'
 import {
   createVerseCellKey,
@@ -14,6 +15,9 @@ import { getDOMScrollTarget, scrollDOMBy } from '../domScroll'
 
 // Drag selection constants
 const DRAG_THRESHOLD = 10 // pixels to detect horizontal drag vs scroll
+// Between two lines of a verse no text is under the finger: the verse is looked for this far
+// above and below, so that a tap a little off a word is not taken for a tap away from the text
+const LINE_GAP_REACH = 12
 const AUTO_SCROLL_ZONE_TOP = 100 // pixels from top edge to trigger auto-scroll up
 const AUTO_SCROLL_ZONE_BOTTOM = 280 // pixels from bottom edge to trigger auto-scroll down
 const AUTO_SCROLL_SPEED = 5 // pixels per frame
@@ -44,6 +48,8 @@ interface TouchState {
   isSwipe: boolean
   hasMoved: boolean
   dragHandle: 'start' | 'end' | null
+  // Reading mode: the handle of selected verses under the finger, taken once the finger moves
+  pendingVerseHandle: { range: SelectionRange; handle: 'start' | 'end' } | null
   // Unified gesture state
   longPressTimer: ReturnType<typeof setTimeout> | null
   longPressFired: boolean
@@ -70,6 +76,7 @@ const INITIAL_TOUCH_STATE: Omit<TouchState, 'longPressTimer'> = {
   isSwipe: false,
   hasMoved: false,
   dragHandle: null,
+  pendingVerseHandle: null,
   longPressFired: false,
   startTime: 0,
   velocitySamples: [],
@@ -84,6 +91,7 @@ function resetTouchState(state: TouchState): void {
   state.isSwipe = false
   state.hasMoved = false
   state.dragHandle = null
+  state.pendingVerseHandle = null
   state.startWord = null
   state.startVerse = null
   state.longPressFired = false
@@ -109,6 +117,8 @@ export interface TouchSelectionCallbacks {
   onMouseSelectionStart?: (verse: VerseTarget) => boolean
   /** Called when drag starts */
   onDragStart?: () => void
+  /** Reading mode: a handle of selected verses is dragged, the words of its block take over */
+  onVerseHandleDragStart?: (range: SelectionRange) => void
   /** Called to notify which verse is currently being touched (for visual feedback) */
   onTouchedVerseChange?: (verse: VerseTarget | null) => void
   /** Called when tapping on empty space (not on a verse) - useful for clearing selection */
@@ -119,6 +129,11 @@ export interface TouchSelectionCallbacks {
 
 export interface TouchSelectionConfig {
   containerRef: RefObject<HTMLDivElement | null>
+  /**
+   * The element gestures are listened to on, when wider than the text: on a wide screen, a tap
+   * in the margins beside the text is a tap away from it
+   */
+  gestureSurfaceRef?: RefObject<HTMLElement | null>
   /** The element selection handle positions are relative to (the highlight layer's host) */
   highlightOriginRef?: RefObject<HTMLDivElement | null>
   selection: SelectionRange | null
@@ -126,6 +141,8 @@ export interface TouchSelectionConfig {
   versesByVersion: Record<string, TVerse[]>
   getTokens: (verseKey: string, text: string) => WordToken[]
   getSelectionHandlePositions: () => { start: Position | null; end: Position | null }
+  /** Reading mode: the handles of the selected verses, block by block */
+  getVerseSelectionHandles?: () => VerseSelectionHandles[]
   highlightRects: HighlightRect[]
   /** Whether annotation mode is currently active */
   annotationMode: boolean
@@ -150,12 +167,14 @@ const createSelection = (start: WordTarget, end: WordPosition): SelectionRange =
 
 export function useTouchSelection({
   containerRef,
+  gestureSurfaceRef = containerRef,
   highlightOriginRef = containerRef,
   selection,
   setSelection,
   versesByVersion,
   getTokens,
   getSelectionHandlePositions,
+  getVerseSelectionHandles = () => [],
   annotationMode,
   callbacks = {},
 }: TouchSelectionConfig): {
@@ -176,6 +195,7 @@ export function useTouchSelection({
   const versesByVersionRef = useRef(versesByVersion)
   const getTokensRef = useRef(getTokens)
   const getSelectionHandlePositionsRef = useRef(getSelectionHandlePositions)
+  const getVerseSelectionHandlesRef = useRef(getVerseSelectionHandles)
   const annotationModeRef = useRef(annotationMode)
   const setSelectionRef = useRef(setSelection)
   const callbacksRef = useRef(callbacks)
@@ -185,6 +205,7 @@ export function useTouchSelection({
     versesByVersionRef.current = versesByVersion
     getTokensRef.current = getTokens
     getSelectionHandlePositionsRef.current = getSelectionHandlePositions
+    getVerseSelectionHandlesRef.current = getVerseSelectionHandles
     annotationModeRef.current = annotationMode
     setSelectionRef.current = setSelection
     callbacksRef.current = callbacks
@@ -192,6 +213,7 @@ export function useTouchSelection({
     annotationMode,
     callbacks,
     getSelectionHandlePositions,
+    getVerseSelectionHandles,
     getTokens,
     selection,
     setSelection,
@@ -228,6 +250,12 @@ export function useTouchSelection({
     return getVerseTarget(findVerseContainer(caretInfo.targetElement))
   }
 
+  // The verse at a point, or in the lines just above and below it
+  const getVerseNearPoint = (clientX: number, clientY: number): VerseTarget | null =>
+    getVerseAtPoint(clientX, clientY) ??
+    getVerseAtPoint(clientX, clientY - LINE_GAP_REACH) ??
+    getVerseAtPoint(clientX, clientY + LINE_GAP_REACH)
+
   // Check if a touch point is near a selection handle
   const isNearHandle = (touchX: number, touchY: number, handlePos: Position | null): boolean => {
     if (!handlePos) return false
@@ -241,6 +269,31 @@ export function useTouchSelection({
     const dx = touchX - handleScreenX
     const dy = touchY - handleScreenY
     return Math.sqrt(dx * dx + dy * dy) < HANDLE_HIT_RADIUS
+  }
+
+  // Reading mode: the handle of selected verses at a point, if any
+  const findVerseSelectionHandle = (x: number, y: number): TouchState['pendingVerseHandle'] => {
+    if (annotationModeRef.current) return null
+    for (const { range, start, end } of getVerseSelectionHandlesRef.current()) {
+      if (isNearHandle(x, y, start)) return { range, handle: 'start' }
+      if (isNearHandle(x, y, end)) return { range, handle: 'end' }
+    }
+    return null
+  }
+
+  // The finger or pointer moved off a handle of selected verses: it now drags the words of the
+  // block, which the handle's end follows
+  const startVerseHandleDrag = (touchState: TouchState) => {
+    const pending = touchState.pendingVerseHandle
+    if (!pending) return
+    touchState.pendingVerseHandle = null
+    touchState.dragHandle = pending.handle
+    touchState.isDragging = true
+    clearLongPressTimer()
+    callbacksRef.current.onTouchedVerseChange?.(null)
+    setSelectionRef.current(() => pending.range)
+    callbacksRef.current.onVerseHandleDragStart?.(pending.range)
+    callbacksRef.current.onDragStart?.()
   }
 
   // Auto-scroll functionality
@@ -359,7 +412,7 @@ export function useTouchSelection({
   // Attach native touch event handlers once and read latest values from refs.
   // This avoids tearing down and re-attaching listeners when props change.
   useEffect(() => {
-    const container = containerRef.current
+    const container = gestureSurfaceRef.current
     if (!container) return
     let lastTouchEndAt = 0
     let mouseIsDown = false
@@ -399,7 +452,7 @@ export function useTouchSelection({
       touchState.startWord = wordPos
       touchState.startVerse = wordPos
         ? toVerseTarget(wordPos)
-        : getVerseAtPoint(touch.clientX, touch.clientY)
+        : getVerseNearPoint(touch.clientX, touch.clientY)
 
       if (touchState.startVerse) {
         cbs.onTouchedVerseChange?.(touchState.startVerse)
@@ -423,6 +476,10 @@ export function useTouchSelection({
           return
         }
       }
+
+      // A tap on a handle of selected verses still unselects a verse: the handle is only
+      // taken when the finger moves
+      touchState.pendingVerseHandle = findVerseSelectionHandle(touch.clientX, touch.clientY)
 
       // Start long-press timer (only if we found a verse)
       if (touchState.startVerse) {
@@ -450,6 +507,18 @@ export function useTouchSelection({
       touchState.velocitySamples.push({ time: now, x: touch.clientX })
       if (touchState.velocitySamples.length > VELOCITY_SAMPLE_COUNT) {
         touchState.velocitySamples.shift()
+      }
+
+      // A finger on a handle of selected verses holds the page still, and takes the handle once
+      // it moves
+      if (touchState.pendingVerseHandle) {
+        e.preventDefault()
+        const distance = Math.hypot(
+          touch.clientX - touchState.startPos.x,
+          touch.clientY - touchState.startPos.y
+        )
+        if (distance <= DRAG_THRESHOLD) return
+        startVerseHandleDrag(touchState)
       }
 
       // If already dragging (handle or horizontal), block scroll and update selection
@@ -568,7 +637,8 @@ export function useTouchSelection({
           } else {
             handleSingleTap(verse, { ...touchState.startPos }, now)
           }
-        } else {
+        } else if (!touchState.pendingVerseHandle) {
+          // A tap on a handle itself, off the text, is not a tap away from the text
           cbs.onTapEmpty?.()
         }
       }
@@ -610,7 +680,7 @@ export function useTouchSelection({
       touchState.startWord = wordPos
       touchState.startVerse = wordPos
         ? toVerseTarget(wordPos)
-        : getVerseAtPoint(e.clientX, e.clientY)
+        : getVerseNearPoint(e.clientX, e.clientY)
 
       // Handles sit outside the text lines, so test them before requiring a verse under the pointer
       if (selectionRef.current && annotationModeRef.current) {
@@ -629,6 +699,7 @@ export function useTouchSelection({
         }
       }
 
+      touchState.pendingVerseHandle = findVerseSelectionHandle(e.clientX, e.clientY)
       if (!touchState.startVerse) return
       cbs.onTouchedVerseChange?.(touchState.startVerse)
 
@@ -648,6 +719,16 @@ export function useTouchSelection({
 
       const touchState = touchStateRef.current
       currentTouchPosRef.current = { x: e.clientX, y: e.clientY }
+
+      if (touchState.pendingVerseHandle) {
+        const distance = Math.hypot(
+          e.clientX - touchState.startPos.x,
+          e.clientY - touchState.startPos.y
+        )
+        if (distance <= DRAG_THRESHOLD) return
+        startVerseHandleDrag(touchState)
+        suppressMouseClickUntil = Date.now() + 700
+      }
 
       if (touchState.isDragging) {
         e.preventDefault()
@@ -733,11 +814,12 @@ export function useTouchSelection({
       )
         return
 
-      const verse = getVerseTarget(
-        e.target instanceof Element ? findVerseContainer(e.target) : null
-      )
+      const verse =
+        getVerseTarget(e.target instanceof Element ? findVerseContainer(e.target) : null) ??
+        getVerseNearPoint(e.clientX, e.clientY)
       if (!verse) {
-        callbacksRef.current.onTapEmpty?.()
+        // A click on a handle itself, off the text, is not a click away from the text
+        if (!findVerseSelectionHandle(e.clientX, e.clientY)) callbacksRef.current.onTapEmpty?.()
         return
       }
 

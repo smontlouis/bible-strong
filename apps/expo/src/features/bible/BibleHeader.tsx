@@ -70,8 +70,10 @@ interface BibleHeaderProps {
   bibleAtom: PrimitiveAtom<BibleTab>
   isFormSheet?: boolean
   onBibleParamsClick: () => void
-  onExitAnnotationMode?: () => void
   annotationModeEnabled?: boolean
+  /** The verse keys the words selected in annotation mode start and end in, if any */
+  annotationSelection?: { startVerseKey: string; endVerseKey: string } | null
+  annotatedVersion?: string
   hidePersonalBibleData?: boolean
   isInTab?: boolean
   coverage?: BibleVersionCoverage
@@ -84,8 +86,9 @@ const Header = ({
   isFormSheet,
   bibleAtom,
   onBibleParamsClick,
-  onExitAnnotationMode,
   annotationModeEnabled,
+  annotationSelection,
+  annotatedVersion,
   hidePersonalBibleData = false,
   isInTab,
   coverage,
@@ -143,6 +146,30 @@ const Header = ({
   const selectedVersesReference = isParallel
     ? `${verseToReference(selectedVerses)} · ${getSelectedVersesVersion(bible.data)}`
     : verseToReference(selectedVerses)
+
+  // Annotation mode: the verses the selected words are in, or the chapter without a selection
+  const annotationVerseNumbers = annotationSelection
+    ? [annotationSelection.startVerseKey, annotationSelection.endVerseKey]
+        .map(verseKey => Number(verseKey.split('-')[2]))
+        .sort((a, b) => a - b)
+    : []
+  const annotationReference = [
+    verseToReference(
+      {
+        bookNum: bookNumber,
+        chapterNum: chapter,
+        verses: annotationVerseNumbers.length
+          ? Array.from(
+              { length: annotationVerseNumbers[1] - annotationVerseNumbers[0] + 1 },
+              (_, index) => annotationVerseNumbers[0] + index
+            )
+          : undefined,
+      },
+      { language: readingLanguage }
+    ),
+    ...(isParallel && annotatedVersion ? [annotatedVersion] : []),
+    t('Annotation'),
+  ].join(' · ')
 
   // Check if current chapter has a bookmark
   const selectBookmarkForChapter = makeSelectBookmarkForChapter()
@@ -435,10 +462,11 @@ const Header = ({
     </AnimatedTouchableBox>
   )
 
+  // Annotation mode keeps the reading header, naming the selected verses and the mode
   if (annotationModeEnabled) {
     return (
       <AnimatedVStack
-        className="border-continuous overflow-visible justify-center w-[100%] bg-primary px-[15px] border-b-[1px] border-border absolute top-[0px] left-[0px]"
+        className="border-continuous overflow-visible w-[100%] bg-reverse justify-center px-[15px] border-b-[1px] border-border absolute top-[0px] left-[0px]"
         entering={FadeIn}
         exiting={FadeOut}
         key="annotation-mode-header"
@@ -451,40 +479,25 @@ const Header = ({
         {isFormSheet && <FormSheetHandle />}
 
         <HStack
-          className="border-continuous overflow-visible mx-auto items-center w-[100%]"
+          className="overflow-hidden border-continuous mx-auto items-center w-[100%]"
           style={{ maxWidth: PAGE_CONTENT_MAX_WIDTH }}
         >
-          <Box className="w-[80px] h-[40px] justify-center items-start">
-            {hasBackButton && (
-              <Back
-                onGoBack={() => {
-                  setIsFullScreenBible(false)
-                  console.log('[Bible] onGoBack')
-                }}
-              >
-                <Box className="overflow-hidden border-continuous items-center justify-center w-[50px] h-[32px]">
-                  <FeatherIcon name="arrow-left" size={20} color="reverse" />
-                </Box>
-              </Back>
-            )}
-          </Box>
-          <Box className="overflow-hidden border-continuous flex-[1] min-w-0 items-center justify-center">
-            <Text className="font-bold text-reverse text-[14px]" numberOfLines={1}>
-              {`${verseToReference({ bookNum: bookNumber, chapterNum: chapter, verses: displayVerses }, { language: readingLanguage })} - ${version}`}
-            </Text>
-          </Box>
-
-          <Box className="w-[80px] h-[40px] justify-center items-end">
-            <AnimatedTouchableBox
-              className="overflow-hidden border-continuous min-h-[40px] justify-center"
-              onPress={onExitAnnotationMode}
-              accessibilityRole="button"
-              accessibilityLabel={t('accessibility.exitAnnotationMode')}
+          {hasBackButton && (
+            <Back
+              onGoBack={() => {
+                setIsFullScreenBible(false)
+                console.log('[Bible] onGoBack')
+              }}
             >
-              <Box className="overflow-hidden border-continuous bg-reverse rounded-[8px] h-[28px] px-[12px] items-center justify-center">
-                <Text className="text-primary font-bold text-[12px]">{t('Terminé')}</Text>
+              <Box className="overflow-hidden border-continuous items-center justify-center w-[50px] h-[32px]">
+                <FeatherIcon name="arrow-left" size={20} />
               </Box>
-            </AnimatedTouchableBox>
+            </Back>
+          )}
+          <Box className="overflow-hidden border-continuous flex-[1] min-w-0 items-center justify-center">
+            <Text className="font-bold text-[14px]" numberOfLines={1}>
+              {annotationReference}
+            </Text>
           </Box>
         </HStack>
       </AnimatedVStack>

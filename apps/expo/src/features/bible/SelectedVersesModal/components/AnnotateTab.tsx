@@ -24,7 +24,6 @@ interface AnnotateTabProps {
   onSelectStudy?: (studyId: string, format: 'inline' | 'block') => Promise<void>
   reference?: string
   onPinVerses: () => void
-  onEnterAnnotationMode?: () => void
   moreThanOneVerseSelected: boolean
   activeStates: VerseActiveStates
 }
@@ -42,7 +41,6 @@ const AnnotateTab = ({
   onSelectStudy,
   reference,
   onPinVerses,
-  onEnterAnnotationMode,
   moreThanOneVerseSelected,
   activeStates,
 }: AnnotateTabProps) => {
@@ -83,15 +81,6 @@ const AnnotateTab = ({
         isActive={hasFocus}
         shortcut={SELECTION_SHORTCUTS.focus}
       />
-      {onEnterAnnotationMode && (
-        <ActionItem
-          name="edit-2"
-          label={t('Mode libre')}
-          onPress={onEnterAnnotationMode}
-          variant="emphasized"
-          shortcut={SELECTION_SHORTCUTS.freeMode}
-        />
-      )}
     </ActionsLayout>
   )
 }

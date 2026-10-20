@@ -81,6 +81,9 @@ interface UseAnnotationHighlightsProps {
   // Optional: Selection support for annotation mode
   selection?: SelectionRange | null
   getTokens?: (verseKey: string, text: string) => WordToken[]
+  // Selected verses, as the word ranges of the blocks of verses that follow one another:
+  // each block gets its own handles
+  verseSelectionBlocks?: SelectionRange[]
 }
 
 /**
@@ -219,12 +222,45 @@ function getRectsForSelection(
   return rects
 }
 
-type HandlePositions = {
+export type HandlePositions = {
   start: { x: number; y: number } | null
   end: { x: number; y: number } | null
 }
 
 const EMPTY_HANDLE_POSITIONS: HandlePositions = { start: null, end: null }
+
+/** A block of selected verses and where its handles stand. */
+export interface VerseSelectionHandles extends HandlePositions {
+  range: SelectionRange
+}
+
+// The handles of a selection: before its first word and after its last one
+function getHandlePositions(
+  selectionRects: Pick<HighlightRect, 'top' | 'left' | 'width' | 'height'>[],
+  isRTL: boolean
+): HandlePositions {
+  if (selectionRects.length === 0) return EMPTY_HANDLE_POSITIONS
+
+  // Sort rects by position (top to bottom, then left to right for LTR, right to left for RTL)
+  const sortedRects = [...selectionRects].sort((a, b) => {
+    if (Math.abs(a.top - b.top) > 5) return a.top - b.top
+    return isRTL ? b.left - a.left : a.left - b.left
+  })
+
+  const firstRect = sortedRects[0]
+  const lastRect = sortedRects[sortedRects.length - 1]
+
+  // Add small vertical offset for better visual alignment with text
+  const HANDLE_OFFSET = 2
+  return {
+    start: isRTL
+      ? { x: firstRect.left + firstRect.width, y: firstRect.top + HANDLE_OFFSET }
+      : { x: firstRect.left, y: firstRect.top + HANDLE_OFFSET },
+    end: isRTL
+      ? { x: lastRect.left, y: lastRect.top + lastRect.height - HANDLE_OFFSET }
+      : { x: lastRect.left + lastRect.width, y: lastRect.top + lastRect.height - HANDLE_OFFSET },
+  }
+}
 
 export function useAnnotationHighlights({
   containerRef,
@@ -239,11 +275,16 @@ export function useAnnotationHighlights({
   focusVerses,
   selection,
   getTokens,
+  verseSelectionBlocks = [],
 }: UseAnnotationHighlightsProps): {
   highlightRects: HighlightRect[]
   selectionHandlePositions: HandlePositions
+  verseSelectionHandles: VerseSelectionHandles[]
 } {
   const [highlightRects, setHighlightRects] = useState<HighlightRect[]>([])
+  const [verseSelectionHandles, setVerseSelectionHandles] = useState<VerseSelectionHandles[]>([])
+  // The blocks only change with the selected verses: a key keeps the layout pass from rerunning
+  const verseSelectionBlocksKey = JSON.stringify(verseSelectionBlocks)
   const [isRTL, setIsRTL] = useState(false)
   // Track if we're waiting for new rects to be calculated after a chapter change
   const [isPending, setIsPending] = useState(true)
@@ -372,11 +413,29 @@ export function useAnnotationHighlights({
       return annotationRects
     }
 
+    const calculateVerseSelectionHandles = (isRTLLayout: boolean): VerseSelectionHandles[] =>
+      getTokens
+        ? verseSelectionBlocks.map(range => ({
+            range,
+            ...getHandlePositions(
+              getRectsForSelection(
+                containerRef,
+                range,
+                versesByVersion[range.version] ?? [],
+                getTokens
+              ),
+              isRTLLayout
+            ),
+          }))
+        : []
+
     const updateLayoutState = () => {
       const rects = calculateAllRects()
       const container = containerRef.current
-      setIsRTL(container ? getComputedStyle(container).direction === 'rtl' : false)
+      const isRTLLayout = container ? getComputedStyle(container).direction === 'rtl' : false
+      setIsRTL(isRTLLayout)
       setHighlightRects(rects)
+      setVerseSelectionHandles(calculateVerseSelectionHandles(isRTLLayout))
     }
 
     requestAnimationFrame(() => {
@@ -416,40 +475,20 @@ export function useAnnotationHighlights({
     layoutKey,
     isContextFocused,
     focusKey,
+    verseSelectionBlocksKey,
   ])
 
   // Calculate selection handle positions synchronously from highlight rects
-  const selectionHandlePositions = (() => {
-    const selectionRects = highlightRects.filter(r => r.type === 'selection')
-    if (selectionRects.length === 0) {
-      return EMPTY_HANDLE_POSITIONS
-    }
-
-    // Sort rects by position (top to bottom, then left to right for LTR, right to left for RTL)
-    const sortedRects = [...selectionRects].sort((a, b) => {
-      if (Math.abs(a.top - b.top) > 5) return a.top - b.top
-      return isRTL ? b.left - a.left : a.left - b.left
-    })
-
-    const firstRect = sortedRects[0]
-    const lastRect = sortedRects[sortedRects.length - 1]
-
-    // Add small vertical offset for better visual alignment with text
-    const HANDLE_OFFSET = 2
-    return {
-      start: isRTL
-        ? { x: firstRect.left + firstRect.width, y: firstRect.top + HANDLE_OFFSET }
-        : { x: firstRect.left, y: firstRect.top + HANDLE_OFFSET },
-      end: isRTL
-        ? { x: lastRect.left, y: lastRect.top + lastRect.height - HANDLE_OFFSET }
-        : { x: lastRect.left + lastRect.width, y: lastRect.top + lastRect.height - HANDLE_OFFSET },
-    }
-  })()
+  const selectionHandlePositions = getHandlePositions(
+    highlightRects.filter(r => r.type === 'selection'),
+    isRTL
+  )
 
   // Return empty array while pending to prevent flash of old positions
   // BUT allow selection to show during isPending (for drag-to-select feedback)
   return {
     highlightRects: isPending && !selection ? [] : highlightRects,
     selectionHandlePositions,
+    verseSelectionHandles: isPending ? [] : verseSelectionHandles,
   }
 }

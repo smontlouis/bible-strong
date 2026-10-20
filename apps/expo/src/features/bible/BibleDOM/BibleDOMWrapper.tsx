@@ -88,6 +88,8 @@ import {
   PLAN_DAY_STEP,
   CREATE_ANNOTATION,
   ENTER_ANNOTATION_MODE,
+  EXIT_ANNOTATION_MODE,
+  CLEAR_SELECTED_VERSES,
   COLLAPSE_CONTEXT,
   DOWNLOAD_BIBLE_VERSION,
   ERASE_SELECTION,
@@ -239,6 +241,7 @@ export type WebViewProps = {
   interlinearReadingVersions?: string[]
   addSelectedVerse: (id: string, version?: VersionCode) => void
   removeSelectedVerse: (id: string) => void
+  clearSelectedVerses?: () => void
   setSelectedVerse: (selectedVerse: number) => void
   version: VersionCode
   interlinearMode?: InterlinearMode
@@ -329,6 +332,7 @@ export type WebViewProps = {
   // Enter annotation mode from double-tap, on the version the reader double-tapped
   /** The verse touched to enter the mode, where the desktop menu opens. */
   onEnterAnnotationMode?: (version?: VersionCode, verseKey?: string) => void
+  onExitAnnotationMode?: () => void
   // Red words data
   redWords?: Record<string, { start: number; end: number }[]> | null
   // Red words of the parallel versions, by version
@@ -444,6 +448,7 @@ export const BibleDOMWrapper = ({
   addParallelVersion,
   setSelectedCode,
   removeSelectedVerse,
+  clearSelectedVerses,
   addSelectedVerse,
   expandContext,
   collapseContext,
@@ -461,6 +466,7 @@ export const BibleDOMWrapper = ({
   goToPrevChapter,
   goToNextChapter,
   onEnterAnnotationMode,
+  onExitAnnotationMode,
   isFormSheet,
   redWords,
   parallelRedWords,
@@ -1036,6 +1042,16 @@ export const BibleDOMWrapper = ({
 
       case PLAN_DAY_STEP: {
         onPlanDayStep?.()
+        break
+      }
+
+      case EXIT_ANNOTATION_MODE: {
+        onExitAnnotationMode?.()
+        break
+      }
+
+      case CLEAR_SELECTED_VERSES: {
+        clearSelectedVerses?.()
         break
       }
 

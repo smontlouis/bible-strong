@@ -78,7 +78,27 @@ const isSameVerse = (toggle: OptimisticVerseToggle, target: VerseTarget) =>
  */
 export function useOptimisticVerseSelection(selection: VerseSelection) {
   const [toggles, setToggles] = useState<OptimisticVerseToggle[]>([])
+  // Every verse was unselected at this time: none is shown until the native side follows
+  const [clearedAt, setClearedAt] = useState<number | null>(null)
   const { selectedVerses, selectedVersesVersion } = selection
+  const isReturnedSelectionEmpty = Object.keys(selectedVerses).length === 0
+
+  useEffect(() => {
+    if (clearedAt === null) return
+    if (isReturnedSelectionEmpty) {
+      setClearedAt(null)
+      return
+    }
+    const timer = setTimeout(
+      () => setClearedAt(null),
+      Math.max(0, clearedAt + UNCONFIRMED_TOGGLE_LIFETIME - Date.now())
+    )
+    return () => clearTimeout(timer)
+  }, [clearedAt, isReturnedSelectionEmpty])
+
+  // The selection the toggles apply to: none while a clearing is on its way to the native side
+  const baseSelection: VerseSelection =
+    clearedAt === null ? selection : { selectedVerses: {}, selectedVersesVersion }
 
   // A toggle is no longer needed once the selection coming back from the native side shows it
   useEffect(() => {
@@ -104,9 +124,9 @@ export function useOptimisticVerseSelection(selection: VerseSelection) {
     return () => clearTimeout(timer)
   }, [toggles])
 
-  const shownSelection = applyVerseToggles(selection, toggles)
+  const shownSelection = applyVerseToggles(baseSelection, toggles)
   const decidedSelection = applyVerseToggles(
-    selection,
+    baseSelection,
     toggles.filter(toggle => !toggle.held)
   )
 
@@ -116,7 +136,7 @@ export function useOptimisticVerseSelection(selection: VerseSelection) {
       if (previous.some(toggle => toggle.held && isSameVerse(toggle, target))) return previous
       const others = previous.filter(toggle => !isSameVerse(toggle, target))
       const decided = applyVerseToggles(
-        selection,
+        baseSelection,
         others.filter(toggle => !toggle.held)
       )
       return [...others, createVerseToggle(decided, target, true, Date.now())]
@@ -135,7 +155,7 @@ export function useOptimisticVerseSelection(selection: VerseSelection) {
       }
       const others = previous.filter(toggle => !isSameVerse(toggle, target))
       const decided = applyVerseToggles(
-        selection,
+        baseSelection,
         previous.filter(toggle => !toggle.held)
       )
       return [...others, createVerseToggle(decided, target, false, now)]
@@ -148,5 +168,18 @@ export function useOptimisticVerseSelection(selection: VerseSelection) {
     )
   }
 
-  return { shownSelection, decidedSelection, showHeldToggle, showSentToggle, discardHeldToggles }
+  // Every verse unselected: by a tap away from the text, or by words taking over the selection
+  const showClearedSelection = () => {
+    setToggles([])
+    setClearedAt(Date.now())
+  }
+
+  return {
+    shownSelection,
+    decidedSelection,
+    showHeldToggle,
+    showSentToggle,
+    discardHeldToggles,
+    showClearedSelection,
+  }
 }

@@ -5,7 +5,6 @@ export const SELECTION_SHORTCUTS = {
   link: 'L',
   bookmark: 'B',
   focus: 'F',
-  freeMode: 'M',
   references: 'R',
   compare: 'C',
 } as const

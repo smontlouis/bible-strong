@@ -32,6 +32,8 @@ import { getBibleDOMErrorPresentation } from './bibleDOMErrorPresentation'
 import VersionChip from './VersionChip'
 import {
   ENTER_ANNOTATION_MODE,
+  EXIT_ANNOTATION_MODE,
+  CLEAR_SELECTED_VERSES,
   DOWNLOAD_BIBLE_VERSION,
   NAVIGATE_TO_PERICOPE,
   NAVIGATE_TO_VERSION,
@@ -75,6 +77,7 @@ import { tokenizeVerseText, WordToken, getWordIndexFromCharOffset } from '~helpe
 import { getCaretInfoFromPoint } from './AnnotationMode/domUtils'
 import type { VerseTarget } from './AnnotationMode/verseTargets'
 import { useOptimisticVerseSelection } from './optimisticVerseSelection'
+import { getVerseSelectionBlocks } from './verseSelectionBlocks'
 // Unified verse renderer
 import { UnifiedVersesRenderer } from './UnifiedVersesRenderer'
 import AnnotationInlineItems from './AnnotationInlineItems'
@@ -700,6 +703,9 @@ const LoadedBibleContent = ({
 }: Props) => {
   // Ref for highlight layer
   const containerRef = useRef<HTMLDivElement>(null)
+  // The whole width of the reader: on a wide screen the text keeps its reading width, and a tap
+  // in the margins beside it is a tap away from it
+  const readerSurfaceRef = useRef<HTMLDivElement>(null)
   const shouldReduceMotion = useReducedMotion()
   const [parallelViewportWidth, setParallelViewportWidth] = useState(0)
   useEffect(() => {
@@ -829,22 +835,49 @@ const LoadedBibleContent = ({
     versionId => !interlinearReadingVersions.includes(versionId)
   )
 
+  // Words of interlinear presentations cannot be annotated (different DOM structure)
+  const canAnnotateVersion = (versionId: string) =>
+    !isVersionGestureSuppressed(versionId) &&
+    !(
+      versionId === 'BHG' &&
+      (versesByVersion[versionId] ?? []).some(verse => Boolean(verse.InterlinearTokens?.length))
+    )
+
+  // Selected verses get handles where they can turn into selected words: in reading mode, in a
+  // version whose words can be annotated. Parallel reading: in the first column showing it.
+  const verseSelectionVersion = shownSelection.selectedVersesVersion
+  const verseSelectionBlocks =
+    !annotationMode && !isSelectionMode && canAnnotateVersion(verseSelectionVersion)
+      ? getVerseSelectionBlocks({
+          selectedVerses: shownSelection.selectedVerses,
+          verses: versesByVersion[verseSelectionVersion] ?? [],
+          version: verseSelectionVersion,
+          column: isParallelVerseMode
+            ? displayedVersions.indexOf(verseSelectionVersion)
+            : undefined,
+          getTokens,
+        })
+      : []
+
   // Use shared hook for annotation highlights (with selection support when in annotation mode)
-  const { highlightRects, selectionHandlePositions } = useAnnotationHighlights({
-    containerRef: highlightOriginRef,
-    wordAnnotations,
-    versions: annotatedVersions,
-    book: book.Numero,
-    chapter,
-    versesByVersion,
-    settings,
-    layoutKey: `${parallelDisplayMode}:${parallelColumnWidth}`,
-    contextDisplayMode,
-    focusVerses,
-    // Pass selection only when in annotation mode
-    selection: annotationMode ? selection : undefined,
-    getTokens: annotationMode ? getTokens : undefined,
-  })
+  const { highlightRects, selectionHandlePositions, verseSelectionHandles } =
+    useAnnotationHighlights({
+      containerRef: highlightOriginRef,
+      wordAnnotations,
+      versions: annotatedVersions,
+      book: book.Numero,
+      chapter,
+      versesByVersion,
+      settings,
+      layoutKey: `${parallelDisplayMode}:${parallelColumnWidth}`,
+      contextDisplayMode,
+      focusVerses,
+      // Words selected by a double tap or a dragged handle show at once, before the native side
+      // confirms annotation mode
+      selection,
+      getTokens,
+      verseSelectionBlocks,
+    })
   const [isVerseLayoutAnimating, setIsVerseLayoutAnimating] = useState(false)
   const [versePositionLayoutProps] = useState(() =>
     createVersePositionLayoutProps({
@@ -853,14 +886,6 @@ const LoadedBibleContent = ({
       onAnimationSettled: () => setIsVerseLayoutAnimating(false),
     })
   )
-
-  // Words of interlinear presentations cannot be annotated (different DOM structure)
-  const canAnnotateVersion = (versionId: string) =>
-    !isVersionGestureSuppressed(versionId) &&
-    !(
-      versionId === 'BHG' &&
-      (versesByVersion[versionId] ?? []).some(verse => Boolean(verse.InterlinearTokens?.length))
-    )
 
   // One word selected in the column of the version it was touched in
   const createWordSelection = (target: VerseTarget, wordIndex: number): SelectionRange => ({
@@ -891,38 +916,39 @@ const LoadedBibleContent = ({
       return
     }
 
-    // Don't clear selection if clicking inside it
+    // A tap on the selected words keeps them
     if (isClickInsideSelection(highlightRects, containerRect, position)) {
       return
     }
 
-    // Clear annotation selection
-    if (selectedAnnotationId) {
-      dispatch({
-        type: 'ANNOTATION_SELECTED',
-        payload: { annotationId: null },
-      }).catch(console.error)
-    }
+    // Anywhere else, the words are let go and annotation mode ends: a double tap selects others
+    exitAnnotationMode()
+  }
 
-    // If there's already a selection, clear it
-    if (selection) {
-      setSelection(null)
+  const exitAnnotationMode = () => {
+    setSelection(null)
+    dispatch({ type: EXIT_ANNOTATION_MODE }).catch(console.error)
+  }
+
+  // A tap away from the text: annotation mode ends, selected verses are all unselected
+  const handleTapEmpty = () => {
+    if (annotationMode) {
+      exitAnnotationMode()
       return
     }
+    if (Object.keys(verseSelection.decidedSelection.selectedVerses).length === 0) return
+    verseSelection.showClearedSelection()
+    dispatch({ type: CLEAR_SELECTED_VERSES }).catch(console.error)
+  }
 
-    // No selection exists -- create one on the clicked word, in the version tapped
-    if (!canAnnotateVersion(target.version)) return
-    const verse = getVerse(target)
-    if (!verse) return
-
-    const tokens = getTokens(target.verseKey, verse.Texte)
-    const caretInfo = getCaretInfoFromPoint(position.x, position.y)
-    if (!caretInfo) return
-
-    const wordIndex = getWordIndexFromCharOffset(tokens, caretInfo.charOffset)
-    if (wordIndex === null) return
-
-    setSelection(createWordSelection(target, wordIndex))
+  // Dragging a handle of selected verses turns the block into the words it holds, in annotation
+  // mode: the verses are let go, and the other blocks with them.
+  const handleVerseHandleDragStart = (range: SelectionRange) => {
+    verseSelection.showClearedSelection()
+    dispatch({
+      type: ENTER_ANNOTATION_MODE,
+      payload: { version: range.version, verseKey: range.end.verseKey },
+    }).catch(console.error)
   }
 
   // A tapped verse is selected in the version it was tapped in.
@@ -1110,6 +1136,7 @@ const LoadedBibleContent = ({
   // Annotation mode controller (handles touch selection and annotation events)
   useAnnotationModeController({
     containerRef,
+    gestureSurfaceRef: readerSurfaceRef,
     highlightOriginRef,
     annotationMode,
     versesByVersion,
@@ -1119,6 +1146,7 @@ const LoadedBibleContent = ({
     getTokens,
     highlightRects,
     selectionHandlePositions,
+    verseSelectionHandles,
     selectedAnnotationId,
     triggers: {
       clearSelectionTrigger,
@@ -1146,20 +1174,8 @@ const LoadedBibleContent = ({
       onLongPressVerse: handleLongPressVerse,
       onTouchedVerseChange: target =>
         setTouchedVerse(target && !isVersionGestureSuppressed(target.version) ? target : null),
-      onTapEmpty: () => {
-        // In annotation mode, tapping on empty space clears selection
-        if (annotationMode) {
-          if (selectedAnnotationId) {
-            dispatch({
-              type: 'ANNOTATION_SELECTED',
-              payload: { annotationId: null },
-            }).catch(console.error)
-          }
-          if (selection) {
-            setSelection(null)
-          }
-        }
-      },
+      onTapEmpty: handleTapEmpty,
+      onVerseHandleDragStart: handleVerseHandleDragStart,
       // Horizontal parallel mode scrolls its columns instead of changing chapter
       onSwipe: isHorizontalParallelMode
         ? annotationMode
@@ -1461,7 +1477,7 @@ const LoadedBibleContent = ({
 
   const isHebreu = version === 'BHS' || (version === 'BHG' && Number(verses[0].Livre) < 40)
   const highlightLayer = !isVerseLayoutAnimating &&
-    (highlightRects.length > 0 || (annotationMode && selection)) && (
+    (highlightRects.length > 0 || selection || verseSelectionHandles.length > 0) && (
       <HighlightLayer $overflowVisible={isHorizontalParallelMode}>
         {highlightRects.map(rect => (
           <HighlightRectDiv
@@ -1479,14 +1495,21 @@ const LoadedBibleContent = ({
             $animationDelay={rect.type === 'annotation' ? getAnimationDelay(rect.id) : 0}
           />
         ))}
-        {/* Selection handles - only in annotation mode */}
-        {annotationMode && (
-          <SelectionHandles
-            hasSelection={selection !== null}
-            startPosition={selectionHandlePositions.start}
-            endPosition={selectionHandlePositions.end}
-          />
-        )}
+        <SelectionHandles
+          hasSelection={selection !== null}
+          startPosition={selectionHandlePositions.start}
+          endPosition={selectionHandlePositions.end}
+        />
+        {/* Selected verses: two handles per block of verses that follow one another */}
+        {!selection &&
+          verseSelectionHandles.map(handles => (
+            <SelectionHandles
+              key={`${handles.range.start.verseKey}:${handles.range.end.verseKey}`}
+              hasSelection
+              startPosition={handles.start}
+              endPosition={handles.end}
+            />
+          ))}
       </HighlightLayer>
     )
   const isParallelVerse = Boolean(parallelVerses?.length)
@@ -1504,245 +1527,247 @@ const LoadedBibleContent = ({
     <TranslationsProvider translations={translations}>
       <GlobalStyles />
       <DispatchProvider dispatch={dispatch}>
-        <Container
-          ref={containerRef}
-          rtl={isHebreu}
-          settings={settings}
-          isParallelVerse={
-            isParallelVerse && (!keepControlsVisible || parallelDisplayMode === 'horizontal')
-          }
-          headerHeight={headerHeight}
-          $columnsScrollScope={titlesFollowColumnsScroll}
-          $scrollsColumns={isHorizontalParallelMode}
-        >
-          {/* Highlight layer for word annotations and selection */}
-          {!isHorizontalParallelMode && highlightLayer}
-          {isParallelVerse && parallelDisplayMode === 'horizontal' && (
-            <HeaderScrollWrapper
-              ref={headerScrollRef}
-              columnCount={parallelVersionTitles.length}
-              $followsScroll={titlesFollowColumnsScroll}
-            >
-              <VersionsContainer
+        <div ref={readerSurfaceRef} style={{ width: '100%' }}>
+          <Container
+            ref={containerRef}
+            rtl={isHebreu}
+            settings={settings}
+            isParallelVerse={
+              isParallelVerse && (!keepControlsVisible || parallelDisplayMode === 'horizontal')
+            }
+            headerHeight={headerHeight}
+            $columnsScrollScope={titlesFollowColumnsScroll}
+            $scrollsColumns={isHorizontalParallelMode}
+          >
+            {/* Highlight layer for word annotations and selection */}
+            {!isHorizontalParallelMode && highlightLayer}
+            {isParallelVerse && parallelDisplayMode === 'horizontal' && (
+              <HeaderScrollWrapper
+                ref={headerScrollRef}
                 columnCount={parallelVersionTitles.length}
-                columnWidth={parallelColumnWidth}
                 $followsScroll={titlesFollowColumnsScroll}
               >
-                {parallelVersionTitles?.map((p, i) => (
-                  <VersionTitleColumn
-                    key={i}
-                    columnCount={parallelVersionTitles.length}
-                    columnWidth={parallelColumnWidth}
-                  >
-                    <VersionTitleGroup
-                      data-version-title={i}
-                      // Columns after the first open with a gap: each pill keeps to its text
-                      style={{ marginInlineStart: i === 0 ? 0 : PARALLEL_COLUMN_GAP }}
-                      $followsScroll={titlesFollowColumnsScroll}
+                <VersionsContainer
+                  columnCount={parallelVersionTitles.length}
+                  columnWidth={parallelColumnWidth}
+                  $followsScroll={titlesFollowColumnsScroll}
+                >
+                  {parallelVersionTitles?.map((p, i) => (
+                    <VersionTitleColumn
+                      key={i}
+                      columnCount={parallelVersionTitles.length}
+                      columnWidth={parallelColumnWidth}
                     >
-                      <VersionChip
-                        settings={settings}
-                        version={p.id}
-                        hasError={Boolean(p.error)}
-                        controls={columnTextModeControls?.[i]}
-                        withChevron
-                        onVersionPress={() => navigateToVersion(p.id, i)}
-                        onTextModePress={kind => openColumnTextMode(kind, i)}
-                      />
-                    </VersionTitleGroup>
-                  </VersionTitleColumn>
-                ))}
-              </VersionsContainer>
-            </HeaderScrollWrapper>
-          )}
-          {/* The chapter opens above its featured introduction and below secondary media, which
+                      <VersionTitleGroup
+                        data-version-title={i}
+                        // Columns after the first open with a gap: each pill keeps to its text
+                        style={{ marginInlineStart: i === 0 ? 0 : PARALLEL_COLUMN_GAP }}
+                        $followsScroll={titlesFollowColumnsScroll}
+                      >
+                        <VersionChip
+                          settings={settings}
+                          version={p.id}
+                          hasError={Boolean(p.error)}
+                          controls={columnTextModeControls?.[i]}
+                          withChevron
+                          onVersionPress={() => navigateToVersion(p.id, i)}
+                          onTextModePress={kind => openColumnTextMode(kind, i)}
+                        />
+                      </VersionTitleGroup>
+                    </VersionTitleColumn>
+                  ))}
+                </VersionsContainer>
+              </HeaderScrollWrapper>
+            )}
+            {/* The chapter opens above its featured introduction and below secondary media, which
               stay at the very top. Both keep their place in the tree and swap by order, so the
               media morph and the opening slides when the chapter changes. */}
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {!isContextFocused && (
-              <div
-                style={
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {!isContextFocused && (
+                <div
+                  style={
+                    isHorizontalParallelMode
+                      ? { paddingInline: `${BIBLE_READING_HORIZONTAL_PADDING}px` }
+                      : undefined
+                  }
+                >
+                  <PassageMediaThumbnails
+                    items={passageMedia.introduction}
+                    gallerySections={passageMediaGallerySections}
+                    placement="introduction"
+                    settings={settings}
+                    isDisabled={annotationMode}
+                    isCompact={!passageMedia.isIntroductionStartChapter}
+                  />
+                </div>
+              )}
+              {/* A passage shown for itself (plan, context, focus) opens on its verses */}
+              {!focusVerses?.length && !inPlan && (
+                <m.div
+                  layout="position"
+                  layoutDependency={passageMedia.isIntroductionStartChapter}
+                  transition={{ layout: getOverlayLayoutTransition(shouldReduceMotion) }}
+                  style={{ order: passageMedia.isIntroductionStartChapter ? -1 : 1 }}
+                >
+                  <ChapterOpening
+                    settings={settings}
+                    book={book}
+                    chapter={chapter}
+                    bookName={translations.chapterOpening.bookName}
+                    chapterLabel={translations.chapterOpening.chapter}
+                    psalmLabel={translations.chapterOpening.psalm}
+                    originalTitle={translations.chapterOpening.originalTitle}
+                  />
+                </m.div>
+              )}
+            </div>
+            <HorizontalScrollWrapper
+              ref={contentScrollRef}
+              columnCount={
+                isParallelVerse && parallelDisplayMode === 'horizontal'
+                  ? parallelVersionTitles.length
+                  : 1
+              }
+              $panYOnly={isHorizontalParallelMode && Boolean(annotationMode)}
+              $scrollTimeline={titlesFollowColumnsScroll}
+              $scrollsColumns={isHorizontalParallelMode}
+            >
+              <ColumnsBlock
+                $columnsWidth={
                   isHorizontalParallelMode
-                    ? { paddingInline: `${BIBLE_READING_HORIZONTAL_PADDING}px` }
+                    ? getParallelColumnsWidth(parallelVersionTitles.length, parallelColumnWidth)
                     : undefined
                 }
               >
-                <PassageMediaThumbnails
-                  items={passageMedia.introduction}
-                  gallerySections={passageMediaGallerySections}
-                  placement="introduction"
-                  settings={settings}
-                  isDisabled={annotationMode}
-                  isCompact={!passageMedia.isIntroductionStartChapter}
+                {isHebreu && (
+                  <RightDirection settings={settings}>Sens de la lecture ←</RightDirection>
+                )}
+                {/* Introduction media sit above the columns, at the original scroll origin */}
+                <EntityChipsDOM
+                  items={focusedMetadataItems}
+                  color={settings.colors[settings.theme].primary}
+                  backgroundColor={settings.colors[settings.theme].lightPrimary}
+                  onPress={(type, id) => {
+                    void onFocusedMetadataPress?.(type, id)
+                  }}
                 />
-              </div>
-            )}
-            {/* A passage shown for itself (plan, context, focus) opens on its verses */}
-            {!focusVerses?.length && !inPlan && (
-              <m.div
-                layout="position"
-                layoutDependency={passageMedia.isIntroductionStartChapter}
-                transition={{ layout: getOverlayLayoutTransition(shouldReduceMotion) }}
-                style={{ order: passageMedia.isIntroductionStartChapter ? -1 : 1 }}
-              >
-                <ChapterOpening
-                  settings={settings}
-                  book={book}
-                  chapter={chapter}
-                  bookName={translations.chapterOpening.bookName}
-                  chapterLabel={translations.chapterOpening.chapter}
-                  psalmLabel={translations.chapterOpening.psalm}
-                  originalTitle={translations.chapterOpening.originalTitle}
-                />
-              </m.div>
-            )}
-          </div>
-          <HorizontalScrollWrapper
-            ref={contentScrollRef}
-            columnCount={
-              isParallelVerse && parallelDisplayMode === 'horizontal'
-                ? parallelVersionTitles.length
-                : 1
-            }
-            $panYOnly={isHorizontalParallelMode && Boolean(annotationMode)}
-            $scrollTimeline={titlesFollowColumnsScroll}
-            $scrollsColumns={isHorizontalParallelMode}
-          >
-            <ColumnsBlock
-              $columnsWidth={
-                isHorizontalParallelMode
-                  ? getParallelColumnsWidth(parallelVersionTitles.length, parallelColumnWidth)
-                  : undefined
-              }
-            >
-              {isHebreu && (
-                <RightDirection settings={settings}>Sens de la lecture ←</RightDirection>
-              )}
-              {/* Introduction media sit above the columns, at the original scroll origin */}
-              <EntityChipsDOM
-                items={focusedMetadataItems}
-                color={settings.colors[settings.theme].primary}
-                backgroundColor={settings.colors[settings.theme].lightPrimary}
-                onPress={(type, id) => {
-                  void onFocusedMetadataPress?.(type, id)
-                }}
-              />
-              <m.div
-                ref={versesContentRef}
-                style={{ position: 'relative' }}
-                {...versePositionLayoutProps}
-              >
-                {/* Highlight layer drawn inside the columns it marks */}
-                {isHorizontalParallelMode && highlightLayer}
-                {/* Unified verse rendering for all modes */}
-                <UnifiedVersesRenderer
-                  isPassagePreview={Boolean(focusVerses?.length)}
-                  inlineCommentaries={inlineCommentaries}
-                  verses={verses}
-                  parallelVerses={parallelVerses}
-                  interlinearReadingVersions={interlinearReadingVersions}
-                  focusVerses={focusVerses}
-                  selectedVerses={shownSelection.selectedVerses}
-                  selectedVersesVersion={shownSelection.selectedVersesVersion}
-                  highlightedVerses={highlightedVerses}
-                  settings={columnSettings}
-                  verseToScroll={verseToScroll}
-                  contextDisplayMode={contextDisplayMode}
-                  version={version}
-                  interlinearMode={interlinearMode}
-                  pericopeChapter={pericopeChapter}
-                  parallelPericopeChapters={parallelPericopeChapters}
-                  isSelectionMode={isSelectionMode}
-                  selectedCode={selectedCode}
-                  isHebreu={isHebreu}
-                  isParallelVerse={
-                    isParallelVerse &&
-                    (!keepControlsVisible || parallelDisplayMode === 'horizontal')
-                  }
-                  wordAnnotations={wordAnnotations}
-                  wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
-                  taggedVerses={taggedVerses}
-                  bookmarkedVerses={bookmarkedVerses}
-                  annotationNotesCountByVerse={annotationNotesCountByVerse}
-                  relationItemsCount={relationItemsCount}
-                  relationItemsText={relationItemsText}
-                  versesWithAnnotationNotes={versesWithAnnotationNotes}
-                  navigateToPericope={navigateToPericope}
-                  annotationMode={annotationMode}
-                  touchedVerse={touchedVerse}
-                  taggedVersesInChapter={taggedVersesInChapter}
-                  versesWithNonHighlightTags={versesWithNonHighlightTags}
-                  columnCount={isParallelVerse ? parallelVersionTitles.length : 1}
-                  columnWidth={parallelColumnWidth}
-                  parallelDisplayMode={parallelDisplayMode}
-                  columnTextModeControls={columnTextModeControls}
-                  redWordsByVersion={redWordsByVersion}
-                  passageMediaAfterVerses={passageMedia.afterVerses}
-                  passageMediaGallerySections={passageMediaGallerySections}
-                />
-                <AnnotationInlineItems
-                  wordAnnotations={wordAnnotations}
-                  annotationRelationItems={annotationRelationItems}
-                  versions={annotatedVersions}
-                  settings={columnSettings}
-                  annotationMode={annotationMode}
-                  contentKey={annotationInlineContentKey}
-                />
-              </m.div>
-            </ColumnsBlock>
-          </HorizontalScrollWrapper>
-          <ChapterEntities
-            entities={chapterEntities}
-            loaded={chapterEntitiesLoaded}
-            availabilityStatus={chapterEntityModuleStatus}
-            downloadState={chapterEntityDownloadState}
-            settings={settings}
-            translations={chapterEntityTranslations}
-            chapterResources={
-              !isContextFocused && passageMediaGalleryItems.length ? (
-                <PassageMediaThumbnails
-                  items={passageMediaGalleryItems}
-                  gallerySections={passageMediaGallerySections}
-                  placement="chapter-resources"
-                  settings={settings}
-                  isDisabled={annotationMode}
-                  blockMargin={0}
-                />
-              ) : null
-            }
-            onOpenEntity={uniqueName => {
-              void dispatch({ type: NAVIGATE_TO_BIBLICAL_ENTITY, payload: uniqueName })
-            }}
-            onDownload={() => {
-              void dispatch({ type: DOWNLOAD_CHAPTER_ENTITIES })
-            }}
-            onDismiss={() => {
-              void dispatch({ type: DISMISS_CONTEXTUAL_INFORMATION })
-            }}
-          />
-          {planDayStep && !annotationMode && (
-            <PlanDayStepCard
-              step={planDayStep}
+                <m.div
+                  ref={versesContentRef}
+                  style={{ position: 'relative' }}
+                  {...versePositionLayoutProps}
+                >
+                  {/* Highlight layer drawn inside the columns it marks */}
+                  {isHorizontalParallelMode && highlightLayer}
+                  {/* Unified verse rendering for all modes */}
+                  <UnifiedVersesRenderer
+                    isPassagePreview={Boolean(focusVerses?.length)}
+                    inlineCommentaries={inlineCommentaries}
+                    verses={verses}
+                    parallelVerses={parallelVerses}
+                    interlinearReadingVersions={interlinearReadingVersions}
+                    focusVerses={focusVerses}
+                    selectedVerses={shownSelection.selectedVerses}
+                    selectedVersesVersion={shownSelection.selectedVersesVersion}
+                    highlightedVerses={highlightedVerses}
+                    settings={columnSettings}
+                    verseToScroll={verseToScroll}
+                    contextDisplayMode={contextDisplayMode}
+                    version={version}
+                    interlinearMode={interlinearMode}
+                    pericopeChapter={pericopeChapter}
+                    parallelPericopeChapters={parallelPericopeChapters}
+                    isSelectionMode={isSelectionMode}
+                    selectedCode={selectedCode}
+                    isHebreu={isHebreu}
+                    isParallelVerse={
+                      isParallelVerse &&
+                      (!keepControlsVisible || parallelDisplayMode === 'horizontal')
+                    }
+                    wordAnnotations={wordAnnotations}
+                    wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
+                    taggedVerses={taggedVerses}
+                    bookmarkedVerses={bookmarkedVerses}
+                    annotationNotesCountByVerse={annotationNotesCountByVerse}
+                    relationItemsCount={relationItemsCount}
+                    relationItemsText={relationItemsText}
+                    versesWithAnnotationNotes={versesWithAnnotationNotes}
+                    navigateToPericope={navigateToPericope}
+                    annotationMode={annotationMode}
+                    touchedVerse={touchedVerse}
+                    taggedVersesInChapter={taggedVersesInChapter}
+                    versesWithNonHighlightTags={versesWithNonHighlightTags}
+                    columnCount={isParallelVerse ? parallelVersionTitles.length : 1}
+                    columnWidth={parallelColumnWidth}
+                    parallelDisplayMode={parallelDisplayMode}
+                    columnTextModeControls={columnTextModeControls}
+                    redWordsByVersion={redWordsByVersion}
+                    passageMediaAfterVerses={passageMedia.afterVerses}
+                    passageMediaGallerySections={passageMediaGallerySections}
+                  />
+                  <AnnotationInlineItems
+                    wordAnnotations={wordAnnotations}
+                    annotationRelationItems={annotationRelationItems}
+                    versions={annotatedVersions}
+                    settings={columnSettings}
+                    annotationMode={annotationMode}
+                    contentKey={annotationInlineContentKey}
+                  />
+                </m.div>
+              </ColumnsBlock>
+            </HorizontalScrollWrapper>
+            <ChapterEntities
+              entities={chapterEntities}
+              loaded={chapterEntitiesLoaded}
+              availabilityStatus={chapterEntityModuleStatus}
+              downloadState={chapterEntityDownloadState}
               settings={settings}
-              onPress={() => {
-                void dispatch({ type: PLAN_DAY_STEP })
+              translations={chapterEntityTranslations}
+              chapterResources={
+                !isContextFocused && passageMediaGalleryItems.length ? (
+                  <PassageMediaThumbnails
+                    items={passageMediaGalleryItems}
+                    gallerySections={passageMediaGallerySections}
+                    placement="chapter-resources"
+                    settings={settings}
+                    isDisabled={annotationMode}
+                    blockMargin={0}
+                  />
+                ) : null
+              }
+              onOpenEntity={uniqueName => {
+                void dispatch({ type: NAVIGATE_TO_BIBLICAL_ENTITY, payload: uniqueName })
+              }}
+              onDownload={() => {
+                void dispatch({ type: DOWNLOAD_CHAPTER_ENTITIES })
+              }}
+              onDismiss={() => {
+                void dispatch({ type: DISMISS_CONTEXTUAL_INFORMATION })
               }}
             />
-          )}
-          <ReturnToSelectedVerseButton
-            type="button"
-            settings={settings}
-            $position={returnToSelectedVersePosition}
-            onClick={() => scrollSelectedVerseToMiddle()}
-            aria-label="Retourner au verset sélectionné"
-          >
-            <Feather
-              name={returnToSelectedVersePosition === 'top' ? 'chevron-up' : 'chevron-down'}
-              size={24}
-              color={settings.colors[settings.theme].primary}
-            />
-          </ReturnToSelectedVerseButton>
-        </Container>
+            {planDayStep && !annotationMode && (
+              <PlanDayStepCard
+                step={planDayStep}
+                settings={settings}
+                onPress={() => {
+                  void dispatch({ type: PLAN_DAY_STEP })
+                }}
+              />
+            )}
+            <ReturnToSelectedVerseButton
+              type="button"
+              settings={settings}
+              $position={returnToSelectedVersePosition}
+              onClick={() => scrollSelectedVerseToMiddle()}
+              aria-label="Retourner au verset sélectionné"
+            >
+              <Feather
+                name={returnToSelectedVersePosition === 'top' ? 'chevron-up' : 'chevron-down'}
+                size={24}
+                color={settings.colors[settings.theme].primary}
+              />
+            </ReturnToSelectedVerseButton>
+          </Container>
+        </div>
         <svg
           style={{
             visibility: 'hidden',

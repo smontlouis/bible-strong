@@ -59,7 +59,7 @@ const AnnotationSheet = (props: AnnotationToolbarProps) => {
           <Box className="flex-1 min-w-0 gap-[4px]">
             <HStack className="items-center gap-[8px]">
               <Text className="font-bold text-[18px] flex-shrink" numberOfLines={1}>
-                {t('Mode libre')}
+                {t('Annotation')}
               </Text>
               {version && (
                 <Box

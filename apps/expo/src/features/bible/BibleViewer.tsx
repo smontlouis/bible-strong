@@ -747,33 +747,17 @@ const BibleViewer = ({
       })
     : EMPTY_PASSAGE_MEDIA
 
-  // Handler for entering annotation mode (from SelectedVersesModal)
-  const handleEnterAnnotationMode = useCallback(() => {
-    if (hidePersonalBibleData) return
-    const selectedVerseKeys = Object.keys(selectedVerses)
-    setAnnotationEntryVerseKey(selectedVerseKeys[selectedVerseKeys.length - 1])
-    // Clear selected verses and close the modal
-    actions.clearSelectedVerses()
-    versesModal.close()
-
-    annotationMode.enterMode(selectionVersion)
-    annotationToolbar.open()
-  }, [
-    actions,
-    versesModal,
-    annotationMode,
-    annotationToolbar,
-    selectionVersion,
-    selectedVerses,
-    hidePersonalBibleData,
-  ])
-
-  // Handler for entering annotation mode (from double-tap on a verse of one of the versions)
-  const handleEnterAnnotationModeFromDoubleTap = (
+  // Entering annotation mode from the Bible view: a double tap on a verse, or a selection handle
+  // dragged off the verses it was on. Those verses stop being selected: the words take over.
+  const handleEnterAnnotationModeFromBible = (
     annotatedVersion: VersionCode = version,
     verseKey?: string
   ) => {
     if (hidePersonalBibleData) return
+    if (hasSelectedVerses(selectedVerses)) {
+      actions.clearSelectedVerses()
+      versesModal.close()
+    }
     setAnnotationEntryVerseKey(verseKey)
     annotationMode.enterMode(annotatedVersion)
     annotationToolbar.open()
@@ -1412,6 +1396,7 @@ const BibleViewer = ({
     interlinearReadingVersions,
     addSelectedVerse: hidePersonalBibleData ? () => undefined : actions.addSelectedVerse,
     removeSelectedVerse: hidePersonalBibleData ? () => undefined : actions.removeSelectedVerse,
+    clearSelectedVerses: actions.clearSelectedVerses,
     setSelectedVerse: actions.setSelectedVerse,
     version,
     interlinearMode,
@@ -1484,9 +1469,8 @@ const BibleViewer = ({
     onOpenCanonicalBibleNote: handleOpenCanonicalBibleNote,
     onOpenStudyRelationsModal: hidePersonalBibleData ? undefined : openVerseStudyRelationsModal,
     // Double-tap to enter annotation mode
-    onEnterAnnotationMode: hidePersonalBibleData
-      ? undefined
-      : handleEnterAnnotationModeFromDoubleTap,
+    onEnterAnnotationMode: hidePersonalBibleData ? undefined : handleEnterAnnotationModeFromBible,
+    onExitAnnotationMode: handleExitAnnotationMode,
     // Red words
     redWords: settings.redWordsDisplay ? redWords : null,
     parallelRedWords: settings.redWordsDisplay ? parallelRedWords : undefined,
@@ -1642,8 +1626,16 @@ const BibleViewer = ({
         onBibleParamsClick={bibleParamsModal.open}
         isFormSheet={isFormSheet}
         isInTab={isInTab}
-        onExitAnnotationMode={handleExitAnnotationMode}
         annotationModeEnabled={annotationMode.enabled && !hidePersonalBibleData}
+        annotationSelection={
+          annotationMode.selection
+            ? {
+                startVerseKey: annotationMode.selection.start.verseKey,
+                endVerseKey: annotationMode.selection.end.verseKey,
+              }
+            : null
+        }
+        annotatedVersion={annotationMode.version}
         hidePersonalBibleData={hidePersonalBibleData}
         coverage={coverageData}
         onOpenTextMode={(kind, column) => textModeSheetsRef.current?.open(kind, column)}
@@ -1818,7 +1810,6 @@ const BibleViewer = ({
           onSelectStudy={handleSelectStudy}
           onAddBookmark={handleAddBookmark}
           onPinVerses={handlePinVerses}
-          onEnterAnnotationMode={handleEnterAnnotationMode}
           focusVerses={focusVerses}
         />
       )}

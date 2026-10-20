@@ -7,6 +7,7 @@ import type { Verse } from '~common/types'
 import type { WordToken } from '~helpers/wordTokenizer'
 import type { SelectionRange } from '../selectionUtils'
 import { useTouchSelection, type TouchSelectionCallbacks } from '../useTouchSelection'
+import type { VerseSelectionHandles } from '../useAnnotationHighlights'
 
 // Two parallel columns: the first under x < 100, the second beyond. Each column starts a word
 // at 0 and 6. Below y = 100 there is no verse, like the gap between lines where handles sit.
@@ -47,6 +48,7 @@ const Harness = ({
   sameVersionColumns = false,
   initialSelection = null,
   handlePositions = { start: null, end: null },
+  verseSelectionHandles = [],
 }: {
   annotationMode: boolean
   callbacks: TouchSelectionCallbacks
@@ -58,6 +60,7 @@ const Harness = ({
     start: { x: number; y: number } | null
     end: { x: number; y: number } | null
   }
+  verseSelectionHandles?: VerseSelectionHandles[]
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const [selection, setSelectionState] = useState<SelectionRange | null>(initialSelection)
@@ -75,6 +78,7 @@ const Harness = ({
     versesByVersion: { LSG: [verse], KJV: [{ ...verse, Texte: 'In the beginning' }] },
     getTokens: () => tokens,
     getSelectionHandlePositions: () => handlePositions,
+    getVerseSelectionHandles: () => verseSelectionHandles,
     highlightRects: [],
     annotationMode,
     callbacks,
@@ -499,5 +503,122 @@ describe('Web mouse gestures for Bible annotations', () => {
 
     expect(onDoubleTapVerse).toHaveBeenCalledTimes(1)
     expect(onTapVerse).not.toHaveBeenCalled()
+  })
+
+  // Verse 1-1-1 of LSG selected: its handles stand before its first word and after its last one
+  const selectedVerseHandles: VerseSelectionHandles[] = [
+    {
+      range: {
+        start: { verseKey: '1-1-1', wordIndex: 0 },
+        end: { verseKey: '1-1-1', wordIndex: 1 },
+        version: 'LSG',
+      },
+      start: { x: 0, y: 0 },
+      end: { x: 90, y: 150 },
+    },
+  ]
+
+  it('turns selected verses into their words when a handle is dragged', () => {
+    const onVerseHandleDragStart = jest.fn()
+    const onSelectionChange = jest.fn()
+    act(() => {
+      root.render(
+        <Harness
+          annotationMode={false}
+          callbacks={{ onVerseHandleDragStart }}
+          onSelectionChange={onSelectionChange}
+          verseSelectionHandles={selectedVerseHandles}
+        />
+      )
+    })
+    const container = host.firstElementChild!
+
+    act(() => {
+      container.dispatchEvent(
+        new MouseEvent('mousedown', { bubbles: true, button: 0, clientX: 90, clientY: 150 })
+      )
+      window.dispatchEvent(
+        new MouseEvent('mousemove', { bubbles: true, buttons: 1, clientX: 10, clientY: 10 })
+      )
+      window.dispatchEvent(
+        new MouseEvent('mouseup', { bubbles: true, button: 0, clientX: 10, clientY: 10 })
+      )
+    })
+
+    expect(onVerseHandleDragStart).toHaveBeenCalledWith(selectedVerseHandles[0].range)
+    // The end handle followed the pointer back to the first word
+    expect(onSelectionChange).toHaveBeenLastCalledWith({
+      start: { verseKey: '1-1-1', wordIndex: 0 },
+      end: { verseKey: '1-1-1', wordIndex: 0 },
+      version: 'LSG',
+    })
+  })
+
+  it('keeps the verses selected when a handle is pressed without moving', () => {
+    const onVerseHandleDragStart = jest.fn()
+    const onTapEmpty = jest.fn()
+    act(() => {
+      root.render(
+        <Harness
+          annotationMode={false}
+          callbacks={{ onVerseHandleDragStart, onTapEmpty }}
+          verseSelectionHandles={selectedVerseHandles}
+        />
+      )
+    })
+    const container = host.firstElementChild!
+
+    act(() => {
+      container.dispatchEvent(
+        new MouseEvent('mousedown', { bubbles: true, button: 0, clientX: 90, clientY: 150 })
+      )
+      window.dispatchEvent(
+        new MouseEvent('mouseup', { bubbles: true, button: 0, clientX: 90, clientY: 150 })
+      )
+      container.dispatchEvent(
+        new MouseEvent('click', { bubbles: true, button: 0, clientX: 90, clientY: 150 })
+      )
+    })
+
+    expect(onVerseHandleDragStart).not.toHaveBeenCalled()
+    expect(onTapEmpty).not.toHaveBeenCalled()
+  })
+
+  it('reports a click away from the text', () => {
+    const onTapEmpty = jest.fn()
+    act(() => {
+      root.render(<Harness annotationMode={false} callbacks={{ onTapEmpty }} />)
+    })
+
+    // Well below the text lines, out of reach of the line just above
+    act(() => {
+      host.firstElementChild!.dispatchEvent(
+        new MouseEvent('click', { bubbles: true, button: 0, clientX: 30, clientY: 150 })
+      )
+    })
+
+    expect(onTapEmpty).toHaveBeenCalledTimes(1)
+  })
+
+  it('takes a click between two lines for a click on the verse beside it', () => {
+    const onTapVerse = jest.fn()
+    const onTapEmpty = jest.fn()
+    act(() => {
+      root.render(<Harness annotationMode={false} callbacks={{ onTapVerse, onTapEmpty }} />)
+    })
+
+    // Just below the last line of text, within reach of it
+    act(() => {
+      host.firstElementChild!.dispatchEvent(
+        new MouseEvent('click', { bubbles: true, button: 0, clientX: 30, clientY: 105 })
+      )
+      jest.advanceTimersByTime(250)
+    })
+
+    expect(onTapEmpty).not.toHaveBeenCalled()
+    expect(onTapVerse).toHaveBeenCalledWith(
+      { verseKey: '1-1-1', version: 'LSG' },
+      { x: 30, y: 105 }
+    )
   })
 })

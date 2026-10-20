@@ -164,7 +164,7 @@ export default function AnnotationMenu(props: AnnotationToolbarProps) {
 
   const screens: Record<string, PanelScreen> = {
     actions: {
-      title: t('Mode libre'),
+      title: t('Annotation'),
       width: ANNOTATION_MENU_WIDTH,
       headerRight: (
         <>
@@ -294,7 +294,7 @@ export default function AnnotationMenu(props: AnnotationToolbarProps) {
     <VerseMenu
       isRequested={isRequested}
       target={target}
-      accessibilityLabel={t('Mode libre')}
+      accessibilityLabel={t('Annotation')}
       initialScreen="actions"
       width={ANNOTATION_MENU_WIDTH}
       screens={screens}

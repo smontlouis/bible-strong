@@ -50,7 +50,6 @@ const SelectedVersesModal = ({
   onSelectStudy,
   onAddBookmark,
   onPinVerses,
-  onEnterAnnotationMode,
   focusVerses,
 }: SelectedVersesModalProps) => {
   const { t } = useTranslation()
@@ -125,7 +124,6 @@ const SelectedVersesModal = ({
         onSelectStudy={onSelectStudy}
         reference={selectedVersesTitle}
         onPinVerses={onPinVerses}
-        onEnterAnnotationMode={onEnterAnnotationMode}
         moreThanOneVerseSelected={moreThanOneVerseSelected}
         activeStates={activeStates}
       />,
@@ -164,7 +162,6 @@ const SelectedVersesModal = ({
             link: onCreateLinkClick,
             bookmark: moreThanOneVerseSelected ? undefined : menu => menu.openScreen('bookmark'),
             focus: onPinVerses,
-            freeMode: onEnterAnnotationMode,
             references: moreThanOneVerseSelected ? undefined : onOpenReferences,
             compare: compareVerses,
             copy: copyToClipboard,
@@ -269,7 +266,6 @@ const SelectedVersesModal = ({
                       onSelectStudy={onSelectStudy}
                       reference={selectedVersesTitle}
                       onPinVerses={onPinVerses}
-                      onEnterAnnotationMode={onEnterAnnotationMode}
                       moreThanOneVerseSelected={moreThanOneVerseSelected}
                       activeStates={activeStates}
                     />
