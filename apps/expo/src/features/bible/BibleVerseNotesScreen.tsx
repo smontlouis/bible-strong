@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { useAtom, useSetAtom } from 'jotai/react'
@@ -9,14 +9,12 @@ import FlatList from '~common/ui/FlatList'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import BibleNoteItem from './BibleNoteItem'
 import { Tag } from '~common/types'
-import { useSheet } from '~helpers/useSheet'
 import { unifiedTagsModalAtom } from '~state/app'
 import { getNoteTitle } from '~helpers/getNoteTitle'
 import { RootState } from '~redux/modules/reducer'
 import { selectRelationCountsByEndpointIdentity } from '~redux/selectors/bible'
 import { selectNoteListRows } from '~redux/selectors/notes'
 import type { NoteListRow } from '~features/entityListQuery/noteListRows'
-import BibleNotesSettingsModal from './BibleNotesSettingsModal'
 import { endpointIdentity, type RelationEndpoint } from '~features/studyRelations/domain'
 import { createNoteEndpoint } from '~features/studyRelations/endpoints'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
@@ -47,7 +45,6 @@ const BibleVerseNotes = ({
   const hasBackButton = isFormSheet ? canGoBackInStack : true
 
   const [queryState, setQueryState] = useAtom(notesListQueryAtom)
-  const [noteSettingsId, setNoteSettingsId] = useState<string | null>(null)
   const openEntityRelations = useOpenEntityRelations()
   const openNote = useOpenNote()
 
@@ -70,7 +67,6 @@ const BibleVerseNotes = ({
   const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
 
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
-  const noteSettingsModal = useSheet()
 
   const openTagsModal = () => {
     setUnifiedTagsModal({
@@ -97,11 +93,6 @@ const BibleVerseNotes = ({
     selectedChip ? Boolean(item.note.tags?.[selectedChip.id]) : true
   )
   const filteredNotes = queryEntityList(matchingNotes, queryState)
-  const openNoteSettings = (noteId: string) => {
-    setNoteSettingsId(noteId)
-    noteSettingsModal.open()
-  }
-
   const openNoteEditor = (noteId: string) => {
     if (isNewTabSelection) {
       const note = notes.find(candidate => candidate.noteId === noteId)
@@ -131,7 +122,6 @@ const BibleVerseNotes = ({
       <BibleNoteItem
         item={item}
         onPress={openNoteEditor}
-        onMenuPress={openNoteSettings}
         relationCount={relationCountsByEndpoint[endpointIdentity(endpoint)] || 0}
         onRelationPress={() => openEntityRelations(endpoint)}
       />
@@ -195,11 +185,6 @@ const BibleVerseNotes = ({
             }
           />
         )}
-        <BibleNotesSettingsModal
-          ref={noteSettingsModal.getRef()}
-          noteId={noteSettingsId}
-          onClosed={() => setNoteSettingsId(null)}
-        />
       </Box>
     </FormSheetScreen>
   )

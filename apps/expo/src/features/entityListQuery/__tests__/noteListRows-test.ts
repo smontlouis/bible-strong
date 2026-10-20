@@ -73,6 +73,8 @@ describe('buildNoteListRows', () => {
     })
     expect(rows[2]).toMatchObject({
       reference: 'Genèse 2:3 (annotation)',
+      passage: 'Genèse 2:3',
+      isAnnotation: true,
       title: 'Annotation',
     })
     expect(rows[3].reference).toBe('')

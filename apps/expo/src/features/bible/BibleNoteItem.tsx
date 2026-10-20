@@ -14,10 +14,8 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 
 import { useTranslation } from 'react-i18next'
-import Paragraph from '~common/ui/Paragraph'
 import type { NoteListRow } from '~features/entityListQuery/noteListRows'
 import { getDateLocale } from '~helpers/languageUtils'
-import truncate from '~helpers/truncate'
 import useLanguage from '~helpers/useLanguage'
 import { useMountTime } from '~helpers/useMountTime'
 
@@ -27,7 +25,7 @@ const NoteLink = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const resolvedClassName = twMerge('py-[20px] p-[20px] pr-[0px] flex-row', className)
+  const resolvedClassName = twMerge('pl-[20px] pt-[16px]', className)
   return (
     <Link
       {...props}
@@ -37,10 +35,11 @@ const NoteLink = (
   )
 }
 
+const collapseWhitespace = (text?: string) => text?.replace(/\s+/g, ' ').trim() ?? ''
+
 type Props = {
   item: NoteListRow
   onPress: (noteId: string) => void
-  onMenuPress: (noteId: string) => void
   relationCount?: number
   onRelationPress?: () => void
 }
@@ -56,41 +55,61 @@ const BibleNoteItem = ({ item, onPress, relationCount, onRelationPress }: Props)
     locale: getDateLocale(lang),
   })
   const relativeDate = t('Il y a {{formattedDate}}', { formattedDate })
-  const metadataLabel = item.reference ? `${item.reference} - ${relativeDate}` : relativeDate
-  const noteTitle = item.note.title?.trim() ?? ''
-  const noteDescription = item.note.description?.trim() ?? ''
+  // A preview reads as running text: the note's line breaks would only leave blank lines.
+  const noteTitle = collapseWhitespace(item.note.title)
+  const noteDescription = collapseWhitespace(item.note.description)
+  const showDescription = !!noteDescription && noteDescription !== noteTitle
 
   const hasChips = Boolean(Object.keys(item.note.tags || {}).length || relationCount)
 
   return (
     <Box className="overflow-hidden border-continuous">
-      <Box className="overflow-hidden border-continuous flex-row items-center">
+      <Box className="overflow-hidden border-continuous flex-row items-start">
         <Box className="overflow-hidden border-continuous flex-[1]">
           <NoteLink
             onPress={() => onPress(item.noteId)}
-            style={{ paddingBottom: hasChips ? 8 : 20 }}
+            style={{ paddingBottom: hasChips ? 0 : 16 }}
           >
-            <Box className="overflow-hidden border-continuous flex-[1]">
-              <Text className="text-dark-grey font-bold text-[11px]">{metadataLabel}</Text>
-              {!!noteTitle && (
-                <Text
-                  className="text-[17px]"
-                  numberOfLines={2}
-                  ellipsizeMode="tail"
-                  style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-                >
-                  {noteTitle}
-                </Text>
+            <Box className="overflow-hidden border-continuous flex-row items-center">
+              {item.isAnnotation && (
+                <Box className="overflow-hidden border-continuous rounded-[4px] bg-light-primary px-[5px] py-[1px] mr-[6px]">
+                  <Text className="text-[10px] font-semibold uppercase tracking-[0.5px] text-primary">
+                    {t('Annotation')}
+                  </Text>
+                </Box>
               )}
-              {!!noteDescription && noteDescription !== noteTitle && (
-                <Paragraph scale={-1} scaleLineHeight={-1}>
-                  {truncate(noteDescription, 100)}
-                </Paragraph>
-              )}
+              <Text className="flex-[1] text-[12px] text-dark-grey" numberOfLines={1}>
+                {!!item.passage && (
+                  <Text className="text-[12px] font-semibold text-grey">{item.passage}</Text>
+                )}
+                {item.passage ? ` · ${relativeDate}` : relativeDate}
+              </Text>
             </Box>
+            {!!noteTitle && (
+              <Text
+                className="mt-[6px] text-[16px] leading-[22px]"
+                numberOfLines={2}
+                ellipsizeMode="tail"
+                style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+              >
+                {noteTitle}
+              </Text>
+            )}
+            {showDescription && (
+              <Text
+                className={twMerge(
+                  'text-[14px] leading-[20px] text-grey',
+                  noteTitle ? 'mt-[2px]' : 'mt-[6px]'
+                )}
+                numberOfLines={3}
+                ellipsizeMode="tail"
+              >
+                {noteDescription}
+              </Text>
+            )}
           </NoteLink>
           {hasChips && (
-            <Box className="overflow-hidden border-continuous px-[20px] pb-[20px]">
+            <Box className="overflow-hidden border-continuous pl-[20px] pt-[5px] pb-[16px]">
               <EntityChipList
                 tags={item.note.tags}
                 relationCount={relationCount}
@@ -99,7 +118,10 @@ const BibleNoteItem = ({ item, onPress, relationCount, onRelationPress }: Props)
             </Box>
           )}
         </Box>
-        <NoteOptionsPanel noteId={item.noteId} title={item.title} />
+        {/* The 54pt trigger centres its icon on the header line. */}
+        <Box className="overflow-hidden border-continuous mt-[-3px] mr-[4px]">
+          <NoteOptionsPanel noteId={item.noteId} title={item.title} />
+        </Box>
       </Box>
       <Border className="mx-[20px]" />
     </Box>

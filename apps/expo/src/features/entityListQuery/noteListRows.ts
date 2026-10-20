@@ -7,7 +7,11 @@ import type { WordAnnotationsObj } from '~redux/modules/user/wordAnnotations'
 export type NoteListRow = {
   id: string
   noteId: string
+  /** The passage, labelled as an annotation when the note annotates words: searched and shown. */
   reference: string
+  /** The passage alone, for a list that marks annotations by other means. */
+  passage: string
+  isAnnotation: boolean
   note: Note
   title: string
   description: string
@@ -42,24 +46,28 @@ export const buildNoteListRows = (
   const rows: NoteListRow[] = []
 
   for (const [noteId, note] of Object.entries(notes)) {
-    let reference = ''
+    let passage = ''
+    const isAnnotation = noteId.startsWith('annotation:')
 
-    if (noteId.startsWith('annotation:')) {
+    if (isAnnotation) {
       const annotation = wordAnnotations[noteId.slice('annotation:'.length)]
       const firstRange = annotation?.ranges[0]
       if (!firstRange) continue
-      reference = `${verseToReference({ [firstRange.verseKey]: true })} (${annotationLabel})`
+      passage = verseToReference({ [firstRange.verseKey]: true })
     } else {
       const verseKeys = verseKeysByNoteId[noteId]
       if (verseKeys?.size) {
-        reference = verseToReference(Object.fromEntries(Array.from(verseKeys, key => [key, true])))
+        passage = verseToReference(Object.fromEntries(Array.from(verseKeys, key => [key, true])))
       }
     }
+    const reference = isAnnotation ? `${passage} (${annotationLabel})` : passage
 
     rows.push({
       id: noteId,
       noteId,
       reference,
+      passage,
+      isAnnotation,
       note,
       title: getNoteTitle(note, reference),
       description: note.description,

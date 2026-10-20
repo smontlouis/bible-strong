@@ -16,10 +16,8 @@ import Text from '~common/ui/Text'
 
 import { useTranslation } from 'react-i18next'
 import { FeatherIcon } from '~common/ui/Icon'
-import Paragraph from '~common/ui/Paragraph'
 import { linkTypeConfig } from '~helpers/fetchOpenGraphData'
 import { getDateLocale } from '~helpers/languageUtils'
-import truncate from '~helpers/truncate'
 import useLanguage from '~helpers/useLanguage'
 import { useMountTime } from '~helpers/useMountTime'
 import { Link as LinkType } from '~redux/modules/user'
@@ -30,7 +28,7 @@ const LinkItemContainer = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const resolvedClassName = twMerge('py-[20px] p-[20px] pr-[0px] flex-row', className)
+  const resolvedClassName = twMerge('flex-row items-start pl-[20px] py-[16px]', className)
   return (
     <Link
       {...props}
@@ -69,7 +67,6 @@ type TLink = {
 type Props = {
   item: TLink
   onPress: (linkId: string) => void
-  onMenuPress: (linkId: string) => void
   relationCount?: number
   onRelationPress?: () => void
 }
@@ -89,12 +86,12 @@ const BibleLinkItem = ({ item, onPress, relationCount, onRelationPress }: Props)
   const iconName = config.icon as React.ComponentProps<typeof FeatherIcon>['name']
   const displayTitle = item.link.customTitle || item.link.ogData?.title || item.link.url
   const relativeDate = t('Il y a {{formattedDate}}', { formattedDate })
-  const metadataLabel = item.reference ? `${item.reference} - ${relativeDate}` : relativeDate
+  const hasChips = Boolean(Object.keys(item.link.tags || {}).length || relationCount)
 
   return (
     <Box className="overflow-hidden border-continuous">
       <LinkItemContainer onPress={() => onPress(item.linkId)}>
-        <LinkTypeIcon bgColor={config.color}>
+        <LinkTypeIcon bgColor={config.color} className="mt-[-4px]">
           {config.textIcon ? (
             <Text className="font-bold text-[12px] text-[white]">{config.textIcon}</Text>
           ) : (
@@ -102,25 +99,37 @@ const BibleLinkItem = ({ item, onPress, relationCount, onRelationPress }: Props)
           )}
         </LinkTypeIcon>
         <Box className="overflow-hidden border-continuous flex-[1]">
-          <Box className="overflow-hidden border-continuous flex-row justify-between">
-            <Text className="text-dark-grey font-bold text-[11px]">{metadataLabel}</Text>
-          </Box>
+          <Text className="text-[12px] text-dark-grey" numberOfLines={1}>
+            {!!item.reference && (
+              <Text className="text-[12px] font-semibold text-grey">{item.reference}</Text>
+            )}
+            {item.reference ? ` · ${relativeDate}` : relativeDate}
+          </Text>
           <Text
-            className="text-[16px]"
+            className="mt-[6px] text-[16px] leading-[22px]"
+            numberOfLines={2}
+            ellipsizeMode="tail"
             style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
           >
-            {truncate(displayTitle, 50)}
+            {displayTitle}
           </Text>
-          <Paragraph className="text-tertiary" scale={-3} scaleLineHeight={-1} numberOfLines={1}>
+          <Text className="mt-[2px] text-[13px] leading-[18px] text-tertiary" numberOfLines={1}>
             {item.link.url}
-          </Paragraph>
-          <EntityChipList
-            tags={item.link.tags}
-            relationCount={relationCount}
-            onRelationPress={onRelationPress}
-          />
+          </Text>
+          {hasChips && (
+            <Box className="overflow-hidden border-continuous pt-[5px]">
+              <EntityChipList
+                tags={item.link.tags}
+                relationCount={relationCount}
+                onRelationPress={onRelationPress}
+              />
+            </Box>
+          )}
         </Box>
-        <LinkOptionsPanel linkId={item.linkId} onRelations={onRelationPress} />
+        {/* The 54pt trigger centres its icon on the header line. */}
+        <Box className="overflow-hidden border-continuous mt-[-19px] mr-[4px]">
+          <LinkOptionsPanel linkId={item.linkId} onRelations={onRelationPress} />
+        </Box>
       </LinkItemContainer>
       <Border className="mx-[20px]" />
     </Box>
