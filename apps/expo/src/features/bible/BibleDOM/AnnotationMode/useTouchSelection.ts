@@ -589,9 +589,7 @@ export function useTouchSelection({
         ? toVerseTarget(wordPos)
         : getVerseAtPoint(e.clientX, e.clientY)
 
-      if (!touchState.startVerse) return
-      cbs.onTouchedVerseChange?.(touchState.startVerse)
-
+      // Handles sit outside the text lines, so test them before requiring a verse under the pointer
       if (selectionRef.current && annotationModeRef.current) {
         const handlePositions = getSelectionHandlePositionsRef.current()
         if (isNearHandle(e.clientX, e.clientY, handlePositions.start)) {
@@ -607,6 +605,9 @@ export function useTouchSelection({
           return
         }
       }
+
+      if (!touchState.startVerse) return
+      cbs.onTouchedVerseChange?.(touchState.startVerse)
 
       touchState.longPressTimer = setTimeout(() => {
         if (!mouseIsDown || touchState.hasMoved || touchState.isDragging) return

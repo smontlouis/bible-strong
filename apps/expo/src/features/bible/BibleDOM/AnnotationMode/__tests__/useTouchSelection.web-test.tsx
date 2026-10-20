@@ -9,13 +9,16 @@ import type { SelectionRange } from '../selectionUtils'
 import { useTouchSelection, type TouchSelectionCallbacks } from '../useTouchSelection'
 
 // Two parallel columns: the first under x < 100, the second beyond. Each column starts a word
-// at 0 and 6.
+// at 0 and 6. Below y = 100 there is no verse, like the gap between lines where handles sit.
 jest.mock('../domUtils', () => ({
   findVerseContainer: (element: Element | null) => element?.closest('[data-verse-key]') ?? null,
-  getCaretInfoFromPoint: (x: number) => ({
-    charOffset: x % 100 < 50 ? 0 : 6,
-    targetElement: globalThis.document.querySelectorAll('[data-verse-text]')[x < 100 ? 0 : 1],
-  }),
+  getCaretInfoFromPoint: (x: number, y: number) =>
+    y < 100
+      ? {
+          charOffset: x % 100 < 50 ? 0 : 6,
+          targetElement: globalThis.document.querySelectorAll('[data-verse-text]')[x < 100 ? 0 : 1],
+        }
+      : null,
   isIgnoredVerseTouchTarget: () => false,
 }))
 
@@ -42,15 +45,22 @@ const Harness = ({
   callbacks,
   onSelectionChange,
   sameVersionColumns = false,
+  initialSelection = null,
+  handlePositions = { start: null, end: null },
 }: {
   annotationMode: boolean
   callbacks: TouchSelectionCallbacks
   onSelectionChange?: (selection: SelectionRange | null) => void
   // LSG shown in both parallel columns instead of LSG and KJV
   sameVersionColumns?: boolean
+  initialSelection?: SelectionRange | null
+  handlePositions?: {
+    start: { x: number; y: number } | null
+    end: { x: number; y: number } | null
+  }
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [selection, setSelectionState] = useState<SelectionRange | null>(null)
+  const [selection, setSelectionState] = useState<SelectionRange | null>(initialSelection)
 
   useTouchSelection({
     containerRef,
@@ -64,7 +74,7 @@ const Harness = ({
     },
     versesByVersion: { LSG: [verse], KJV: [{ ...verse, Texte: 'In the beginning' }] },
     getTokens: () => tokens,
-    getSelectionHandlePositions: () => ({ start: null, end: null }),
+    getSelectionHandlePositions: () => handlePositions,
     highlightRects: [],
     annotationMode,
     callbacks,
@@ -139,6 +149,44 @@ describe('Web mouse gestures for Bible annotations', () => {
 
     expect(onLongPressVerse).toHaveBeenCalledWith({ verseKey: '1-1-1', version: 'LSG' })
     expect(onTapVerse).not.toHaveBeenCalled()
+  })
+
+  it('drags a selection handle pressed outside the text lines', () => {
+    const onSelectionChange = jest.fn()
+    act(() => {
+      root.render(
+        <Harness
+          annotationMode
+          callbacks={{}}
+          onSelectionChange={onSelectionChange}
+          initialSelection={{
+            start: { verseKey: '1-1-1', wordIndex: 0 },
+            end: { verseKey: '1-1-1', wordIndex: 0 },
+            version: 'LSG',
+          }}
+          handlePositions={{ start: { x: 20, y: 0 }, end: { x: 20, y: 150 } }}
+        />
+      )
+    })
+    const container = host.firstElementChild!
+
+    act(() => {
+      container.dispatchEvent(
+        new MouseEvent('mousedown', { bubbles: true, button: 0, clientX: 20, clientY: 150 })
+      )
+      window.dispatchEvent(
+        new MouseEvent('mousemove', { bubbles: true, buttons: 1, clientX: 70, clientY: 10 })
+      )
+      window.dispatchEvent(
+        new MouseEvent('mouseup', { bubbles: true, button: 0, clientX: 70, clientY: 10 })
+      )
+    })
+
+    expect(onSelectionChange).toHaveBeenLastCalledWith({
+      start: { verseKey: '1-1-1', wordIndex: 0 },
+      end: { verseKey: '1-1-1', wordIndex: 1 },
+      version: 'LSG',
+    })
   })
 
   it('keeps annotation mode active while dragging and suppresses the trailing click', () => {
