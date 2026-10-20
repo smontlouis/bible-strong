@@ -3,7 +3,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { MenuView } from '~common/ui/MenuView'
 import { useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import FlatList from '~common/ui/FlatList'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Header from '~common/Header'
@@ -39,6 +39,7 @@ const ConcordanceByBook = () => {
   const isFormSheet = IS_FORM_SHEET
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : true
+  const bottomInset = usePageBottomInset()
   const [strongResourceLanguage, setStrongResourceLanguage] = useResourceLanguage('STRONG')
   const defaultStrongBibleVersionId = useSelector(
     (state: RootState) => state.user.bible.settings.defaultStrongBibleVersionId ?? 'LSG'
@@ -128,7 +129,7 @@ const ConcordanceByBook = () => {
       )}
       {(!isLoading || !!verses.length) && (
         <FlatList
-          contentContainerStyle={{ padding: 20 }}
+          contentContainerStyle={{ padding: 20, paddingBottom: 20 + bottomInset }}
           removeClippedSubviews
           data={verses}
           onEndReached={() => {

@@ -87,7 +87,7 @@ const TimelineEvent = ({
   if (type === 'minor') {
     return (
       <LinkBox
-        className="h-[25px] absolute bg-reverse flex-row rounded-[20px]"
+        className="h-[25px] absolute bg-surface flex-row rounded-full"
         onPress={onOpenEvent}
         disabled={!hasDetails}
         style={[
@@ -97,17 +97,11 @@ const TimelineEvent = ({
               top: top,
               left: left + offset,
               opacity: !hasDetails ? 0.6 : hasDetails ? 1 : 0.6,
-              shadowColor: 'rgb(89,131,240)',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 7,
-              elevation: 1,
-              overflow: 'visible',
             },
           ],
         ]}
       >
-        <Box className="overflow-hidden border-continuous rounded-tl-[10px] rounded-bl-[10px] bg-tertiary px-[10px] justify-center">
+        <Box className="overflow-hidden border-continuous bg-tertiary px-[10px] justify-center">
           <Text className="text-[white] text-[10px]" numberOfLines={1}>
             {getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
           </Text>
@@ -121,7 +115,7 @@ const TimelineEvent = ({
 
   return (
     <LinkBox
-      className="h-[60px] absolute bg-reverse flex-row rounded-[20px]"
+      className="h-[60px] absolute bg-surface flex-row rounded-[16px]"
       onPress={onOpenEvent}
       disabled={!hasDetails}
       style={[
@@ -132,12 +126,6 @@ const TimelineEvent = ({
             top: top,
             left: left + offset,
             opacity: !hasDetails ? 0.6 : hasDetails ? 1 : 0.6,
-            shadowColor: 'rgb(89,131,240)',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 7,
-            elevation: 1,
-            overflow: 'visible',
           },
         ],
       ]}
@@ -152,10 +140,7 @@ const TimelineEvent = ({
         <Box className="border-continuous overflow-hidden border-b-[1px] border-border" />
         <Text className="text-[10px] text-center">{label}</Text>
       </AnimatedBox>
-      <Box
-        className="overflow-hidden border-continuous ml-auto rounded-tr-[10px] rounded-br-[10px]"
-        style={{ width: imageSize }}
-      >
+      <Box className="overflow-hidden border-continuous ml-auto" style={{ width: imageSize }}>
         <Image
           style={{ width: imageSize, height: '100%' }}
           source={{

@@ -135,7 +135,6 @@ const NaveOfTheDay = ({
             right: 0,
             top: 0,
             height: itemHeight,
-            borderRadius: 3,
           }}
         >
           <LinearGradient

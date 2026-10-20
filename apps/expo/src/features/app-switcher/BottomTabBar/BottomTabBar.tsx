@@ -1,4 +1,5 @@
 import { useAtomValue } from 'jotai/react'
+import { StyleSheet } from 'react-native'
 import { GestureDetector } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
@@ -30,9 +31,13 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
 
   return (
     <AnimatedBox
-      className="overflow-hidden border-continuous bg-reverse absolute bottom-[0px] left-[0px] right-[0px] border-t-[1px] border-border"
+      className="overflow-hidden border-continuous bg-reverse absolute bottom-[0px] left-[0px] right-[0px] border-separator"
       style={[
-        { paddingBottom: insets.bottom, height: bottomBarHeight },
+        {
+          paddingBottom: insets.bottom,
+          height: bottomBarHeight,
+          borderTopWidth: StyleSheet.hairlineWidth,
+        },
         {
           transform: [{ translateY: isFullScreenBible ? bottomBarHeight : 0 }],
           transitionProperty: 'transform',

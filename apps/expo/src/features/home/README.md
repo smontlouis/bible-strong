@@ -6,9 +6,17 @@ out differently. There is no separate desktop home.
 
 ## Groups and parts
 
-Four groups carry large titles (`HomeSectionTitle`). Parts inside a group carry small titles
-(`HomeSubsectionTitle`), and groups are spaced more widely than parts, so the page reads as
-four blocks rather than a list of equal sections.
+Four groups carry large titles (`HomeSectionTitle`). Parts inside a group carry the app's one
+section title (`HomeSubsectionTitle`, built on `ListSectionTitle`), and groups are spaced more
+widely than parts, so the page reads as four blocks rather than a list of equal sections.
+
+The home is a hub (design-system README, « The app »): its ground is `canvas`, its content
+sits in `surface` cards with no border and no shadow. The daily card, the event card and the
+footer band take the hub's large radius (24); the other cards take 16, tiles 8, buttons and
+chips the pill. Rows grouped in one card (plans, « Aller plus loin » on a phone) use
+`ListRow` and hairline separators. Only the floating close button carries `floatingShadow`.
+The event card stays a deliberate dark feature card, and the Explorer illustrations keep the
+light tint they were drawn on.
 
 1. **Header**: date, greeting, and the avatar to the profile. On the wide Web home the
    sidebar already shows the account, so the command-palette search (`HomeSearch.web.tsx`,
@@ -29,9 +37,10 @@ four blocks rather than a list of equal sections.
    tab type of the new tab (`HomeOpenSection`), each opening the same scoped search
    (ADR-0045); then the four illustrated cards (`HomeExploreGrid`); then the **Un mot au
    hasard** part with random Greek, Hebrew, Nave and dictionary entries (`HomeDiscovery`).
-5. **Aller plus loin**: Audibible and donation rows (`HomeGoFurther`).
-6. **Footer** (`HomeFooter`): Follow and FAQ buttons on a raised panel for touch layouts; a
-   row of links with the app download on the wide Web home.
+5. **Aller plus loin**: Audibible and donation rows (`HomeGoFurther`), grouped in one card on
+   a phone and set side by side in two cards on a wide home.
+6. **Footer** (`HomeFooter`): Follow and FAQ buttons on a surface band for touch layouts; a
+   row of links under a hairline, with the app download, on the wide Web home.
 
 ## Width-driven layout
 

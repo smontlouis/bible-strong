@@ -10,7 +10,7 @@ const OnlineOnlyUnavailableScreen = ({ titleKey }: { titleKey: string }) => {
   const { t } = useTranslation()
 
   return (
-    <SafeAreaBox className="overflow-hidden border-continuous flex-[1] bg-light-grey">
+    <SafeAreaBox className="overflow-hidden border-continuous flex-[1] bg-canvas">
       <Header title={t(titleKey)} hasBackButton />
       <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center px-[28px]">
         <FeatherIcon name="cloud" size={56} color="primary" />

@@ -54,7 +54,7 @@ const Timeline = ({
 
   return (
     <TimelineResourceBoundary hasBackButton={hasBackButton} onBackPress={onBackPress}>
-      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
         <View style={{ flex: 1, position: 'relative' }}>
           {events?.map((ev, i) => {
             const prevEvent = events[i - 1] && omitEvents(events[i - 1])

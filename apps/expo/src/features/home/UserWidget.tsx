@@ -11,6 +11,7 @@ import Button from '~common/ui/Button'
 import Paragraph from '~common/ui/Paragraph'
 import useLogin from '~helpers/useLogin'
 import type { Theme as AppTheme } from '~themes'
+import { useTheme } from '~themes/ThemeProvider'
 import OfflineNotice from './OfflineNotice'
 import VerseOfTheDay, { VERSE_CARD_HEIGHT } from './VerseOfTheDay'
 import { VISIBLE_VERSE_OF_THE_DAY_OFFSETS } from './verseOfTheDayPolicy'
@@ -25,7 +26,7 @@ const Container = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const resolvedClassName = twMerge('bg-light-grey pt-[20px] pb-[0px] overflow-visible', className)
+  const resolvedClassName = twMerge('pt-[20px] pb-[0px] overflow-visible', className)
   return (
     <View
       {...props}
@@ -96,24 +97,32 @@ const UserWidget = () => {
 export const LoginPrompt = ({ className }: { className?: string }) => {
   const { isLogged } = useLogin()
   const { t } = useTranslation()
+  const theme = useTheme()
 
   if (isLogged) return null
 
   return (
     <Box
       className={twMerge(
-        'overflow-hidden border-continuous px-[20px] rounded-[30px] mx-[20px] bg-primary py-[20px]',
+        'overflow-hidden border-continuous px-[20px] rounded-[16px] mx-[20px] bg-primary py-[20px]',
         className
       )}
     >
       <Paragraph className="font-bold text-reverse mb-[20px]" scale={-1}>
         {t('Connectez-vous pour profiter de toutes les fonctionnalités de la Bible Strong !')}
       </Paragraph>
+      {/* On the primary card the button is the page's light ground with dark text. */}
       <Button
         reverse
         route="Login"
+        style={{ backgroundColor: theme.colors.reverse }}
         rightIcon={
-          <Icon.Feather name="arrow-right" size={20} color="white" style={{ marginLeft: 10 }} />
+          <Icon.Feather
+            name="arrow-right"
+            size={20}
+            color={theme.colors.default}
+            style={{ marginLeft: 10 }}
+          />
         }
       >
         {t('Je me connecte')}

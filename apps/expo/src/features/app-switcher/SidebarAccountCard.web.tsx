@@ -5,7 +5,9 @@ import type { PanelScreen } from '~common/ContextualPanel/types'
 import PanelAction from '~common/ContextualPanel/PanelAction'
 import { type PersonalContent, personalContentIcons } from '~common/personalContent'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
+import Border from '~common/ui/Border'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
+import Card from '~common/ui/Card'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import UserAvatar from '~common/ui/UserAvatar'
@@ -79,7 +81,7 @@ export default function SidebarAccountCard({
               <TouchableBox
                 key={resource.route}
                 accessibilityRole="button"
-                className="flex-row items-center gap-[10px] min-h-[42px] px-[8px] py-[5px] rounded-[8px] hover:bg-light-grey"
+                className="flex-row items-center gap-[10px] min-h-[42px] px-[8px] py-[5px] rounded-[8px] hover:bg-canvas"
                 onPress={() => {
                   navigation.close()
                   if (resource.route === 'Studies' && !isLogged) {
@@ -91,7 +93,7 @@ export default function SidebarAccountCard({
                 }}
               >
                 <Box
-                  className="w-[28px] h-[28px] rounded-[7px] items-center justify-center"
+                  className="w-[28px] h-[28px] rounded-[8px] items-center justify-center"
                   style={{ backgroundColor: color.background }}
                 >
                   <FeatherIcon
@@ -107,7 +109,7 @@ export default function SidebarAccountCard({
               </TouchableBox>
             )
           })}
-          <Box className="h-px bg-border my-[5px] mx-[8px]" />
+          <Border className="my-[5px] mx-[8px]" />
           <PanelAction
             label={isLogged ? t('workspace.profile') : t('Se connecter')}
             icon="user"
@@ -142,16 +144,14 @@ export default function SidebarAccountCard({
 
   return (
     <div ref={anchorRef}>
-      <Box
-        testID="workspace-account-card"
-        className="bg-reverse rounded-[16px] p-[8px] border border-border shadow-[0_2px_7px_rgba(89,131,240,0.1)]"
-      >
+      {/* The card sits in the sidebar's flow: its edge is its contrast with the canvas. */}
+      <Card testID="workspace-account-card" className="p-[8px]">
         <HStack className="items-center">
           <TouchableBox
             accessibilityRole="button"
             accessibilityLabel={isLogged ? t('workspace.profile') : t('Se connecter')}
             onPress={openAccount}
-            className="flex-1 min-w-0 flex-row items-center gap-[9px] min-h-[44px] px-[4px] rounded-[8px] hover:bg-light-grey"
+            className="flex-1 min-w-0 flex-row items-center gap-[9px] min-h-[44px] px-[4px] rounded-[8px] hover:bg-canvas"
           >
             <UserAvatar
               size={38}
@@ -167,12 +167,12 @@ export default function SidebarAccountCard({
             accessibilityRole="button"
             accessibilityLabel={t('workspace.accountMenu')}
             onPress={() => menuRef.current?.present()}
-            className="w-[40px] h-[40px] items-center justify-center rounded-[8px] hover:bg-light-grey"
+            className="w-[40px] h-[40px] items-center justify-center rounded-[8px] hover:bg-canvas"
           >
             <FeatherIcon name="chevron-up" size={18} color="grey" />
           </TouchableBox>
         </HStack>
-      </Box>
+      </Card>
       <ContextualPanel
         accessibilityLabel={t('workspace.myResources')}
         anchorRef={anchorRef}

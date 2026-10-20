@@ -24,7 +24,7 @@ const TabButton = () => {
       style={{ ...(TAB_ICON_SIZE ? { width: TAB_ICON_SIZE, height: TAB_ICON_SIZE } : {}) }}
     >
       <AnimatedBox
-        className="overflow-hidden border-continuous border-[2px] rounded-[5px] items-center justify-center"
+        className="overflow-hidden border-continuous border-[2px] rounded-[4px] items-center justify-center"
         style={[
           {
             backgroundColor: resolveThemeColor(stylingTheme, groupColor),

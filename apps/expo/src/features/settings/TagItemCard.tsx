@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import type { ReactNode } from 'react'
 import type { TagsObj } from '~common/types'
+import Border from '~common/ui/Border'
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
@@ -56,12 +57,13 @@ const TagItemCard = ({ item, variant, badge }: Props) => {
       activeOpacity={0.7}
       onPress={() => pushRouteOnce(navigationConfig)}
     >
-      <VStack className="border-continuous overflow-hidden gap-[6px] mx-[20px] py-[15px] border-b-[1px] border-border">
-        <HStack className="overflow-hidden border-continuous gap-[10px] items-center">
+      <VStack className="gap-[6px] px-[20px] py-[15px]">
+        <HStack className="gap-[10px] items-center">
           <Text className="text-[14px] font-bold">{item.title}</Text>
           {badge}
         </HStack>
       </VStack>
+      <Border className="ml-[20px]" />
     </TouchableOpacity>
   )
 }
@@ -83,13 +85,7 @@ export const StrongItemCard = ({
       variant={isGrec ? 'strong-grec' : 'strong-hebreu'}
       badge={
         <Box
-          className={twMerge(
-            'overflow-hidden border-continuous',
-            twMerge(
-              isGrec ? 'bg-primary' : 'bg-quart',
-              'overflow-hidden border-continuous px-[8px] py-[3px] rounded-[20px]'
-            )
-          )}
+          className={twMerge(isGrec ? 'bg-primary' : 'bg-quart', 'px-[8px] py-[3px] rounded-full')}
         >
           <Text className="text-[10px] text-reverse font-bold">
             {item.id} - {isGrec ? t('Grec') : t('Hébreu')}

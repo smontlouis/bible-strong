@@ -48,7 +48,7 @@ const DetailsModal = ({
           }
         >
           {!!image && (
-            <Box className="overflow-hidden border-continuous mb-[20px] rounded-[20px]">
+            <Box className="overflow-hidden border-continuous mb-[20px] rounded-[12px]">
               <Image
                 contentFit="cover"
                 style={{ width: '100%', aspectRatio: 1.8, maxHeight: 240 }}
@@ -78,7 +78,7 @@ const DetailsModal = ({
           {!!author.displayName && (
             <Box className="overflow-hidden border-continuous mt-[40px] flex-row items-center justify-center">
               {author.photoUrl && (
-                <Box className="overflow-hidden border-continuous rounded-[10px]">
+                <Box className="overflow-hidden border-continuous rounded-[8px]">
                   <Image
                     style={{ width: 50, height: 50 }}
                     source={{

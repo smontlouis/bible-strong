@@ -6,14 +6,15 @@ import type { ColumnTextModeControls, RootStyles } from './BibleDOMWrapper'
 import ChevronDownIcon from './ChevronDownIcon'
 import { INTERFACE_FONT } from './interfaceFont'
 import { useTranslations } from './TranslationsContext'
+import { radii } from '~common/ui/surfaces'
 
 type TextModeKind = keyof ColumnTextModeControls
 
 const TEXT_MODE_KINDS: TextModeKind[] = ['strong', 'interlinear']
 
-// The header's book and version selectors: one chip split into segments by a thin gap
+// The header's book and version selectors: one pill split into segments by a thin gap
 const SEGMENT_GAP = '3px'
-const SEGMENT_RADIUS = '20px'
+const SEGMENT_RADIUS = `${radii.pill}px`
 
 const Chip = styled('div')({
   display: 'inline-flex',

@@ -20,7 +20,7 @@ export default function HomeSearch() {
         openCommandPalette(true)
       }}
       accessibilityLabel={t('commandPalette.label')}
-      className="flex-row items-center gap-[12px] shadow-[0_2px_7px_rgba(89,131,240,0.1)] bg-reverse rounded-[16px] px-[16px] py-[14px]"
+      className="flex-row items-center gap-[12px] bg-surface rounded-[12px] px-[16px] py-[14px]"
     >
       <FeatherIcon name="search" size={19} color="grey" />
       <Text className="text-grey text-[13px] flex-1 min-w-0" numberOfLines={1}>

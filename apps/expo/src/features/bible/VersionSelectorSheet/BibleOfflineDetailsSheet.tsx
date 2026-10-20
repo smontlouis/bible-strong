@@ -228,7 +228,7 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
         contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 22, paddingBottom: 32 }}
       >
         <Box className="overflow-hidden border-continuous flex-row items-center gap-[16px]">
-          <Box className="overflow-hidden border-continuous w-[78px] h-[94px] items-center justify-center bg-light-grey rounded-[14px]">
+          <Box className="overflow-hidden border-continuous w-[78px] h-[94px] items-center justify-center bg-light-grey rounded-[8px]">
             <Box className="overflow-hidden border-continuous absolute left-[0px] top-[0px] bottom-[0px] w-[6px] bg-primary" />
             <Text
               className="w-[66px] pl-[6px] text-[22px] font-bold text-center"
@@ -261,21 +261,21 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
           </Box>
         </Box>
 
-        <Box className="border-continuous overflow-hidden flex-row mt-[22px] py-[14px] border-t-[1px] border-b-[1px] border-border">
+        <Box className="border-continuous overflow-hidden flex-row mt-[22px] py-[14px] border-t-[1px] border-b-[1px] border-separator">
           <Box className="overflow-hidden border-continuous flex-[1] items-center gap-[4px]">
             <Text className="text-tertiary text-[9px] font-bold">
               {t('bibleOfflineDetails.language').toUpperCase()}
             </Text>
             <Text className="text-[13px] font-bold">{languageLabel}</Text>
           </Box>
-          <Box className="overflow-hidden border-continuous w-[1px] bg-border" />
+          <Box className="overflow-hidden border-continuous w-[1px] bg-separator" />
           <Box className="overflow-hidden border-continuous flex-[1] items-center gap-[4px]">
             <Text className="text-tertiary text-[9px] font-bold">
               {t('bibleOfflineDetails.books').toUpperCase()}
             </Text>
             <Text className="text-[13px] font-bold">{bookCount}</Text>
           </Box>
-          <Box className="overflow-hidden border-continuous w-[1px] bg-border" />
+          <Box className="overflow-hidden border-continuous w-[1px] bg-separator" />
           <Box className="overflow-hidden border-continuous flex-[1] items-center gap-[4px]">
             <Text className="text-tertiary text-[9px] font-bold">
               {t('bibleOfflineDetails.installedSize').toUpperCase()}
@@ -287,7 +287,7 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
         </Box>
 
         {activeQueue && (
-          <Box className="border-continuous overflow-hidden mt-[20px] p-[14px] border-[1px] border-border rounded-[14px]">
+          <Box className="border-continuous overflow-hidden mt-[20px] p-[14px] bg-light-grey rounded-[12px]">
             <Box className="overflow-hidden border-continuous flex-row items-center">
               <Progress progress={Math.max(progress, 0.04)} size={30} thickness={3} />
               <Box className="overflow-hidden border-continuous ml-[12px] flex-[1]">
@@ -307,7 +307,7 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
         )}
 
         {!activeQueue && failedQueue && (
-          <Box className="border-continuous overflow-hidden mt-[20px] p-[14px] border-[1px] border-quart rounded-[14px]">
+          <Box className="border-continuous overflow-hidden mt-[20px] p-[14px] bg-light-grey rounded-[12px]">
             <Text className="text-quart font-bold">{t('bibleOfflineDetails.downloadFailed')}</Text>
             <TouchableBox
               className="overflow-hidden border-continuous pt-[10px]"
@@ -332,11 +332,11 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
         )}
 
         {!activeQueue && !failedQueue && availabilityReady && (
-          <Box className="overflow-hidden border-continuous mt-[22px] p-[16px] bg-light-grey rounded-[22px] gap-[14px]">
+          <Box className="overflow-hidden border-continuous mt-[22px] p-[16px] bg-light-grey rounded-[12px] gap-[14px]">
             {indexMark && indexArtifact && !indexInstalled && (
-              <Box className="overflow-hidden border-continuous flex-row items-center p-[14px] bg-reverse rounded-[17px]">
+              <Box className="overflow-hidden border-continuous flex-row items-center p-[14px] bg-reverse rounded-[8px]">
                 <Box
-                  className="overflow-hidden border-continuous items-center justify-center bg-light-grey rounded-[13px]"
+                  className="overflow-hidden border-continuous items-center justify-center bg-light-grey rounded-[8px]"
                   style={{ width: 42, height: 42 }}
                 >
                   <Text className="text-[20px] font-bold" style={{ fontFamily: serifFontFamily }}>
@@ -399,7 +399,7 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
               </Box>
               {bibleInstalled && (
                 <TouchableBox
-                  className="border-continuous overflow-hidden items-center justify-center bg-reverse rounded-[24px] border-[1px] border-border"
+                  className="border-continuous overflow-hidden items-center justify-center bg-reverse rounded-full"
                   accessibilityRole="button"
                   accessibilityLabel={t('bibleOfflineDetails.removeBible')}
                   onPress={removeBible}

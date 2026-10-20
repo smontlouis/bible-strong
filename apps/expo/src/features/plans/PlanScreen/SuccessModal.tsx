@@ -37,17 +37,7 @@ const SuccessModal = ({ modalRef, isPlanCompleted, onClose }: Props) => {
             }
           />
         </Box>
-        <Box
-          className="overflow-hidden border-continuous bg-reverse rounded-[30px] mb-[30px] p-[20px]"
-          style={{
-            shadowColor: 'rgb(89,131,240)',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 7,
-            elevation: 1,
-            overflow: 'visible',
-          }}
-        >
+        <Box className="overflow-hidden border-continuous bg-light-grey rounded-[12px] mb-[30px] p-[20px]">
           {isPlanCompleted ? (
             <>
               <Paragraph className="text-center font-bold" fontFamily="text">

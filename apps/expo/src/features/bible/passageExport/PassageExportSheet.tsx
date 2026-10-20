@@ -71,7 +71,7 @@ const ExportFilterButton = ({ label, value, onPress, screen }: ExportFilterButto
   const navigation = useContext(PanelNavigationContext)
   return (
     <TouchableBox
-      className="border-continuous overflow-hidden flex-[1] min-w-[0px] p-[13px] border-[1px] border-border rounded-[14px]"
+      className="border-continuous overflow-hidden flex-[1] min-w-[0px] p-[13px] bg-light-grey rounded-[12px]"
       accessibilityRole="button"
       accessibilityLabel={`${label}, ${value}`}
       onPress={() => (screen && navigation?.openScreen ? navigation.openScreen(screen) : onPress())}
@@ -462,9 +462,7 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
             </Box>
 
             <Box className="overflow-hidden border-continuous gap-[8px]">
-              <Text className="font-bold text-[13px] text-grey">
-                {t('passageExport.preview').toUpperCase()}
-              </Text>
+              <Text className="text-[13px] text-grey">{t('passageExport.preview')}</Text>
               {result && (
                 <Text className="text-grey text-[12px]">
                   {t('passageExport.summary', result.counts)}
@@ -502,7 +500,7 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
                   </Text>
                 </Box>
               ) : null}
-              <Box className="overflow-hidden border-continuous p-[16px] rounded-[14px] bg-light-grey">
+              <Box className="overflow-hidden border-continuous p-[16px] rounded-[12px] bg-light-grey">
                 <Text
                   className="text-[13px] leading-[20px]"
                   selectable

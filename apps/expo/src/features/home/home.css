@@ -1,10 +1,10 @@
 /* Web-only home styles, loaded by homeStyles.web.ts. Column counts come from the measured
    home width (homeLayout.tsx), not from CSS, so native and Web share the same layout code. */
 
+/* The daily card is one of the hub's large cards: radius 24, no shadow (design-system README). */
 .bs-home-verse-height {
-  box-shadow: 0 2px 7px rgba(89, 131, 240, 0.1);
   overflow: hidden;
-  border-radius: 30px;
+  border-radius: 24px;
   transition: height 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -55,8 +55,8 @@
 .bs-home-shortcut {
   flex-shrink: 0;
   padding: 4px 7px;
-  border-radius: 6px;
-  background: var(--color-light-grey);
+  border-radius: 4px;
+  background: var(--color-canvas);
   color: var(--color-grey);
   font:
     12px system-ui,

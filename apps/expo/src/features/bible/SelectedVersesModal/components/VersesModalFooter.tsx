@@ -7,6 +7,7 @@ import type { AnimatedStyle } from 'react-native-reanimated'
 import Animated from 'react-native-reanimated'
 import type { SheetFooterProps } from '~common/sheet'
 import { AnimatedBox } from '~common/ui/Box'
+import { radii } from '~common/ui/surfaces'
 import { TAB_CONTAINER_PADDING } from '../constants'
 import TabButton from './TabButton'
 interface VersesModalFooterProps {
@@ -33,7 +34,7 @@ const VersesModalFooter = ({
   return (
     <AnimatedBox
       onLayout={event => onContainerWidthChange(event.nativeEvent.layout.width)}
-      className="bg-light-grey rounded-[18px] p-[3px] mx-[16px] mb-[5px] relative"
+      className="bg-light-grey rounded-full p-[3px] mx-[16px] mb-[5px] relative"
       style={{
         transitionProperty: 'margin',
         transitionDuration: 300,
@@ -48,7 +49,8 @@ const VersesModalFooter = ({
             bottom: TAB_CONTAINER_PADDING,
             width: tabWidth,
             backgroundColor: theme.colors.reverse,
-            borderRadius: 14,
+            // A segmented control: its track and its thumb are pills, as buttons are.
+            borderRadius: radii.pill,
           },
           indicatorAnimatedStyle,
         ]}

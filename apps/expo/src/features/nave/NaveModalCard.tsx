@@ -98,7 +98,7 @@ const NaveModalCard = ({ selectedVerse, selectedVersion, updateVerse }: Props) =
   const hasTopics = Boolean(naveItemsForVerse?.length || naveItemsForChapter?.length)
 
   return (
-    <Box className="overflow-hidden border-continuous flex-[1] bg-light-grey">
+    <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
       <ResourceVerseContext
         verse={selectedVerse}
         {...verseContext}

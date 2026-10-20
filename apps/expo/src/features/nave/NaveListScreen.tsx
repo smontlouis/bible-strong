@@ -1,12 +1,10 @@
-import { resolveFontFamily } from '~themes/styleValues'
-import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 import SectionList from '~common/ui/SectionList'
 import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
-import Text from '~common/ui/Text'
+import { ListSectionTitle } from '~common/ui/ListSection'
 import FiltersHeader from '~common/FiltersHeader'
 import SearchInput from '~common/SearchInput'
 import Loading from '~common/Loading'
@@ -14,8 +12,7 @@ import type { NaveTopicSummary } from '~features/resources/naveAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import Empty from '~common/Empty'
 import AlphabetList from '~common/AlphabetList'
-import SectionTitle from '~common/SectionTitle'
-import NaveItem from './NaveItem'
+import NaveItem, { NAVE_ITEM_HEIGHT } from './NaveItem'
 import { useSearchValue, useInfiniteResultsByLetterOrSearch } from '../lexique/useUtilities'
 import { useTranslation } from 'react-i18next'
 import { getLanguage } from '~i18n'
@@ -38,9 +35,12 @@ type NaveSection = {
   data: NaveRow[]
 }
 
+/** A letter title: 16 above, an 18 line, 6 below. */
+const SECTION_HEADER_HEIGHT = 40
+
 const getNaveItemLayout = sectionListGetItemLayout({
-  getItemHeight: () => 60,
-  getSectionHeaderHeight: () => 50,
+  getItemHeight: () => NAVE_ITEM_HEIGHT,
+  getSectionHeaderHeight: () => SECTION_HEADER_HEIGHT,
   getSeparatorHeight: () => 0,
   getSectionFooterHeight: () => 0,
 }) as (data: NaveSection[], index: number) => { length: number; offset: number; index: number }
@@ -74,8 +74,6 @@ const NaveListScreen = ({
   newTabId,
   onNaveSelect,
 }: NaveListScreenProps) => {
-  const stylingTheme = useStylingTheme()
-
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const isConnected = useConnection()
@@ -177,7 +175,9 @@ const NaveListScreen = ({
   }
 
   return (
-    <FormSheetScreen isFormSheet={isFormSheet}>
+    // The letter bar sits fixed under the list: while it shows, the page stays above the home
+    // indicator and the tab bar.
+    <FormSheetScreen isFormSheet={isFormSheet} reserveBottom={!searchValue}>
       <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         <FiltersHeader
           hasBackButton={showBackButton}
@@ -209,16 +209,17 @@ const NaveListScreen = ({
             />
           </Box>
         </FiltersHeader>
-        <Box className="overflow-hidden border-continuous flex-[1] pt-[20px]">
+        <Box className="overflow-hidden border-continuous flex-[1]">
           {isLoading ? (
             <Loading message={t('Chargement...')} />
           ) : sectionResults.length ? (
             <SectionList<NaveRow, NaveSection>
-              renderItem={({ item: { normalizedName, name } }) => (
+              renderItem={({ item: { normalizedName, name }, index, section }) => (
                 <NaveItem
                   name_lower={normalizedName}
                   name={name}
                   onSelect={isNewTabSelection || onNaveSelect ? selectNave : undefined}
+                  hasSeparator={index < section.data.length - 1}
                 />
               )}
               removeClippedSubviews
@@ -229,17 +230,11 @@ const NaveListScreen = ({
                 getNaveItemLayout((data || []) as NaveSection[], index)
               }
               renderSectionHeader={({ section: { title } }) => (
-                <SectionTitle color="quint">
-                  <Text
-                    className="font-bold text-[16px]"
-                    style={[
-                      { fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) },
-                      { color: 'white' },
-                    ]}
-                  >
+                <Box className="bg-reverse" style={{ height: SECTION_HEADER_HEIGHT }}>
+                  <ListSectionTitle className="ml-[20px] mt-[16px] mb-[6px] leading-[18px]">
                     {title.toUpperCase()}
-                  </Text>
-                </SectionTitle>
+                  </ListSectionTitle>
+                </Box>
               )}
               stickySectionHeadersEnabled
               sections={sectionResults}

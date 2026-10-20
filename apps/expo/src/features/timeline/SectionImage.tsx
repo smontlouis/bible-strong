@@ -4,6 +4,7 @@ import React from 'react'
 import { Image } from 'expo-image'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import { radii } from '~common/ui/surfaces'
 import Text from '~common/ui/Text'
 import useTimelineLanguage from './useTimelineLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
@@ -28,7 +29,7 @@ const SectionImage = ({
   const lang = useTimelineLanguage()
 
   return (
-    <Box className="overflow-hidden border-continuous flex-[1] bg-reverse flex-row">
+    <Box className="overflow-hidden border-continuous flex-[1] bg-canvas flex-row">
       <Box className="overflow-hidden border-continuous w-[60px] items-center justify-center">
         {direction === 'previous' && <FeatherIcon name="chevron-left" size={60} />}
       </Box>
@@ -59,33 +60,17 @@ const SectionImage = ({
           <Box className="overflow-hidden border-continuous h-[2px] bg-default" />
         </Box>
         <Box
-          className="overflow-hidden border-continuous flex-row mt-[50px] rounded-[10px]"
-          style={{
-            width: width,
-            shadowColor: 'rgb(89,131,240)',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 7,
-            elevation: 1,
-            overflow: 'visible',
-          }}
+          className="overflow-hidden border-continuous flex-row mt-[50px] rounded-[12px]"
+          style={{ width: width }}
         >
           <Image
-            style={{ width, height: width, borderRadius: 10 }}
+            style={{ width, height: width, borderRadius: radii.control }}
             source={getTimelinePeriodImageSource(image)}
           />
         </Box>
         <Box
-          className="overflow-hidden border-continuous mt-[50px] w-[50px] h-[10px] rounded-[10px]"
-          style={{
-            backgroundColor: resolveThemeColor(stylingTheme, color),
-            shadowColor: 'rgb(89,131,240)',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 7,
-            elevation: 1,
-            overflow: 'visible',
-          }}
+          className="overflow-hidden border-continuous mt-[50px] w-[50px] h-[10px] rounded-full"
+          style={{ backgroundColor: resolveThemeColor(stylingTheme, color) }}
         />
       </Box>
       <Box className="overflow-hidden border-continuous w-[60px] items-center justify-center">

@@ -140,7 +140,7 @@ const TabGroupPager = () => {
     <>
       <GestureDetector gesture={panGesture}>
         <AnimatedBox
-          className="flex-[1] bg-light-grey"
+          className="flex-[1] bg-canvas"
           accessibilityElementsHidden={appSwitcherMode === 'view'}
           importantForAccessibility={appSwitcherMode === 'view' ? 'no-hide-descendants' : 'auto'}
         >

@@ -1,17 +1,24 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
 import { useAtom } from 'jotai'
 import { Pressable, type TextStyle, type ViewStyle } from 'react-native'
 import Animated, { type AnimatedStyle } from 'react-native-reanimated'
 import { useTheme } from '~themes/ThemeProvider'
-import { Image } from 'expo-image'
+import { resolveUniverseColors, type Universe } from '~themes/universeColors'
+import DictionnaryIcon from '~common/DictionnaryIcon'
 import Header from '~common/Header'
+import LexiqueIcon from '~common/LexiqueIcon'
+import NaveIcon from '~common/NaveIcon'
 import Container from '~common/ui/Container'
-import Box, { HStack, VStack } from '~common/ui/Box'
+import Box, { HStack, VStack, usePageBottomInset } from '~common/ui/Box'
+import Card from '~common/ui/Card'
+import IconTile, { ICON_TILE_SIZE } from '~common/ui/IconTile'
+import { ListSectionTitle, ListSeparator } from '~common/ui/ListSection'
 import Text from '~common/ui/Text'
 import ScrollView from '~common/ui/ScrollView'
 import { FeatherIcon } from '~common/ui/Icon'
+import { radii } from '~common/ui/surfaces'
 import { resetCompareVersion, setDefaultBibleVersion } from '~redux/modules/user'
 import {
   resourcesLanguageAtom,
@@ -20,53 +27,63 @@ import {
 } from 'src/state/resourcesLanguage'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
-// Icons mapping using SVG files
-const icons = {
-  strong: require('~assets/images/tab-icons/lexique.svg'),
-  dictionary: require('~assets/images/tab-icons/dictionary.svg'),
-  nave: require('~assets/images/tab-icons/nave.svg'),
-}
-
-// Resource configuration
-type SvgIconType = keyof typeof icons
-type FeatherIconType = 'align-left' | 'clock'
-
+// Each resource shows in its universe colours, as in the More screen.
 type ResourceConfig = {
   id: keyof ResourcesLanguageState
   labelKey: string
   descriptionKey: string
-} & ({ iconType: 'svg'; icon: SvgIconType } | { iconType: 'feather'; icon: FeatherIconType })
+  universe: Extract<Universe, 'strong' | 'dictionary' | 'nave' | 'timeline'>
+}
 
 const RESOURCES_CONFIG: ResourceConfig[] = [
   {
     id: 'STRONG',
     labelKey: 'Lexique Strong',
     descriptionKey: 'resourceLanguage.strongDesc',
-    iconType: 'svg',
-    icon: 'strong',
+    universe: 'strong',
   },
   {
     id: 'DICTIONNAIRE',
     labelKey: 'Dictionnaire',
     descriptionKey: 'resourceLanguage.dictDesc',
-    iconType: 'svg',
-    icon: 'dictionary',
+    universe: 'dictionary',
   },
   {
     id: 'NAVE',
     labelKey: 'Bible Thématique Nave',
     descriptionKey: 'resourceLanguage.naveDesc',
-    iconType: 'svg',
-    icon: 'nave',
+    universe: 'nave',
   },
   {
     id: 'TIMELINE',
     labelKey: 'Chronologie',
     descriptionKey: 'resourceLanguage.timelineDesc',
-    iconType: 'feather',
-    icon: 'clock',
+    universe: 'timeline',
   },
 ]
+
+const ResourceUniverseIcon = ({ universe }: { universe: ResourceConfig['universe'] }) => {
+  const theme = useTheme()
+  switch (universe) {
+    case 'strong':
+      return <LexiqueIcon size={18} />
+    case 'dictionary':
+      return <DictionnaryIcon size={18} />
+    case 'nave':
+      return <NaveIcon size={18} />
+    case 'timeline':
+      return (
+        <FeatherIcon
+          name="clock"
+          size={18}
+          color={resolveUniverseColors(theme.colors, 'timeline').foreground}
+        />
+      )
+  }
+}
+
+// The row's text starts after its padding, the icon tile and the gap.
+const RESOURCE_TEXT_INSET = 14 + ICON_TILE_SIZE + 12
 
 // Segmented Toggle Component with CSS transitions
 interface SegmentedLanguageToggleProps {
@@ -93,7 +110,7 @@ const SegmentedLanguageToggle = ({
     width: indicatorWidth,
     height: height - 6,
     backgroundColor: theme.colors.primary,
-    borderRadius: (height - 6) / 2,
+    borderRadius: radii.pill,
     transitionProperty: 'left',
     transitionDuration: 250,
     transitionTimingFunction: 'ease-out',
@@ -102,7 +119,6 @@ const SegmentedLanguageToggle = ({
     fontSize: isLarge ? 16 : 13,
     fontWeight: '600',
     color: value === 'fr' ? '#FFFFFF' : theme.colors.grey,
-    textTransform: 'uppercase',
     transitionProperty: 'color',
     transitionDuration: 200,
   }
@@ -110,15 +126,15 @@ const SegmentedLanguageToggle = ({
     fontSize: isLarge ? 16 : 13,
     fontWeight: '600',
     color: value === 'en' ? '#FFFFFF' : theme.colors.grey,
-    textTransform: 'uppercase',
     transitionProperty: 'color',
     transitionDuration: 200,
   }
 
+  // The track sits on a card: the canvas is the recessed level in every theme.
   return (
     <Box
-      className="overflow-hidden border-continuous bg-light-grey flex-row p-[3px] relative"
-      style={{ width: containerWidth, height: height, borderRadius: height / 2 }}
+      className="overflow-hidden border-continuous rounded-full bg-canvas flex-row p-[3px] relative"
+      style={{ width: containerWidth, height: height }}
     >
       {/* Animated sliding indicator */}
       <Animated.View style={indicatorStyle} />
@@ -156,36 +172,23 @@ interface AppLanguageSectionProps {
 
 const AppLanguageSection = ({ currentLang, onLanguageChange }: AppLanguageSectionProps) => {
   const { t } = useTranslation()
-  const theme = useTheme()
 
   return (
-    <Box
-      className="overflow-hidden border-continuous mx-[16px] mt-[16px] mb-[24px] p-[24px] bg-reverse rounded-[20px] items-center justify-center"
-      style={{
-        shadowColor: 'rgb(89,131,240)',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 7,
-        elevation: 1,
-        overflow: 'visible',
-      }}
-    >
-      {/* Globe icon */}
-      <Box
-        className="overflow-hidden border-continuous rounded-[32px] bg-light-grey items-center justify-center mb-[16px]"
-        style={[{ width: 64, height: 64 }, { backgroundColor: 'rgba(89, 131, 240, 0.1)' }]}
-      >
-        <FeatherIcon name="globe" size={28} color={theme.colors.primary} />
-      </Box>
+    <Box className="mx-[20px] mb-[22px]">
+      <Card className="p-[24px] items-center justify-center">
+        <IconTile tint="primary" size={44} className="mb-[14px]">
+          <FeatherIcon name="globe" size={22} color="primary" />
+        </IconTile>
 
-      <Text className="font-bold text-[20px] mb-[8px]">{t('language.appLanguage')}</Text>
+        <Text className="font-bold text-[18px] mb-[6px]">{t('language.appLanguage')}</Text>
 
-      <Text className="text-[14px] text-grey text-center mb-[20px] px-[20px]">
-        {t('language.appLanguageDesc')}
-      </Text>
+        <Text className="text-[14px] text-grey text-center mb-[20px] px-[12px]">
+          {t('language.appLanguageDesc')}
+        </Text>
 
-      {/* Large segmented control */}
-      <SegmentedLanguageToggle value={currentLang} onChange={onLanguageChange} size="large" />
+        {/* Large segmented control */}
+        <SegmentedLanguageToggle value={currentLang} onChange={onLanguageChange} size="large" />
+      </Card>
     </Box>
   )
 }
@@ -197,7 +200,6 @@ interface ResourceRowProps {
   description: string
   currentLang: ResourceLanguage
   onLanguageChange: (lang: ResourceLanguage) => void
-  isLast?: boolean
 }
 
 const ResourceRow = ({
@@ -206,54 +208,35 @@ const ResourceRow = ({
   description,
   currentLang,
   onLanguageChange,
-  isLast,
 }: ResourceRowProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
 
   return (
-    <Box className="overflow-hidden border-continuous">
-      <HStack className="overflow-hidden border-continuous px-[20px] py-[16px] items-center">
-        {/* Resource icon */}
-        <Box
-          className="overflow-hidden border-continuous rounded-[12px] bg-light-grey items-center justify-center mr-[14px]"
-          style={{ width: 40, height: 40 }}
-        >
-          {resource.iconType === 'svg' ? (
-            <Image
-              source={icons[resource.icon]}
-              style={{ width: 20, height: 20 }}
-              tintColor={theme.colors.grey}
-              contentFit="contain"
-            />
-          ) : (
-            <FeatherIcon name={resource.icon} size={20} color={theme.colors.grey} />
-          )}
-        </Box>
+    <HStack className="px-[14px] py-[10px] items-center gap-[12px]">
+      <IconTile bg={resolveUniverseColors(theme.colors, resource.universe).background}>
+        <ResourceUniverseIcon universe={resource.universe} />
+      </IconTile>
 
-        {/* Text content */}
-        <VStack className="overflow-hidden border-continuous flex-[1] mr-[12px]">
-          <Text className="font-bold text-[15px] mb-[2px]">{t(label)}</Text>
-          <Text className="text-[12px] text-grey" numberOfLines={2}>
-            {t(description)}
-          </Text>
-        </VStack>
+      <VStack className="flex-[1]">
+        <Text className="text-[15px]" numberOfLines={2}>
+          {t(label)}
+        </Text>
+        <Text className="text-[13px] text-grey mt-[2px]" numberOfLines={2}>
+          {t(description)}
+        </Text>
+      </VStack>
 
-        {/* Compact toggle */}
-        <SegmentedLanguageToggle value={currentLang} onChange={onLanguageChange} size="compact" />
-      </HStack>
-
-      {/* Separator - inset aligned with text */}
-      {!isLast && (
-        <Box className="overflow-hidden border-continuous h-[1px] bg-light-grey mx-[20px] ml-[74px]" />
-      )}
-    </Box>
+      {/* Compact toggle */}
+      <SegmentedLanguageToggle value={currentLang} onChange={onLanguageChange} size="compact" />
+    </HStack>
   )
 }
 
 const ResourceLanguageScreen = () => {
   const { t, i18n } = useTranslation()
   const dispatch = useDispatch()
+  const bottomInset = usePageBottomInset()
 
   const [resourcesLanguages, setResourcesLanguages] = useAtom(resourcesLanguageAtom)
   const currentAppLang = i18n.language as ResourceLanguage
@@ -281,54 +264,44 @@ const ResourceLanguageScreen = () => {
   }
 
   return (
-    <Container>
+    <Container className="bg-canvas">
       <Header hasBackButton title={t('Changer la langue')} />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 40 }}>
+      <ScrollView
+        backgroundColor="canvas"
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 40 + bottomInset }}
+      >
         {/* Hero App Language Section */}
         <AppLanguageSection
           currentLang={currentAppLang}
           onLanguageChange={handleAppLanguageChange}
         />
 
-        {/* Per-Resource Section Header */}
-        <Box className="overflow-hidden border-continuous mx-[16px] mb-[8px]">
-          <Text
-            className="font-bold text-[13px] text-grey mb-[8px]"
-            style={{ textTransform: 'uppercase' }}
-          >
-            {t('resourceLanguage.perResource')}
+        {/* Not ListRows: a pressable row would swallow the radios of its toggle. */}
+        <Box className="mx-[20px] mb-[22px]">
+          <ListSectionTitle>{t('resourceLanguage.perResource')}</ListSectionTitle>
+          <Card>
+            {RESOURCES_CONFIG.map((resource, index) => (
+              <Fragment key={resource.id}>
+                {index > 0 && <ListSeparator inset={RESOURCE_TEXT_INSET} />}
+                <ResourceRow
+                  resource={resource}
+                  label={resource.labelKey}
+                  description={resource.descriptionKey}
+                  currentLang={resourcesLanguages[resource.id]}
+                  onLanguageChange={lang => handleLanguageChange(resource.id, lang)}
+                />
+              </Fragment>
+            ))}
+          </Card>
+          <Text className="text-[13px] text-grey mt-[8px] mx-[4px]">
+            {t('resourceLanguage.description')}
           </Text>
-          <Text className="text-[13px] text-grey">{t('resourceLanguage.description')}</Text>
-        </Box>
-
-        {/* Resources Card */}
-        <Box
-          className="border-continuous overflow-visible mx-[16px] bg-reverse rounded-[16px]"
-          style={{
-            shadowColor: 'rgb(89,131,240)',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 7,
-            elevation: 1,
-            overflow: 'visible',
-          }}
-        >
-          {RESOURCES_CONFIG.map((resource, index) => (
-            <ResourceRow
-              key={resource.id}
-              resource={resource}
-              label={resource.labelKey}
-              description={resource.descriptionKey}
-              currentLang={resourcesLanguages[resource.id]}
-              onLanguageChange={lang => handleLanguageChange(resource.id, lang)}
-              isLast={index === RESOURCES_CONFIG.length - 1}
-            />
-          ))}
         </Box>
 
         {/* Footer note */}
-        <Box className="overflow-hidden border-continuous px-[20px] pt-[20px]">
-          <Text className="text-[12px] text-grey text-center">{t('resourceLanguage.note')}</Text>
+        <Box className="px-[24px]">
+          <Text className="text-[13px] text-grey">{t('resourceLanguage.note')}</Text>
         </Box>
       </ScrollView>
     </Container>

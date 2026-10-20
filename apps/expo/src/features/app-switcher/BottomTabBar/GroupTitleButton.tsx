@@ -66,7 +66,7 @@ const GroupTitleButton = () => {
       >
         <Box className="overflow-hidden border-continuous flex-row items-center justify-center">
           <AnimatedBox
-            className="overflow-hidden border-continuous flex-row py-[6px] px-[12px] rounded-[20px] items-center justify-center"
+            className="overflow-hidden border-continuous flex-row py-[6px] px-[12px] rounded-full items-center justify-center"
             layout={LinearTransition}
             style={{
               backgroundColor: activeGroup.color || 'transparent',

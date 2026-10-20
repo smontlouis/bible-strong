@@ -48,7 +48,7 @@ const StyledUnderline = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { color } = props
-  const resolvedClassName = twMerge('mt-[5px] h-[8px] w-[30px] rounded-[5px]', className)
+  const resolvedClassName = twMerge('mt-[5px] h-[8px] w-[30px] rounded-full', className)
   return (
     <Box
       {...props}

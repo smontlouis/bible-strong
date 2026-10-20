@@ -17,7 +17,7 @@ const PlayButton = ({ disabled, isPlaying, onToggle, error, isLoading }: PlayBut
   if (error) {
     return (
       <Box
-        className="overflow-hidden border-continuous w-[50px] h-[50px] bg-reverse mx-[10px] items-center justify-center"
+        className="overflow-hidden border-continuous w-[50px] h-[50px] rounded-full mx-[10px] items-center justify-center"
         accessible
         accessibilityRole="text"
         accessibilityLabel={t('accessibility.audioUnavailable')}
@@ -30,7 +30,7 @@ const PlayButton = ({ disabled, isPlaying, onToggle, error, isLoading }: PlayBut
   if (isLoading) {
     return (
       <Box
-        className="overflow-hidden border-continuous w-[50px] h-[50px] bg-primary rounded-[25px] items-center justify-center mx-[10px]"
+        className="overflow-hidden border-continuous w-[50px] h-[50px] bg-primary rounded-full items-center justify-center mx-[10px]"
         accessible
         accessibilityRole="progressbar"
         accessibilityLabel={t('accessibility.audioLoading')}
@@ -43,7 +43,7 @@ const PlayButton = ({ disabled, isPlaying, onToggle, error, isLoading }: PlayBut
 
   return (
     <TouchableBox
-      className="overflow-hidden border-continuous items-center justify-center w-[50px] h-[50px] bg-primary rounded-[25px] mx-[10px]"
+      className="overflow-hidden border-continuous items-center justify-center w-[50px] h-[50px] bg-primary rounded-full mx-[10px]"
       disabled={disabled}
       activeOpacity={0.5}
       onPress={onToggle}

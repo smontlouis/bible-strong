@@ -5,13 +5,14 @@ import { useDispatch } from './DispatchProvider'
 import { SelectedCode } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import { scaleFontSize } from './scaleFontSize'
-import { isDarkTheme, noSelect } from './utils'
+import { noSelect } from './utils'
 import { getDisabledStyles } from './disabledStyles'
 import { scaleLineHeight } from './scaleLineHeight'
 import { getStrongReferenceNumber, type StrongIdentity } from '~helpers/strongIdentities'
 import { dispatchStrongSelection } from './strongSelectionAction'
 import type { StrongSelectionMorphology } from '~helpers/strongSelection'
 import UntranslatedStrongMarker from './UntranslatedStrongMarker'
+import { referenceHalo } from './referenceHalo'
 
 const StyledReference = styled('span')<
   RootStyles & {
@@ -34,9 +35,8 @@ const StyledReference = styled('span')<
     backgroundColor: isSelected ? colors[theme].primary : 'inherit',
     fontSize: scaleFontSize(16, fontSizeScale),
     lineHeight: scaleLineHeight(30, lineHeight, fontSizeScale),
-    boxShadow: isDarkTheme(theme)
-      ? `0 0 10px 0 rgba(255, 255, 255, 0.1)`
-      : `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
+    // An untranslated reference is a bare marker, without the halo
+    ...($isUntranslated ? {} : referenceHalo(theme)),
     borderRadius: '8px',
     paddingInlineEnd: '4px',
     paddingInlineStart: '4px',
@@ -51,7 +51,6 @@ const StyledReference = styled('span')<
           height: scaleFontSize(24, fontSizeScale),
           padding: 0,
           borderRadius: '50%',
-          boxShadow: 'none',
           backgroundColor: 'transparent',
           verticalAlign: 'middle',
         }

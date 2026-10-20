@@ -8,7 +8,9 @@ import Loading from '~common/Loading'
 import MultipleChoiceFilterModal from '~common/MultipleChoiceFilterModal'
 import SearchFilterModal from '~common/SearchFilterModal'
 import { type SheetRef } from '~common/sheet'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
+import { twMerge } from '~common/ui/classNames'
+import { ListSeparator } from '~common/ui/ListSection'
 import Container from '~common/ui/Container'
 import SectionList from '~common/ui/SectionList'
 import DownloadableItem from './components/DownloadableItem'
@@ -17,6 +19,7 @@ import type { StatusFilter, LangFilter } from './components/FilterChipRow'
 import DownloadSectionHeader from './components/DownloadSectionHeader'
 import DownloadSubsectionHeader from './components/DownloadSubsectionHeader'
 import DownloadManagementFooter from './components/DownloadManagementFooter'
+import { DOWNLOAD_LIST_LAYOUT } from './components/downloadListLayout'
 import { AvailableUpdatesSheet, AvailableUpdatesWidget } from './components/AvailableUpdatesWidget'
 import { versions, type Version } from '~helpers/bibleVersions'
 import { databases } from '~helpers/databases'
@@ -381,6 +384,7 @@ const DownloadsScreen = () => {
   const lang = useLanguage()
   const resources = useResourceAccess()
   const isConnected = useConnection()
+  const bottomInset = usePageBottomInset()
   const searchRef = React.useRef<SheetRef>(null)
   const statusRef = React.useRef<SheetRef>(null)
   const languageRef = React.useRef<SheetRef>(null)
@@ -766,7 +770,7 @@ const DownloadsScreen = () => {
   }
 
   return (
-    <Container>
+    <Container className="bg-canvas">
       <FiltersHeader
         hasBackButton
         title={t('downloads.title')}
@@ -815,10 +819,11 @@ const DownloadsScreen = () => {
         />
       ) : (
         <SectionList<DisplayDownloadItem, UnifiedSection>
+          bg="canvas"
           sections={displaySections}
           keyExtractor={(item: DisplayDownloadItem) => item.occurrenceKey}
           stickySectionHeadersEnabled={false}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={{ paddingTop: 16, paddingBottom: 100 + bottomInset }}
           ListHeaderComponent={
             <>
               <StorageSummaryCard />
@@ -857,20 +862,32 @@ const DownloadsScreen = () => {
             const isSubsectionCollapsed =
               !hasActiveFilters && collapsedSubsections.has(subsectionCollapseKey)
             const isNestedDependency = item.parentItemId !== undefined
-            const hasDependency = section.data.some(
-              sectionItem => sectionItem.parentItemId === item.id
-            )
-            const hasFollowingSibling =
-              item.parentItemId !== undefined &&
-              section.data[index + 1]?.parentItemId === item.parentItemId
+            const isFirst = index === 0
+            const isLast = index === section.data.length - 1
             const bibleVersionId = identity.kind === 'bible' ? identity.versionId : undefined
             const resourceIdentity = resourceIdentityFromOfflineCopy(identity)
             const relatedResources = bibleVersionId
               ? getBibleRelatedPublicationResources(bibleVersionId)
               : undefined
 
+            // Each item is one slice of its section's card: the first and the last round it.
             return (
-              <>
+              <Box
+                className={twMerge(
+                  'border-continuous mx-[20px] bg-surface',
+                  isFirst && 'rounded-t-[16px] overflow-hidden',
+                  isLast && 'rounded-b-[16px] overflow-hidden mb-[22px]'
+                )}
+              >
+                {!isFirst && (item.startsSubsection || !isNestedDependency) && (
+                  <ListSeparator
+                    inset={
+                      item.startsSubsection
+                        ? DOWNLOAD_LIST_LAYOUT.cardPaddingHorizontal
+                        : DOWNLOAD_LIST_LAYOUT.itemTextInset
+                    }
+                  />
+                )}
                 {item.startsSubsection && (
                   <DownloadSubsectionHeader
                     title={item.subsectionTitle}
@@ -886,6 +903,9 @@ const DownloadsScreen = () => {
                     onToggleSelectAll={() => toggleSelectAll(subsectionItems)}
                     onToggleCollapse={() => toggleSubsectionCollapse(subsectionCollapseKey)}
                   />
+                )}
+                {item.startsSubsection && !isSubsectionCollapsed && (
+                  <ListSeparator inset={DOWNLOAD_LIST_LAYOUT.itemTextInset} />
                 )}
                 {!isSubsectionCollapsed && (
                   <DownloadableItem
@@ -906,8 +926,6 @@ const DownloadsScreen = () => {
                     needsUpdate={itemNeedsUpdate(item)}
                     isInvalid={invalidSet.has(item.id)}
                     variant={isNestedDependency ? 'dependency' : 'standard'}
-                    hasDependency={hasDependency}
-                    hasFollowingSibling={hasFollowingSibling}
                     onlineAccessStatus={
                       resourceIdentity
                         ? resources.capabilities.getOnlineAccess(resourceIdentity).status
@@ -916,7 +934,7 @@ const DownloadsScreen = () => {
                     downloadsDisabled={!isConnected}
                   />
                 )}
-              </>
+              </Box>
             )
           }}
         />

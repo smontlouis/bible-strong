@@ -9,6 +9,7 @@ import Link from '~common/Link'
 import { toast } from '~helpers/toast'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
+import Card from '~common/ui/Card'
 import Paragraph from '~common/ui/Paragraph'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { fetchPlan } from '~redux/modules/plan'
@@ -47,20 +48,9 @@ const ExplorePlanItem = ({
   return (
     <Box className="overflow-hidden border-continuous" style={{ width: featured ? '100%' : '50%' }}>
       <Link onPress={() => modalRef?.current?.present()}>
-        <Box
-          className="overflow-hidden border-continuous bg-reverse rounded-[20px] m-[10px]"
-          style={{
-            opacity: hasAlreadyStarted ? 0.5 : 1,
-            shadowColor: 'rgb(89,131,240)',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 7,
-            elevation: 1,
-            overflow: 'visible',
-          }}
-        >
+        <Card className="m-[6px]" style={{ opacity: hasAlreadyStarted ? 0.5 : 1 }}>
           <Box
-            className="overflow-hidden border-continuous m-[10px] mb-[0px] bg-light-grey rounded-[15px]"
+            className="overflow-hidden border-continuous m-[8px] mb-[0px] bg-canvas rounded-[12px]"
             style={{ height: featured ? featuredHeight : height }}
           >
             <Image
@@ -89,7 +79,7 @@ const ExplorePlanItem = ({
               </Paragraph>
             )}
           </Box>
-        </Box>
+        </Card>
       </Link>
       <DetailsModal
         modalRefDetails={modalRef}

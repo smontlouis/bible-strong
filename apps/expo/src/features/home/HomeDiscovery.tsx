@@ -2,7 +2,7 @@ import { useFonts } from 'expo-font'
 import { useTranslation } from 'react-i18next'
 import HorizontalControlScrollView from '~common/HorizontalControlScrollView'
 import ResourceIcon from '~common/icons/ResourceIcon'
-import Box from '~common/ui/Box'
+import Card from '~common/ui/Card'
 import NaveOfTheDay from './NaveOfTheDay'
 import { DiscoveryCardContext } from './ResourceDiscoveryEntry'
 import StrongOfTheDay from './StrongOfTheDay'
@@ -34,11 +34,7 @@ const HomeDiscovery = () => {
       key={card.id}
       value={{ icon: <ResourceIcon kind={card.kind} size={20} /> }}
     >
-      <Box
-        className={`${wide ? 'w-full' : 'w-[220px]'} h-[148px] p-[14px] rounded-[18px] bg-reverse shadow-[0_2px_7px_rgba(89,131,240,0.1)]`}
-      >
-        {card.entry}
-      </Box>
+      <Card className={`${wide ? 'w-full' : 'w-[220px]'} h-[148px] p-[14px]`}>{card.entry}</Card>
     </DiscoveryCardContext.Provider>
   ))
 
@@ -52,7 +48,7 @@ const HomeDiscovery = () => {
           accessibilityLabel={t('home.discovery.subtitle')}
           showsHorizontalScrollIndicator={false}
           style={{ overflow: 'visible' }}
-          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 4, gap: 12 }}
+          contentContainerStyle={{ paddingHorizontal: 20, gap: 12 }}
         >
           {items}
         </HorizontalControlScrollView>

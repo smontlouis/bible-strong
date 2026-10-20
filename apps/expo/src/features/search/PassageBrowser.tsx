@@ -1,5 +1,7 @@
+import { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Keyboard } from 'react-native'
+import Border from '~common/ui/Border'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -26,20 +28,22 @@ export default function PassageBrowser({
   if (!book) {
     return (
       <Box>
-        {books.map(item => (
-          <TouchableBox
-            key={item.Numero}
-            className="flex-row items-center justify-between px-5 py-4 border-b border-light-grey"
-            accessibilityRole="button"
-            onPress={() => {
-              Keyboard.dismiss()
-              setSelectedBook(item.Numero)
-              onNavigate()
-            }}
-          >
-            <Text>{t(item.Nom)}</Text>
-            <FeatherIcon name="chevron-right" size={18} />
-          </TouchableBox>
+        {books.map((item, index) => (
+          <Fragment key={item.Numero}>
+            {index > 0 && <Border className="ml-[20px]" />}
+            <TouchableBox
+              className="flex-row items-center justify-between px-5 py-4"
+              accessibilityRole="button"
+              onPress={() => {
+                Keyboard.dismiss()
+                setSelectedBook(item.Numero)
+                onNavigate()
+              }}
+            >
+              <Text>{t(item.Nom)}</Text>
+              <FeatherIcon name="chevron-right" size={18} />
+            </TouchableBox>
+          </Fragment>
         ))}
       </Box>
     )
@@ -67,7 +71,7 @@ export default function PassageBrowser({
         {(selectedChapter ? verses : chapters).map(number => (
           <TouchableBox
             key={number}
-            className="h-12 w-12 items-center justify-center rounded-md bg-opacity5"
+            className="h-12 w-12 items-center justify-center rounded-[8px] bg-opacity5"
             accessibilityRole="button"
             accessibilityLabel={`${t(book.Nom)}${selectedChapter ? ` ${selectedChapter}, ${t('Verset')}` : `, ${t('Chapitre')}`} ${number}`}
             onPress={() => {

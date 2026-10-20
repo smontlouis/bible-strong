@@ -1,6 +1,8 @@
 import React from 'react'
 import useConnection from '~helpers/useConnection'
 import Box from '~common/ui/Box'
+import Card from '~common/ui/Card'
+import IconTile from '~common/ui/IconTile'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useTranslation } from 'react-i18next'
@@ -13,17 +15,14 @@ const OfflineNotice = () => {
   }
 
   return (
-    <Box className="overflow-hidden border-continuous flex-row items-center px-[20px] py-[16px] bg-reverse rounded-[28px] mx-[32px] mt-[10px] mb-[32px]">
-      <Box
-        className="overflow-hidden border-continuous rounded-[16px] bg-light-grey items-center justify-center"
-        style={{ width: 32, height: 32 }}
-      >
-        <FeatherIcon size={17} name="wifi-off" color="tertiary" />
-      </Box>
-      <Box className="overflow-hidden border-continuous ml-[10px] flex-[1]">
+    <Card className="flex-row items-center gap-[12px] px-[14px] py-[12px] mx-[20px] mb-[16px]">
+      <IconTile tint="tertiary">
+        <FeatherIcon size={18} name="wifi-off" color="tertiary" />
+      </IconTile>
+      <Box className="flex-[1]">
         <Text className="text-tertiary">{t('app.youAreOffline')}</Text>
       </Box>
-    </Box>
+    </Card>
   )
 }
 

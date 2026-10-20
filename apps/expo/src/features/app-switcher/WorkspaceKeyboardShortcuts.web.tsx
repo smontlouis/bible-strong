@@ -215,7 +215,7 @@ export default function WorkspaceKeyboardShortcuts({
         <Dialog.Content
           className="bs-command-dialog bs-tab-switcher"
           style={{
-            background: theme.colors.reverse,
+            background: theme.colors.surfaceRaised,
             color: theme.colors.default,
             fontFamily: webFontFamily(theme.fontFamily.text),
           }}

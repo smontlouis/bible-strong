@@ -46,7 +46,7 @@ export default function ResourceDiscoveryEntry({
           disabled={isRefreshing}
           accessibilityState={{ busy: isRefreshing, disabled: isRefreshing }}
           accessibilityLabel={t('home.discovery.shuffle')}
-          className="items-center justify-center shrink-0 h-[36px] w-[36px] rounded-[10px] bg-light-grey"
+          className="items-center justify-center shrink-0 h-[36px] w-[36px] rounded-full bg-canvas"
         >
           <FeatherIcon name="shuffle" size={17} color="grey" />
         </Link>

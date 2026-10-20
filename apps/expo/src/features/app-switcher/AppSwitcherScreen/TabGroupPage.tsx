@@ -66,7 +66,7 @@ const GroupHeader = ({
       style={{ paddingTop: SCREEN_MARGIN + insets.top }}
     >
       <Box
-        className="overflow-hidden border-continuous w-[24px] h-[24px] rounded-[6px] items-center justify-center"
+        className="overflow-hidden border-continuous w-[24px] h-[24px] rounded-[8px] items-center justify-center"
         style={{ backgroundColor: resolveThemeColor(stylingTheme, group.color) }}
       >
         <Text className="text-[12px] font-bold" style={{ color: textColor }}>
@@ -191,7 +191,7 @@ const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGrou
   if (group.tabs?.length === 0) {
     return (
       <AnimatedBox
-        className="overflow-hidden border-continuous flex-[1] bg-light-grey z-[2]"
+        className="overflow-hidden border-continuous flex-[1] bg-canvas z-[2]"
         style={[{ width }, opacityStyle]}
       >
         <FadingBox
@@ -207,7 +207,7 @@ const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGrou
               tintColor={theme.colors.tertiary}
             />
             <TouchableOpacity accessibilityRole="button" onPress={handleCreateTab}>
-              <Box className="overflow-hidden border-continuous bg-primary py-[12px] px-[20px] rounded-[24px] flex-row items-center justify-center">
+              <Box className="overflow-hidden border-continuous bg-primary py-[12px] px-[20px] rounded-full flex-row items-center justify-center">
                 <FeatherIcon name="plus" color="white" size={20} />
                 <Text className="text-[white] ml-[8px] font-bold">{t('tabs.create')}</Text>
               </Box>
@@ -223,7 +223,7 @@ const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGrou
   if (!isBuffered) {
     return (
       <AnimatedBox
-        className="overflow-hidden border-continuous flex-[1] bg-light-grey"
+        className="overflow-hidden border-continuous flex-[1] bg-canvas"
         style={[{ width }, opacityStyle]}
       >
         <FlashList
@@ -242,7 +242,7 @@ const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGrou
   // Pour les groupes bufferises: rendu avec atoms (actif + adjacents)
   return (
     <AnimatedBox
-      className="overflow-hidden border-continuous flex-[1] bg-light-grey"
+      className="overflow-hidden border-continuous flex-[1] bg-canvas"
       style={[{ width }, opacityStyle]}
     >
       <FlashList

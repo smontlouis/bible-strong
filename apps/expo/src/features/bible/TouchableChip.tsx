@@ -18,7 +18,7 @@ const Touchable = (
 
   const { disabled } = props
   const resolvedClassName = twMerge(
-    'flex-row items-center justify-center mr-[10px] bg-light-primary h-[30px] px-[10px] rounded-[20px]',
+    'flex-row items-center justify-center mr-[10px] bg-light-primary h-[30px] px-[10px] rounded-full',
     className
   )
   return (

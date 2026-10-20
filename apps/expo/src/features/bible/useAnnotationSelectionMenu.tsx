@@ -1,6 +1,7 @@
 import { useSetAtom } from 'jotai/react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { StyleSheet } from 'react-native'
 import ColorCircleGrid from '~common/ColorCircleGrid'
 import type { PanelNavigation, PanelScreen } from '~common/ContextualPanel/types'
 import { useEntityTagsScreen } from '~common/ContextualPanel/useEntityTagsScreen'
@@ -155,7 +156,7 @@ export default function useAnnotationSelectionMenu(
               accessibilityLabel={t('Supprimer')}
               disabled={!isEnabled}
               onPress={erase}
-              className="w-[28px] h-[28px] items-center justify-center rounded-md"
+              className="w-[28px] h-[28px] items-center justify-center rounded-full"
             >
               <FeatherIcon name="trash-2" size={16} color="quart" />
             </TouchableBox>
@@ -164,7 +165,7 @@ export default function useAnnotationSelectionMenu(
             accessibilityRole="button"
             accessibilityLabel={t('Fermer')}
             onPress={onClose}
-            className="w-[28px] h-[28px] items-center justify-center rounded-md"
+            className="w-[28px] h-[28px] items-center justify-center rounded-full"
           >
             <FeatherIcon name="x" size={17} color="tertiary" />
           </TouchableBox>
@@ -174,7 +175,7 @@ export default function useAnnotationSelectionMenu(
         <HStack className="px-3 pb-[6px] items-center gap-[6px]">
           {version && (
             <Box
-              className="rounded-[5px] px-[5px] py-[1px] bg-light-grey"
+              className="rounded-full px-[6px] py-[1px] bg-light-grey"
               testID="annotation-toolbar-version"
             >
               <Text className="text-[11px] font-bold text-primary">{version}</Text>
@@ -222,7 +223,7 @@ export default function useAnnotationSelectionMenu(
                   circleSize={22}
                 />
               </Box>
-              <Box className="h-px bg-border" />
+              <Box className="bg-separator" style={{ height: StyleSheet.hairlineWidth }} />
               <Box className="w-full gap-[2px]">
                 <ActionItem
                   name={selectedAnnotation?.noteId ? 'file-text' : 'file-plus'}

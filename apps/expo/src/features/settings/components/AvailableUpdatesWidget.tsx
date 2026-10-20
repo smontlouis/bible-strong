@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { SheetFlatList, SheetFooter, SheetHeader, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ModalSheet'
 import Box, { TouchableBox } from '~common/ui/Box'
+import IconTile from '~common/ui/IconTile'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -27,7 +28,7 @@ export const AvailableUpdatesWidget = ({
 
   return (
     <TouchableBox
-      className="overflow-hidden border-continuous mx-[16px] mb-[16px] px-[12px] min-h-[42px] rounded-[12px] flex-row items-center"
+      className="overflow-hidden border-continuous mx-[20px] mb-[16px] px-[14px] min-h-[44px] rounded-[16px] flex-row items-center"
       accessibilityRole="button"
       accessibilityLabel={t('downloads.updatesAvailable', { count })}
       onPress={onPress}
@@ -79,13 +80,10 @@ export const AvailableUpdatesSheet = ({
         keyExtractor={item => item.id}
         contentContainerStyle={{ paddingBottom: 16 }}
         renderItem={({ item }) => (
-          <Box className="border-continuous overflow-hidden px-[20px] py-[14px] flex-row items-center border-b-[1px] border-border">
-            <Box
-              className="overflow-hidden border-continuous rounded-[10px] bg-light-primary items-center justify-center mr-[12px]"
-              style={{ width: 36, height: 36 }}
-            >
-              <FeatherIcon name="refresh-cw" size={17} color="primary" />
-            </Box>
+          <Box className="border-continuous overflow-hidden px-[20px] py-[14px] flex-row items-center gap-[12px] border-b-[1px] border-separator">
+            <IconTile tint="primary">
+              <FeatherIcon name="refresh-cw" size={16} color="primary" />
+            </IconTile>
             <Box className="overflow-hidden border-continuous flex-[1]">
               <Text className="text-[15px] font-bold" numberOfLines={2}>
                 {item.name}

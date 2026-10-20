@@ -12,7 +12,9 @@ import Header from '~common/Header'
 import { toast } from '~helpers/toast'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
+import Card from '~common/ui/Card'
 import Container from '~common/ui/Container'
+import { ListSectionTitle } from '~common/ui/ListSection'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
 import { importData } from '~redux/modules/user'
@@ -38,18 +40,22 @@ const ImportExport = () => {
   const { t } = useTranslation()
 
   return (
-    <Container>
+    <Container className="bg-canvas">
       <Header hasBackButton title={t('app.importexport')} />
-      <ScrollView style={{ flex: 1 }}>
-        <Box className="overflow-hidden border-continuous mt-[20px] px-[20px]">
-          <Text className="text-[20px] font-bold">{t('app.export')}</Text>
-          <Text className="mt-[10px] text-[12px]">{t('app.exportDesc')}</Text>
-          <LastSave />
+      <ScrollView backgroundColor="canvas" style={{ flex: 1 }}>
+        <Box className="mx-[20px] mb-[22px]">
+          <ListSectionTitle>{t('app.export')}</ListSectionTitle>
+          <Card className="p-[16px]">
+            <Text className="text-[14px] leading-[20px]">{t('app.exportDesc')}</Text>
+            <LastSave />
+          </Card>
         </Box>
-        <Box className="overflow-hidden border-continuous mt-[40px] px-[20px]">
-          <Text className="text-[20px] font-bold">{t('app.import')}</Text>
-          <Text className="mt-[10px] text-quart text-[12px]">{t('app.importDesc')}</Text>
-          <ImportSave />
+        <Box className="mx-[20px] mb-[22px]">
+          <ListSectionTitle>{t('app.import')}</ListSectionTitle>
+          <Card className="p-[16px]">
+            <Text className="text-quart text-[14px] leading-[20px]">{t('app.importDesc')}</Text>
+            <ImportSave />
+          </Card>
         </Box>
       </ScrollView>
     </Container>
@@ -71,14 +77,14 @@ const LastSave = () => {
   })
 
   return (
-    <Box className="overflow-hidden border-continuous mt-[20px]">
-      <Text className="font-bold">{t('app.lastSave')}</Text>
+    <Box className="mt-[16px]">
+      <Text className="text-[15px] font-bold">{t('app.lastSave')}</Text>
       {lastSave ? (
-        <Text className="mt-[5px] text-grey">
+        <Text className="mt-[2px] text-[14px] text-grey">
           {format((lastSave.modificationTime || 0) * 1000, 'dd/MM/yyyy HH:mm')}
         </Text>
       ) : (
-        <Text className="text-grey">{t('app.noSave')}</Text>
+        <Text className="mt-[2px] text-[14px] text-grey">{t('app.noSave')}</Text>
       )}
       <ExportButton
         onSaved={file => {
@@ -166,7 +172,7 @@ const ExportButton = ({ onSaved }: { onSaved: (file: ExistingFileInfo) => void }
   }
 
   return (
-    <Button style={{ width: 130, marginTop: 20 }} reverse small onPress={sync} disabled={isSyncing}>
+    <Button style={{ width: 130, marginTop: 16 }} reverse small onPress={sync} disabled={isSyncing}>
       <Text className="text-[15px]">{isSyncing ? 'Export...' : t('app.export')}</Text>
     </Button>
   )
@@ -201,7 +207,7 @@ const ImportSave = () => {
   }
 
   return (
-    <Button style={{ width: 130, marginTop: 20 }} reverse small onPress={importSave}>
+    <Button style={{ width: 130, marginTop: 16 }} reverse small onPress={importSave}>
       <Text className="text-[15px]">{t('app.import')}</Text>
     </Button>
   )

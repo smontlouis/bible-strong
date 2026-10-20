@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import Header from '~common/Header'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import { pageContentStyle } from '~common/ui/PageContent'
 import StandaloneVerseOfTheDay from '~features/home/StandaloneVerseOfTheDay'
@@ -18,10 +18,13 @@ const DailyVerseScreen = () => {
   const offset = (getScheduledPlanDay(today, date) ?? 1) - 1
   const router = useRouter()
   const { t } = useTranslation()
+  const bottomInset = usePageBottomInset()
   return (
     <Container>
       <Header hasBackButton title={t('dailyReading.default')} />
-      <ScrollView contentContainerStyle={[pageContentStyle, { padding: 20 }]}>
+      <ScrollView
+        contentContainerStyle={[pageContentStyle, { padding: 20, paddingBottom: 20 + bottomInset }]}
+      >
         <Box className="items-center mb-[16px]">
           <ReadingDatePicker
             value={date}

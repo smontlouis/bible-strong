@@ -48,7 +48,11 @@ jest.mock('~common/ui/ScrollView', () => ({
   __esModule: true,
   default: mockHostComponent('ScrollView'),
 }))
-jest.mock('~common/ui/Box', () => ({ __esModule: true, default: mockHostComponent('Box') }))
+jest.mock('~common/ui/Box', () => ({
+  __esModule: true,
+  default: mockHostComponent('Box'),
+  usePageBottomInset: () => 0,
+}))
 jest.mock('~common/Empty', () => ({ __esModule: true, default: mockHostComponent('Empty') }))
 jest.mock('../resources/CompareCard', () => ({
   __esModule: true,

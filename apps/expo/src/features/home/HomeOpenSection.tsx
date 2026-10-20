@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import HorizontalControlScrollView from '~common/HorizontalControlScrollView'
 import Link from '~common/Link'
-import Box, { TouchableBox } from '~common/ui/Box'
+import { TouchableBox } from '~common/ui/Box'
+import Card from '~common/ui/Card'
 import Text from '~common/ui/Text'
 import { useLaunchSearch } from '~features/app-switcher/commandPalette/useLaunchSearch'
 import TabIcon from '~features/app-switcher/utils/getIconByTabType'
@@ -66,9 +67,9 @@ const HomeOpenSection = () => {
       onPress={() => launchSearch(type)}
       className={`${wide ? 'w-full' : 'w-[72px]'} items-center gap-[7px]`}
     >
-      <Box className="w-[60px] h-[60px] rounded-[19px] bg-reverse items-center justify-center shadow-[0_2px_7px_rgba(89,131,240,0.12)]">
+      <Card className="w-[60px] h-[60px] items-center justify-center">
         <TabIcon type={type} size={26} />
-      </Box>
+      </Card>
       <Text className="text-[12px] leading-[16px]" numberOfLines={1}>
         {t(label)}
       </Text>

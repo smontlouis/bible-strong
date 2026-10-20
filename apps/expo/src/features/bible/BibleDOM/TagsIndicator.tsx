@@ -4,15 +4,13 @@ import { resolveUniverseColors } from '~themes/universeColors'
 import { styled } from 'goober'
 import { RootState } from '~redux/modules/reducer'
 import { RootStyles } from './BibleDOMWrapper'
-import { isDarkTheme } from './utils'
+import { referenceHalo } from './referenceHalo'
 import { getDisabledStyles } from './disabledStyles'
 
 const Div = styled('span')<RootStyles & { isDisabled?: boolean }>(
   ({ settings: { theme, colors }, isDisabled }) => ({
     backgroundColor: colors[theme].reverse,
-    boxShadow: isDarkTheme(theme)
-      ? `0 0 10px 0 rgba(255, 255, 255, 0.1)`
-      : `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
+    ...referenceHalo(theme),
     borderRadius: '8px',
     padding: '4px 8px 4px 8px',
     wordBreak: 'break-word',

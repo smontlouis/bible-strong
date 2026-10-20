@@ -24,7 +24,7 @@ const StyledTextInput = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const resolvedClassName = twMerge(
-    'text-default h-[48px] border-border border-[2px] rounded-[10px] px-[15px] text-[16px]',
+    'text-default h-[48px] border-border border-[2px] rounded-[12px] px-[15px] text-[16px]',
     className
   )
   return (
@@ -133,7 +133,7 @@ const EditGroupModal = ({
           >
             {GROUP_COLORS.map((color, index) => (
               <TouchableBox
-                className="overflow-hidden border-continuous w-[32px] h-[32px] rounded-[16px] items-center justify-center"
+                className="overflow-hidden border-continuous w-[32px] h-[32px] rounded-full items-center justify-center"
                 key={color}
                 onPress={() => setSelectedColor(color)}
                 accessibilityRole="radio"
@@ -142,7 +142,7 @@ const EditGroupModal = ({
                 style={{ backgroundColor: color }}
               >
                 {selectedColor === color && (
-                  <Box className="overflow-hidden border-continuous w-[12px] h-[12px] rounded-[6px] bg-[black] opacity-[0.5]" />
+                  <Box className="overflow-hidden border-continuous w-[12px] h-[12px] rounded-full bg-[black] opacity-[0.5]" />
                 )}
               </TouchableBox>
             ))}

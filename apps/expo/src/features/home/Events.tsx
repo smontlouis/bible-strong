@@ -3,6 +3,7 @@ import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { useTranslation } from 'react-i18next'
 import { HStack, VStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import { radii } from '~common/ui/surfaces'
 import Text from '~common/ui/Text'
 import { collection, firebaseDb, getDocs, query, where } from '~helpers/firebase'
 import { useQuery } from '@tanstack/react-query'
@@ -113,9 +114,10 @@ export const Events = () => {
 
   if (!event) return null
 
+  // A deliberate dark feature card, one of the hub's large cards; its edge is its contrast.
   return (
     <TouchableOpacity accessibilityRole="button" onPress={handlePress} activeOpacity={0.8}>
-      <VStack className="border-continuous overflow-hidden px-[20px] rounded-[30px] border-[3px] border-light-primary mx-[20px] bg-[black] py-[20px] gap-[8px]">
+      <VStack className="border-continuous overflow-hidden px-[20px] rounded-[24px] mx-[20px] bg-[black] py-[20px] gap-[8px]">
         {imageUri && (
           <MaskedView
             style={StyleSheet.absoluteFill}
@@ -129,14 +131,14 @@ export const Events = () => {
             }
           >
             <Image
-              style={[StyleSheet.absoluteFill, { borderRadius: 30 }]}
+              style={[StyleSheet.absoluteFill, { borderRadius: radii.sheet }]}
               source={{ uri: imageUri }}
               contentFit="cover"
             />
           </MaskedView>
         )}
         <HStack className="overflow-hidden border-continuous gap-[8px] items-center">
-          <HStack className="overflow-hidden border-continuous bg-light-primary rounded-[10px] items-center justify-center h-[22px] gap-[4px] px-[8px]">
+          <HStack className="overflow-hidden border-continuous bg-light-primary rounded-full items-center justify-center h-[22px] gap-[4px] px-[8px]">
             <Text className="font-bold text-[12px]">{t('event')}</Text>
           </HStack>
         </HStack>

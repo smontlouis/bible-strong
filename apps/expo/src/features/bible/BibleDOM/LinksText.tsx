@@ -5,31 +5,6 @@ import { RootState } from '~redux/modules/reducer'
 import { LinkedVerse, RootStyles } from './BibleDOMWrapper'
 import { getLinkTypeIconComponent, getLinkTypeColor } from './LinkIcons'
 import { InlineItemContainer, InlineItemIconWrapper, InlineItemText } from './InlineItem'
-import { noSelect } from './utils'
-
-const Div = styled('span')<RootStyles & { isParallel?: boolean }>(
-  ({ isParallel, settings: { fontSizeScale, theme, colors, fontFamily } }) => ({
-    fontFamily,
-    ...noSelect,
-    fontSize: scaleFontSize(isParallel ? 10 : 14, fontSizeScale),
-    lineHeight: scaleFontSize(isParallel ? 18 : 26, fontSizeScale),
-    '@media (min-width: 768px)': {
-      fontSize: scaleFontSize(14, fontSizeScale),
-      lineHeight: scaleFontSize(26, fontSizeScale),
-    },
-    backgroundColor: colors[theme].reverse,
-    boxShadow: `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
-    borderRadius: '8px',
-    padding: '4px 8px',
-    wordBreak: 'break-word',
-    marginRight: '4px',
-    marginLeft: '4px',
-
-    '&:active': {
-      opacity: 0.4,
-    },
-  })
-)
 
 const LinkTypeIndicator = styled('span')<RootStyles>(({ settings: { fontSizeScale } }) => ({
   display: 'inline-flex',

@@ -10,12 +10,13 @@ import React from 'react'
 import { Platform, SectionList, TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import FiltersHeader from '~common/FiltersHeader'
 import { type SheetRef } from '~common/sheet'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
+import { twMerge } from '~common/ui/classNames'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
+import { ListSectionTitle, ListSeparator } from '~common/ui/ListSection'
 import Text from '~common/ui/Text'
 import { useIsOfflineResourceInstalled } from '~features/resources/useOfflineResourceRegistry'
 import CommentaryAvatar from './CommentaryAvatar'
@@ -31,6 +32,12 @@ import { createCommentaryProjectionId } from './commentarySelection'
 import type { RootState } from '~redux/modules/reducer'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 type CommentarySelectionFilter = 'all' | 'selected'
+
+const ROW_PADDING = 14
+const AVATAR_SIZE = 48
+const AVATAR_GAP = 13
+/** Where a row's text starts, so the hairline between two rows starts there too. */
+const ROW_TEXT_INSET = ROW_PADDING + AVATAR_SIZE + AVATAR_GAP
 
 type Projection = {
   entry: CommentaryCatalogEntry
@@ -55,16 +62,22 @@ const CommentaryLibraryItem = ({
   const installed = useIsOfflineResourceInstalled(identity)
 
   return (
-    <Box className="border-continuous overflow-hidden min-h-[78px] px-[18px] py-[11px] bg-reverse flex-row items-center border-b-[1px] border-border">
+    <Box
+      className="border-continuous overflow-hidden min-h-[78px] pr-[4px] py-[11px] flex-row items-center"
+      style={{ paddingLeft: ROW_PADDING }}
+    >
       <TouchableOpacity style={{ flex: 1 }} onPress={onOpen} accessibilityRole="button">
         <Box className="overflow-hidden border-continuous flex-row items-center">
           <CommentaryAvatar
             resourceCode={`${entry.publicationId}:${language}`}
             author={entry.author}
             fallback={entry.shortName}
-            size={48}
+            size={AVATAR_SIZE}
           />
-          <Box className="overflow-hidden border-continuous ml-[13px] flex-[1]">
+          <Box
+            className="overflow-hidden border-continuous flex-[1]"
+            style={{ marginLeft: AVATAR_GAP }}
+          >
             <Text className="font-bold text-[16px]" numberOfLines={2}>
               {entry.title}
             </Text>
@@ -87,7 +100,7 @@ const CommentaryLibraryItem = ({
 const CommentaryLibraryScreen = () => {
   const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
-  const insets = useSafeAreaInsets()
+  const bottomInset = usePageBottomInset()
   const detailsRef = React.useRef<SheetRef>(null)
   const selectedCommentaries = useSelector(
     (state: RootState) => state.user.bible.settings.commentarySelection
@@ -135,8 +148,8 @@ const CommentaryLibraryScreen = () => {
   }
 
   return (
-    <FormSheetScreen isFormSheet={false}>
-      <Box className="overflow-hidden border-continuous flex-[1] bg-light-grey">
+    <FormSheetScreen className="bg-canvas" isFormSheet={false}>
+      <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
         <FiltersHeader
           title={t('Commentaires')}
           hasBackButton
@@ -211,27 +224,40 @@ const CommentaryLibraryScreen = () => {
         />
         <SectionList<Projection>
           sections={sections}
-          stickySectionHeadersEnabled
+          stickySectionHeadersEnabled={false}
           keyExtractor={item => createCommentaryProjectionId(item.entry.id, item.language)}
-          contentContainerStyle={[pageContentStyle, { paddingBottom: insets.bottom + 20 }]}
+          contentContainerStyle={[
+            pageContentStyle,
+            { paddingTop: 16, paddingBottom: bottomInset + 20 },
+          ]}
           renderSectionHeader={({ section }) => (
-            <Box className="overflow-hidden border-continuous px-[20px] py-[11px] bg-light-grey border-b-[1px] border-border">
-              <Text className="font-bold text-grey text-[13px]">{section.title}</Text>
-            </Box>
+            <ListSectionTitle className="mx-[24px]">{section.title}</ListSectionTitle>
           )}
-          renderItem={({ item }) => {
+          renderItem={({ item, index, section }) => {
             const projectionId = createCommentaryProjectionId(item.entry.id, item.language)
+            const isFirst = index === 0
+            const isLast = index === section.data.length - 1
+            // Each row is one slice of its language's card: the first and the last round it.
             return (
-              <CommentaryLibraryItem
-                projection={item}
-                onOpen={() =>
-                  pushRouteOnce({
-                    pathname: '/commentary-chapter',
-                    params: { projectionId, book: '1', chapter: '1' },
-                  })
-                }
-                onOpenDetails={() => openDetails(item)}
-              />
+              <Box
+                className={twMerge(
+                  'border-continuous mx-[20px] bg-surface',
+                  isFirst && 'rounded-t-[16px] overflow-hidden',
+                  isLast && 'rounded-b-[16px] overflow-hidden mb-[22px]'
+                )}
+              >
+                {!isFirst && <ListSeparator inset={ROW_TEXT_INSET} />}
+                <CommentaryLibraryItem
+                  projection={item}
+                  onOpen={() =>
+                    pushRouteOnce({
+                      pathname: '/commentary-chapter',
+                      params: { projectionId, book: '1', chapter: '1' },
+                    })
+                  }
+                  onOpenDetails={() => openDetails(item)}
+                />
+              </Box>
             )
           }}
         />

@@ -164,7 +164,7 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
   )
 
   return (
-    <FormSheetScreen isFormSheet={isFormSheet}>
+    <FormSheetScreen isFormSheet={isFormSheet} reserveBottom>
       <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         <PericopeHeader hasBackButton={hasBackButton} title={`${t('Péricopes')} ${version}`} />
         {availabilityQuery.isPending ||
@@ -251,7 +251,7 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
             </Box>
           </ScrollView>
         )}
-        {/* The iOS sheet reaches the bottom edge; outside it, Container already pads the inset. */}
+        {/* The iOS sheet reaches the bottom edge; outside it, the page reserves the inset. */}
         <Box
           className="overflow-hidden border-continuous bg-reverse flex-row px-[20px] py-[10px] justify-between"
           style={isFormSheet ? { paddingBottom: Math.max(insets.bottom, 10) } : undefined}

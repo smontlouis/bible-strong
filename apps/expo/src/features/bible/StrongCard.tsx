@@ -174,7 +174,7 @@ const StrongCard = (props: Props) => {
 
   return (
     <Box className="overflow-hidden border-continuous flex-[1]">
-      <Box className="border-continuous overflow-visible mt-[20px] px-[15px] py-[14px] flex-[1] bg-reverse rounded-[14px]">
+      <Box className="border-continuous overflow-visible mt-[20px] px-[15px] py-[14px] flex-[1] bg-surface rounded-[16px]">
         <Box className="overflow-hidden border-continuous">
           <HStack className="overflow-hidden border-continuous items-start gap-[10px]">
             <TouchableBox
@@ -206,7 +206,7 @@ const StrongCard = (props: Props) => {
             </TouchableBox>
             {isSelectionMode ? (
               <Box
-                className="overflow-hidden border-continuous rounded-[16px] items-center justify-center"
+                className="overflow-hidden border-continuous rounded-full items-center justify-center"
                 style={{
                   backgroundColor: colorWithOpacity(
                     resolveThemeColor(stylingTheme, 'primary'),
@@ -223,7 +223,7 @@ const StrongCard = (props: Props) => {
                 strongEntry.baseCode
               ) ? (
               <Box
-                className="overflow-hidden border-continuous rounded-[16px] items-center justify-center"
+                className="overflow-hidden border-continuous rounded-full items-center justify-center"
                 style={{
                   backgroundColor: colorWithOpacity(
                     resolveThemeColor(stylingTheme, 'primary'),

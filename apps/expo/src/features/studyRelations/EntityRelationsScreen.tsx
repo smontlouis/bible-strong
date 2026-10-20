@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { ScrollView } from 'react-native'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
-import Box, { TouchableBox } from '~common/ui/Box'
+import Box, { TouchableBox, usePageBottomInset } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useSheet } from '~helpers/useSheet'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
@@ -26,6 +26,7 @@ const EntityRelationsScreen = () => {
   const hasBackButton = isFormSheet ? canGoBackInStack : true
   const isSingleVerseEndpoint = endpoint?.type === 'verse' && endpoint.verseKeys.length === 1
   const endpointLabel = endpoint ? getEndpointFallbackLabel(endpoint) : ''
+  const bottomInset = usePageBottomInset()
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
@@ -44,7 +45,7 @@ const EntityRelationsScreen = () => {
           ) : undefined
         }
       />
-      <ScrollView contentContainerStyle={pageContentStyle}>
+      <ScrollView contentContainerStyle={[pageContentStyle, { paddingBottom: 16 + bottomInset }]}>
         {endpoint ? (
           <StudyRelationList
             endpoint={endpoint}

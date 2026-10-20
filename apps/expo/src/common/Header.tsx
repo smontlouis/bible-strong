@@ -1,6 +1,7 @@
 import { twMerge } from '~common/ui/classNames'
 
 import React from 'react'
+import { StyleSheet } from 'react-native'
 import PageContent from '~common/ui/PageContent'
 import Back from '~common/Back'
 import Box, { HStack, VStack } from '~common/ui/Box'
@@ -41,13 +42,10 @@ const Header = ({
       {...props}
       testID="workspace-page-header"
       className={twMerge(
-        'overflow-hidden border-continuous border-border',
-        twMerge(
-          background ? 'bg-reverse' : '',
-          'border-border',
-          'overflow-hidden border-continuous border-b-[1px]'
-        )
+        'overflow-hidden border-continuous border-separator',
+        background ? 'bg-reverse' : ''
       )}
+      style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
     >
       <PageContent style={maxWidth ? { maxWidth } : undefined}>
         <Box

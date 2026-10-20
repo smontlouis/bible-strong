@@ -1,5 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { StyleSheet } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -14,9 +15,10 @@ const BackBottomTabBar = ({ onClose, direction }: BackBottomTabBarProps) => {
 
   return (
     <Box
-      className="border-continuous overflow-hidden flex-row bg-reverse px-[20px] items-center absolute bottom-[0px] left-[0px] right-[0px] border-t-[1px] border-border"
+      className="border-continuous overflow-hidden flex-row bg-reverse px-[20px] items-center absolute bottom-[0px] left-[0px] right-[0px] border-separator"
       style={{
         paddingBottom: useSafeAreaInsets().bottom,
+        borderTopWidth: StyleSheet.hairlineWidth,
         justifyContent: direction === 'left' ? 'flex-start' : 'flex-end',
       }}
     >

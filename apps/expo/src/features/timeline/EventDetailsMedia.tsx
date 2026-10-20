@@ -1,9 +1,10 @@
 import { Image } from 'expo-image'
-import React from 'react'
+import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Carousel } from 'react-native-reanimated-carousel'
 import { configureCarouselPan } from '~helpers/configureCarouselPan'
 import Link from '~common/Link'
+import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
@@ -91,45 +92,38 @@ const Media = ({
       )}
       {!!related?.length && (
         <Box className="overflow-hidden border-continuous p-[20px]">
-          <Paragraph className="mb-[20px]" fontFamily="title">
+          <Paragraph className="mb-[6px]" fontFamily="title">
             {t('Évenements associés')}
           </Paragraph>
-          {related.map(r => (
-            <Link
-              key={r.slug}
-              onPress={() => {
-                const foundEvent = flattenedEvents?.find(ev => ev.slug === r.slug)
-                if (foundEvent && onOpenEvent) {
-                  onOpenEvent(foundEvent)
-                } else if (foundEvent) {
-                  pushRouteOnce({
-                    pathname: '/event',
-                    params: { slug: foundEvent.slug },
-                  })
-                } else {
-                  console.log("[Timeline] Can't open this event.")
-                }
-              }}
-            >
-              <Box
-                className="overflow-hidden border-continuous bg-reverse p-[20px] rounded-[20px] mb-[20px] flex-row"
-                style={{
-                  shadowColor: 'rgb(89,131,240)',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 7,
-                  elevation: 1,
-                  overflow: 'visible',
+          {related.map((r, index) => (
+            <Fragment key={r.slug}>
+              {index > 0 && <Border />}
+              <Link
+                onPress={() => {
+                  const foundEvent = flattenedEvents?.find(ev => ev.slug === r.slug)
+                  if (foundEvent && onOpenEvent) {
+                    onOpenEvent(foundEvent)
+                  } else if (foundEvent) {
+                    pushRouteOnce({
+                      pathname: '/event',
+                      params: { slug: foundEvent.slug },
+                    })
+                  } else {
+                    console.log("[Timeline] Can't open this event.")
+                  }
                 }}
               >
-                <Paragraph className="flex-[1]" key={r.slug}>
-                  {r.title}
-                </Paragraph>
-                <Box className="overflow-hidden border-continuous items-center flex-row">
-                  <FeatherIcon name="chevron-right" size={22} color="primary" />
+                {/* Related events run as a list on the page, split by hairlines. */}
+                <Box className="overflow-hidden border-continuous py-[14px] flex-row items-center gap-[12px]">
+                  <Paragraph className="flex-[1]" key={r.slug}>
+                    {r.title}
+                  </Paragraph>
+                  <Box className="overflow-hidden border-continuous items-center flex-row">
+                    <FeatherIcon name="chevron-right" size={22} color="primary" />
+                  </Box>
                 </Box>
-              </Box>
-            </Link>
+              </Link>
+            </Fragment>
           ))}
         </Box>
       )}

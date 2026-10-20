@@ -7,6 +7,7 @@ import {
   Platform,
   ScrollView,
   SectionList,
+  StyleSheet,
   TextInput,
   useWindowDimensions,
   type FlatListProps,
@@ -203,7 +204,8 @@ const runSheetCommand = (
 
 const SheetItem = ({ children, tag, onPress, ...props }: SheetItemProps) => (
   <TouchableBox
-    className="border-continuous overflow-visible flex-row items-center justify-between p-[20px] border-border border-b-[1px]"
+    className="border-continuous overflow-visible flex-row items-center justify-between p-[20px] border-separator"
+    style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
     accessibilityRole="button"
     onPress={onPress}
   >
@@ -413,7 +415,10 @@ const SheetHeader = ({
   onBackPress,
   rightComponent,
 }: SheetHeaderProps) => (
-  <Box className="border-continuous overflow-hidden border-border border-b-[1px]">
+  <Box
+    className="border-continuous overflow-hidden border-separator"
+    style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
+  >
     <PageContent>
       {(title || subTitle || hasBackButton || leftComponent || rightComponent) && (
         <Box className="overflow-hidden border-continuous min-h-[54px] flex-row items-center">

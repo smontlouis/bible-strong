@@ -18,17 +18,7 @@ const NaveModalForVerse = ({ items, label }: NaveModalForVerseProps) => {
   }
 
   return (
-    <Box
-      className="overflow-hidden border-continuous px-[14px] py-[13px] rounded-[20px] bg-reverse"
-      style={{
-        shadowColor: 'rgb(89,131,240)',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 7,
-        elevation: 1,
-        overflow: 'visible',
-      }}
-    >
+    <Box className="overflow-hidden border-continuous px-[14px] py-[13px] rounded-[16px] bg-surface">
       <Text
         className="text-[14px] text-grey"
         style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}

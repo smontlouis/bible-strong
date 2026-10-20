@@ -2,6 +2,7 @@ import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import type { CommentaryCatalogEntry } from '@bible-strong/resource-catalog/commentaries'
 import { useTheme } from '~themes/ThemeProvider'
 import React from 'react'
+import { StyleSheet } from 'react-native'
 
 import { useTranslation } from 'react-i18next'
 import { SheetScrollView, type SheetRef } from '~common/sheet'
@@ -117,21 +118,33 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
           </Box>
         </Box>
 
-        <Box className="border-continuous overflow-hidden flex-row mt-[22px] py-[14px] border-t-[1px] border-b-[1px] border-border">
+        <Box
+          className="border-continuous overflow-hidden flex-row mt-[22px] py-[14px] border-separator"
+          style={{
+            borderTopWidth: StyleSheet.hairlineWidth,
+            borderBottomWidth: StyleSheet.hairlineWidth,
+          }}
+        >
           <Box className="overflow-hidden border-continuous flex-[1] items-center gap-[4px]">
             <Text className="text-tertiary text-[9px] font-bold">
               {t('bibleOfflineDetails.language').toUpperCase()}
             </Text>
             <Text className="text-[13px] font-bold">{languageLabel}</Text>
           </Box>
-          <Box className="overflow-hidden border-continuous w-[1px] bg-border" />
+          <Box
+            className="overflow-hidden border-continuous bg-separator"
+            style={{ width: StyleSheet.hairlineWidth }}
+          />
           <Box className="overflow-hidden border-continuous flex-[1] items-center gap-[4px]">
             <Text className="text-tertiary text-[9px] font-bold">
               {t('commentaries.details.tradition').toUpperCase()}
             </Text>
             <Text className="text-[13px] font-bold text-center">{entry.tradition}</Text>
           </Box>
-          <Box className="overflow-hidden border-continuous w-[1px] bg-border" />
+          <Box
+            className="overflow-hidden border-continuous bg-separator"
+            style={{ width: StyleSheet.hairlineWidth }}
+          />
           <Box className="overflow-hidden border-continuous flex-[1] items-center gap-[4px]">
             <Text className="text-tertiary text-[9px] font-bold">
               {t('bibleOfflineDetails.installedSize').toUpperCase()}
@@ -150,7 +163,7 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
         >
           {entry.tags.map(tag => (
             <Box
-              className="overflow-hidden border-continuous px-[10px] py-[6px] bg-light-grey rounded-[14px]"
+              className="overflow-hidden border-continuous px-[10px] py-[6px] bg-light-grey rounded-full"
               key={tag}
             >
               <Text className="text-[12px]">{tag}</Text>
@@ -158,12 +171,15 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
           ))}
         </Box>
 
-        <Box className="border-continuous overflow-hidden mt-[20px] pt-[16px] border-t-[1px] border-border">
+        <Box
+          className="border-continuous overflow-hidden mt-[20px] pt-[16px] border-separator"
+          style={{ borderTopWidth: StyleSheet.hairlineWidth }}
+        >
           <Text className="text-tertiary text-[12px]">{entry.rights}</Text>
         </Box>
 
         {downloading ? (
-          <Box className="overflow-hidden border-continuous mt-[22px] p-[16px] bg-light-grey rounded-[22px] flex-row items-center">
+          <Box className="overflow-hidden border-continuous mt-[22px] p-[16px] bg-light-grey rounded-[12px] flex-row items-center">
             <Progress progress={Math.max(progress, 0.04)} size={30} thickness={3} />
             <Text className="ml-[12px] flex-[1] font-bold">{Math.round(progress * 100)} %</Text>
             <TouchableBox
@@ -174,7 +190,7 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
             </TouchableBox>
           </Box>
         ) : (
-          <Box className="overflow-hidden border-continuous mt-[22px] p-[16px] bg-light-grey rounded-[22px] flex-row items-center gap-[10px]">
+          <Box className="overflow-hidden border-continuous mt-[22px] p-[16px] bg-light-grey rounded-[12px] flex-row items-center gap-[10px]">
             <Box className="overflow-hidden border-continuous flex-[1]">
               <Button
                 onPress={download}
@@ -204,7 +220,7 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
             </Box>
             {installed && (
               <TouchableBox
-                className="border-continuous overflow-hidden items-center justify-center bg-reverse rounded-[24px] border-[1px] border-border"
+                className="border-continuous overflow-hidden items-center justify-center bg-reverse rounded-full"
                 accessibilityRole="button"
                 accessibilityLabel={t('commentaries.selector.removeOffline')}
                 onPress={remove}

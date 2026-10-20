@@ -48,7 +48,7 @@ const ReminderSettings = ({
     if (allowed) onChange('07:00')
   }
   return (
-    <Box className="bg-light-grey rounded-[20px] p-[20px] gap-[12px]">
+    <Box className="bg-light-grey rounded-[12px] p-[20px] gap-[12px]">
       <Box className="flex-row items-center justify-between gap-[16px]">
         <Box className="flex-1 flex-row items-center gap-[8px]">
           {showIcon && Platform.OS !== 'web' && (

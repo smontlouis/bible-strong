@@ -434,8 +434,11 @@ export const VersionCatalogList = ({
       renderSectionHeader={({ section }) => {
         if (grouping === 'alphabetical') return null
         return (
-          <Box className="overflow-hidden border-continuous min-h-[48px] pl-[20px] pr-[8px] flex-row items-center bg-light-grey border-b-[1px] border-border">
-            <Text className="flex-[1] text-[16px] opacity-[0.8]">{section.title}</Text>
+          // Sticky, so it takes the sheet's own ground to cover the rows scrolling under it.
+          <Box className="overflow-hidden border-continuous min-h-[40px] pl-[20px] pr-[8px] pt-[10px] flex-row items-center bg-reverse">
+            <Text className="flex-[1] text-[13px] text-grey" accessibilityRole="header">
+              {section.title}
+            </Text>
             {grouping === 'style' && section.readingProfile && (
               <TouchableOpacity
                 accessibilityRole="button"

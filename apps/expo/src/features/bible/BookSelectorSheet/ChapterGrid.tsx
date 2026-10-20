@@ -95,7 +95,7 @@ const ChapterGrid = ({ book, chapters: availableChapters, selectedChapter }: Cha
               'overflow-hidden border-continuous',
               twMerge(
                 isSelected ? 'bg-light-grey' : 'bg-opacity5',
-                'overflow-hidden border-continuous items-center rounded-[6px] justify-center'
+                'overflow-hidden border-continuous items-center rounded-[8px] justify-center'
               )
             )}
             key={chapter}

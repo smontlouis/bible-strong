@@ -60,7 +60,7 @@ const SmallCircle = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const resolvedClassName = twMerge(
-    'w-[6px] h-[6px] opacity-[0.5] bg-primary rounded-[3px] items-center justify-center',
+    'w-[6px] h-[6px] opacity-[0.5] bg-primary rounded-full items-center justify-center',
     className
   )
   return (
@@ -87,7 +87,7 @@ const Circle = (
   const theme = themeOverride ?? contextTheme
   const { isComplete, isNext, isSectionCompleted } = props
   const resolvedClassName = twMerge(
-    'w-[18px] h-[18px] rounded-[9px] items-center justify-center',
+    'w-[18px] h-[18px] rounded-full items-center justify-center',
     className
   )
   return (

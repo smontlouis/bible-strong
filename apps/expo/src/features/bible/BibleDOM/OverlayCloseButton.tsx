@@ -1,4 +1,5 @@
 import Feather from '@expo/vector-icons/Feather'
+import { floatingShadow } from '~common/ui/surfaces'
 
 type Props = {
   label: string
@@ -7,6 +8,7 @@ type Props = {
   onClose: () => void
 }
 
+/** Floats above an overlay, so it takes the app's one floating shadow. */
 const OverlayCloseButton = ({ label, color, backgroundColor, onClose }: Props) => (
   <button
     type="button"
@@ -27,10 +29,10 @@ const OverlayCloseButton = ({ label, color, backgroundColor, onClose }: Props) =
       margin: 0,
       padding: 0,
       border: 0,
-      borderRadius: 19,
+      borderRadius: '50%',
       background: backgroundColor,
       color,
-      boxShadow: '0 4px 14px rgba(0, 0, 0, 0.22)',
+      ...floatingShadow,
       cursor: 'pointer',
       WebkitTapHighlightColor: 'transparent',
     }}

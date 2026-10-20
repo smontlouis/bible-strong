@@ -1,15 +1,18 @@
 import Feather from '@expo/vector-icons/Feather'
 import type { CSSProperties } from 'react'
 
+import { radii } from '~common/ui/surfaces'
 import type { RootStyles } from './BibleDOMWrapper'
-import { isDarkTheme } from './utils'
 
 /** What the plan offers after its passage: the next element of the day, or the day's end. */
 export type PlanDayStepView = { kind: 'next' | 'finish'; label: string; title?: string }
 
 type Props = RootStyles & { step: PlanDayStepView; onPress: () => void }
 
-/** Mirrors the card at the end of a plan element's page, in the Bible reader's own styles. */
+/**
+ * Mirrors the card at the end of a plan element's page, in the Bible reader's own styles:
+ * a card on the reading ground, set apart by its tint alone, with no border and no shadow.
+ */
 const PlanDayStepCard = ({ step, settings, onPress }: Props) => {
   const colors = settings.colors[settings.theme]
   const textStyle: CSSProperties = {
@@ -31,13 +34,10 @@ const PlanDayStepCard = ({ step, settings, onPress }: Props) => {
         alignItems: 'center',
         gap: 14,
         marginTop: 48,
-        padding: '16px 18px',
+        padding: '14px 16px',
         border: 0,
-        borderRadius: 18,
-        background: colors.reverse,
-        boxShadow: isDarkTheme(settings.theme)
-          ? '0 4px 16px rgba(0, 0, 0, 0.4)'
-          : '0 4px 16px rgba(0, 0, 0, 0.12)',
+        borderRadius: radii.card,
+        background: colors.lightGrey,
         cursor: 'pointer',
         textAlign: 'left',
         userSelect: 'none',
@@ -70,7 +70,7 @@ const PlanDayStepCard = ({ step, settings, onPress }: Props) => {
           width: 36,
           height: 36,
           placeItems: 'center',
-          borderRadius: 18,
+          borderRadius: '50%',
           background: colors.primary,
         }}
       >

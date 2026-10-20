@@ -6,18 +6,9 @@ import { getAppleReviewing } from '~helpers/getAppleReviewing'
 import { Image } from 'expo-image'
 import * as Updates from 'expo-updates'
 import { useSetAtom } from 'jotai/react'
-import {
-  Children,
-  Fragment,
-  isValidElement,
-  memo,
-  useRef,
-  useState,
-  type ComponentPropsWithRef as UIComponentProps,
-  type ReactNode,
-} from 'react'
+import { memo, useRef, useState, type ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, Platform, StyleSheet } from 'react-native'
+import { ActivityIndicator, Platform } from 'react-native'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { twMerge } from '~common/ui/classNames'
 
@@ -27,10 +18,9 @@ import LexiqueIcon from '~common/LexiqueIcon'
 import Link, { LinkProps } from '~common/Link'
 import NaveIcon from '~common/NaveIcon'
 import { type SheetRef } from '~common/sheet'
-import Box, { SafeAreaBox } from '~common/ui/Box'
+import Box, { SafeAreaBox, usePageBottomInset } from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
-import IconCircle from '~common/ui/IconCircle'
-import NotificationDot from '~common/ui/NotificationDot'
+import ListSection, { ListRow } from '~common/ui/ListSection'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
 import UserAvatar from '~common/ui/UserAvatar'
@@ -86,84 +76,6 @@ const Infos = memo(() => {
   )
 })
 
-const ROW_PADDING = 14
-const ICON_SIZE = 30
-const ROW_GAP = 12
-
-const Chevron = () => <FeatherIcon name="chevron-right" size={18} color="grey" />
-
-/** A titled group of rows: the title sits on the page, the rows share one card. */
-const MenuSection = ({ title, children }: { title?: string; children: ReactNode }) => {
-  const rows = Children.toArray(children)
-  return (
-    <Box className="mx-[20px] mb-[22px]">
-      {title ? (
-        <Text className="text-[13px] text-grey mb-[9px] ml-[4px]">{title}</Text>
-      ) : null}
-      <Box className="overflow-hidden border-continuous rounded-[16px] bg-reverse">
-        {rows.map((row, index) => (
-          <Fragment key={isValidElement(row) && row.key != null ? row.key : index}>
-            {index > 0 && <RowSeparator />}
-            {row}
-          </Fragment>
-        ))}
-      </Box>
-    </Box>
-  )
-}
-
-const RowSeparator = () => {
-  const theme = useTheme()
-  return (
-    <Box
-      style={{
-        height: StyleSheet.hairlineWidth,
-        backgroundColor: theme.colors.border,
-        marginLeft: ROW_PADDING + ICON_SIZE + ROW_GAP,
-      }}
-    />
-  )
-}
-
-type MenuRowProps = Pick<
-  LinkProps<keyof MainStackProps>,
-  'route' | 'href' | 'share' | 'onPress' | 'accessibilityLabel'
-> & {
-  icon: ReactNode
-  iconBg?: string
-  label: string
-  labelClassName?: string
-  hasChevron?: boolean
-  badge?: boolean
-}
-
-const MenuRow = ({
-  icon,
-  iconBg = 'rgba(107, 114, 128, 0.1)',
-  label,
-  labelClassName,
-  hasChevron = true,
-  badge = false,
-  ...linkProps
-}: MenuRowProps) => (
-  <Link
-    {...linkProps}
-    className="flex-row items-center"
-    style={{ gap: ROW_GAP, paddingHorizontal: ROW_PADDING, paddingVertical: 11 }}
-  >
-    <Box>
-      <IconCircle bg={iconBg} size={ICON_SIZE} className="rounded-[8px]">
-        {icon}
-      </IconCircle>
-      {badge && <NotificationDot size={10} style={{ position: 'absolute', top: -3, right: -3 }} />}
-    </Box>
-    <Text className={twMerge('flex-[1] text-[15px]', labelClassName)} numberOfLines={1}>
-      {label}
-    </Text>
-    {hasChevron && <Chevron />}
-  </Link>
-)
-
 type MoreProps = {
   closeMenu: () => void
   inWorkspace?: boolean
@@ -173,6 +85,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
   const router = useRouter()
   const { isLogged, user, logout } = useLogin()
   const theme = useTheme()
+  const bottomInset = usePageBottomInset()
   const deleteAccountModalRef = useRef<SheetRef>(null)
   const contactDeveloperRef = useRef<SheetRef>(null)
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false)
@@ -232,22 +145,22 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
     resolveUniverseColors(theme.colors, universe).background
 
   return (
-    <SafeAreaBox className="border-continuous overflow-hidden border-l-[1px] border-border bg-light-grey">
+    <SafeAreaBox className="border-continuous overflow-hidden border-l-[1px] border-border bg-canvas">
       <Header
         title={t(inWorkspace ? 'settings.settings' : 'Plus')}
         onCustomBackPress={closeMenu}
         hasBackButton={!inWorkspace}
       />
       <ScrollView
-        backgroundColor="lightGrey"
+        backgroundColor="canvas"
         style={{ flex: 1 }}
         contentContainerStyle={{
           paddingTop: 16,
-          paddingBottom: 20,
-          backgroundColor: theme.colors.lightGrey,
+          paddingBottom: 20 + bottomInset,
+          backgroundColor: theme.colors.canvas,
         }}
       >
-        <MenuSection>
+        <ListSection>
           {isLogged ? (
             <Link route="Profile" className="flex-row items-center gap-[12px] px-[14px] py-[12px]">
               <UserAvatar
@@ -262,44 +175,44 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
                 </Text>
                 <Text className="text-[13px] text-grey mt-[2px]">{t('settings.viewProfile')}</Text>
               </Box>
-              <Chevron />
+              <FeatherIcon name="chevron-right" size={18} color="grey" />
             </Link>
           ) : (
-            <MenuRow
+            <ListRow
               route="Login"
               icon={<FeatherIcon name="log-in" size={18} color="primary" />}
-              iconBg="lightPrimary"
+              iconTint="primary"
               label={t('Se connecter')}
               labelClassName="text-primary"
             />
           )}
-        </MenuSection>
+        </ListSection>
 
-        <MenuSection title={t('settings.resources')}>
-          <MenuRow
+        <ListSection title={t('settings.resources')}>
+          <ListRow
             route="History"
             icon={<FeatherIcon name="clock" size={18} color="grey" />}
             label={t('history.title')}
           />
-          <MenuRow
+          <ListRow
             route="Lexique"
             icon={<LexiqueIcon size={18} />}
             iconBg={universeBg('strong')}
             label={t('Lexique')}
           />
-          <MenuRow
+          <ListRow
             route="Dictionnaire"
             icon={<DictionnaryIcon size={18} />}
             iconBg={universeBg('dictionary')}
             label={t('Dictionnaire')}
           />
-          <MenuRow
+          <ListRow
             route="Nave"
             icon={<NaveIcon size={18} />}
             iconBg={universeBg('nave')}
             label={t('Bible Thématique Nave')}
           />
-          <MenuRow
+          <ListRow
             route="CommentaryLibrary"
             icon={
               <Image
@@ -312,31 +225,31 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
             iconBg={universeBg('commentary')}
             label={t('Commentaires')}
           />
-          <MenuRow
+          <ListRow
             route="Plans"
             icon={<MaterialIcon name="playlist-add-check" size={18} color="grey" />}
             label={t('Plans')}
           />
-        </MenuSection>
+        </ListSection>
 
-        <MenuSection title={t('settings.settings')}>
-          <MenuRow
+        <ListSection title={t('settings.settings')}>
+          <ListRow
             route="ResourceLanguage"
             icon={<MaterialIcon name="language" size={18} color="grey" />}
             label={t('Changer la langue')}
           />
-          <MenuRow
+          <ListRow
             route="Theme"
             icon={<FeatherIcon name="sun" size={18} color="grey" />}
             label={t('settings.theme')}
           />
-          <MenuRow
+          <ListRow
             route="BibleDefaults"
             icon={<FeatherIcon name="book-open" size={18} color="grey" />}
             label={t('bibleDefaults.title')}
           />
           {Platform.OS !== 'web' && (
-            <MenuRow
+            <ListRow
               route="Downloads"
               accessibilityLabel={hasUpdates ? t('accessibility.downloadsWithUpdates') : undefined}
               icon={<FeatherIcon name="download" size={18} color="grey" />}
@@ -345,7 +258,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
             />
           )}
           {Platform.OS !== 'web' && (
-            <MenuRow
+            <ListRow
               onPress={checkForUpdate}
               icon={
                 isCheckingUpdate ? (
@@ -358,80 +271,80 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
               hasChevron={false}
             />
           )}
-        </MenuSection>
+        </ListSection>
 
-        <MenuSection title={t('settings.help')}>
-          <MenuRow
+        <ListSection title={t('settings.help')}>
+          <ListRow
             onPress={() => openChangelogModal(true)}
             icon={<FeatherIcon name="terminal" size={18} color="quint" />}
-            iconBg="rgba(147, 51, 234, 0.1)"
+            iconTint="quint"
             label={t('Changelog')}
           />
-          <MenuRow
+          <ListRow
             route="FAQ"
             icon={<FeatherIcon name="help-circle" size={18} color="quint" />}
-            iconBg="rgba(147, 51, 234, 0.1)"
+            iconTint="quint"
             label={t('Foire aux questions')}
           />
-          <MenuRow
+          <ListRow
             onPress={() => contactDeveloperRef.current?.present()}
             icon={<FeatherIcon name="send" size={18} color="quint" />}
-            iconBg="rgba(147, 51, 234, 0.1)"
+            iconTint="quint"
             label={t('Contacter le développeur')}
           />
-        </MenuSection>
+        </ListSection>
 
-        <MenuSection title={t('settings.community')}>
-          <MenuRow
+        <ListSection title={t('settings.community')}>
+          <ListRow
             href="https://www.facebook.com/fr.bible.strong"
             icon={<FeatherIcon name="facebook" size={18} color="primary" />}
-            iconBg="rgba(59, 89, 152, 0.1)"
+            iconTint="primary"
             label={t('Nous suivre sur facebook')}
           />
-          <MenuRow
+          <ListRow
             href={
               Platform.OS === 'ios'
                 ? 'https://apps.apple.com/fr/app/bible-strong/id1454738221?mt=8'
                 : 'https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong'
             }
             icon={<FeatherIcon name="star" size={18} color="secondary" />}
-            iconBg="rgba(251, 191, 36, 0.12)"
+            iconTint="secondary"
             label={t("Noter l'application")}
           />
-          <MenuRow
+          <ListRow
             share={shareMessage()}
             icon={<FeatherIcon name="share-2" size={18} color="success" />}
-            iconBg="rgba(16, 185, 129, 0.1)"
+            iconTint="success"
             label={t("Partager l'application")}
           />
           {!appleIsReviewing && (
-            <MenuRow
+            <ListRow
               href={
                 lang === 'fr' ? 'https://bible-strong.app/fr/give' : 'https://bible-strong.app/give'
               }
               icon={<FeatherIcon name="heart" size={18} color="color2" />}
-              iconBg="rgba(236, 72, 153, 0.1)"
+              iconTint="color2"
               label={t('Contribuer')}
             />
           )}
-          <MenuRow
+          <ListRow
             href="https://github.com/smontlouis/bible-strong"
             icon={<FeatherIcon name="github" size={18} color="grey" />}
             label="Github"
           />
-        </MenuSection>
+        </ListSection>
 
         {isLogged && (
-          <MenuSection>
-            <MenuRow
+          <ListSection>
+            <ListRow
               onPress={promptLogout}
               icon={<FeatherIcon name="log-out" size={18} color="quart" />}
-              iconBg="rgba(239, 68, 68, 0.1)"
+              iconTint="quart"
               label={t('Se déconnecter')}
-              labelClassName="text-quart"
+              destructive
               hasChevron={false}
             />
-          </MenuSection>
+          </ListSection>
         )}
 
         <Box className="overflow-hidden border-continuous px-[24px] mb-[22px]">
@@ -464,24 +377,24 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
         </Box>
 
         {__DEV__ && Platform.OS !== 'web' && (
-          <MenuSection title="Dev">
-            <MenuRow
+          <ListSection title="Dev">
+            <ListRow
               onPress={() =>
                 router.push({ pathname: '/playground', params: { playground: 'avatar' } })
               }
               icon={<FeatherIcon name="smile" size={18} color="primary" />}
-              iconBg="rgba(89, 131, 240, 0.12)"
+              iconTint="primary"
               label="Playground · Avatar"
             />
-            <MenuRow
+            <ListRow
               onPress={promptNuke}
               icon={<FeatherIcon name="trash-2" size={18} color="quart" />}
-              iconBg="rgba(239, 68, 68, 0.1)"
+              iconTint="quart"
               label="Nuke app (reset total)"
-              labelClassName="text-quart"
+              destructive
               hasChevron={false}
             />
-          </MenuSection>
+          </ListSection>
         )}
 
         <Infos />

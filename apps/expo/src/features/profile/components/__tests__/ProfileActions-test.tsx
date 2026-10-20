@@ -16,14 +16,11 @@ jest.mock('~helpers/useLogin', () => ({
 }))
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
 jest.mock('~common/ui/Box', () => ({ __esModule: true, default: 'Box' }))
-jest.mock('~common/ui/Text', () => ({ __esModule: true, default: 'Text' }))
-jest.mock('~common/ui/CardLinkItem', () => ({ __esModule: true, default: 'CardLinkItem' }))
 jest.mock('~common/ui/Icon', () => ({ FeatherIcon: 'FeatherIcon' }))
-jest.mock('~common/ui/IconCircle', () => ({ __esModule: true, default: 'IconCircle' }))
-jest.mock('~common/ui/SectionCard', () => ({
+jest.mock('~common/ui/ListSection', () => ({
   __esModule: true,
-  default: 'SectionCard',
-  SectionCardHeader: 'SectionCardHeader',
+  default: 'ListSection',
+  ListRow: 'ListRow',
 }))
 jest.mock('../ChangePasswordModal', () => ({ __esModule: true, default: () => null }))
 jest.mock('../DeleteAccountModal', () => ({ __esModule: true, default: () => null }))
@@ -43,10 +40,10 @@ describe('ProfileActions logout', () => {
   afterEach(() => act(() => renderer.unmount()))
 
   const pressLogout = async () => {
-    const action = renderer.root
-      .findAll(item => String(item.type) === 'CardLinkItem')
-      .find(item => item.findAllByProps({ children: 'Se déconnecter' }).length > 0)
-    await act(async () => action?.props.onPress())
+    const action = renderer.root.find(
+      item => String(item.type) === 'ListRow' && item.props.label === 'Se déconnecter'
+    )
+    await act(async () => action.props.onPress())
   }
 
   it('logs out after confirmation', async () => {

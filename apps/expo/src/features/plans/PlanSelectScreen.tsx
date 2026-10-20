@@ -18,7 +18,7 @@ const PlanSelect = () => {
   const userLanguage = i18n.language
   const filters = resolveReadingPlanFilters(params, userLanguage)
   return (
-    <Container>
+    <Container className="bg-canvas">
       <FiltersHeader
         hasBackButton
         title={t('readingPlans.tab')}
@@ -65,7 +65,7 @@ const PlanSelect = () => {
           },
         ]}
       />
-      <Box className="w-full flex-1 bg-light-grey">
+      <Box className="w-full flex-1 bg-canvas">
         <ReadingPlansScreen filters={filters} />
       </Box>
     </Container>

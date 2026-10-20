@@ -24,7 +24,7 @@ import RenameModal from '~common/RenameModal'
 import SearchFilterModal from '~common/SearchFilterModal'
 import { Tag } from '~common/types'
 import Border from '~common/ui/Border'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import FabButton from '~common/ui/FabButton'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Text from '~common/ui/Text'
@@ -51,7 +51,7 @@ const Chip = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const resolvedClassName = twMerge(
-    'rounded-[20px] bg-border pt-[3px] pb-[3px] pl-[7px] pr-[7px] mr-[5px] mb-[5px] mt-[5px]',
+    'rounded-full bg-border pt-[3px] pb-[3px] pl-[7px] pr-[7px] mr-[5px] mb-[5px] mt-[5px]',
     className
   )
   return (
@@ -139,7 +139,7 @@ const TagItem = ({ item, setOpen }: TagItemProps) => {
           <TagOptionsPanel tag={item.tag} />
         </Box>
       </Link>
-      <Border className="mx-[10px]" />
+      <Border className="ml-[20px]" />
     </Box>
   )
 }
@@ -153,6 +153,7 @@ const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
   const { t } = useTranslation()
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : true
+  const bottomInset = usePageBottomInset()
   const tagRows = useSelector(selectTagListRows)
   const [queryState, setQueryState] = useAtom(tagListQueryAtom)
   const [isOpen, setOpen] = useState<Tag | undefined>(undefined)
@@ -264,7 +265,7 @@ const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
             data={result}
             renderItem={({ item }) => <TagItem setOpen={setOpen} item={item} />}
             keyExtractor={item => item.id}
-            contentContainerStyle={[pageContentStyle, { paddingBottom: 70 }]}
+            contentContainerStyle={[pageContentStyle, { paddingBottom: 80 + bottomInset }]}
           />
         ) : (
           <Empty

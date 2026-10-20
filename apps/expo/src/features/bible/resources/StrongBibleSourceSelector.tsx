@@ -12,6 +12,7 @@ import { SheetFlatList, SheetHeader, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import { ListSeparator } from '~common/ui/ListSection'
 import Radio from '~common/ui/Radio'
 import Text from '~common/ui/Text'
 import {
@@ -83,6 +84,9 @@ const FRENCH_FIRST_SOURCE_GROUPS = [
   },
 ] as const
 
+// Rows are split by a hairline that starts where their text starts, after the radio.
+const SOURCE_TEXT_INSET = 16 + 22 + 12
+
 const EMPTY_STRONG_AVAILABILITY = new Map<StrongBibleVersionId, StrongBibleSidecarAvailability>()
 
 type StrongBibleSourceLanguage = 'en' | 'fr'
@@ -139,7 +143,7 @@ export const StrongBibleSourceButton = ({
         className="overflow-hidden border-continuous items-center justify-center min-h-[44px] px-[4px]"
         key={layoutKey}
       >
-        <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[32px] px-[10px] rounded-[16px] bg-light-grey max-w-[100px]">
+        <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[32px] px-[10px] rounded-full bg-light-grey max-w-[100px]">
           <Text className="text-[12px] font-bold" numberOfLines={1}>
             {label}
           </Text>
@@ -167,6 +171,7 @@ const StrongSourceRow = ({
   failedDownload,
   availabilityError,
   downloadDisabled,
+  separated,
 }: {
   sourceId: string
   name: string
@@ -179,6 +184,8 @@ const StrongSourceRow = ({
   failedDownload?: DownloadItemState
   availabilityError?: boolean
   downloadDisabled?: boolean
+  /** Follows another row, from which a hairline splits it. */
+  separated?: boolean
 }) => {
   const { t } = useTranslation()
   const progress = activeDownload ? getDownloadItemProgress(activeDownload) : 0
@@ -186,102 +193,105 @@ const StrongSourceRow = ({
   if (Platform.OS === 'web' && !isAvailable) return null
 
   return (
-    <Box className="border-continuous overflow-hidden flex-row items-center min-h-[76px] px-[16px] py-[10px] border-b-[1px] border-border">
-      <Pressable
-        accessibilityRole="radio"
-        accessibilityState={{ checked: selected, disabled: !isAvailable }}
-        disabled={!isAvailable}
-        onPress={onSelect}
-        style={({ pressed }) => ({
-          flex: 1,
-          minHeight: 56,
-          justifyContent: 'center',
-          opacity: pressed && isAvailable ? 0.7 : 1,
-        })}
-      >
-        <Box className="overflow-hidden border-continuous flex-row items-center">
-          <Radio
-            className="mr-[12px]"
-            selected={selected}
-            style={{ opacity: isAvailable ? 1 : 0.4 }}
-            size={22}
-          />
-          <Box className="overflow-hidden border-continuous flex-[1]">
-            <Text className="text-[15px] font-bold">{sourceId}</Text>
-            <Text className="text-[12px] text-tertiary mt-[2px]" numberOfLines={1}>
-              {name}
-            </Text>
-          </Box>
-        </Box>
-      </Pressable>
-
-      {isChecking ? (
-        <Box className="overflow-hidden border-continuous w-[40px] ml-[12px] items-center justify-center">
-          <ActivityIndicator size="small" />
-        </Box>
-      ) : activeDownload ? (
-        <Box className="overflow-hidden border-continuous w-[88px] ml-[12px] items-end">
-          <Text
-            className="text-[11px] text-tertiary"
-            style={{ fontVariant: ['tabular-nums'] }}
-            numberOfLines={1}
-          >
-            {activeDownload.status === 'queued'
-              ? t('downloads.queue')
-              : activeDownload.status === 'inserting'
-                ? t('downloads.inserting')
-                : `${Math.round(progress * 100)} %`}
-          </Text>
-          <Box className="border-continuous overflow-visible mt-[6px] w-[88px] h-[4px] rounded-[2px] bg-border">
-            <Box
-              className={twMerge(
-                'overflow-hidden border-continuous',
-                twMerge(
-                  activeDownload.status === 'inserting' ? 'bg-success' : 'bg-primary',
-                  'overflow-hidden border-continuous h-[4px] rounded-[2px]'
-                )
-              )}
-              style={{ width: `${Math.round(progress * 100)}%` }}
-            />
-          </Box>
-        </Box>
-      ) : !isAvailable ? (
+    <>
+      {separated && <ListSeparator inset={SOURCE_TEXT_INSET} />}
+      <Box className="border-continuous overflow-hidden flex-row items-center min-h-[76px] px-[16px] py-[10px]">
         <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={
-            availabilityError
-              ? t('resource.action.temporarilyUnavailable')
-              : downloadDisabled
-                ? t('resource.action.connectionRequired')
-                : failedDownload
-                  ? t('downloads.retry')
-                  : t('downloads.download')
-          }
-          accessibilityState={{ disabled: downloadDisabled }}
-          disabled={downloadDisabled}
-          onPress={onDownload}
+          accessibilityRole="radio"
+          accessibilityState={{ checked: selected, disabled: !isAvailable }}
+          disabled={!isAvailable}
+          onPress={onSelect}
           style={({ pressed }) => ({
-            marginLeft: 12,
-            width: 48,
-            minHeight: 48,
-            alignItems: 'center',
+            flex: 1,
+            minHeight: 56,
             justifyContent: 'center',
-            opacity: pressed ? 0.7 : 1,
+            opacity: pressed && isAvailable ? 0.7 : 1,
           })}
         >
-          <FeatherIcon
-            name={
-              availabilityError || failedDownload
-                ? 'rotate-cw'
-                : downloadDisabled
-                  ? 'wifi-off'
-                  : 'download-cloud'
-            }
-            size={16}
-          />
+          <Box className="overflow-hidden border-continuous flex-row items-center">
+            <Radio
+              className="mr-[12px]"
+              selected={selected}
+              style={{ opacity: isAvailable ? 1 : 0.4 }}
+              size={22}
+            />
+            <Box className="overflow-hidden border-continuous flex-[1]">
+              <Text className="text-[15px] font-bold">{sourceId}</Text>
+              <Text className="text-[12px] text-tertiary mt-[2px]" numberOfLines={1}>
+                {name}
+              </Text>
+            </Box>
+          </Box>
         </Pressable>
-      ) : null}
-    </Box>
+
+        {isChecking ? (
+          <Box className="overflow-hidden border-continuous w-[40px] ml-[12px] items-center justify-center">
+            <ActivityIndicator size="small" />
+          </Box>
+        ) : activeDownload ? (
+          <Box className="overflow-hidden border-continuous w-[88px] ml-[12px] items-end">
+            <Text
+              className="text-[11px] text-tertiary"
+              style={{ fontVariant: ['tabular-nums'] }}
+              numberOfLines={1}
+            >
+              {activeDownload.status === 'queued'
+                ? t('downloads.queue')
+                : activeDownload.status === 'inserting'
+                  ? t('downloads.inserting')
+                  : `${Math.round(progress * 100)} %`}
+            </Text>
+            <Box className="border-continuous overflow-visible mt-[6px] w-[88px] h-[4px] rounded-full bg-border">
+              <Box
+                className={twMerge(
+                  'overflow-hidden border-continuous',
+                  twMerge(
+                    activeDownload.status === 'inserting' ? 'bg-success' : 'bg-primary',
+                    'overflow-hidden border-continuous h-[4px] rounded-full'
+                  )
+                )}
+                style={{ width: `${Math.round(progress * 100)}%` }}
+              />
+            </Box>
+          </Box>
+        ) : !isAvailable ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              availabilityError
+                ? t('resource.action.temporarilyUnavailable')
+                : downloadDisabled
+                  ? t('resource.action.connectionRequired')
+                  : failedDownload
+                    ? t('downloads.retry')
+                    : t('downloads.download')
+            }
+            accessibilityState={{ disabled: downloadDisabled }}
+            disabled={downloadDisabled}
+            onPress={onDownload}
+            style={({ pressed }) => ({
+              marginLeft: 12,
+              width: 48,
+              minHeight: 48,
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: pressed ? 0.7 : 1,
+            })}
+          >
+            <FeatherIcon
+              name={
+                availabilityError || failedDownload
+                  ? 'rotate-cw'
+                  : downloadDisabled
+                    ? 'wifi-off'
+                    : 'download-cloud'
+              }
+              size={16}
+            />
+          </Pressable>
+        ) : null}
+      </Box>
+    </>
   )
 }
 
@@ -294,6 +304,7 @@ const StrongBibleSourceRow = ({
   onDownload,
   availabilityError,
   downloadDisabled,
+  separated,
 }: {
   versionId: StrongBibleVersionId
   availability?: StrongBibleSidecarAvailability
@@ -303,6 +314,7 @@ const StrongBibleSourceRow = ({
   onDownload: () => void
   availabilityError?: boolean
   downloadDisabled?: boolean
+  separated?: boolean
 }) => {
   const bibleDownload = useDownloadItemStatus(createOfflineCopyId({ kind: 'bible', versionId }))
   const strongDownload = useDownloadItemStatus(
@@ -323,6 +335,7 @@ const StrongBibleSourceRow = ({
       failedDownload={downloads.find(state => state?.status === 'failed')}
       availabilityError={availabilityError}
       downloadDisabled={downloadDisabled}
+      separated={separated}
     />
   )
 }
@@ -335,6 +348,7 @@ const BhgStrongSourceRow = ({
   availabilityError,
   downloadDisabled,
   isChecking,
+  separated,
 }: {
   availability?: BhgLexiconAvailability
   selected: boolean
@@ -343,6 +357,7 @@ const BhgStrongSourceRow = ({
   availabilityError?: boolean
   downloadDisabled?: boolean
   isChecking: boolean
+  separated?: boolean
 }) => {
   const bibleDownload = useDownloadItemStatus(
     createOfflineCopyId({ kind: 'bible', versionId: 'BHG' })
@@ -368,6 +383,7 @@ const BhgStrongSourceRow = ({
       failedDownload={downloads.find(state => state?.status === 'failed')}
       availabilityError={availabilityError}
       downloadDisabled={downloadDisabled}
+      separated={separated}
     />
   )
 }
@@ -565,7 +581,7 @@ export const StrongBibleSourceSheet = ({
             onPress={() => selectSource()}
             style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           >
-            <Box className="border-continuous overflow-hidden flex-row items-center min-h-[76px] px-[16px] py-[10px] border-b-[1px] border-border">
+            <Box className="border-continuous overflow-hidden flex-row items-center min-h-[76px] px-[16px] py-[10px]">
               <Radio
                 className="mr-[12px]"
                 selected={!strongBibleSourceVersionId && resolvedProvenance?.versionId !== 'BHG'}
@@ -578,7 +594,7 @@ export const StrongBibleSourceSheet = ({
             </Box>
           </Pressable>
         }
-        renderItem={({ item }) =>
+        renderItem={({ item, index }) =>
           item.type === 'section' ? (
             <Pressable
               accessibilityRole="button"
@@ -592,8 +608,9 @@ export const StrongBibleSourceSheet = ({
               }
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             >
-              <Box className="border-continuous overflow-hidden min-h-[48px] pl-[20px] pr-[8px] flex-row items-center bg-light-grey border-b-[1px] border-border">
-                <Text className="flex-[1] text-[16px] opacity-[0.8]">{t(item.titleKey)}</Text>
+              {/* A section title on the sheet's ground, which opens or closes its group. */}
+              <Box className="border-continuous overflow-hidden min-h-[48px] pl-[20px] pr-[8px] pt-[8px] flex-row items-center">
+                <Text className="flex-[1] text-[13px] text-grey">{t(item.titleKey)}</Text>
                 <Box className="overflow-hidden border-continuous w-[40px] h-[40px] items-center justify-center">
                   <FeatherIcon
                     name={item.expanded ? 'chevron-down' : 'chevron-right'}
@@ -605,6 +622,7 @@ export const StrongBibleSourceSheet = ({
             </Pressable>
           ) : item.type === 'bhg-source' ? (
             <BhgStrongSourceRow
+              separated
               availability={bhgAvailability}
               availabilityError={availabilityQuery.isError}
               downloadDisabled={!isConnected && !availabilityQuery.isError}
@@ -619,6 +637,7 @@ export const StrongBibleSourceSheet = ({
             />
           ) : (
             <StrongBibleSourceRow
+              separated={index === 0 || sourceListData[index - 1]?.type !== 'section'}
               versionId={item.versionId}
               availability={availabilityByVersion.get(item.versionId)}
               isChecking={availabilityQuery.isPending || availabilityQuery.isFetching}

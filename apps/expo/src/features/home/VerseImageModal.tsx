@@ -101,7 +101,7 @@ const VerseImageModal = ({ modalRef, imageUrls, verseOfTheDay }: Props) => {
           transition={300}
         />
         <LinkBox
-          className="w-[44px] h-[44px] absolute bottom-[10px] left-[10px] bg-reverse items-center justify-center rounded-[20px]"
+          className="w-[44px] h-[44px] absolute bottom-[10px] left-[10px] bg-surface-raised items-center justify-center rounded-full"
           accessibilityLabel={t('accessibility.shareVerseImage')}
           accessibilityState={{ busy: shareIsLoading, disabled: shareIsLoading }}
           disabled={shareIsLoading}

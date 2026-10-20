@@ -12,6 +12,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import { floatingShadow } from '~common/ui/surfaces'
 import { useWorkspaceRoutePanel, workspacePanelClosingAtom } from './useWorkspaceRoutePanel'
 
 const ModalRouteFrame = ({ children }: { children: ReactNode }) => {
@@ -72,7 +73,8 @@ const ModalRouteFrame = ({ children }: { children: ReactNode }) => {
               right: reservedWidth,
               zIndex: 100,
               backgroundColor: theme.colors.reverse,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+              // The close handle floats over the reader: the one shared shadow.
+              ...floatingShadow,
             }}
             accessibilityRole="button"
             accessibilityLabel={t('Fermer')}

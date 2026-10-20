@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Linking, Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinkBox, type LinkProps } from '~common/Link'
+import Border from '~common/ui/Border'
 import Box, { HStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -18,8 +19,9 @@ const FooterLink = ({ children, ...props }: PropsWithChildren<LinkProps<keyof Ma
 )
 
 /**
- * Follow and FAQ. Touch layouts keep the two buttons on a raised panel that also leaves room
- * for the close button; the wide Web home lists them as links, with the app download.
+ * Follow and FAQ. Touch layouts keep the two buttons on a surface band, its top corners at the
+ * hub's large radius, that also leaves room for the close button; the wide Web home lists them
+ * as links under a hairline, with the app download.
  */
 const HomeFooter = () => {
   const { t } = useTranslation()
@@ -28,21 +30,21 @@ const HomeFooter = () => {
 
   if (Platform.OS === 'web' && isWide)
     return (
-      <HStack className="items-center flex-wrap gap-[24px] border-t border-border mx-[20px] pt-[16px] pb-[32px]">
-        <FooterLink href="https://www.facebook.com/fr.bible.strong">{t('Suivre')}</FooterLink>
-        <FooterLink route="FAQ">{t('FAQ')}</FooterLink>
-        <FooterLink href="https://bible-strong.app">{t('home.desktop.downloadApp')}</FooterLink>
-      </HStack>
+      <Box className="mx-[20px]">
+        <Border />
+        <HStack className="items-center flex-wrap gap-[24px] pt-[16px] pb-[32px]">
+          <FooterLink href="https://www.facebook.com/fr.bible.strong">{t('Suivre')}</FooterLink>
+          <FooterLink route="FAQ">{t('FAQ')}</FooterLink>
+          <FooterLink href="https://bible-strong.app">{t('home.desktop.downloadApp')}</FooterLink>
+        </HStack>
+      </Box>
     )
 
   return (
-    <Box className="overflow-hidden border-continuous bg-light-grey">
+    <Box className="overflow-hidden border-continuous">
       <Box
-        className="overflow-hidden border-continuous bg-reverse flex-row px-[20px] pt-[20px]"
-        style={[
-          { paddingBottom: insets.bottom + 100 },
-          { borderTopLeftRadius: 30, borderTopRightRadius: 30 },
-        ]}
+        className="overflow-hidden border-continuous bg-surface flex-row px-[20px] pt-[20px] rounded-t-[24px]"
+        style={{ paddingBottom: insets.bottom + 100 }}
       >
         <Box className="overflow-hidden border-continuous flex-[1]">
           <Button
@@ -58,7 +60,7 @@ const HomeFooter = () => {
         <Box className="overflow-hidden border-continuous w-[20px]" />
         <Box className="overflow-hidden border-continuous flex-[1]">
           <Button
-            color="#2ecc71"
+            success
             route="FAQ"
             leftIcon={
               <FeatherIcon name="help-circle" size={20} color="white" style={{ marginRight: 10 }} />

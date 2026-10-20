@@ -68,7 +68,7 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <HStack className="flex-1 bg-light-grey overflow-hidden">
+    <HStack className="flex-1 bg-canvas overflow-hidden">
       <GlobalCommandPalette />
       <WorkspaceKeyboardShortcuts
         toggleSidebar={() => {

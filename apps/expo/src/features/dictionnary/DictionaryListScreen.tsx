@@ -1,5 +1,3 @@
-import { resolveFontFamily } from '~themes/styleValues'
-import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
@@ -11,11 +9,10 @@ import Empty from '~common/Empty'
 import FiltersHeader from '~common/FiltersHeader'
 import Loading from '~common/Loading'
 import SearchInput from '~common/SearchInput'
-import SectionTitle from '~common/SectionTitle'
 import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
+import { ListSectionTitle } from '~common/ui/ListSection'
 import SectionList from '~common/ui/SectionList'
-import Text from '~common/ui/Text'
 import { getFirstLetterFrom } from '~helpers/alphabet'
 import {
   getDefaultDictionaryWork,
@@ -26,7 +23,7 @@ import {
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { DictionaryTab } from '../../state/tabs'
 import { useInfiniteResultsByLetterOrSearch, useSearchValue } from '../lexique/useUtilities'
-import DictionnaireItem from './DictionnaireItem'
+import DictionnaireItem, { DICTIONNAIRE_ITEM_HEIGHT } from './DictionnaireItem'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 import { useAtom } from 'jotai/react'
@@ -46,9 +43,12 @@ interface DictionarySection {
   data: DictionaryRow[]
 }
 
+/** A letter title: 16 above, an 18 line, 6 below. */
+const SECTION_HEADER_HEIGHT = 40
+
 const getDictionaryItemLayout = sectionListGetItemLayout({
-  getItemHeight: () => 60,
-  getSectionHeaderHeight: () => 50,
+  getItemHeight: () => DICTIONNAIRE_ITEM_HEIGHT,
+  getSectionHeaderHeight: () => SECTION_HEADER_HEIGHT,
   getSeparatorHeight: () => 0,
   getSectionFooterHeight: () => 0,
 })
@@ -95,8 +95,6 @@ const DictionaryListScreen = ({
   newTabId,
   onWordSelect,
 }: DictionaryListScreenProps) => {
-  const stylingTheme = useStylingTheme()
-
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const pushRouteOnce = usePushRouteOnce()
@@ -365,7 +363,9 @@ const DictionaryListScreen = ({
   }
 
   return (
-    <FormSheetScreen isFormSheet={isFormSheet}>
+    // The letter bar sits fixed under the list: while it shows, the page stays above the home
+    // indicator and the tab bar.
+    <FormSheetScreen isFormSheet={isFormSheet} reserveBottom={!searchValue}>
       <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
         <FiltersHeader
           hasBackButton={showBackButton}
@@ -426,12 +426,13 @@ const DictionaryListScreen = ({
             />
           </Box>
         </FiltersHeader>
-        <Box className="overflow-hidden border-continuous flex-[1] pt-[20px]">
+        <Box className="overflow-hidden border-continuous flex-[1]">
           {isLoading ? (
             <Loading message={t('Chargement...')} />
           ) : sectionResults.length ? (
             <SectionList<DictionaryRow, DictionarySection>
-              renderItem={({ item }) => {
+              renderItem={({ item, index, section }) => {
+                const hasSeparator = index < section.data.length - 1
                 if ('sources' in item) {
                   const source =
                     item.sources.find(
@@ -461,6 +462,7 @@ const DictionaryListScreen = ({
                       onSelect={() =>
                         selectWord(source.word, dictionary, source.id, item.correspondenceId)
                       }
+                      hasSeparator={hasSeparator}
                     />
                   )
                 }
@@ -468,6 +470,7 @@ const DictionaryListScreen = ({
                   <DictionnaireItem
                     word={item.word}
                     onSelect={() => selectWord(item.word, selectedDictionary, item.id)}
+                    hasSeparator={hasSeparator}
                   />
                 )
               }}
@@ -479,14 +482,11 @@ const DictionaryListScreen = ({
                 getDictionaryItemLayout((data || []) as DictionarySection[], index)
               }
               renderSectionHeader={({ section: { title } }) => (
-                <SectionTitle color="secondary">
-                  <Text
-                    className="font-bold text-[16px] text-reverse"
-                    style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-                  >
+                <Box className="bg-reverse" style={{ height: SECTION_HEADER_HEIGHT }}>
+                  <ListSectionTitle className="ml-[20px] mt-[16px] mb-[6px] leading-[18px]">
                     {title}
-                  </Text>
-                </SectionTitle>
+                  </ListSectionTitle>
+                </Box>
               )}
               stickySectionHeadersEnabled
               sections={sectionResults}

@@ -18,6 +18,7 @@ import Feather from '@expo/vector-icons/Feather'
 import { domMax, LazyMotion } from 'motion/react'
 import React, { useEffect, useState, useRef } from 'react'
 import { Verse as TVerse } from '~common/types'
+import { floatingShadow, radii } from '~common/ui/surfaces'
 import {
   Dispatch,
   BibleDOMDownloadState,
@@ -81,7 +82,7 @@ import { getVerseSelectionBlocks } from './verseSelectionBlocks'
 // Unified verse renderer
 import { UnifiedVersesRenderer } from './UnifiedVersesRenderer'
 import AnnotationInlineItems from './AnnotationInlineItems'
-import { isDarkTheme } from './utils'
+import { withColorAlpha } from './themeOverlayColor'
 import { getScrollTargetVerse } from './verseRenderingModel'
 import { shouldSuppressVerseGestures } from '~helpers/interlinearDisplayMode'
 import ChapterEntities from './ChapterEntities'
@@ -345,12 +346,11 @@ const ReturnToSelectedVerseButton = styled('button')<
     width: '44px',
     height: '44px',
     borderRadius: '999px',
-    border: `1px solid ${colors[theme].border}`,
-    background: colors[theme].reverse,
+    border: 0,
+    // Floats above the text: the raised surface and the app's one floating shadow
+    background: colors[theme].surfaceRaised,
     color: colors[theme].primary,
-    boxShadow: isDarkTheme(theme)
-      ? '0 8px 24px rgba(0, 0, 0, 0.45)'
-      : '0 8px 24px rgba(0, 0, 0, 0.18)',
+    ...floatingShadow,
     fontFamily,
     fontSize: '22px',
     lineHeight: '22px',
@@ -412,9 +412,10 @@ const ErrorButton = styled('button')<RootStyles & { $secondary?: boolean }>(
   ({ settings: { theme, colors, fontFamily }, $secondary }) => ({
     minHeight: '44px',
     padding: '0 18px',
-    borderRadius: '8px',
-    border: `1px solid ${$secondary ? colors[theme].border : colors[theme].primary}`,
-    background: $secondary ? colors[theme].reverse : colors[theme].primary,
+    borderRadius: `${radii.pill}px`,
+    border: 0,
+    // As the app's buttons: the secondary one is a neutral tint, not an outline
+    background: $secondary ? withColorAlpha(colors[theme].default, 0.07) : colors[theme].primary,
     color: $secondary ? colors[theme].default : colors[theme].reverse,
     fontFamily,
     fontWeight: 700,

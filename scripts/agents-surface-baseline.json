@@ -1,0 +1,417 @@
+{
+  "apps/expo/src/common/Changelog.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/ColorFilterModal.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/ColorPicker.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/ColorPickerModal.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/ContextualPanel/PanelTextForm.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/EntityChipList.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/EntityChipsDOM.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/FilterHeaderButton.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/HighlightTypeIndicator.tsx": {
+    "radius": 0,
+    "shadow": 3,
+    "ground": 0
+  },
+  "apps/expo/src/common/HorizontalControlScrollView.web.tsx": {
+    "radius": 0,
+    "shadow": 1,
+    "ground": 0
+  },
+  "apps/expo/src/common/LineHeightIcon.tsx": {
+    "radius": 3,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/Login.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/MigrationModal.tsx": {
+    "radius": 2,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/RenameModal.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/sheet-expo-ui.tsx": {
+    "radius": 0,
+    "shadow": 1,
+    "ground": 0
+  },
+  "apps/expo/src/common/sheet.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/SheetSearchInput.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/SwitchButton.tsx": {
+    "radius": 1,
+    "shadow": 2,
+    "ground": 0
+  },
+  "apps/expo/src/common/ui/Checkbox.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/ui/Chip.tsx": {
+    "radius": 1,
+    "shadow": 2,
+    "ground": 0
+  },
+  "apps/expo/src/common/ui/Fab.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/ui/FabButton.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/ui/FormSheetScreen.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/ui/NewChip.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/ui/ProgressBar.tsx": {
+    "radius": 3,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/ui/TextArea.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/ui/TextInput.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/UnifiedTagsModal.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/vaulBottomSheet.tsx": {
+    "radius": 2,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/common/VerseAccordion.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/bookmarks/BookmarkModal.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/dictionnary/DictionaryDetailTabScreen.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/dictionnary/DictionaryResultItem.tsx": {
+    "radius": 2,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/dictionnary/DictionnaireVerseReference.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/feature-onboarding/components/OnboardingFooter.tsx": {
+    "radius": 2,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/feature-onboarding/FeatureOnboardingModal.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/lexique/LexiqueResultItem.tsx": {
+    "radius": 2,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/lexique/StrongDetailMainPage.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/lexique/StrongDetailUI.tsx": {
+    "radius": 4,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/lexique/StrongEntityPage.tsx": {
+    "radius": 2,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/lexique/StrongEntityRelationGraph.tsx": {
+    "radius": 2,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/migrations/AccountMigrationModal.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/migrations/LocalMigrationGate.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/nave/NaveResultItem.tsx": {
+    "radius": 2,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/onboarding/abel/SceneActionButton.tsx": {
+    "radius": 0,
+    "shadow": 1,
+    "ground": 0
+  },
+  "apps/expo/src/features/onboarding/abel/scenes/GenesisSourceCard.tsx": {
+    "radius": 0,
+    "shadow": 1,
+    "ground": 0
+  },
+  "apps/expo/src/features/onboarding/abel/scenes/NoteCard.tsx": {
+    "radius": 0,
+    "shadow": 1,
+    "ground": 0
+  },
+  "apps/expo/src/features/onboarding/abel/scenes/SceneFourOccurrences.tsx": {
+    "radius": 1,
+    "shadow": 4,
+    "ground": 0
+  },
+  "apps/expo/src/features/onboarding/abel/scenes/SceneOneVerseHighlight.tsx": {
+    "radius": 0,
+    "shadow": 4,
+    "ground": 0
+  },
+  "apps/expo/src/features/onboarding/abel/scenes/SceneSevenReturnToVerse.tsx": {
+    "radius": 0,
+    "shadow": 2,
+    "ground": 0
+  },
+  "apps/expo/src/features/onboarding/abel/scenes/SceneSixRelations.tsx": {
+    "radius": 0,
+    "shadow": 2,
+    "ground": 0
+  },
+  "apps/expo/src/features/onboarding/abel/scenes/SceneThreeStrong.tsx": {
+    "radius": 0,
+    "shadow": 4,
+    "ground": 0
+  },
+  "apps/expo/src/features/onboarding/abel/scenes/SceneTwoLexique.tsx": {
+    "radius": 0,
+    "shadow": 1,
+    "ground": 0
+  },
+  "apps/expo/src/features/onboarding/abel/VerseCard.tsx": {
+    "radius": 0,
+    "shadow": 2,
+    "ground": 0
+  },
+  "apps/expo/src/features/onboarding/AbelOnboarding.tsx": {
+    "radius": 2,
+    "shadow": 2,
+    "ground": 0
+  },
+  "apps/expo/src/features/onboarding/components/OfflineResourceFolderBadge.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/onboarding/components/OfflineResourceFolderItems.tsx": {
+    "radius": 0,
+    "shadow": 1,
+    "ground": 0
+  },
+  "apps/expo/src/features/onboarding/components/OfflineSetupResourceOption.tsx": {
+    "radius": 3,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/onboarding/components/OfflineSetupReviewHeader.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/onboarding/components/OfflineSetupReviewSheet.tsx": {
+    "radius": 3,
+    "shadow": 1,
+    "ground": 0
+  },
+  "apps/expo/src/features/onboarding/DownloadResources.tsx": {
+    "radius": 4,
+    "shadow": 2,
+    "ground": 0
+  },
+  "apps/expo/src/features/onboarding/ResourceItem.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/onboarding/SelectResources.tsx": {
+    "radius": 0,
+    "shadow": 1,
+    "ground": 0
+  },
+  "apps/expo/src/features/passageMediaLibrary/PassageMediaLibraryCard.tsx": {
+    "radius": 0,
+    "shadow": 2,
+    "ground": 0
+  },
+  "apps/expo/src/features/passageMediaLibrary/PassageMediaPlayerScreen.tsx": {
+    "radius": 3,
+    "shadow": 2,
+    "ground": 0
+  },
+  "apps/expo/src/features/plans/Explore/ExploreScreen.tsx": {
+    "radius": 1,
+    "shadow": 2,
+    "ground": 0
+  },
+  "apps/expo/src/features/playground/PlaygroundHome.tsx": {
+    "radius": 3,
+    "shadow": 2,
+    "ground": 0
+  },
+  "apps/expo/src/features/playground/PlaygroundPreferences.tsx": {
+    "radius": 3,
+    "shadow": 2,
+    "ground": 0
+  },
+  "apps/expo/src/features/profile/components/ChangePasswordModal.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/profile/components/DeleteAccountModal.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/profile/components/EmailVerificationModal.tsx": {
+    "radius": 2,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/profile/components/SubscriptionBadge.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/studies/StudiesDOM/StudiesDomWrapper.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/studies/StudyFooter.tsx": {
+    "radius": 3,
+    "shadow": 2,
+    "ground": 0
+  },
+  "apps/expo/src/features/study-assistant/AssistantComposer.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/study-assistant/AssistantLauncherButton.tsx": {
+    "radius": 0,
+    "shadow": 1,
+    "ground": 0
+  },
+  "apps/expo/src/features/study-assistant/AssistantThread.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/study-assistant/ErrorState.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/study-assistant/MessageRenderer.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/study-assistant/widgets/BookWidget.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/studyRelations/EntityRelationsScreen.tsx": {
+    "radius": 1,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/studyRelations/StudyRelationList.tsx": {
+    "radius": 2,
+    "shadow": 0,
+    "ground": 0
+  },
+  "apps/expo/src/features/tips/HelpTip.tsx": {
+    "radius": 1,
+    "shadow": 1,
+    "ground": 0
+  }
+}

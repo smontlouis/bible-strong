@@ -12,6 +12,7 @@ import EntityChipList from '~common/EntityChipList'
 import Link from '~common/Link'
 import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
+import IconTile, { ICON_TILE_SIZE } from '~common/ui/IconTile'
 import Text from '~common/ui/Text'
 
 import { useTranslation } from 'react-i18next'
@@ -38,25 +39,8 @@ const LinkItemContainer = (
   )
 }
 
-const LinkTypeIcon = (
-  componentProps: Omit<UIComponentProps<typeof Box>, keyof { bgColor: string } | 'theme'> &
-    Omit<{ bgColor: string }, 'theme'> & { theme?: AppTheme; className?: string }
-) => {
-  const { theme: _themeOverride, className, ...props } = componentProps
-
-  const { bgColor } = props
-  const resolvedClassName = twMerge(
-    'w-[24px] h-[24px] rounded-[4px] mr-[10px] items-center justify-center',
-    className
-  )
-  return (
-    <Box
-      {...props}
-      style={[{ backgroundColor: bgColor }, props.style] as UIComponentProps<typeof Box>['style']}
-      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
-    />
-  )
-}
+/** Where the row's text starts, after its 20pt gutter, its icon tile and the gap. */
+const TEXT_INSET = 20 + ICON_TILE_SIZE + 12
 
 type TLink = {
   linkId: string
@@ -91,13 +75,14 @@ const BibleLinkItem = ({ item, onPress, relationCount, onRelationPress }: Props)
   return (
     <Box className="overflow-hidden border-continuous">
       <LinkItemContainer onPress={() => onPress(item.linkId)}>
-        <LinkTypeIcon bgColor={config.color} className="mt-[-4px]">
+        {/* A brand fill with a white glyph: a tint would lose the black brands in dark themes. */}
+        <IconTile bg={config.color} className="mr-[12px]">
           {config.textIcon ? (
-            <Text className="font-bold text-[12px] text-[white]">{config.textIcon}</Text>
+            <Text className="font-bold text-[14px] text-[white]">{config.textIcon}</Text>
           ) : (
-            <FeatherIcon name={iconName} size={14} color="white" />
+            <FeatherIcon name={iconName} size={16} color="white" />
           )}
-        </LinkTypeIcon>
+        </IconTile>
         <Box className="overflow-hidden border-continuous flex-[1]">
           <Text className="text-[12px] text-dark-grey" numberOfLines={1}>
             {!!item.reference && (
@@ -131,7 +116,7 @@ const BibleLinkItem = ({ item, onPress, relationCount, onRelationPress }: Props)
           <LinkOptionsPanel linkId={item.linkId} onRelations={onRelationPress} />
         </Box>
       </LinkItemContainer>
-      <Border className="mx-[20px]" />
+      <Border style={{ marginLeft: TEXT_INSET }} />
     </Box>
   )
 }

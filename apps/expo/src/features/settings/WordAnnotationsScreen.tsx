@@ -1,5 +1,5 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
-import { useEffect, useRef } from 'react'
+import { Fragment, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FlatList, Platform, Text as NativeText, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
@@ -15,9 +15,10 @@ import ChoiceFilterModal from '~common/ChoiceFilterModal'
 import ColorFilterModal from '~common/ColorFilterModal'
 import FiltersHeader from '~common/FiltersHeader'
 import type { SheetRef } from '~common/sheet'
-import Box from '~common/ui/Box'
+import Border from '~common/ui/Border'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import Container from '~common/ui/Container'
-import Text from '~common/ui/Text'
+import { ListSectionTitle } from '~common/ui/ListSection'
 import { getAnnotationGroupVerseKey } from '~features/entityListQuery/wordAnnotationsQuery'
 import { getBibleViewParamsForVerseKeys } from '~features/studyRelations/openableStudyObjects'
 import { isBookInTestament } from '~helpers/bibleBookCatalog'
@@ -42,10 +43,7 @@ const TabContainer = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const resolvedClassName = twMerge(
-    'flex-row bg-reverse border-b-[1px] border-b-border px-[16px]',
-    className
-  )
+  const resolvedClassName = twMerge('flex-row bg-reverse px-[16px]', className)
   return (
     <View
       {...props}
@@ -107,7 +105,7 @@ const TabText = (
   )
 }
 
-const AnnotationCard = (
+const AnnotationRow = (
   componentProps: Omit<UIComponentProps<typeof TouchableOpacity>, 'theme'> & {
     theme?: AppTheme
     className?: string
@@ -115,10 +113,7 @@ const AnnotationCard = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const resolvedClassName = twMerge(
-    'bg-reverse mx-[16px] my-[8px] p-[16px] rounded-[8px] border-[1px] border-border',
-    className
-  )
+  const resolvedClassName = twMerge('px-[20px] py-[14px]', className)
   return (
     <TouchableOpacity
       {...props}
@@ -203,6 +198,7 @@ const EmptyText = (
 const WordAnnotationsScreen = () => {
   const { t } = useTranslation()
   const pushRouteOnce = usePushRouteOnce()
+  const bottomInset = usePageBottomInset()
   const [queryState, setQueryState] = useAtom(wordAnnotationsListQueryAtom)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const colorModalRef = useRef<SheetRef>(null)
@@ -392,8 +388,8 @@ const WordAnnotationsScreen = () => {
     })
   }
 
-  // Render annotation card
-  const renderAnnotationCard = (annotation: WordAnnotation & { id: string }) => {
+  // Render annotation row, after a hairline when it follows another row
+  const renderAnnotationRow = (annotation: WordAnnotation & { id: string }, index: number) => {
     // Combine all text from ranges
     const allText = annotation.ranges.map(r => r.text).join(' ... ')
     const reference = verseToReference(
@@ -401,13 +397,16 @@ const WordAnnotationsScreen = () => {
     )
 
     return (
-      <AnnotationCard key={annotation.id} onPress={() => handleAnnotationPress(annotation)}>
-        <AnnotationText numberOfLines={3}>{allText}</AnnotationText>
-        <AnnotationMeta>
-          {reference} • {annotation.version}
-          {annotation.noteId && ` • ${t('Contient une note')}`}
-        </AnnotationMeta>
-      </AnnotationCard>
+      <Fragment key={annotation.id}>
+        {index > 0 && <Border className="ml-[20px]" />}
+        <AnnotationRow onPress={() => handleAnnotationPress(annotation)}>
+          <AnnotationText numberOfLines={3}>{allText}</AnnotationText>
+          <AnnotationMeta>
+            {reference} • {annotation.version}
+            {annotation.noteId && ` • ${t('Contient une note')}`}
+          </AnnotationMeta>
+        </AnnotationRow>
+      </Fragment>
     )
   }
 
@@ -428,15 +427,15 @@ const WordAnnotationsScreen = () => {
     if (queryState.view === 'verse') {
       return (
         <FlatList
-          contentContainerStyle={pageContentStyle}
+          contentContainerStyle={[pageContentStyle, { paddingBottom: 16 + bottomInset }]}
           data={groupedByVerse}
           keyExtractor={item => item.verseKey}
           renderItem={({ item }) => (
             <Box className="overflow-hidden border-continuous">
-              <Box className="overflow-hidden border-continuous px-[16px] py-[8px]">
-                <Text className="text-[14px] font-bold text-tertiary">{item.reference}</Text>
-              </Box>
-              {item.annotations.map(renderAnnotationCard)}
+              <ListSectionTitle className="ml-[20px] mt-[16px] mb-[6px]">
+                {item.reference}
+              </ListSectionTitle>
+              {item.annotations.map(renderAnnotationRow)}
             </Box>
           )}
         />
@@ -446,15 +445,15 @@ const WordAnnotationsScreen = () => {
     if (queryState.view === 'date') {
       return (
         <FlatList
-          contentContainerStyle={pageContentStyle}
+          contentContainerStyle={[pageContentStyle, { paddingBottom: 16 + bottomInset }]}
           data={groupedByDate}
           keyExtractor={item => item.date}
           renderItem={({ item }) => (
             <Box className="overflow-hidden border-continuous">
-              <Box className="overflow-hidden border-continuous px-[16px] py-[8px]">
-                <Text className="text-[14px] font-bold text-tertiary">{item.label}</Text>
-              </Box>
-              {item.annotations.map(renderAnnotationCard)}
+              <ListSectionTitle className="ml-[20px] mt-[16px] mb-[6px]">
+                {item.label}
+              </ListSectionTitle>
+              {item.annotations.map(renderAnnotationRow)}
             </Box>
           )}
         />
@@ -464,16 +463,16 @@ const WordAnnotationsScreen = () => {
     // Flat list
     return (
       <FlatList
-        contentContainerStyle={pageContentStyle}
+        contentContainerStyle={[pageContentStyle, { paddingBottom: 16 + bottomInset }]}
         data={annotationsList}
         keyExtractor={item => item.id}
-        renderItem={({ item }) => renderAnnotationCard(item)}
+        renderItem={({ item, index }) => renderAnnotationRow(item, index)}
       />
     )
   }
 
   return (
-    <Container className="bg-light-grey flex-[1]">
+    <Container className="flex-[1]">
       <FiltersHeader
         title={t('Annotations')}
         hasBackButton
@@ -771,6 +770,7 @@ const WordAnnotationsScreen = () => {
           <TabText active={queryState.view === 'flat'}>{t('Liste')}</TabText>
         </Tab>
       </TabContainer>
+      <Border />
 
       {renderContent()}
     </Container>

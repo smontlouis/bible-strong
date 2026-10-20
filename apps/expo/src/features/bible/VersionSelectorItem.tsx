@@ -1,9 +1,9 @@
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { twMerge } from '~common/ui/classNames'
-import { resolveThemeColor } from '~themes/colorValues'
+import { colorWithOpacity, resolveThemeColor } from '~themes/colorValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React from 'react'
-import { Linking, Platform, TouchableOpacity } from 'react-native'
+import { Linking, Platform, StyleSheet, TouchableOpacity } from 'react-native'
 import { useQuery } from '@tanstack/react-query'
 import { getDefaultStore } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
@@ -43,31 +43,41 @@ import {
 import useConnection from '~helpers/useConnection'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { localQueryOptions } from '~helpers/queryOptions'
+const ROW_PADDING_LEFT = 20
+const CHECKBOX_SLOT = 48
+
 const VersionItemContainer = ({
   children,
   needsUpdate,
   selected,
+  separatorInset = ROW_PADDING_LEFT,
   onPress,
 }: React.PropsWithChildren<{
   needsUpdate?: boolean
   selected?: boolean
+  /** Where the hairline under the row starts: where its text starts. */
+  separatorInset?: number
   onPress?: () => void
 }>) => {
+  const theme = useStylingTheme()
   const content = (
     <Box
       className={twMerge(
-        'overflow-hidden border-continuous',
-        twMerge(
-          selected ? 'border-l-primary' : needsUpdate ? 'border-l-success' : '',
-          'overflow-hidden min-h-[76px] pl-[20px] pr-[4px] py-[12px] border-border'
-        )
+        'overflow-hidden border-continuous min-h-[76px] pr-[4px] py-[12px]',
+        needsUpdate && 'border-l-success'
       )}
       style={{
-        borderBottomWidth: 1,
-        borderLeftWidth: selected ? 3 : needsUpdate ? 5 : 0,
+        paddingLeft: ROW_PADDING_LEFT,
+        // An update waiting keeps its mark on the edge; the chosen version takes a tint.
+        borderLeftWidth: needsUpdate ? 5 : 0,
+        backgroundColor: selected ? colorWithOpacity(theme.colors.primary, 0.12) : undefined,
       }}
     >
       {children}
+      <Box
+        className="absolute bottom-[0px] right-[0px] bg-separator"
+        style={{ left: separatorInset, height: StyleSheet.hairlineWidth }}
+      />
     </Box>
   )
 
@@ -414,7 +424,7 @@ const VersionSelectorItem = ({
   const renderSelectedIndicator = () => (
     <ActionColumn>
       {isSelected && (
-        <Box className="overflow-hidden border-continuous w-[22px] h-[22px] rounded-[11px] bg-primary items-center justify-center">
+        <Box className="overflow-hidden border-continuous w-[22px] h-[22px] rounded-full bg-primary items-center justify-center">
           <FeatherIcon name="check" size={14} color="white" />
         </Box>
       )}
@@ -434,7 +444,12 @@ const VersionSelectorItem = ({
 
   if (onOpenOfflineDetails) {
     return (
-      <VersionItemContainer needsUpdate={needsUpdate} selected={isSelected}>
+      // With a checkbox, the box says a version is chosen: the row takes no tint.
+      <VersionItemContainer
+        needsUpdate={needsUpdate}
+        selected={isSelected && !showSelectionCheckbox}
+        separatorInset={showSelectionCheckbox ? ROW_PADDING_LEFT + CHECKBOX_SLOT : undefined}
+      >
         <Box className="overflow-visible border-continuous flex-[1] flex-row items-center">
           <TouchableOpacity
             style={{ flex: 1 }}
@@ -484,7 +499,7 @@ const VersionSelectorItem = ({
                   <FeatherIcon name="cloud" size={18} color="primary" />
                   {strongPresent && (
                     <Box
-                      className="overflow-hidden border-continuous absolute right-[-1px] bottom-[-2px] rounded-[7px] bg-primary items-center justify-center"
+                      className="overflow-hidden border-continuous absolute right-[-1px] bottom-[-2px] rounded-full bg-primary items-center justify-center"
                       style={{ width: 14, height: 14 }}
                     >
                       <Text

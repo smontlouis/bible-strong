@@ -70,7 +70,7 @@ const CompareCard = ({
       <Empty
         iconElement={
           <Box
-            className="overflow-hidden border-continuous rounded-[32px] bg-light-grey items-center justify-center"
+            className="overflow-hidden border-continuous rounded-full bg-light-grey items-center justify-center"
             style={{ width: 64, height: 64 }}
           >
             <FeatherIcon name="columns" size={28} color="primary" />

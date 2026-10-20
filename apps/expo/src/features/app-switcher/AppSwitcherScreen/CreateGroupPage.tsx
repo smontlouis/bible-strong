@@ -156,7 +156,7 @@ const CreateGroupPage = memo(
 
     return (
       <AnimatedBox
-        className="overflow-hidden border-continuous flex-[1] bg-reverse rounded-[24px]"
+        className="overflow-hidden border-continuous flex-[1] bg-surface rounded-[24px]"
         style={[{ paddingTop: insets.top }, [{ width }, animatedStyle]]}
       >
         <ScrollView
@@ -165,7 +165,7 @@ const CreateGroupPage = memo(
           scrollEnabled={false}
         >
           <Box className="overflow-hidden border-continuous items-center justify-center absolute top-[0px] right-[0px] left-[0px] bottom-[0px]">
-            <Box className="overflow-hidden border-continuous items-center justify-center bg-reverse p-[20px] rounded-[24px]">
+            <Box className="overflow-hidden border-continuous items-center justify-center p-[20px]">
               <Image
                 source={require('~assets/images/new-group-tab.svg')}
                 style={{ width: 120, height: 120, opacity: 0.3 }}
@@ -174,19 +174,9 @@ const CreateGroupPage = memo(
               />
             </Box>
           </Box>
-          <Box
-            className="overflow-hidden border-continuous flex-row justify-between items-center px-[20px] py-[8px]"
-            style={{
-              shadowColor: 'rgb(89,131,240)',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 7,
-              elevation: 1,
-              overflow: 'visible',
-            }}
-          >
+          <Box className="overflow-hidden border-continuous flex-row justify-between items-center px-[20px] py-[8px]">
             <TouchableBox
-              className="overflow-hidden border-continuous p-[8px] rounded-[24px] bg-reverse"
+              className="overflow-hidden border-continuous p-[8px] rounded-full bg-canvas"
               accessibilityLabel={t('Annuler')}
               accessibilityRole="button"
               onPress={handleCancel}
@@ -195,7 +185,7 @@ const CreateGroupPage = memo(
             </TouchableBox>
 
             <TouchableBox
-              className="overflow-hidden border-continuous p-[8px] rounded-[24px] bg-primary"
+              className="overflow-hidden border-continuous p-[8px] rounded-full bg-primary"
               accessibilityLabel={t('accessibility.createGroup')}
               accessibilityRole="button"
               accessibilityState={{ disabled: isDisabled }}
@@ -227,7 +217,7 @@ const CreateGroupPage = memo(
             <HStack className="gap-[8px] overflow-visible">
               {GROUP_COLORS.map((color, index) => (
                 <TouchableBox
-                  className="overflow-hidden border-continuous w-[32px] h-[32px] rounded-[16px] items-center justify-center"
+                  className="overflow-hidden border-continuous w-[32px] h-[32px] rounded-full items-center justify-center"
                   key={color}
                   accessibilityLabel={t('accessibility.colorOption', { index: index + 1 })}
                   accessibilityRole="radio"
@@ -238,7 +228,7 @@ const CreateGroupPage = memo(
                   }}
                 >
                   {selectedColor === color && (
-                    <Box className="overflow-hidden border-continuous w-[12px] h-[12px] rounded-[6px] bg-[black] opacity-[0.5]" />
+                    <Box className="overflow-hidden border-continuous w-[12px] h-[12px] rounded-full bg-[black] opacity-[0.5]" />
                   )}
                 </TouchableBox>
               ))}

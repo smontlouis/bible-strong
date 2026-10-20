@@ -191,7 +191,7 @@ export default function useVerseSelectionMenu(
           accessibilityRole="button"
           accessibilityLabel={t('Désélectionner')}
           onPress={clearSelectedVerses}
-          className="w-[28px] h-[28px] items-center justify-center rounded-md"
+          className="w-[28px] h-[28px] items-center justify-center rounded-full"
         >
           <FeatherIcon name="x" size={17} color="tertiary" />
         </TouchableBox>

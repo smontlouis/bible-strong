@@ -6,6 +6,7 @@ import Container from './Container'
 
 type Props = BoxProps & {
   isFormSheet?: boolean
+  reserveBottom?: boolean
   children: React.ReactNode
 }
 

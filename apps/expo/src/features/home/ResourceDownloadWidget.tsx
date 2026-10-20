@@ -87,7 +87,7 @@ const ResourceDownloadWidget = ({ identity, title, fileSize, onRetry }: Props) =
 
   return (
     <AnimatedTouchableBox
-      className="overflow-hidden border-continuous items-center justify-center rounded-[20px] mr-[16px] px-[16px] border-[1.5px] border-dashed border-border"
+      className="overflow-hidden border-continuous items-center justify-center rounded-[12px] mr-[16px] px-[16px] border-[1.5px] border-dashed border-border"
       accessibilityRole="button"
       accessibilityLabel={
         isActive ? `${title}. ${t('Téléchargement en cours')}` : `${title}. ${fileSize} Mo`

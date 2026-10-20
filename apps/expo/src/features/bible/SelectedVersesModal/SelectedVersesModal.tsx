@@ -147,7 +147,7 @@ const SelectedVersesModal = ({
               >
                 <Box style={{ width: groupWidth, flexShrink: 0 }}>
                   {expanded && (
-                    <Text className="text-center uppercase text-[11px] font-medium tracking-[1px] text-tertiary opacity-60 py-[10px]">
+                    <Text className="text-center text-[13px] text-grey py-[10px]">
                       {t('tabs.annotate')}
                     </Text>
                   )}
@@ -170,7 +170,7 @@ const SelectedVersesModal = ({
                 </Box>
                 <Box style={{ width: groupWidth, flexShrink: 0 }}>
                   {expanded && (
-                    <Text className="text-center uppercase text-[11px] font-medium tracking-[1px] text-tertiary opacity-60 py-[10px]">
+                    <Text className="text-center text-[13px] text-grey py-[10px]">
                       {t('tabs.study')}
                     </Text>
                   )}
@@ -187,7 +187,7 @@ const SelectedVersesModal = ({
                 </Box>
                 <Box style={{ width: groupWidth, flexShrink: 0 }}>
                   {expanded && (
-                    <Text className="text-center uppercase text-[11px] font-medium tracking-[1px] text-tertiary opacity-60 py-[10px]">
+                    <Text className="text-center text-[13px] text-grey py-[10px]">
                       {t('tabs.share')}
                     </Text>
                   )}

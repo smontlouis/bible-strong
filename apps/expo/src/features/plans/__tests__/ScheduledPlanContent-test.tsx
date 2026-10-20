@@ -20,7 +20,11 @@ jest.mock('expo-router', () => ({
   }),
 }))
 jest.mock('~navigation/usePushRouteOnce', () => ({ usePushRouteOnce: () => mockPush }))
-jest.mock('react-native', () => ({ ScrollView: 'ScrollView', Platform: { OS: 'ios' } }))
+jest.mock('react-native', () => ({
+  ScrollView: 'ScrollView',
+  Platform: { OS: 'ios' },
+  StyleSheet: { hairlineWidth: 1 },
+}))
 jest.mock('expo-image', () => ({ Image: 'Image' }))
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'fr' } }),
@@ -37,7 +41,11 @@ jest.mock('~redux/modules/plan', () => ({
   markEntitySliceAsUnread: (payload: unknown) => mockUnread(payload),
 }))
 jest.mock('~common/Link', () => 'Link')
-jest.mock('~common/ui/Box', () => 'Box')
+jest.mock('~common/ui/Box', () => ({
+  __esModule: true,
+  default: 'Box',
+  usePageBottomInset: () => 0,
+}))
 jest.mock('~common/ui/Text', () => 'Text')
 jest.mock('~common/ui/Button', () => 'Button')
 jest.mock('~common/ui/Icon', () => ({ FeatherIcon: 'Icon' }))

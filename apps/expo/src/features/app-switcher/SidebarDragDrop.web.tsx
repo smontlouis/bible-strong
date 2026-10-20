@@ -25,6 +25,7 @@ import { useTheme } from '~themes/ThemeProvider'
 import { resolveThemeColor } from '~themes/colorValues'
 import Color from 'color'
 import { webFontFamily } from '~helpers/webFontFamily'
+import { floatingShadow, radii } from '~common/ui/surfaces'
 import TabIcon, { tabIconColorConfig } from './utils/getIconByTabType'
 import type {
   SidebarDragGroupProps,
@@ -67,7 +68,7 @@ function PreviewTab({ tab }: { tab: TabItem }) {
         style={{
           width: 20,
           height: 20,
-          borderRadius: 5,
+          borderRadius: radii.mark,
           flexShrink: 0,
           display: 'flex',
           alignItems: 'center',
@@ -96,12 +97,12 @@ function DragPreview({ snapshot }: { snapshot: Snapshot }) {
       data-sidebar-drag-preview
       style={{
         width,
-        borderRadius: 8,
-        background: theme.colors.lightGrey,
+        borderRadius: radii.tile,
+        // The dragged row floats above the sidebar: raised, with the one shared shadow.
+        background: theme.colors.surfaceRaised,
         color: theme.colors.default,
         fontFamily: webFontFamily(theme.fontFamily.text),
-        boxShadow: '0 8px 24px #0003',
-        border: `1px solid ${theme.colors.border}`,
+        ...floatingShadow,
         boxSizing: 'border-box',
         overflow: 'hidden',
         pointerEvents: 'none',

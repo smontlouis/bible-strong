@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Link from '~common/Link'
 import Box, { AnimatedBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import { floatingShadow } from '~common/ui/surfaces'
 import { useMediaQueriesArray } from '~helpers/useMediaQueries'
 import { wpUI } from '~helpers/utils'
 import { offset } from './constants'
@@ -80,16 +81,12 @@ const CurrentYear = ({
     >
       {prevColor && (
         <LinkBox
-          className="absolute bottom-[0px] left-[0px] rounded-tr-[5px] rounded-tl-[5px] bg-reverse items-center justify-center"
+          className="absolute bottom-[0px] left-[0px] rounded-tl-[8px] rounded-tr-[8px] bg-surface-raised items-center justify-center"
           onPress={onPrev}
           style={{
             width: r([30, 40, 60, 60]),
             height: r([30, 40, 60, 60]),
-            shadowColor: 'rgb(89,131,240)',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 7,
-            elevation: 1,
+            ...floatingShadow,
             overflow: 'visible',
           }}
         >
@@ -98,16 +95,12 @@ const CurrentYear = ({
       )}
       {nextColor && (
         <LinkBox
-          className="ml-auto absolute bottom-[0px] right-[0px] rounded-tr-[5px] rounded-tl-[5px] bg-reverse items-center justify-center"
+          className="ml-auto absolute bottom-[0px] right-[0px] rounded-tl-[8px] rounded-tr-[8px] bg-surface-raised items-center justify-center"
           onPress={onNext}
           style={{
             width: r([30, 40, 60, 60]),
             height: r([30, 40, 60, 60]),
-            shadowColor: 'rgb(89,131,240)',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 7,
-            elevation: 1,
+            ...floatingShadow,
             overflow: 'visible',
           }}
         >
@@ -115,7 +108,7 @@ const CurrentYear = ({
         </LinkBox>
       )}
       <Box
-        className="overflow-hidden border-continuous absolute bottom-[0px] w-[100px] h-[30px] items-center justify-center rounded-tl-[5px] rounded-tr-[5px]"
+        className="overflow-hidden border-continuous absolute bottom-[0px] w-[100px] h-[30px] items-center justify-center rounded-tl-[8px] rounded-tr-[8px]"
         pointerEvents="none"
         style={{ left: offset - 50, backgroundColor: resolveThemeColor(stylingTheme, color) }}
       >
@@ -146,15 +139,7 @@ const CurrentYear = ({
       <AnimatedBox
         className="overflow-hidden border-continuous absolute left-[0px] bottom-[0px] h-[3px]"
         style={[
-          {
-            backgroundColor: resolveThemeColor(stylingTheme, color),
-            shadowColor: 'rgb(89,131,240)',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 7,
-            elevation: 1,
-            overflow: 'visible',
-          },
+          { backgroundColor: resolveThemeColor(stylingTheme, color) },
           useAnimatedStyle(() => ({
             width: `${progressInSection.value}%`,
           })),

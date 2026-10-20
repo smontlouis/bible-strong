@@ -300,6 +300,20 @@ Theme palettes live in `src/themes/`. `global.css` is generated from them: run
 edit generated palette values. Use `useTheme` from `~themes/ThemeProvider` when a
 consumer needs JavaScript values. See ADR-0040 for the Bible DOM boundary.
 
+## Surfaces
+
+Pages, cards, rows, radii and shadows follow the chapter « The app » of
+`../../design-system/project/README.md` (ADR-0086). A hub or settings page sits on
+`bg-canvas`, set on its root `Container`, `SafeAreaBox` or `FormSheetScreen`, with its content
+in `ListSection`, `ListRow` and `Card`; a continuous list
+runs full width on the page ground. A page that scrolls runs to the bottom edge: the shared
+`ScrollView`, `FlatList` and `SectionList` pad their content with `usePageBottomInset()`, a raw
+scroll view does it itself, and only a page with fixed bottom content passes `reserveBottom` to
+its container. Take radii from `radii` and the one shadow from
+`floatingShadow` in `~common/ui/surfaces`. `yarn agents:styles:check` refuses new
+departures; when a change removes some, lower `scripts/agents-surface-baseline.json`
+with `node scripts/agents-surface-lint.mjs --update-baseline`.
+
 ## Reanimated 4 Best Practices
 
 This project uses **React Native Reanimated 4.x**. Follow these best practices:

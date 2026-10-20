@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import Link from '~common/Link'
 import type { ComputedPlanItem, OngoingPlan } from '~common/types'
 import Box from '~common/ui/Box'
+import IconTile from '~common/ui/IconTile'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useFireStorage } from './plan.hooks'
@@ -45,18 +46,20 @@ const FollowedPlanCard = ({
       accessibilityHint={t('readingPlans.continue')}
       className="flex-row items-center gap-[12px] px-[16px] py-[12px]"
     >
-      <Box className="w-[40px] h-[40px] rounded-[10px] bg-light-grey overflow-hidden items-center justify-center">
-        {image ? (
+      {image ? (
+        <Box className="w-[40px] h-[40px] rounded-[8px] bg-canvas overflow-hidden">
           <Image
             source={{ uri: image }}
             contentFit="cover"
             accessible={false}
             style={{ width: '100%', height: '100%' }}
           />
-        ) : (
+        </Box>
+      ) : (
+        <IconTile tint="primary" size={40}>
           <FeatherIcon name="book-open" size={18} color="primary" />
-        )}
-      </Box>
+        </IconTile>
+      )}
       <Box className="flex-1 min-w-0 gap-[8px]">
         <Box className="flex-row items-baseline justify-between gap-[8px]">
           <Text className="flex-1 text-default text-[15px] font-bold" numberOfLines={1}>
@@ -70,7 +73,7 @@ const FollowedPlanCard = ({
           accessibilityRole="progressbar"
           accessibilityLabel={detail}
           accessibilityValue={{ min: 0, max: total, now: completed }}
-          className="h-[6px] bg-light-grey rounded-full overflow-hidden"
+          className="h-[6px] bg-canvas rounded-full overflow-hidden"
         >
           <Box className="h-full bg-primary rounded-full" style={{ width: `${percent}%` }} />
         </Box>

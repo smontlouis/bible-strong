@@ -7,7 +7,7 @@ import { useAtom, useSetAtom } from 'jotai/react'
 import Empty from '~common/Empty'
 import FiltersHeader from '~common/FiltersHeader'
 import RenameModal from '~common/RenameModal'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import FabButton from '~common/ui/FabButton'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { useSheet } from '~helpers/useSheet'
@@ -64,6 +64,7 @@ const StudiesScreen = ({
   const dispatch = useDispatch()
   const r = useMediaQueriesArray()
   const [listWidth, setListWidth] = useState(0)
+  const bottomInset = usePageBottomInset()
   const columns =
     Platform.OS === 'web' ? (listWidth >= 1000 ? 4 : listWidth >= 720 ? 3 : 2) : r([2, 2, 3, 3])
 
@@ -190,8 +191,8 @@ const StudiesScreen = ({
     queryState
   )
   return (
-    <FormSheetScreen isFormSheet={isFormSheet}>
-      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
+    <FormSheetScreen className="bg-canvas" isFormSheet={isFormSheet}>
+      <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
         <FiltersHeader
           title={t('Études')}
           hasBackButton={showBackButton}
@@ -264,7 +265,11 @@ const StudiesScreen = ({
             onLayout={event => setListWidth(event.nativeEvent.layout.width)}
             numColumns={columns}
             data={filteredStudies}
-            contentContainerStyle={[pageContentStyle, { paddingBottom: 100 }]}
+            contentContainerStyle={[
+              pageContentStyle,
+              // With the cards' margins: a 20 gutter on the sides, 12 between two cards.
+              { paddingHorizontal: 14, paddingTop: 10, paddingBottom: 100 + bottomInset },
+            ]}
             keyExtractor={item => item.id}
             renderItem={({ item }) => {
               const endpoint = createStudyEndpoint(item.id, item.title)

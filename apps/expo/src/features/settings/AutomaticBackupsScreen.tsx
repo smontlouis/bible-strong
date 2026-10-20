@@ -11,7 +11,9 @@ import Header from '~common/Header'
 import { toast } from '~helpers/toast'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
+import Card from '~common/ui/Card'
 import Container from '~common/ui/Container'
+import ListSection from '~common/ui/ListSection'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
 import { autoBackupManager, BackupInfo } from '~helpers/AutoBackupManager'
@@ -20,13 +22,13 @@ const AutomaticBackupsScreen = () => {
   const { t } = useTranslation()
 
   return (
-    <Container>
+    <Container className="bg-canvas">
       <Header hasBackButton title={t('backups.title')} />
-      <ScrollView style={{ flex: 1 }}>
-        <Box className="overflow-hidden border-continuous px-[20px] mt-[20px]">
-          <Text className="text-quart text-[12px]">{t('backups.description')}</Text>
-          <AutoBackupsList />
-        </Box>
+      <ScrollView backgroundColor="canvas" style={{ flex: 1 }}>
+        <Text className="mx-[24px] mb-[22px] text-[14px] leading-[20px] text-grey">
+          {t('backups.description')}
+        </Text>
+        <AutoBackupsList />
       </ScrollView>
     </Container>
   )
@@ -133,17 +135,27 @@ const AutoBackupsList = () => {
   }
 
   if (isLoading) {
-    return <Text className="mt-[10px]">{t('backups.loading')}</Text>
+    return (
+      <Card className="mx-[20px] mb-[22px] p-[16px]">
+        <Text className="text-[15px] text-grey text-center">{t('backups.loading')}</Text>
+      </Card>
+    )
   }
 
   if (backups.length === 0) {
-    return <Text className="mt-[10px] text-grey text-center">{t('backups.none')}</Text>
+    return (
+      <Card className="mx-[20px] mb-[22px] p-[16px]">
+        <Text className="text-[15px] leading-[21px] text-grey text-center">
+          {t('backups.none')}
+        </Text>
+      </Card>
+    )
   }
 
   return (
-    <Box className="overflow-hidden border-continuous mt-[10px]">
-      <Box className="overflow-hidden border-continuous flex-row justify-between items-center mb-[10px]">
-        <Text className="text-[12px] text-grey">
+    <>
+      <Box className="flex-row justify-between items-center gap-[12px] ml-[24px] mr-[20px] mb-[9px]">
+        <Text className="flex-1 text-[13px] text-grey">
           {t('backups.count', { count: backups.length })} -{' '}
           {(backups.reduce((acc, b) => acc + b.size, 0) / 1024).toFixed(0)} KB
         </Text>
@@ -153,78 +165,80 @@ const AutoBackupsList = () => {
           disabled={isFetching}
           style={{ paddingHorizontal: 10 }}
         >
-          <Text className="text-[11px]">{isFetching ? '...' : t('backups.refresh')}</Text>
+          <Text className="text-[13px] font-bold text-white">
+            {isFetching ? '...' : t('backups.refresh')}
+          </Text>
         </Button>
       </Box>
-      {backups.map(backup => (
-        <Box
-          className="overflow-hidden border-continuous mb-[10px] p-[10px] bg-[rgba(0,0,0,0.05)] rounded-[5px]"
-          key={backup.filename}
-        >
-          <Text className="text-[14px] font-bold">
-            {format(backup.timestamp, 'dd/MM/yyyy à HH:mm:ss')}
-          </Text>
-          <Text className="text-[12px] text-grey mt-[5px]">
-            {t('backups.size')}: {(backup.size / 1024).toFixed(1)} KB
-          </Text>
-          {backup.stats && (
-            <Text className="text-[11px] text-grey mt-[3px]">
-              {backup.stats.highlightsCount > 0 &&
-                `${t('backups.highlights', { count: backup.stats.highlightsCount })} • `}
-              {backup.stats.notesCount > 0 &&
-                `${t('backups.notes', { count: backup.stats.notesCount })} • `}
-              {backup.stats.bookmarksCount > 0 &&
-                `${t('backups.bookmarks', { count: backup.stats.bookmarksCount })} • `}
-              {backup.stats.linksCount > 0 &&
-                `${t('backups.links', { count: backup.stats.linksCount })} • `}
-              {backup.stats.tagsCount > 0 &&
-                `${t('backups.tags', { count: backup.stats.tagsCount })} • `}
-              {backup.stats.studiesCount > 0 &&
-                `${t('backups.studies', { count: backup.stats.studiesCount })} • `}
-              {backup.stats.tabsCount > 0 &&
-                `${t('backups.tabs', { count: backup.stats.tabsCount })}`}
+      <ListSection>
+        {backups.map(backup => (
+          <Box className="px-[14px] py-[12px]" key={backup.filename}>
+            <Text className="text-[15px] font-bold">
+              {format(backup.timestamp, 'dd/MM/yyyy à HH:mm:ss')}
             </Text>
-          )}
-          <Box className="overflow-hidden border-continuous flex-row mt-[10px]">
-            <Button
-              style={{ width: 100, marginRight: 10 }}
-              small
-              onPress={() => handleRestore(backup)}
-              disabled={restoreMutation.isPending}
-            >
-              <Text
-                className="text-[12px]"
-                style={{ opacity: restoreMutation.isPending ? 0.4 : 1 }}
-              >
-                {t('backups.restore')}
+            <Text className="text-[13px] text-grey mt-[2px]">
+              {t('backups.size')}: {(backup.size / 1024).toFixed(1)} KB
+            </Text>
+            {backup.stats && (
+              <Text className="text-[13px] leading-[18px] text-grey mt-[2px]">
+                {backup.stats.highlightsCount > 0 &&
+                  `${t('backups.highlights', { count: backup.stats.highlightsCount })} • `}
+                {backup.stats.notesCount > 0 &&
+                  `${t('backups.notes', { count: backup.stats.notesCount })} • `}
+                {backup.stats.bookmarksCount > 0 &&
+                  `${t('backups.bookmarks', { count: backup.stats.bookmarksCount })} • `}
+                {backup.stats.linksCount > 0 &&
+                  `${t('backups.links', { count: backup.stats.linksCount })} • `}
+                {backup.stats.tagsCount > 0 &&
+                  `${t('backups.tags', { count: backup.stats.tagsCount })} • `}
+                {backup.stats.studiesCount > 0 &&
+                  `${t('backups.studies', { count: backup.stats.studiesCount })} • `}
+                {backup.stats.tabsCount > 0 &&
+                  `${t('backups.tabs', { count: backup.stats.tabsCount })}`}
               </Text>
-            </Button>
-            <Button
-              style={{ width: 100 }}
-              small
-              reverse
-              onPress={() => handleExport(backup)}
-              disabled={exportMutation.isPending}
-            >
-              <Text
-                className="text-[12px]"
-                style={{
-                  opacity:
-                    exportMutation.isPending &&
-                    exportMutation.variables?.filename === backup.filename
-                      ? 0.4
-                      : 1,
-                }}
+            )}
+            <Box className="flex-row mt-[12px]">
+              <Button
+                style={{ width: 100, marginRight: 10 }}
+                small
+                onPress={() => handleRestore(backup)}
+                disabled={restoreMutation.isPending}
               >
-                {exportMutation.isPending && exportMutation.variables?.filename === backup.filename
-                  ? '...'
-                  : t('backups.export')}
-              </Text>
-            </Button>
+                <Text
+                  className="text-[13px] font-bold text-white"
+                  style={{ opacity: restoreMutation.isPending ? 0.4 : 1 }}
+                >
+                  {t('backups.restore')}
+                </Text>
+              </Button>
+              <Button
+                style={{ width: 100 }}
+                small
+                reverse
+                onPress={() => handleExport(backup)}
+                disabled={exportMutation.isPending}
+              >
+                <Text
+                  className="text-[13px] font-bold"
+                  style={{
+                    opacity:
+                      exportMutation.isPending &&
+                      exportMutation.variables?.filename === backup.filename
+                        ? 0.4
+                        : 1,
+                  }}
+                >
+                  {exportMutation.isPending &&
+                  exportMutation.variables?.filename === backup.filename
+                    ? '...'
+                    : t('backups.export')}
+                </Text>
+              </Button>
+            </Box>
           </Box>
-        </Box>
-      ))}
-    </Box>
+        ))}
+      </ListSection>
+    </>
   )
 }
 

@@ -19,6 +19,7 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { MainStackProps } from '~navigation/type'
 import { Theme } from '~themes'
+import { colorWithOpacity } from '~themes/colorValues'
 
 interface Props {
   children: React.ReactNode
@@ -58,9 +59,8 @@ const buttonStyles = ({
   success,
   fullWidth,
 }: WrapperButtonProps): ViewStyle => ({
-  backgroundColor: reverse ? theme.colors.reverse : theme.colors.primary,
-  borderWidth: reverse ? 1 : 0,
-  borderColor: theme.colors.border,
+  // The secondary button is a neutral tint, not an outline: a border only marks fields and selection.
+  backgroundColor: reverse ? colorWithOpacity(theme.colors.default, 0.07) : theme.colors.primary,
   borderRadius: 24,
   height: 48,
   alignItems: 'center',

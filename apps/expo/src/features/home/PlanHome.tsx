@@ -6,8 +6,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import Link from '~common/Link'
 import type { Plan } from '~common/types'
 import Box from '~common/ui/Box'
+import Card from '~common/ui/Card'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
+import { ListRow, ListSeparator } from '~common/ui/ListSection'
 import {
   useComputedPlanItems,
   useDownloadFollowedPlans,
@@ -19,6 +21,9 @@ import FollowedPlanCard from '~features/plans/FollowedPlanCard'
 import useLanguage from '~helpers/useLanguage'
 import { addPlan } from '~redux/modules/plan'
 import type { RootState } from '~redux/modules/reducer'
+
+/** Where the text of a `FollowedPlanCard` row starts: its padding, its 40-point cover and the gap. */
+const FOLLOWED_PLAN_TEXT_INSET = 16 + 40 + 12
 
 const readResponseText = async (response: Response): Promise<string> => {
   if (!response.ok) {
@@ -111,31 +116,28 @@ const PlanHome = () => {
 
   if (!followed.length) {
     return (
-      <Link route="Plans" accessibilityLabel={t('readingPlans.explorePlans')}>
-        <Box className="bg-reverse rounded-[20px] p-[18px] flex-row items-center gap-[14px]">
-          <Box className="w-[48px] h-[48px] rounded-[14px] bg-light-grey items-center justify-center">
-            <FeatherIcon name="book-open" size={24} color="primary" />
-          </Box>
-          <Box className="flex-1 gap-[5px]">
-            <Text className="text-default font-bold text-[16px]">
-              {t('readingPlans.explorePlans')}
-            </Text>
-            <Text className="text-grey text-[13px]">{t('readingPlans.readAtYourPace')}</Text>
-          </Box>
-          <FeatherIcon name="chevron-right" size={20} color="primary" />
-        </Box>
-      </Link>
+      <Card>
+        <ListRow
+          route="Plans"
+          accessibilityLabel={t('readingPlans.explorePlans')}
+          icon={<FeatherIcon name="book-open" size={18} color="primary" />}
+          iconTint="primary"
+          label={t('readingPlans.explorePlans')}
+          description={t('readingPlans.readAtYourPace')}
+        />
+      </Card>
     )
   }
 
   return (
-    <Box className="bg-reverse rounded-[18px] overflow-hidden shadow-[0_2px_7px_rgba(89,131,240,0.1)]">
+    <Card>
       {followed.map(({ plan, participation }, index) => (
-        <Box key={plan.id} className={index ? 'border-t border-border' : undefined}>
+        <Box key={plan.id}>
+          {index > 0 && <ListSeparator inset={FOLLOWED_PLAN_TEXT_INSET} />}
           <FollowedPlanCard plan={plan} participation={participation} />
         </Box>
       ))}
-    </Box>
+    </Card>
   )
 }
 

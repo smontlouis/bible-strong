@@ -12,14 +12,14 @@ export default function SelectionMenuTabs({
   onChange: (index: number) => void
 }) {
   return (
-    <Box className="flex-row bg-light-grey rounded-lg p-[2px] mx-[2px] mt-[6px] mb-[6px]">
+    <Box className="flex-row bg-light-grey rounded-full p-[2px] mx-[2px] mt-[6px] mb-[6px]">
       {labels.map((label, index) => (
         <TouchableBox
           key={label}
           accessibilityRole="tab"
           accessibilityState={{ selected: index === activeIndex }}
           onPress={() => onChange(index)}
-          className={`flex-1 items-center py-[5px] rounded-md ${index === activeIndex ? 'bg-reverse' : ''}`}
+          className={`flex-1 items-center py-[5px] rounded-full ${index === activeIndex ? 'bg-reverse' : ''}`}
         >
           <Text
             className={`text-[12px] ${index === activeIndex ? 'font-bold text-default' : 'text-tertiary'}`}

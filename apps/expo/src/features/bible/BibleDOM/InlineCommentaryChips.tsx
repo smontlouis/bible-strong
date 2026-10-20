@@ -4,6 +4,7 @@ import {
 } from '~features/commentaries/commentaryAvatarIdentity'
 import { formatCommentaryExcerpt } from '~features/commentaries/commentaryExcerpt'
 import type { InlineCommentaryChip } from '~features/commentaries/inlineCommentaryPlacement'
+import { radii } from '~common/ui/surfaces'
 import type { RootStyles } from './BibleDOMWrapper'
 import { useDispatch } from './DispatchProvider'
 import { OPEN_INLINE_COMMENTARY } from './dispatch'
@@ -31,7 +32,7 @@ export default function InlineCommentaryChips({
         flexDirection: 'column',
         gap: 14,
         padding: 14,
-        borderRadius: 18,
+        borderRadius: radii.card,
         background: colors.lightGrey,
         margin: '8px 0 14px',
         userSelect: 'none',
@@ -55,7 +56,7 @@ export default function InlineCommentaryChips({
           }
           style={{
             border: 0,
-            borderRadius: 9,
+            borderRadius: radii.tile,
             background: 'transparent',
             color: colors.tertiary,
             fontSize: 12,
@@ -101,7 +102,7 @@ export default function InlineCommentaryChips({
                     fontSize: 11,
                     lineHeight: 1.4,
                     background: colors.lightPrimary,
-                    borderRadius: 7,
+                    borderRadius: radii.tile,
                     padding: '2px 6px',
                   }}
                 >

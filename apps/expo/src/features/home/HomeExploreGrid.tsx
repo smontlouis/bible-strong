@@ -22,7 +22,8 @@ type ExploreCard = {
   description: string
   image: ImageSource
   /**
-   * Transparent illustration drawn on a tint. The bust always sits on the bottom edge of the tint;
+   * Transparent illustration drawn on a tint, which belongs to the illustration and so keeps its
+   * own light colour in every theme. The bust always sits on the bottom edge of the tint;
    * `drop` lowers the art by that many points when an object in front of the bust (a scroll)
    * should spill onto the text area.
    */
@@ -30,7 +31,10 @@ type ExploreCard = {
   link: Pick<LinkProps<keyof MainStackProps>, 'route' | 'params' | 'onPress'>
 }
 
-/** Editorial entries of the home, all in the same card: image, title, one-line hint. */
+/**
+ * Editorial entries of the home, all in the same card on the canvas: image, title, one-line hint.
+ * The card keeps its overflow visible so the illustration can rise above it.
+ */
 const HomeExploreGrid = () => {
   const { t } = useTranslation()
   const { content } = useHomeLayout()
@@ -95,11 +99,11 @@ const HomeExploreGrid = () => {
           {...card.link}
           accessibilityLabel={card.title}
           accessibilityHint={card.description}
-          className="rounded-[18px] bg-reverse shadow-[0_2px_7px_rgba(89,131,240,0.1)]"
+          className="rounded-[16px] bg-surface"
         >
           {card.art ? (
             <Box
-              className="rounded-t-[18px] z-10"
+              className="rounded-t-[16px] z-10"
               style={{ height: TINT_HEIGHT, backgroundColor: card.art.tint, overflow: 'visible' }}
             >
               <Image
@@ -118,7 +122,7 @@ const HomeExploreGrid = () => {
             </Box>
           ) : (
             <Box
-              className="rounded-t-[18px] overflow-hidden bg-light-grey"
+              className="rounded-t-[16px] overflow-hidden bg-canvas"
               style={{ height: TINT_HEIGHT }}
             >
               <Image

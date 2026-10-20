@@ -17,6 +17,7 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
 import { FeatherIcon } from '~common/ui/Icon'
+import { radii } from '~common/ui/surfaces'
 import { useDailyMeditation, useLocalReadingDate } from './useDailyMeditation'
 
 export interface DailyMeditationCardProps {
@@ -63,7 +64,7 @@ const DailyMeditationCard = ({
       className={
         desktop
           ? 'flex-1 p-[24px] pb-[12px]'
-          : 'overflow-hidden border-continuous px-[20px] rounded-[30px] bg-reverse py-[20px]'
+          : 'overflow-hidden border-continuous px-[20px] rounded-[24px] bg-surface py-[20px]'
       }
       style={desktop ? style : { height: 280 }}
     >
@@ -183,7 +184,7 @@ const DailyMeditationCard = ({
               <Image
                 source={{ uri: cover }}
                 contentFit="cover"
-                style={{ width: 24, height: 24, borderRadius: 5 }}
+                style={{ width: 24, height: 24, borderRadius: radii.mark }}
                 accessibilityIgnoresInvertColors
               />
             )}

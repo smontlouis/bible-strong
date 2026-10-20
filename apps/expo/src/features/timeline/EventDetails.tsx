@@ -7,6 +7,7 @@ import useTimelineLanguage from './useTimelineLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
+import { radii } from '~common/ui/surfaces'
 import { calculateLabel } from './constants'
 import { TimelineEventDetail, TimelineEvent as TimelineEventProps } from './types'
 import { Image } from 'expo-image'
@@ -98,7 +99,7 @@ export const EventDetailsContent = ({
       {image && (
         <Box className="overflow-hidden border-continuous items-center justify-center my-[30px]">
           <Image
-            style={{ width: 150, height: 150, borderRadius: 10 }}
+            style={{ width: 150, height: 150, borderRadius: radii.control }}
             source={{
               uri: image,
             }}

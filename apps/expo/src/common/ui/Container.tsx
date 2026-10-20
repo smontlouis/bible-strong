@@ -5,8 +5,9 @@ import Box, { BoxProps, SafeAreaBox } from './Box'
 const Container = ({
   isSafe = true,
   isPadding = true,
+  reserveBottom = false,
   ...props
-}: BoxProps & { isSafe?: boolean; isPadding?: boolean }) => {
+}: BoxProps & { isSafe?: boolean; isPadding?: boolean; reserveBottom?: boolean }) => {
   if (!isSafe)
     return (
       <Box
@@ -20,6 +21,7 @@ const Container = ({
   return (
     <SafeAreaBox
       isPadding={isPadding}
+      reserveBottom={reserveBottom}
       {...props}
       className={twMerge(
         'overflow-hidden border-continuous',

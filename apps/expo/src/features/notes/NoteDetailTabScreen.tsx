@@ -15,7 +15,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import EntityChipList from '~common/EntityChipList'
 import Header from '~common/Header'
 import { VerseIds } from '~common/types'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Fab from '~common/ui/Fab'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
@@ -100,6 +100,7 @@ const NoteDetailTabScreen = ({
   const editorLayoutYRef = useRef(0)
   const cursorBottomRef = useRef(0)
   const { bottomBarHeight } = useBottomBarHeightInTab()
+  const bottomInset = usePageBottomInset()
   const { colorScheme } = useCurrentThemeSelector()
   const fontSizeScale = useSelector((state: RootState) => state.user.bible.settings.fontSizeScale)
   const isCreating = !noteId
@@ -493,7 +494,7 @@ ${currentNote.description}
             {
               maxWidth: 600,
               padding: 20,
-              paddingBottom: isEditing ? 20 : insets.bottom + 100,
+              paddingBottom: isEditing ? 20 : bottomInset + 100,
             },
           ]}
         >
@@ -591,7 +592,12 @@ ${currentNote.description}
     </Box>
   )
 
-  return <FormSheetScreen isFormSheet={isFormSheet}>{content}</FormSheetScreen>
+  // While editing, the page keeps its bottom save bar above the home indicator and the tab bar.
+  return (
+    <FormSheetScreen isFormSheet={isFormSheet} reserveBottom={isEditing}>
+      {content}
+    </FormSheetScreen>
+  )
 }
 
 export default NoteDetailTabScreen

@@ -42,7 +42,7 @@
   color: var(--command-muted);
   border: 1px solid var(--command-border);
   padding: 3px 5px;
-  border-radius: 5px;
+  border-radius: 4px;
 }
 .bs-command [cmdk-list] {
   max-height: min(360px, 50vh);
@@ -85,7 +85,7 @@
   width: 28px;
   height: 28px;
   flex-shrink: 0;
-  border-radius: 7px;
+  border-radius: 8px;
 }
 .bs-command-item-text {
   overflow: hidden;
@@ -131,7 +131,8 @@
   width: min(620px, calc(100vw - 32px));
   outline: none;
   border-radius: 16px;
-  box-shadow: 0 24px 80px #0003;
+  /* floatingShadow in apps/expo/src/common/ui/surfaces.ts */
+  box-shadow: 0 6px 20px rgba(16, 27, 53, 0.14);
 }
 .bs-command-sr-only {
   position: absolute;
@@ -202,7 +203,7 @@
   max-width: 45%;
   padding: 6px 8px;
   border: none;
-  border-radius: 7px;
+  border-radius: 8px;
   background: var(--command-active);
   color: var(--command-text);
   font: inherit;
@@ -274,7 +275,7 @@
   justify-content: center;
   width: 28px;
   height: 28px;
-  border-radius: 7px;
+  border-radius: 8px;
   flex-shrink: 0;
 }
 
@@ -358,10 +359,11 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
+/* Inner panels of the guide: a tinted ground, not an outline. */
 .bs-command-help-search > div {
   padding: 14px;
-  border: 1px solid var(--command-border);
-  border-radius: 10px;
+  background: var(--command-panel);
+  border-radius: 12px;
 }
 .bs-command-help-tools {
   grid-column: 1 / -1;
@@ -393,14 +395,14 @@
   background: var(--command-active);
   color: var(--command-text);
   padding: 3px 7px;
-  border-radius: 5px;
+  border-radius: 4px;
   font-size: 11px;
 }
 
 .bs-command-help-search .bs-command-help-example {
   margin-top: 10px;
   padding: 6px 8px;
-  border-radius: 5px;
+  border-radius: 4px;
   background: var(--command-active);
   color: var(--command-text);
   font-size: 12px;

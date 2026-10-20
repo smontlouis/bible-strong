@@ -144,7 +144,7 @@ const BookItem = memo(
                     <Box
                       className={twMerge(
                         isSelectedChapter ? 'bg-light-grey' : 'bg-opacity5',
-                        'overflow-hidden border-continuous rounded-[6px] h-[60px] items-center justify-center'
+                        'overflow-hidden border-continuous rounded-[8px] h-[60px] items-center justify-center'
                       )}
                       style={{ width: ITEM_WIDTH }}
                     >

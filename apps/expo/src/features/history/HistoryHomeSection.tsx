@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import HorizontalControlScrollView from '~common/HorizontalControlScrollView'
 import Link from '~common/Link'
 import Box, { HStack, VStack } from '~common/ui/Box'
+import Card from '~common/ui/Card'
+import { ListSectionTitle } from '~common/ui/ListSection'
 import Text from '~common/ui/Text'
 import { historyAtom } from '~state/app'
 import {
@@ -24,13 +26,16 @@ const SeeAll = () => {
   )
 }
 
-/** `stretch`: grid cell of the wide home, filling its column instead of capping its width. */
+/**
+ * One entry as a small card on the home's canvas. `stretch`: grid cell of the wide home, filling
+ * its column instead of capping its width.
+ */
 const Pill = ({ item, stretch = false }: { item: HistoryItem; stretch?: boolean }) => {
   const { title, subtitle } = useHistoryEntryText(item)
   return (
     <HistoryEntryLink item={item} accessibilityLabel={`${title}, ${subtitle}`}>
-      <HStack
-        className={`overflow-hidden border-continuous h-[56px] px-[14px] rounded-[14px] bg-reverse items-center gap-[10px] ${stretch ? '' : 'max-w-[200px]'}`}
+      <Card
+        className={`flex-row h-[56px] px-[14px] items-center gap-[10px] ${stretch ? '' : 'max-w-[200px]'}`}
       >
         <HistoryEntryIcon item={item} size={18} bare />
         <VStack className="shrink min-w-0">
@@ -43,7 +48,7 @@ const Pill = ({ item, stretch = false }: { item: HistoryItem; stretch?: boolean 
             </Text>
           ) : null}
         </VStack>
-      </HStack>
+      </Card>
     </HistoryEntryLink>
   )
 }
@@ -91,10 +96,10 @@ const HistoryHomeSection = ({
   }
 
   return (
-    <Box className="overflow-hidden border-continuous bg-light-grey">
+    <Box>
       {!headerless && (
         <HStack className="px-[20px] items-center justify-between">
-          <Text className="text-[12px] font-bold text-grey">{t('history.title')}</Text>
+          <ListSectionTitle className="mb-0">{t('history.title')}</ListSectionTitle>
           <SeeAll />
         </HStack>
       )}
