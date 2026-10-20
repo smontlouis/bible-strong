@@ -54,3 +54,36 @@ it('keeps nested navigation local and resets it on dismissal', () => {
   expect(panel!.direction).toBe('forward')
   act(() => renderer.unmount())
 })
+
+it('opens on the last screen of its initial stack, the others behind it', () => {
+  ;(
+    globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }
+  ).IS_REACT_ACT_ENVIRONMENT = true
+  let panel: ReturnType<typeof usePanelNavigation>
+  let renderer: ReactTestRenderer
+  function Probe() {
+    panel = usePanelNavigation({
+      initialScreen: 'books',
+      initialStack: ['books', 'chapters'],
+      accessibilityLabel: 'Books',
+      trigger: null,
+      screens: {
+        books: { title: 'Books', content: () => null },
+        chapters: { title: 'Chapters', content: () => null },
+      },
+    })
+    return null
+  }
+  act(() => {
+    renderer = create(<Probe />)
+  })
+  act(() => panel.present())
+  expect(panel!.screen.title).toBe('Chapters')
+  expect(panel!.canGoBack).toBe(true)
+  act(() => panel.navigation.back())
+  expect(panel!.screen.title).toBe('Books')
+  act(() => panel.navigation.close())
+  act(() => panel.present())
+  expect(panel!.screen.title).toBe('Chapters')
+  act(() => renderer.unmount())
+})

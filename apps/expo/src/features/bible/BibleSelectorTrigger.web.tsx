@@ -1,6 +1,6 @@
 import { BookSelectorParams } from './BookSelectorSheet/BookSelectorParams'
 import FiltersHeader from '~common/FiltersHeader'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAtomValue } from 'jotai'
 import { useQuery } from '@tanstack/react-query'
@@ -99,6 +99,27 @@ function VersionPanel({
     </>
   )
 }
+/**
+ * Scrolls its content to the middle of the panel each time the panel screen holding it is shown:
+ * a hidden screen has no size, so the size it takes when shown is the signal.
+ */
+function RevealWhenShown({ children }: { children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const element = ref.current
+    if (!element || typeof ResizeObserver === 'undefined') return
+    let shown = false
+    const observer = new ResizeObserver(() => {
+      const isShown = element.offsetHeight > 0
+      if (isShown && !shown) element.scrollIntoView({ block: 'center' })
+      shown = isShown
+    })
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
+  return <div ref={ref}>{children}</div>
+}
+
 export function useBookPanelScreens({
   data,
   actions,
@@ -181,17 +202,26 @@ export function useBookPanelScreens({
                   name.toLocaleLowerCase().includes(query.toLocaleLowerCase())
                 )
               )
-              .map(item => (
-                <PanelAction
-                  key={item.Numero}
-                  label={nameOf(item)}
-                  nested
-                  onPress={() => {
-                    setBook(item)
-                    nav.open('chapters')
-                  }}
-                />
-              ))}
+              .map(item => {
+                const action = (
+                  <PanelAction
+                    key={item.Numero}
+                    label={nameOf(item)}
+                    nested
+                    selected={item.Numero === data.selectedBook.Numero}
+                    onPress={() => {
+                      setBook(item)
+                      nav.open('chapters')
+                    }}
+                  />
+                )
+                // The reading's book is where the list opens, back from its chapters
+                return item.Numero === data.selectedBook.Numero ? (
+                  <RevealWhenShown key={item.Numero}>{action}</RevealWhenShown>
+                ) : (
+                  action
+                )
+              })}
           </>
         ),
       },
@@ -202,29 +232,34 @@ export function useBookPanelScreens({
             testID="bible-selector-number-grid"
             className="flex-row flex-wrap gap-[10px] p-[10px]"
           >
-            {chapters.map(value => (
-              <TouchableBox
-                key={value}
-                className="w-[48px] h-[48px] rounded-md bg-opacity5 items-center justify-center"
-                accessibilityRole="button"
-                accessibilityLabel={t('Chapitre') + ' ' + value}
-                onPress={() => {
-                  if (withVerses) {
-                    setChapter(value)
-                    nav.open('verses')
-                  } else {
-                    select(value, 1)
+            {chapters.map(value => {
+              const isCurrent =
+                book.Numero === data.selectedBook.Numero && value === data.selectedChapter
+              return (
+                <TouchableBox
+                  key={value}
+                  className={`w-[48px] h-[48px] rounded-md items-center justify-center ${isCurrent ? 'bg-light-primary' : 'bg-opacity5'}`}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('Chapitre') + ' ' + value}
+                  accessibilityState={{ selected: isCurrent }}
+                  onPress={() => {
+                    if (withVerses) {
+                      setChapter(value)
+                      nav.open('verses')
+                    } else {
+                      select(value, 1)
+                      nav.close()
+                    }
+                  }}
+                  onLongPress={() => {
+                    longSelect(value, 1)
                     nav.close()
-                  }
-                }}
-                onLongPress={() => {
-                  longSelect(value, 1)
-                  nav.close()
-                }}
-              >
-                <Text>{value}</Text>
-              </TouchableBox>
-            ))}
+                  }}
+                >
+                  <Text className={isCurrent ? 'text-primary font-bold' : undefined}>{value}</Text>
+                </TouchableBox>
+              )
+            })}
           </Box>
         ),
       },
@@ -277,7 +312,11 @@ function BookPanel({
     <ContextualPanel
       width={400}
       initialScreen="books"
+      // Opens on the reading's chapters, as the native selector opens on its book
+      initialStack={['books', 'chapters']}
       accessibilityLabel={accessibilityLabel || t('Livres')}
+      // On opening too: closing after a choice resets to the book read before it
+      onOpen={panel.reset}
       onClose={panel.reset}
       trigger={<Box className={className}>{children}</Box>}
       screens={panel.screens}

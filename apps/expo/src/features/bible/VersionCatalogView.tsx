@@ -341,6 +341,10 @@ export const VersionCatalogList = ({
   const panelNavigation = React.useContext(PanelNavigationContext)
   const { height: windowHeight } = useWindowDimensions()
   const isWebPanel = Platform.OS === 'web' && Boolean(panelNavigation)
+  // On the web every row is rendered: rows differ in height (a description, an interlinear
+  // button), so a windowed list placed them by guess and left blanks under a fast scroll.
+  const isWeb = Platform.OS === 'web'
+  const itemCount = sections.reduce((count, section) => count + section.data.length, 0)
   const { t } = useTranslation()
   const listRef = React.useRef<SectionList<VersionCatalogItem, VersionCatalogSection>>(null)
   const listHeightRef = React.useRef(0)
@@ -402,15 +406,17 @@ export const VersionCatalogList = ({
       stickySectionHeadersEnabled
       sections={sections}
       keyExtractor={item => item.id}
-      // About a screen of rows: the sheet waits for them before it opens
-      initialNumToRender={isWebPanel ? 8 : 12}
-      maxToRenderPerBatch={isWebPanel ? 8 : undefined}
-      windowSize={isWebPanel ? 3 : undefined}
-      getItemLayout={(_, index) => ({
-        index,
-        length: ESTIMATED_CATALOG_ROW_HEIGHT,
-        offset: ESTIMATED_CATALOG_ROW_HEIGHT * index,
-      })}
+      // Native: about a screen of rows, which the sheet waits for before it opens
+      initialNumToRender={isWeb ? Math.max(itemCount, 12) : 12}
+      getItemLayout={
+        isWeb
+          ? undefined
+          : (_, index) => ({
+              index,
+              length: ESTIMATED_CATALOG_ROW_HEIGHT,
+              offset: ESTIMATED_CATALOG_ROW_HEIGHT * index,
+            })
+      }
       onLayout={event => {
         listHeightRef.current = event.nativeEvent.layout.height
         revealSelectedVersion()

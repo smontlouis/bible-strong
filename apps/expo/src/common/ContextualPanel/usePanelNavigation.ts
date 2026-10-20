@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import type { ContextualPanelProps, PanelScreen } from './types'
 export function usePanelNavigation({
   initialScreen,
+  initialStack,
   screens,
   onClose,
   onOpen,
@@ -38,7 +39,7 @@ export function usePanelNavigation({
       if (openRef.current) return
       openRef.current = true
       onOpen?.()
-      setHistory([initialScreen])
+      setHistory(initialStack?.length ? initialStack : [initialScreen])
       setDirection('forward')
       setOpen(true)
     },

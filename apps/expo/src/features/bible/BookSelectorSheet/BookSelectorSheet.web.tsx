@@ -21,6 +21,7 @@ export default function BookSelectorSheet({
     <ContextualSheet
       ref={sheetRef}
       panelInitialScreen="books"
+      panelInitialStack={['books', 'chapters']}
       panelScreens={panel.screens}
       panelWidth={400}
       onPresent={panel.reset}

@@ -30,6 +30,8 @@ export type ContextualPanelProps = {
   accessibilityLabel: string
   screens: Record<string, PanelScreen>
   initialScreen: string
+  /** Screens the panel opens on, the last one shown: back leads through the others. */
+  initialStack?: string[]
   width?: number
   onClose?: () => void
   onOpen?: () => void

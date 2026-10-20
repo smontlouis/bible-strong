@@ -17,6 +17,7 @@ export default function ContextualSheet({
   panelWidth,
   panelScreens,
   panelInitialScreen,
+  panelInitialStack,
   onPresent,
   onDismissStart,
   onDismiss,
@@ -92,6 +93,7 @@ export default function ContextualSheet({
         trigger={null}
         accessibilityLabel={panelTitle ?? heading?.title ?? ''}
         initialScreen={panelInitialScreen ?? 'content'}
+        initialStack={panelInitialStack}
         width={panelWidth ?? maxWidth ?? 440}
         onOpen={() => {
           onPresent?.()

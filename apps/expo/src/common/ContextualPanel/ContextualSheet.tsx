@@ -10,6 +10,7 @@ export type ContextualSheetProps = SheetProps & {
   panelWidth?: number
   panelScreens?: Record<string, PanelScreen>
   panelInitialScreen?: string
+  panelInitialStack?: string[]
 }
 
 // Opt-in adapter: native retains exactly the existing sheet.
@@ -20,6 +21,7 @@ export default function ContextualSheet({
   panelWidth: ____,
   panelScreens: _____,
   panelInitialScreen: ______,
+  panelInitialStack: _______,
   ...props
 }: ContextualSheetProps) {
   return <Sheet {...props} />

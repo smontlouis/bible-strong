@@ -212,13 +212,14 @@ describe('VersionCatalogList', () => {
     })
     expect(mockScrollToLocation).toHaveBeenCalledTimes(3)
   })
-  it('bounds web panel lists and preserves native and standalone rendering', () => {
+  it('renders every row on the web, placed by measure rather than by a fixed height', () => {
     Platform.OS = 'web'
     const panel = createRenderer(true)
     const list = panel.root.findByType('SectionList' as never)
+    const itemCount = sections.reduce((count, section) => count + section.data.length, 0)
     expect(list.props.style.maxHeight).toBe(420)
-    expect(list.props.initialNumToRender).toBe(8)
-    expect(list.props.windowSize).toBe(3)
+    expect(list.props.initialNumToRender).toBe(itemCount)
+    expect(list.props.getItemLayout).toBeUndefined()
     act(() => list.props.onLayout({ nativeEvent: { layout: { height: 420 } } }))
     expect(mockScrollToLocation).toHaveBeenCalledWith({
       sectionIndex: 4,
@@ -229,7 +230,7 @@ describe('VersionCatalogList', () => {
     const standalone = createRenderer()
     const standaloneList = standalone.root.findByType('SectionList' as never)
     expect(standaloneList.props.style).toBeUndefined()
-    expect(standaloneList.props.initialNumToRender).toBe(12)
+    expect(standaloneList.props.initialNumToRender).toBe(itemCount)
     act(() => {
       panel.unmount()
       standalone.unmount()
