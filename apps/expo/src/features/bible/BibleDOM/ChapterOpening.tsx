@@ -25,6 +25,17 @@ const Title = styled('h1')<RootStyles>(
   })
 )
 
+// The title in the version's own language, under the book's name
+const OriginalTitle = styled('p')<RootStyles>(
+  ({ settings: { fontFamily, fontSizeScale, colors, theme } }) => ({
+    margin: '6px 0 0',
+    fontFamily,
+    fontSize: scaleFontSize(19, fontSizeScale),
+    lineHeight: 1.3,
+    color: colors[theme].tertiary,
+  })
+)
+
 const ChapterNumber = styled('span')<RootStyles>(
   ({ settings: { fontFamily, fontSizeScale } }) => ({
     display: 'block',
@@ -67,12 +78,14 @@ export default function ChapterOpening({
   bookName,
   chapterLabel,
   psalmLabel,
+  originalTitle,
 }: RootStyles & {
   book: { Numero: number; Chapitres: number }
   chapter: number
   bookName: string
   chapterLabel: string
   psalmLabel: string
+  originalTitle?: { title: string; lang: string; dir: 'rtl' | 'ltr' } | null
 }) {
   const isPsalm = book.Numero === PSALMS
   const numberLabel = isPsalm ? psalmLabel : chapterLabel
@@ -81,6 +94,11 @@ export default function ChapterOpening({
     return (
       <Opening>
         <Title settings={settings}>{bookName}</Title>
+        {originalTitle && (
+          <OriginalTitle settings={settings} lang={originalTitle.lang} dir={originalTitle.dir}>
+            {originalTitle.title}
+          </OriginalTitle>
+        )}
         <Rule settings={settings} $spaceAfter={book.Chapitres > 1} />
         {book.Chapitres > 1 && <Label settings={settings}>{`${numberLabel} 1`}</Label>}
       </Opening>

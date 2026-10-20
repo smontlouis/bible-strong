@@ -15,7 +15,11 @@ jest.mock('~i18n', () => ({
   __esModule: true,
   default: {
     t: (key: string, options?: Record<string, unknown>) =>
-      options?.bookNumber ? `Livre ${options.bookNumber}` : key,
+      options?.bookNumber
+        ? `Livre ${options.bookNumber}`
+        : options?.lng === 'en' && key === 'Genèse'
+          ? 'Genesis'
+          : key,
   },
 }))
 
@@ -36,5 +40,10 @@ describe('verseToReference', () => {
 
   it('formats deuterocanonical references by stable book id', () => {
     expect(verseToReference(['67-2-3'])).toBe('Tobie 2:3')
+  })
+
+  it('names the books in the language asked for', () => {
+    expect(verseToReference(['1-1-1'], { language: 'en' })).toBe('Genesis 1:1')
+    expect(verseToReference({ bookNum: 1, chapterNum: 2 }, { language: 'en' })).toBe('Genesis 2')
   })
 })

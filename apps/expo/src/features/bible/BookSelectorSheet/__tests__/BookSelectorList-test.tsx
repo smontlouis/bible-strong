@@ -31,6 +31,9 @@ jest.mock('react-native', () => {
   }
 })
 
+jest.mock('~helpers/readingLanguage', () => ({
+  getReadingBookName: (book: { Nom: string }) => book.Nom,
+}))
 jest.mock('../BookItem', () => ({
   __esModule: true,
   default: (props: Record<string, unknown>) =>

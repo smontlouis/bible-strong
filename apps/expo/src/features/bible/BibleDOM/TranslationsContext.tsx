@@ -37,6 +37,8 @@ export interface BibleDOMTranslations {
     bookName: string
     chapter: string
     psalm: string
+    /** The book's title in a Hebrew, Greek or Latin version's own language. */
+    originalTitle: { title: string; lang: string; dir: 'rtl' | 'ltr' } | null
   }
 }
 

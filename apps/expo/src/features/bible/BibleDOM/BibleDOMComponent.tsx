@@ -1563,6 +1563,7 @@ const LoadedBibleContent = ({
                   bookName={translations.chapterOpening.bookName}
                   chapterLabel={translations.chapterOpening.chapter}
                   psalmLabel={translations.chapterOpening.psalm}
+                  originalTitle={translations.chapterOpening.originalTitle}
                 />
               </m.div>
             )}

@@ -3,6 +3,7 @@ import { FlatList, ScrollView } from 'react-native'
 import { bookSelectorSelectionModeAtom } from './atom'
 import { useAtomValue } from 'jotai/react'
 import { Book } from '~assets/bible_versions/books-desc'
+import { getReadingBookName } from '~helpers/readingLanguage'
 import BookItem from './BookItem'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SharedValue } from 'react-native-reanimated'
@@ -44,6 +45,7 @@ export const BookSelectorList = ({
     return (
       <BookItem
         book={book}
+        bookName={getReadingBookName(book, bookSelectorData?.selectedVersion)}
         chapters={chaptersByBook?.[book.Numero]}
         isSelected={isSelected}
         selectedChapter={isSelected ? bookSelectorData?.selectedChapter : undefined}
@@ -99,6 +101,7 @@ export const BookSelectorList = ({
             key={book.Numero}
             onChange={onGridBookSelect}
             book={book}
+            bookName={getReadingBookName(book, bookSelectorData?.selectedVersion)}
             isSelected={book.Numero === bookSelectorData?.selectedBook.Numero}
           />
         ))}

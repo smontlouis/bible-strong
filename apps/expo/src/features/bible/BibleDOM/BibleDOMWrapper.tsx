@@ -160,6 +160,8 @@ import { getStrongSelectionPayload, type StrongSelection } from '~helpers/strong
 import type { ResolvedPassageMediaChapter } from '../passageMedia'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import useConnection from '~helpers/useConnection'
+import { getOriginalBookTitle } from '~helpers/originalBookTitles'
+import { getReadingBookName, translateForReading } from '~helpers/readingLanguage'
 import { getWordAnnotationText } from '~redux/modules/user/wordAnnotationRanges'
 import type { UnifiedTagsModalProps } from '~state/app'
 export type { StudyRelationsModalTarget } from './bibleDomBridgeCommands'
@@ -612,10 +614,12 @@ export const BibleDOMWrapper = ({
       passages: t('bible.passageMedia.sections.passages'),
       chapterResources: t('bible.passageMedia.sections.chapterResources'),
     },
+    // The frame of the text speaks the version's language (the app's for Hebrew, Greek, Latin)
     chapterOpening: {
-      bookName: t(book.Nom),
-      chapter: t('Chapitre'),
-      psalm: t('Psaume'),
+      bookName: getReadingBookName(book, version),
+      chapter: translateForReading('Chapitre', version),
+      psalm: translateForReading('Psaume', version),
+      originalTitle: getOriginalBookTitle(book.Numero, version),
     },
   }
   const chapterEntityTranslations = {

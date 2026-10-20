@@ -25,6 +25,8 @@ type VerseInput =
 
 interface VerseToReferenceOptions {
   isPlan?: boolean
+  /** The language of the book names; the app's by default. */
+  language?: string
 }
 
 interface ParsedVerse {
@@ -92,8 +94,8 @@ const verseToReference = (v: VerseInput, options: VerseToReferenceOptions = {}):
     const { bookNum, chapterNum, verses: inputVerses } = v
     const bookName = getBook(bookNum)?.Nom
     const translatedBookName = bookName
-      ? i18n.t(bookName)
-      : i18n.t('Livre {{bookNumber}}', { bookNumber: bookNum })
+      ? i18n.t(bookName, { lng: options.language })
+      : i18n.t('Livre {{bookNumber}}', { bookNumber: bookNum, lng: options.language })
     // If no verses, return just book and chapter
     if (!inputVerses || !inputVerses.length) {
       return `${translatedBookName} ${chapterNum}`
@@ -141,8 +143,8 @@ const verseToReference = (v: VerseInput, options: VerseToReferenceOptions = {}):
     .map(group => {
       const bookName = getBook(group.book)?.Nom
       const translatedBookName = bookName
-        ? i18n.t(bookName)
-        : i18n.t('Livre {{bookNumber}}', { bookNumber: group.book })
+        ? i18n.t(bookName, { lng: options.language })
+        : i18n.t('Livre {{bookNumber}}', { bookNumber: group.book, lng: options.language })
       return `${translatedBookName} ${group.chapter}:${compactVerseNumbers(group.verses)}`
     })
     .join('; ')

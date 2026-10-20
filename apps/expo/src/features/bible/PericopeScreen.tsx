@@ -38,6 +38,7 @@ import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import type { VersionCode } from '~state/tabs'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
+import { getReadingBookName, translateForReading } from '~helpers/readingLanguage'
 import PericopeHeader from './PericopeHeader'
 
 type PericopeVerse = {
@@ -203,7 +204,9 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
         ) : (
           <ScrollView>
             <Box className="overflow-hidden border-continuous p-[20px]">
-              <Text className="text-[30px] font-bold mb-[40px]">{t(book.Nom)}</Text>
+              <Text className="text-[30px] font-bold mb-[40px]">
+                {getReadingBookName(book, version)}
+              </Text>
               {!Object.keys(pericopeBook).length ? (
                 <Empty
                   message={t('Aucun péricope pour ce Livre, essayez avec une autre version.')}
@@ -213,7 +216,7 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
                   <Fragment key={chapterKey}>
                     {!!Object.keys(chapterObject).length && (
                       <Text className="text-tertiary text-[12px] mb-[10px]">
-                        {t('CHAPITRE')} {chapterKey}
+                        {translateForReading('CHAPITRE', version)} {chapterKey}
                       </Text>
                     )}
                     {Object.entries(chapterObject).map(([verseKey, verseObject]) => {

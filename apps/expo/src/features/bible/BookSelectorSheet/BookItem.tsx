@@ -20,6 +20,8 @@ import {
 import { BOOK_SELECTION_EVENT } from './constants'
 interface BookItemProps {
   book: Book
+  /** The book's name in the reading's language. */
+  bookName: string
   chapters?: number[]
   isSelected: boolean
   selectedChapter?: number
@@ -33,6 +35,7 @@ export const itemHeight = BOOK_ITEM_HEIGHT
 const BookItem = memo(
   ({
     book,
+    bookName,
     chapters: availableChapters,
     isSelected,
     selectedChapter,
@@ -75,7 +78,7 @@ const BookItem = memo(
     return (
       <Box className="overflow-hidden border-continuous">
         <TouchableOpacity
-          accessibilityLabel={t(book.Nom)}
+          accessibilityLabel={bookName}
           accessibilityRole="button"
           accessibilityState={{ expanded: shouldRenderChapters }}
           activeOpacity={0.8}
@@ -98,7 +101,7 @@ const BookItem = memo(
               )}
               style={{ fontWeight: isSelected ? 'bold' : undefined }}
             >
-              {t(book.Nom)}
+              {bookName}
             </Text>
             <MotiView
               transition={{

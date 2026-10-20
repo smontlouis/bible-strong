@@ -21,6 +21,7 @@ import { useTheme } from '~themes/ThemeProvider'
 import { applyBookChapterSelection } from './bookSelectorSelection'
 import { getBooksForCanon, isBibleCanonId } from '~helpers/bibleBookCatalog'
 import { getBibleVersionCanonId } from '~helpers/bibleVersions'
+import { getReadingBookName } from '~helpers/readingLanguage'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { staticResourceQueryOptions } from '~helpers/queryOptions'
@@ -139,10 +140,13 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
   const data = useMemo(() => {
     const booksArray = getBooksForCanon(canonId, coverageData?.books)
     if (isAlphabetical) {
-      return [...booksArray].sort((a, b) => a.Nom.localeCompare(b.Nom))
+      // Sorted as the reader sees them, in the reading's language
+      return [...booksArray].sort((a, b) =>
+        getReadingBookName(a, selectedVersion).localeCompare(getReadingBookName(b, selectedVersion))
+      )
     }
     return booksArray
-  }, [canonId, coverageData?.books, isAlphabetical])
+  }, [canonId, coverageData?.books, isAlphabetical, selectedVersion])
 
   const selectedBookNumber = bookSelectorData?.selectedBook.Numero || 1
   const initialScrollIndex = data.findIndex(book => book.Numero === selectedBookNumber)
@@ -238,7 +242,9 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
         header={
           <>
             <SheetHeader
-              title={isGridChapterPicker ? t(gridBook.Nom) : t('Livres')}
+              title={
+                isGridChapterPicker ? getReadingBookName(gridBook, selectedVersion) : t('Livres')
+              }
               subTitle={isGridChapterPicker ? t('Chapitres') : undefined}
               centerTitle
               hasBackButton={isGridChapterPicker}

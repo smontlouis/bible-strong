@@ -13,6 +13,7 @@ import type { SheetRef } from '~common/sheet'
 import { getBooksForCanon, isBibleCanonId } from '~helpers/bibleBookCatalog'
 import { getBibleVersionCanonId, versions } from '~helpers/bibleVersions'
 import { getChapterVerseCountFromCoverage } from '~helpers/bibleCoverage'
+import { getReadingBookName } from '~helpers/readingLanguage'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
@@ -133,6 +134,8 @@ export function useBookPanelScreens({
     canon && isBibleCanonId(canon) ? canon : getBibleVersionCanonId(data.selectedVersion),
     actualCoverage?.books
   )
+  // Book names speak the reading's language
+  const nameOf = (item: { Nom: string }) => getReadingBookName(item, data.selectedVersion)
   const chapters =
     actualCoverage?.chaptersByBook[book.Numero] ??
     Array.from({ length: book.Chapitres }, (_, i) => i + 1)
@@ -172,12 +175,16 @@ export function useBookPanelScreens({
         content: nav => (
           <>
             {[...books]
-              .sort((a, b) => (sort === 'alphabetical' ? a.Nom.localeCompare(b.Nom) : 0))
-              .filter(item => item.Nom.toLocaleLowerCase().includes(query.toLocaleLowerCase()))
+              .sort((a, b) => (sort === 'alphabetical' ? nameOf(a).localeCompare(nameOf(b)) : 0))
+              .filter(item =>
+                [nameOf(item), item.Nom].some(name =>
+                  name.toLocaleLowerCase().includes(query.toLocaleLowerCase())
+                )
+              )
               .map(item => (
                 <PanelAction
                   key={item.Numero}
-                  label={item.Nom}
+                  label={nameOf(item)}
                   nested
                   onPress={() => {
                     setBook(item)
@@ -189,7 +196,7 @@ export function useBookPanelScreens({
         ),
       },
       chapters: {
-        title: book.Nom,
+        title: nameOf(book),
         content: nav => (
           <Box
             testID="bible-selector-number-grid"
@@ -222,7 +229,7 @@ export function useBookPanelScreens({
         ),
       },
       verses: {
-        title: book.Nom + ' ' + chapter,
+        title: nameOf(book) + ' ' + chapter,
         content: nav => (
           <Box
             testID="bible-selector-number-grid"

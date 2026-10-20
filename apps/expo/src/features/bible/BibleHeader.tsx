@@ -24,6 +24,7 @@ import {
 } from 'src/state/tabs'
 import Back from '~common/Back'
 import ParallelIcon from '~common/ParallelIcon'
+import { getReadingBookName, getReadingLanguage } from '~helpers/readingLanguage'
 import { type SheetRef } from '~common/sheet'
 import Box, {
   AnimatedBox,
@@ -129,7 +130,9 @@ const Header = ({
     planPassage,
   } = bible.data
   const bookNumber = book.Numero
-  const bookName = book.Nom
+  // The frame of the reading speaks the main version's language
+  const readingLanguage = getReadingLanguage(version)
+  const bookName = getReadingBookName(book, version)
   const isParallel = parallelVersions.length > 0
   const displayVerses = focusVerses
 
@@ -150,7 +153,10 @@ const Header = ({
 
   const hasFocusVerses = focusVerses && focusVerses.length > 0
   const focusedReference = hasFocusVerses
-    ? verseToReference({ bookNum: bookNumber, chapterNum: chapter, verses: displayVerses })
+    ? verseToReference(
+        { bookNum: bookNumber, chapterNum: chapter, verses: displayVerses },
+        { language: readingLanguage }
+      )
     : ''
   useEffect(() => {
     const { selectedBook, selectedChapter, selectedVersion, focusVerses } = bible.data
@@ -208,7 +214,7 @@ const Header = ({
         style={opacityTransitionStyle}
       />
       <AnimatedText className="font-bold text-[14px]" style={translateYTransitionStyle}>
-        {isSmall ? truncate(`${t(bookName)} ${chapter}`, 10) : `${t(bookName)} ${chapter}`}
+        {isSmall ? truncate(`${bookName} ${chapter}`, 10) : `${bookName} ${chapter}`}
       </AnimatedText>
     </>
   )
@@ -464,7 +470,7 @@ const Header = ({
           </Box>
           <Box className="overflow-hidden border-continuous flex-[1] min-w-0 items-center justify-center">
             <Text className="font-bold text-reverse text-[14px]" numberOfLines={1}>
-              {`${verseToReference({ bookNum: bookNumber, chapterNum: chapter, verses: displayVerses })} - ${version}`}
+              {`${verseToReference({ bookNum: bookNumber, chapterNum: chapter, verses: displayVerses }, { language: readingLanguage })} - ${version}`}
             </Text>
           </Box>
 
@@ -601,7 +607,7 @@ const Header = ({
                   // The plan bounds the reading, so the passage reads as a label, not a selector.
                   <Box
                     className={bookTriggerClassName}
-                    accessibilityLabel={`${t(bookName)} ${chapter}`}
+                    accessibilityLabel={`${bookName} ${chapter}`}
                   >
                     {bookTriggerContent}
                   </Box>
@@ -620,7 +626,7 @@ const Header = ({
                     }}
                     accessibilityRole="button"
                     accessibilityLabel={t('accessibility.chooseBookAndChapter', {
-                      reference: `${t(bookName)} ${chapter}`,
+                      reference: `${bookName} ${chapter}`,
                     })}
                   >
                     {bookTriggerContent}
