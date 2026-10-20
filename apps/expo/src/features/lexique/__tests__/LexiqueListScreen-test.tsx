@@ -7,6 +7,7 @@ import LexiqueListScreen from '../LexiqueListScreen'
 jest.mock('~themes/ThemeProvider', () => ({ useTheme: () => ({ fontFamily: {} }) }))
 jest.mock('~themes/styleValues', () => ({ resolveFontFamily: () => '' }))
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
+jest.mock('~i18n', () => ({ getLanguage: () => 'fr' }))
 jest.mock('@tanstack/react-query', () => ({ useQuery: () => ({}) }))
 jest.mock('~state/resourcesLanguage', () => ({
   useResourceLanguage: () => jest.requireActual<typeof React>('react').useState('fr'),
@@ -88,7 +89,10 @@ describe('Lexique filters', () => {
       )
       expect(query.queryKey).toContain('greek')
     }
+    expect(header().filters[0].active).toBe(true)
     act(() => header().onReset())
+    expect(header().filters[0].active).toBe(false)
+    expect(header().filters[0].value).toBe('versionCatalog.language.fr')
     expect(header().filters[1].active).toBe(false)
     expect(jest.mocked(useInfiniteResultsByLetterOrSearch).mock.lastCall![0].queryKey).toContain(
       'all'

@@ -18,6 +18,7 @@ import Text from '~common/ui/Text'
 import { getFirstLetterFrom } from '~helpers/alphabet'
 import { useInfiniteResultsByLetterOrSearch, useSearchValue } from './useUtilities'
 import { useTranslation } from 'react-i18next'
+import { getLanguage } from '~i18n'
 import LexiqueItem from './LexiqueItem'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
@@ -87,6 +88,7 @@ const LexiqueListScreen = ({
   const [lexicalLanguage, setLexicalLanguage] = useState<'all' | 'hebrew' | 'greek'>(
     initialLexicalLanguage ?? 'all'
   )
+  const appLanguage = getLanguage()
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
   const coreAvailabilityQuery = useQuery({
@@ -225,13 +227,17 @@ const LexiqueListScreen = ({
         <FiltersHeader
           hasBackButton={showBackButton}
           title={t('Lexique')}
-          onReset={() => setLexicalLanguage('all')}
+          onReset={() => {
+            setLexicalLanguage('all')
+            setStrongResourceLanguage(appLanguage)
+          }}
           filters={[
             {
               key: 'language',
               icon: 'globe',
               label: t('menu.language'),
               value: t(`versionCatalog.language.${strongResourceLanguage}`),
+              active: strongResourceLanguage !== appLanguage,
               onPress: () => {},
               options: (['fr', 'en'] as const).map(language => ({
                 key: language,

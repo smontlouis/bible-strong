@@ -2,14 +2,12 @@ import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { MenuView } from '~common/ui/MenuView'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 import SectionList from '~common/ui/SectionList'
 import Box from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Text from '~common/ui/Text'
-import Header from '~common/Header'
+import FiltersHeader from '~common/FiltersHeader'
 import SearchInput from '~common/SearchInput'
 import Loading from '~common/Loading'
 import type { NaveTopicSummary } from '~features/resources/naveAccess'
@@ -20,9 +18,9 @@ import SectionTitle from '~common/SectionTitle'
 import NaveItem from './NaveItem'
 import { useSearchValue, useInfiniteResultsByLetterOrSearch } from '../lexique/useUtilities'
 import { useTranslation } from 'react-i18next'
+import { getLanguage } from '~i18n'
 import { NaveTab } from '../../state/tabs'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import { toast } from '~helpers/toast'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 import { useResourceLanguage } from 'src/state/resourcesLanguage'
@@ -85,6 +83,7 @@ const NaveListScreen = ({
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
   const [naveResourceLanguage, setNaveResourceLanguage] = useResourceLanguage('NAVE')
+  const appLanguage = getLanguage()
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
   const availabilityQuery = useQuery({
@@ -155,12 +154,6 @@ const NaveListScreen = ({
     onNaveSelect?.(nameLower, name)
   }
 
-  const toggleNaveLanguage = () => {
-    const nextLanguage = naveResourceLanguage === 'fr' ? 'en' : 'fr'
-    setNaveResourceLanguage(nextLanguage)
-    toast(t('menu.languageChanged', { language: nextLanguage === 'fr' ? 'Français' : 'English' }))
-  }
-
   if (availabilityQuery.isError || error) {
     return (
       <ResourceUnavailableScreen
@@ -186,32 +179,26 @@ const NaveListScreen = ({
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
       <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
-        <Header
+        <FiltersHeader
           hasBackButton={showBackButton}
           title={t('Thématique Nave')}
-          rightComponent={
-            <Box className="overflow-hidden border-continuous flex-row items-center">
-              <MenuView
-                tabActions
-                actions={[
-                  {
-                    id: 'language',
-                    title: `${t('menu.language')}: ${
-                      naveResourceLanguage === 'fr' ? 'Français' : 'English'
-                    }`,
-                    image: 'globe',
-                  },
-                ]}
-                onPressAction={({ nativeEvent }) => {
-                  if (nativeEvent.event === 'language') toggleNaveLanguage()
-                }}
-              >
-                <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[54px]">
-                  <FeatherIcon name="more-vertical" size={18} />
-                </Box>
-              </MenuView>
-            </Box>
-          }
+          onReset={() => setNaveResourceLanguage(appLanguage)}
+          filters={[
+            {
+              key: 'language',
+              icon: 'globe',
+              label: t('menu.language'),
+              value: t(`versionCatalog.language.${naveResourceLanguage}`),
+              active: naveResourceLanguage !== appLanguage,
+              onPress: () => {},
+              options: (['fr', 'en'] as const).map(language => ({
+                key: language,
+                label: t(`versionCatalog.language.${language}`),
+                selected: naveResourceLanguage === language,
+                onSelect: () => setNaveResourceLanguage(language),
+              })),
+            },
+          ]}
         >
           <Box className="overflow-hidden border-continuous pb-[10px] px-[20px]">
             <SearchInput
@@ -221,7 +208,7 @@ const NaveListScreen = ({
               onDelete={() => setSearchValue('')}
             />
           </Box>
-        </Header>
+        </FiltersHeader>
         <Box className="overflow-hidden border-continuous flex-[1] pt-[20px]">
           {isLoading ? (
             <Loading message={t('Chargement...')} />

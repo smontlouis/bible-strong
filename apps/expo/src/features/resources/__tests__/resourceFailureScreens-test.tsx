@@ -22,6 +22,7 @@ let mockStrongAvailability: { status: 'available' | 'missing'; moduleId?: 'core'
 
 jest.mock('react-native-section-list-get-item-layout', () => () => jest.fn())
 jest.mock('expo-file-system/legacy', () => ({}))
+jest.mock('~i18n', () => ({ getLanguage: () => 'fr' }))
 jest.mock('expo-sqlite', () => ({}))
 jest.mock('@expo/vector-icons', () => ({ Feather: () => null }))
 jest.mock('~common/ui/Icon', () => ({ FeatherIcon: () => null }))
