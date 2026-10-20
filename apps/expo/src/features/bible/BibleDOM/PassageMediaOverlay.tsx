@@ -15,6 +15,7 @@ import {
 } from './overlayStagger'
 import { NAVIGATE_TO_STRONG } from './dispatch'
 import { useDispatch } from './DispatchProvider'
+import { INTERFACE_FONT } from './interfaceFont'
 import { withColorAlpha } from './themeOverlayColor'
 
 type OverlayColors = {
@@ -86,7 +87,7 @@ const PassageMediaGalleryCard = ({
         alignSelf: 'start',
         overflow: 'visible',
         color: colors.default,
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        fontFamily: INTERFACE_FONT,
         textAlign: 'left',
         background: 'transparent',
       }}
@@ -427,7 +428,7 @@ const PassageMediaOverlay = ({
                     style={{
                       margin: '0 0 14px 2px',
                       color: colors.primary,
-                      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                      fontFamily: INTERFACE_FONT,
                       fontSize: 12,
                       lineHeight: 1.2,
                       fontWeight: 700,

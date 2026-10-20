@@ -4,6 +4,7 @@ import React from 'react'
 import { keyframes, styled } from 'goober'
 import type { ColumnTextModeControls, RootStyles } from './BibleDOMWrapper'
 import ChevronDownIcon from './ChevronDownIcon'
+import { INTERFACE_FONT } from './interfaceFont'
 import { useTranslations } from './TranslationsContext'
 
 type TextModeKind = keyof ColumnTextModeControls
@@ -13,8 +14,6 @@ const TEXT_MODE_KINDS: TextModeKind[] = ['strong', 'interlinear']
 // The header's book and version selectors: one chip split into segments by a thin gap
 const SEGMENT_GAP = '3px'
 const SEGMENT_RADIUS = '20px'
-// The interface font of the header's selectors, not the Bible text's
-const INTERFACE_FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
 
 // A segment waits, as the header's button does, while its resources download
 const downloadPulse = keyframes`

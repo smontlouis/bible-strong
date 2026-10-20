@@ -3,6 +3,7 @@
 import { styled } from 'goober'
 import type { PericopeChapter, RootStyles } from './BibleDOMWrapper'
 import ExternalIcon from './ExternalIcon'
+import { INTERFACE_FONT } from './interfaceFont'
 import { scaleFontSize } from './scaleFontSize'
 import { getCompactHeadingFontSize } from './verseTypography'
 import {
@@ -14,18 +15,17 @@ import { useDispatch } from './DispatchProvider'
 import { useTranslations } from './TranslationsContext'
 
 const pericopeHeading = (tag: 'h1' | 'h2' | 'h3' | 'h4', level: 1 | 2 | 3 | 4, size: number) =>
-  styled(tag)<RootStyles & { $compact?: boolean }>(
-    ({ settings: { fontSizeScale, fontFamily }, $compact }) => ({
-      fontFamily,
-      fontSize: $compact
-        ? getCompactHeadingFontSize(level, fontSizeScale)
-        : scaleFontSize(size, fontSizeScale),
-      ...($compact ? { marginBlock: '0.5em 0.35em' } : {}),
-      textAlign: 'start',
-      position: 'relative',
-      zIndex: 1,
-    })
-  )
+  styled(tag)<RootStyles & { $compact?: boolean }>(({ settings: { fontSizeScale }, $compact }) => ({
+    // The app's font, not the Bible text's
+    fontFamily: INTERFACE_FONT,
+    fontSize: $compact
+      ? getCompactHeadingFontSize(level, fontSizeScale)
+      : scaleFontSize(size, fontSizeScale),
+    ...($compact ? { marginBlock: '0.5em 0.35em' } : {}),
+    textAlign: 'start',
+    position: 'relative',
+    zIndex: 1,
+  }))
 
 const H1 = pericopeHeading('h1', 1, 28)
 const H2 = pericopeHeading('h2', 2, 24)

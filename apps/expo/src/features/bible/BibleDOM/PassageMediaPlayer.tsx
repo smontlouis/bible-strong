@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { getPassageMediaEmbedUrl, type ResolvedPassageMedia } from '../passageMedia'
 import { OPEN_PASSAGE_MEDIA_SOURCE } from './dispatch'
 import { useDispatch } from './DispatchProvider'
+import { INTERFACE_FONT } from './interfaceFont'
 import PassageMediaImage from './PassageMediaImage'
 import { useTranslations } from './TranslationsContext'
 
@@ -107,7 +108,7 @@ const PassageMediaPlayer = ({
           padding: '7px 12px',
           background: buttonBackgroundColor,
           color: buttonColor,
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          fontFamily: INTERFACE_FONT,
           fontSize: 12,
           lineHeight: 1.2,
           fontWeight: 650,
