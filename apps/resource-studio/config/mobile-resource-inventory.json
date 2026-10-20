@@ -45,7 +45,7 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/81761d61ed06cbe4d6bd730257eb1947989abe49b98316323e1ab5b5b5fc62df/bibles/bible-bsb-strong.sqlite.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/25cbbf468bf8981528436ce33f46d1c2a721f829199cd9bcdf7c202c38cf57d8/bibles/bible-bsb-strong.sqlite.zip",
         "entry": "bible-bsb-strong.sqlite"
       }
     ],
@@ -153,7 +153,7 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/91d6ae74cfccc2d8453790f399e926c60c31b69c1d02ee29196bd28b5c0834b4/bibles/bible-rv1895-strong.sqlite.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/e6139726ad850dedf2a59a96dc227b7533131987632173f7c8272d773ec24044/bibles/bible-rv1895-strong.sqlite.zip",
         "entry": "bible-rv1895-strong.sqlite"
       }
     ],
@@ -263,7 +263,7 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/1a4ba83d6852e24e057767fc35702f1e257df3974c81df32268c7af0d89df1bb/bibles/bible-bsb.json.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/b61b94d16d174b71ff79fc1551b0e5cd39644a9886bb812dc2be95ea02b595d5/bibles/bible-bsb.json.zip",
         "entry": "bible-bsb.json"
       }
     ],
@@ -647,7 +647,7 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/48925d5dc5d998ece8ea5f5aa9172ed156f78614553a7b159ea22ecb0b1436db/bibles/bible-rv1895.json.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/8ef0887c8bca35d87775bdd94941d0ecfaf04009a6ad4f60a30572ce66edab99/bibles/bible-rv1895.json.zip",
         "entry": "bible-rv1895.json"
       }
     ],

@@ -61,7 +61,7 @@
     },
     "BSB": {
       "text": {
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/sources/59307362bd4b970ff05ed509675c01bcf40788c3e2fa0a9de06bba86934daeb4/bible-bsb.json.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/sources/895467fad2a38375868460cd65e5ee28d129ee8089a2db465dcec10e036dfae2/bible-bsb.json.zip",
         "entry": "bible-bsb.json"
       }
     },
@@ -317,7 +317,7 @@
     },
     "RV1895": {
       "text": {
-        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-rv1895.json.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/sources/26b67404c9664c65a70cab9bdd08c02fe93c3c2794ff960e0d582d2cec68f89a/bible-rv1895.json.zip",
         "entry": "bible-rv1895.json"
       }
     },
