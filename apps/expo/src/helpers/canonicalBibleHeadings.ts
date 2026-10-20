@@ -90,7 +90,9 @@ export const getCanonicalChapterPericope = (verses: Verse[]): Pericope => {
 }
 
 const getHeadingLevel = (heading: CanonicalBibleHeading): 'h1' | 'h2' | 'h3' | 'h4' => {
-  if (heading.kind === 'parallel') return 'h4'
+  // A parallel passage reference follows its title, unless it is the scope line of a major
+  // section (LSG, Exodus 1:1), which comes before the section's first title
+  if (heading.kind === 'parallel') return heading.type === 'scope' ? 'h2' : 'h4'
   if (heading.type === 'majorSection') return 'h1'
   if (
     heading.type === 'scope' ||

@@ -80,6 +80,52 @@ describe('canonicalBibleHeadings', () => {
     })
   })
 
+  it('keeps a parallel scope line between the major section and its first title', () => {
+    expect(
+      getCanonicalChapterPericope([
+        {
+          Livre: 2,
+          Chapitre: 1,
+          Verset: 1,
+          Texte: 'Voici les noms',
+          Headings: [
+            {
+              offset: 0,
+              order: 0,
+              kind: 'pericope',
+              type: 'majorSection',
+              text: 'Major',
+              markup: '<h1>Major</h1>',
+            },
+            {
+              offset: 0,
+              order: 1,
+              kind: 'parallel',
+              type: 'scope',
+              text: 'Ch. 1 à 15:21. (Ge 15:13, 14.)',
+              markup:
+                '<h2>Ch. 1 à 15:21. (<reference osisRef="Gen.15.13-Gen.15.14">Ge 15:13, 14</reference>.)</h2>',
+            },
+            {
+              offset: 0,
+              order: 2,
+              kind: 'pericope',
+              type: 'section',
+              text: 'Section',
+              markup: '<h3>Section</h3>',
+            },
+          ],
+        },
+      ])
+    ).toEqual({
+      '2': {
+        '1': {
+          '1': { h1: 'Major', h2: 'Ch. 1 à 15:21. (Ge 15:13, 14.)', h3: 'Section' },
+        },
+      },
+    })
+  })
+
   it('keeps every heading when two V4 headings prefer the same legacy level', () => {
     const headings = getCanonicalChapterPericope([
       {
