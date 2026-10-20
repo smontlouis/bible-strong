@@ -10,7 +10,8 @@ const PlanDayStepCard = ({ step }: { step: PlanDayStepAction }) => {
   const label = t(step.kind === 'next' ? 'readingPlans.seeNext' : 'readingPlans.finishDay')
   return (
     <TouchableBox
-      className="bg-light-primary rounded-[18px] px-[18px] py-[16px]"
+      className="bg-reverse rounded-[18px] px-[18px] py-[16px]"
+      style={{ boxShadow: '0 4px 16px rgba(0, 0, 0, 0.12)' }}
       accessibilityRole="button"
       accessibilityLabel={step.kind === 'next' ? `${label}, ${step.title}` : label}
       onPress={step.onPress}

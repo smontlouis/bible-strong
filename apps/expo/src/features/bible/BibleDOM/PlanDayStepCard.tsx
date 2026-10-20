@@ -2,6 +2,7 @@ import Feather from '@expo/vector-icons/Feather'
 import type { CSSProperties } from 'react'
 
 import type { RootStyles } from './BibleDOMWrapper'
+import { isDarkTheme } from './utils'
 
 /** What the plan offers after its passage: the next element of the day, or the day's end. */
 export type PlanDayStepView = { kind: 'next' | 'finish'; label: string; title?: string }
@@ -33,7 +34,10 @@ const PlanDayStepCard = ({ step, settings, onPress }: Props) => {
         padding: '16px 18px',
         border: 0,
         borderRadius: 18,
-        background: colors.lightPrimary,
+        background: colors.reverse,
+        boxShadow: isDarkTheme(settings.theme)
+          ? '0 4px 16px rgba(0, 0, 0, 0.4)'
+          : '0 4px 16px rgba(0, 0, 0, 0.12)',
         cursor: 'pointer',
         textAlign: 'left',
         userSelect: 'none',
