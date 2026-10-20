@@ -1,6 +1,6 @@
 'use dom'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { getWordAnnotationAnchorRange } from '~redux/modules/user/wordAnnotationRanges'
 import type { RootStyles, VerseRelationItem, WebViewProps } from './BibleDOMWrapper'
@@ -50,7 +50,9 @@ const AnnotationInlineItems = ({
     tagsAreInline,
   })
 
-  useEffect(() => {
+  // Before the screen is painted: the verse text is redrawn on a change of mode, and the items
+  // laid in it must be back in the same frame, or the lines close up for a moment without them
+  useLayoutEffect(() => {
     const targets: PortalTarget[] = []
 
     Object.entries(wordAnnotations).forEach(([annotationId, annotation]) => {
