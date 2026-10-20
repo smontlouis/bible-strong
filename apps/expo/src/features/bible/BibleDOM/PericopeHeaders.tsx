@@ -2,7 +2,7 @@
 
 import { styled } from 'goober'
 import type { PericopeChapter, RootStyles } from './BibleDOMWrapper'
-import ExternalIcon from './ExternalIcon'
+import ChevronRightIcon from './ChevronRightIcon'
 import { INTERFACE_FONT } from './interfaceFont'
 import { scaleFontSize } from './scaleFontSize'
 import { getCompactHeadingFontSize } from './verseTypography'
@@ -15,17 +15,25 @@ import { useDispatch } from './DispatchProvider'
 import { useTranslations } from './TranslationsContext'
 
 const pericopeHeading = (tag: 'h1' | 'h2' | 'h3' | 'h4', level: 1 | 2 | 3 | 4, size: number) =>
-  styled(tag)<RootStyles & { $compact?: boolean }>(({ settings: { fontSizeScale }, $compact }) => ({
-    // The app's font, not the Bible text's
-    fontFamily: INTERFACE_FONT,
-    fontSize: $compact
-      ? getCompactHeadingFontSize(level, fontSizeScale)
-      : scaleFontSize(size, fontSizeScale),
-    ...($compact ? { marginBlock: '0.5em 0.35em' } : {}),
-    textAlign: 'start',
-    position: 'relative',
-    zIndex: 1,
-  }))
+  styled(tag)<RootStyles & { $compact?: boolean; $opensIndex?: boolean }>(
+    ({ settings: { fontSizeScale }, $compact, $opensIndex }) => ({
+      // The app's font, not the Bible text's
+      fontFamily: INTERFACE_FONT,
+      fontSize: $compact
+        ? getCompactHeadingFontSize(level, fontSizeScale)
+        : scaleFontSize(size, fontSizeScale),
+      ...($compact ? { marginBlock: '0.5em 0.35em' } : {}),
+      textAlign: 'start',
+      position: 'relative',
+      zIndex: 1,
+      ...($opensIndex
+        ? {
+            cursor: 'pointer',
+            '&:hover [data-pericope-index-chevron]': { opacity: 1 },
+          }
+        : {}),
+    })
+  )
 
 // A cross-reference to a parallel passage, as the source marks it: a discreet line in the Bible
 // text's font, not a title. Literata ships no italic face, so the browser slants the roman.
@@ -60,7 +68,8 @@ export const getPericopeVerse = (pericopeChapter: PericopeChapter | undefined, v
 
 /**
  * Renders pericope headers (h1-h4) for a verse.
- * In normal mode, only canonical verse references and the external icon are clickable.
+ * In normal mode, a title opens the pericope index and its canonical verse references open
+ * their passage. Parallel passage references are a discreet line, not a title.
  * In annotation mode, headers are plain text.
  */
 export function PericopeHeaders({
@@ -130,25 +139,41 @@ export function PericopeHeaders({
     )
   }
 
-  const renderExternalButton = () => (
+  // The chevron only hints that the whole title opens the index; its button keeps the action
+  // reachable from the keyboard, and its click reaches the title.
+  const renderIndexChevron = () => (
     <button
       type="button"
       aria-label={translations.pericopeIndex}
-      onClick={navigateToPericope}
       style={{
         appearance: 'none',
         background: 'transparent',
         border: 0,
+        color: 'inherit',
+        font: 'inherit',
         cursor: 'pointer',
         margin: 0,
         padding: 0,
       }}
     >
-      <ExternalIcon style={{ marginLeft: 10, verticalAlign: 'middle' }} />
+      <ChevronRightIcon
+        data-pericope-index-chevron
+        style={{
+          marginLeft: '0.3em',
+          // Centred on the capitals rather than on the lowercase letters
+          verticalAlign: '-0.06em',
+          opacity: 0.4,
+          transition: 'opacity 150ms ease',
+        }}
+      />
     </button>
   )
   const stopHeadingClick = (event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation()
+  }
+  const openPericopeIndex = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation()
+    navigateToPericope()
   }
 
   const levels = [
@@ -179,11 +204,12 @@ export function PericopeHeaders({
             key={index}
             settings={settings}
             $compact={isCompact}
+            $opensIndex={!annotationMode}
             data-ignore-verse-touch
-            onClick={stopHeadingClick}
+            onClick={annotationMode ? stopHeadingClick : openPericopeIndex}
           >
             {renderHeadingContent(text)}
-            {!annotationMode && renderExternalButton()}
+            {!annotationMode && renderIndexChevron()}
           </Heading>
         )
       })}
