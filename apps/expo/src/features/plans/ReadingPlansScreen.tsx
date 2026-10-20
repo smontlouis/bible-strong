@@ -8,6 +8,8 @@ import Link from '~common/Link'
 import type { OnlinePlan } from '~common/types'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
+import Card from '~common/ui/Card'
+import { ListSectionTitle } from '~common/ui/ListSection'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { pageContentStyle } from '~common/ui/PageContent'
@@ -40,13 +42,13 @@ const ReadingPlanCard = ({ plan, active }: { plan: OnlinePlan; active: boolean }
       .filter(reading => progress?.readingSlices[reading.id] === 'Completed').length ?? 0
   const open = () => router.push({ pathname: '/plan', params: { planId: plan.id } })
   return (
-    <Box className="bg-reverse rounded-[20px] p-[16px] mb-[12px]">
+    <Card className="mb-[12px]">
       <Link
         onPress={open}
         accessibilityLabel={plan.title}
-        className="flex-row gap-[16px] items-center"
+        className="flex-row gap-[14px] items-center p-[14px]"
       >
-        <Box className="rounded-[14px] bg-light-grey overflow-hidden w-[96px] h-[64px]">
+        <Box className="rounded-[8px] bg-canvas overflow-hidden w-[96px] h-[64px]">
           {image ? (
             <Image
               source={{ uri: image }}
@@ -63,9 +65,9 @@ const ReadingPlanCard = ({ plan, active }: { plan: OnlinePlan; active: boolean }
           <Text className="text-default font-bold text-[16px]">{plan.title}</Text>
           <Box className="flex-row flex-wrap items-center gap-[8px]">
             {active && !!total && (
-              <Box className="w-[50px] h-[6px] bg-light-grey rounded-full overflow-hidden">
+              <Box className="w-[50px] h-[6px] bg-canvas rounded-full overflow-hidden">
                 <Box
-                  className="h-full bg-primary"
+                  className="h-full bg-primary rounded-full"
                   style={{ width: `${(completed / total) * 100}%` }}
                 />
               </Box>
@@ -97,9 +99,9 @@ const ReadingPlanCard = ({ plan, active }: { plan: OnlinePlan; active: boolean }
             )}
           </Text>
         </Box>
-        <FeatherIcon name="chevron-right" color="primary" size={20} />
+        <FeatherIcon name="chevron-right" color="grey" size={18} />
       </Link>
-    </Box>
+    </Card>
   )
 }
 
@@ -121,7 +123,12 @@ const ReadingPlansScreen = ({ filters }: { filters: ReadingPlanFilters }) => {
     dispatch(fetchPlans())
   }, [dispatch])
   return (
-    <ScrollView contentContainerStyle={[pageContentStyle, { padding: 24, paddingBottom: 48 }]}>
+    <ScrollView
+      contentContainerStyle={[
+        pageContentStyle,
+        { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 48 },
+      ]}
+    >
       {!!active.length && (
         <Text className="text-default font-bold text-[18px] mb-[16px]">
           {t('readingPlans.yours')}
@@ -154,9 +161,7 @@ const ReadingPlansScreen = ({ filters }: { filters: ReadingPlanFilters }) => {
         if (!entries.length) return null
         return (
           <Box key={language} className="mb-[20px]">
-            <Text accessibilityRole="header" className="text-grey font-bold text-[14px] mb-[12px]">
-              {t(language === 'fr' ? 'Français' : 'Anglais')}
-            </Text>
+            <ListSectionTitle>{t(language === 'fr' ? 'Français' : 'Anglais')}</ListSectionTitle>
             {entries.map(plan => (
               <ReadingPlanCard key={plan.id} plan={plan} active={isActive(plan.id)} />
             ))}

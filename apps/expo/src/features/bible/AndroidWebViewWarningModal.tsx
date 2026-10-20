@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Modal, TouchableOpacity, View } from 'react-native'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
+import { floatingShadow } from '~common/ui/surfaces'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { dismissTipAtom, useTip } from '~features/tips/atom'
@@ -26,20 +27,14 @@ const AndroidWebViewWarningModal = ({ top }: { top: number }) => {
         style={{ flex: 1 }}
       >
         <Box
-          className="overflow-hidden border-continuous absolute left-[20px] right-[20px] bg-reverse rounded-[12px] p-[18px]"
-          style={{
-            top: Math.max(16, top - 12),
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 10 },
-            shadowOpacity: 0.22,
-            shadowRadius: 18,
-            elevation: 24,
-          }}
+          className="overflow-hidden border-continuous absolute left-[20px] right-[20px] bg-surface-raised rounded-[16px] p-[18px]"
+          // The tip floats above the Bible: the floating level and its one shadow.
+          style={{ top: Math.max(16, top - 12), ...floatingShadow, overflow: 'visible' }}
         >
           <Box className="overflow-hidden border-continuous flex-row items-start gap-[12px]">
             <Box
-              className="overflow-hidden border-continuous rounded-[20px] items-center justify-center bg-quart shrink-[0]"
-              style={[{ width: 36, height: 36 }, { borderRadius: 18 }]}
+              className="overflow-hidden border-continuous rounded-full items-center justify-center bg-quart shrink-[0]"
+              style={{ width: 36, height: 36 }}
             >
               <FeatherIcon name="alert-triangle" size={19} color="reverse" />
             </Box>

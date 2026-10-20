@@ -4,14 +4,16 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import type { PlanDayStepAction } from './usePlanDayStep'
 
-/** At the end of an element of a plan day: the way on to the next one, or to the day's end. */
+/**
+ * At the end of an element of a plan day: the way on to the next one, or to the day's end.
+ * A card on the page ground of the reading, so it takes the tint instead of a shadow.
+ */
 const PlanDayStepCard = ({ step }: { step: PlanDayStepAction }) => {
   const { t } = useTranslation()
   const label = t(step.kind === 'next' ? 'readingPlans.seeNext' : 'readingPlans.finishDay')
   return (
     <TouchableBox
-      className="bg-reverse rounded-[18px] px-[18px] py-[16px]"
-      style={{ boxShadow: '0 4px 16px rgba(0, 0, 0, 0.12)' }}
+      className="bg-light-grey rounded-[16px] px-[16px] py-[14px]"
       accessibilityRole="button"
       accessibilityLabel={step.kind === 'next' ? `${label}, ${step.title}` : label}
       onPress={step.onPress}

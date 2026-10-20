@@ -11,7 +11,7 @@ import { useAtomValue, useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { FadeIn, FadeOut } from 'react-native-reanimated'
-import { Platform } from 'react-native'
+import { Platform, StyleSheet } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useSelector } from 'react-redux'
 import { isFullScreenBibleAtom } from 'src/state/app'
@@ -236,7 +236,7 @@ const Header = ({
     <>
       <AnimatedBox
         className={`overflow-hidden border-continuous bg-light-grey absolute left-[0px] bottom-[0px] right-[0px] top-[0px] ${
-          isParallel ? 'rounded-[20px]' : 'rounded-tl-[20px] rounded-bl-[20px]'
+          isParallel ? 'rounded-full' : 'rounded-tl-[16px] rounded-bl-[16px]'
         }`}
         style={opacityTransitionStyle}
       />
@@ -402,8 +402,8 @@ const Header = ({
         accessibilityState={{ selected: isTextModeActive }}
       >
         <AnimatedBox
-          className={`overflow-hidden border-continuous bg-light-grey rounded-tr-[20px] rounded-br-[20px] absolute left-[0px] bottom-[0px] right-[0px] top-[0px] ${
-            standalone ? 'rounded-tl-[20px] rounded-bl-[20px]' : ''
+          className={`overflow-hidden border-continuous bg-light-grey rounded-tr-[16px] rounded-br-[16px] absolute left-[0px] bottom-[0px] right-[0px] top-[0px] ${
+            standalone ? 'rounded-tl-[16px] rounded-bl-[16px]' : ''
           }`}
           style={opacityTransitionStyle}
         />
@@ -438,7 +438,7 @@ const Header = ({
       >
         <AnimatedBox
           className={`overflow-hidden border-continuous bg-light-grey absolute left-[0px] bottom-[0px] right-[0px] top-[0px] ${
-            textModeKind ? '' : 'rounded-tr-[20px] rounded-br-[20px]'
+            textModeKind ? '' : 'rounded-tr-[16px] rounded-br-[16px]'
           }`}
           style={opacityTransitionStyle}
         />
@@ -466,7 +466,7 @@ const Header = ({
   if (annotationModeEnabled) {
     return (
       <AnimatedVStack
-        className="border-continuous overflow-visible w-[100%] bg-reverse justify-center px-[15px] border-b-[1px] border-border absolute top-[0px] left-[0px]"
+        className="border-continuous overflow-visible w-[100%] bg-reverse justify-center px-[15px] border-separator absolute top-[0px] left-[0px]"
         entering={FadeIn}
         exiting={FadeOut}
         key="annotation-mode-header"
@@ -474,6 +474,7 @@ const Header = ({
           paddingTop: TOP_INSET,
           height: headerHeight + TOP_INSET,
           zIndex: nativeHeaderZIndex,
+          borderBottomWidth: StyleSheet.hairlineWidth,
         }}
       >
         {isFormSheet && <FormSheetHandle />}
@@ -507,7 +508,7 @@ const Header = ({
   if (hasSelectedVerses) {
     return (
       <AnimatedVStack
-        className="border-continuous overflow-visible w-[100%] bg-reverse justify-center px-[15px] border-b-[1px] border-border absolute top-[0px] left-[0px]"
+        className="border-continuous overflow-visible w-[100%] bg-reverse justify-center px-[15px] border-separator absolute top-[0px] left-[0px]"
         entering={FadeIn}
         exiting={FadeOut}
         key="selected-verses-header"
@@ -515,6 +516,7 @@ const Header = ({
           paddingTop: TOP_INSET,
           height: headerHeight + TOP_INSET,
           zIndex: nativeHeaderZIndex,
+          borderBottomWidth: StyleSheet.hairlineWidth,
         }}
       >
         {isFormSheet && <FormSheetHandle />}
@@ -547,9 +549,13 @@ const Header = ({
   // the newly mounted book selector invisible on iOS.
   return (
     <AnimatedVStack
-      className="border-continuous overflow-visible justify-center w-[100%] bg-reverse border-b-[1px] border-border absolute top-[0px] left-[0px]"
+      className="border-continuous overflow-visible justify-center w-[100%] bg-reverse border-separator absolute top-[0px] left-[0px]"
       style={[
-        { paddingTop: TOP_INSET, zIndex: nativeHeaderZIndex },
+        {
+          paddingTop: TOP_INSET,
+          zIndex: nativeHeaderZIndex,
+          borderBottomWidth: StyleSheet.hairlineWidth,
+        },
         {
           height: isHeaderCollapsed ? 20 + TOP_INSET : undefined,
           minHeight: isHeaderCollapsed ? 20 + TOP_INSET : headerHeight + TOP_INSET,
@@ -696,7 +702,7 @@ const Header = ({
                     >
                       <Box className="border-continuous overflow-visible relative">
                         <ParallelIcon color="primary" />
-                        <Box className="overflow-hidden border-continuous absolute bottom-[-2px] right-[-4px] bg-grey rounded-[99px] w-[12px] h-[12px] items-center justify-center">
+                        <Box className="overflow-hidden border-continuous absolute bottom-[-2px] right-[-4px] bg-grey rounded-full w-[12px] h-[12px] items-center justify-center">
                           <Text className="text-[9px] text-reverse font-bold">
                             {parallelVersions.length + 1}
                           </Text>

@@ -22,7 +22,7 @@ export default function NewTabSearch(_props: {
   return (
     <LinkBox
       accessibilityLabel={t('commandPalette.label')}
-      className="flex-row items-center gap-[12px] bg-reverse shadow-[0_2px_7px_rgba(89,131,240,0.1)] rounded-[16px] px-[16px] py-[16px]"
+      className="flex-row items-center gap-[12px] bg-surface rounded-[16px] px-[16px] py-[16px]"
       onPress={event => {
         if (event?.currentTarget instanceof HTMLElement) setReturnFocus(event.currentTarget)
         setScope(undefined)
@@ -31,7 +31,7 @@ export default function NewTabSearch(_props: {
     >
       <FeatherIcon name="search" size={20} color="grey" />
       <Text className="flex-1 text-grey text-[15px]">{t('commandPalette.placeholder')}</Text>
-      <Text className="text-grey text-[12px] bg-light-grey rounded-[6px] px-[7px] py-[4px]">
+      <Text className="text-grey text-[12px] bg-canvas rounded-[4px] px-[7px] py-[4px]">
         {typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
           ? '⌘ K'
           : 'Ctrl K'}

@@ -1,5 +1,6 @@
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 import type { SelectedCode, Verse } from '~common/types'
+import { radii } from '~common/ui/surfaces'
 import type { RootState } from '~redux/modules/reducer'
 import { buildTokenizedVerseLayout } from '~helpers/interlinearVerseLayout'
 import {
@@ -104,7 +105,7 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode }: Pro
               style={{
                 appearance: 'none',
                 border: 0,
-                borderRadius: 6,
+                borderRadius: radii.tile,
                 background: selected ? colors.primary : 'transparent',
                 color: selected ? colors.reverse : colors.default,
                 display: 'inline-flex',

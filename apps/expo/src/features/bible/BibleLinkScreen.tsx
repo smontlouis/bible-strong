@@ -7,7 +7,15 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Dimensions, Image, Linking, ScrollView, TextInput } from 'react-native'
+import {
+  ActivityIndicator,
+  Dimensions,
+  Image,
+  Linking,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+} from 'react-native'
 import {
   KeyboardAvoidingView,
   KeyboardStickyView,
@@ -19,6 +27,7 @@ import { twMerge } from '~common/ui/classNames'
 
 import { MenuView } from '~common/ui/MenuView'
 import { pageContentStyle } from '~common/ui/PageContent'
+import { radii } from '~common/ui/surfaces'
 import YoutubePlayer from '~helpers/react-native-youtube-iframe'
 import type { Theme as AppTheme } from '~themes'
 
@@ -66,7 +75,7 @@ const StyledTextInput = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const resolvedClassName = twMerge(
-    'text-default h-[48px] border-border border-[2px] rounded-[10px] px-[15px] text-[16px]',
+    'text-default h-[48px] border-border border-[2px] rounded-[12px] px-[15px] text-[16px]',
     className
   )
   return (
@@ -377,15 +386,15 @@ const BibleLinkScreen = () => {
                   />
 
                   {isYoutubeLink && currentLink.videoId && (
-                    <Box className="border-continuous overflow-visible mb-[20px] rounded-[10px] bg-light-grey">
+                    <Box className="border-continuous overflow-visible mb-[20px] rounded-[12px] bg-light-grey">
                       <YoutubePlayer
                         height={playerHeight}
                         width={playerWidth}
                         videoId={currentLink.videoId}
                         onReady={() => console.log('[BibleLinkScreen] YouTube ready')}
                         onError={e => console.log('[BibleLinkScreen] YouTube error:', e)}
-                        viewContainerStyle={{ borderRadius: 10, overflow: 'hidden' }}
-                        webviewStyle={{ borderRadius: 10, overflow: 'hidden' }}
+                        viewContainerStyle={{ borderRadius: radii.control, overflow: 'hidden' }}
+                        webviewStyle={{ borderRadius: radii.control, overflow: 'hidden' }}
                       />
                     </Box>
                   )}
@@ -396,7 +405,7 @@ const BibleLinkScreen = () => {
                       style={{
                         width: '100%',
                         height: 180,
-                        borderRadius: 10,
+                        borderRadius: radii.control,
                         marginBottom: 15,
                         backgroundColor: theme.colors.lightGrey,
                       }}
@@ -445,7 +454,10 @@ const BibleLinkScreen = () => {
 
           {isEditing && (
             <KeyboardStickyView style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
-              <HStack className="border-border px-[20px] py-[10px] justify-end border-t-[1px] bg-reverse">
+              <HStack
+                className="border-separator px-[20px] py-[10px] justify-end bg-reverse"
+                style={{ borderTopWidth: StyleSheet.hairlineWidth }}
+              >
                 {currentLink && (
                   <Box className="overflow-hidden border-continuous">
                     <Button reverse onPress={cancelEditing}>

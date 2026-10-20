@@ -168,7 +168,7 @@ export default function CommandPalette({ tabAtom, onDone, inputId, initialScope 
       label={t('commandPalette.label')}
       style={
         {
-          '--command-bg': theme.colors.reverse,
+          '--command-bg': theme.colors.surfaceRaised,
           '--command-text': theme.colors.default,
           '--command-muted': theme.colors.tertiary,
           '--command-border': theme.colors.border,

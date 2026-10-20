@@ -51,7 +51,7 @@ const Chip = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const resolvedClassName = twMerge(
-    'rounded-[20px] bg-border pt-[3px] pb-[3px] pl-[7px] pr-[7px] mr-[5px] mb-[5px] mt-[5px]',
+    'rounded-full bg-border pt-[3px] pb-[3px] pl-[7px] pr-[7px] mr-[5px] mb-[5px] mt-[5px]',
     className
   )
   return (
@@ -139,7 +139,7 @@ const TagItem = ({ item, setOpen }: TagItemProps) => {
           <TagOptionsPanel tag={item.tag} />
         </Box>
       </Link>
-      <Border className="mx-[10px]" />
+      <Border className="ml-[20px]" />
     </Box>
   )
 }

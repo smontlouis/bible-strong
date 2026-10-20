@@ -1,5 +1,6 @@
 import { m, useReducedMotion, type Transition } from 'motion/react'
 import { createPortal } from 'react-dom'
+import { radii } from '~common/ui/surfaces'
 import { formatPassageMediaDuration, type ResolvedPassageMedia } from '../passageMedia'
 import { useTranslations } from './TranslationsContext'
 import OverlayCloseButton from './OverlayCloseButton'
@@ -23,6 +24,7 @@ type OverlayColors = {
   lightGrey: string
   primary: string
   reverse: string
+  surfaceRaised: string
 }
 
 type Props = {
@@ -106,7 +108,7 @@ const PassageMediaGalleryCard = ({
           margin: 0,
           padding: 0,
           border: 0,
-          borderRadius: 11,
+          borderRadius: radii.control,
           background: 'transparent',
           WebkitTapHighlightColor: 'transparent',
         }}
@@ -121,8 +123,7 @@ const PassageMediaGalleryCard = ({
             aspectRatio: '16 / 9',
             boxSizing: 'border-box',
             border: `2px solid ${colors.reverse}`,
-            borderRadius: 11,
-            boxShadow: '0 7px 22px rgba(0, 0, 0, 0.25)',
+            borderRadius: radii.control,
           }}
         >
           <m.span
@@ -348,7 +349,7 @@ const PassageMediaOverlay = ({
         <OverlayCloseButton
           label={translations.passageMediaClose}
           color={colors.default}
-          backgroundColor={colors.reverse}
+          backgroundColor={colors.surfaceRaised}
           onClose={closeOverlay}
         />
       )}

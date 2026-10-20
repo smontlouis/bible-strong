@@ -1,12 +1,12 @@
 import type { ReactNode } from 'react'
 import Box from '~common/ui/Box'
 import { twMerge } from '~common/ui/classNames'
-import Text from '~common/ui/Text'
+import { ListSectionTitle } from '~common/ui/ListSection'
 
 /**
- * Small title of a part inside a home section (« Reprendre » and « Mes plans » under « Ma
- * bibliothèque »). The row keeps the height of an action link, so parts line up with or without
- * one.
+ * Title of a part inside a home group (« Reprendre » and « Mes plans » under « Ma
+ * bibliothèque »): the app's one section title, set on the canvas above its card. The row keeps
+ * the height of an action link, so parts line up with or without one.
  */
 const HomeSubsectionTitle = ({
   title,
@@ -24,9 +24,7 @@ const HomeSubsectionTitle = ({
       className
     )}
   >
-    <Text accessibilityRole="header" className="shrink text-[16px] font-bold">
-      {title}
-    </Text>
+    <ListSectionTitle className="shrink mb-0">{title}</ListSectionTitle>
     {action}
   </Box>
 )

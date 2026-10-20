@@ -15,6 +15,10 @@
       --color-reverse: rgb(255,255,255);
       --color-border: rgb(230,230,230);
       --color-light-grey: #F4F7FF;
+      --color-canvas: #F4F7FF;
+      --color-surface: rgb(255,255,255);
+      --color-surface-raised: rgb(255,255,255);
+      --color-separator: rgba(16,27,53,0.14);
       --color-grey: rgb(78,79,79);
       --color-dark-grey: rgba(0,0,0,0.5);
       --color-primary: rgb(89,131,240);
@@ -39,6 +43,10 @@
       --color-reverse: rgb(255,255,255);
       --color-border: rgb(230,230,230);
       --color-light-grey: #F4F7FF;
+      --color-canvas: #F4F7FF;
+      --color-surface: rgb(255,255,255);
+      --color-surface-raised: rgb(255,255,255);
+      --color-separator: rgba(16,27,53,0.14);
       --color-grey: rgb(78,79,79);
       --color-dark-grey: rgba(0,0,0,0.5);
       --color-primary: rgb(89,131,240);
@@ -63,6 +71,10 @@
       --color-reverse: rgb(18,45,66);
       --color-border: #253e51;
       --color-light-grey: rgb(30, 61, 82);
+      --color-canvas: rgb(18,45,66);
+      --color-surface: rgb(30,61,82);
+      --color-surface-raised: rgb(38,72,96);
+      --color-separator: rgba(255,255,255,0.12);
       --color-grey: rgb(150,150,150);
       --color-dark-grey: rgba(255, 255, 255, 0.5);
       --color-primary: rgb(14,211,185);
@@ -87,6 +99,10 @@
       --color-reverse: rgb(245,242,227);
       --color-border: #E1DDCA;
       --color-light-grey: #ebded1;
+      --color-canvas: #ebded1;
+      --color-surface: rgb(245,242,227);
+      --color-surface-raised: rgb(245,242,227);
+      --color-separator: rgba(72,54,35,0.16);
       --color-grey: rgb(171, 138, 106);
       --color-dark-grey: rgba(72,54,35,0.5);
       --color-primary: rgb(125,123,168);
@@ -111,6 +127,10 @@
       --color-reverse: rgb(253,255,253);
       --color-border: #DEEFDE;
       --color-light-grey: #EAF9EC;
+      --color-canvas: #EAF9EC;
+      --color-surface: rgb(253,255,253);
+      --color-surface-raised: rgb(253,255,253);
+      --color-separator: rgba(27,70,40,0.14);
       --color-grey: rgb(41,70,50);
       --color-dark-grey: rgba(0,0,0,0.5);
       --color-primary: rgb(211,78,110);
@@ -135,6 +155,10 @@
       --color-reverse: #FFFAF8;
       --color-border: #F5E8E2;
       --color-light-grey: #FAE7DF;
+      --color-canvas: #FAE7DF;
+      --color-surface: #FFFAF8;
+      --color-surface-raised: #FFFAF8;
+      --color-separator: rgba(68,40,30,0.14);
       --color-grey: rgb(68,60,80);
       --color-dark-grey: rgba(0,0,0,0.5);
       --color-primary: rgb(200,148,186);
@@ -159,6 +183,10 @@
       --color-reverse: rgb(0,0,0);
       --color-border: #272727;
       --color-light-grey: rgb(20, 20, 20);
+      --color-canvas: rgb(0,0,0);
+      --color-surface: rgb(24,24,24);
+      --color-surface-raised: rgb(34,34,34);
+      --color-separator: rgba(255,255,255,0.14);
       --color-grey: rgb(150,150,150);
       --color-dark-grey: rgba(255, 255, 255, 0.5);
       --color-primary: rgb(89,131,240);
@@ -183,6 +211,10 @@
       --color-reverse: rgb(51,4,46);
       --color-border: rgb(72, 19, 66);
       --color-light-grey: rgb(66, 14, 60);
+      --color-canvas: rgb(51,4,46);
+      --color-surface: rgb(66,14,60);
+      --color-surface-raised: rgb(78,22,72);
+      --color-separator: rgba(255,255,255,0.12);
       --color-grey: rgb(150,150,150);
       --color-dark-grey: rgba(255, 255, 255, 0.5);
       --color-primary: rgb(14,211,185);
@@ -207,6 +239,10 @@
       --color-reverse: rgb(0,50,100);
       --color-border: #164778;
       --color-light-grey: rgb(17, 69, 120);
+      --color-canvas: rgb(0,50,100);
+      --color-surface: rgb(17,69,120);
+      --color-surface-raised: rgb(26,80,134);
+      --color-separator: rgba(255,255,255,0.12);
       --color-grey: rgb(150,170,187);
       --color-dark-grey: rgba(255, 255, 255, 0.5);
       --color-primary: rgb(14,211,185);

@@ -79,6 +79,7 @@ jest.mock('~common/ui/Box', () => {
       ReactModule.createElement('Box', props, children),
   }
 })
+jest.mock('~common/ui/Border', () => () => null)
 jest.mock('~common/ui/Text', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
   return {

@@ -1,7 +1,7 @@
 import * as Icon from '~common/ui/classNameIcons'
 import { useQuery } from '@tanstack/react-query'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
-import { FlatList, TouchableOpacity, View } from 'react-native'
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import { pageContentStyle } from '~common/ui/PageContent'
@@ -33,7 +33,7 @@ const OccurencesNumber = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const resolvedClassName = twMerge(
-    'ml-[10px] pr-[4px] pl-[4px] pt-[2px] pb-[2px] rounded-[3px] bg-light-primary',
+    'ml-[10px] pr-[6px] pl-[6px] pt-[2px] pb-[2px] rounded-full bg-light-primary',
     className
   )
   return (
@@ -53,11 +53,16 @@ const ListItem = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const resolvedClassName = twMerge('border-b-[1px] border-b-border', className)
+  // Rows of a continuous list, split by a hairline
+  const resolvedClassName = twMerge('border-b-separator', className)
   return (
     <Box
       {...props}
-      style={[props.style] as UIComponentProps<typeof Box>['style']}
+      style={
+        [{ borderBottomWidth: StyleSheet.hairlineWidth }, props.style] as UIComponentProps<
+          typeof Box
+        >['style']
+      }
       className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )

@@ -25,10 +25,10 @@ const getProviderIcon = (provider: string) => {
     case 'google.com':
       return { icon: 'logo-google' as const, color: '#4285F4' }
     case 'apple.com':
-      return { icon: 'logo-apple' as const, color: '#000000' }
+      return { icon: 'logo-apple' as const, color: 'default' }
     case 'password':
     default:
-      return { icon: 'mail' as const, color: '#6B7280' }
+      return { icon: 'mail' as const, color: 'grey' }
   }
 }
 

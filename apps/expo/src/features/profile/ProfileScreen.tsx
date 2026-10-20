@@ -25,17 +25,19 @@ const ProfileScreen = () => {
   }
 
   return (
-    <Container>
+    <Container className="bg-canvas">
       <Header hasBackButton title={t('profile.title')} />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 40 }}>
+      <ScrollView
+        backgroundColor="canvas"
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
         <Box className="web:w-full web:max-w-[500px] web:self-center">
-          <Box className="overflow-hidden border-continuous p-[20px]">
+          <Box className="px-[24px] mb-[28px]">
             <ProfileHeader />
           </Box>
           <ProfileStats />
-          <Box className="overflow-hidden border-continuous pt-[20px]">
-            <ProfileActions />
-          </Box>
+          <ProfileActions />
         </Box>
       </ScrollView>
     </Container>

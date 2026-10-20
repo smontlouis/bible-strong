@@ -170,8 +170,8 @@ const CommentaryResourceTabScreen = ({
   if (!parsed) {
     return (
       <FormSheetScreen isFormSheet={false}>
-        <Box className="overflow-hidden border-continuous flex-[1] bg-light-grey">
-          <Header background title={t('Commentaires')} />
+        <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
+          <Header title={t('Commentaires')} />
           <ResourceUnavailableView
             title={t('commentaries.resource.invalid')}
             failure={{ cause: 'not-found', recoveries: [] }}
@@ -202,9 +202,8 @@ const CommentaryResourceTabScreen = ({
     : undefined
   return (
     <FormSheetScreen isFormSheet={false}>
-      <Box className="overflow-hidden border-continuous flex-[1] bg-light-grey">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
         <Header
-          background
           title={entry.author}
           subTitle={passage}
           rightComponent={
@@ -250,6 +249,7 @@ const CommentaryResourceTabScreen = ({
           ) : (
             <ScrollView
               ref={scrollRef}
+              backgroundColor="canvas"
               contentContainerStyle={{ maxWidth: 600, padding: 18, paddingBottom: 32 }}
             >
               <CommentarySectionCard
@@ -276,13 +276,14 @@ const CommentaryResourceTabScreen = ({
         ) : (
           <ScrollView
             stickyHeaderIndices={[1]}
+            backgroundColor="canvas"
             contentContainerStyle={{ maxWidth: 600, padding: 18, paddingBottom: 32 }}
           >
             <CommentaryRoomIntro entry={entry} language={projection.language} />
 
-            <Box className="overflow-hidden border-continuous flex-row items-center justify-between mx-[-18px] px-[18px] py-[8px] bg-light-grey z-[10]">
+            <Box className="overflow-hidden border-continuous flex-row items-center justify-between mx-[-18px] px-[18px] py-[8px] bg-canvas z-[10]">
               <TouchableBox
-                className="overflow-hidden border-continuous bg-light-grey rounded-[20px] h-[32px] px-[12px] flex-row items-center"
+                className="overflow-hidden border-continuous bg-surface rounded-full h-[32px] px-[12px] flex-row items-center"
                 onPress={() => {
                   openCommentaryBookSelector({
                     openBookSelector,
@@ -328,7 +329,7 @@ const CommentaryResourceTabScreen = ({
                 {query.data.sections.map(candidate => {
                   return (
                     <TouchableBox
-                      className="overflow-hidden border-continuous bg-reverse rounded-[20px] px-[17px] py-[14px]"
+                      className="overflow-hidden border-continuous bg-surface rounded-[16px] px-[17px] py-[14px]"
                       key={candidate.id}
                       activeOpacity={0.62}
                       onPress={() =>
@@ -343,17 +344,9 @@ const CommentaryResourceTabScreen = ({
                         })
                       }
                       accessibilityRole="button"
-                      style={{
-                        shadowColor: 'rgb(89,131,240)',
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 0.1,
-                        shadowRadius: 7,
-                        elevation: 1,
-                        overflow: 'visible',
-                      }}
                     >
                       <Box className="overflow-hidden border-continuous flex-row items-start">
-                        <Box className="overflow-hidden border-continuous px-[10px] py-[5px] rounded-[12px] bg-light-primary">
+                        <Box className="overflow-hidden border-continuous px-[10px] py-[5px] rounded-full bg-light-primary">
                           <Text className="text-primary font-bold text-[12px]">
                             {formatRange(candidate.rangeStartVerse, candidate.rangeEndVerse)}
                           </Text>

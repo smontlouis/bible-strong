@@ -4,10 +4,12 @@ import { TouchableOpacity } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
+import { colorWithOpacity } from '~themes/colorValues'
 import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 
 import { NavigationState, SceneRendererProps } from 'react-native-tab-view'
 import Box from '~common/ui/Box'
+import { radii } from '~common/ui/surfaces'
 import Text from '~common/ui/Text'
 
 interface TabItemProps {
@@ -41,15 +43,10 @@ const TabItem = (
             ...(isLast && {
               marginLeft: 0,
             }),
+            // The active tab is a tinted pill, not a raised one.
             ...(isRouteActive && {
-              borderRadius: 8,
-              backgroundColor: theme.colors.reverse,
-              shadowColor: 'rgb(89,131,240)',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 7,
-              elevation: 1,
-              overflow: 'visible',
+              borderRadius: radii.pill,
+              backgroundColor: colorWithOpacity(theme.colors.primary, 0.12),
             }),
           },
           props.style,

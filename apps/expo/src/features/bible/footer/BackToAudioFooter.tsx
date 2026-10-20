@@ -4,6 +4,7 @@ import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isBibleOverlayOpenAtom } from 'src/state/app'
+import { floatingShadow } from '~common/ui/surfaces'
 import { useFooterFullScreen } from './footerFullScreen'
 import {
   CHAPTER_NAV_ICON_SIZE,
@@ -80,7 +81,7 @@ const BackToAudioFooter = ({
       style={{ maxWidth: isWide && !isParallel && Platform.OS !== 'web' ? 710 : undefined }}
     >
       <AnimatedTouchableBox
-        className="border-continuous overflow-visible border-[2px] border-light-grey bg-reverse items-center justify-center absolute"
+        className="border-continuous overflow-visible bg-surface-raised items-center justify-center absolute"
         disabled={disabled || !hasPreviousChapter}
         onPress={hasPreviousChapter ? goToPrevChapter : undefined}
         accessibilityRole="button"
@@ -108,7 +109,7 @@ const BackToAudioFooter = ({
         <FeatherIcon name="chevron-left" size={CHAPTER_NAV_ICON_SIZE} color="tertiary" />
       </AnimatedTouchableBox>
       <AnimatedHStack
-        className="border-continuous overflow-visible absolute self-center flex-row bg-light-grey p-[2px] rounded-[50px]"
+        className="border-continuous overflow-visible absolute self-center flex-row"
         style={[
           { bottom: 10 + bottomBarHeight },
           {
@@ -119,7 +120,8 @@ const BackToAudioFooter = ({
         ]}
       >
         <TouchableBox
-          className="border-continuous overflow-visible items-center justify-center px-[15px] py-[10px] bg-primary rounded-[12px] border-light-grey relative flex-row"
+          className="border-continuous overflow-visible items-center justify-center px-[15px] py-[10px] bg-primary rounded-full relative flex-row"
+          style={floatingShadow}
           onPress={() => slideToIndex(playingBibleTabIndex)}
           accessibilityRole="button"
           accessibilityLabel={t('audio.goBack')}
@@ -129,7 +131,7 @@ const BackToAudioFooter = ({
         </TouchableBox>
       </AnimatedHStack>
       <AnimatedTouchableBox
-        className="border-continuous overflow-visible items-center justify-center border-[2px] border-light-grey bg-reverse absolute"
+        className="border-continuous overflow-visible items-center justify-center bg-surface-raised absolute"
         disabled={disabled || !hasNextChapter}
         onPress={hasNextChapter ? goToNextChapter : undefined}
         accessibilityRole="button"

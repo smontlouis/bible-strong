@@ -102,7 +102,7 @@ const WorkspaceSidebar = ({
     >
       {(previewGroups, foldedGroupId) => (
         <Box
-          className="flex-1 min-h-0 border-continuous overflow-hidden bg-light-grey border-r-[1px] border-border"
+          className="flex-1 min-h-0 border-continuous overflow-hidden bg-canvas border-r-[1px] border-border"
           style={{
             paddingTop: insets.top,
             paddingBottom: insets.bottom,
@@ -253,18 +253,15 @@ const WorkspaceSidebar = ({
                         {group.isDefault && (
                           <SidebarHoverActions showOnTouch={false}>
                             {showActions => (
+                              // The open page is filled with the surface; a hovered one is tinted.
                               <HStack
                                 className="border-continuous overflow-visible items-center rounded-[8px]"
                                 style={{
-                                  boxShadow:
-                                    activePage === 'home'
-                                      ? '0 2px 7px rgba(89, 131, 240, 0.1)'
-                                      : undefined,
                                   backgroundColor: colorWithOpacity(
                                     resolveThemeColor(
                                       stylingTheme,
                                       activePage === 'home'
-                                        ? 'reverse'
+                                        ? 'surface'
                                         : showActions
                                           ? 'default'
                                           : undefined
@@ -282,7 +279,7 @@ const WorkspaceSidebar = ({
                                   style={{ minHeight: rowHeight }}
                                 >
                                   <Box
-                                    className="w-[20px] h-[20px] rounded-[5px] items-center justify-center shrink-0"
+                                    className="w-[20px] h-[20px] rounded-[4px] items-center justify-center shrink-0"
                                     style={{
                                       backgroundColor: colorWithOpacity(labelStyle.color, 0.12),
                                     }}
@@ -320,13 +317,10 @@ const WorkspaceSidebar = ({
                                   <HStack
                                     className="border-continuous overflow-visible items-center rounded-[8px]"
                                     style={{
-                                      boxShadow: selected
-                                        ? '0 2px 7px rgba(89, 131, 240, 0.1)'
-                                        : undefined,
                                       backgroundColor: colorWithOpacity(
                                         resolveThemeColor(
                                           stylingTheme,
-                                          selected ? 'reverse' : showActions ? 'default' : undefined
+                                          selected ? 'surface' : showActions ? 'default' : undefined
                                         ),
                                         !selected && showActions ? 0.05 : undefined
                                       ),
@@ -341,7 +335,7 @@ const WorkspaceSidebar = ({
                                       style={{ minHeight: rowHeight }}
                                     >
                                       <Box
-                                        className="w-[20px] h-[20px] rounded-[5px] items-center justify-center shrink-0"
+                                        className="w-[20px] h-[20px] rounded-[4px] items-center justify-center shrink-0"
                                         style={{
                                           backgroundColor: resolveUniverseColors(
                                             stylingTheme.colors,
@@ -415,11 +409,11 @@ const WorkspaceSidebar = ({
           <Box className="border-continuous overflow-hidden px-[12px] pt-[8px] pb-[8px] gap-[4px]">
             {Platform.OS === 'web' ? (
               <HStack
-                className="bg-reverse rounded-[14px] items-center overflow-hidden shadow-[0_2px_7px_rgba(89,131,240,0.1)]"
+                className="bg-surface rounded-full items-center overflow-hidden"
                 testID="workspace-create-actions"
               >
                 <TouchableBox
-                  className="flex-1 flex-row items-center justify-center gap-[6px] min-h-[36px] hover:bg-light-grey"
+                  className="flex-1 flex-row items-center justify-center gap-[6px] min-h-[36px] hover:bg-canvas"
                   onPress={addTab}
                   accessibilityRole="button"
                   accessibilityLabel={t('tabs.new')}
@@ -429,9 +423,9 @@ const WorkspaceSidebar = ({
                     {t('workspace.newTabShort')}
                   </Text>
                 </TouchableBox>
-                <Box className="w-px h-[20px] bg-border" />
+                <Box className="w-px h-[20px] bg-separator" />
                 <TouchableBox
-                  className="flex-1 flex-row items-center justify-center gap-[6px] min-h-[36px] hover:bg-light-grey"
+                  className="flex-1 flex-row items-center justify-center gap-[6px] min-h-[36px] hover:bg-canvas"
                   onPress={() => createRef.current?.present()}
                   disabled={groups.length >= MAX_TAB_GROUPS}
                   accessibilityRole="button"
@@ -447,7 +441,7 @@ const WorkspaceSidebar = ({
               </HStack>
             ) : (
               <TouchableBox
-                className="overflow-hidden border-continuous flex-row items-center justify-center rounded-[8px] bg-reverse"
+                className="overflow-hidden border-continuous flex-row items-center justify-center rounded-full bg-surface"
                 onPress={addTab}
                 accessibilityRole="button"
                 style={{ minHeight: rowHeight }}
@@ -474,7 +468,7 @@ const WorkspaceSidebar = ({
                 style={{
                   minHeight: rowHeight,
                   backgroundColor:
-                    activePage === 'settings' ? stylingTheme.colors.reverse : undefined,
+                    activePage === 'settings' ? stylingTheme.colors.surface : undefined,
                   borderRadius: 8,
                 }}
               >

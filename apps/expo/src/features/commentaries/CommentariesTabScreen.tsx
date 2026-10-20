@@ -187,13 +187,8 @@ const CommentariesTabScreen = ({
   return (
     <>
       {hasHeader && (
-        <>
-          <Box
-            className="overflow-hidden border-continuous bg-reverse"
-            style={{ paddingTop: insets.top }}
-          />
+        <Box className="bg-canvas" style={{ paddingTop: insets.top }}>
           <Header
-            background
             hasBackButton={hasBackButton}
             title={displayedContent.headerTitle}
             rightComponent={
@@ -233,11 +228,11 @@ const CommentariesTabScreen = ({
               </MenuView>
             }
           />
-        </>
+        </Box>
       )}
 
       <ScrollView
-        style={{ backgroundColor: theme.colors.lightGrey }}
+        style={{ backgroundColor: theme.colors.canvas }}
         contentContainerStyle={[
           pageContentStyle,
           { maxWidth: 600, paddingBottom: scrollBottomInset },

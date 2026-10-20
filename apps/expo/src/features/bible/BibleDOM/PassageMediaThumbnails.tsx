@@ -1,5 +1,6 @@
 import { LayoutGroup, m, useMotionValue, useReducedMotion } from 'motion/react'
 import { useEffect, useId, useRef, useState, type CSSProperties } from 'react'
+import { radii } from '~common/ui/surfaces'
 import type { ResolvedPassageMedia } from '../passageMedia'
 import type { RootStyles } from './BibleDOMWrapper'
 import { getDisabledStyles } from './disabledStyles'
@@ -211,8 +212,8 @@ const PassageMediaThumbnails = ({
                 boxSizing: 'border-box',
                 placeSelf: 'center',
                 border: `2px solid ${colors.reverse}`,
-                borderRadius: isCompact ? 7 : isInline ? 5 : 9,
-                boxShadow: '0 2px 7px rgba(0, 0, 0, 0.22)',
+                // Set in a verse, a thumbnail is a mark; elsewhere, a tile
+                borderRadius: isInline && !isCompact ? radii.mark : radii.tile,
                 x: transform.x,
                 rotate: transform.rotate,
                 transformOrigin: 'center',

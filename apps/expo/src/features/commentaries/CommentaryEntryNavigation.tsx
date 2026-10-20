@@ -30,7 +30,7 @@ const CommentaryEntryNavigation = ({
     <Box className="overflow-hidden border-continuous flex-row items-center justify-between">
       {showArrows && (
         <TouchableBox
-          className="overflow-hidden border-continuous rounded-[18px] bg-light-grey items-center justify-center"
+          className="overflow-hidden border-continuous rounded-full bg-canvas items-center justify-center"
           disabled={!hasPrevious}
           activeOpacity={0.62}
           onPress={onPrevious}
@@ -47,7 +47,7 @@ const CommentaryEntryNavigation = ({
       )}
 
       <TouchableBox
-        className={`overflow-hidden border-continuous flex-[1] px-[11px] py-[7px] rounded-[14px] bg-light-primary items-center justify-center ${showArrows ? 'mx-[12px]' : ''}`}
+        className={`overflow-hidden border-continuous flex-[1] px-[11px] py-[7px] rounded-full bg-light-primary items-center justify-center ${showArrows ? 'mx-[12px]' : ''}`}
         activeOpacity={0.62}
         disabled={referenceDisabled}
         accessibilityRole={referenceDisabled ? undefined : 'link'}
@@ -66,7 +66,7 @@ const CommentaryEntryNavigation = ({
 
       {showArrows && (
         <TouchableBox
-          className="overflow-hidden border-continuous rounded-[18px] bg-light-grey items-center justify-center"
+          className="overflow-hidden border-continuous rounded-full bg-canvas items-center justify-center"
           disabled={!hasNext}
           activeOpacity={0.62}
           onPress={onNext}

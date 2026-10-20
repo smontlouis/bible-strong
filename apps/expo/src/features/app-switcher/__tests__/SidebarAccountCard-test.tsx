@@ -23,6 +23,7 @@ jest.mock('~helpers/toast', () => ({
 jest.mock('~common/ui/UserAvatar', () => 'img')
 jest.mock('~common/ui/Icon', () => ({ FeatherIcon: 'i' }))
 jest.mock('~common/ui/Text', () => 'span')
+jest.mock('~common/ui/Border', () => 'hr')
 jest.mock('~common/ui/Box', () => ({
   __esModule: true,
   default: 'div',

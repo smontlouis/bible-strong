@@ -73,7 +73,8 @@ export default function ShortcutGuide({
           onKeyDown={event => event.stopPropagation()}
           style={
             {
-              '--command-bg': theme.colors.reverse,
+              '--command-bg': theme.colors.surfaceRaised,
+              '--command-panel': theme.colors.canvas,
               '--command-text': theme.colors.default,
               '--command-muted': theme.colors.tertiary,
               '--command-border': theme.colors.border,

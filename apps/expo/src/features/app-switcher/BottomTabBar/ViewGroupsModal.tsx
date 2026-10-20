@@ -5,9 +5,12 @@ import Sheet from '~common/ContextualPanel/ContextualSheet'
 import InlineSheetContent from '~common/ContextualPanel/InlineSheetContent'
 import distanceInWords from 'date-fns/formatDistance'
 import { useAtomValue } from 'jotai/react'
-import React from 'react'
+import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
+import Border from '~common/ui/Border'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
+import { radii } from '~common/ui/surfaces'
 import Text from '~common/ui/Text'
 import { getDateLocale } from '~helpers/languageUtils'
 import useLanguage from '~helpers/useLanguage'
@@ -32,8 +35,9 @@ const TabPreviewGrid = ({ group, size: gridSize = 50 }: TabPreviewGridProps) => 
   const gap = Math.round(gridSize * 0.03)
   const cellSize = Math.round((gridSize - 2 * padding - gap) / 2)
   const iconSize = Math.round(cellSize * 0.6)
-  const gridBorderRadius = Math.round(gridSize * 0.2)
-  const cellBorderRadius = Math.round(cellSize * 0.25)
+  // A thumbnail takes the tile radius; its cells the mark radius, so the corners stay concentric.
+  const gridBorderRadius = radii.tile
+  const cellBorderRadius = radii.mark
   const badgeFontSize = Math.round(cellSize * 0.4)
 
   const renderCell = (index: number) => {
@@ -111,7 +115,6 @@ const GroupCard = ({ group, isActive, onPress }: GroupCardProps) => {
 
   const mountTime = useMountTime()
   const { t } = useTranslation()
-  const theme = useTheme()
   const lang = useLanguage()
 
   const getCreatedText = () => {
@@ -132,25 +135,17 @@ const GroupCard = ({ group, isActive, onPress }: GroupCardProps) => {
 
   return (
     <TouchableBox
-      className="overflow-hidden border-continuous flex-row p-[16px] mb-[12px] rounded-[16px] bg-light-grey items-center"
+      className="overflow-hidden border-continuous flex-row py-[12px] items-center"
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={`${displayName}. ${getCreatedText()}`}
       accessibilityState={{ selected: isActive }}
-      style={
-        isActive
-          ? {
-              borderWidth: 2,
-              borderColor: group.color || theme.colors.primary,
-            }
-          : undefined
-      }
     >
       <TabPreviewGrid group={group} />
       <VStack className="overflow-hidden border-continuous flex-[1] ml-[12px] gap-[4px]">
         <HStack className="overflow-hidden border-continuous items-center gap-[4px]">
           <Box
-            className="overflow-hidden border-continuous w-[10px] h-[10px] rounded-[5px]"
+            className="overflow-hidden border-continuous w-[10px] h-[10px] rounded-full"
             style={{ backgroundColor: resolveThemeColor(stylingTheme, group.color || 'grey') }}
           />
           <Text className="text-[16px] font-bold" numberOfLines={1} style={{ flex: 1 }}>
@@ -159,6 +154,10 @@ const GroupCard = ({ group, isActive, onPress }: GroupCardProps) => {
         </HStack>
         <Text className="text-[13px] text-grey">{getCreatedText()}</Text>
       </VStack>
+      {/* The open group is marked by a check, not by an outline. */}
+      {isActive && (
+        <FeatherIcon name="check" size={20} color="primary" style={{ marginLeft: 12 }} />
+      )}
     </TouchableBox>
   )
 }
@@ -197,14 +196,17 @@ const ViewGroupsModal = ({ sheetRef, onClose, inline = false }: ViewGroupsModalP
       onDismiss={onClose}
       // header={<SheetHeader title={t('tabs.viewMyGroups')} />}
     >
-      <Box className="overflow-hidden border-continuous px-[20px] pt-[16px]">
-        {groups.map(group => (
-          <GroupCard
-            key={group.id}
-            group={group}
-            isActive={group.id === activeGroupId}
-            onPress={() => handleSelectGroup(group.id)}
-          />
+      <Box className="overflow-hidden border-continuous px-[20px] pt-[8px] pb-[16px]">
+        {groups.map((group, index) => (
+          <Fragment key={group.id}>
+            {/* Starts where the group's name starts, after its thumbnail. */}
+            {index > 0 && <Border className="ml-[62px]" />}
+            <GroupCard
+              group={group}
+              isActive={group.id === activeGroupId}
+              onPress={() => handleSelectGroup(group.id)}
+            />
+          </Fragment>
         ))}
       </Box>
     </Container>

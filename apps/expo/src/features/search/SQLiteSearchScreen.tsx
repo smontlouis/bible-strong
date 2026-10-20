@@ -16,7 +16,7 @@ import PageContent, { pageContentStyle } from '~common/ui/PageContent'
 import type { ReactNode } from 'react'
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, Keyboard, TextInput } from 'react-native'
+import { FlatList, Keyboard, StyleSheet, TextInput } from 'react-native'
 import { KeyboardAwareScrollView, useKeyboardState } from '~common/KeyboardAwareScrollView'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
@@ -66,6 +66,7 @@ import SearchFacetBar from './shared/SearchFacetBar'
 import SearchSectionBlock, {
   SEARCH_SECTION_LOAD_MORE_COUNT,
   SEARCH_SECTION_PREVIEW_LIMIT,
+  SearchResultSeparator,
 } from './shared/SearchSectionBlock'
 import { type DictionarySearchRow, type NaveSearchItemRow } from './shared/searchItems'
 import type { SearchEntityResult } from './shared/searchResultTypes'
@@ -1145,6 +1146,7 @@ const SQLiteSearchScreen = ({
             data={soloPaginatedSection.items}
             keyExtractor={item => item.id}
             renderItem={({ item }) => renderSearchResult(item)}
+            ItemSeparatorComponent={SearchResultSeparator}
             onEndReachedThreshold={0.4}
             onEndReached={() => fetchNextPage(soloPaginatedSection.id)}
             ListHeaderComponent={
@@ -1296,7 +1298,11 @@ const SQLiteSearchScreen = ({
 
   return (
     <Box className="overflow-hidden border-continuous flex-[1]">
-      <Box testID="workspace-page-header" className="border-b-[1px] border-border">
+      <Box
+        testID="workspace-page-header"
+        className="border-separator"
+        style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
+      >
         <PageContent>
           <HStack className="items-center gap-[4px] pl-[20px] pt-[6px] pb-[4px]">
             <Box className="flex-1 pt-[5px]">
@@ -1336,13 +1342,15 @@ const SQLiteSearchScreen = ({
       <PassageSearchFiltersSheet ref={passageFiltersRef} {...passageFilterProps} />
 
       {rateLimitNotice && (
-        <Box className="px-[20px] py-[12px] bg-light-grey">
-          <Text accessibilityLiveRegion="polite" className="text-grey text-[13px]">
-            {t(rateLimitNotice.retrying ? 'search.rateLimitedRetrying' : 'search.rateLimited', {
-              seconds: rateLimitNotice.seconds,
-            })}
-          </Text>
-        </Box>
+        <PageContent className="px-[20px] pt-[12px]">
+          <Box className="overflow-hidden border-continuous px-[14px] py-[10px] rounded-[12px] bg-light-grey">
+            <Text accessibilityLiveRegion="polite" className="text-grey text-[13px]">
+              {t(rateLimitNotice.retrying ? 'search.rateLimitedRetrying' : 'search.rateLimited', {
+                seconds: rateLimitNotice.seconds,
+              })}
+            </Text>
+          </Box>
+        </PageContent>
       )}
       {isShowingPreviousResults && currentSearchModel.isLoading ? <SearchSpinner /> : null}
       {renderContent()}

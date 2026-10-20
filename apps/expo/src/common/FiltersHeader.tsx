@@ -1,7 +1,7 @@
 import { FilterHeaderButtonContent } from './FilterHeaderButton'
 import FilterChoices from './FilterChoices'
 import { useTranslation } from 'react-i18next'
-import { Platform } from 'react-native'
+import { Platform, StyleSheet } from 'react-native'
 import { useState, type ComponentProps, type ReactNode } from 'react'
 import PanelSearch from './ContextualPanel/PanelSearch'
 import { useTheme } from '~themes/ThemeProvider'
@@ -160,7 +160,11 @@ export default function FiltersHeader({
   )
   if (buttonOnly) return filterButton
   return (
-    <Box className="bg-reverse border-b border-border" testID="workspace-page-header">
+    <Box
+      className="border-separator"
+      style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
+      testID="workspace-page-header"
+    >
       <PageContent className="min-h-[54px] items-center flex-row">
         {hasBackButton ? (
           <Back padding>

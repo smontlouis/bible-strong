@@ -26,7 +26,7 @@ const CircleImage = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const resolvedClassName = twMerge(
-    'absolute top-[2px] right-[0px] left-[2px] bottom-[0px] w-[34px] h-[34px] rounded-[17px] bg-light-grey',
+    'absolute top-[2px] right-[0px] left-[2px] bottom-[0px] w-[34px] h-[34px] rounded-full bg-light-grey',
     className
   )
   return (
@@ -73,7 +73,7 @@ const Section = ({
             size={38}
             progress={progress}
             color={theme.colors.primary}
-            unfilledColor={progress ? 'rgb(230,230,230)' : undefined}
+            unfilledColor={progress ? theme.colors.border : undefined}
             animationDuration={300}
           >
             <CircleImage className="items-center justify-center">

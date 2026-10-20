@@ -34,11 +34,11 @@ const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
 
   return (
     <SelectBibleReferenceModalProvider>
-      <Box className="flex-1 bg-light-grey">
+      <Box className="flex-1 bg-canvas">
         <ScrollView
           style={{
             flex: 1,
-            backgroundColor: theme.colors.lightGrey,
+            backgroundColor: theme.colors.canvas,
             ...(Platform.OS === 'web' ? { scrollbarGutter: 'stable' } : {}),
           }}
           contentInsetAdjustmentBehavior="never"
@@ -68,6 +68,7 @@ const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
                   <React.Fragment key={plan.id}>
                     <PlanItem
                       {...plan}
+                      onPlainGround
                       onPress={() => {
                         planSelectorRef.current?.dismiss()
                         setTab(tab => ({

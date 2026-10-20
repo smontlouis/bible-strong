@@ -83,7 +83,7 @@ export const VerseSelectorPopup = ({
                     accessibilityRole="button"
                     accessibilityLabel={t('Verset') + ' ' + verse}
                     accessibilityState={{ selected: verse === bible.data.selectedVerse }}
-                    className="w-[40px] h-[40px] bg-opacity5 rounded-[3px] items-center justify-center"
+                    className="w-[40px] h-[40px] bg-opacity5 rounded-[8px] items-center justify-center"
                     onPress={() => {
                       actions.setSelectedVerse(verse)
                       nav.close()
@@ -125,7 +125,7 @@ export const VerseSelectorPopup = ({
           {verseNumbers.length ? (
             verseNumbers.map(verse => (
               <TouchableBox
-                className="overflow-hidden border-continuous bg-opacity5 rounded-[3px] h-[40px] items-center justify-center"
+                className="overflow-hidden border-continuous bg-opacity5 rounded-[8px] h-[40px] items-center justify-center"
                 key={String(verse)}
                 onPress={() => handleSelect(verse)}
                 accessibilityRole="button"

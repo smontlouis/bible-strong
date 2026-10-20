@@ -1,41 +1,22 @@
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
-import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { Pressable } from 'react-native'
-import { twMerge } from '~common/ui/classNames'
 
-import type { Theme as AppTheme } from '~themes'
-
+import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+
+/** Height of a row, used by the list layout. */
+export const DICTIONNAIRE_ITEM_HEIGHT = 60
 
 interface DictionnaireItemProps {
   word: string
   onSelect: () => void
+  /** The hairline under the row; the last row of a group has none. */
+  hasSeparator?: boolean
 }
 
-const SectionItem = (
-  componentProps: Omit<UIComponentProps<typeof Box>, 'theme'> & {
-    theme?: AppTheme
-    className?: string
-  }
-) => {
-  const { theme: _themeOverride, className, ...props } = componentProps
-
-  const resolvedClassName = twMerge(
-    'h-[60px] ml-[20px] mr-[20px] bg-reverse border-b-border border-b-[1px] items-start justify-center',
-    className
-  )
-  return (
-    <Box
-      {...props}
-      style={[props.style] as UIComponentProps<typeof Box>['style']}
-      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
-    />
-  )
-}
-
-const DictionnaireItem = ({ word, onSelect }: DictionnaireItemProps) => {
+const DictionnaireItem = ({ word, onSelect, hasSeparator = true }: DictionnaireItemProps) => {
   const stylingTheme = useStylingTheme()
 
   return (
@@ -45,8 +26,11 @@ const DictionnaireItem = ({ word, onSelect }: DictionnaireItemProps) => {
       onPress={onSelect}
       style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
     >
-      <SectionItem>
-        <Box className="overflow-hidden border-continuous flex-row">
+      <Box
+        className="px-[20px] items-start justify-center"
+        style={{ height: DICTIONNAIRE_ITEM_HEIGHT }}
+      >
+        <Box className="flex-row">
           <Text
             className="text-[18px] text-default flex-[1] pr-[20px]"
             style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
@@ -54,7 +38,8 @@ const DictionnaireItem = ({ word, onSelect }: DictionnaireItemProps) => {
             {word}
           </Text>
         </Box>
-      </SectionItem>
+        {hasSeparator && <Border className="absolute bottom-0 left-[20px] right-0" />}
+      </Box>
     </Pressable>
   )
 }

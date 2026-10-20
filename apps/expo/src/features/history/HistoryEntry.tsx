@@ -2,7 +2,7 @@ import type { ComponentProps, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import Link from '~common/Link'
-import Box from '~common/ui/Box'
+import IconTile from '~common/ui/IconTile'
 import SearchTypeIcon from '~features/search/shared/SearchTypeIcon'
 import type { SearchItemType } from '~state/searchFilters'
 import { getBook } from '~helpers/bibleBookCatalog'
@@ -29,10 +29,13 @@ const entryKinds = {
   'commentary-resource': 'commentary',
 } as const satisfies Record<HistoryItem['type'], SearchItemType>
 
-/** `bare`: the resource-colored glyph alone, without its tinted square. */
+/**
+ * The resource-colored glyph of an entry in its icon tile. `bare`: the glyph alone, without its
+ * tile. `size` is the glyph's.
+ */
 export const HistoryEntryIcon = ({
   item,
-  size = 36,
+  size = 18,
   bare = false,
 }: {
   item: HistoryItem
@@ -43,17 +46,9 @@ export const HistoryEntryIcon = ({
   const kind = entryKinds[item.type]
   if (bare) return <SearchTypeIcon type={kind} size={size} />
   return (
-    <Box
-      className="overflow-hidden border-continuous items-center justify-center shrink-0"
-      style={{
-        width: size,
-        height: size,
-        borderRadius: size * 0.28,
-        backgroundColor: resolveUniverseColors(theme.colors, kind).background,
-      }}
-    >
-      <SearchTypeIcon type={kind} size={size / 2} />
-    </Box>
+    <IconTile bg={resolveUniverseColors(theme.colors, kind).background}>
+      <SearchTypeIcon type={kind} size={size} />
+    </IconTile>
   )
 }
 

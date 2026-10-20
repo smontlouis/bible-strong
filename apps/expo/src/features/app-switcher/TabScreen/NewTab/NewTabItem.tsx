@@ -59,7 +59,7 @@ const NewTabItem = ({
         accessibilityLabel={label}
         accessibilityHint={description}
         activeOpacity={0.7}
-        className="relative overflow-hidden border-continuous bg-reverse shadow-[0_2px_7px_rgba(89,131,240,0.1)] rounded-[18px] px-[20px] py-[20px] min-h-[120px] justify-center gap-[4px]"
+        className="relative overflow-hidden border-continuous bg-surface rounded-[24px] px-[20px] py-[20px] min-h-[120px] justify-center gap-[4px]"
         onPress={onPress}
       >
         <Text className="text-[28px] leading-[34px] font-medium">{label}</Text>
@@ -90,8 +90,8 @@ const NewTabItem = ({
         activeOpacity={0.7}
         className={
           isTile
-            ? 'flex-1 border-continuous bg-reverse shadow-[0_2px_7px_rgba(89,131,240,0.1)] rounded-[16px] px-[12px] py-[14px] min-h-[92px] gap-[8px]'
-            : 'flex-1 border-continuous flex-row items-center bg-reverse shadow-[0_2px_7px_rgba(89,131,240,0.1)] rounded-[16px] px-[12px] py-[10px] min-h-[64px] gap-[10px]'
+            ? 'flex-1 overflow-hidden border-continuous bg-surface rounded-[16px] px-[12px] py-[14px] min-h-[92px] gap-[8px]'
+            : 'flex-1 overflow-hidden border-continuous flex-row items-center bg-surface rounded-[16px] px-[12px] py-[10px] min-h-[64px] gap-[10px]'
         }
         onPress={onPress}
       >
@@ -114,8 +114,8 @@ const NewTabItem = ({
       activeOpacity={0.7}
       className={
         hero
-          ? 'relative overflow-hidden border-continuous flex-row items-center bg-reverse shadow-[0_2px_7px_rgba(89,131,240,0.1)] rounded-[18px] px-[24px] py-[24px]'
-          : 'border-continuous flex-row items-center bg-reverse shadow-[0_2px_7px_rgba(89,131,240,0.1)] rounded-[18px] px-[18px] py-[18px] min-h-[92px] gap-[14px]'
+          ? 'relative overflow-hidden border-continuous flex-row items-center bg-surface rounded-[24px] px-[24px] py-[24px]'
+          : 'overflow-hidden border-continuous flex-row items-center bg-surface rounded-[16px] px-[18px] py-[18px] min-h-[92px] gap-[14px]'
       }
       style={hero ? { minHeight: compact ? 180 : 218 } : undefined}
       onPress={onPress}

@@ -12,6 +12,7 @@ import { BibleResource } from '~common/types'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
+import { floatingShadow } from '~common/ui/surfaces'
 import Text from '~common/ui/Text'
 import TouchableSvgIcon from '~features/bible/TouchableSvgIcon'
 import { wp } from '~helpers/utils'
@@ -30,90 +31,97 @@ const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props
   const iconWidth = Platform.OS === 'web' ? 74 : wp(18)
 
   return (
+    // In the sheet the bar floats over the resource, so it takes the floating level and its
+    // shadow; in the desktop sidebar it sits in the flow, under the resource, and keeps no shadow.
     <Box
-      className="border-continuous overflow-hidden bg-reverse py-[10px] rounded-[20px] border-[1px] border-border"
-      style={{ marginHorizontal: Platform.OS === 'web' ? 12 : 20 }}
+      className="border-continuous bg-surface-raised rounded-[24px]"
+      style={{
+        marginHorizontal: Platform.OS === 'web' ? 12 : 20,
+        ...(Platform.OS !== 'web' && floatingShadow),
+      }}
     >
-      <HorizontalControlScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ flexGrow: 1 }}
-      >
-        <HStack className="flex-[1]" spacing={0}>
-          <Box
-            className="overflow-hidden border-continuous"
-            style={{ width: iconWidth, opacity: resourceType === 'strong' ? 1 : 0.3 }}
-          >
-            <TouchableSvgIcon
-              icon={LexiqueIcon}
-              color={resourceType === 'strong' ? getUniverseColor('strong') : 'grey'}
-              onPress={() => onPress('strong')}
-              label={t('Lexique')}
-            />
-          </Box>
-          <Box
-            className="overflow-hidden border-continuous"
-            style={{ width: iconWidth, opacity: resourceType === 'dictionary' ? 1 : 0.3 }}
-          >
-            <TouchableSvgIcon
-              icon={DictionnaireIcon}
-              color={resourceType === 'dictionary' ? getUniverseColor('dictionary') : 'grey'}
-              onPress={() => onPress('dictionary')}
-              label={t('Dictionnaire')}
-            />
-          </Box>
-          <Box
-            className="overflow-hidden border-continuous"
-            style={{ width: iconWidth, opacity: resourceType === 'nave' ? 1 : 0.3 }}
-          >
-            <TouchableSvgIcon
-              icon={NaveIcon}
-              color={resourceType === 'nave' ? getUniverseColor('nave') : 'grey'}
-              onPress={() => onPress('nave')}
-              label={t('Thèmes')}
-            />
-          </Box>
-          <Box
-            className="overflow-hidden border-continuous"
-            style={{ width: iconWidth, opacity: resourceType === 'reference' ? 1 : 0.3 }}
-          >
-            <TouchableSvgIcon
-              icon={RefIcon}
-              color={resourceType === 'reference' ? getUniverseColor('reference') : 'grey'}
-              onPress={() => onPress('reference')}
-              label={t('Références')}
-            />
-          </Box>
-          <Box
-            className="overflow-hidden border-continuous"
-            style={{ width: iconWidth, opacity: resourceType === 'commentary' ? 1 : 0.3 }}
-          >
-            <TouchableSvgIcon
-              icon={CommentIcon}
-              color={resourceType === 'commentary' ? getUniverseColor('commentary') : 'grey'}
-              onPress={() => onPress('commentary')}
-              label={t('Comment.')}
-            />
-          </Box>
-          <Box
-            className="overflow-hidden border-continuous"
-            style={{ width: iconWidth, opacity: resourceType === 'compare' ? 1 : 0.3 }}
-          >
-            <TouchableOpacity
-              accessibilityRole="button"
-              onPress={() => onPress('compare')}
-              style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+      <Box className="border-continuous overflow-hidden rounded-[24px] py-[10px]">
+        <HorizontalControlScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
+          <HStack className="flex-[1]" spacing={0}>
+            <Box
+              className="overflow-hidden border-continuous"
+              style={{ width: iconWidth, opacity: resourceType === 'strong' ? 1 : 0.3 }}
             >
-              <FeatherIcon
-                name="layers"
-                size={20}
-                color={resourceType === 'compare' ? getUniverseColor('compare') : 'grey'}
+              <TouchableSvgIcon
+                icon={LexiqueIcon}
+                color={resourceType === 'strong' ? getUniverseColor('strong') : 'grey'}
+                onPress={() => onPress('strong')}
+                label={t('Lexique')}
               />
-              <Text className="mt-[5px] text-[9px] text-grey">{t('Comparer')}</Text>
-            </TouchableOpacity>
-          </Box>
-        </HStack>
-      </HorizontalControlScrollView>
+            </Box>
+            <Box
+              className="overflow-hidden border-continuous"
+              style={{ width: iconWidth, opacity: resourceType === 'dictionary' ? 1 : 0.3 }}
+            >
+              <TouchableSvgIcon
+                icon={DictionnaireIcon}
+                color={resourceType === 'dictionary' ? getUniverseColor('dictionary') : 'grey'}
+                onPress={() => onPress('dictionary')}
+                label={t('Dictionnaire')}
+              />
+            </Box>
+            <Box
+              className="overflow-hidden border-continuous"
+              style={{ width: iconWidth, opacity: resourceType === 'nave' ? 1 : 0.3 }}
+            >
+              <TouchableSvgIcon
+                icon={NaveIcon}
+                color={resourceType === 'nave' ? getUniverseColor('nave') : 'grey'}
+                onPress={() => onPress('nave')}
+                label={t('Thèmes')}
+              />
+            </Box>
+            <Box
+              className="overflow-hidden border-continuous"
+              style={{ width: iconWidth, opacity: resourceType === 'reference' ? 1 : 0.3 }}
+            >
+              <TouchableSvgIcon
+                icon={RefIcon}
+                color={resourceType === 'reference' ? getUniverseColor('reference') : 'grey'}
+                onPress={() => onPress('reference')}
+                label={t('Références')}
+              />
+            </Box>
+            <Box
+              className="overflow-hidden border-continuous"
+              style={{ width: iconWidth, opacity: resourceType === 'commentary' ? 1 : 0.3 }}
+            >
+              <TouchableSvgIcon
+                icon={CommentIcon}
+                color={resourceType === 'commentary' ? getUniverseColor('commentary') : 'grey'}
+                onPress={() => onPress('commentary')}
+                label={t('Comment.')}
+              />
+            </Box>
+            <Box
+              className="overflow-hidden border-continuous"
+              style={{ width: iconWidth, opacity: resourceType === 'compare' ? 1 : 0.3 }}
+            >
+              <TouchableOpacity
+                accessibilityRole="button"
+                onPress={() => onPress('compare')}
+                style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+              >
+                <FeatherIcon
+                  name="layers"
+                  size={20}
+                  color={resourceType === 'compare' ? getUniverseColor('compare') : 'grey'}
+                />
+                <Text className="mt-[5px] text-[9px] text-grey">{t('Comparer')}</Text>
+              </TouchableOpacity>
+            </Box>
+          </HStack>
+        </HorizontalControlScrollView>
+      </Box>
     </Box>
   )
 })

@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import InlineLink from '~common/InlineLink'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
+import { radii } from '~common/ui/surfaces'
 import Text from '~common/ui/Text'
 import useTimelineLanguage from './useTimelineLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
@@ -88,22 +89,14 @@ const SectionDetailsModal = ({
             <Box className="overflow-hidden border-continuous h-[2px] bg-default" />
           </Box>
           <Box
-            className="overflow-hidden border-continuous flex-row mt-[50px] rounded-[10px]"
-            style={{
-              width: imageWidth,
-              shadowColor: 'rgb(89,131,240)',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 7,
-              elevation: 1,
-              overflow: 'visible',
-            }}
+            className="overflow-hidden border-continuous flex-row mt-[50px] rounded-[12px]"
+            style={{ width: imageWidth }}
           >
             <Image
               style={{
                 width: imageWidth,
                 ...(isWeb ? { aspectRatio: 1 } : { height: width }),
-                borderRadius: 10,
+                borderRadius: radii.control,
               }}
               source={{
                 uri: image,
@@ -111,16 +104,8 @@ const SectionDetailsModal = ({
             />
           </Box>
           <Box
-            className="overflow-hidden border-continuous w-[50px] h-[10px] rounded-[10px] my-[50px]"
-            style={{
-              backgroundColor: resolveThemeColor(stylingTheme, color),
-              shadowColor: 'rgb(89,131,240)',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 7,
-              elevation: 1,
-              overflow: 'visible',
-            }}
+            className="overflow-hidden border-continuous w-[50px] h-[10px] rounded-full my-[50px]"
+            style={{ backgroundColor: resolveThemeColor(stylingTheme, color) }}
           />
           <Paragraph>
             {getLegacyLocalizedField(lang, { fr: description, en: descriptionEn })}

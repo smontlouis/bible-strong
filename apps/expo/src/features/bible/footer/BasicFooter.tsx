@@ -1,6 +1,7 @@
 import { Platform } from 'react-native'
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 import { resolveThemeColor } from '~themes/colorValues'
+import { floatingShadow } from '~common/ui/surfaces'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
@@ -59,7 +60,7 @@ const BasicFooter = ({
       style={{ maxWidth: isWide && !isParallel && Platform.OS !== 'web' ? 710 : undefined }}
     >
       <AnimatedTouchableBox
-        className="border-continuous overflow-visible border-[1px] border-light-grey bg-reverse items-center justify-center absolute"
+        className="border-continuous overflow-visible bg-surface-raised items-center justify-center absolute"
         disabled={isDisabled || !onPrevChapter}
         onPress={onPrevChapter}
         accessibilityRole="button"
@@ -96,7 +97,7 @@ const BasicFooter = ({
         centerTranslateY={centerTranslateY}
       />
       <AnimatedTouchableBox
-        className="border-continuous overflow-visible items-center justify-center border-[2px] border-light-grey bg-reverse absolute"
+        className="border-continuous overflow-visible items-center justify-center bg-surface-raised absolute"
         disabled={isDisabled || !onNextChapter}
         onPress={onNextChapter}
         accessibilityRole="button"
@@ -157,7 +158,7 @@ const PlayableButtons = ({
 
   return (
     <AnimatedHStack
-      className="border-continuous overflow-visible absolute self-center flex-row bg-light-grey p-[2px] rounded-[50px]"
+      className="border-continuous overflow-visible absolute self-center flex-row"
       style={[
         { bottom: 10 + bottomBarHeight },
         {
@@ -168,18 +169,22 @@ const PlayableButtons = ({
       ]}
     >
       <TouchableBox
-        className="border-continuous overflow-visible items-center justify-center w-[50px] h-[50px] border-[2px] rounded-[25px] border-light-grey relative"
+        className="border-continuous overflow-visible items-center justify-center w-[50px] h-[50px] rounded-full relative"
         disabled={isDisabled}
         activeOpacity={0.5}
         onPress={onPlay}
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
         accessibilityState={{ disabled: isDisabled, busy: isLoading }}
+        // The play button floats over the text: the one shadow, no ring around it.
         style={[
-          { opacity: isDisabled ? 0.6 : 1 },
+          { opacity: isDisabled ? 0.6 : 1, ...floatingShadow },
           [
             {
-              backgroundColor: resolveThemeColor(stylingTheme, isPlaying ? 'primary' : 'reverse'),
+              backgroundColor: resolveThemeColor(
+                stylingTheme,
+                isPlaying ? 'primary' : 'surfaceRaised'
+              ),
               opacity: isDisabled ? 0.6 : 1,
             },
           ],

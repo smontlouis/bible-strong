@@ -4,6 +4,7 @@ import { useTheme } from '~themes/ThemeProvider'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box from '~common/ui/Box'
+import { floatingShadow } from '~common/ui/surfaces'
 import Text from '~common/ui/Text'
 interface BatchActionBarProps {
   selectedCount: number
@@ -39,14 +40,10 @@ const BatchActionBar = ({
 
   return (
     <Box
-      className="overflow-hidden border-continuous absolute left-[0px] right-[0px] bottom-[0px] bg-reverse rounded-tl-[16px] rounded-tr-[16px] px-[20px] pt-[16px]"
+      className="overflow-hidden border-continuous absolute left-[0px] right-[0px] bottom-[0px] bg-surface-raised rounded-tl-[24px] rounded-tr-[24px] px-[20px] pt-[16px]"
       style={{
         paddingBottom: insets.bottom > 0 ? insets.bottom : 16,
-        shadowColor: 'rgb(89,131,240)',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 7,
-        elevation: 1,
+        ...floatingShadow,
         overflow: 'visible',
       }}
     >
@@ -71,7 +68,7 @@ const BatchActionBar = ({
                 downloadsDisabled || isDeleting ? theme.colors.tertiary : theme.colors.primary,
               paddingHorizontal: 16,
               paddingVertical: 10,
-              borderRadius: 8,
+              borderRadius: 999,
             }}
           >
             <Text className="text-[14px] font-bold" style={{ color: '#fff' }}>
@@ -92,7 +89,7 @@ const BatchActionBar = ({
               backgroundColor: isDeleting ? theme.colors.tertiary : theme.colors.quart,
               paddingHorizontal: 16,
               paddingVertical: 10,
-              borderRadius: 8,
+              borderRadius: 999,
               flexDirection: 'row',
               alignItems: 'center',
               gap: 8,
@@ -107,7 +104,7 @@ const BatchActionBar = ({
       </Box>
 
       {deletionProgress !== null && (
-        <Box className="border-continuous overflow-visible mt-[12px] h-[3px] bg-border rounded-[2px]">
+        <Box className="border-continuous overflow-visible mt-[12px] h-[3px] bg-border rounded-full">
           <Box
             className="overflow-hidden border-continuous h-[3px] bg-primary"
             style={{ width: `${progressPercent}%` }}

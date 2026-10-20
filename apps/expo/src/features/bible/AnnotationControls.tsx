@@ -9,6 +9,7 @@ import Text from '~common/ui/Text'
 import verseToReference from '~helpers/verseToReference'
 import { useColorItems, useResolvedColor } from '~helpers/useHighlightColors'
 import { colorPickerModalAtom } from 'src/state/app'
+import { colorWithOpacity } from '~themes/colorValues'
 import { useTheme } from '~themes/ThemeProvider'
 import type { AnnotationType, SelectedAnnotation, SelectionRange } from './hooks/useAnnotationMode'
 
@@ -135,34 +136,43 @@ export const AnnotationTypeButton = ({
   children,
   label,
   compact,
-}: AnnotationTypeButtonProps) => (
-  <TouchableBox
-    className={twMerge(
-      'flex-1 min-w-0 items-center justify-center border',
-      compact
-        ? 'gap-[2px] min-h-[58px] px-[2px] py-[6px] rounded-[10px]'
-        : 'gap-[6px] min-h-[75px] px-[4px] py-[10px] rounded-[12px]',
-      !disabled && activeType === type ? 'border-primary bg-light-grey' : 'border-border'
-    )}
-    accessibilityRole="button"
-    accessibilityLabel={label}
-    accessibilityState={{ disabled, selected: !disabled && activeType === type }}
-    disabled={disabled}
-    onPress={() => onPress(type)}
-    style={{ opacity: disabled ? 0.5 : 1 }}
-  >
-    {children}
-    <Text
+}: AnnotationTypeButtonProps) => {
+  const theme = useTheme()
+  return (
+    <TouchableBox
       className={twMerge(
-        compact ? 'text-[12px]' : 'text-[13px]',
-        !disabled && activeType === type ? 'text-primary font-bold' : 'text-default'
+        'flex-1 min-w-0 items-center justify-center',
+        compact
+          ? 'gap-[2px] min-h-[58px] px-[2px] py-[6px] rounded-[8px]'
+          : 'gap-[6px] min-h-[75px] px-[4px] py-[10px] rounded-[12px]'
       )}
-      numberOfLines={1}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled, selected: !disabled && activeType === type }}
+      disabled={disabled}
+      onPress={() => onPress(type)}
+      style={{
+        opacity: disabled ? 0.5 : 1,
+        // The chosen type takes a tint, not an outline.
+        backgroundColor:
+          !disabled && activeType === type
+            ? colorWithOpacity(theme.colors.primary, 0.12)
+            : undefined,
+      }}
     >
-      {label}
-    </Text>
-  </TouchableBox>
-)
+      {children}
+      <Text
+        className={twMerge(
+          compact ? 'text-[12px]' : 'text-[13px]',
+          !disabled && activeType === type ? 'text-primary font-bold' : 'text-default'
+        )}
+        numberOfLines={1}
+      >
+        {label}
+      </Text>
+    </TouchableBox>
+  )
+}
 
 type AnnotationColorPaletteProps = {
   type: AnnotationType
@@ -200,7 +210,7 @@ export const AnnotationColorPalette = ({
         </TouchableBox>
       ))}
       <TouchableBox
-        className="overflow-hidden border-continuous rounded-[15px] items-center justify-center bg-opacity5"
+        className="overflow-hidden border-continuous rounded-full items-center justify-center bg-opacity5"
         onPress={() => {
           setColorPickerModal({
             selectedColor,

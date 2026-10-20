@@ -12,6 +12,7 @@ import StylizedHTMLView from '~common/SwitchableHTMLView'
 import { getCommentaryShare } from './shareCommentary'
 import ScrollView from '~common/ui/ScrollView'
 import Box from '~common/ui/Box'
+import Card from '~common/ui/Card'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { useResourceAccess } from '~features/resources/resourceAccess'
@@ -127,9 +128,8 @@ const CommentaryEntryScreen = ({
 
   return (
     <FormSheetScreen isFormSheet={IS_FORM_SHEET}>
-      <Box className="overflow-hidden border-continuous flex-[1] bg-light-grey">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
         <Header
-          background
           hasBackButton={IS_FORM_SHEET ? canGoBackInStack : true}
           title={entry.author}
           subTitle={passage}
@@ -175,6 +175,7 @@ const CommentaryEntryScreen = ({
         ) : (
           <ScrollView
             ref={scrollRef}
+            backgroundColor="canvas"
             contentContainerStyle={{ maxWidth: 600, padding: 18, paddingBottom: 44 }}
           >
             <CommentaryRoomIntro
@@ -195,17 +196,7 @@ const CommentaryEntryScreen = ({
                     })
               }
             />
-            <Box
-              className="overflow-hidden border-continuous bg-reverse rounded-[20px] px-[18px] py-[18px]"
-              style={{
-                shadowColor: 'rgb(89,131,240)',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 7,
-                elevation: 1,
-                overflow: 'visible',
-              }}
-            >
+            <Card className="px-[18px] py-[18px]">
               <CommentaryEntryNavigation
                 hasPrevious={Boolean(previousSection)}
                 hasNext={Boolean(nextSection)}
@@ -249,7 +240,7 @@ const CommentaryEntryScreen = ({
                   }}
                 />
               </Box>
-            </Box>
+            </Card>
           </ScrollView>
         )}
       </Box>

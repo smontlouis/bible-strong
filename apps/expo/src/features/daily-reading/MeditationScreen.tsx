@@ -201,7 +201,7 @@ export const MeditationReader = ({
                   <Link
                     size={36}
                     hitSlop={4}
-                    className="bg-light-grey rounded-[18px]"
+                    className="bg-light-grey rounded-full"
                     accessibilityLabel={t('dailyReading.previous')}
                     onPress={() => move(-1)}
                   >
@@ -223,7 +223,7 @@ export const MeditationReader = ({
                       hitSlop={4}
                       accessibilityLabel={t('dailyReading.previous')}
                       onPress={() => move(-1)}
-                      className="bg-light-grey rounded-[18px]"
+                      className="bg-light-grey rounded-full"
                     >
                       <FeatherIcon name="chevron-left" size={20} color="primary" />
                     </Link>
@@ -232,7 +232,7 @@ export const MeditationReader = ({
                       hitSlop={4}
                       accessibilityLabel={t('dailyReading.next')}
                       onPress={() => move(1)}
-                      className="bg-light-grey rounded-[18px]"
+                      className="bg-light-grey rounded-full"
                     >
                       <FeatherIcon name="chevron-right" size={20} color="primary" />
                     </Link>
@@ -241,7 +241,7 @@ export const MeditationReader = ({
                   <Link
                     size={36}
                     hitSlop={4}
-                    className="bg-light-grey rounded-[18px]"
+                    className="bg-light-grey rounded-full"
                     accessibilityLabel={t('dailyReading.next')}
                     onPress={() => move(1)}
                   >

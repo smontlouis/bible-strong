@@ -6,6 +6,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import Header from '~common/Header'
 import Box, { TouchableBox } from '~common/ui/Box'
+import Card from '~common/ui/Card'
+import { twMerge } from '~common/ui/classNames'
+import ListSection, { ListSectionTitle } from '~common/ui/ListSection'
 import { useTheme } from '~themes/ThemeProvider'
 import { useReadingTypography } from '~common/useReadingTypography'
 import { webFontFamily } from '~helpers/webFontFamily'
@@ -70,94 +73,116 @@ const BibleShareOptionsScreen = ({ inline = false }: { inline?: boolean }) => {
     ...localQueryOptions,
   })
 
-  const Wrapper = inline ? Box : Container
-  return (
-    <Wrapper>
-      {!inline && <Header hasBackButton title={t('bible.settings.shareOptions')} />}
-      <ScrollView contentContainerStyle={pageContentStyle}>
-        <Box className={isWeb ? 'p-[4px]' : 'px-[16px] py-[8px]'}>
-          {[
-            {
-              label: t('bible.settings.hasVerseNumbers'),
-              value: hasVerseNumbers,
-              action: toggleSettingsShareVerseNumbers,
-            },
-            {
-              label: t('bible.settings.hasInlineVerses'),
-              value: hasInlineVerses,
-              action: toggleSettingsShareLineBreaks,
-            },
-            {
-              label: t('bible.settings.hasQuotes'),
-              value: hasQuotes,
-              action: toggleSettingsShareQuotes,
-            },
-          ].map(option =>
-            isWeb ? (
-              <TouchableBox
-                key={option.label}
-                accessibilityRole="switch"
-                aria-checked={option.value}
-                accessibilityLabel={option.label}
-                accessibilityState={{ checked: option.value }}
-                onPress={() => dispatch(option.action())}
-                className="min-h-[44px] p-[12px] flex-row items-center gap-[12px] rounded-lg hover:bg-[#80808015]"
-              >
-                <Text className="flex-1 text-[14px]">{option.label}</Text>
-                <Box
-                  className="w-[36px] h-[22px] rounded-full p-[3px]"
-                  style={{
-                    backgroundColor: option.value ? theme.colors.primary : theme.colors.border,
-                  }}
-                >
-                  <Box
-                    className="w-[16px] h-[16px] rounded-full bg-white"
-                    style={{ alignSelf: option.value ? 'flex-end' : 'flex-start' }}
-                  />
-                </Box>
-              </TouchableBox>
-            ) : (
-              <Box
-                key={option.label}
-                className="min-h-[56px] py-[8px] flex-row items-center gap-[12px]"
-              >
-                <Text className="flex-1 text-[16px]">{option.label}</Text>
-                <Switch
-                  accessibilityLabel={option.label}
-                  accessibilityState={{ checked: option.value }}
-                  value={option.value}
-                  onValueChange={() => {
-                    dispatch(option.action())
-                  }}
-                  trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
-                  ios_backgroundColor={theme.colors.border}
-                  thumbColor="#ffffff"
-                />
-              </Box>
-            )
-          )}
-        </Box>
+  const options = [
+    {
+      label: t('bible.settings.hasVerseNumbers'),
+      value: hasVerseNumbers,
+      action: toggleSettingsShareVerseNumbers,
+    },
+    {
+      label: t('bible.settings.hasInlineVerses'),
+      value: hasInlineVerses,
+      action: toggleSettingsShareLineBreaks,
+    },
+    {
+      label: t('bible.settings.hasQuotes'),
+      value: hasQuotes,
+      action: toggleSettingsShareQuotes,
+    },
+  ]
+  const rows = options.map(option =>
+    isWeb ? (
+      <TouchableBox
+        key={option.label}
+        accessibilityRole="switch"
+        aria-checked={option.value}
+        accessibilityLabel={option.label}
+        accessibilityState={{ checked: option.value }}
+        onPress={() => dispatch(option.action())}
+        className={twMerge(
+          'min-h-[44px] p-[12px] flex-row items-center gap-[12px] rounded-lg hover:bg-[#80808015]',
+          !inline && 'px-[14px] rounded-none'
+        )}
+      >
+        <Text className="flex-1 text-[14px]">{option.label}</Text>
         <Box
-          className={
-            isWeb
-              ? 'm-[8px] mt-[16px] p-[16px] rounded-[14px] bg-light-grey gap-[12px]'
-              : 'm-[16px] p-[20px] rounded-[16px] bg-light-grey gap-[12px]'
-          }
+          className="w-[36px] h-[22px] rounded-full p-[3px]"
+          style={{
+            backgroundColor: option.value ? theme.colors.primary : theme.colors.border,
+          }}
         >
-          <Text className="text-[11px] uppercase tracking-[1px] text-tertiary">{t('Aperçu')}</Text>
-          <Text
-            selectable
-            style={{
-              fontFamily: isWeb ? webFontFamily(typography.fontFamily) : typography.fontFamily,
-              fontSize: 16,
-              lineHeight: 24,
-            }}
-          >
-            {message || t('Chargement...')}
-          </Text>
+          <Box
+            className="w-[16px] h-[16px] rounded-full bg-white"
+            style={{ alignSelf: option.value ? 'flex-end' : 'flex-start' }}
+          />
+        </Box>
+      </TouchableBox>
+    ) : (
+      <Box
+        key={option.label}
+        className={twMerge(
+          'min-h-[56px] py-[8px] flex-row items-center gap-[12px]',
+          !inline && 'min-h-[52px] px-[14px]'
+        )}
+      >
+        <Text className={inline ? 'flex-1 text-[16px]' : 'flex-1 text-[15px]'}>{option.label}</Text>
+        <Switch
+          accessibilityLabel={option.label}
+          accessibilityState={{ checked: option.value }}
+          value={option.value}
+          onValueChange={() => {
+            dispatch(option.action())
+          }}
+          trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+          ios_backgroundColor={theme.colors.border}
+          thumbColor="#ffffff"
+        />
+      </Box>
+    )
+  )
+  const preview = (
+    <Text
+      selectable
+      style={{
+        fontFamily: isWeb ? webFontFamily(typography.fontFamily) : typography.fontFamily,
+        fontSize: 16,
+        lineHeight: 24,
+      }}
+    >
+      {message || t('Chargement...')}
+    </Text>
+  )
+
+  // In a sheet or a popover the options sit on its ground; as a page they are grouped in cards.
+  if (inline) {
+    return (
+      <Box>
+        <ScrollView contentContainerStyle={pageContentStyle}>
+          <Box className={isWeb ? 'p-[4px]' : 'px-[16px] py-[8px]'}>{rows}</Box>
+          <Box className={isWeb ? 'm-[8px] mt-[16px]' : 'm-[16px]'}>
+            <ListSectionTitle>{t('Aperçu')}</ListSectionTitle>
+            <Box
+              className={twMerge('rounded-[12px] bg-light-grey', isWeb ? 'p-[16px]' : 'p-[20px]')}
+            >
+              {preview}
+            </Box>
+          </Box>
+        </ScrollView>
+      </Box>
+    )
+  }
+
+  return (
+    <Container className="bg-canvas">
+      <Header hasBackButton title={t('bible.settings.shareOptions')} />
+      <ScrollView contentContainerStyle={[pageContentStyle, { paddingTop: 20, paddingBottom: 20 }]}>
+        <ListSection>{rows}</ListSection>
+        <Box className="mx-[20px] mb-[22px]">
+          <ListSectionTitle>{t('Aperçu')}</ListSectionTitle>
+          <Card className="p-[16px]">{preview}</Card>
         </Box>
       </ScrollView>
-    </Wrapper>
+    </Container>
   )
 }
 export default BibleShareOptionsScreen

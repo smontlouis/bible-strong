@@ -41,7 +41,7 @@ const NextButton = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const resolvedClassName = twMerge(
-    'p-[4px] rounded-[3px] bg-primary text-[white] text-[11px] font-bold mr-[10px]',
+    'p-[4px] rounded-[4px] bg-primary text-white text-[11px] font-bold mr-[10px]',
     className
   )
   return (

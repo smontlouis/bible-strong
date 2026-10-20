@@ -16,7 +16,6 @@ import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
-import RoundedCorner from '~common/ui/RoundedCorner'
 import CanonicalStrongVerseText from './CanonicalStrongVerseText'
 import StrongCard from './StrongCard'
 
@@ -563,14 +562,14 @@ const BibleVerseDetailCard: React.FC<Props> = ({
 
   return (
     <Box
-      className="overflow-hidden border-continuous flex-[1]"
+      className="overflow-hidden border-continuous flex-[1] bg-canvas"
       testID="resource-modal-content"
       onLayout={event => {
         setModalContentHeight(event.nativeEvent.layout.height)
         setModalContentWidth(event.nativeEvent.layout.width)
       }}
     >
-      <Box className="overflow-hidden border-continuous relative z-[1]">
+      <Box className="overflow-hidden border-continuous relative z-[1] bg-surface rounded-b-[24px]">
         <ScrollView
           ref={verseScrollRef}
           testID="resource-verse-scroll"
@@ -614,10 +613,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
           versesInCurrentChapter={versesInCurrentChapter}
         />
       </Box>
-      <Box className="overflow-hidden border-continuous bg-light-grey mt-[-30px] relative z-[0]">
-        <RoundedCorner />
-      </Box>
-      <Box className="overflow-hidden border-continuous bg-light-grey flex-[1]">
+      <Box className="overflow-hidden border-continuous bg-canvas flex-[1]">
         {strongCardsQuery.isError ? (
           <ResourceUnavailableView
             identity={{

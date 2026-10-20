@@ -63,7 +63,7 @@ const TimelineHomeScreen = ({
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
-      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
         <Header
           hasBackButton={showBackButton}
           title={t('La Chronologie biblique')}
@@ -113,7 +113,7 @@ const TimelineHomeScreen = ({
             </ContextualMenu>
           }
         />
-        <ScrollView backgroundColor="lightGrey">
+        <ScrollView backgroundColor="canvas" contentContainerStyle={{ paddingTop: 16 }}>
           {events?.map((event, i) => (
             <TimelineItem
               goTo={i}

@@ -119,9 +119,9 @@ const VerseTextSkeleton = ({ accessibilityLabel }: { accessibilityLabel: string 
     accessibilityRole="progressbar"
     accessibilityLabel={accessibilityLabel}
   >
-    <Box className="overflow-hidden border-continuous h-[13px] w-[92%] rounded-[5px] bg-light-grey" />
-    <Box className="overflow-hidden border-continuous h-[13px] w-[78%] rounded-[5px] bg-light-grey" />
-    <Box className="overflow-hidden border-continuous h-[13px] w-[56%] rounded-[5px] bg-light-grey" />
+    <Box className="overflow-hidden border-continuous h-[13px] w-[92%] rounded-[4px] bg-canvas" />
+    <Box className="overflow-hidden border-continuous h-[13px] w-[78%] rounded-[4px] bg-canvas" />
+    <Box className="overflow-hidden border-continuous h-[13px] w-[56%] rounded-[4px] bg-canvas" />
   </Box>
 )
 
@@ -147,7 +147,8 @@ const ResourceVerseContext = ({
   const verseNumber = verseText?.Verset ?? verse.split('-')[2]
 
   return (
-    <Box className="overflow-hidden border-continuous bg-reverse pt-[10px] rounded-bl-[30px] rounded-br-[30px]">
+    // A surface, so the verse stands out on the canvas below it in every theme.
+    <Box className="overflow-hidden border-continuous bg-surface pt-[10px] rounded-bl-[24px] rounded-br-[24px]">
       <Animated.View layout={reduceMotion ? undefined : CONTENT_LAYOUT_TRANSITION}>
         <Animated.View
           key={verse}

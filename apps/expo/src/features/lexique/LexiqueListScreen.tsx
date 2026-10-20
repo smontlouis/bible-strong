@@ -1,7 +1,5 @@
 import { getSimpleStrongModuleId } from '@bible-strong/resource-domain/strong-lexicon'
 import { getPrimaryStrongLexiconAvailability } from '~features/resources/layeredStrongLexiconAccess'
-import { resolveFontFamily } from '~themes/styleValues'
-import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
@@ -10,16 +8,15 @@ import Empty from '~common/Empty'
 import FiltersHeader from '~common/FiltersHeader'
 import Loading from '~common/Loading'
 import SearchInput from '~common/SearchInput'
-import SectionTitle from '~common/SectionTitle'
 import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
+import { ListSectionTitle } from '~common/ui/ListSection'
 import SectionList from '~common/ui/SectionList'
-import Text from '~common/ui/Text'
 import { getFirstLetterFrom } from '~helpers/alphabet'
 import { useInfiniteResultsByLetterOrSearch, useSearchValue } from './useUtilities'
 import { useTranslation } from 'react-i18next'
 import { getLanguage } from '~i18n'
-import LexiqueItem from './LexiqueItem'
+import LexiqueItem, { LEXIQUE_ITEM_HEIGHT } from './LexiqueItem'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 import { useResourceAccess } from '~features/resources/resourceAccess'
@@ -38,9 +35,12 @@ interface LexiqueSection {
   data: StrongLexiconSearchResult[]
 }
 
+/** A letter title: 16 above, an 18 line, 6 below. */
+const SECTION_HEADER_HEIGHT = 40
+
 const getLexiqueItemLayout = sectionListGetItemLayout({
-  getItemHeight: () => 80,
-  getSectionHeaderHeight: () => 50,
+  getItemHeight: () => LEXIQUE_ITEM_HEIGHT,
+  getSectionHeaderHeight: () => SECTION_HEADER_HEIGHT,
   getSeparatorHeight: () => 0,
   getSectionFooterHeight: () => 0,
 })
@@ -76,8 +76,6 @@ const LexiqueListScreen = ({
   newTabId,
   onStrongSelect,
 }: LexiqueListScreenProps) => {
-  const stylingTheme = useStylingTheme()
-
   const { t } = useTranslation()
   const isOnline = useConnection()
   const resources = useResourceAccess()
@@ -277,15 +275,16 @@ const LexiqueListScreen = ({
             />
           </Box>
         </FiltersHeader>
-        <Box className="overflow-hidden border-continuous flex-[1] pt-[20px]">
+        <Box className="overflow-hidden border-continuous flex-[1]">
           {isLoading ? (
             <Loading message={t('Chargement...')} />
           ) : sectionResults.length ? (
             <SectionList<StrongLexiconSearchResult, LexiqueSection>
-              renderItem={({ item }) => (
+              renderItem={({ item, index, section }) => (
                 <LexiqueItem
                   {...item}
                   onSelect={isNewTabSelection || onStrongSelect ? selectStrong : undefined}
+                  hasSeparator={index < section.data.length - 1}
                 />
               )}
               removeClippedSubviews
@@ -296,14 +295,11 @@ const LexiqueListScreen = ({
                 getLexiqueItemLayout((data || []) as LexiqueSection[], index)
               }
               renderSectionHeader={({ section: { title } }) => (
-                <SectionTitle color="primary">
-                  <Text
-                    className="font-bold text-[16px] text-reverse"
-                    style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-                  >
+                <Box className="bg-reverse" style={{ height: SECTION_HEADER_HEIGHT }}>
+                  <ListSectionTitle className="ml-[20px] mt-[16px] mb-[6px] leading-[18px]">
                     {title}
-                  </Text>
-                </SectionTitle>
+                  </ListSectionTitle>
+                </Box>
               )}
               stickySectionHeadersEnabled
               sections={sectionResults}

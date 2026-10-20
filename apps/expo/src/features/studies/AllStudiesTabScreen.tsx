@@ -191,7 +191,7 @@ const StudiesScreen = ({
   )
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
-      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
         <FiltersHeader
           title={t('Études')}
           hasBackButton={showBackButton}
@@ -264,7 +264,11 @@ const StudiesScreen = ({
             onLayout={event => setListWidth(event.nativeEvent.layout.width)}
             numColumns={columns}
             data={filteredStudies}
-            contentContainerStyle={[pageContentStyle, { paddingBottom: 100 }]}
+            contentContainerStyle={[
+              pageContentStyle,
+              // With the cards' margins: a 20 gutter on the sides, 12 between two cards.
+              { paddingHorizontal: 14, paddingTop: 10, paddingBottom: 100 },
+            ]}
             keyExtractor={item => item.id}
             renderItem={({ item }) => {
               const endpoint = createStudyEndpoint(item.id, item.title)

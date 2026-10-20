@@ -26,7 +26,7 @@ const MAX_DRAWER_WIDTH = 450
 
 const AppSwitcherScreen = ({ openHome, openMenu }: AppSwitcherScreenFuncs) => (
   <TabContextProvider>
-    <Box nativeID="compact-workspace" className="flex-1 bg-light-grey overflow-hidden">
+    <Box nativeID="compact-workspace" className="flex-1 bg-canvas overflow-hidden">
       <TabGroupPager />
       <CachedTabScreens />
       <SharedBibleDOM />
@@ -108,7 +108,7 @@ const AppSwitcherScreenWrapper = () => {
   }))
 
   return (
-    <Box className="border-continuous overflow-visible flex-[1] bg-light-grey">
+    <Box className="border-continuous overflow-visible flex-[1] bg-canvas">
       <AnimatedBox
         className="overflow-hidden border-continuous flex-row flex-[1]"
         style={[{ width: drawerWidth * 2 + screenWidth, marginLeft: -drawerWidth }, containerStyle]}

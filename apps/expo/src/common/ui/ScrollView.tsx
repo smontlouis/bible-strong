@@ -46,8 +46,8 @@ const ScrollView = (
             ...(orientation.tablet && {
               marginTop: 20,
               marginBottom: 50,
-              borderBottomLeftRadius: 30,
-              borderBottomRightRadius: 30,
+              borderBottomLeftRadius: 24,
+              borderBottomRightRadius: 24,
             }),
           },
           props.style,
@@ -76,11 +76,11 @@ export const HomeScrollView = ({
     <ScrollView
       {...props}
       orientation={orientation}
-      backgroundColor="lightGrey"
+      backgroundColor="canvas"
       showsVerticalScrollIndicator={showsVerticalScrollIndicator}
       contentContainerStyle={{
         ...(!props.horizontal && pageContentStyle),
-        backgroundColor: theme.colors.lightGrey,
+        backgroundColor: theme.colors.canvas,
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
         ...StyleSheet.flatten(contentContainerStyle),

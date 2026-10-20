@@ -8,9 +8,11 @@ import Empty from '~common/Empty'
 import Header from '~common/Header'
 import FiltersHeader from '~common/FiltersHeader'
 import Link from '~common/Link'
+import Border from '~common/ui/Border'
 import { HStack, VStack } from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
+import { ListSectionTitle } from '~common/ui/ListSection'
 import SectionList from '~common/ui/SectionList'
 import Text from '~common/ui/Text'
 import { getDateLocale } from '~helpers/languageUtils'
@@ -33,6 +35,9 @@ import {
 } from './historyModel'
 
 const REMOVE_ACTION = 'remove'
+
+// Starts where the row's text starts: its padding, the icon tile and the gap after it.
+const HistoryRowSeparator = () => <Border className="ml-[62px]" />
 
 type HistoryRowData = { item: HistoryItem; time: string }
 
@@ -62,7 +67,7 @@ const HistoryRow = ({ item, time }: HistoryRowData) => {
       }}
       onLongPress={remove}
     >
-      <HStack className="overflow-hidden border-continuous px-[20px] py-[12px] items-center gap-[14px]">
+      <HStack className="overflow-hidden border-continuous px-[20px] py-[12px] items-center gap-[12px]">
         <HistoryEntryIcon item={item} />
         <VStack className="overflow-hidden border-continuous flex-[1] gap-[3px]">
           <Text className="text-[15px] font-bold" numberOfLines={1}>
@@ -176,10 +181,11 @@ const History = () => {
             keyExtractor={({ item }: HistoryRowData) => item.id}
             stickySectionHeadersEnabled={false}
             renderSectionHeader={({ section }) => (
-              <Text className="px-[20px] pt-[20px] pb-[6px] text-[13px] font-bold text-grey">
+              <ListSectionTitle className="ml-[20px] mt-[16px] mb-[6px]">
                 {section.title}
-              </Text>
+              </ListSectionTitle>
             )}
+            ItemSeparatorComponent={HistoryRowSeparator}
             renderItem={({ item }: { item: HistoryRowData }) => (
               <HistoryRow item={item.item} time={item.time} />
             )}

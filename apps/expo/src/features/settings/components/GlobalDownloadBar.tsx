@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Animated from 'react-native-reanimated'
 import { EaseView } from 'react-native-ease'
 import Box from '~common/ui/Box'
+import { floatingShadow } from '~common/ui/surfaces'
 import Text from '~common/ui/Text'
 import { useDownloadQueue } from '~helpers/useDownloadQueue'
 const GlobalDownloadBar = () => {
@@ -32,14 +33,10 @@ const GlobalDownloadBar = () => {
       }}
     >
       <Box
-        className="overflow-hidden border-continuous bg-reverse rounded-tl-[16px] rounded-tr-[16px] px-[20px] pt-[16px]"
+        className="overflow-hidden border-continuous bg-surface-raised rounded-tl-[24px] rounded-tr-[24px] px-[20px] pt-[16px]"
         style={{
           paddingBottom: insets.bottom > 0 ? insets.bottom : 16,
-          shadowColor: 'rgb(89,131,240)',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 7,
-          elevation: 1,
+          ...floatingShadow,
           overflow: 'visible',
         }}
       >
@@ -51,11 +48,11 @@ const GlobalDownloadBar = () => {
                 total: overallProgress.total,
               })}
             </Text>
-            <Box className="border-continuous overflow-visible mt-[8px] h-[4px] rounded-[2px] bg-border">
+            <Box className="border-continuous overflow-visible mt-[8px] h-[4px] rounded-full bg-border">
               <Animated.View
                 style={{
                   height: 4,
-                  borderRadius: 2,
+                  borderRadius: 999,
                   backgroundColor: theme.colors.primary,
                   width: `${Math.round(overallProgress.progress * 100)}%`,
                   transitionProperty: 'width',

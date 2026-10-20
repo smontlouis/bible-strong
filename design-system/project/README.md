@@ -1,4 +1,4 @@
-Bible Strong is a Bible study app and its public site: Bibles, the Strong lexicon of Hebrew and Greek, dictionaries, commentaries and topics, read side by side. This system covers the public site, the videos and the share cards. The app keeps its own themes and is only cited here.
+Bible Strong is a Bible study app and its public site: Bibles, the Strong lexicon of Hebrew and Greek, dictionaries, commentaries and topics, read side by side. This system covers the public site, the videos, the share cards and the surfaces of the app. The app keeps its own palettes, one per theme; its chapter below says how they are used.
 
 Read the rules below, then take every value from `tokens.json`. Never copy a colour, a size or a radius from a screenshot or from another surface.
 
@@ -53,7 +53,21 @@ The mark is a white disc, a grey ring lit from the top and a dot in `brand`. It 
 
 Icons are outline icons from Lucide, in the colour of the text beside them. Small inline arrows (a menu chevron, a back arrow) are drawn inline as SVG at a 1.8px stroke with round caps and joins. No filled icon, no emoji, no icon without a visible or spoken label.
 
-## The three surfaces
+## The app
+
+The app shares the site's shape and depth, not its palette. Its eight themes live in `apps/expo/src/themes/`, and every rule below holds in each of them.
+
+- **Three levels.** `canvas` is the ground of a page. `surface` is a card on the canvas. `surfaceRaised` is what floats above the page: a sheet, a popover, a floating bar. The surface is the lighter one in every theme, dark ones included; take each palette's values, never derive one level from another.
+- **Two kinds of page.** A hub or a settings page (home, More, profile, FAQ, downloads, theme, plans) sits on `canvas`, its content grouped in cards. A continuous list (lexicon, dictionary, topics, notes, highlights, bookmarks, history, search results) runs full width on the page ground, `background`, with no card.
+- **A card's edge is its contrast.** A card in the flow takes no border and no shadow. Rows, in a card or in a list, are split by a `separator` hairline that starts where the row's text starts.
+- **A border carries a meaning**: a text field, a selected item, a drop zone in dashes. It never outlines a card.
+- **One shadow**, `floatingShadow`, and only for what floats: a floating button or bar, a popover, a tab preview.
+- **Radii come from one scale**: 4 for a mark, 8 for a tile (icon tile, thumbnail), 12 for a field or an inner panel, 16 for a card, 24 for a sheet or a hub's large card, and the pill for buttons and chips.
+- **One section title**: 13px in `grey`, sentence case, regular weight, set on the canvas above its card. In a continuous list it heads its rows from their 20px margin; an alphabetical index letter is such a title. A hub may open with a large title in the title family.
+- **Icon tiles** are 30px squares at radius 8, filled with the icon's colour at 12%. A resource takes its universe colours.
+- **Build with the shared pieces** of `apps/expo/src/common/ui/`: `Card`, `ListSection` and `ListRow`, `IconTile`, and `radii` and `floatingShadow` in `surfaces.ts`. `yarn agents:styles:check` refuses a radius off the scale and a hand-written shadow; the departures that remain are counted per file in `scripts/agents-surface-baseline.json`, and the counts only go down.
+
+## The other surfaces
 
 - **A page of the site.** The rules above are its rules. Its styles live in `apps/site/src/resource-pages.css` (`--resource-*` variables) and `apps/site/src/styles.css` (`--landing-*` variables).
 - **A video frame.** 1920 by 1080, on `canvas`, in two columns: the explanation on the left, the real screen on the right. Headings are `frame-heading`, text is `frame-body` in a block of 740px at most. One `brand` accent, no second hue, no shadow. Screens are real captures, never redrawn.

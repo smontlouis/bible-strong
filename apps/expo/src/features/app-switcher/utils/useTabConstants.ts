@@ -1,5 +1,6 @@
 import { useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { radii } from '~common/ui/surfaces'
 
 const useTabConstants = () => {
   const { height: HEIGHT, width: WIDTH } = useWindowDimensions()
@@ -11,7 +12,7 @@ const useTabConstants = () => {
   const HEIGHT_REDUCER_COEFFICIENT = IS_LARGE_SCREEN ? 1 : 0.7
   const TAB_PREVIEW_WIDTH = (WIDTH - SCREEN_MARGIN * 2 - (TABS_PER_ROW - 1) * GAP) / TABS_PER_ROW
   const TAB_PREVIEW_HEIGHT = ((TAB_PREVIEW_WIDTH * HEIGHT) / WIDTH) * HEIGHT_REDUCER_COEFFICIENT
-  const TAB_BORDER_RADIUS = 20
+  const TAB_BORDER_RADIUS = radii.card
   const STATUS_BAR_HEIGHT = useSafeAreaInsets().top
 
   return {

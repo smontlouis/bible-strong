@@ -1,4 +1,3 @@
-import PageContent from '~common/ui/PageContent'
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -8,6 +7,8 @@ import type { SheetRef } from '~common/sheet'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
+import ListSection from '~common/ui/ListSection'
+import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
 import StrongMark from '~features/bible/StrongMark'
 import { getVersionDisplayName } from '~features/bible/versionCatalog'
@@ -26,7 +27,7 @@ import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import { useOfflineResourceState } from '~features/resources/useOfflineResourceRegistry'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { localQueryOptions } from '~helpers/queryOptions'
-type DefaultVersionCardProps = {
+type DefaultVersionSectionProps = {
   title: string
   description: string
   version: Version
@@ -35,47 +36,41 @@ type DefaultVersionCardProps = {
   onPress: () => void
 }
 
-const DefaultVersionCard = ({
+/** One default: its title on the canvas, the chosen version in a card, what it is used for below. */
+const DefaultVersionSection = ({
   title,
   description,
   version,
   displayName,
   strongAvailable,
   onPress,
-}: DefaultVersionCardProps) => (
-  <TouchableBox
-    className="border-continuous overflow-hidden p-[18px] border-[1px] border-border rounded-[14px] bg-reverse"
-    accessibilityRole="button"
-    accessibilityLabel={`${title}, ${displayName}`}
-    onPress={onPress}
-  >
-    <Box className="overflow-hidden border-continuous flex-row items-start">
-      <Box className="overflow-hidden border-continuous flex-[1] pr-[12px]">
-        <Text className="text-[16px] font-bold">{title}</Text>
-        <Text className="mt-[4px] text-[12px] text-grey leading-[17px]">{description}</Text>
-      </Box>
-      <Box className="overflow-hidden border-continuous w-[32px] h-[32px] items-center justify-center">
-        <FeatherIcon name="chevron-right" size={20} color="tertiary" />
-      </Box>
-    </Box>
-
-    <Box className="overflow-hidden border-continuous mt-[18px] flex-row items-center">
-      <Box className="overflow-hidden border-continuous flex-[1]">
+}: DefaultVersionSectionProps) => (
+  <ListSection title={title} footer={description}>
+    <TouchableBox
+      className="flex-row items-center gap-[12px] px-[14px] py-[12px]"
+      accessibilityRole="button"
+      accessibilityLabel={`${title}, ${displayName}`}
+      onPress={onPress}
+    >
+      <Box className="flex-[1]">
         <Text className="text-[12px] text-grey font-bold">{version.id}</Text>
-        <Box className="overflow-hidden border-continuous mt-[2px] flex-row items-center">
-          <Text className="text-[18px]">{displayName}</Text>
+        <Box className="mt-[2px] flex-row items-center">
+          <Text className="text-[17px] shrink" numberOfLines={2}>
+            {displayName}
+          </Text>
           {typeof strongAvailable === 'boolean' && (
-            <Box className="overflow-hidden border-continuous ml-[6px]">
+            <Box className="ml-[6px]">
               <StrongMark highlighted={strongAvailable} />
             </Box>
           )}
         </Box>
-        <Text className="mt-[3px] text-[10px] text-grey" numberOfLines={2}>
+        <Text className="mt-[3px] text-[11px] text-grey" numberOfLines={2}>
           {version.c}
         </Text>
       </Box>
-    </Box>
-  </TouchableBox>
+      <FeatherIcon name="chevron-right" size={18} color="grey" />
+    </TouchableBox>
+  </ListSection>
 )
 
 const BibleDefaultsScreen = () => {
@@ -124,11 +119,11 @@ const BibleDefaultsScreen = () => {
   }
 
   return (
-    <Container className="flex-[1]">
+    <Container className="flex-[1] bg-canvas">
       <Header hasBackButton title={t('bibleDefaults.title')} />
 
-      <PageContent className="pt-[24px] px-[20px] gap-[16px] flex-[1]">
-        <DefaultVersionCard
+      <ScrollView backgroundColor="canvas" style={{ flex: 1 }}>
+        <DefaultVersionSection
           title={t('bibleDefaults.defaultReadingTitle')}
           description={t('bibleDefaults.defaultVersionDescription')}
           version={selectedVersion}
@@ -136,7 +131,7 @@ const BibleDefaultsScreen = () => {
           onPress={() => readingSheetRef.current?.present()}
         />
 
-        <DefaultVersionCard
+        <DefaultVersionSection
           title={t('bibleDefaults.defaultStrongTitle')}
           description={t('bibleDefaults.defaultStrongDescription')}
           version={selectedStrongVersion}
@@ -144,7 +139,7 @@ const BibleDefaultsScreen = () => {
           strongAvailable={isDefaultStrongAvailable}
           onPress={() => strongSheetRef.current?.present()}
         />
-      </PageContent>
+      </ScrollView>
 
       <BibleDefaultSelectorSheet
         kind="reading"

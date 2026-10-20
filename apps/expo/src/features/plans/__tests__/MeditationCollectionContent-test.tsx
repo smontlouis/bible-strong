@@ -10,7 +10,11 @@ const mockPush = jest.fn()
 jest.mock('expo-image', () => ({ Image: 'Image' }))
 jest.mock('../plan.hooks', () => ({ useFireStorage: () => undefined }))
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }))
-jest.mock('react-native', () => ({ ScrollView: 'ScrollView', Platform: { OS: 'ios' } }))
+jest.mock('react-native', () => ({
+  ScrollView: 'ScrollView',
+  Platform: { OS: 'ios' },
+  StyleSheet: { hairlineWidth: 1 },
+}))
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'fr' } }),
 }))

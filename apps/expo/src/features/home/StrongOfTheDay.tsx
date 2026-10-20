@@ -185,14 +185,13 @@ const StrongOfTheDay = ({
             right: 0,
             top: 0,
             height: itemHeight,
-            borderRadius: 3,
           }}
         >
           <LinearGradient start={[0.1, 0.2]} style={{ height: 130 }} colors={[color1, color2]} />
         </Box>
         <RandomButton onPress={() => setRandomSeed(seed => seed + 1)} />
         <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center mt-[20px]">
-          <Box className="overflow-hidden border-continuous bg-[rgba(0,0,0,0.1)] px-[5px] py-[3px] rounded-[20px]">
+          <Box className="overflow-hidden border-continuous bg-[rgba(0,0,0,0.1)] px-[5px] py-[3px] rounded-full">
             <Text className="text-[10px]" style={{ color: 'white' }}>
               {type === 'grec' ? t('Grec') : t('Hébreu')}
             </Text>

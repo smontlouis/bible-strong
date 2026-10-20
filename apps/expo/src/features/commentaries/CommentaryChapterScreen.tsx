@@ -65,21 +65,13 @@ const CommentarySectionCard = ({
   onPress,
 }: CommentarySectionCardProps) => (
   <TouchableBox
-    className="overflow-hidden border-continuous bg-reverse rounded-[20px] px-[17px] py-[14px]"
+    className="overflow-hidden border-continuous bg-surface rounded-[16px] px-[17px] py-[14px]"
     activeOpacity={0.62}
     onPress={onPress}
     accessibilityRole="button"
-    style={{
-      shadowColor: 'rgb(89,131,240)',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 7,
-      elevation: 1,
-      overflow: 'visible',
-    }}
   >
     <Box className="overflow-hidden border-continuous flex-row items-start">
-      <Box className="overflow-hidden border-continuous px-[10px] py-[5px] rounded-[12px] bg-light-primary">
+      <Box className="overflow-hidden border-continuous px-[10px] py-[5px] rounded-full bg-light-primary">
         <Text className="text-primary font-bold text-[12px]">
           {formatRange(section.rangeStartVerse, section.rangeEndVerse, introductionLabel)}
         </Text>
@@ -245,9 +237,8 @@ const CommentaryChapterScreen = ({
 
   return (
     <FormSheetScreen isFormSheet={IS_FORM_SHEET}>
-      <Box className="overflow-hidden border-continuous flex-[1] bg-light-grey">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
         <Header
-          background
           hasBackButton={IS_FORM_SHEET ? canGoBackInStack : true}
           title={entry.author}
           rightComponent={
@@ -283,13 +274,16 @@ const CommentaryChapterScreen = ({
             </Box>
           }
         />
-        <ScrollView contentContainerStyle={{ maxWidth: 600, padding: 18, paddingBottom: 40 }}>
+        <ScrollView
+          backgroundColor="canvas"
+          contentContainerStyle={{ maxWidth: 600, padding: 18, paddingBottom: 40 }}
+        >
           <CommentaryRoomIntro entry={entry} language={projection.language} />
 
           <Box className="overflow-hidden border-continuous flex-row items-center justify-between">
             <Box className="overflow-hidden border-continuous flex-row items-center gap-[7px]">
               <TouchableBox
-                className="overflow-hidden border-continuous bg-light-grey rounded-[20px] h-[32px] px-[12px] flex-row items-center"
+                className="overflow-hidden border-continuous bg-surface rounded-full h-[32px] px-[12px] flex-row items-center"
                 disabled={focusVerse !== undefined}
                 onPress={
                   focusVerse === undefined
@@ -325,7 +319,7 @@ const CommentaryChapterScreen = ({
               </TouchableBox>
               {focusVerse !== undefined ? (
                 <TouchableBox
-                  className="overflow-hidden border-continuous rounded-[16px] bg-light-grey items-center justify-center"
+                  className="overflow-hidden border-continuous rounded-full bg-surface items-center justify-center"
                   activeOpacity={0.62}
                   onPress={() =>
                     onClearFocus ? onClearFocus() : router.setParams({ focusVerse: undefined })
@@ -376,7 +370,7 @@ const CommentaryChapterScreen = ({
               {focusVerse !== undefined && groupedSections.chapterContextSections.length > 0 ? (
                 <>
                   <TouchableBox
-                    className="overflow-hidden border-continuous bg-reverse rounded-[20px] px-[17px] py-[14px]"
+                    className="overflow-hidden border-continuous bg-surface rounded-[16px] px-[17px] py-[14px]"
                     activeOpacity={0.62}
                     onPress={() =>
                       setExpandedChapterContextKey(currentKey =>
@@ -385,14 +379,6 @@ const CommentaryChapterScreen = ({
                     }
                     accessibilityRole="button"
                     accessibilityState={{ expanded: chapterContextExpanded }}
-                    style={{
-                      shadowColor: 'rgb(89,131,240)',
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.1,
-                      shadowRadius: 7,
-                      elevation: 1,
-                      overflow: 'visible',
-                    }}
                   >
                     <Box className="overflow-hidden border-continuous flex-row items-center justify-between">
                       <Box className="overflow-hidden border-continuous flex-[1]">

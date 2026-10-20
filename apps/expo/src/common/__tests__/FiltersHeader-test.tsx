@@ -68,6 +68,7 @@ jest.mock('react-native', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
   return {
     Platform: { OS: 'ios' },
+    StyleSheet: { hairlineWidth: 1 },
     TouchableOpacity: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
       ReactModule.createElement('TouchableOpacity', props, children),
   }

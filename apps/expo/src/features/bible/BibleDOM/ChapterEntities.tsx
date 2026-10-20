@@ -157,7 +157,7 @@ const ChapterEntities = ({
                     height: 62,
                     placeItems: 'center',
                     border: `2px dashed ${colors.border}`,
-                    borderRadius: 33,
+                    borderRadius: '50%',
                     background: colors.reverse,
                     color: colors.tertiary,
                   }}
@@ -219,11 +219,11 @@ const ChapterEntities = ({
                     placeItems: 'center',
                     margin: 0,
                     padding: 0,
-                    border: `1px solid ${colors.border}`,
-                    borderRadius: 12,
-                    background: colors.reverse,
+                    border: 0,
+                    borderRadius: '50%',
+                    // A neutral tint, like the app's secondary button: no outline, no shadow
+                    background: colors.lightGrey,
                     color: colors.tertiary,
-                    boxShadow: '0 1px 4px rgba(0, 0, 0, 0.14)',
                     cursor: 'pointer',
                   }}
                 >
@@ -274,8 +274,7 @@ const ChapterEntities = ({
                         height: 62,
                         placeSelf: 'center',
                         border: `2px solid ${colors.reverse}`,
-                        borderRadius: 33,
-                        boxShadow: '0 2px 7px rgba(0, 0, 0, 0.22)',
+                        borderRadius: '50%',
                         objectFit: 'contain',
                         x: position * 6,
                         y: Math.abs(position) * 2,

@@ -24,7 +24,8 @@ const StyledView = (
   const theme = themeOverride ?? contextTheme
   const { isSelected } = props
   const resolvedClassName = twMerge(
-    'rounded-[5px] pl-[3px] pr-[3px] mb-[5px] overflow-hidden',
+    // A Strong reference in the text takes the tile radius
+    'rounded-[8px] pl-[3px] pr-[3px] mb-[5px] overflow-hidden',
     className
   )
   return (
@@ -48,18 +49,14 @@ const StyledCircle = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const resolvedClassName = twMerge(
-    'w-[25px] h-[25px] bg-light-primary items-center justify-center mx-[3px]',
+    'w-[25px] h-[25px] rounded-full bg-light-primary items-center justify-center mx-[3px]',
     className
   )
   return (
     <TouchableOpacity
       {...props}
       className={resolvedClassName}
-      style={
-        [{ borderRadius: 25 / 2 }, props.style] as UIComponentProps<
-          typeof TouchableOpacity
-        >['style']
-      }
+      style={[props.style] as UIComponentProps<typeof TouchableOpacity>['style']}
     />
   )
 }

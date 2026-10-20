@@ -142,7 +142,7 @@ const InterlinearModeSelectorSheet = ({
             'overflow-hidden border-continuous',
             twMerge(
               selected && available ? 'bg-primary' : '',
-              'overflow-hidden border-continuous flex-[1] flex-row items-center justify-center gap-[7px]'
+              'overflow-hidden border-continuous flex-[1] flex-row items-center justify-center gap-[7px] rounded-full'
             )
           )}
           style={{ opacity: available ? 1 : 0.65 }}
@@ -252,16 +252,21 @@ const InterlinearModeSelectorSheet = ({
         </Box>
 
         {selectedMode === 'interlinear' && (
+          // An inner panel on the translucent well of the cards, with a pill segmented control
           <Box
-            className="border-continuous overflow-hidden flex-row items-center gap-[12px] border-[1px] border-border rounded-[16px] p-[12px]"
+            className="border-continuous overflow-hidden flex-row items-center gap-[12px] rounded-[12px] p-[12px]"
             style={{
-              backgroundColor: colorWithOpacity(resolveThemeColor(stylingTheme, 'reverse'), 0.2),
+              backgroundColor: colorWithOpacity(resolveThemeColor(stylingTheme, 'lightGrey'), 0.5),
             }}
           >
             <Text className="flex-[1] font-bold text-[14px]">{t('Langue des gloses')}</Text>
-            <Box className="border-continuous overflow-hidden flex-row w-[132px] h-[38px] border-[1px] border-border rounded-[10px]">
+            <Box
+              className="border-continuous overflow-hidden flex-row w-[132px] h-[38px] p-[3px] gap-[2px] rounded-full"
+              style={{
+                backgroundColor: colorWithOpacity(resolveThemeColor(stylingTheme, 'default'), 0.07),
+              }}
+            >
               {renderLocaleOption('fr', 'FR')}
-              <Box className="overflow-hidden border-continuous w-[1px] bg-border" />
               {renderLocaleOption('en', 'EN')}
             </Box>
           </Box>

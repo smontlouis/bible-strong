@@ -48,18 +48,16 @@ const ActionTile = ({
             width: ICON_BOX_SIZE,
             height: ICON_BOX_SIZE,
             borderRadius: 16,
+            // The tile sits in the sheet, so it takes no shadow; an active action (a bookmark
+            // already set, a focus on) is marked by a border, which says it is selected.
+            borderWidth: 2,
+            borderColor: isActive ? theme.colors.primary : 'transparent',
             backgroundColor:
               variant === 'emphasized' ? theme.colors.primary : theme.colors.lightGrey,
             alignItems: 'center',
             justifyContent: 'center',
-            transitionProperty: ['backgroundColor', 'boxShadow'],
+            transitionProperty: ['backgroundColor', 'borderColor'],
             transitionDuration: 100,
-            ...(variant === 'emphasized' && {
-              boxShadow: `0 2px 8px 0 ${theme.colors.primary}`,
-            }),
-            ...(isActive && {
-              boxShadow: `inset 0 0 0 2px ${theme.colors.primary}`,
-            }),
           }}
         >
           {Icon ? (

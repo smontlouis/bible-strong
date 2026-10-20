@@ -5,7 +5,7 @@ import type {
   CommentaryLanguage,
 } from '@bible-strong/resource-catalog/commentaries'
 import React from 'react'
-import { Pressable } from 'react-native'
+import { Pressable, StyleSheet } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler'
 import {
@@ -151,7 +151,7 @@ const SortableCommentary = ({
                 'overflow-hidden border-continuous',
                 twMerge(
                   isDragging ? 'border-primary' : 'border-[transparent]',
-                  'overflow-hidden border-continuous absolute top-[-3px] left-[-3px] rounded-[22px] border-[2px]'
+                  'overflow-hidden border-continuous absolute top-[-3px] left-[-3px] rounded-full border-[2px]'
                 )
               )}
               pointerEvents="none"
@@ -180,7 +180,7 @@ const SortableCommentary = ({
               })}
             >
               <Box
-                className="border-continuous overflow-hidden rounded-[10px] items-center justify-center bg-reverse border-[1px] border-border"
+                className="border-continuous overflow-hidden rounded-full items-center justify-center bg-reverse border-[1px] border-border"
                 style={{ width: 18, height: 18 }}
               >
                 <FeatherIcon name="x" size={12} color="tertiary" />
@@ -361,8 +361,8 @@ const SelectedCommentariesHeader = ({ items, onRemove, onMove, onReorder }: Prop
 
   return (
     <Box
-      className="border-continuous overflow-hidden relative py-[10px] bg-reverse border-b-[1px] border-border"
-      style={{ minHeight: SLOT_HEIGHT + 20 }}
+      className="border-continuous overflow-hidden relative py-[10px] bg-reverse border-separator"
+      style={{ minHeight: SLOT_HEIGHT + 20, borderBottomWidth: StyleSheet.hairlineWidth }}
       onLayout={event => setRowWidth(Math.floor(event.nativeEvent.layout.width))}
     >
       {sortableItems.length === 0 ? (

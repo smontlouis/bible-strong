@@ -26,7 +26,7 @@ export const WidgetContainer = (props: BoxProps) => {
       className={twMerge(
         'overflow-hidden border-continuous',
         twMerge(
-          'overflow-hidden border-continuous mr-[16px] bg-reverse items-center justify-center rounded-[20px]',
+          'overflow-hidden border-continuous mr-[16px] bg-surface items-center justify-center rounded-[12px]',
           props.className
         )
       )}
@@ -52,7 +52,7 @@ export const DownloadingWidget = ({ progress }: { progress?: number }) => {
         progress={progress}
         thickness={2}
         color={theme.colors.primary}
-        unfilledColor={theme.colors.lightGrey}
+        unfilledColor={theme.colors.canvas}
         animationDuration={300}
       />
       <Text className="text-grey mt-[20px] text-[12px]">{t('Téléchargement en cours')}</Text>

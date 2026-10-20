@@ -14,6 +14,8 @@ import { type PersonalContent, personalContentIcons } from '~common/personalCont
 
 import Link from '~common/Link'
 import Box, { HStack, VStack } from '~common/ui/Box'
+import Card from '~common/ui/Card'
+import { ListSectionTitle } from '~common/ui/ListSection'
 import Text from '~common/ui/Text'
 import { toast } from '~helpers/toast'
 import useLogin from '~helpers/useLogin'
@@ -25,7 +27,8 @@ const HOME_SINGLE_ROW_CONTENT = 680
 
 /**
  * `home`: no outer inset (aligned with the home section titles) and colored cards, on two rows
- * of three or, when the home is wide enough, a single row of six.
+ * of three or, when the home is wide enough, a single row of six. Otherwise (profile): a titled
+ * group of six cards on the canvas.
  */
 const ProfileStats = ({ home = false }: { home?: boolean }) => {
   const { t } = useTranslation()
@@ -50,14 +53,11 @@ const ProfileStats = ({ home = false }: { home?: boolean }) => {
     Boolean(sync?.isLoading) && collections.some(collection => !sync?.loaded?.[collection])
 
   return (
-    <Box
-      className={
-        home
-          ? ''
-          : 'overflow-hidden border-continuous bg-light-grey rounded-[30px] py-[20px] mx-[20px]'
-      }
-    >
-      <VStack className="overflow-hidden border-continuous gap-[10px] px-[20px]">
+    <Box className={home ? '' : 'mx-[20px] mb-[22px]'}>
+      {!home && <ListSectionTitle>{t('profile.stats')}</ListSectionTitle>}
+      <VStack
+        className={twMerge('overflow-hidden border-continuous gap-[10px]', home && 'px-[20px]')}
+      >
         {sync?.isLoading && (
           <HStack className="overflow-hidden border-continuous items-center gap-[8px]">
             <ActivityIndicator size="small" color={theme.colors.primary} />
@@ -246,28 +246,17 @@ const StatCard = (
 ) => {
   const { theme: _themeOverride, className, tall = false, ...props } = componentProps
 
-  const resolvedClassName = twMerge(
-    tall
-      ? 'flex-[1] bg-reverse rounded-[18px] px-[12px] py-[14px] gap-[8px] elevation-[1]'
-      : 'flex-[1] bg-reverse rounded-[12px] p-[12px] elevation-[1]',
-    className
-  )
+  // Both variants are cards on the canvas; the home's taller card stacks its icon above the count.
   return (
-    <Link
-      {...props}
-      className={resolvedClassName}
-      style={
-        [
-          {
-            shadowColor: 'rgb(89,131,240)',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.08,
-            shadowRadius: 6,
-          },
-          props.style,
-        ] as UIComponentProps<typeof Link>['style']
-      }
-    />
+    <Card className="flex-[1]">
+      <Link
+        {...props}
+        className={twMerge(
+          tall ? 'flex-[1] px-[12px] py-[14px] gap-[8px]' : 'flex-[1] p-[12px]',
+          className
+        )}
+      />
+    </Card>
   )
 }
 

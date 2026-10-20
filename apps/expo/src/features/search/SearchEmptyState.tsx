@@ -1,4 +1,4 @@
-import { ScrollView, TouchableOpacity } from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '~themes/ThemeProvider'
 import { Image } from 'expo-image'
@@ -12,7 +12,7 @@ type Props = {
 
 const ExampleChip = ({ label, onPress }: { label: string; onPress: () => void }) => (
   <TouchableOpacity accessibilityRole="button" onPress={onPress} activeOpacity={0.7}>
-    <Box className="border-continuous overflow-hidden px-[12px] py-[4px] rounded-[20px] bg-light-grey border-[1px] border-border">
+    <Box className="border-continuous overflow-hidden px-[12px] py-[5px] rounded-full bg-light-grey">
       <Text className="text-[14px] text-default">{label}</Text>
     </Box>
   </TouchableOpacity>

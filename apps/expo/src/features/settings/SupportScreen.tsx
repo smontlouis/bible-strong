@@ -1,78 +1,26 @@
 import { resolveFontFamily } from '~themes/styleValues'
-import { useTheme as useStylingTheme, useTheme as useAppTheme } from '~themes/ThemeProvider'
-import * as Icon from '@expo/vector-icons'
-import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { Linking } from 'react-native'
-import { twMerge } from '~common/ui/classNames'
-
-import type { Theme as AppTheme } from '~themes'
 
 import Header from '~common/Header'
-import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
+import { FeatherIcon } from '~common/ui/Icon'
+import ListSection, { ListRow } from '~common/ui/ListSection'
 import Paragraph from '~common/ui/Paragraph'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
-import { Theme } from '~themes'
 
-const LinkItem = (
-  componentProps: Omit<UIComponentProps<typeof Link>, 'theme'> & {
-    theme?: AppTheme
-    className?: string
-  }
-) => {
-  const { theme: _themeOverride, className, ...props } = componentProps
-
-  const resolvedClassName = twMerge(
-    'flex-row items-center px-[20px] py-[15px] border-b-[1px] border-b-border',
-    className
-  )
-  return (
-    <Link
-      {...props}
-      className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof Link>['style']}
-    />
-  )
-}
-
-const StyledIcon = (
-  componentProps: Omit<
-    UIComponentProps<typeof Icon.Feather>,
-    keyof { color?: keyof Theme['colors'] } | 'theme'
-  > &
-    Omit<{ color?: keyof Theme['colors'] }, 'theme'> & { theme?: AppTheme; className?: string }
-) => {
-  const contextTheme = useAppTheme()
-  const { theme: themeOverride, className, ...props } = componentProps
-  const theme = themeOverride ?? contextTheme
-  const { color } = props
-  const resolvedClassName = twMerge('ml-auto mr-[15px]', className)
-  return (
-    <Icon.Feather
-      {...props}
-      className={resolvedClassName}
-      style={
-        [
-          { color: color ? theme.colors[color] : theme.colors.grey },
-          props.style,
-        ] as UIComponentProps<typeof Icon.Feather>['style']
-      }
-    />
-  )
-}
-
-const LoginScreen = () => {
+const SupportScreen = () => {
   const stylingTheme = useStylingTheme()
 
   return (
-    <Container>
+    <Container className="bg-canvas">
       <Header hasBackButton title="Soutenir le développeur" />
-      <ScrollView>
-        <Box className="overflow-hidden border-continuous p-[20px]">
+      <ScrollView backgroundColor="canvas">
+        <Box className="px-[24px]">
           <Text
-            className="text-[30px] mb-[30px]"
+            className="text-[28px] mb-[16px]"
             style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
           >
             Hello !
@@ -118,17 +66,23 @@ const LoginScreen = () => {
           <Paragraph className="mb-[20px]" scaleLineHeight={-1}>
             Merci de m'avoir lu et bonne étude !
           </Paragraph>
-          <LinkItem href="https://fr.tipeee.com/smontlouis">
-            <Text className="font-bold text-[16px]">Lien Tipeee</Text>
-            <StyledIcon name="arrow-right" size={25} />
-          </LinkItem>
-          <LinkItem href="https://www.paypal.me/smontlouis">
-            <Text className="font-bold text-[16px]">Lien paypal</Text>
-            <StyledIcon name="arrow-right" size={25} />
-          </LinkItem>
         </Box>
+        <ListSection>
+          <ListRow
+            href="https://fr.tipeee.com/smontlouis"
+            icon={<FeatherIcon name="heart" size={18} color="color2" />}
+            iconTint="color2"
+            label="Lien Tipeee"
+          />
+          <ListRow
+            href="https://www.paypal.me/smontlouis"
+            icon={<FeatherIcon name="credit-card" size={18} color="primary" />}
+            iconTint="primary"
+            label="Lien paypal"
+          />
+        </ListSection>
       </ScrollView>
     </Container>
   )
 }
-export default LoginScreen
+export default SupportScreen

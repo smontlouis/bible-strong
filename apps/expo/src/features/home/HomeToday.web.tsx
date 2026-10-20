@@ -66,7 +66,7 @@ function DailyVerse() {
 
   return (
     <AnimatedVerseHeight>
-      <HStack className="rounded-[30px] bg-reverse overflow-hidden">
+      <HStack className="rounded-[24px] bg-surface overflow-hidden">
         <VerseOfTheDay
           addDay={VISIBLE_VERSE_OF_THE_DAY_OFFSETS[index]}
           desktop

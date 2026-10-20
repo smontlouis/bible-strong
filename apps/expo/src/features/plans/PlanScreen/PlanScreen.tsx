@@ -75,7 +75,7 @@ const PlanScreen = ({
   }, [progress, prevProgress, isFocused])
 
   return (
-    <Container>
+    <Container className="bg-canvas">
       <Header
         maxWidth={1000}
         title={title}

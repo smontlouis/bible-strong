@@ -1,5 +1,6 @@
 'use dom'
 
+// surface-allow: drawn on the text, not surfaces (pen circle glow, annotation ring, handles)
 import { styled, keyframes } from 'goober'
 
 /** Parse a hex color string to [r, g, b] array */

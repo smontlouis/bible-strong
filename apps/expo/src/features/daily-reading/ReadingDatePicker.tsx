@@ -58,7 +58,7 @@ const ReadingDatePicker = ({
         onPress={() => (Platform.OS === 'ios' ? sheet.current?.present() : setAndroidOpen(true))}
         className={
           variant === 'pill'
-            ? 'min-h-[36px] flex-row items-center justify-center bg-light-primary rounded-[14px] px-[11px] py-[7px]'
+            ? 'min-h-[36px] flex-row items-center justify-center bg-light-primary rounded-full px-[14px] py-[7px]'
             : 'min-h-[44px] flex-row items-center justify-center gap-[8px] px-[12px] py-[10px]'
         }
       >

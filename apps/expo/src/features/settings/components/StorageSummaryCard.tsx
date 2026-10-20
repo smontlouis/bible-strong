@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query'
 import * as FileSystem from 'expo-file-system/legacy'
 import { useTranslation } from 'react-i18next'
 import Box from '~common/ui/Box'
+import Card from '~common/ui/Card'
+import IconTile from '~common/ui/IconTile'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { localQueryOptions } from '~helpers/queryOptions'
@@ -50,13 +52,10 @@ const StorageSummaryCard = () => {
   const otherUsedRatio = totalBytes > 0 ? Math.min(otherUsedBytes / totalBytes, 1) : 0
 
   return (
-    <Box className="border-continuous overflow-hidden mx-[16px] mt-[16px] mb-[16px] p-[16px] rounded-[16px] border-[1px] border-border bg-light-grey flex-row items-center gap-[14px]">
-      <Box
-        className="overflow-hidden border-continuous rounded-[12px] bg-light-primary items-center justify-center"
-        style={{ width: 44, height: 44 }}
-      >
-        <FeatherIcon name="hard-drive" size={21} color="primary" />
-      </Box>
+    <Card className="mx-[20px] mt-[4px] mb-[16px] p-[16px] flex-row items-center gap-[14px]">
+      <IconTile tint="primary" size={40}>
+        <FeatherIcon name="hard-drive" size={20} color="primary" />
+      </IconTile>
       <Box className="overflow-hidden border-continuous flex-[1]">
         <Text className="text-[15px] font-bold text-default">
           {t('downloads.offlineResourcesSize', { size: formatBytes(usedBytes, t) })}
@@ -67,7 +66,7 @@ const StorageSummaryCard = () => {
             total: formatBytes(totalBytes, t),
           })}
         </Text>
-        <Box className="border-continuous overflow-visible mt-[10px] h-[6px] rounded-[3px] bg-reverse flex-row">
+        <Box className="border-continuous overflow-visible mt-[10px] h-[6px] rounded-full bg-canvas flex-row">
           <Box
             className="overflow-hidden border-continuous h-[6px] bg-tertiary opacity-[0.45]"
             style={{ width: `${otherUsedRatio * 100}%` }}
@@ -78,7 +77,7 @@ const StorageSummaryCard = () => {
           />
         </Box>
       </Box>
-    </Box>
+    </Card>
   )
 }
 

@@ -138,7 +138,7 @@ const SearchItemFilterBar = ({
 
             return (
               <TouchableBox
-                className="overflow-hidden border-continuous flex-row items-center justify-center gap-[6px] px-[6px] py-[6px] mr-[8px] rounded-[8px] bg-light-grey"
+                className="overflow-hidden border-continuous flex-row items-center justify-center gap-[6px] px-[10px] py-[6px] mr-[8px] rounded-full bg-light-grey"
                 key={type}
                 onPress={() => onToggle(type)}
                 style={{ opacity: isActive ? 1 : 0.6 }}

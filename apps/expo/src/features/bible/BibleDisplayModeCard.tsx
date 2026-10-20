@@ -31,7 +31,7 @@ const BibleDisplayModeCard = ({
 }: Props) => {
   const stylingTheme = useStylingTheme()
   // Half-transparent grounds: the sheet's blur shows through, as on the other sheets
-  const translucent = (color: 'reverse' | 'lightGrey' | 'lightPrimary') =>
+  const translucent = (color: 'reverse' | 'lightGrey') =>
     colorWithOpacity(resolveThemeColor(stylingTheme, color), 0.5)
 
   return (
@@ -46,21 +46,20 @@ const BibleDisplayModeCard = ({
       style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.72 : 1 })}
     >
       <Box
-        className={twMerge(
-          'overflow-hidden border-continuous rounded-[20px] p-[6px] pb-[12px] gap-[10px]',
-          selected ? 'border-primary' : 'border-border'
-        )}
-        // Sized by its content, then stretched to the taller card of its row
+        className="overflow-hidden border-continuous rounded-[16px] p-[6px] pb-[12px] gap-[10px]"
+        // Sized by its content, then stretched to the taller card of its row. The chosen card
+        // takes the primary tint and the check, not an outline.
         style={{
           flexGrow: 1,
-          borderWidth: selected ? 2 : 1,
-          backgroundColor: translucent('reverse'),
+          backgroundColor: selected
+            ? colorWithOpacity(resolveThemeColor(stylingTheme, 'primary'), 0.12)
+            : translucent('reverse'),
         }}
       >
         <Box
-          className="h-[92px] items-center justify-center overflow-hidden border-continuous rounded-[15px]"
+          className="h-[92px] items-center justify-center overflow-hidden border-continuous rounded-[12px]"
           style={{
-            backgroundColor: translucent(selected ? 'lightPrimary' : 'lightGrey'),
+            backgroundColor: translucent(selected ? 'reverse' : 'lightGrey'),
             opacity: unavailable ? 0.45 : 1,
           }}
         >

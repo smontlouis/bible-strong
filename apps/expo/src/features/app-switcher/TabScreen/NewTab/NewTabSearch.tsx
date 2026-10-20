@@ -59,12 +59,9 @@ export default function NewTabSearch({
   return (
     <Box
       dataSet={{ focusGroup: 'true' }}
-      className="flex-row items-center bg-reverse rounded-[16px] px-[12px] min-h-[58px] gap-[10px]"
-      style={{
-        boxShadow: focused
-          ? '0 2px 7px rgba(89, 131, 240, 0.2)'
-          : '0 2px 7px rgba(89, 131, 240, 0.1)',
-      }}
+      className="flex-row items-center bg-surface rounded-[16px] px-[12px] min-h-[58px] gap-[10px] border-[1px]"
+      // A field shows its focus with its border, not with a shadow.
+      style={{ borderColor: focused ? theme.colors.primary : 'transparent' }}
     >
       <TouchableBox
         accessibilityLabel={t('Rechercher')}
@@ -103,7 +100,7 @@ export default function NewTabSearch({
         <TouchableBox
           onPress={search}
           accessibilityLabel={t('Rechercher')}
-          className="min-w-[44px] min-h-[44px] items-center justify-center rounded-[10px] bg-light-grey"
+          className="min-w-[44px] min-h-[44px] items-center justify-center rounded-full bg-canvas"
         >
           <FeatherIcon name="arrow-right" size={19} color="primary" />
         </TouchableBox>
@@ -113,7 +110,7 @@ export default function NewTabSearch({
           accessibilityLabel={t('newTab.focusSearch')}
           className="min-w-[44px] min-h-[44px] items-center justify-center"
         >
-          <Box className="rounded-[6px] bg-light-grey px-[7px] py-[5px]">
+          <Box className="rounded-[4px] bg-canvas px-[7px] py-[5px]">
             <Text className="text-[11px] text-tertiary">{shortcut}</Text>
           </Box>
         </TouchableBox>

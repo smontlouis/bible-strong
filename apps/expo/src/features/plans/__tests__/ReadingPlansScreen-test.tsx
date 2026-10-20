@@ -56,6 +56,9 @@ jest.mock('~common/ui/Text', () => ({
   default: ({ children }: React.PropsWithChildren) => children,
 }))
 jest.mock('~common/ui/Icon', () => ({ FeatherIcon: () => null }))
+jest.mock('~common/ui/ListSection', () => ({
+  ListSectionTitle: ({ children }: React.PropsWithChildren) => children,
+}))
 jest.mock('~common/ui/PageContent', () => ({ pageContentStyle: {} }))
 beforeAll(() => {
   ;(

@@ -14,15 +14,16 @@ import { twMerge } from '~common/ui/classNames'
 import useDeviceOrientation, { Orientation } from '~helpers/useDeviceOrientation'
 import type { Theme as AppTheme } from '~themes'
 import { Theme } from '~themes'
+import { resolveThemeColor } from '~themes/colorValues'
 import { useTheme as useAppTheme } from '~themes/ThemeProvider'
 import { pageContentStyle } from './PageContent'
 
 const SectionList = (
   componentProps: Omit<
     UIComponentProps<typeof RNSectionList>,
-    keyof { theme?: Theme; orientation: Orientation } | 'theme'
+    keyof { theme?: Theme; orientation: Orientation; bg?: string } | 'theme'
   > &
-    Omit<{ theme?: Theme; orientation: Orientation }, 'theme'> & {
+    Omit<{ theme?: Theme; orientation: Orientation; bg?: string }, 'theme'> & {
       theme?: AppTheme
       className?: string
     }
@@ -30,11 +31,8 @@ const SectionList = (
   const contextTheme = useAppTheme()
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
-  const { orientation } = props
-  const resolvedClassName = twMerge(
-    'pb-[30px] rounded-tl-[30px] rounded-tr-[30px] w-[100%] ml-auto mr-auto',
-    className
-  )
+  const { orientation, bg } = props
+  const resolvedClassName = twMerge('pb-[30px] w-[100%] ml-auto mr-auto', className)
   return (
     <RNSectionList
       {...props}
@@ -42,12 +40,12 @@ const SectionList = (
       style={
         [
           {
-            backgroundColor: theme?.colors.reverse,
+            backgroundColor: resolveThemeColor(theme, bg) ?? theme?.colors.reverse,
             ...(orientation.tablet && {
               marginTop: 20,
               marginBottom: 50,
-              borderBottomLeftRadius: 30,
-              borderBottomRightRadius: 30,
+              borderBottomLeftRadius: 24,
+              borderBottomRightRadius: 24,
             }),
           },
           props.style,
@@ -62,6 +60,8 @@ const AnimatedSectionList = <T, S = unknown>({
   ref,
   ...props
 }: SectionListProps<T, S> & {
+  /** Palette token or color of the list ground; the page ground by default. */
+  bg?: string
   contentContainerStyle?: StyleProp<ViewStyle>
   ref?: React.Ref<RNSectionList<T, S>>
 }) => {

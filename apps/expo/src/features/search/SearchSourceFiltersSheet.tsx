@@ -1,8 +1,9 @@
 import { twMerge } from '~common/ui/classNames'
 
-import { forwardRef } from 'react'
+import { forwardRef, Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
+import Border from '~common/ui/Border'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import Checkbox from '~common/ui/Checkbox'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -60,56 +61,57 @@ const SearchSourceFiltersSheet = forwardRef<SheetRef, SearchSourceFiltersProps>(
         }
       >
         <SheetScrollView>
-          {enabledTypes.map(type => {
+          {enabledTypes.map((type, index) => {
             const config = searchItemFilterConfig[type]
             const checked =
               !!itemFilters[type] && (!emptyMeansAll || !allSelected || enabledTypes.length === 1)
 
             return (
-              <HStack
-                className="border-continuous overflow-hidden min-h-[56px] items-stretch border-b-[1px] border-border"
-                key={type}
-              >
-                <TouchableBox
-                  className="overflow-hidden border-continuous flex-[1] flex-row items-center px-[16px] py-[12px]"
-                  accessibilityRole="checkbox"
-                  accessibilityState={{ checked }}
-                  onPress={() => onToggle(type)}
-                >
-                  <Checkbox className="mr-[12px]" checked={checked} />
-                  <SearchTypeIcon type={type} color={checked ? config.color : 'tertiary'} />
-                  <Text
-                    className={twMerge(
-                      checked ? 'text-default' : 'text-tertiary',
-                      'ml-[12px] text-[16px]'
-                    )}
-                  >
-                    {t(config.labelKey)}
-                  </Text>
-                </TouchableBox>
-
-                {showPassageFilters && type === 'passages' ? (
+              <Fragment key={type}>
+                {/* Starts where the label starts, after the checkbox and the source's glyph. */}
+                {index > 0 && <Border className="ml-[82px]" />}
+                <HStack className="border-continuous overflow-hidden min-h-[56px] items-stretch">
                   <TouchableBox
-                    className="overflow-hidden border-continuous min-w-[64px] items-center justify-center"
-                    accessibilityLabel={t('search.passageFilters.title')}
-                    onPress={onOpenPassageFilters}
+                    className="overflow-hidden border-continuous flex-[1] flex-row items-center px-[16px] py-[12px]"
+                    accessibilityRole="checkbox"
+                    accessibilityState={{ checked }}
+                    onPress={() => onToggle(type)}
                   >
-                    {passageFilterCount ? (
-                      <HStack className="overflow-hidden border-continuous bg-primary min-w-[42px] h-[24px] rounded-[12px] items-center justify-center gap-[3px] px-[7px]">
-                        <Text
-                          className="text-reverse text-[13px] font-bold"
-                          style={{ fontVariant: ['tabular-nums'] }}
-                        >
-                          {passageFilterCount}
-                        </Text>
-                        <FeatherIcon name="sliders" size={13} color="reverse" />
-                      </HStack>
-                    ) : (
-                      <FeatherIcon name="sliders" size={19} color="tertiary" />
-                    )}
+                    <Checkbox className="mr-[12px]" checked={checked} />
+                    <SearchTypeIcon type={type} color={checked ? config.color : 'tertiary'} />
+                    <Text
+                      className={twMerge(
+                        checked ? 'text-default' : 'text-tertiary',
+                        'ml-[12px] text-[16px]'
+                      )}
+                    >
+                      {t(config.labelKey)}
+                    </Text>
                   </TouchableBox>
-                ) : null}
-              </HStack>
+
+                  {showPassageFilters && type === 'passages' ? (
+                    <TouchableBox
+                      className="overflow-hidden border-continuous min-w-[64px] items-center justify-center"
+                      accessibilityLabel={t('search.passageFilters.title')}
+                      onPress={onOpenPassageFilters}
+                    >
+                      {passageFilterCount ? (
+                        <HStack className="overflow-hidden border-continuous bg-primary min-w-[42px] h-[24px] rounded-full items-center justify-center gap-[3px] px-[7px]">
+                          <Text
+                            className="text-reverse text-[13px] font-bold"
+                            style={{ fontVariant: ['tabular-nums'] }}
+                          >
+                            {passageFilterCount}
+                          </Text>
+                          <FeatherIcon name="sliders" size={13} color="reverse" />
+                        </HStack>
+                      ) : (
+                        <FeatherIcon name="sliders" size={19} color="tertiary" />
+                      )}
+                    </TouchableBox>
+                  ) : null}
+                </HStack>
+              </Fragment>
             )
           })}
         </SheetScrollView>

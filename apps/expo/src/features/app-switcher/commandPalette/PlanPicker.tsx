@@ -1,8 +1,9 @@
-import { useRef } from 'react'
+import { Fragment, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import { SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
 import Empty from '~common/Empty'
+import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Link from '~common/Link'
 import Text from '~common/ui/Text'
@@ -37,38 +38,41 @@ export default function PlanPicker({
       <Sheet ref={sheet} snapPoints={[1]} header={<SheetHeader title={t('Plans & Méditations')} />}>
         <SheetScrollView>
           {plans.length ? (
-            <Box className="p-[20px] gap-[16px]">
-              {plans.map(plan => (
-                <Link
-                  key={plan.id}
-                  onPress={() => {
-                    sheet.current?.dismiss()
-                    const nextTab: TabItem = {
-                      id: generateUUID(),
-                      type: 'plan',
-                      title: plan.title,
-                      isRemovable: true,
-                      data: { planId: plan.id },
-                    }
-                    const target = replacement.current
-                    if (target) {
-                      const previous = store.get(target)
-                      if (previous.type === 'new')
-                        store.set(target, { ...nextTab, id: previous.id })
-                    } else openTab(nextTab, { autoRedirect: true })
-                  }}
-                >
-                  <Box className="bg-reverse rounded-[12px] p-[16px] gap-[6px] min-h-[64px]">
-                    <Text className="text-default font-bold">{plan.title}</Text>
-                    <Text className="text-grey text-[13px]">
-                      {t(
-                        getEditorialKind(plan) === 'daily-meditation'
-                          ? 'dailyReading.collection'
-                          : 'readingPlans.tab'
-                      )}
-                    </Text>
-                  </Box>
-                </Link>
+            // A list in a sheet: full-width rows split by hairlines.
+            <Box className="px-[20px] py-[8px]">
+              {plans.map((plan, index) => (
+                <Fragment key={plan.id}>
+                  {index > 0 && <Border />}
+                  <Link
+                    onPress={() => {
+                      sheet.current?.dismiss()
+                      const nextTab: TabItem = {
+                        id: generateUUID(),
+                        type: 'plan',
+                        title: plan.title,
+                        isRemovable: true,
+                        data: { planId: plan.id },
+                      }
+                      const target = replacement.current
+                      if (target) {
+                        const previous = store.get(target)
+                        if (previous.type === 'new')
+                          store.set(target, { ...nextTab, id: previous.id })
+                      } else openTab(nextTab, { autoRedirect: true })
+                    }}
+                  >
+                    <Box className="py-[12px] gap-[4px] min-h-[64px] justify-center">
+                      <Text className="text-default font-bold">{plan.title}</Text>
+                      <Text className="text-grey text-[13px]">
+                        {t(
+                          getEditorialKind(plan) === 'daily-meditation'
+                            ? 'dailyReading.collection'
+                            : 'readingPlans.tab'
+                        )}
+                      </Text>
+                    </Box>
+                  </Link>
+                </Fragment>
               ))}
             </Box>
           ) : (

@@ -28,10 +28,7 @@ const FlatList = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { orientation, bg } = props
-  const resolvedClassName = twMerge(
-    'pb-[30px] rounded-tl-[30px] rounded-tr-[30px] w-[100%] ml-auto mr-auto',
-    className
-  )
+  const resolvedClassName = twMerge('pb-[30px] w-[100%] ml-auto mr-auto', className)
   return (
     <RNFlatList
       {...props}
@@ -45,8 +42,8 @@ const FlatList = (
             ...(orientation.tablet && {
               marginTop: 20,
               marginBottom: 50,
-              borderBottomLeftRadius: 30,
-              borderBottomRightRadius: 30,
+              borderBottomLeftRadius: 24,
+              borderBottomRightRadius: 24,
             }),
           },
           props.style,

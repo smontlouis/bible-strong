@@ -70,12 +70,14 @@ function VerseBookmarkPanel({
       onOpen={panel.prepare}
       trigger={
         <Box className="items-center py-2 gap-2" style={{ width: ACTION_ITEM_WIDTH }}>
+          {/* As the sheet's tile: an existing bookmark is marked by a border, not a shadow. */}
           <Box
             className="items-center justify-center bg-light-grey rounded-[16px]"
             style={{
               width: ICON_BOX_SIZE,
               height: ICON_BOX_SIZE,
-              ...(isActive ? { boxShadow: `inset 0 0 0 2px ${theme.colors.primary}` } : {}),
+              borderWidth: 2,
+              borderColor: isActive ? theme.colors.primary : 'transparent',
             }}
           >
             <FeatherIcon

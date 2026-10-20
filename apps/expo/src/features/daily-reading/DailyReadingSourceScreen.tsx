@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import Header from '~common/Header'
 import Link from '~common/Link'
 import type { OnlinePlan } from '~common/types'
+import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Container from '~common/ui/Container'
@@ -42,7 +43,7 @@ const CollectionCard = ({
   const { t } = useTranslation()
   const { choose, pending, error } = useCollectionChoice(collection)
   return (
-    <Box className="bg-reverse border-b border-border px-[16px] py-[10px]">
+    <Box className="px-[20px] py-[10px]">
       <Box className="flex-row items-center gap-[8px]">
         <Link
           onPress={onPress}
@@ -92,6 +93,9 @@ const CollectionCard = ({
     </Box>
   )
 }
+
+// Starts where the row's text starts: its margin, the 44pt thumbnail and the gap after it.
+const SourceSeparator = () => <Border className="ml-[76px]" />
 
 type SourceItem =
   | { id: 'standalone'; kind: 'standalone' }
@@ -189,22 +193,24 @@ const DailyReadingSourceScreen = ({ embedded = false }: { embedded?: boolean }) 
         stickySectionHeadersEnabled
         keyExtractor={item => item.id}
         initialNumToRender={24}
+        // A continuous list on the page ground: sticky titles mask the rows under them.
         renderSectionHeader={({ section }) =>
           section.title ? (
-            <Box className="min-h-[40px] px-[16px] justify-center bg-light-grey border-b border-border">
-              <Text accessibilityRole="header" className="text-grey text-[14px] font-bold">
+            <Box className="bg-reverse px-[20px] pt-[20px] pb-[8px]">
+              <Text accessibilityRole="header" className="text-[13px] text-grey">
                 {section.title}
               </Text>
             </Box>
           ) : null
         }
+        ItemSeparatorComponent={SourceSeparator}
         renderItem={({ item }) =>
           item.kind === 'standalone' ? (
             <Link
               accessibilityRole="radio"
               accessibilityState={{ checked: !selectedId }}
               onPress={() => dispatch(setDailyMeditation(null))}
-              className="flex-row items-center bg-reverse border-b border-border px-[16px] py-[10px] gap-[12px] min-h-[64px]"
+              className="flex-row items-center px-[20px] py-[10px] gap-[12px] min-h-[64px]"
             >
               <Box className="bg-light-grey rounded-[8px] w-[44px] h-[44px] items-center justify-center">
                 <FeatherIcon name="sun" size={22} color="primary" />

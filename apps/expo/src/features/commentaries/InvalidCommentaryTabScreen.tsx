@@ -20,8 +20,8 @@ const InvalidCommentaryTabScreen = ({ tabAtom }: { tabAtom: PrimitiveAtom<TabIte
   }
 
   return (
-    <Box className="overflow-hidden border-continuous flex-[1] bg-light-grey">
-      <Header background title={t('Commentaires')} />
+    <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
+      <Header title={t('Commentaires')} />
       <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center px-[32px]">
         <FeatherIcon name="alert-circle" size={42} color="grey" />
         <Text className="mt-[18px] font-bold text-[20px] text-center">
@@ -31,7 +31,7 @@ const InvalidCommentaryTabScreen = ({ tabAtom }: { tabAtom: PrimitiveAtom<TabIte
           {t('commentaries.tabs.invalidBody')}
         </Text>
         <TouchableBox
-          className="overflow-hidden border-continuous mt-[24px] px-[20px] py-[13px] rounded-[22px] bg-primary"
+          className="overflow-hidden border-continuous mt-[24px] px-[20px] py-[13px] rounded-full bg-primary"
           onPress={closeTab}
           accessibilityRole="button"
         >

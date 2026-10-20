@@ -1,4 +1,7 @@
 import { twMerge } from '~common/ui/classNames'
+import { floatingShadow } from '~common/ui/surfaces'
+import { colorWithOpacity } from '~themes/colorValues'
+import { useTheme } from '~themes/ThemeProvider'
 import React from 'react'
 import { Linking, TouchableOpacityProps } from 'react-native'
 import { useAtomValue } from 'jotai/react'
@@ -22,20 +25,23 @@ type ChipProps = {
   isActive?: boolean
 }
 
+// A pill filled with a tint, the primary one when chosen: no outline.
 const Chip = ({ children, isActive, ...props }: ChipProps & BoxProps & TouchableOpacityProps) => {
+  const theme = useTheme()
   return (
     <TouchableBox
       {...props}
-      style={props.style}
+      style={[
+        {
+          backgroundColor: isActive
+            ? colorWithOpacity(theme.colors.primary, 0.12)
+            : colorWithOpacity(theme.colors.default, 0.07),
+        },
+        props.style,
+      ]}
       className={twMerge(
-        'overflow-hidden border-continuous',
-        twMerge(
-          isActive ? 'border-primary' : 'border-border',
-          twMerge(
-            'overflow-hidden border-continuous px-[6px] py-[3px] rounded-[8px] border-[1px] flex-row',
-            props.className
-          )
-        )
+        'overflow-hidden border-continuous px-[8px] py-[3px] rounded-full flex-row',
+        props.className
       )}
     >
       <Text className={twMerge(isActive ? 'text-primary' : 'text-default', 'text-[10px]')}>
@@ -55,9 +61,10 @@ const AudioContainer = ({ children, onReduce, audioMode, onChangeMode }: AudioCo
 
   return (
     <AnimatedBox
-      className="overflow-hidden border-continuous h-auto bg-reverse border-border border-[1px] px-[20px] pb-[20px] left-[20px] right-[20px] absolute rounded-[30px]"
+      // The player floats over the text: the raised surface and the one shadow, no outline.
+      className="border-continuous overflow-visible h-auto bg-surface-raised px-[20px] pb-[20px] left-[20px] right-[20px] absolute rounded-[24px]"
       style={[
-        { bottom: 20 + bottomBarHeight },
+        { bottom: 20 + bottomBarHeight, ...floatingShadow },
         {
           transform: [{ translateY: isFullScreenBible ? HEADER_HEIGHT : 0 }],
           transitionProperty: 'transform',

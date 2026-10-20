@@ -118,7 +118,7 @@ const VerseSheet = ({ sheetRef, bookSelectorRef, actions, data }: VerseSheetProp
       >
         {verses?.map(verse => (
           <TouchableBox
-            className="overflow-hidden border-continuous bg-opacity5 rounded-[3px] h-[48px] items-center justify-center"
+            className="overflow-hidden border-continuous bg-opacity5 rounded-[8px] h-[48px] items-center justify-center"
             key={String(verse.Verset)}
             accessibilityActions={[
               {

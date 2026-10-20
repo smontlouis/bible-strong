@@ -1,6 +1,6 @@
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
-import { getUniverseColor } from '~themes/universeColors'
+import { getUniverseColor, type UniverseItem } from '~themes/universeColors'
 import distanceInWords from 'date-fns/formatDistance'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
@@ -17,6 +17,7 @@ import type { TagsObj } from '~common/types'
 import Border from '~common/ui/Border'
 import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import IconTile, { ICON_TILE_SIZE } from '~common/ui/IconTile'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import type { RelationEndpoint } from '~features/studyRelations/domain'
@@ -77,6 +78,13 @@ export type TagSection = {
   data: TagSectionItem[]
 }
 
+const ROW_PADDING = 20
+const LINK_ICON_SIZE = 24
+const LINK_ICON_GAP = 10
+const LINK_TEXT_INSET = ROW_PADDING + LINK_ICON_SIZE + LINK_ICON_GAP
+const GROUP_ROW_GAP = 12
+const GROUP_TEXT_INSET = ROW_PADDING + ICON_TILE_SIZE + GROUP_ROW_GAP
+
 // Styled components
 const LinkTypeIcon = (
   componentProps: Omit<UIComponentProps<typeof Box>, keyof { bgColor: string } | 'theme'> &
@@ -85,35 +93,21 @@ const LinkTypeIcon = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const { bgColor } = props
-  const resolvedClassName = twMerge(
-    'w-[24px] h-[24px] rounded-[4px] mr-[10px] items-center justify-center',
-    className
-  )
+  const resolvedClassName = twMerge('rounded-[4px] items-center justify-center', className)
   return (
     <Box
       {...props}
-      style={[{ backgroundColor: bgColor }, props.style] as UIComponentProps<typeof Box>['style']}
-      className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
-    />
-  )
-}
-
-export const CountChip = (
-  componentProps: Omit<UIComponentProps<typeof Box>, 'theme'> & {
-    theme?: AppTheme
-    className?: string
-  }
-) => {
-  const { theme: _themeOverride, className, ...props } = componentProps
-
-  const resolvedClassName = twMerge(
-    'rounded-[12px] bg-border py-[2px] px-[8px] ml-[8px]',
-    className
-  )
-  return (
-    <Box
-      {...props}
-      style={[props.style] as UIComponentProps<typeof Box>['style']}
+      style={
+        [
+          {
+            backgroundColor: bgColor,
+            width: LINK_ICON_SIZE,
+            height: LINK_ICON_SIZE,
+            marginRight: LINK_ICON_GAP,
+          },
+          props.style,
+        ] as UIComponentProps<typeof Box>['style']
+      }
       className={twMerge('overflow-hidden border-continuous', resolvedClassName)}
     />
   )
@@ -182,7 +176,7 @@ export const NoteItem = ({
   return (
     <TouchableBox className="overflow-hidden border-continuous" onPress={openNote}>
       {content}
-      <Border />
+      <Border className="ml-[20px]" />
     </TouchableBox>
   )
 }
@@ -264,7 +258,7 @@ export const LinkItem = ({
   return (
     <TouchableBox className="overflow-hidden border-continuous" onPress={openLink}>
       {content}
-      <Border />
+      <Border style={{ marginLeft: LINK_TEXT_INSET }} />
     </TouchableBox>
   )
 }
@@ -272,11 +266,11 @@ export const LinkItem = ({
 export const SectionIcon = ({ sectionId }: { sectionId: string }) => {
   switch (sectionId) {
     case 'strongs':
-      return <LexiqueIcon size={20} />
+      return <LexiqueIcon size={18} />
     case 'naves':
-      return <NaveIcon size={20} />
+      return <NaveIcon size={18} />
     case 'words':
-      return <DictionnaryIcon size={20} />
+      return <DictionnaryIcon size={18} />
     case 'highlights':
     case 'notes':
     case 'links':
@@ -295,6 +289,17 @@ export const SectionIcon = ({ sectionId }: { sectionId: string }) => {
   }
 }
 
+const sectionUniverses: Record<string, UniverseItem> = {
+  strongs: 'strong',
+  naves: 'nave',
+  words: 'dictionary',
+  highlights: 'highlights',
+  notes: 'notes',
+  links: 'links',
+  studies: 'study',
+}
+
+/** A group of the tag page: a row that opens or closes the entries of one kind. */
 export const TagSectionHeader = ({
   sectionId,
   title,
@@ -308,30 +313,32 @@ export const TagSectionHeader = ({
   isExpanded: boolean
   toggle: (sectionId: string) => void
 }) => (
-  <TouchableBox
-    className="border-continuous overflow-hidden flex-row items-center py-[20px] px-[20px] bg-reverse border-b-[1px] border-border"
-    onPress={() => toggle(sectionId)}
-  >
-    <Box className="overflow-hidden border-continuous flex-[1] flex-row items-center">
-      <Box className="overflow-hidden border-continuous mr-[12px]">
-        <SectionIcon sectionId={sectionId} />
-      </Box>
-      <Text>{title}</Text>
-      <CountChip>
-        <Text className="text-[12px] text-default font-bold">{count}</Text>
-      </CountChip>
-    </Box>
-    <AnimatedBox
-      className="overflow-hidden border-continuous w-[17px] h-[17px] items-center justify-center"
-      style={{
-        transform: [{ rotate: isExpanded ? '180deg' : '0deg' }],
-        transitionProperty: 'transform',
-        transitionDuration: 500,
-      }}
+  <Box>
+    <TouchableBox
+      className="flex-row items-center py-[12px]"
+      style={{ gap: GROUP_ROW_GAP, paddingHorizontal: ROW_PADDING }}
+      onPress={() => toggle(sectionId)}
     >
-      <FeatherIcon color="grey" name="chevron-down" size={17} />
-    </AnimatedBox>
-  </TouchableBox>
+      <IconTile tint={getUniverseColor(sectionUniverses[sectionId] ?? 'default')}>
+        <SectionIcon sectionId={sectionId} />
+      </IconTile>
+      <Text className="flex-[1] text-[15px]" numberOfLines={1}>
+        {title}
+      </Text>
+      <Text className="text-[13px] text-grey">{count}</Text>
+      <AnimatedBox
+        className="overflow-hidden border-continuous w-[17px] h-[17px] items-center justify-center"
+        style={{
+          transform: [{ rotate: isExpanded ? '180deg' : '0deg' }],
+          transitionProperty: 'transform',
+          transitionDuration: 500,
+        }}
+      >
+        <FeatherIcon color="grey" name="chevron-down" size={17} />
+      </AnimatedBox>
+    </TouchableBox>
+    <Border style={{ marginLeft: GROUP_TEXT_INSET }} />
+  </Box>
 )
 
 // Helper to build sections

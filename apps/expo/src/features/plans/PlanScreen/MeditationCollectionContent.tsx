@@ -3,10 +3,11 @@ import { useRef, useState } from 'react'
 import { Image } from 'expo-image'
 import { useFireStorage } from '../plan.hooks'
 import { useRouter } from 'expo-router'
-import { Platform, ScrollView } from 'react-native'
+import { Platform, ScrollView, StyleSheet } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import type { ComputedPlan, ComputedReadingSlice, Plan } from '~common/types'
 import Link from '~common/Link'
+import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Button from '~common/ui/Button'
@@ -107,12 +108,17 @@ const MeditationCollectionContent = ({ plan, onReadingSlicePress }: Props) => {
         <Box
           className={
             desktop
-              ? 'w-[260px] shrink-0 gap-[24px] pr-[28px] border-r border-border'
-              : 'flex-row items-start gap-[20px] pb-[24px] border-b border-border'
+              ? 'w-[260px] shrink-0 gap-[24px] pr-[28px] border-separator'
+              : 'flex-row items-start gap-[20px] pb-[24px] border-separator'
+          }
+          style={
+            desktop
+              ? { borderRightWidth: StyleSheet.hairlineWidth }
+              : { borderBottomWidth: StyleSheet.hairlineWidth }
           }
         >
           <Box
-            className="rounded-[10px] overflow-hidden bg-light-grey"
+            className="rounded-[12px] overflow-hidden bg-light-grey"
             style={{ width: desktop ? 204 : 80, height: desktop ? 286 : 112 }}
           >
             {cover ? (
@@ -168,7 +174,7 @@ const MeditationCollectionContent = ({ plan, onReadingSlicePress }: Props) => {
                 <Link
                   size={36}
                   hitSlop={4}
-                  className="bg-light-grey rounded-[18px]"
+                  className="bg-light-grey rounded-full"
                   accessibilityLabel={t('dailyReading.previousMonth')}
                   onPress={() => moveMonth(-1)}
                 >
@@ -180,7 +186,7 @@ const MeditationCollectionContent = ({ plan, onReadingSlicePress }: Props) => {
                 <Link
                   size={36}
                   hitSlop={4}
-                  className="bg-light-grey rounded-[18px]"
+                  className="bg-light-grey rounded-full"
                   accessibilityLabel={t('dailyReading.nextMonth')}
                   onPress={() => moveMonth(1)}
                 >
@@ -224,7 +230,7 @@ const MeditationCollectionContent = ({ plan, onReadingSlicePress }: Props) => {
                 >
                   <Link onPress={() => open(reading)} accessibilityRole="button">
                     <Box
-                      className={`min-h-[68px] flex-row items-center gap-[16px] px-[12px] py-[14px] ${selected ? 'bg-light-grey rounded-[14px]' : 'border-b border-border'}`}
+                      className={`min-h-[68px] flex-row items-center gap-[16px] px-[12px] py-[14px] ${selected ? 'bg-light-grey rounded-[12px]' : ''}`}
                     >
                       {key && (
                         <Box className="w-[38px] gap-[2px]">
@@ -260,6 +266,7 @@ const MeditationCollectionContent = ({ plan, onReadingSlicePress }: Props) => {
                       <FeatherIcon name="chevron-right" size={18} color="primary" />
                     </Box>
                   </Link>
+                  {!selected && <Border className="ml-[12px]" />}
                 </Box>
               )
             })}

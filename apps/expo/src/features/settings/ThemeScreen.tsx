@@ -1,16 +1,13 @@
-import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
-import { twMerge } from '~common/ui/classNames'
 
 import Header from '~common/Header'
 import { LinkBox } from '~common/Link'
-import { HStack, SafeAreaBox } from '~common/ui/Box'
+import Box, { HStack, SafeAreaBox } from '~common/ui/Box'
 import Circle from '~common/ui/Circle'
-import { FeatherIcon } from '~common/ui/Icon'
+import ListSection from '~common/ui/ListSection'
 import ScrollView from '~common/ui/ScrollView'
-import SectionCard, { SectionCardHeader } from '~common/ui/SectionCard'
 import Text from '~common/ui/Text'
 import { useParamsModalLabels } from '~features/bible/BibleParamsModal'
 import TouchableIcon from '~features/bible/TouchableIcon'
@@ -20,31 +17,11 @@ import {
   setSettingsPreferredDarkTheme,
   setSettingsPreferredLightTheme,
 } from '~redux/modules/user'
-import type { Theme as AppTheme } from '~themes'
 
-const RowContainer = (
-  componentProps: Omit<UIComponentProps<typeof View>, keyof { border?: boolean } | 'theme'> &
-    Omit<{ border?: boolean }, 'theme'> & { theme?: AppTheme; className?: string }
-) => {
-  const { theme: _themeOverride, className, ...props } = componentProps
-
-  const { border } = props
-  const resolvedClassName = twMerge(
-    'px-[16px] py-[14px] border-b-border flex-row items-center',
-    className
-  )
-  return (
-    <View
-      {...props}
-      className={resolvedClassName}
-      style={
-        [{ borderBottomWidth: border ? 1 : 0 }, props.style] as UIComponentProps<
-          typeof View
-        >['style']
-      }
-    />
-  )
-}
+/** The one row of a section: the current choice, then the controls that change it. */
+const ChoiceRow = ({ children }: { children: ReactNode }) => (
+  <Box className="min-h-[56px] px-[14px] py-[8px] flex-row items-center">{children}</Box>
+)
 
 const ThemeScreen = () => {
   const { t } = useTranslation()
@@ -64,21 +41,11 @@ const ThemeScreen = () => {
     useParamsModalLabels()
 
   return (
-    <SafeAreaBox className="overflow-hidden border-continuous bg-light-grey">
+    <SafeAreaBox className="overflow-hidden border-continuous bg-canvas">
       <Header hasBackButton title={t('settings.theme')} />
-      <ScrollView backgroundColor="lightGrey" contentContainerStyle={{ paddingBottom: 20 }}>
-        {/* Section Mode */}
-        <SectionCard className="mt-[8px]">
-          <SectionCardHeader>
-            <FeatherIcon name="sun" size={16} color="grey" />
-            <Text
-              className="ml-[8px] text-[12px] text-grey font-bold"
-              style={{ textTransform: 'uppercase' }}
-            >
-              {t('Mode')}
-            </Text>
-          </SectionCardHeader>
-          <RowContainer>
+      <ScrollView backgroundColor="canvas" contentContainerStyle={{ paddingBottom: 20 }}>
+        <ListSection title={t('Mode')}>
+          <ChoiceRow>
             <Text className="text-[15px]">
               {preferredColorSchemeToString[preferredColorScheme]}
             </Text>
@@ -105,21 +72,11 @@ const ThemeScreen = () => {
                 noFlex
               />
             </HStack>
-          </RowContainer>
-        </SectionCard>
+          </ChoiceRow>
+        </ListSection>
 
-        {/* Section Couleur Jour */}
-        <SectionCard>
-          <SectionCardHeader>
-            <FeatherIcon name="sun" size={16} color="grey" />
-            <Text
-              className="ml-[8px] text-[12px] text-grey font-bold"
-              style={{ textTransform: 'uppercase' }}
-            >
-              {t('Couleur Jour')}
-            </Text>
-          </SectionCardHeader>
-          <RowContainer>
+        <ListSection title={t('Couleur Jour')}>
+          <ChoiceRow>
             <Text className="flex-[1] text-[15px]">
               {preferredLightThemeToString[preferredLightTheme]}
             </Text>
@@ -167,21 +124,11 @@ const ThemeScreen = () => {
             >
               <Circle isSelected={preferredLightTheme === 'sunset'} size={28} color="#FAE0D5" />
             </LinkBox>
-          </RowContainer>
-        </SectionCard>
+          </ChoiceRow>
+        </ListSection>
 
-        {/* Section Couleur Nuit */}
-        <SectionCard>
-          <SectionCardHeader>
-            <FeatherIcon name="moon" size={16} color="grey" />
-            <Text
-              className="ml-[8px] text-[12px] text-grey font-bold"
-              style={{ textTransform: 'uppercase' }}
-            >
-              {t('Couleur Nuit')}
-            </Text>
-          </SectionCardHeader>
-          <RowContainer>
+        <ListSection title={t('Couleur Nuit')}>
+          <ChoiceRow>
             <Text className="flex-[1] text-[15px]">
               {preferredDarkThemeToString[preferredDarkTheme]}
             </Text>
@@ -221,8 +168,8 @@ const ThemeScreen = () => {
             >
               <Circle isSelected={preferredDarkTheme === 'night'} size={28} color="rgb(0,50,100)" />
             </LinkBox>
-          </RowContainer>
-        </SectionCard>
+          </ChoiceRow>
+        </ListSection>
       </ScrollView>
     </SafeAreaBox>
   )

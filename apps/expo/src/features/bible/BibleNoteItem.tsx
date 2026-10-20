@@ -72,10 +72,8 @@ const BibleNoteItem = ({ item, onPress, relationCount, onRelationPress }: Props)
           >
             <Box className="overflow-hidden border-continuous flex-row items-center">
               {item.isAnnotation && (
-                <Box className="overflow-hidden border-continuous rounded-[4px] bg-light-primary px-[5px] py-[1px] mr-[6px]">
-                  <Text className="text-[10px] font-semibold uppercase tracking-[0.5px] text-primary">
-                    {t('Annotation')}
-                  </Text>
+                <Box className="overflow-hidden border-continuous rounded-full bg-light-primary px-[7px] py-[1px] mr-[6px]">
+                  <Text className="text-[11px] font-semibold text-primary">{t('Annotation')}</Text>
                 </Box>
               )}
               <Text className="flex-[1] text-[12px] text-dark-grey" numberOfLines={1}>
@@ -123,7 +121,7 @@ const BibleNoteItem = ({ item, onPress, relationCount, onRelationPress }: Props)
           <NoteOptionsPanel noteId={item.noteId} title={item.title} />
         </Box>
       </Box>
-      <Border className="mx-[20px]" />
+      <Border className="ml-[20px]" />
     </Box>
   )
 }

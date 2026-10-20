@@ -4,6 +4,7 @@ import ContextualPanel from '~common/ContextualPanel'
 import PanelAction from '~common/ContextualPanel/PanelAction'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import Box, { TouchableBox } from '~common/ui/Box'
+import { radii } from '~common/ui/surfaces'
 import { useTheme } from '~themes/ThemeProvider'
 import { webFontFamily } from '~helpers/webFontFamily'
 import { useDebouncedGroupEdit } from './useDebouncedGroupEdit'
@@ -34,7 +35,7 @@ export default function GroupActionsPopover(props: GroupActionsPopoverProps) {
           title: props.group.name,
           hideHeader: !props.group.isDefault,
           headerContent: !props.group.isDefault ? (
-            <Box className="p-3 gap-3 border-b border-border mb-1">
+            <Box className="p-3 gap-3 border-b border-separator mb-1">
               <input
                 aria-label={t('tabs.groupNamePlaceholder')}
                 value={edit.name}
@@ -50,7 +51,7 @@ export default function GroupActionsPopover(props: GroupActionsPopoverProps) {
                   width: '100%',
                   minWidth: 0,
                   height: 36,
-                  borderRadius: 8,
+                  borderRadius: radii.control,
                   border: `1px solid ${theme.colors.border}`,
                   background: theme.colors.reverse,
                   color: theme.colors.default,
@@ -68,15 +69,12 @@ export default function GroupActionsPopover(props: GroupActionsPopoverProps) {
                     accessibilityState={{ checked: edit.color === color }}
                     onPress={() => edit.changeColor(color)}
                     className="w-[22px] h-[22px] rounded-full items-center justify-center"
-                    style={{
-                      borderWidth: 2,
-                      borderColor: edit.color === color ? color : 'transparent',
-                    }}
+                    style={{ backgroundColor: color }}
                   >
-                    <Box
-                      className="w-[14px] h-[14px] rounded-full"
-                      style={{ backgroundColor: color }}
-                    />
+                    {/* The chosen colour carries a mark, as in the native editor, not a ring. */}
+                    {edit.color === color && (
+                      <Box className="w-[8px] h-[8px] rounded-full bg-[black] opacity-[0.5]" />
+                    )}
                   </TouchableBox>
                 ))}
               </Box>

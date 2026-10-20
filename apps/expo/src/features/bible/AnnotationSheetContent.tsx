@@ -11,6 +11,7 @@ import {
 import Box, { AnimatedBox, HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
+import { StyleSheet } from 'react-native'
 import { LinearTransition } from 'react-native-reanimated'
 
 /**
@@ -55,7 +56,7 @@ const AnnotationSheetContent = (props: AnnotationToolbarProps) => {
             </Text>
             {version && (
               <Box
-                className="rounded-[6px] px-[6px] py-[2px] bg-light-grey"
+                className="rounded-full px-[7px] py-[2px] bg-light-grey"
                 testID="annotation-toolbar-version"
               >
                 <Text className="text-[13px] font-bold text-primary">{version}</Text>
@@ -103,7 +104,10 @@ const AnnotationSheetContent = (props: AnnotationToolbarProps) => {
           />
         </Box>
       </AnimatedBox>
-      <HStack className="mx-[16px] border-t border-border py-[12px] items-center">
+      <HStack
+        className="mx-[16px] border-separator py-[12px] items-center"
+        style={{ borderTopWidth: StyleSheet.hairlineWidth }}
+      >
         <TouchableBox
           className="flex-1 min-w-0 h-[44px] flex-row gap-[6px] items-center justify-center"
           accessibilityRole="button"
@@ -122,7 +126,7 @@ const AnnotationSheetContent = (props: AnnotationToolbarProps) => {
             {t('Note')}
           </Text>
         </TouchableBox>
-        <Box className="w-px h-[24px] bg-border" />
+        <Box className="h-[24px] bg-separator" style={{ width: StyleSheet.hairlineWidth }} />
         <TouchableBox
           className="flex-1 min-w-0 h-[44px] flex-row gap-[6px] items-center justify-center"
           accessibilityRole="button"
@@ -142,7 +146,7 @@ const AnnotationSheetContent = (props: AnnotationToolbarProps) => {
             </Box>
           )}
         </TouchableBox>
-        <Box className="w-px h-[24px] bg-border" />
+        <Box className="h-[24px] bg-separator" style={{ width: StyleSheet.hairlineWidth }} />
         <TouchableBox
           className="flex-1 min-w-0 h-[44px] flex-row gap-[6px] items-center justify-center"
           accessibilityRole="button"

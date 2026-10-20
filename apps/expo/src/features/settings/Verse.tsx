@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import EntityChipList from '~common/EntityChipList'
 import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
 import type { TagsObj, Verse, VerseIds } from '~common/types'
+import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
@@ -54,10 +55,7 @@ const Container = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const resolvedClassName = twMerge(
-    'm-[20px] pb-[20px] mb-[0px] border-b-border border-b-[1px]',
-    className
-  )
+  const resolvedClassName = twMerge('mx-[20px] mt-[20px] pb-[20px]', className)
   return (
     <Box
       {...props}
@@ -136,34 +134,37 @@ const VerseComponent = ({
   }
 
   return (
-    <Container>
-      <TouchableOpacity accessibilityRole="button" activeOpacity={0.7} onPress={openBibleView}>
-        <Box
-          className="overflow-hidden border-continuous flex-row pr-[32px] items-center"
-          style={{ marginBottom: 10 }}
-        >
-          <Box className="overflow-hidden border-continuous flex-[1] flex-row items-center">
-            <HighlightTypeIndicator color={resolvedColor} type={highlightType} size={15} />
-            <Text
-              className="text-[14px] ml-[10px]"
-              style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-            >
-              {title}
-            </Text>
+    <>
+      <Container>
+        <TouchableOpacity accessibilityRole="button" activeOpacity={0.7} onPress={openBibleView}>
+          <Box
+            className="overflow-hidden border-continuous flex-row pr-[32px] items-center"
+            style={{ marginBottom: 10 }}
+          >
+            <Box className="overflow-hidden border-continuous flex-[1] flex-row items-center">
+              <HighlightTypeIndicator color={resolvedColor} type={highlightType} size={15} />
+              <Text
+                className="text-[14px] ml-[10px]"
+                style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+              >
+                {title}
+              </Text>
+            </Box>
+            <DateText style={{ fontSize: 10 }}>
+              {t('Il y a {{formattedDate}}', { formattedDate })}
+            </DateText>
           </Box>
-          <DateText style={{ fontSize: 10 }}>
-            {t('Il y a {{formattedDate}}', { formattedDate })}
-          </DateText>
-        </Box>
-        <Paragraph className="mb-[15px]" scale={-2}>
-          {content
-            ? truncate(removeBreakLines(content), 200)
-            : t('bibleVerse.textUnavailableInstalled')}
-        </Paragraph>
-      </TouchableOpacity>
-      <EntityChipList tags={tags} />
-      {setSettings && stringIds && <HighlightOptions verseIds={stringIds} color={color} />}
-    </Container>
+          <Paragraph className="mb-[15px]" scale={-2}>
+            {content
+              ? truncate(removeBreakLines(content), 200)
+              : t('bibleVerse.textUnavailableInstalled')}
+          </Paragraph>
+        </TouchableOpacity>
+        <EntityChipList tags={tags} />
+        {setSettings && stringIds && <HighlightOptions verseIds={stringIds} color={color} />}
+      </Container>
+      <Border className="ml-[20px]" />
+    </>
   )
 }
 

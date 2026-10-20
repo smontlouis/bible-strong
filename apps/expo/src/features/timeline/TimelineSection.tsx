@@ -181,21 +181,10 @@ const Timeline = ({
         isReady={isReady}
         entrance={entrance}
       >
-        <Box
-          className="overflow-hidden border-continuous"
-          style={{
-            width: width,
-            height: height,
-            shadowColor: 'rgb(89,131,240)',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 7,
-            elevation: 1,
-            overflow: 'visible',
-          }}
-        >
+        <Box className="overflow-hidden border-continuous" style={{ width: width, height: height }}>
+          {/* The period lies on the page ground; its events are the cards on it. */}
           <Box
-            className="overflow-hidden border-continuous relative bg-light-grey"
+            className="overflow-hidden border-continuous relative bg-canvas"
             style={{ width: width, height: height }}
           >
             {events.map(event => (

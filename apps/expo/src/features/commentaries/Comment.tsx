@@ -18,18 +18,10 @@ const Comment = ({ comment, passageLabel }: Props) => {
 
   return (
     <AnimatedBox
-      className="overflow-hidden border-continuous m-[20px] mb-[0px] p-[20px] rounded-[20px] bg-reverse"
+      className="overflow-hidden border-continuous m-[20px] mb-[0px] p-[20px] rounded-[16px] bg-surface"
       layout={reduceMotion ? undefined : LinearTransition.duration(220)}
       entering={reduceMotion ? undefined : FadeIn.duration(160)}
       exiting={reduceMotion ? undefined : FadeOut.duration(130)}
-      style={{
-        shadowColor: 'rgb(89,131,240)',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 7,
-        elevation: 1,
-        overflow: 'visible',
-      }}
     >
       <Box className="overflow-hidden border-continuous flex-row">
         <CommentaryAvatar
@@ -64,7 +56,7 @@ const Comment = ({ comment, passageLabel }: Props) => {
         >
           {content}
         </Text>
-        <Box className="overflow-hidden border-continuous mt-[14px] px-[10px] py-[5px] rounded-[12px] bg-light-primary self-start">
+        <Box className="overflow-hidden border-continuous mt-[14px] px-[10px] py-[5px] rounded-full bg-light-primary self-start">
           <Text className="text-primary text-[12px]">{passageLabel}</Text>
         </Box>
       </AnimatedBox>

@@ -17,7 +17,7 @@ const NaveItem = ({ item: { name, name_lower } }: NaveModalItemProps) => {
   return (
     <Link route="NaveDetail" params={{ name, name_lower }}>
       <Box
-        className="overflow-hidden border-continuous rounded-[5px] px-[12px] py-[5px]"
+        className="overflow-hidden border-continuous rounded-full px-[12px] py-[5px]"
         style={{ backgroundColor: colorWithOpacity(resolveThemeColor(stylingTheme, 'quint'), 0.1) }}
       >
         <Text

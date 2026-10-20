@@ -6,6 +6,7 @@ import React from 'react'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HomeScrollView } from '~common/ui/ScrollView'
+import { floatingShadow } from '~common/ui/surfaces'
 import { LoginPrompt } from './UserWidget'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useTranslation } from 'react-i18next'
@@ -45,7 +46,7 @@ export const Home = ({ closeHome, inWorkspace = false }: HomeProps) => {
   const insets = useSafeAreaInsets()
 
   return (
-    <Box className="overflow-hidden border-continuous bg-light-grey flex-[1]">
+    <Box className="overflow-hidden border-continuous bg-canvas flex-[1]">
       <HomeScrollView showsVerticalScrollIndicator={false}>
         <HomeLayout>
           <HomeHeader />
@@ -79,26 +80,17 @@ export const Home = ({ closeHome, inWorkspace = false }: HomeProps) => {
               start={[0.5, 0]}
               end={[0.5, 0.9]}
               style={{ height: 100 }}
-              colors={[
-                `${Color(theme.colors.lightGrey).alpha(0).string()}`,
-                `${theme.colors.lightGrey}`,
-              ]}
+              colors={[`${Color(theme.colors.canvas).alpha(0).string()}`, `${theme.colors.canvas}`]}
             />
           </Box>
           <TouchableBox
-            className="overflow-hidden border-continuous items-center justify-center w-[50px] h-[50px] rounded-[30px] bg-reverse"
+            className="overflow-hidden border-continuous items-center justify-center w-[50px] h-[50px] rounded-full bg-surface-raised"
             accessibilityLabel={t('Fermer')}
             accessibilityRole="button"
             activeOpacity={0.8}
             onPress={closeHome}
-            style={{
-              shadowColor: 'rgb(89,131,240)',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 7,
-              elevation: 1,
-              overflow: 'visible',
-            }}
+            // The close button floats above the page, so it is the one home element with a shadow.
+            style={{ ...floatingShadow, overflow: 'visible' }}
           >
             <FeatherIcon name="x" size={24} color="grey" />
           </TouchableBox>

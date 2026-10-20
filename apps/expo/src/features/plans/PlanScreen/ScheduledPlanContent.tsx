@@ -7,8 +7,10 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import type { ComputedPlan, ComputedReadingSlice, EntitySlice } from '~common/types'
 import Link from '~common/Link'
+import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
+import Card from '~common/ui/Card'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { pageContentStyle } from '~common/ui/PageContent'
@@ -172,7 +174,7 @@ const ScheduledPlanContent = ({ plan, initialReadingSliceId }: Props) => {
         <Box className={desktop ? 'flex-row items-center gap-[24px]' : 'items-center gap-[16px]'}>
           {cover && (
             <Box
-              className="bg-light-grey rounded-[18px] overflow-hidden"
+              className="bg-surface rounded-[12px] overflow-hidden"
               style={{ width: desktop ? 180 : 144, height: desktop ? 104 : 88 }}
             >
               <Image
@@ -187,9 +189,9 @@ const ScheduledPlanContent = ({ plan, initialReadingSliceId }: Props) => {
             <Text className="text-grey text-[14px]">{plan.author?.displayName}</Text>
             {started && (
               <Box className="flex-row items-center gap-[8px] mt-[8px]">
-                <Box className="w-[50px] h-[6px] rounded-full bg-light-grey overflow-hidden">
+                <Box className="w-[50px] h-[6px] rounded-full bg-border overflow-hidden">
                   <Box
-                    className="h-full bg-primary"
+                    className="h-full bg-primary rounded-full"
                     style={{
                       width: `${readings.length ? (completed / readings.length) * 100 : 0}%`,
                     }}
@@ -205,7 +207,7 @@ const ScheduledPlanContent = ({ plan, initialReadingSliceId }: Props) => {
         {!started && !!plan.description && (
           <Text className="text-default text-[15px] leading-[24px]">{plan.description}</Text>
         )}
-        <Box className="bg-light-grey rounded-[24px] p-[16px] gap-[20px]">
+        <Card className="rounded-[24px] p-[16px] gap-[20px]">
           <Box className="flex-row items-center justify-between gap-[12px]">
             <Text className="text-default font-bold text-[18px]">
               {t('readingPlans.dayOfTotal', { day: selectedDay, total: readings.length })}
@@ -262,7 +264,7 @@ const ScheduledPlanContent = ({ plan, initialReadingSliceId }: Props) => {
                   >
                     <Box className="items-center gap-[6px] w-[60px]">
                       <Box
-                        className={`w-[40px] h-[40px] rounded-full items-center justify-center ${selected ? 'bg-primary' : done ? 'bg-success' : 'bg-reverse'}`}
+                        className={`w-[40px] h-[40px] rounded-full items-center justify-center ${selected ? 'bg-primary' : done ? 'bg-success' : 'bg-canvas'}`}
                       >
                         {done ? (
                           <FeatherIcon name="check" size={20} color="white" />
@@ -307,72 +309,71 @@ const ScheduledPlanContent = ({ plan, initialReadingSliceId }: Props) => {
             </Link>
           )}
           {reading && (
-            <Box className="bg-reverse rounded-[18px] px-[16px]">
+            <Box>
+              <Border />
               {reading.slices.map((slice, index) => {
                 const title = getEntitySliceTitle(slice, t)
-                const border = index ? 'border-t border-border' : ''
                 if (slice.type === 'Title')
                   return (
-                    <Text
-                      key={`${slice.id}:${index}`}
-                      className={`text-grey font-bold text-[13px] pt-[18px] pb-[10px] ${border}`}
-                    >
-                      {title}
-                    </Text>
+                    <Box key={`${slice.id}:${index}`}>
+                      {!!index && <Border />}
+                      <Text className="text-grey text-[13px] pt-[18px] pb-[8px]">{title}</Text>
+                    </Box>
                   )
                 if (!isReadableEntitySlice(slice)) return null
                 const entitySliceId = getEntitySliceKey(reading.id, slice, index)
                 const location = { planId: plan.id, readingSliceId: reading.id, entitySliceId }
                 const read = readEntityKeys.includes(entitySliceId)
                 return (
-                  <Box
-                    key={entitySliceId}
-                    className={`min-h-[68px] flex-row items-center gap-[14px] ${border}`}
-                  >
-                    {started && (
+                  <Box key={entitySliceId}>
+                    {/* The hairline starts where the element's name starts. */}
+                    {!!index && <Border style={{ marginLeft: started ? 84 : 34 }} />}
+                    <Box className="min-h-[68px] flex-row items-center gap-[14px]">
+                      {started && (
+                        <Link
+                          size={36}
+                          hitSlop={8}
+                          accessibilityRole="checkbox"
+                          accessibilityState={{ checked: read }}
+                          accessibilityLabel={title}
+                          onPress={() => {
+                            // Stay on this day: ticking its last element must not move to the next one.
+                            setChosenDay(selectedDay)
+                            dispatch(
+                              read
+                                ? markEntitySliceAsUnread(location)
+                                : markEntitySliceAsRead(location)
+                            )
+                          }}
+                        >
+                          <FeatherIcon
+                            name={read ? 'check-circle' : 'circle'}
+                            size={24}
+                            color={read ? 'success' : 'grey'}
+                          />
+                        </Link>
+                      )}
                       <Link
-                        size={36}
-                        hitSlop={8}
-                        accessibilityRole="checkbox"
-                        accessibilityState={{ checked: read }}
+                        accessibilityRole="link"
                         accessibilityLabel={title}
-                        onPress={() => {
-                          // Stay on this day: ticking its last element must not move to the next one.
-                          setChosenDay(selectedDay)
-                          dispatch(
-                            read
-                              ? markEntitySliceAsUnread(location)
-                              : markEntitySliceAsRead(location)
-                          )
-                        }}
+                        className="flex-1 flex-row items-center gap-[14px] py-[14px]"
+                        onPress={() => openEntity(reading, slice, index)}
                       >
                         <FeatherIcon
-                          name={read ? 'check-circle' : 'circle'}
-                          size={24}
-                          color={read ? 'success' : 'grey'}
+                          name={ENTITY_ICONS[slice.type as keyof typeof ENTITY_ICONS]}
+                          size={20}
+                          color="grey"
                         />
+                        <Text className="flex-1 text-default text-[17px]">{title}</Text>
+                        <FeatherIcon name="chevron-right" size={20} color="grey" />
                       </Link>
-                    )}
-                    <Link
-                      accessibilityRole="link"
-                      accessibilityLabel={title}
-                      className="flex-1 flex-row items-center gap-[14px] py-[14px]"
-                      onPress={() => openEntity(reading, slice, index)}
-                    >
-                      <FeatherIcon
-                        name={ENTITY_ICONS[slice.type as keyof typeof ENTITY_ICONS]}
-                        size={20}
-                        color="grey"
-                      />
-                      <Text className="flex-1 text-default text-[17px]">{title}</Text>
-                      <FeatherIcon name="chevron-right" size={20} color="grey" />
-                    </Link>
+                    </Box>
                   </Box>
                 )
               })}
             </Box>
           )}
-        </Box>
+        </Card>
         <Box className={desktop ? 'self-end min-w-[200px]' : 'w-full'}>
           <Button
             disabled={!reading}

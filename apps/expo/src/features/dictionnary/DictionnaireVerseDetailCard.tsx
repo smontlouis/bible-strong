@@ -84,7 +84,7 @@ const DictionnaireVerseDetailScreen = ({
     t(count === 1 ? '{{count}} article' : '{{count}} articles', { count })
 
   return (
-    <Box className="overflow-hidden border-continuous flex-[1] bg-light-grey">
+    <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
       <ResourceVerseContext
         verse={verseKey}
         {...verseContext}
@@ -122,16 +122,8 @@ const DictionnaireVerseDetailScreen = ({
             ].map(section =>
               section.concepts.length > 0 ? (
                 <Box
-                  className="overflow-hidden border-continuous px-[14px] py-[13px] rounded-[20px] bg-reverse"
+                  className="overflow-hidden border-continuous px-[14px] py-[13px] rounded-[16px] bg-surface"
                   key={section.key}
-                  style={{
-                    shadowColor: 'rgb(89,131,240)',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 7,
-                    elevation: 1,
-                    overflow: 'visible',
-                  }}
                 >
                   <Text
                     className="text-[14px] text-grey"
@@ -145,7 +137,7 @@ const DictionnaireVerseDetailScreen = ({
                       if (!source) return null
                       return (
                         <TouchableBox
-                          className="overflow-hidden border-continuous rounded-[5px] px-[12px] py-[5px]"
+                          className="overflow-hidden border-continuous rounded-full px-[12px] py-[5px]"
                           key={concept.key}
                           accessibilityRole="button"
                           accessibilityLabel={`${concept.label}, ${articleCountLabel(

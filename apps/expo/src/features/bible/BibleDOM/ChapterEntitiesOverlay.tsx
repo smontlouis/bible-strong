@@ -26,6 +26,7 @@ type Props = {
     default: string
     primary: string
     reverse: string
+    surfaceRaised: string
   }
   fontFamily: string
   visibleStackItemCount: number
@@ -90,7 +91,7 @@ const ChapterEntitiesOverlay = ({
         <OverlayCloseButton
           label={translations.passageMediaClose}
           color={colors.default}
-          backgroundColor={colors.reverse}
+          backgroundColor={colors.surfaceRaised}
           onClose={onClose}
         />
       )}
@@ -178,8 +179,7 @@ const ChapterEntitiesOverlay = ({
                       height: 68,
                       margin: '0 auto 8px',
                       border: `2px solid ${colors.reverse}`,
-                      borderRadius: 36,
-                      boxShadow: '0 5px 16px rgba(0, 0, 0, 0.2)',
+                      borderRadius: '50%',
                       objectFit: 'contain',
                     }}
                   />

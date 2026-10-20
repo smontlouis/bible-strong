@@ -1,9 +1,10 @@
 import { Platform, type DimensionValue } from 'react-native'
 import { BIBLE_READING_HORIZONTAL_PADDING, READING_TEXT_MAX_WIDTH } from '~common/readingLayout'
+import { floatingShadow, radii } from '~common/ui/surfaces'
 
 const isWeb = Platform.OS === 'web'
 
-/** Floating previous/next chapter buttons: bigger and lifted by a shadow on web. */
+/** Floating previous/next chapter buttons, bigger on web. */
 export const CHAPTER_NAV_BUTTON_SIZE = isWeb ? 48 : 40
 export const CHAPTER_NAV_ICON_SIZE = isWeb ? 24 : 20
 /** Minimum distance between a button and the edge of the Bible pane. */
@@ -23,9 +24,10 @@ export const chapterNavSideOffset = (isParallel: boolean): DimensionValue => {
   return `max(${CHAPTER_NAV_SIDE_OFFSET}px, calc(50% - ${outsideColumn}px))` as DimensionValue
 }
 
+/** A circle floating over the text: the one shadow of what floats, and no outline. */
 export const chapterNavButtonStyle = {
   width: CHAPTER_NAV_BUTTON_SIZE,
   height: CHAPTER_NAV_BUTTON_SIZE,
-  borderRadius: CHAPTER_NAV_BUTTON_SIZE / 2,
-  boxShadow: 'rgba(0, 0, 0, 0.15) 0px 8px 16px'
+  borderRadius: radii.pill,
+  ...floatingShadow,
 } as const

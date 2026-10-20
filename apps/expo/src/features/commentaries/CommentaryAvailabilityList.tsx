@@ -67,16 +67,8 @@ const CommentaryAvailabilityList = ({ items, headerTitle, onManage, onOpen }: Pr
             style={[{ opacity: hasError ? 0.6 : 1 }, [{ opacity: hasError ? 0.6 : 1 }]]}
           >
             <AnimatedBox
-              className="overflow-hidden border-continuous mx-[20px] mb-[12px] px-[14px] py-[13px] min-h-[94px] rounded-[20px] bg-reverse flex-row items-center"
+              className="overflow-hidden border-continuous mx-[20px] mb-[12px] px-[14px] py-[13px] min-h-[94px] rounded-[16px] bg-surface flex-row items-center"
               layout={reduceMotion ? undefined : LinearTransition.duration(200)}
-              style={{
-                shadowColor: 'rgb(89,131,240)',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 7,
-                elevation: 1,
-                overflow: 'visible',
-              }}
             >
               <Box className="overflow-hidden border-continuous relative">
                 <Box
@@ -91,7 +83,7 @@ const CommentaryAvailabilityList = ({ items, headerTitle, onManage, onOpen }: Pr
                   />
                 </Box>
                 <Box
-                  className="border-continuous overflow-hidden absolute right-[-1px] bottom-[-1px] rounded-[7px] border-[2px] border-reverse"
+                  className="border-continuous overflow-hidden absolute right-[-1px] bottom-[-1px] rounded-full border-[2px] border-surface"
                   style={{
                     backgroundColor: resolveThemeColor(stylingTheme, STATUS_COLORS[item.state]),
                     width: 13,

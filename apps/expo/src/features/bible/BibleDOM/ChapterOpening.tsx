@@ -36,15 +36,13 @@ const OriginalTitle = styled('p')<RootStyles>(
   })
 )
 
-const ChapterNumber = styled('span')<RootStyles>(
-  ({ settings: { fontFamily, fontSizeScale } }) => ({
-    display: 'block',
-    marginTop: '4px',
-    fontFamily,
-    fontSize: scaleFontSize(56, fontSizeScale),
-    lineHeight: 1.05,
-  })
-)
+const ChapterNumber = styled('span')<RootStyles>(({ settings: { fontFamily, fontSizeScale } }) => ({
+  display: 'block',
+  marginTop: '4px',
+  fontFamily,
+  fontSize: scaleFontSize(56, fontSizeScale),
+  lineHeight: 1.05,
+}))
 
 const Label = styled('span')<RootStyles>(({ settings: { fontSizeScale, colors, theme } }) => ({
   display: 'block',
@@ -61,7 +59,7 @@ const Rule = styled('div')<RootStyles & { $spaceAfter?: boolean }>(
   ({ settings: { colors, theme }, $spaceAfter }) => ({
     width: '28px',
     height: '2px',
-    borderRadius: '2px',
+    borderRadius: '999px',
     background: colors[theme].primary,
     margin: `16px auto ${$spaceAfter ? '12px' : '0'}`,
   })
