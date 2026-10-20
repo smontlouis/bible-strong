@@ -101,7 +101,7 @@ const DailyMeditationCard = ({
             style={{
               fontFamily,
               fontWeight: 'normal',
-              ...(desktop ? { fontSize: 23, lineHeight: 34, maxWidth: 600 } : {}),
+              ...(desktop ? { fontSize: 20, lineHeight: 30, maxWidth: 600 } : {}),
             }}
           >
             {opening.quote.replace(/\n+/g, ' ')}
