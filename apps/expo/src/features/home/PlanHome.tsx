@@ -8,7 +8,11 @@ import type { Plan } from '~common/types'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
-import { useComputedPlanItems, useUpdatePlans } from '~features/plans/plan.hooks'
+import {
+  useComputedPlanItems,
+  useDownloadFollowedPlans,
+  useUpdatePlans,
+} from '~features/plans/plan.hooks'
 import { getEditorialKind } from '~features/plans/readingCalendar'
 import { hasPlanParticipation } from '~features/plans/planProgress'
 import FollowedPlanCard from '~features/plans/FollowedPlanCard'
@@ -79,6 +83,8 @@ const PlanHome = ({ compact = false, title }: { compact?: boolean; title?: strin
   })
   useUpdatePlans()
   useGetFirstPlans()
+  // Progress syncs but plan content is per device: fetch what followed plans lack here.
+  useDownloadFollowedPlans()
 
   if (!followed.length) {
     return (

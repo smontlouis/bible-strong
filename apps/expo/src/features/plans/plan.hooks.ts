@@ -22,7 +22,12 @@ import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 import { VersionCode } from '~state/tabs'
 import type { AppDispatch } from '~redux/store'
 import { normalizeMeditationCollection } from './readingCalendar'
-import { areOngoingPlansEqual, buildComputedPlan, buildComputedPlanItem } from './planProgress'
+import {
+  areOngoingPlansEqual,
+  buildComputedPlan,
+  buildComputedPlanItem,
+  hasPlanParticipation,
+} from './planProgress'
 
 interface VerseContent {
   Pericope: {
@@ -154,6 +159,43 @@ export const useDownloadPlans = () => {
   }, [])
 
   return { isLoading }
+}
+
+/** Followed plans whose download is running, or failed during this session. */
+const requestedFollowedPlans = new Set<string>()
+
+/**
+ * Download the content of followed plans this device does not have. Progress syncs between
+ * devices but plan content is stored per device, and the home needs both to list « Mes plans ».
+ * Unlike useDownloadPlans, it reacts to the sync arriving after mount, stays silent, and tries a
+ * failing plan once per session.
+ */
+export const useDownloadFollowedPlans = () => {
+  const dispatch = useDispatch<AppDispatch>()
+  // A joined string keeps the selection stable between renders.
+  const missingIds = useSelector((state: RootState) =>
+    state.plan.ongoingPlans
+      .filter(
+        participation =>
+          hasPlanParticipation(participation) &&
+          !state.plan.myPlans.some(plan => plan.id === participation.id)
+      )
+      .map(participation => participation.id)
+      .join(',')
+  )
+
+  React.useEffect(() => {
+    if (!missingIds) return
+    for (const id of missingIds.split(',')) {
+      if (requestedFollowedPlans.has(id)) continue
+      requestedFollowedPlans.add(id)
+      dispatch(fetchPlan({ id }))
+        .unwrap()
+        // A downloaded plan may be needed again after a logout clears the local plans.
+        .then(() => requestedFollowedPlans.delete(id))
+        .catch(error => console.warn('[Plans] Could not download a followed plan', id, error))
+    }
+  }, [missingIds, dispatch])
 }
 
 /**
