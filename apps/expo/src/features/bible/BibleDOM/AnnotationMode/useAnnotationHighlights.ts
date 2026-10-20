@@ -1,6 +1,6 @@
 'use dom'
 
-import { RefObject, useEffect, useState } from 'react'
+import { RefObject, useEffect, useLayoutEffect, useState } from 'react'
 import { Verse as TVerse } from '~common/types'
 import { getTokenByWordIndex, tokenizeVerseText, WordToken } from '~helpers/wordTokenizer'
 import { RootStyles, WebViewProps } from '../BibleDOMWrapper'
@@ -222,6 +222,19 @@ function getRectsForSelection(
   return rects
 }
 
+const isSameRects = (
+  a: Pick<HighlightRect, 'top' | 'left' | 'width' | 'height'>[],
+  b: Pick<HighlightRect, 'top' | 'left' | 'width' | 'height'>[]
+) =>
+  a.length === b.length &&
+  a.every(
+    (rect, index) =>
+      rect.top === b[index].top &&
+      rect.left === b[index].left &&
+      rect.width === b[index].width &&
+      rect.height === b[index].height
+  )
+
 export type HandlePositions = {
   start: { x: number; y: number } | null
   end: { x: number; y: number } | null
@@ -282,6 +295,8 @@ export function useAnnotationHighlights({
   verseSelectionHandles: VerseSelectionHandles[]
 } {
   const [highlightRects, setHighlightRects] = useState<HighlightRect[]>([])
+  // The selected words, measured apart from the annotations (see below)
+  const [selectionRects, setSelectionRects] = useState<HighlightRect[]>([])
   const [verseSelectionHandles, setVerseSelectionHandles] = useState<VerseSelectionHandles[]>([])
   // The blocks only change with the selected verses: a key keeps the layout pass from rerunning
   const verseSelectionBlocksKey = JSON.stringify(verseSelectionBlocks)
@@ -396,23 +411,6 @@ export function useAnnotationHighlights({
       return rects
     }
 
-    const calculateAllRects = (): HighlightRect[] => {
-      const annotationRects = calculateAnnotationRects()
-
-      // Add selection rects if we have a selection and getTokens function
-      if (selection && getTokens) {
-        const selectionRects = getRectsForSelection(
-          containerRef,
-          selection,
-          versesByVersion[selection.version] ?? [],
-          getTokens
-        )
-        return [...annotationRects, ...selectionRects]
-      }
-
-      return annotationRects
-    }
-
     const calculateVerseSelectionHandles = (isRTLLayout: boolean): VerseSelectionHandles[] =>
       getTokens
         ? verseSelectionBlocks.map(range => ({
@@ -430,7 +428,7 @@ export function useAnnotationHighlights({
         : []
 
     const updateLayoutState = () => {
-      const rects = calculateAllRects()
+      const rects = calculateAnnotationRects()
       const container = containerRef.current
       const isRTLLayout = container ? getComputedStyle(container).direction === 'rtl' : false
       setIsRTL(isRTLLayout)
@@ -469,7 +467,6 @@ export function useAnnotationHighlights({
     book,
     chapter,
     annotationKey,
-    selection,
     versesByVersion,
     settings,
     layoutKey,
@@ -478,16 +475,43 @@ export function useAnnotationHighlights({
     verseSelectionBlocksKey,
   ])
 
+  // The selected words are measured before the screen is painted: when a handle is dragged off
+  // selected verses, their background goes in the same frame as the words' comes, and the words
+  // let go of leave with the mode. Measuring a selection only reads its own lines.
+  useLayoutEffect(() => {
+    const measure = () => {
+      const next =
+        selection && getTokens && containerRef.current
+          ? getRectsForSelection(
+              containerRef,
+              selection,
+              versesByVersion[selection.version] ?? [],
+              getTokens
+            )
+          : []
+      // The same rects keep the same state: setting them anew would render again without end
+      setSelectionRects(previous => (isSameRects(previous, next) ? previous : next))
+    }
+    measure()
+    if (!selection) return
+
+    // The text moves under the selection: measure it again with the annotations
+    const measureNextFrame = () => requestAnimationFrame(measure)
+    window.addEventListener('resize', measureNextFrame)
+    const unsubscribeFromLayoutChanges = subscribeToBibleLayoutChanges(measureNextFrame)
+    return () => {
+      window.removeEventListener('resize', measureNextFrame)
+      unsubscribeFromLayoutChanges()
+    }
+  }, [selection, versesByVersion, settings, layoutKey, versionsKey, book, chapter])
+
   // Calculate selection handle positions synchronously from highlight rects
-  const selectionHandlePositions = getHandlePositions(
-    highlightRects.filter(r => r.type === 'selection'),
-    isRTL
-  )
+  const selectionHandlePositions = getHandlePositions(selectionRects, isRTL)
 
   // Return empty array while pending to prevent flash of old positions
   // BUT allow selection to show during isPending (for drag-to-select feedback)
   return {
-    highlightRects: isPending && !selection ? [] : highlightRects,
+    highlightRects: [...(isPending ? [] : highlightRects), ...selectionRects],
     selectionHandlePositions,
     verseSelectionHandles: isPending ? [] : verseSelectionHandles,
   }
