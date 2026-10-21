@@ -36,10 +36,33 @@ index aa87e345f0b65163cc2a5ab2e6af9736e360113a..9e8b33ecbb044ebcd3cca26f4db2082d
   * Get the base URL for the DOM Components HTML
   */ export function getBaseURL() {
 diff --git a/build/dom/dom-entry.js b/build/dom/dom-entry.js
-index f47c31a5efa074b849cbdf6eb2354ede1e4f603d..b5cbaaf53953ecc8fc5ca2404c193906dafcee4d 100644
+index f47c31a5efa074b849cbdf6eb2354ede1e4f603d..8251b2f841fab8a66c0d01b00739bf195aea5b45 100644
 --- a/build/dom/dom-entry.js
 +++ b/build/dom/dom-entry.js
-@@ -46,11 +46,15 @@ export function registerDOMComponent(AppModule) {
+@@ -35,6 +35,22 @@ function isErrorShaped(error) {
+     }
+     return new Error(String(error));
+ }
++// A partial message carries the changed props, the removed keys, and the action names only
++// when they changed. Without props yet, the full message sent on load will bring them.
++function mergePartialProps(previous, msg) {
++    if (!previous) return previous;
++    const props = {
++        ...previous.props,
++        ...msg.data.props
++    };
++    for (const key of msg.removed || []){
++        delete props[key];
++    }
++    return {
++        names: msg.data.names || previous.names,
++        props
++    };
++}
+ export function registerDOMComponent(AppModule) {
+     if (typeof window.$$EXPO_DOM_HOST_OS === 'undefined') {
+         throw new Error('Top OS ($$EXPO_DOM_HOST_OS) is not defined. This is a bug in the DOM Component runtime.');
+@@ -46,11 +62,20 @@ export function registerDOMComponent(AppModule) {
              if (typeof window.$$EXPO_INITIAL_PROPS === 'undefined') {
                  throw new Error('Initial props are not defined. This is a bug in the DOM Component runtime.');
              }
@@ -51,11 +74,16 @@ index f47c31a5efa074b849cbdf6eb2354ede1e4f603d..b5cbaaf53953ecc8fc5ca2404c193906
          React.useEffect(()=>{
              const remove = addEventListener((msg)=>{
                  if (msg.type === '$$props') {
++                    if (msg.partial) {
++                        // Only the props that changed: the others keep their identity.
++                        setProps((previous)=>mergePartialProps(previous, msg));
++                        return;
++                    }
 +                    window.$$EXPO_INITIAL_PROPS_PENDING = false;
                      setProps(msg.data);
                  }
              });
-@@ -63,7 +67,7 @@ export function registerDOMComponent(AppModule) {
+@@ -63,7 +88,7 @@ export function registerDOMComponent(AppModule) {
              setProps
          ]);
          const proxyActions = React.useMemo(()=>{
@@ -64,7 +92,7 @@ index f47c31a5efa074b849cbdf6eb2354ede1e4f603d..b5cbaaf53953ecc8fc5ca2404c193906
              // Create a named map { [name: string]: ProxyFunction }
              // TODO(@kitten): Unclear how this is typed or shaped
              return marshalledProps.names.reduce((acc, key)=>{
-@@ -71,8 +75,11 @@ export function registerDOMComponent(AppModule) {
+@@ -71,8 +96,11 @@ export function registerDOMComponent(AppModule) {
                  return acc;
              }, {});
          }, [
@@ -78,10 +106,10 @@ index f47c31a5efa074b849cbdf6eb2354ede1e4f603d..b5cbaaf53953ecc8fc5ca2404c193906
              ...props,
              ...marshalledProps.props || {},
 diff --git a/build/dom/webview-wrapper.js b/build/dom/webview-wrapper.js
-index 02f713b7592c68e3cb6db2013b2aee0600a602a8..76e473f380bc2fda9cde59cca35a2b6b91ad313b 100644
+index 02f713b7592c68e3cb6db2013b2aee0600a602a8..9ab6b1d3a26cc95cfd74183a66cc891d1fc1c88c 100644
 --- a/build/dom/webview-wrapper.js
 +++ b/build/dom/webview-wrapper.js
-@@ -5,7 +5,7 @@
+@@ -5,15 +5,28 @@
  // iOS https://github.com/expo/expo/blob/main/packages/%40expo/log-box/ios/ExpoLogBoxWebViewWrapper.swift
  import React from 'react';
  import { AppState } from 'react-native';
@@ -90,8 +118,21 @@ index 02f713b7592c68e3cb6db2013b2aee0600a602a8..76e473f380bc2fda9cde59cca35a2b6b
  import { _emitGlobalEvent } from './global-events';
  import { DOM_READY, getInjectBodySizeObserverScript, getInjectEventScript, MATCH_CONTENTS_EVENT, NATIVE_ACTION, NATIVE_ACTION_RESULT, REGISTER_DOM_IMPERATIVE_HANDLE_PROPS } from './injection';
  import ExpoDomWebView from './webview/ExpoDOMWebView';
-@@ -13,7 +13,7 @@ import RNWebView from './webview/RNWebView';
+ import RNWebView from './webview/RNWebView';
  import { useDebugZeroHeight } from './webview/useDebugZeroHeight';
++// One JSON string per prop; a prop whose value serializes to nothing is absent, as in the
++// JSON sent to the DOM side.
++function serializeMarshalledProps(marshalled) {
++    const props = {};
++    for (const [key, value] of Object.entries(marshalled.props)){
++        const json = JSON.stringify(value);
++        if (json !== undefined) props[key] = json;
++    }
++    return {
++        names: JSON.stringify(marshalled.names),
++        props
++    };
++}
  const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
      const { children, dom: domProps, filePath, ref: _ref, ...marshalProps } = props;
 -    const { overrideUri, unstable_useExpoModulesBridge, ...dom } = domProps || {};
@@ -99,7 +140,7 @@ index 02f713b7592c68e3cb6db2013b2aee0600a602a8..76e473f380bc2fda9cde59cca35a2b6b
      const useExpoModulesBridge = unstable_useExpoModulesBridge ?? false;
      if (__DEV__) {
          if (children !== undefined) {
-@@ -44,7 +44,7 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
+@@ -44,7 +57,7 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
      const webviewRef = React.useRef(null);
      const domImperativeHandlePropsRef = React.useRef([]);
      const source = {
@@ -108,10 +149,12 @@ index 02f713b7592c68e3cb6db2013b2aee0600a602a8..76e473f380bc2fda9cde59cca35a2b6b
      };
      const [containerStyle, setContainerStyle] = React.useState(null);
      const { debugZeroHeightStyle, debugOnLayout } = useDebugZeroHeight(dom);
-@@ -69,6 +69,16 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
+@@ -69,16 +82,58 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
      // Keep `initialProps` stable to prevent webview reloads when
      // `injectedJavaScriptObject` changes.
      const initialPropsRef = React.useRef(smartActions);
+-    // When the `marshalProps` change, emit them to the webview.
+-    React.useEffect(()=>{
 +    const initialDomGlobalsScript = React.useMemo(()=>{
 +        const hostOS = JSON.stringify(process.env.EXPO_OS);
 +        const initialProps = JSON.stringify(initialPropsRef.current);
@@ -122,10 +165,57 @@ index 02f713b7592c68e3cb6db2013b2aee0600a602a8..76e473f380bc2fda9cde59cca35a2b6b
 +    })();
 +    true;`;
 +    }, []);
-     // When the `marshalProps` change, emit them to the webview.
-     React.useEffect(()=>{
++    // What the DOM side last received, one JSON string per prop. A render that changes nothing
++    // sends nothing, and one that changes a prop sends only that prop: the DOM side merges it
++    // into the props it has, so the unchanged ones keep their identity there.
++    const sentPropsRef = React.useRef(null);
++    const emitProps = (full)=>{
++        const serialized = serializeMarshalledProps(smartActions);
++        const previous = sentPropsRef.current;
++        sentPropsRef.current = serialized;
++        if (full || previous == null) {
++            emit({
++                type: '$$props',
++                data: smartActions
++            });
++            return;
++        }
++        const props = {};
++        let changed = false;
++        for (const key of Object.keys(serialized.props)){
++            if (serialized.props[key] !== previous.props[key]) {
++                props[key] = smartActions.props[key];
++                changed = true;
++            }
++        }
++        const removed = Object.keys(previous.props).filter((key)=>!(key in serialized.props));
++        const namesChanged = serialized.names !== previous.names;
++        if (!changed && removed.length === 0 && !namesChanged) return;
          emit({
-@@ -98,7 +108,8 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
+             type: '$$props',
+-            data: smartActions
++            partial: true,
++            removed,
++            data: namesChanged ? {
++                names: smartActions.names,
++                props
++            } : {
++                props
++            }
+         });
+-    }, [
+-        emit,
+-        smartActions
+-    ]);
++    };
++    // When the `marshalProps` change, emit them to the webview.
++    React.useEffect(()=>{
++        emitProps(false);
++    });
+     return /*#__PURE__*/ React.createElement(webView, {
+         webviewDebuggingEnabled: __DEV__,
+         // Make iOS scrolling feel native.
+@@ -98,7 +153,8 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
          onContentProcessDidTerminate: ()=>{
              webviewRef.current?.reload();
          },
@@ -135,16 +225,13 @@ index 02f713b7592c68e3cb6db2013b2aee0600a602a8..76e473f380bc2fda9cde59cca35a2b6b
              // Simulate iOS `onContentProcessDidTerminate` behavior to reload when the app is in foreground or back to foreground.
              if (AppState.currentState === 'active') {
                  webviewRef.current?.reload();
-@@ -119,12 +130,24 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
+@@ -119,12 +175,21 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
              dom?.containerStyle
          ],
          onLayout: __DEV__ ? debugOnLayout : dom?.onLayout,
 +        onLoad: (event)=>{
 +            dom?.onLoad?.(event);
-+            emit({
-+                type: '$$props',
-+                data: smartActions
-+            });
++            emitProps(true);
 +        },
          injectedJavaScriptObject: {
              // Inject the top-most OS for the DOM component to read.
@@ -160,6 +247,18 @@ index 02f713b7592c68e3cb6db2013b2aee0600a602a8..76e473f380bc2fda9cde59cca35a2b6b
          injectedJavaScript: [
              dom?.matchContents ? getInjectBodySizeObserverScript() : null,
              dom?.injectedJavaScript,
+@@ -155,10 +220,7 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
+             }
+             if (type === DOM_READY) {
+                 // Re-send the props the DOM side missed while the WebView was loading.
+-                emit({
+-                    type: '$$props',
+-                    data: smartActions
+-                });
++                emitProps(true);
+                 return;
+             }
+             if (type === REGISTER_DOM_IMPERATIVE_HANDLE_PROPS) {
 diff --git a/src/dom/base.ts b/src/dom/base.ts
 index e53e872f0c6023392d454d4836c5db9d81978268..bc2d3157be1f0a4fc03c8fdbdd5bd38718209c7d 100644
 --- a/src/dom/base.ts
@@ -193,10 +292,31 @@ index e53e872f0c6023392d454d4836c5db9d81978268..bc2d3157be1f0a4fc03c8fdbdd5bd387
  /**
   * Get the base URL for the DOM Components HTML
 diff --git a/src/dom/dom-entry.tsx b/src/dom/dom-entry.tsx
-index b77612db2392507ba5a9f021b88052b55de21851..23f2140becacbf558afc2dba887f418007bbef0a 100644
+index b77612db2392507ba5a9f021b88052b55de21851..dbcda86d0391930c8fba7424559f5e424d8794f0 100644
 --- a/src/dom/dom-entry.tsx
 +++ b/src/dom/dom-entry.tsx
-@@ -66,18 +66,22 @@ export function registerDOMComponent(AppModule: any) {
+@@ -56,6 +56,20 @@ function convertError(error: any) {
+   return new Error(String(error));
+ }
+ 
++// A partial message carries the changed props, the removed keys, and the action names only
++// when they changed. Without props yet, the full message sent on load will bring them.
++function mergePartialProps(
++  previous: MarshalledProps | null,
++  msg: { removed?: string[]; data: { names?: string[]; props: Record<string, unknown> } }
++): MarshalledProps | null {
++  if (!previous) return previous;
++  const props = { ...previous.props, ...msg.data.props };
++  for (const key of msg.removed || []) {
++    delete props[key];
++  }
++  return { names: msg.data.names || previous.names, props } as MarshalledProps;
++}
++
+ export function registerDOMComponent(AppModule: any) {
+   if (typeof window.$$EXPO_DOM_HOST_OS === 'undefined') {
+     throw new Error(
+@@ -66,18 +80,27 @@ export function registerDOMComponent(AppModule: any) {
  
    function DOMComponentRoot(props: Record<string, unknown>) {
      // Props listeners
@@ -216,11 +336,16 @@ index b77612db2392507ba5a9f021b88052b55de21851..23f2140becacbf558afc2dba887f4180
      React.useEffect(() => {
        const remove = addEventListener!((msg) => {
          if (msg.type === '$$props') {
++          if ((msg as any).partial) {
++            // Only the props that changed: the others keep their identity.
++            setProps((previous) => mergePartialProps(previous, msg as any));
++            return;
++          }
 +          (window as any).$$EXPO_INITIAL_PROPS_PENDING = false;
            setProps(msg.data as MarshalledProps);
          }
        });
-@@ -89,14 +93,18 @@ export function registerDOMComponent(AppModule: any) {
+@@ -89,14 +112,18 @@ export function registerDOMComponent(AppModule: any) {
      }, [setProps]);
  
      const proxyActions = React.useMemo(() => {
@@ -242,7 +367,7 @@ index b77612db2392507ba5a9f021b88052b55de21851..23f2140becacbf558afc2dba887f4180
      return <AppModule {...props} {...(marshalledProps.props || {})} {...proxyActions} />;
    }
 diff --git a/src/dom/webview-wrapper.tsx b/src/dom/webview-wrapper.tsx
-index c9d79a41e43da2e7e5f668bf0e2ab665bdbf5182..bd90b4c4e3a5f8b93e36c39423802074b3b795be 100644
+index c9d79a41e43da2e7e5f668bf0e2ab665bdbf5182..e89ac65fdbc96235f303c6a3e29159dba92a793b 100644
 --- a/src/dom/webview-wrapper.tsx
 +++ b/src/dom/webview-wrapper.tsx
 @@ -6,7 +6,7 @@
@@ -254,8 +379,26 @@ index c9d79a41e43da2e7e5f668bf0e2ab665bdbf5182..bd90b4c4e3a5f8b93e36c39423802074
  import type { DOMPropsInternal } from './dom-internal.types';
  import type { BridgeMessage, WebViewProps, WebViewRef } from './dom.types';
  import { _emitGlobalEvent } from './global-events';
-@@ -35,7 +35,12 @@ interface Props {
+@@ -33,9 +33,30 @@ interface Props {
+   [propName: string]: unknown;
+ }
  
++type SerializedMarshalledProps = { names: string; props: Record<string, string> };
++
++// One JSON string per prop; a prop whose value serializes to nothing is absent, as in the
++// JSON sent to the DOM side.
++function serializeMarshalledProps(marshalled: {
++  names: string[];
++  props: Record<string, unknown>;
++}): SerializedMarshalledProps {
++  const props: Record<string, string> = {};
++  for (const [key, value] of Object.entries(marshalled.props)) {
++    const json = JSON.stringify(value);
++    if (json !== undefined) props[key] = json;
++  }
++  return { names: JSON.stringify(marshalled.names), props };
++}
++
  const RawWebView = React.forwardRef<object, Props>((props, ref) => {
    const { children, dom: domProps, filePath, ref: _ref, ...marshalProps } = props as Props;
 -  const { overrideUri, unstable_useExpoModulesBridge, ...dom } = domProps || {};
@@ -268,7 +411,7 @@ index c9d79a41e43da2e7e5f668bf0e2ab665bdbf5182..bd90b4c4e3a5f8b93e36c39423802074
    const useExpoModulesBridge = unstable_useExpoModulesBridge ?? false;
    if (__DEV__) {
      if (children !== undefined) {
-@@ -74,7 +79,7 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+@@ -74,7 +95,7 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
    const webView = resolveWebView(useExpoDOMWebView);
    const webviewRef = React.useRef<WebViewRef>(null);
    const domImperativeHandlePropsRef = React.useRef<string[]>([]);
@@ -277,7 +420,7 @@ index c9d79a41e43da2e7e5f668bf0e2ab665bdbf5182..bd90b4c4e3a5f8b93e36c39423802074
    const [containerStyle, setContainerStyle] = React.useState<WebViewProps['containerStyle']>(null);
  
    const { debugZeroHeightStyle, debugOnLayout } = useDebugZeroHeight(dom);
-@@ -107,6 +112,16 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+@@ -107,11 +128,52 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
    // Keep `initialProps` stable to prevent webview reloads when
    // `injectedJavaScriptObject` changes.
    const initialPropsRef = React.useRef(smartActions);
@@ -291,10 +434,48 @@ index c9d79a41e43da2e7e5f668bf0e2ab665bdbf5182..bd90b4c4e3a5f8b93e36c39423802074
 +    })();
 +    true;`;
 +  }, []);
++
++  // What the DOM side last received, one JSON string per prop. A render that changes nothing
++  // sends nothing, and one that changes a prop sends only that prop: the DOM side merges it
++  // into the props it has, so the unchanged ones keep their identity there.
++  const sentPropsRef = React.useRef<SerializedMarshalledProps | null>(null);
++  const emitProps = (full: boolean) => {
++    const serialized = serializeMarshalledProps(smartActions);
++    const previous = sentPropsRef.current;
++    sentPropsRef.current = serialized;
++    if (full || previous == null) {
++      emit({ type: '$$props', data: smartActions });
++      return;
++    }
++    const props: Record<string, unknown> = {};
++    let changed = false;
++    for (const key of Object.keys(serialized.props)) {
++      if (serialized.props[key] !== previous.props[key]) {
++        props[key] = smartActions.props[key];
++        changed = true;
++      }
++    }
++    const removed = Object.keys(previous.props).filter((key) => !(key in serialized.props));
++    const namesChanged = serialized.names !== previous.names;
++    if (!changed && removed.length === 0 && !namesChanged) return;
++    emit({
++      type: '$$props',
++      partial: true,
++      removed,
++      data: namesChanged ? { names: smartActions.names, props } : { props },
++    });
++  };
  
    // When the `marshalProps` change, emit them to the webview.
    React.useEffect(() => {
-@@ -130,7 +145,8 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+-    emit({ type: '$$props', data: smartActions });
+-  }, [emit, smartActions]);
++    emitProps(false);
++  });
+ 
+   return React.createElement(webView, {
+     webviewDebuggingEnabled: __DEV__,
+@@ -130,7 +192,8 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
      onContentProcessDidTerminate: () => {
        webviewRef.current?.reload();
      },
@@ -304,13 +485,13 @@ index c9d79a41e43da2e7e5f668bf0e2ab665bdbf5182..bd90b4c4e3a5f8b93e36c39423802074
        // Simulate iOS `onContentProcessDidTerminate` behavior to reload when the app is in foreground or back to foreground.
        if (AppState.currentState === 'active') {
          webviewRef.current?.reload();
-@@ -145,12 +161,23 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+@@ -145,12 +208,23 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
      ...(useExpoDOMWebView ? { useExpoModulesBridge } : null),
      containerStyle: [containerStyle, debugZeroHeightStyle, dom?.containerStyle],
      onLayout: (__DEV__ ? debugOnLayout : dom?.onLayout) as RawWebViewProps['onLayout'],
 +    onLoad: (event: any) => {
 +      dom?.onLoad?.(event);
-+      emit({ type: '$$props', data: smartActions });
++      emitProps(true);
 +    },
      injectedJavaScriptObject: {
        // Inject the top-most OS for the DOM component to read.
@@ -328,3 +509,12 @@ index c9d79a41e43da2e7e5f668bf0e2ab665bdbf5182..bd90b4c4e3a5f8b93e36c39423802074
      injectedJavaScript: [
        dom?.matchContents ? getInjectBodySizeObserverScript() : null,
        dom?.injectedJavaScript,
+@@ -180,7 +254,7 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+ 
+       if (type === DOM_READY) {
+         // Re-send the props the DOM side missed while the WebView was loading.
+-        emit({ type: '$$props', data: smartActions });
++        emitProps(true);
+         return;
+       }
+ 

@@ -20706,7 +20706,7 @@ __metadata:
 
 "expo@patch:expo@npm%3A58.0.14#~/.yarn/patches/expo-npm-58.0.14-6039ef82aa.patch":
   version: 58.0.14
-  resolution: "expo@patch:expo@npm%3A58.0.14#~/.yarn/patches/expo-npm-58.0.14-6039ef82aa.patch::version=58.0.14&hash=40c16e"
+  resolution: "expo@patch:expo@npm%3A58.0.14#~/.yarn/patches/expo-npm-58.0.14-6039ef82aa.patch::version=58.0.14&hash=8b87a5"
   dependencies:
     "@babel/runtime": "npm:^7.20.0"
     "@expo/cli": "npm:^58.1.11"
@@ -20755,7 +20755,7 @@ __metadata:
     expo: bin/cli
     expo-modules-autolinking: bin/autolinking
     fingerprint: bin/fingerprint
-  checksum: 10c0/62bd2086574c8ec67b89f49d67e7ccf07a45d111f0db3034e3d3be62167d335a7a27cc049de22f2c910b1436fc0d4c9ac994ad64d6ab38d491a411ec4e086fa8
+  checksum: 10c0/4dd09481cbda4c04e57aa4f83940b164e03c61ee62846977dda4aa3a3a8a154631879ce70e92408d5ab54167589aa6d4a80ced8465accae9822fc064139ce28d
   languageName: node
   linkType: hard
 
