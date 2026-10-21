@@ -198,6 +198,9 @@ export const useDownloadFollowedPlans = () => {
   }, [missingIds, dispatch])
 }
 
+// The home remounts its plans whenever its layout changes width; check for updates once a launch.
+let plansUpdateRequested = false
+
 /**
  * Update myplans
  */
@@ -205,6 +208,8 @@ export const useDownloadFollowedPlans = () => {
 export const useUpdatePlans = () => {
   const dispatch = useDispatch<AppDispatch>()
   React.useEffect(() => {
+    if (plansUpdateRequested) return
+    plansUpdateRequested = true
     dispatch(updatePlans())
   }, [dispatch])
 }

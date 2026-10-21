@@ -47,6 +47,9 @@ const NaveOfTheDay = ({
     queryKey: ['home-nave-random', resourceLanguage, randomSeed, isConnected],
     queryFn: async () => (await resources.nave.loadRandom(resourceLanguage)) ?? null,
     ...localQueryOptions,
+    // A remount (the home switching layout as its width changes) keeps the draw; the shuffle
+    // button draws again by changing randomSeed.
+    staleTime: Infinity,
   })
   const naveReference = naveQuery.data
 

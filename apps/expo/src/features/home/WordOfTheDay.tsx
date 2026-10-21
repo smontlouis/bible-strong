@@ -65,6 +65,9 @@ const DictionnaireOfTheDay = ({
     queryKey: ['home-dictionary-random', lang, work, resourceSignal, randomSeed, isConnected],
     queryFn: () => loadDictionaryWidgetEntry(resources.dictionary, lang, work),
     ...localQueryOptions,
+    // A remount (the home switching layout as its width changes) keeps the draw; the shuffle
+    // button draws again by changing randomSeed.
+    staleTime: Infinity,
   })
   const strongReference = strongQuery.data
 

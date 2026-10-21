@@ -75,6 +75,9 @@ const StrongOfTheDay = ({
         resourceLanguage
       )) ?? null,
     ...localQueryOptions,
+    // A remount (the home switching layout as its width changes) keeps the draw; the shuffle
+    // button draws again by changing randomSeed.
+    staleTime: Infinity,
   })
   const strongReference = strongQuery.data
   if (availabilityQuery.isError) {
