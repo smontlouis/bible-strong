@@ -27,6 +27,18 @@ type BiblePublicationMetadata = {
 const bibleMetadata = (value: Record<string, unknown>): BiblePublicationMetadata =>
   value as BiblePublicationMetadata
 
+// The metadata of a Bible also holds its coverage, about 18 KB, which only the coverage read
+// derives again from the verses. The reads of verses use the three revisions alone and ask
+// Neon for nothing else: a chapter joins its publication on every verse row, and the whole
+// column made Neon send some 700 KB for a chapter of 9 KB. A revision absent from the
+// metadata stays absent.
+const revisionMetadata = (column: 'metadata' | 'resource_publications.metadata') =>
+  sql<Record<string, unknown>>`jsonb_strip_nulls(jsonb_build_object(
+    'resource_revision', ${sql.ref(column)} -> 'resource_revision',
+    'text_revision', ${sql.ref(column)} -> 'text_revision',
+    'text_sha256', ${sql.ref(column)} -> 'text_sha256'
+  ))`.as('metadata')
+
 // White space and punctuation marks. A Bible may keep a verse its manuscripts omit as a row
 // that is empty, or that only holds a line break or the bracket that closed the omitted
 // words: a verse has text when something else remains.
@@ -62,7 +74,7 @@ export const makeKyselyBibleChapterRepository = (
           .select([
             'resource_publications.resource_identity',
             'resource_publications.revision',
-            'resource_publications.metadata',
+            revisionMetadata('resource_publications.metadata'),
             'bible_verses.verse',
             'bible_verses.text',
             'bible_verses.presentation',
@@ -114,7 +126,7 @@ export const makeKyselyBibleChapterRepository = (
       const publication = yield* tryDatabasePromise('bible.verse-texts.read-publication', () =>
         database
           .selectFrom('resource_publications')
-          .select(['id', 'revision', 'metadata'])
+          .select(['id', 'revision', revisionMetadata('metadata')])
           .where('resource_publications.resource_identity', '=', `bible-text:${input.versionId}`)
           .where('resource_publications.status', '=', 'active')
           .executeTakeFirst()
@@ -177,7 +189,7 @@ export const makeKyselyBibleChapterRepository = (
           )
           .select([
             'resource_publications.revision',
-            'resource_publications.metadata',
+            revisionMetadata('resource_publications.metadata'),
             'bible_verses.verse',
             'bible_verses.text',
             'bible_verses.presentation',
@@ -225,7 +237,7 @@ export const makeKyselyBibleChapterRepository = (
       const gathered = yield* tryDatabasePromise('bible.coverage.read-active', () =>
         sql<CoverageRows>`
           WITH publication AS MATERIALIZED (
-            SELECT id, revision, metadata
+            SELECT id, revision, metadata - 'coverage' AS metadata
               FROM resource_publications
              WHERE resource_identity = ${`bible-text:${versionId}`}
                AND status = 'active'
@@ -311,7 +323,7 @@ export const makeKyselyBibleChapterRepository = (
       const publication = yield* tryDatabasePromise('bible.pericopes.read-publication', () =>
         database
           .selectFrom('resource_publications')
-          .select(['id', 'revision', 'metadata'])
+          .select(['id', 'revision', revisionMetadata('metadata')])
           .where('resource_identity', '=', `bible-text:${versionId}`)
           .where('status', '=', 'active')
           .executeTakeFirst()

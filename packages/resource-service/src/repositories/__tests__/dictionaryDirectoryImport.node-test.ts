@@ -176,6 +176,14 @@ describe('Dictionary passage discovery', { skip: !runIntegration }, () => {
       assert.ok(
         result.every(entry => entry.work === 'westphal' && entry.revision === 'westphal-r1')
       )
+      assert.ok(
+        result.every(
+          entry =>
+            entry.resourceId === 'WESTPHAL' &&
+            entry.title === 'Dictionnaire encyclopédique' &&
+            entry.abbreviation === 'Westphal'
+        )
+      )
     } finally {
       await isolated.dispose()
     }

@@ -433,7 +433,13 @@ export const makeKyselyDictionaryRepository = (
             'publication.resource_identity',
             'publication.revision',
             'publication.language',
-            'publication.metadata',
+            // The publication is repeated on every link: only the three names a citation
+            // shows are read from its metadata.
+            sql<Record<string, unknown>>`jsonb_build_object(
+              'resource_id', publication.metadata -> 'resource_id',
+              'title', publication.metadata -> 'title',
+              'abbreviation', publication.metadata -> 'abbreviation'
+            )`.as('metadata'),
             'entry.entry_id',
             'entry.word',
             'entry.normalized_word',
@@ -479,7 +485,7 @@ export const makeKyselyDictionaryRepository = (
 
         let activeWorkQuery = database
           .selectFrom('resource_publications')
-          .select(['resource_identity', 'revision', 'language', 'metadata'])
+          .select(['resource_identity', 'revision', 'language'])
           .where('resource_kind', '=', 'dictionary')
           .where('status', '=', 'active')
         if (input.language) {
