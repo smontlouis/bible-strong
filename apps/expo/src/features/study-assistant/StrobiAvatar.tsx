@@ -100,7 +100,8 @@ function EyePath({
  * React Native renderer for the Strobi definition. The shared core samples each frame on
  * the UI thread (Bundle Mode forwards `@bible-strong/avatar-core` to it, see babel.config.js)
  * and writes the paths straight into shared values: the JS thread only hears of a change of
- * colours. The frame callback pauses while the app is not active.
+ * colours. The frame callback pauses while the app is not active, and stops for a muted
+ * avatar once it has fallen asleep.
  */
 export default function StrobiAvatar({
   animation,
@@ -131,10 +132,12 @@ export default function StrobiAvatar({
   const sample = useSharedValue<AvatarFrameSnapshot | null>(null)
   const renderedAt = useSharedValue(0)
   const shownColors = useSharedValue(initial.colors)
-
-  useEffect(() => {
-    mutedProgress.set(withTiming(muted ? 1 : 0, { duration: 300 }))
-  }, [muted, mutedProgress])
+  const holdStill = useSharedValue(muted)
+  const asleep = useSharedValue(false)
+  const reportedStill = useSharedValue(false)
+  // The frame callback reports when a muted avatar reached its sleeping pose.
+  const [still, setStill] = useState(false)
+  const [appActive, setAppActive] = useState(AppState.currentState === 'active')
 
   useEffect(() => {
     void AccessibilityInfo.isReduceMotionEnabled().then(enabled => reduceMotion.set(enabled))
@@ -149,6 +152,12 @@ export default function StrobiAvatar({
   }, [animation, requestedAnimation])
 
   const frameCallback = useFrameCallback(({ timestamp: now }) => {
+    const hold = holdStill.get() && asleep.get()
+    if (hold !== reportedStill.get()) {
+      reportedStill.set(hold)
+      scheduleOnRN(setStill, hold)
+    }
+    if (hold) return
     const requested = requestedAnimation.get()
     if (playedAnimation.get() !== requested) {
       playedAnimation.set(requested)
@@ -165,6 +174,8 @@ export default function StrobiAvatar({
     playback.set(next.status === 'playing' ? next : null)
     const current = sampleAvatarFrame(definition, next, now, environment)
     sample.set(current)
+    // Settled in the sleeping pose, between two blinks: a frame a muted avatar can hold.
+    asleep.set(next.activeAnimation === 'sleeping' && next.phase === 'hold' && current.blink === 1)
     const expression = environment.reduceMotion
       ? current.expression
       : applyAmbientMotion(current.expression, current.sampledAt)
@@ -184,13 +195,22 @@ export default function StrobiAvatar({
     }
   }, AppState.currentState === 'active')
 
+  useEffect(() => {
+    mutedProgress.set(withTiming(muted ? 1 : 0, { duration: 300 }))
+    holdStill.set(muted)
+  }, [muted, mutedProgress, holdStill])
+
   // The display may keep firing in background (it does in the simulator): nothing to draw there.
   useEffect(() => {
     const subscription = AppState.addEventListener('change', state =>
-      frameCallback.setActive(state === 'active')
+      setAppActive(state === 'active')
     )
     return () => subscription.remove()
-  }, [frameCallback])
+  }, [])
+
+  useEffect(() => {
+    frameCallback.setActive(appActive && !(muted && still))
+  }, [frameCallback, appActive, muted, still])
 
   const body = { color: colors.body, grey: toGrey(colors.body), muted: mutedProgress }
   const eyes = { color: colors.eyes, grey: toGrey(colors.eyes), muted: mutedProgress }

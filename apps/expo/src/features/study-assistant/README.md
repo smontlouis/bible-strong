@@ -63,7 +63,9 @@ stored in MMKV under the web's per-account key.
 Avatar. `StrobiAvatar.tsx` renders the same `strobi.avatar.json` with `@bible-strong/avatar-core`
 and `react-native-svg`. The core samples a frame at 30 fps on the UI thread, in a Reanimated
 frame callback (Bundle Mode forwards the package there, see `babel.config.js`), and writes the
-paths into shared values; the callback pauses while the app is not active. Do not sample it on
+paths into shared values; the callback pauses while the app is not active, and stops once the
+greyed floating button has fallen asleep (settled in the `sleeping` pose, between two blinks),
+because sampling cost about 14 % of the main thread at rest. Do not sample it on
 the JS thread again: a `requestAnimationFrame` loop there cost 12–19 % CPU at rest and, with the
 app in background where nothing paces `requestAnimationFrame`, spun at 100 % CPU while the heap
 grew by about 40 MB a minute until taps no longer reached JavaScript (2026-10-21). Do not update
