@@ -111,7 +111,7 @@ const linkifyText = (text: string, linkColor?: string): string => {
   return result + text.slice(cursor)
 }
 
-export const linkifyStrongEditorialBibleReferences = (html: string, linkColor?: string): string => {
+const linkifyEditorialHtml = (html: string, linkColor?: string): string => {
   const normalizedHtml = normalizeLegacyEditorialHtml(html)
   let anchorDepth = 0
   let cursor = 0
@@ -135,4 +135,22 @@ export const linkifyStrongEditorialBibleReferences = (html: string, linkColor?: 
 
   const remaining = normalizedHtml.slice(cursor)
   return result + (anchorDepth > 0 ? remaining : linkifyText(remaining, linkColor))
+}
+
+// Finding the references takes the parser over every text node in two languages, about 0.4 s
+// in development for a 23 KB dictionary article: a page rendered again reuses its result.
+const LINKIFIED_CACHE_SIZE = 50
+const linkifiedHtmlCache = new Map<string, string>()
+
+export const linkifyStrongEditorialBibleReferences = (html: string, linkColor?: string): string => {
+  const key = `${getLanguage()}\n${linkColor ?? ''}\n${html}`
+  const cached = linkifiedHtmlCache.get(key)
+  if (cached !== undefined) return cached
+
+  const linkified = linkifyEditorialHtml(html, linkColor)
+  if (linkifiedHtmlCache.size >= LINKIFIED_CACHE_SIZE) {
+    linkifiedHtmlCache.delete(linkifiedHtmlCache.keys().next().value as string)
+  }
+  linkifiedHtmlCache.set(key, linkified)
+  return linkified
 }
