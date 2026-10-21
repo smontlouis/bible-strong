@@ -2,7 +2,7 @@ import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { twMerge } from '~common/ui/classNames'
 import { colorWithOpacity, resolveThemeColor } from '~themes/colorValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
-import React from 'react'
+import React, { useEffectEvent } from 'react'
 import { Linking, Platform, StyleSheet, TouchableOpacity } from 'react-native'
 import { useQuery } from '@tanstack/react-query'
 import { getDefaultStore } from 'jotai/vanilla'
@@ -361,13 +361,15 @@ const VersionSelectorItem = ({
     downloadManager.enqueue([item])
   }
 
+  // The shared function keeps the download of the render that shared it.
+  const getStartDownload = useEffectEvent(() => startDownload)
   React.useEffect(() => {
     if (shareFn) {
+      const start = getStartDownload()
       shareFn(() => {
-        void startDownload()
+        void start()
       })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shareFn, version.id])
 
   // Watch for Bible-only download completion

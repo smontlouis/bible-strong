@@ -1,5 +1,5 @@
 import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { DeviceEventEmitter, FlatList, useWindowDimensions } from 'react-native'
@@ -134,8 +134,16 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
       subscription.remove()
       if (openInNewTabTimer) clearTimeout(openInNewTabTimer)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bookSelectorActions, openInNewTab, t, bookSelectorData, bookSelectorHasVerses])
+  }, [
+    bookSelectorActions,
+    openInNewTab,
+    t,
+    bookSelectorData,
+    bookSelectorHasVerses,
+    sheetRef,
+    setTempSelectedBook,
+    setTempSelectedChapter,
+  ])
 
   const data = useMemo(() => {
     const booksArray = getBooksForCanon(canonId, coverageData?.books)
@@ -171,7 +179,7 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
 
   // The provider sets a new state right before presenting, even when the tab data is unchanged:
   // every opening starts on the book being read
-  useEffect(() => {
+  const startOnSelectedBook = useEffectEvent(() => {
     if (isPresentedRef.current || !bookSelectorData) return
 
     const book = bookSelectorData.selectedBook
@@ -181,7 +189,9 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
     setExpandedBookNumber(book.Numero)
     setRenderedChapterBookNumbers([book.Numero])
     setGridBook(book)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  })
+  useEffect(() => {
+    startOnSelectedBook()
   }, [bookSelectorState])
 
   const scheduleChapterUnmount = (bookNumber: number) => {

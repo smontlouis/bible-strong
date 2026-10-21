@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useState } from 'react'
 
 import { atom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
@@ -18,18 +18,15 @@ const DictionaryScreen = ({
   newTabId,
 }: DictionaryScreenProps) => {
   const { t } = useTranslation()
-  const onTheFlyAtom = useMemo(
-    () =>
-      atom<DictionaryTab>({
-        id: `dictionary-${generateUUID()}`,
-        title: t('Dictionnaire'),
-        isRemovable: true,
-        hasBackButton: true,
-        type: 'dictionary',
-        data: {},
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+  const [onTheFlyAtom] = useState(() =>
+    atom<DictionaryTab>({
+      id: `dictionary-${generateUUID()}`,
+      title: t('Dictionnaire'),
+      isRemovable: true,
+      hasBackButton: true,
+      type: 'dictionary',
+      data: {},
+    })
   )
 
   return (

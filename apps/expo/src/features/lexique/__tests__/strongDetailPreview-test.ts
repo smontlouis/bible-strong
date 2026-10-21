@@ -1,4 +1,5 @@
 import {
+  getStrongEditorialPreviewHtml,
   hasHiddenStrongPreviewItems,
   isStrongEditorialPreviewOverflowing,
 } from '../strongDetailPreview'
@@ -22,6 +23,14 @@ describe('Strong detail previews', () => {
         5
       )
     ).toBe(true)
+  })
+
+  it('keeps the start of a long editorial text, cut after a word, and a short one whole', () => {
+    const html = '<p>Un <b>mot</b> commun, partagé entre tous.</p><p>Suite de l’article.</p>'
+
+    expect(getStrongEditorialPreviewHtml(html, 1000)).toBe(html)
+    expect(getStrongEditorialPreviewHtml(html, 5)).toBe('<p>Un <b>mot</b>')
+    expect(getStrongEditorialPreviewHtml(html, 12)).toBe('<p>Un <b>mot</b> commun,')
   })
 
   it('reports hidden items only when the total exceeds the displayed count', () => {

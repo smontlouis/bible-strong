@@ -27,10 +27,14 @@ module.exports = function (api) {
       // Automatically adds debug labels to Jotai atoms
       'jotai/babel/plugin-debug-label',
       // Bundle Mode lets a worklet call an npm module off the JS thread: react-native-streamdown
-      // closes streamed Markdown with `remend` there. Native bundles only. Keep this plugin last.
+      // closes streamed Markdown with `remend` there, and the assistant's avatar samples its
+      // frames with `@bible-strong/avatar-core`. Native bundles only. Keep this plugin last.
       [
         'react-native-worklets/plugin',
-        { bundleMode: !isWeb && !isTest, importForwarding: { moduleNames: ['remend'] } },
+        {
+          bundleMode: !isWeb && !isTest,
+          importForwarding: { moduleNames: ['remend', '@bible-strong/avatar-core'] },
+        },
       ],
     ],
     env: {

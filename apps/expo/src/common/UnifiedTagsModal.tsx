@@ -1,7 +1,7 @@
 import { SheetHeader, SheetScrollView } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import { useAtom } from 'jotai/react'
-import { useEffect } from 'react'
+import { useEffect, useEffectEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -62,13 +62,14 @@ export const UnifiedTagsModalInstance = ({ item, setItem }: UnifiedTagsModalInst
     keys: ['name'],
   })
 
+  const openWithFreshSearch = useEffectEvent(() => {
+    open()
+    resetSearch()
+  })
+
   // Auto-open when atom changes
   useEffect(() => {
-    if (item) {
-      open()
-      resetSearch()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (item) openWithFreshSearch()
   }, [item])
 
   // Calculate current items and selected tags for select mode

@@ -1210,7 +1210,7 @@ const BibleViewer = ({
   }
 
   // Bookmark handler
-  const handleAddBookmark = useCallback(() => {
+  const handleAddBookmark = () => {
     const location = getSelectedVersesBookmarkLocation(selectedVerses)
     if (location) {
       setSelectedVerseForBookmark({
@@ -1223,8 +1223,7 @@ const BibleViewer = ({
       // Use setTimeout to ensure state is updated before presenting
       setTimeout(() => bookmarkModalRef.current?.present(), 0)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedVerses, selectionVersion, actions])
+  }
 
   // Handler for opening bookmark modal from DOM (existing bookmark)
   const handleOpenBookmarkModal = useCallback((bookmark: Bookmark) => {
@@ -1484,14 +1483,14 @@ const BibleViewer = ({
       if (!chip) return
       const entry = getCommentaryByPublicationId(chip.resourceId, chip.language)
       if (!entry) return
-      const openCommentary = (sectionId = chip.sectionId) =>
+      const openCommentary = (sectionId?: string) =>
         pushRouteOnce({
           pathname: '/commentary-entry',
           params: {
             projectionId: `${entry.id}:${chip.language}`,
             book: String(book.Numero),
             chapter: String(chapter),
-            sectionId,
+            sectionId: sectionId === undefined ? chip.sectionId : sectionId,
           },
         })
       if (Platform.OS !== 'web') {
@@ -1542,11 +1541,13 @@ const BibleViewer = ({
   })
 
   // Exit annotation mode when this tab becomes inactive
-  useEffect(() => {
+  const exitAnnotationModeIfInactive = useEffectEvent(() => {
     if (useSharedDOM && !isActiveBibleTab && annotationMode.enabled) {
       handleExitAnnotationMode()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  })
+  useEffect(() => {
+    exitAnnotationModeIfInactive()
   }, [isActiveBibleTab])
 
   // Track PortalHost lifecycle for Sentry (context for native Android crashes)

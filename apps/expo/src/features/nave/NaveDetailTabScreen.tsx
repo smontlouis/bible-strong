@@ -1,7 +1,7 @@
 import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import { naveContext } from '~features/study-assistant/resourceContext'
 import { goBackOrHome } from '~navigation/goBackOrHome'
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useEffectEvent } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { useSelector } from 'react-redux'
@@ -139,16 +139,16 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
       : null
   const relationCount = useRelationCount(naveEndpoint)
 
-  const setTitle = (title: string) =>
+  const setTitle = useEffectEvent((title: string) =>
     setNaveTab(
       produce(draft => {
         draft.title = title
       })
     )
+  )
 
   useEffect(() => {
     setTitle(naveItem?.name || name || '')
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [naveItem?.name, name])
 
   useEffect(() => {

@@ -6,7 +6,7 @@ import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { useRouter } from 'expo-router'
 import { produce } from 'immer'
 import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Platform, ScrollView, Share } from 'react-native'
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
@@ -110,7 +110,11 @@ const NoteDetailTabScreen = ({
     setWebViewHeight(Math.max(NOTE_EDITOR_MIN_HEIGHT, Math.ceil(height)))
   }
 
-  const keepEditorCursorVisible = (viewportHeight = scrollViewportHeightRef.current) => {
+  const keepEditorCursorVisible = (measuredViewportHeight?: number) => {
+    const viewportHeight =
+      measuredViewportHeight === undefined
+        ? scrollViewportHeightRef.current
+        : measuredViewportHeight
     if (!isEditing || !viewportHeight || !cursorBottomRef.current) return
 
     const cursorY = editorLayoutYRef.current + cursorBottomRef.current
@@ -217,11 +221,13 @@ const NoteDetailTabScreen = ({
     )
   }, [onBackPress, setNotesTab, t])
 
-  // Initialize form when note loads
+  // Initialize form when note loads: the note is read, its edits do not reset the form.
+  const readCurrentNote = useEffectEvent(() => currentNote)
   useEffect(() => {
-    if (currentNote) {
-      setTitle(currentNote.title || '')
-      setDescription(currentNote.description || '')
+    const note = readCurrentNote()
+    if (note) {
+      setTitle(note.title || '')
+      setDescription(note.description || '')
       setIsEditing(false)
       setEditorResetKey(key => key + 1)
     } else if (isCreating || isCreatingAnnotationNote) {
@@ -230,7 +236,6 @@ const NoteDetailTabScreen = ({
       setIsEditing(true)
       setEditorResetKey(key => key + 1)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [noteId, isCreating, isCreatingAnnotationNote])
 
   // Update tab title when note title changes

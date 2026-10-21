@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useEffectEvent, useState } from 'react'
 
 import { atom } from 'jotai/vanilla'
 import type { SheetRef } from '~common/sheet'
@@ -18,27 +18,26 @@ const CommentariesCard = ({
   onChangeVerse: (verse: string) => void
   commentarySelectorRef?: React.RefObject<SheetRef | null>
 }) => {
-  const onTheFlyAtom = useMemo(
-    () =>
-      atom<CommentaryTab>({
-        id: `commentary-${generateUUID()}`,
-        title: 'Commentaire',
-        isRemovable: true,
-        hasBackButton: true,
-        type: 'commentary',
-        data: {
-          verse,
-        },
-      } as CommentaryTab),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+  const [onTheFlyAtom] = useState(() =>
+    atom<CommentaryTab>({
+      id: `commentary-${generateUUID()}`,
+      title: 'Commentaire',
+      isRemovable: true,
+      hasBackButton: true,
+      type: 'commentary',
+      data: {
+        verse,
+      },
+    } as CommentaryTab)
   )
 
   const [commentaryTab] = useAtom(onTheFlyAtom)
 
+  const reportVerse = useEffectEvent((value: string) => {
+    onChangeVerse(value)
+  })
   useEffect(() => {
-    onChangeVerse(commentaryTab.data.verse)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    reportVerse(commentaryTab.data.verse)
   }, [commentaryTab.data.verse])
 
   return (

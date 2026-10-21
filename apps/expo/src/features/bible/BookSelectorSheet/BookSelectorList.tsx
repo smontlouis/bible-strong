@@ -66,8 +66,7 @@ export const BookSelectorList = ({
     }, 100)
 
     return () => clearTimeout(scrollTimer)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.length, initialScrollOffset])
+  }, [data.length, flatListRef, initialScrollOffset])
 
   if (selectionMode === 'grid') {
     if (gridBook) {

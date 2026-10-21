@@ -1,0 +1,28 @@
+steps:
+  - echo: Open the tab grid from the Bible reader (tab button, bottom bar)
+  - tap:
+      x: 0.682
+      y: 0.94
+  - echo: Open the first tab card of the second row
+  - tool: gesture-tap
+    args:
+      x: 0.261
+      y: 0.36
+    delayMs: 1500
+  - echo: Back to the tab grid
+  - tool: gesture-tap
+    args:
+      x: 0.682
+      y: 0.94
+    delayMs: 2500
+  - echo: Open the second tab card of the second row
+  - tool: gesture-tap
+    args:
+      x: 0.716
+      y: 0.36
+    delayMs: 1500
+  - tool: screenshot
+    delayMs: 2500
+executionPrerequisite: Bible Strong production app in the foreground on the
+  Bible reader, heavy test account with 11 tabs open (several Bible tabs in the
+  first rows of the tab grid).

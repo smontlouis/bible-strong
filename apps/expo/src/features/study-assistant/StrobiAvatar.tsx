@@ -1,12 +1,14 @@
-import { useEffect, useId, useRef, useState } from 'react'
-import { AccessibilityInfo } from 'react-native'
+import { useEffect, useId, useState } from 'react'
+import { AccessibilityInfo, AppState } from 'react-native'
 import Animated, {
   interpolateColor,
   useAnimatedProps,
+  useFrameCallback,
   useSharedValue,
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated'
+import { scheduleOnRN } from 'react-native-worklets'
 import Svg, { ClipPath, Defs, G, Path } from 'react-native-svg'
 import {
   advanceAvatarPlayback,
@@ -30,8 +32,8 @@ const definition: AvatarDefinition = validated.value
 
 // A body node is drawn behind or in front of the head depending on the pose.
 const layers = Array.from({ length: definition.body.nodes.length + 2 }, (_, index) => index)
-// The geometry is sampled on the JS thread: half the display rate keeps the motion fluid
-// at this size without competing with the reader.
+// The geometry is sampled on the UI thread at half the display rate: the motion stays fluid
+// at this size for half the work.
 const FRAME_MS = 1000 / 30
 
 const AnimatedPath = Animated.createAnimatedComponent(Path)
@@ -95,9 +97,11 @@ function EyePath({
 }
 
 /**
- * React Native renderer for the Strobi definition. The shared core samples one frame on
- * the JS thread; the paths reach the native views through shared values, so the avatar
- * never renders React while it moves.
+ * React Native renderer for the Strobi definition. The shared core samples each frame on
+ * the UI thread (Bundle Mode forwards `@bible-strong/avatar-core` to it, see babel.config.js)
+ * and writes the paths straight into shared values: the JS thread only hears of a change of
+ * colours. The frame callback pauses while the app is not active, and stops for a muted
+ * avatar once it has fallen asleep.
  */
 export default function StrobiAvatar({
   animation,
@@ -119,72 +123,94 @@ export default function StrobiAvatar({
   const rightVisible = useSharedValue(initial.geometry.rightVisible)
   const back = useSharedValue(initial.geometry.backPaths)
   const front = useSharedValue(initial.geometry.frontPaths)
-  const playback = useRef<AvatarPlaybackState | null>(null)
-  const sample = useRef<AvatarFrameSnapshot | null>(null)
-  const reduceMotion = useRef(false)
   const mutedProgress = useSharedValue(muted ? 1 : 0)
+  const reduceMotion = useSharedValue(false)
+  // What React asks for; the frame callback starts it on its own clock.
+  const requestedAnimation = useSharedValue(animation)
+  const playedAnimation = useSharedValue<StrobiAnimation | null>(null)
+  const playback = useSharedValue<AvatarPlaybackState | null>(null)
+  const sample = useSharedValue<AvatarFrameSnapshot | null>(null)
+  const renderedAt = useSharedValue(0)
+  const shownColors = useSharedValue(initial.colors)
+  const holdStill = useSharedValue(muted)
+  const asleep = useSharedValue(false)
+  const reportedStill = useSharedValue(false)
+  // The frame callback reports when a muted avatar reached its sleeping pose.
+  const [still, setStill] = useState(false)
+  const [appActive, setAppActive] = useState(AppState.currentState === 'active')
+
+  useEffect(() => {
+    void AccessibilityInfo.isReduceMotionEnabled().then(enabled => reduceMotion.set(enabled))
+    const subscription = AccessibilityInfo.addEventListener('reduceMotionChanged', enabled =>
+      reduceMotion.set(enabled)
+    )
+    return () => subscription.remove()
+  }, [reduceMotion])
+
+  useEffect(() => {
+    requestedAnimation.set(animation)
+  }, [animation, requestedAnimation])
+
+  const frameCallback = useFrameCallback(({ timestamp: now }) => {
+    const hold = holdStill.get() && asleep.get()
+    if (hold !== reportedStill.get()) {
+      reportedStill.set(hold)
+      scheduleOnRN(setStill, hold)
+    }
+    if (hold) return
+    const requested = requestedAnimation.get()
+    if (playedAnimation.get() !== requested) {
+      playedAnimation.set(requested)
+      const started = playAvatarAnimation(definition, requested, now, sample.get() ?? undefined)
+      playback.set(started.ok ? started.value : null)
+      renderedAt.set(0)
+    }
+    const state = playback.get()
+    if (!state || now - renderedAt.get() < FRAME_MS - 1) return
+    renderedAt.set(now)
+    const environment = { random: Math.random, reduceMotion: reduceMotion.get() }
+    const next = advanceAvatarPlayback(definition, state, now, environment)
+    // A finished animation keeps its last frame without sampling again.
+    playback.set(next.status === 'playing' ? next : null)
+    const current = sampleAvatarFrame(definition, next, now, environment)
+    sample.set(current)
+    // Settled in the sleeping pose, between two blinks: a frame a muted avatar can hold.
+    asleep.set(next.activeAnimation === 'sleeping' && next.phase === 'hold' && current.blink === 1)
+    const expression = environment.reduceMotion
+      ? current.expression
+      : applyAmbientMotion(current.expression, current.sampledAt)
+    const scene = renderAvatarExpression(definition, expression, current.colors, current.blink)
+    head.set(scene.geometry.headPath)
+    left.set(scene.geometry.leftPath)
+    right.set(scene.geometry.rightPath)
+    leftVisible.set(scene.geometry.leftVisible)
+    rightVisible.set(scene.geometry.rightVisible)
+    back.set(scene.geometry.backPaths)
+    front.set(scene.geometry.frontPaths)
+    // Colours only change with the expression: React follows them, not every frame.
+    const previous = shownColors.get()
+    if (previous.body !== scene.colors.body || previous.eyes !== scene.colors.eyes) {
+      shownColors.set(scene.colors)
+      scheduleOnRN(setColors, scene.colors)
+    }
+  }, AppState.currentState === 'active')
 
   useEffect(() => {
     mutedProgress.set(withTiming(muted ? 1 : 0, { duration: 300 }))
-  }, [muted, mutedProgress])
+    holdStill.set(muted)
+  }, [muted, mutedProgress, holdStill])
 
+  // The display may keep firing in background (it does in the simulator): nothing to draw there.
   useEffect(() => {
-    void AccessibilityInfo.isReduceMotionEnabled().then(enabled => {
-      reduceMotion.current = enabled
-    })
-    const subscription = AccessibilityInfo.addEventListener('reduceMotionChanged', enabled => {
-      reduceMotion.current = enabled
-    })
+    const subscription = AppState.addEventListener('change', state =>
+      setAppActive(state === 'active')
+    )
     return () => subscription.remove()
   }, [])
 
   useEffect(() => {
-    const started = playAvatarAnimation(
-      definition,
-      animation,
-      performance.now(),
-      sample.current ?? undefined
-    )
-    if (!started.ok) return
-    playback.current = started.value
-    let frame = 0
-    let renderedAt = 0
-    const tick = () => {
-      const state = playback.current
-      if (!state) return
-      const now = performance.now()
-      if (now - renderedAt >= FRAME_MS - 1) {
-        renderedAt = now
-        const environment = { random: Math.random, reduceMotion: reduceMotion.current }
-        const next = advanceAvatarPlayback(definition, state, now, environment)
-        playback.current = next
-        const current = sampleAvatarFrame(definition, next, now, environment)
-        sample.current = current
-        const expression = environment.reduceMotion
-          ? current.expression
-          : applyAmbientMotion(current.expression, current.sampledAt)
-        const scene = renderAvatarExpression(definition, expression, current.colors, current.blink)
-        head.set(scene.geometry.headPath)
-        left.set(scene.geometry.leftPath)
-        right.set(scene.geometry.rightPath)
-        leftVisible.set(scene.geometry.leftVisible)
-        rightVisible.set(scene.geometry.rightVisible)
-        back.set(scene.geometry.backPaths)
-        front.set(scene.geometry.frontPaths)
-        // Colours only change with the expression: React follows them, not every frame.
-        setColors(previous =>
-          previous.body === scene.colors.body && previous.eyes === scene.colors.eyes
-            ? previous
-            : scene.colors
-        )
-        if (next.status !== 'playing') return
-      }
-      frame = requestAnimationFrame(tick)
-    }
-    frame = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(frame)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [animation])
+    frameCallback.setActive(appActive && !(muted && still))
+  }, [frameCallback, appActive, muted, still])
 
   const body = { color: colors.body, grey: toGrey(colors.body), muted: mutedProgress }
   const eyes = { color: colors.eyes, grey: toGrey(colors.eyes), muted: mutedProgress }

@@ -1,4 +1,4 @@
-import { useEffect, type RefObject } from 'react'
+import { useEffect, useEffectEvent, type RefObject } from 'react'
 import { useAtom } from 'jotai'
 import { assistantOpenRequestAtom } from './assistantSheetContext'
 
@@ -9,10 +9,12 @@ import { assistantOpenRequestAtom } from './assistantSheetContext'
  */
 export function useAssistantOpenRequest(sheet: RefObject<{ present: () => void } | null>) {
   const [request, setRequest] = useAtom(assistantOpenRequestAtom)
-  useEffect(() => {
-    if (!request) return
+  const present = useEffectEvent(() => {
     sheet.current?.present()
     setRequest(0)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  })
+  useEffect(() => {
+    if (!request) return
+    present()
   }, [request])
 }

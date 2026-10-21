@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useState } from 'react'
 
 import { atom } from 'jotai/vanilla'
 import { useLocalSearchParams } from 'expo-router'
@@ -12,20 +12,17 @@ const CompareVersesScreen = () => {
   // Parse params from URL strings
   const selectedVerses = params.selectedVerses ? JSON.parse(params.selectedVerses) : undefined
 
-  const onTheFlyAtom = useMemo(
-    () =>
-      atom<CompareTab>({
-        id: `compare-${generateUUID()}`,
-        title: 'Comparer',
-        isRemovable: true,
-        hasBackButton: true,
-        type: 'compare',
-        data: {
-          selectedVerses,
-        },
-      } as CompareTab),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+  const [onTheFlyAtom] = useState(() =>
+    atom<CompareTab>({
+      id: `compare-${generateUUID()}`,
+      title: 'Comparer',
+      isRemovable: true,
+      hasBackButton: true,
+      type: 'compare',
+      data: {
+        selectedVerses,
+      },
+    } as CompareTab)
   )
 
   return <CompareVersesTabScreen compareAtom={onTheFlyAtom} />

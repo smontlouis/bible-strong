@@ -32,7 +32,10 @@ import type {
 } from '~features/resources/strongLexiconAccess'
 import { linkifyStrongEditorialBibleReferences } from './strongEditorialHtml'
 import { getScaledStrongTextStyle, type StrongReadingTypography } from './strongEditorialHtmlStyles'
-import { isStrongEditorialPreviewOverflowing } from './strongDetailPreview'
+import {
+  getStrongEditorialPreviewHtml,
+  isStrongEditorialPreviewOverflowing,
+} from './strongDetailPreview'
 import { getStrongEntityAvatarSource } from './strongEntityAvatars'
 import { isStrongOriginalUnnamed } from './strongOriginalPresentation'
 export const StrongEyebrow = ({ children }: { children: React.ReactNode }) => (
@@ -281,6 +284,9 @@ const renderEditorialPreviewNodes = (
     return <React.Fragment key={key}>{children}</React.Fragment>
   })
 
+// More characters than a line of the preview holds, even on a wide screen.
+const PREVIEW_TEXT_PER_LINE = 160
+
 export const StrongEditorialPreview = ({
   value,
   readingTypography,
@@ -299,18 +305,23 @@ export const StrongEditorialPreview = ({
   const preview = useReferencePreview()
   const theme = useTheme()
   if (!value) return null
+  const html = removeLegacySpacerImages(value)
+  // Only what the lines can show: a text cut there overflows them anyway.
+  const previewHtml = getStrongEditorialPreviewHtml(html, numberOfLines * PREVIEW_TEXT_PER_LINE)
+  const isCut = previewHtml.length < html.length
   const document = parseDocument(
-    linkifyStrongEditorialBibleReferences(removeLegacySpacerImages(value), theme.colors.primary),
+    linkifyStrongEditorialBibleReferences(previewHtml, theme.colors.primary),
     { decodeEntities: true }
   )
   const fullText = DomUtils.textContent(document)
   const reportOverflow = (event: NativeSyntheticEvent<TextLayoutEventData>) => {
     onOverflowChange?.(
-      isStrongEditorialPreviewOverflowing(
-        fullText,
-        event.nativeEvent.lines.map(line => line.text),
-        numberOfLines
-      )
+      isCut ||
+        isStrongEditorialPreviewOverflowing(
+          fullText,
+          event.nativeEvent.lines.map(line => line.text),
+          numberOfLines
+        )
     )
   }
 

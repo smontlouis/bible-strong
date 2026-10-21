@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useEffectEvent } from 'react'
 import { useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai'
 import { assistantOpenRequestAtom } from './assistantSheetContext'
@@ -7,11 +7,13 @@ import { assistantOpenRequestAtom } from './assistantSheetContext'
 export default function StudyAssistantScreen() {
   const router = useRouter()
   const requestOpen = useSetAtom(assistantOpenRequestAtom)
-  useEffect(() => {
+  const openOverPreviousScreen = useEffectEvent(() => {
     if (router.canGoBack()) router.back()
     else router.replace('/')
     requestOpen(count => count + 1)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  })
+  useEffect(() => {
+    openOverPreviousScreen()
   }, [])
   return null
 }

@@ -5,7 +5,7 @@ import { goBackOrHome } from '~navigation/goBackOrHome'
 import { twMerge } from '~common/ui/classNames'
 import { resolveThemeColor } from '~themes/colorValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useEffectEvent, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { useSelector } from 'react-redux'
@@ -233,18 +233,18 @@ const DictionnaryDetailScreen = ({
     : null
   const relationCount = useRelationCount(dictionaryEndpoint)
 
-  const setTitle = (title: string) =>
+  const setTitle = useEffectEvent((title: string) =>
     setDictionaryTab(
       produce(draft => {
         draft.title = title
       })
     )
+  )
 
   useEffect(() => {
     if (word) {
       setTitle(word)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [word])
 
   useEffect(() => {

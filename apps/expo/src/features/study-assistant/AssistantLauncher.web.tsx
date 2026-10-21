@@ -1,7 +1,7 @@
 import type { DebugEntry, DebugSession } from './debug/trace'
 import ErrorState from './ErrorState.web'
 import { createPortal } from 'react-dom'
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useEffectEvent, useRef, useState, type CSSProperties } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
@@ -230,15 +230,15 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
             ? 'sleeping'
             : 'idle'
   const dictationActive = ['starting', 'listening', 'stopping'].includes(dictationState)
+  const syncFollowReading = useEffectEvent((enabled: boolean) => changeFollowReading(enabled))
   useEffect(() => {
     const key = followReadingPreferenceKey(account)
     const sync = (event: StorageEvent) => {
       if (event.key !== key) return
-      changeFollowReading(event.newValue === 'true')
+      syncFollowReading(event.newValue === 'true')
     }
     window.addEventListener('storage', sync)
     return () => window.removeEventListener('storage', sync)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account])
   const onNew = async (message: AppendMessage) => {
     await send(message.content.flatMap(p => (p.type === 'text' ? [p.text] : [])).join('\n'))

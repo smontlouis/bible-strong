@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useEffectEvent, useRef } from 'react'
 import { useAppRating } from './useAppRating'
 
 /**
@@ -10,12 +10,15 @@ export function useAppRatingCheck() {
   const { trackAppOpen, shouldShowRatingPrompt } = useAppRating()
   const hasTracked = useRef(false)
 
-  useEffect(() => {
+  const trackFirstOpen = useEffectEvent(() => {
     if (!hasTracked.current) {
       hasTracked.current = true
       trackAppOpen()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  })
+
+  useEffect(() => {
+    trackFirstOpen()
   }, [])
 
   return {

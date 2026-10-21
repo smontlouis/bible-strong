@@ -1,5 +1,5 @@
 import { produce } from 'immer'
-import { useMemo } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Book } from '~assets/bible_versions/books-desc'
 import { getBook } from '~helpers/bibleBookCatalog'
@@ -101,8 +101,7 @@ const BibleScreenContent = ({
   })
 
   // Always create an on-the-fly atom for this screen
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const bibleAtom = useMemo(() => atom<BibleTab>(initialValues), [])
+  const [bibleAtom] = useState(() => atom<BibleTab>(initialValues))
 
   return (
     <BibleTabScreen
