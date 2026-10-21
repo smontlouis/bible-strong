@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useEffectEvent, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { useLocalSearchParams } from 'expo-router'
@@ -106,7 +106,7 @@ const BibleVerseLinks = ({ isFormSheet = false }: BibleVerseLinksProps) => {
     openEntityRelations(endpoint)
   }
 
-  const loadPage = async () => {
+  const loadPage = useEffectEvent(async () => {
     let title
     const filtered_links: TLink[] = []
 
@@ -154,11 +154,10 @@ const BibleVerseLinks = ({ isFormSheet = false }: BibleVerseLinksProps) => {
 
     setTitle(title)
     setLinks(filtered_links)
-  }
+  })
 
   useEffect(() => {
     loadPage()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [verse, _links, relations])
 
   const openLink = (linkId: string) => {

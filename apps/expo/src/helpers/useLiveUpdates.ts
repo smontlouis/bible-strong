@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useEffectEvent, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import type { RootState } from '~redux/modules/reducer'
 import {
@@ -102,6 +102,7 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
   const hasStudies = useSelector(
     (state: RootState) => Object.keys(state.user.bible.studies).length > 0
   )
+  const readStudiesSyncMode = useEffectEvent(() => ({ isNewlyLogged, hasStudies }))
 
   useEffect(() => {
     if (!enabled || !isLogged || !user.id || connectionStatus !== 'internet') return
@@ -111,6 +112,9 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
   }, [connectionStatus, enabled, isLogged, user.id])
 
   useEffect(() => {
+    // Captured when the listeners are set up: the studies callback keeps these values
+    // for the whole subscription instead of following later renders.
+    const studiesSyncMode = readStudiesSyncMode()
     // Use module-level variables for cleanup access before logout
     currentUnsubscribeUsers = undefined
     currentUnsubscribeStudies = undefined
@@ -296,7 +300,7 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
           const source = querySnapshot?.metadata.hasPendingWrites ? 'Local' : 'Server'
           if (source === 'Local' || !querySnapshot) return
 
-          if (isNewlyLogged || !hasStudies) {
+          if (studiesSyncMode.isNewlyLogged || !studiesSyncMode.hasStudies) {
             const studies = {} as { [key: string]: Study }
             querySnapshot.forEach((docSnap: QueryDocumentSnapshot) => {
               const study = docSnap.data() as Study
@@ -360,8 +364,8 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
       // Cleanup on unmount
       cleanupFirestoreSubscriptions()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, isLogged, isLoading, resumeToken, user.id])
+    // resumeToken only restarts the subscription; dispatch is the store's stable dispatch.
+  }, [enabled, isLogged, isLoading, resumeToken, user.id, dispatch])
 }
 
 export default useLiveUpdates

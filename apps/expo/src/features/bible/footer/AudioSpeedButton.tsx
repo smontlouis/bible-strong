@@ -27,8 +27,7 @@ const AudioSpeedButton = (props: AudioSpeedButtonProps) => {
     ;(async () => {
       setRate(await TrackPlayer.getRate())
     })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [setRate])
 
   const onChange = async (value: string) => {
     setRate(Number(value))

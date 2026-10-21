@@ -1,6 +1,6 @@
 import { pageContentStyle } from '~common/ui/PageContent'
 import { type SheetRef } from '~common/sheet'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { FlatList, Platform } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useAtom, useSetAtom } from 'jotai/react'
@@ -87,7 +87,6 @@ const StudiesScreen = ({
     renameModalRef.current?.present()
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const onStudyPress = (studyId: string) => {
     if (isNewTabSelection) {
       const study = studies.find(candidate => candidate.id === studyId)
@@ -147,12 +146,13 @@ const StudiesScreen = ({
   )
 
   // Open the study when a new study is created
+  const openPendingStudy = useEffectEvent((studyId: string) => onStudyPress(studyId))
   useEffect(() => {
     if (pendingStudyId && pendingStudy) {
-      onStudyPress(pendingStudyId)
+      openPendingStudy(pendingStudyId)
       setPendingStudyId(null)
     }
-  }, [pendingStudy, pendingStudyId, onStudyPress])
+  }, [pendingStudy, pendingStudyId])
 
   const sortOptions = [
     { value: 'newest', label: t('entityList.sort.newest') },

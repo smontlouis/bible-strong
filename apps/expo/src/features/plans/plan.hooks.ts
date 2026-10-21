@@ -133,29 +133,31 @@ export const useDownloadPlans = () => {
   const dispatch = useDispatch<AppDispatch>()
   const ongoingPlans = useSelector((state: RootState) => state.plan.ongoingPlans, shallowEqual)
 
+  // Plans are read once, when the screen mounts.
+  const downloadMissingPlans = React.useEffectEvent(async () => {
+    const planNeedsToBeDownloaded = ongoingPlans.filter(
+      plan => !myPlans.find(myPlan => myPlan.id === plan.id)
+    )
+
+    let err
+    ;[err] = await to(
+      Promise.all(
+        planNeedsToBeDownloaded.map(async planToDownload => {
+          setIsLoading(true)
+          return dispatch(fetchPlan({ id: planToDownload.id })).unwrap()
+        })
+      )
+    )
+
+    setIsLoading(false)
+
+    if (err) {
+      toast.error('Impossible de télécharger vos plans, vérifiez votre connexion internet.')
+    }
+  })
+
   React.useEffect(() => {
-    ;(async () => {
-      const planNeedsToBeDownloaded = ongoingPlans.filter(
-        plan => !myPlans.find(myPlan => myPlan.id === plan.id)
-      )
-
-      let err
-      ;[err] = await to(
-        Promise.all(
-          planNeedsToBeDownloaded.map(async planToDownload => {
-            setIsLoading(true)
-            return dispatch(fetchPlan({ id: planToDownload.id })).unwrap()
-          })
-        )
-      )
-
-      setIsLoading(false)
-
-      if (err) {
-        toast.error('Impossible de télécharger vos plans, vérifiez votre connexion internet.')
-      }
-    })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    void downloadMissingPlans()
   }, [])
 
   return { isLoading }

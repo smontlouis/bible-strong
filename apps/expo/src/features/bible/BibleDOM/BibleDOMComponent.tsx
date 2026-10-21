@@ -16,7 +16,7 @@ import { createGlobalStyles } from 'goober/global'
 import { m, useReducedMotion } from 'motion/react'
 import Feather from '@expo/vector-icons/Feather'
 import { domMax, LazyMotion } from 'motion/react'
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useEffectEvent, useState, useRef } from 'react'
 import { Verse as TVerse } from '~common/types'
 import { floatingShadow, radii } from '~common/ui/surfaces'
 import {
@@ -641,6 +641,23 @@ function isClickInsideSelection(
   )
 }
 
+// The layout props read the verses' transform only during a layout animation, but React
+// Compiler sees a ref captured during render and would skip the whole chapter: they are built
+// here, in a hook of their own, once per mount.
+const useVersePositionLayoutProps = (
+  versesContentRef: React.RefObject<HTMLDivElement | null>,
+  setIsAnimating: (isAnimating: boolean) => void
+) => {
+  const [props] = useState(() =>
+    createVersePositionLayoutProps({
+      getTransform: () => versesContentRef.current?.style.transform,
+      onAnimationStart: () => setIsAnimating(true),
+      onAnimationSettled: () => setIsAnimating(false),
+    })
+  )
+  return props
+}
+
 // ============================================================================
 // LOADED BIBLE CONTENT (heavy component, only rendered when verses are available)
 // ============================================================================
@@ -880,12 +897,9 @@ const LoadedBibleContent = ({
       verseSelectionBlocks,
     })
   const [isVerseLayoutAnimating, setIsVerseLayoutAnimating] = useState(false)
-  const [versePositionLayoutProps] = useState(() =>
-    createVersePositionLayoutProps({
-      getTransform: () => versesContentRef.current?.style.transform,
-      onAnimationStart: () => setIsVerseLayoutAnimating(true),
-      onAnimationSettled: () => setIsVerseLayoutAnimating(false),
-    })
+  const versePositionLayoutProps = useVersePositionLayoutProps(
+    versesContentRef,
+    setIsVerseLayoutAnimating
   )
 
   // One word selected in the column of the version it was touched in
@@ -1422,14 +1436,17 @@ const LoadedBibleContent = ({
     verseNavigationRequest,
   ])
 
+  // The scroll helpers read the selection of the latest render without being triggers.
+  const scrollSelectedVerseIntoMiddle = useEffectEvent(() => scrollSelectedVerseToMiddle('smooth'))
+  const readReturnToSelectedVersePosition = useEffectEvent(getReturnToSelectedVersePosition)
+
   useEffect(() => {
     if (!selectedVerseElementId || !hasVerses) {
       setReturnToSelectedVersePosition(null)
       return
     }
 
-    requestAnimationFrame(() => scrollSelectedVerseToMiddle('smooth'))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    requestAnimationFrame(() => scrollSelectedVerseIntoMiddle())
   }, [selectedVerseElementId, hasVerses])
 
   useEffect(() => {
@@ -1440,7 +1457,7 @@ const LoadedBibleContent = ({
     const updateVisibility = () => {
       if (rafId) cancelAnimationFrame(rafId)
       rafId = requestAnimationFrame(() => {
-        setReturnToSelectedVersePosition(getReturnToSelectedVersePosition())
+        setReturnToSelectedVersePosition(readReturnToSelectedVersePosition())
       })
     }
 
@@ -1453,7 +1470,6 @@ const LoadedBibleContent = ({
       window.removeEventListener('resize', updateVisibility)
       if (rafId) cancelAnimationFrame(rafId)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedVerseElementId, headerHeight])
 
   const navigateToPericope = () => {

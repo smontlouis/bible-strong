@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import * as Haptics from 'expo-haptics'
 import { StyleSheet, View, type LayoutRectangle } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
@@ -105,10 +105,10 @@ export default function AssistantLauncherButton({
     return () => clearTimeout(timer)
   }, [touching, releasedAt])
 
+  const reportIdle = useEffectEvent((value: boolean) => onIdleChange(value))
   useEffect(() => {
     idleProgress.set(withTiming(idle ? 1 : 0, { duration: 300 }))
-    onIdleChange(idle)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    reportIdle(idle)
   }, [idle, idleProgress])
 
   const wake = () => {
@@ -127,12 +127,8 @@ export default function AssistantLauncherButton({
   const visibility = useSharedValue(1)
   const shownOnce = useRef(false)
 
-  useEffect(() => {
-    // The first render places it as it is; only later changes slide it.
-    if (!shownOnce.current) {
-      shownOnce.current = true
-      return
-    }
+  // Reads the latest layout without sliding again when it changes.
+  const slide = useEffectEvent((hidden: boolean) => {
     // Out toward the side it rests on, back from there.
     const direction = x.get() + BUTTON_SIZE / 2 > (layout?.width ?? 0) / 2 ? 1 : -1
     if (hidden) {
@@ -146,7 +142,14 @@ export default function AssistantLauncherButton({
     // Back on screen, it is awake and waits again before going idle.
     setIdle(false)
     setReleasedAt(Date.now())
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  })
+  useEffect(() => {
+    // The first render places it as it is; only later changes slide it.
+    if (!shownOnce.current) {
+      shownOnce.current = true
+      return
+    }
+    slide(hidden)
   }, [hidden])
   const startX = useSharedValue(0)
   const startY = useSharedValue(0)

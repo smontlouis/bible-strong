@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AssistantAction } from '@bible-strong/ai-contract/contract'
 import { getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
@@ -73,9 +73,11 @@ export function useAssistantSession({
   const active = useRef<AbortController | null>(null)
   const receivedInitialIndex = useRef(false)
   const context = followReading ? pinned || liveContext : null
+  // The host passes a new function on each render: it must not restart the account's effects.
+  const readPreferenceStorage = useEffectEvent(() => preferenceStorage())
   useEffect(() => {
     try {
-      setFollowReading(loadFollowReadingPreference(preferenceStorage(), account))
+      setFollowReading(loadFollowReadingPreference(readPreferenceStorage(), account))
     } catch {
       setStorageError(true)
     }
@@ -123,7 +125,6 @@ export function useAssistantSession({
       active.current?.abort()
       active.current = null
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account])
   const currentIsCloud = cloudIds.includes(current.id)
   useEffect(() => {
@@ -151,11 +152,10 @@ export function useAssistantSession({
   useEffect(() => {
     if (!ready) return
     try {
-      saveFollowReadingPreference(preferenceStorage(), account, followReading)
+      saveFollowReadingPreference(readPreferenceStorage(), account, followReading)
     } catch {
       setStorageError(true)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account, followReading, ready])
   const publish = (conversation: Conversation) => {
     setCurrent(conversation)

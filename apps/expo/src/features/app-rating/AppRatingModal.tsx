@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useEffectEvent } from 'react'
 
 import { useSheet } from '~helpers/useSheet'
 import RatingPrompt from './RatingPrompt'
@@ -13,15 +13,18 @@ const AppRatingModal = () => {
   const { ref, open, close } = useSheet()
   const { shouldShowRatingPrompt } = useAppRating()
 
+  const readMountCheck = useEffectEvent(() => ({ shouldShowRatingPrompt, open }))
+
   useEffect(() => {
+    // Check against the rating state read at mount, even if it changes during the delay.
+    const mountCheck = readMountCheck()
     const timer = setTimeout(() => {
-      if (shouldShowRatingPrompt('engagement_milestone')) {
-        open()
+      if (mountCheck.shouldShowRatingPrompt('engagement_milestone')) {
+        mountCheck.open()
       }
     }, 5000)
 
     return () => clearTimeout(timer)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return <RatingPrompt modalRef={ref} onClose={close} />

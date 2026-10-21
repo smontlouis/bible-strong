@@ -1,5 +1,5 @@
 import { useAtomValue } from 'jotai/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useEffectEvent, useState } from 'react'
 import { usePrevious } from '~helpers/usePrevious'
 import wait from '~helpers/wait'
 import { tabsCountAtom } from '../../../state/tabs'
@@ -16,9 +16,13 @@ export const useExpandNewTab = () => {
 
   const [tabId, setTabId] = useState<string | null>(null)
 
+  const readExpandTools = useEffectEvent(() => ({ flashListRefs, measureTabPreview, expandTab }))
+
   useEffect(() => {
     let cancelled = false
     const isNewTab = tabsCount > prevTabsCount && typeof prevTabsCount !== 'undefined'
+    // Read when the effect runs, so the calls after the wait use the same render's tools
+    const { flashListRefs, measureTabPreview, expandTab } = readExpandTools()
     ;(async () => {
       if (isNewTab && tabId) {
         const index = tabsCount - 1
@@ -45,7 +49,6 @@ export const useExpandNewTab = () => {
     return () => {
       cancelled = true
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabId, tabsCount, prevTabsCount])
 
   return { triggerExpandNewTab: setTabId }

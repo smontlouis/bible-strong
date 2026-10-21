@@ -373,19 +373,20 @@ export const VersionCatalogList = ({
   }, [scrollToTopKey])
 
   React.useEffect(() => {
-    if (!isRevealPending() || !revealVersionId || listHeightRef.current <= 0) return
-
-    const frame = scheduleCatalogVersionReveal(
-      listRef.current,
-      sections,
-      revealVersionId,
-      markRevealed
+    if (
+      !revealVersionId ||
+      revealedRequestKeyRef.current === revealRequestKey ||
+      listHeightRef.current <= 0
     )
+      return
+
+    const frame = scheduleCatalogVersionReveal(listRef.current, sections, revealVersionId, () => {
+      revealedRequestKeyRef.current = revealRequestKey
+    })
 
     return () => {
       if (frame !== null) cancelAnimationFrame(frame)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [revealRequestKey, revealRetry, revealVersionId, sections])
 
   function revealSelectedVersion() {

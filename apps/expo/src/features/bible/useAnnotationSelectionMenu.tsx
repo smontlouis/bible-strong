@@ -1,5 +1,5 @@
 import { useSetAtom } from 'jotai/react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet } from 'react-native'
 import ColorCircleGrid from '~common/ColorCircleGrid'
@@ -94,10 +94,12 @@ export default function useAnnotationSelectionMenu(
   }
 
   // The tags screen belongs to one annotation: choosing another one comes back to the tools.
-  useEffect(() => {
+  const backToTools = useEffectEvent(() => {
     navigation.current?.back()
     tags.reset()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  })
+  useEffect(() => {
+    backToTools()
   }, [selectedAnnotation?.id])
 
   const erase = selectedAnnotation

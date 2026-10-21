@@ -1,4 +1,4 @@
-import React, { memo, ReactNode, useEffect, useState } from 'react'
+import React, { memo, ReactNode, useEffect, useEffectEvent, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, {
@@ -338,12 +338,15 @@ export default memo(
     const deltaX = useSharedValue(0)
     const deltaY = useSharedValue(0)
 
-    useEffect(() => {
+    // Placed off screen once, on mount.
+    const placeForEntrance = useEffectEvent(() => {
       if (canStartAnimation.get() === 0) {
         x.set(entrance ? wpUI(100) : lowerBoundX - wpUI(100))
         canStartAnimation.set(withDelay(1500, withTiming(1, { duration: 0 })))
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+    })
+    useEffect(() => {
+      placeForEntrance()
     }, [])
 
     useAnimatedReaction(

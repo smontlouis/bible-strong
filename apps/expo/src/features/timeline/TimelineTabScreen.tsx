@@ -71,6 +71,8 @@ const TimelineTabScreen = ({ timelineAtom }: Props) => {
     })
   }
 
+  const goHomeOnBackPress = React.useEffectEvent(() => goHome())
+
   React.useEffect(() => {
     return subscribeToHardwareBackPress(() => {
       if (!isCurrentTab(timelineAtom)) return false
@@ -80,14 +82,12 @@ const TimelineTabScreen = ({ timelineAtom }: Props) => {
       }
 
       if (timelineTab.data.sectionIndex !== undefined) {
-        goHome()
+        goHomeOnBackPress()
         return true
       }
 
       return false
     })
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCurrentTab, timelineAtom, timelineTab.data.eventSlug, timelineTab.data.sectionIndex])
 
   if (timelineTab.data.eventSlug) {

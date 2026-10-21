@@ -4,7 +4,7 @@ import CommentIcon from '~common/CommentIcon'
 import { pageContentStyle } from '~common/ui/PageContent'
 import { useQuery } from '@tanstack/react-query'
 import MenuView from '~features/commentaries/CommentaryMenu'
-import React, { useEffect } from 'react'
+import React, { useEffect, useEffectEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView } from 'react-native'
 import Empty from '~common/Empty'
@@ -180,9 +180,11 @@ const CommentariesTabScreen = ({
     bottomBarHeight,
     sheetFooterInset,
   })
+  const updateTitle = useEffectEvent((title: string) => {
+    setTitle(title)
+  })
   useEffect(() => {
-    setTitle(displayedContent.headerTitle)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    updateTitle(displayedContent.headerTitle)
   }, [displayedContent.headerTitle])
   return (
     <>

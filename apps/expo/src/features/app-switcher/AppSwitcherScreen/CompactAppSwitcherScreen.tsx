@@ -1,6 +1,6 @@
 import { compactWorkspaceDrawerAtom } from '../workspaceViewTracking'
 import { useAtomValue, useSetAtom } from 'jotai/react'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { StyleSheet, useWindowDimensions } from 'react-native'
 import { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 import Box, { AnimatedBox } from '~common/ui/Box'
@@ -78,29 +78,32 @@ const AppSwitcherScreenWrapper = () => {
     isHomeOpen.current = false
   }
 
-  // Not the best, but when adding a new tab, close home drawer
-  useEffect(() => {
+  const closeDrawers = useEffectEvent(() => {
     closeHome()
     closeMenu()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  })
+
+  // Not the best, but when adding a new tab, close home drawer
+  useEffect(() => {
+    closeDrawers()
   }, [tabsCount])
 
+  const onHardwareBackPress = useEffectEvent(() => {
+    if (isMenuOpen.current) {
+      closeMenu()
+      return true
+    }
+
+    if (isHomeOpen.current) {
+      closeHome()
+      return true
+    }
+
+    return false
+  })
+
   useEffect(() => {
-    return subscribeToHardwareBackPress(() => {
-      if (isMenuOpen.current) {
-        closeMenu()
-        return true
-      }
-
-      if (isHomeOpen.current) {
-        closeHome()
-        return true
-      }
-
-      return false
-    })
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return subscribeToHardwareBackPress(() => onHardwareBackPress())
   }, [])
 
   const containerStyle = useAnimatedStyle(() => ({

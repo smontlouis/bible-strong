@@ -1,7 +1,7 @@
 import { getEntityChipListState } from '~common/entityChips'
 import { webFontFamily } from '~helpers/webFontFamily'
 import type { JSONValue } from 'expo/build/dom/dom.types'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 import { Platform, ScrollView } from 'react-native'
 import { WebViewMessageEvent } from 'react-native-webview'
@@ -110,11 +110,11 @@ export default function StudiesDomWrapper({
   const getIsCurrentTab = useIsCurrentTab()
   const isCurrentTab = studyAtom ? getIsCurrentTab(studyAtom as PrimitiveAtom<TabItem>) : false
 
-  useEffect(() => {
-    if (!isReadOnly || (studyAtom && !isCurrentTab)) return
-    let active = true
-
-    void refreshStudyEntityEmbeds(contentToDisplay, {
+  // Refresh on entry/re-entry, not after each editor keystroke: the content and the
+  // resources are read when the effect runs, they do not trigger it.
+  const refreshEmbeds = useEffectEvent(() => {
+    if (!isReadOnly || (studyAtom && !isCurrentTab)) return null
+    return refreshStudyEntityEmbeds(contentToDisplay, {
       resources,
       defaultBibleVersion,
       resourceLanguages,
@@ -122,7 +122,14 @@ export default function StudiesDomWrapper({
       links,
       studies,
       wordAnnotations,
-    }).then(content => {
+    })
+  })
+  useEffect(() => {
+    const refresh = refreshEmbeds()
+    if (!refresh) return
+    let active = true
+
+    void refresh.then(content => {
       if (!active || !content || !ref.current?.reloadEditor) return
       ref.current.reloadEditor(encodeDeltaContent(content))
     })
@@ -130,8 +137,6 @@ export default function StudiesDomWrapper({
     return () => {
       active = false
     }
-    // Refresh on entry/re-entry, not after each editor keystroke.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [studyId, isCurrentTab, isReadOnly])
 
   function dispatchToWebView(type: string, payload?: JSONValue): void {

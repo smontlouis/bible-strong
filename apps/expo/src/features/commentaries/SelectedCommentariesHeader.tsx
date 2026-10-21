@@ -239,8 +239,7 @@ const SortableCommentaryRow = ({
 
   React.useLayoutEffect(() => {
     scrollX.set(initialScrollX)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [scrollX, initialScrollX])
 
   useAnimatedReaction(
     () => scrollX.get() as number,

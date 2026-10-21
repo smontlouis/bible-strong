@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useEffectEvent, useState } from 'react'
 import { type QueryKey, useInfiniteQuery } from '@tanstack/react-query'
 import useDebounce from '~helpers/useDebounce'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
@@ -17,11 +17,10 @@ export const useSearchValue = ({ onDebouncedValue }: UseSearchValueOptions = {})
   const [searchValue, setSearchValue] = useState('')
   const debouncedSearchValue = useDebounce(searchValue, 600)
 
+  const notifyEmptyValue = useEffectEvent(() => onDebouncedValue?.())
+
   useEffect(() => {
-    if (!debouncedSearchValue && onDebouncedValue) {
-      onDebouncedValue()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!debouncedSearchValue) notifyEmptyValue()
   }, [debouncedSearchValue])
 
   return { searchValue, debouncedSearchValue, setSearchValue }

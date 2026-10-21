@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useEffectEvent } from 'react'
 import ContextualMenu from '~common/ContextualPanel/ContextualMenu'
 import verseToReference from '~helpers/verseToReference'
 import Header from '~common/Header'
@@ -62,9 +62,11 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
   // The site compares versions on the page of a verse; the reader's own version names it.
   const shareUrl = getVersesShareUrl(Object.keys(selectedVerses), useDefaultBibleVersion())
   const bottomInset = usePageBottomInset()
+  const updateTitle = useEffectEvent((reference: string) => {
+    setTitle(`${t('Comparer')} ${reference}`)
+  })
   useEffect(() => {
-    setTitle(`${t('Comparer')} ${title}`)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    updateTitle(title)
   }, [title])
 
   return (

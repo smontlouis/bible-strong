@@ -1,5 +1,5 @@
 import { type SheetRef } from '~common/sheet'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router'
 import { produce } from 'immer'
@@ -113,9 +113,9 @@ const EditStudyScreen = ({
   }
 
   // Control weither bible webview send back to study tab or not
+  const markOpenedFromTab = useEffectEvent(() => setOpenedFromTab(openedFromTab))
   useEffect(() => {
-    setOpenedFromTab(openedFromTab)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    markOpenedFromTab()
   }, [])
 
   useFocusEffect(
