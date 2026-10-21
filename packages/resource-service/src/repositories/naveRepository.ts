@@ -14,19 +14,25 @@ import {
   NaveTopicNotFound,
   type NaveRepositoryService,
   type NaveTopic,
+  type NaveTopicSummary,
 } from '../domain/nave'
+
+const mapTopicSummary = (row: {
+  normalized_name: string
+  name: string
+  initial: string
+}): NaveTopicSummary => ({
+  normalizedName: row.normalized_name,
+  name: row.name,
+  initial: row.initial,
+})
 
 const mapTopic = (row: {
   normalized_name: string
   name: string
   initial: string
   description: string
-}): NaveTopic => ({
-  normalizedName: row.normalized_name,
-  name: row.name,
-  initial: row.initial,
-  description: row.description,
-})
+}): NaveTopic => ({ ...mapTopicSummary(row), description: row.description })
 
 export const makeKyselyNaveRepository = (
   database: Kysely<ResourceDatabase>
@@ -67,9 +73,10 @@ export const makeKyselyNaveRepository = (
         if (!publication) {
           return yield* new ActiveNavePublicationUnavailable({ language: input.language })
         }
+        // A list names its topics; their descriptions are read one topic at a time.
         let query = database
           .selectFrom('nave_topics')
-          .select(['normalized_name', 'name', 'initial', 'description'])
+          .select(['normalized_name', 'name', 'initial'])
           .where('publication_id', '=', publication.id)
         if (input.initial) query = query.where('initial', '=', input.initial)
         if (input.search) query = query.where('name', 'ilike', `%${input.search.trim()}%`)
@@ -91,7 +98,7 @@ export const makeKyselyNaveRepository = (
         return {
           language: input.language,
           revision: publication.revision,
-          topics: rows.slice(0, limit).map(mapTopic),
+          topics: rows.slice(0, limit).map(mapTopicSummary),
           limit,
           ...(rows.length > limit && rows[limit - 1]
             ? {
@@ -123,7 +130,6 @@ export const makeKyselyNaveRepository = (
               'nave_topics.normalized_name',
               'nave_topics.name',
               'nave_topics.initial',
-              'nave_topics.description',
             ])
             .where('nave_verse_links.publication_id', '=', publication.id)
             .where('nave_verse_links.verse_key', 'in', [input.verseKey, chapterKey])
@@ -134,8 +140,8 @@ export const makeKyselyNaveRepository = (
           language: input.language,
           revision: publication.revision,
           verseKey: input.verseKey,
-          verseTopics: rows.filter(row => row.verse_key === input.verseKey).map(mapTopic),
-          chapterTopics: rows.filter(row => row.verse_key === chapterKey).map(mapTopic),
+          verseTopics: rows.filter(row => row.verse_key === input.verseKey).map(mapTopicSummary),
+          chapterTopics: rows.filter(row => row.verse_key === chapterKey).map(mapTopicSummary),
         }
       }),
     findRandomTopic: language =>

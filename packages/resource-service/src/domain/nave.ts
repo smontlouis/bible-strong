@@ -12,12 +12,12 @@ import {
 
 export type NaveLanguage = 'fr' | 'en'
 
-export type NaveTopic = {
+export type NaveTopicSummary = {
   normalizedName: string
   name: string
   initial: string
-  description: string
 }
+export type NaveTopic = NaveTopicSummary & { description: string }
 
 export type NaveTopicLookup = { language: NaveLanguage; normalizedName: string }
 export type NaveTopicList = {
@@ -38,7 +38,7 @@ type ActiveNaveTopic = {
 type ActiveNaveTopicList = {
   language: NaveLanguage
   revision: string
-  topics: readonly NaveTopic[]
+  topics: readonly NaveTopicSummary[]
   limit: number
   nextCursor?: string
 }
@@ -47,8 +47,8 @@ type ActiveNaveVerseTopics = {
   language: NaveLanguage
   revision: string
   verseKey: string
-  verseTopics: readonly NaveTopic[]
-  chapterTopics: readonly NaveTopic[]
+  verseTopics: readonly NaveTopicSummary[]
+  chapterTopics: readonly NaveTopicSummary[]
 }
 
 export class UnsupportedNaveLanguage extends Data.TaggedError('UnsupportedNaveLanguage')<{
@@ -68,9 +68,7 @@ export class NaveRepositoryFailure extends Data.TaggedError('NaveRepositoryFailu
 }> {}
 
 export type NaveRepositoryError =
-  | ActiveNavePublicationUnavailable
-  | NaveTopicNotFound
-  | NaveRepositoryFailure
+  ActiveNavePublicationUnavailable | NaveTopicNotFound | NaveRepositoryFailure
 
 export type NaveRepositoryService = {
   findTopic: (input: NaveTopicLookup) => Effect.Effect<ActiveNaveTopic, NaveRepositoryError>
@@ -95,13 +93,13 @@ const revisionDto = (language: NaveLanguage, revision: string) =>
   new NaveRevisionDto({ kind: 'nave', language, revision })
 
 const topicDto = (topic: NaveTopic) => new NaveTopicDto(topic)
-const summaryDto = (topic: NaveTopic) =>
+const summaryDto = (topic: NaveTopicSummary) =>
   new NaveTopicSummaryDto({
     normalizedName: topic.normalizedName,
     name: topic.name,
     initial: topic.initial,
   })
-const referenceDto = (topic: NaveTopic) =>
+const referenceDto = (topic: NaveTopicSummary) =>
   new NaveTopicReferenceDto({ normalizedName: topic.normalizedName, name: topic.name })
 
 export const readNaveTopic = (input: NaveTopicLookup) =>
