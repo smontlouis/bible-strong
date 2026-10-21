@@ -1,0 +1,46 @@
+steps:
+  - tap:
+      x: 0.136
+      y: 0.94
+  - tool: gesture-tap
+    args:
+      x: 0.473
+      y: 0.93
+    delayMs: 800
+  - tool: gesture-tap
+    args:
+      x: 0.864
+      y: 0.94
+    delayMs: 800
+  - tool: run-sequence
+    args:
+      steps:
+        - tool: gesture-tap
+          args:
+            x: 0.112
+            y: 0.093
+          delayMs: 800
+        - tool: gesture-tap
+          args:
+            x: 0.136
+            y: 0.94
+          delayMs: 1200
+        - tool: gesture-tap
+          args:
+            x: 0.473
+            y: 0.93
+          delayMs: 800
+        - tool: gesture-tap
+          args:
+            x: 0.864
+            y: 0.94
+          delayMs: 1200
+        - tool: gesture-tap
+          args:
+            x: 0.112
+            y: 0.093
+          delayMs: 800
+    delayMs: 800
+executionPrerequisite: Bible Strong production app (com.smontlouis.biblestrong)
+  in the foreground on the Bible reader, signed in to the heavy test account
+  (~3000 highlights, 11 tabs), first sync finished.
