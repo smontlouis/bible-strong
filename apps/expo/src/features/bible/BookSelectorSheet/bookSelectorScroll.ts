@@ -17,6 +17,17 @@ export const getListChapterLayout = (windowWidth: number) => {
   }
 }
 
+// Height of an expanded book's chapter grid, padding included
+export const getListChapterGridHeight = (chapterCount: number, windowWidth: number) => {
+  const rows = Math.ceil(chapterCount / getListChapterLayout(windowWidth).itemsPerRow)
+
+  return (
+    rows * LIST_CHAPTER_SIZE +
+    Math.max(0, rows - 1) * LIST_CHAPTER_GAP +
+    2 * LIST_CHAPTER_VERTICAL_PADDING
+  )
+}
+
 interface ChapterRowScrollInput {
   chapterIndex: number
   itemsPerRow: number

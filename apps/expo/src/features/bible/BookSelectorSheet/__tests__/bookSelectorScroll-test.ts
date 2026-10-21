@@ -1,6 +1,7 @@
 import {
   getBookListScrollOffset,
   getChapterRowScrollOffset,
+  getListChapterGridHeight,
   getListChapterLayout,
 } from '../bookSelectorScroll'
 
@@ -59,5 +60,16 @@ describe('getChapterRowScrollOffset', () => {
 
   it('waits for a measured viewport', () => {
     expect(getChapterRowScrollOffset({ ...grid, chapterIndex: 118, viewportHeight: 0 })).toBe(0)
+  })
+})
+
+describe('getListChapterGridHeight', () => {
+  it('stacks full and partial rows of chapters between the grid padding', () => {
+    // Genesis: 50 chapters, ten rows of five on a phone
+    expect(getListChapterGridHeight(50, 390)).toBe(10 * 60 + 9 * 10 + 20)
+    // Psalms: 150 chapters, 22 rows of seven on a tablet
+    expect(getListChapterGridHeight(150, 1024)).toBe(22 * 60 + 21 * 10 + 20)
+    // Jude: a single chapter
+    expect(getListChapterGridHeight(1, 390)).toBe(60 + 20)
   })
 })

@@ -1,6 +1,6 @@
 import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
-import React, { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
-import { useAtomValue, useSetAtom } from 'jotai/react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useAtomValue, useSetAtom, useStore } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { DeviceEventEmitter, FlatList, useWindowDimensions } from 'react-native'
 import { useSharedValue } from 'react-native-reanimated'
@@ -41,6 +41,8 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
   const [expandedBookNumber, setExpandedBookNumber] = useState<number | null>(null)
   const [renderedChapterBookNumbers, setRenderedChapterBookNumbers] = useState<number[]>([])
   const [gridBook, setGridBook] = useState<Book | null>(null)
+  // The book the selector opened on shows its chapters without animating, until the reader taps a book
+  const [instantBookNumber, setInstantBookNumber] = useState<number | null>(null)
   const collapseTimeouts = useRef<Record<number, ReturnType<typeof setTimeout>>>({})
   const flatListRef = useRef<FlatList>(null)
   const isPresentedRef = useRef(false)
@@ -54,6 +56,7 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
   const bookSelectorHasVerses = verses === 'with-verses'
   const setTempSelectedBook = useSetAtom(tempSelectedBookAtom)
   const setTempSelectedChapter = useSetAtom(tempSelectedChapterAtom)
+  const store = useStore()
   const bookSelectorState = useAtomValue(bookSelectorDataAtom)
   const {
     actions: bookSelectorActions,
@@ -178,21 +181,24 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
   )
 
   // The provider sets a new state right before presenting, even when the tab data is unchanged:
-  // every opening starts on the book being read
-  const startOnSelectedBook = useEffectEvent(() => {
-    if (isPresentedRef.current || !bookSelectorData) return
+  // every opening starts on the book being read. Preparing it as the state is written, not in an
+  // effect, lets the list render its first frame with that book already expanded and in view
+  useEffect(
+    () =>
+      store.sub(bookSelectorDataAtom, () => {
+        const book = store.get(bookSelectorDataAtom).data?.selectedBook
+        if (isPresentedRef.current || !book) return
 
-    const book = bookSelectorData.selectedBook
-    Object.values(collapseTimeouts.current).forEach(clearTimeout)
-    collapseTimeouts.current = {}
-    expandedBook.set(book.Numero)
-    setExpandedBookNumber(book.Numero)
-    setRenderedChapterBookNumbers([book.Numero])
-    setGridBook(book)
-  })
-  useEffect(() => {
-    startOnSelectedBook()
-  }, [bookSelectorState])
+        Object.values(collapseTimeouts.current).forEach(clearTimeout)
+        collapseTimeouts.current = {}
+        expandedBook.set(book.Numero)
+        setExpandedBookNumber(book.Numero)
+        setRenderedChapterBookNumbers([book.Numero])
+        setInstantBookNumber(book.Numero)
+        setGridBook(book)
+      }),
+    [store, expandedBook]
+  )
 
   const scheduleChapterUnmount = (bookNumber: number) => {
     clearTimeout(collapseTimeouts.current[bookNumber])
@@ -204,6 +210,7 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
 
   const handleBookSelect = (book: Book) => {
     const currentExpandedBookNumber = expandedBookNumber
+    setInstantBookNumber(null)
 
     if (currentExpandedBookNumber === book.Numero) {
       expandedBook.set(null)
@@ -233,17 +240,12 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
         snapPoints={[1]}
         onPresent={() => {
           isPresentedRef.current = true
-          if (data.length > 0) {
-            flatListRef.current?.scrollToOffset({
-              offset: initialScrollOffset,
-              animated: false,
-            })
-          }
         }}
         onDismiss={() => {
           isPresentedRef.current = false
           expandedBook.set(null)
           setExpandedBookNumber(null)
+          setInstantBookNumber(null)
           setGridBook(null)
           Object.values(collapseTimeouts.current).forEach(clearTimeout)
           collapseTimeouts.current = {}
@@ -287,6 +289,7 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
           flatListRef={flatListRef}
           chaptersByBook={coverageData?.chaptersByBook}
           renderedChapterBookNumbers={renderedChapterBookNumbers}
+          instantBookNumber={instantBookNumber}
           onBookSelect={handleBookSelect}
           gridBook={gridBook}
           onGridBookSelect={setGridBook}

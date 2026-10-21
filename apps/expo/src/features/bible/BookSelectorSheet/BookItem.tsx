@@ -12,6 +12,7 @@ import Text from '~common/ui/Text'
 import AccordionItem from './AccordionItem'
 import {
   BOOK_ITEM_HEIGHT,
+  getListChapterGridHeight,
   getListChapterLayout,
   LIST_CHAPTER_GAP,
   LIST_CHAPTER_SIZE,
@@ -28,6 +29,8 @@ interface BookItemProps {
   onBookSelect: (book: Book) => void
   expandedBook: SharedValue<number | null>
   shouldRenderChapters: boolean
+  /** Shows the chapters already expanded, as when the selector opens on this book. */
+  expandsInstantly: boolean
 }
 
 export const itemHeight = BOOK_ITEM_HEIGHT
@@ -42,6 +45,7 @@ const BookItem = memo(
     onBookSelect,
     expandedBook,
     shouldRenderChapters,
+    expandsInstantly,
   }: BookItemProps) => {
     const { t } = useTranslation()
     const { width: windowWidth } = useWindowDimensions()
@@ -115,7 +119,13 @@ const BookItem = memo(
           </HStack>
         </TouchableOpacity>
         {shouldRenderChapters && (
-          <AccordionItem isExpanded={isExpanded} viewKey={book.Nom}>
+          <AccordionItem
+            isExpanded={isExpanded}
+            viewKey={book.Nom}
+            initialHeight={
+              expandsInstantly ? getListChapterGridHeight(chapters.length, windowWidth) : undefined
+            }
+          >
             <HStack
               className="overflow-hidden border-continuous"
               style={[
@@ -185,7 +195,8 @@ const BookItem = memo(
     return (
       prevProps.isSelected === nextProps.isSelected &&
       prevProps.selectedChapter === nextProps.selectedChapter &&
-      prevProps.shouldRenderChapters === nextProps.shouldRenderChapters
+      prevProps.shouldRenderChapters === nextProps.shouldRenderChapters &&
+      prevProps.expandsInstantly === nextProps.expandsInstantly
     )
   }
 )

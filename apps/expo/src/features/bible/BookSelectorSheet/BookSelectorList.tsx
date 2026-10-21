@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { FlatList, ScrollView } from 'react-native'
 import { bookSelectorSelectionModeAtom } from './atom'
 import { useAtomValue } from 'jotai/react'
@@ -20,6 +20,7 @@ interface BookSelectorListProps {
   flatListRef: React.RefObject<FlatList | null>
   chaptersByBook?: Record<number, number[]>
   renderedChapterBookNumbers: number[]
+  instantBookNumber: number | null
   onBookSelect: (book: Book) => void
   gridBook: Book | null
   onGridBookSelect: (book: Book) => void
@@ -32,6 +33,7 @@ export const BookSelectorList = ({
   flatListRef,
   chaptersByBook,
   renderedChapterBookNumbers,
+  instantBookNumber,
   onBookSelect,
   gridBook,
   onGridBookSelect,
@@ -52,11 +54,20 @@ export const BookSelectorList = ({
         onBookSelect={onBookSelect}
         expandedBook={expandedBook}
         shouldRenderChapters={renderedChapterBookNumbers.includes(book.Numero)}
+        expandsInstantly={book.Numero === instantBookNumber}
       />
     )
   }
 
+  // The list mounts with each opening and starts at this offset; later changes scroll to it
+  const [mountScrollOffset] = useState(initialScrollOffset)
+  const hasMountedRef = useRef(false)
+
   useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true
+      return
+    }
     if (data.length === 0) return
     const scrollTimer = setTimeout(() => {
       flatListRef.current?.scrollToOffset({
@@ -114,6 +125,9 @@ export const BookSelectorList = ({
       data={data}
       renderItem={renderItem}
       keyExtractor={item => item.Numero.toString()}
+      contentOffset={{ x: 0, y: mountScrollOffset }}
+      // Every book is rendered at once, so the offset lands on laid out rows
+      initialNumToRender={data.length}
       maintainVisibleContentPosition={{
         minIndexForVisible: 0,
       }}
