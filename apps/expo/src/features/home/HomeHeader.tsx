@@ -5,6 +5,10 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import UserAvatar from '~common/ui/UserAvatar'
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
+import {
+  useWorkspaceHeaderInset,
+  WORKSPACE_SIDEBAR_BUTTON_HEIGHT,
+} from '~features/app-switcher/workspaceHeaderInset'
 import useLogin from '~helpers/useLogin'
 import { useTheme } from '~themes/ThemeProvider'
 import { resolveFontFamily } from '~themes/styleValues'
@@ -22,6 +26,8 @@ const HomeHeader = () => {
   const theme = useTheme()
   const { isLogged, user } = useLogin()
   const isWide = useResponsiveWorkspace()
+  // The home has no header bar: its greeting starts below the sidebar button.
+  const sidebarButtonClearance = useWorkspaceHeaderInset() ? WORKSPACE_SIDEBAR_BUTTON_HEIGHT : 20
   const search = Platform.OS === 'web' && isWide
   const firstName = user.displayName?.trim().split(/\s+/)[0]
   const date = new Date().toLocaleDateString(i18n.language, {
@@ -32,7 +38,8 @@ const HomeHeader = () => {
 
   return (
     <Box
-      className={`flex-row items-end justify-between gap-[12px] px-[20px] pt-[20px] ${search ? 'flex-wrap' : ''}`}
+      className={`flex-row items-end justify-between gap-[12px] px-[20px] ${search ? 'flex-wrap' : ''}`}
+      style={{ paddingTop: sidebarButtonClearance }}
     >
       <Box className="min-w-0" style={search ? { flexGrow: 1, flexBasis: 240 } : { flex: 1 }}>
         <Text className="text-[12px] leading-[16px] font-bold uppercase tracking-[1.5px] text-tertiary">

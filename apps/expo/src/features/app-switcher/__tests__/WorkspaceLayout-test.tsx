@@ -48,6 +48,7 @@ jest.mock('../utils/useResponsiveWorkspace', () => ({
   useResponsiveWorkspace: () => true,
   WORKSPACE_SIDEBAR_WIDTH: 260,
   WORKSPACE_FRAME_GAP: 8,
+  useWorkspaceSidebarWidth: () => 260,
   workspaceSidebarVariant: 'inset',
 }))
 

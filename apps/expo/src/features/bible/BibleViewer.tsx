@@ -11,7 +11,7 @@ import * as Sentry from '@sentry/react-native'
 import { useCallback, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react'
 import { Platform, type LayoutChangeEvent } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
-import Box, { TouchableBox } from '~common/ui/Box'
+import Box, { RightInsetCleared, TouchableBox, useRightInsetToClear } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import BibleViewport from './BibleViewport'
 import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
@@ -217,6 +217,7 @@ const BibleViewer = ({
   isInTab,
   initialAnnotationId,
 }: BibleViewerProps) => {
+  const rightInset = useRightInsetToClear()
   const { t } = useTranslation()
   const confirmDeletion = useConfirmDialog()
   const pushRouteOnce = usePushRouteOnce()
@@ -1607,301 +1608,307 @@ const BibleViewer = ({
   }
 
   return (
-    <BibleViewport className="overflow-hidden border-continuous flex-[1] bg-reverse">
-      <BibleHeader
-        onNavigateToVerse={destination => {
-          // A plan keeps its passage: reaching another verse only opens the whole chapter.
-          if (isContextFocused && planPassage) actions.expandContext()
-          else if (isContextFocused) actions.clearFocusVerses()
-          actions.setSelectedVerse(destination)
-          setVerseNavigationRequest(request => request + 1)
-        }}
-        bibleAtom={bibleAtom}
-        onBibleParamsClick={bibleParamsModal.open}
-        isFormSheet={isFormSheet}
-        isInTab={isInTab}
-        annotationModeEnabled={annotationMode.enabled && !hidePersonalBibleData}
-        annotationSelection={
-          annotationMode.selection
-            ? {
-                startVerseKey: annotationMode.selection.start.verseKey,
-                endVerseKey: annotationMode.selection.end.verseKey,
-              }
-            : null
-        }
-        annotatedVersion={annotationMode.version}
-        hidePersonalBibleData={hidePersonalBibleData}
-        coverage={coverageData}
-        onOpenTextMode={(kind, column) => textModeSheetsRef.current?.open(kind, column)}
-      />
-      <BibleTextModeSheets bibleAtom={bibleAtom} ref={textModeSheetsRef} />
-      {planPassage && !annotationMode.enabled ? (
-        <PlanPassageBanner
-          reference={planReference}
-          focused={focusVerses?.length ? isContextFocused : undefined}
+    <BibleViewport
+      className="overflow-hidden border-continuous flex-[1] bg-reverse"
+      // Clear a landscape iPhone's camera, as SafeAreaBox does for other pages.
+      style={{ paddingRight: isFormSheet ? 0 : rightInset }}
+    >
+      <RightInsetCleared>
+        <BibleHeader
+          onNavigateToVerse={destination => {
+            // A plan keeps its passage: reaching another verse only opens the whole chapter.
+            if (isContextFocused && planPassage) actions.expandContext()
+            else if (isContextFocused) actions.clearFocusVerses()
+            actions.setSelectedVerse(destination)
+            setVerseNavigationRequest(request => request + 1)
+          }}
+          bibleAtom={bibleAtom}
+          onBibleParamsClick={bibleParamsModal.open}
           isFormSheet={isFormSheet}
-          onExpand={actions.expandContext}
-          onCollapse={actions.collapseContext}
-          onExit={actions.exitPlanMode}
+          isInTab={isInTab}
+          annotationModeEnabled={annotationMode.enabled && !hidePersonalBibleData}
+          annotationSelection={
+            annotationMode.selection
+              ? {
+                  startVerseKey: annotationMode.selection.start.verseKey,
+                  endVerseKey: annotationMode.selection.end.verseKey,
+                }
+              : null
+          }
+          annotatedVersion={annotationMode.version}
+          hidePersonalBibleData={hidePersonalBibleData}
+          coverage={coverageData}
+          onOpenTextMode={(kind, column) => textModeSheetsRef.current?.open(kind, column)}
         />
-      ) : (
-        !!focusVerses?.length &&
-        !annotationMode.enabled && (
-          <PassageContextButton
-            focused={isContextFocused}
+        <BibleTextModeSheets bibleAtom={bibleAtom} ref={textModeSheetsRef} />
+        {planPassage && !annotationMode.enabled ? (
+          <PlanPassageBanner
+            reference={planReference}
+            focused={focusVerses?.length ? isContextFocused : undefined}
             isFormSheet={isFormSheet}
             onExpand={actions.expandContext}
             onCollapse={actions.collapseContext}
-            onExit={actions.clearFocusVerses}
+            onExit={actions.exitPlanMode}
           />
-        )
-      )}
-      {settings.redWordsDisplay && redWordsFailureIsTemporary && (
-        <Box className="border-continuous overflow-hidden bg-reverse border-b-[1px] border-border">
-          <ResourceUnavailableView
-            identity={{ kind: 'bible', versionId: version }}
-            title={t('resource.redWords.temporarilyUnavailable')}
-            fileSize={Math.max(
-              1,
-              Math.round(
-                createOfflineCopyDownloadItem({ kind: 'bible', versionId: version }).estimatedSize /
-                  1_000_000
-              )
-            )}
-            failure={resourceFailureFromAccessError(
-              redWordsQuery.error ?? redWordsAvailabilityQuery.error
-            )}
-            size="small"
-            onRetry={() => {
-              void redWordsAvailabilityQuery.refetch()
-              void redWordsQuery.refetch()
-            }}
-          />
-        </Box>
-      )}
-      {settings.redWordsDisplay && redWordsUnavailable && (
-        <Box className="border-continuous overflow-hidden bg-reverse border-b-[1px] border-border">
-          <ResourceUnavailableView
-            identity={redWordsUnavailable.recoveryIdentity}
-            title={t('resource.redWords.offlineCopyNeeded')}
-            offlineTitle={t('resource.redWords.temporarilyUnavailable')}
-            fileSize={Math.max(
-              1,
-              Math.round(
-                createOfflineCopyDownloadItem(redWordsUnavailable.recoveryIdentity).estimatedSize /
-                  1_000_000
-              )
-            )}
-            failure={resourceFailureFromAvailability({
-              reason: redWordsUnavailable.reason,
-              recoveries:
-                redWordsUnavailable.reason === 'invalid-offline-copy'
-                  ? ['acquire-offline-copy', 'manage-offline-copies']
-                  : ['acquire-offline-copy'],
-            })}
-            size="small"
-            onRetry={() => {
-              void redWordsAvailabilityQuery.refetch()
-              void redWordsQuery.refetch()
-            }}
-          />
-        </Box>
-      )}
-      {readingCommentaries.length > 0 &&
-        (inlineCommentaryQuery.isError || !!inlineCommentaryQuery.data?.unavailable.length) && (
-          <Box className="flex-row items-center gap-[12px] px-[16px] py-[8px] bg-reverse">
-            <Text className="flex-1 text-[12px] text-tertiary">
-              {t('inlineCommentary.unavailable')}
-            </Text>
-            <TouchableBox
-              className="min-h-[44px] justify-center"
-              accessibilityRole="button"
-              onPress={() => void inlineCommentaryQuery.refetch()}
-            >
-              <Text className="text-[12px] font-semibold text-primary">
-                {t('bible.error.retry')}
-              </Text>
-            </TouchableBox>
-            <TouchableBox
-              className="min-h-[44px] justify-center"
-              accessibilityRole="button"
-              onPress={bibleParamsModal.open}
-            >
-              <Text className="text-[12px] font-semibold text-primary">
-                {t('inlineCommentary.options')}
-              </Text>
-            </TouchableBox>
-          </Box>
-        )}
-      <Box
-        className="overflow-hidden border-continuous flex-[1]"
-        style={{ zIndex: domLayerZIndex }}
-      >
-        {useSharedDOM ? (
-          // Keep every host mounted so Android only retargets between
-          // stable native parents instead of unmounting/remounting hosts.
-          <Box
-            className="overflow-hidden border-continuous flex-[1]"
-            onLayout={handleBibleDOMHostLayout}
-          >
-            <BibleDOMPortalHost
-              name={getBibleDOMDestination(bible.id)}
-              style={{ flex: 1, zIndex: domLayerZIndex }}
-            />
-            {!isActiveBibleTab && (
-              <Box className="overflow-hidden border-continuous absolute top-[0px] left-[0px] right-[0px] bottom-[0px]">
-                <SnapshotPlaceholder base64={bible.base64Preview} />
-              </Box>
-            )}
-          </Box>
         ) : (
-          // Stack navigation mode: render own BibleDOMWrapper inline
-          <BibleDOMWrapper {...domProps} />
+          !!focusVerses?.length &&
+          !annotationMode.enabled && (
+            <PassageContextButton
+              focused={isContextFocused}
+              isFormSheet={isFormSheet}
+              onExpand={actions.expandContext}
+              onCollapse={actions.collapseContext}
+              onExit={actions.clearFocusVerses}
+            />
+          )
         )}
-      </Box>
-      {!isContextFocused && (
-        <FooterInSheetProvider value={!!isFormSheet}>
-          <BibleFooter
-            bibleAtom={bibleAtom}
-            disabled={isLoading}
-            book={book}
-            chapter={chapter}
-            chapterVerses={
-              mainReadingQuery.isPlaceholderData || !mainChapterData ? undefined : verses
-            }
-            coverage={coverageData}
-            goToPrevChapter={goToPrevAvailableChapter}
-            goToNextChapter={goToNextAvailableChapter}
-            goToChapter={goToChapter}
-            version={version}
-            isInTab={isInTab}
-          />
-        </FooterInSheetProvider>
-      )}
-      <CreateEntityRelationModal
-        ref={createRelationModal.getRef()}
-        sourceEndpoint={createRelationSourceEndpoint}
-        onCreated={handleRelationCreatedFromSelection}
-      />
-      <ResourcesModal
-        resourceModalRef={resourceModal.getRef()}
-        bibleAtom={bibleAtom}
-        resourceType={resourceType}
-        onChangeResourceType={onChangeResourceType}
-        isSelectionMode={isSelectionMode}
-        selectedVersion={resourceModalSelection?.selectedVersion ?? selectionVersion}
-        selectedVerses={resourceModalSelection?.selectedVerses}
-        onChangeVerse={changeResourceModalVerse}
-      />
-      <BibleParamsModal modalRef={bibleParamsModal.getRef()} />
-      <AddToStudyModal
-        sheetRef={addToStudyModal.getRef()}
-        onSelectStudy={handleSelectStudy}
-        reference={selectedVersesReference}
-      />
-      <VerseFormatSheet
-        sheetRef={verseFormatModal.getRef()}
-        onSelectFormat={handleSelectFormat}
-        reference={pendingVerseData?.verseData.title || selectedVersesReference}
-      />
-      <BookmarkModal
-        sheetRef={bookmarkModalRef}
-        onClose={() => {
-          setSelectedVerseForBookmark(null)
-          setEditingBookmark(null)
-        }}
-        book={selectedVerseForBookmark?.book ?? editingBookmark?.book}
-        chapter={selectedVerseForBookmark?.chapter ?? editingBookmark?.chapter}
-        verse={selectedVerseForBookmark?.verse ?? editingBookmark?.verse}
-        version={selectedVerseForBookmark?.version ?? version}
-        existingBookmark={editingBookmark || undefined}
-      />
-      <BibleSelectionSheet
-        ref={selectionSheet.getRef()}
-        isAnnotating={isAnnotating}
-        verses={
-          hidePersonalBibleData
-            ? null
-            : {
-                isSelectionMode,
-                selectedVerseHighlightColor,
-                onChangeResourceType: val => {
-                  setResourceModalSelection(null)
-                  onChangeResourceType(val)
-                  resourceModal.open()
-                },
-                onCreateNoteClick: toggleCreateNote,
-                onCreateLinkClick: toggleCreateLink,
-                onCreateStudyRelationClick: toggleCreateStudyRelation,
-                addHighlight: addHiglightAndOpenQuickTags,
-                addTag,
-                removeHighlight: () => {
-                  dispatch(removeHighlight({ selectedVerses }))
-                },
-                clearSelectedVerses: actions.clearSelectedVerses,
-                selectedVerses,
-                selectAllVerses,
-                version: selectionVersion,
-                onAddToStudy: handleOpenAddToStudy,
-                onSelectStudy: handleSelectStudy,
-                onAddBookmark: handleAddBookmark,
-                onPinVerses: handlePinVerses,
-                focusVerses,
+        {settings.redWordsDisplay && redWordsFailureIsTemporary && (
+          <Box className="border-continuous overflow-hidden bg-reverse border-b-[1px] border-border">
+            <ResourceUnavailableView
+              identity={{ kind: 'bible', versionId: version }}
+              title={t('resource.redWords.temporarilyUnavailable')}
+              fileSize={Math.max(
+                1,
+                Math.round(
+                  createOfflineCopyDownloadItem({ kind: 'bible', versionId: version })
+                    .estimatedSize / 1_000_000
+                )
+              )}
+              failure={resourceFailureFromAccessError(
+                redWordsQuery.error ?? redWordsAvailabilityQuery.error
+              )}
+              size="small"
+              onRetry={() => {
+                void redWordsAvailabilityQuery.refetch()
+                void redWordsQuery.refetch()
+              }}
+            />
+          </Box>
+        )}
+        {settings.redWordsDisplay && redWordsUnavailable && (
+          <Box className="border-continuous overflow-hidden bg-reverse border-b-[1px] border-border">
+            <ResourceUnavailableView
+              identity={redWordsUnavailable.recoveryIdentity}
+              title={t('resource.redWords.offlineCopyNeeded')}
+              offlineTitle={t('resource.redWords.temporarilyUnavailable')}
+              fileSize={Math.max(
+                1,
+                Math.round(
+                  createOfflineCopyDownloadItem(redWordsUnavailable.recoveryIdentity)
+                    .estimatedSize / 1_000_000
+                )
+              )}
+              failure={resourceFailureFromAvailability({
+                reason: redWordsUnavailable.reason,
+                recoveries:
+                  redWordsUnavailable.reason === 'invalid-offline-copy'
+                    ? ['acquire-offline-copy', 'manage-offline-copies']
+                    : ['acquire-offline-copy'],
+              })}
+              size="small"
+              onRetry={() => {
+                void redWordsAvailabilityQuery.refetch()
+                void redWordsQuery.refetch()
+              }}
+            />
+          </Box>
+        )}
+        {readingCommentaries.length > 0 &&
+          (inlineCommentaryQuery.isError || !!inlineCommentaryQuery.data?.unavailable.length) && (
+            <Box className="flex-row items-center gap-[12px] px-[16px] py-[8px] bg-reverse">
+              <Text className="flex-1 text-[12px] text-tertiary">
+                {t('inlineCommentary.unavailable')}
+              </Text>
+              <TouchableBox
+                className="min-h-[44px] justify-center"
+                accessibilityRole="button"
+                onPress={() => void inlineCommentaryQuery.refetch()}
+              >
+                <Text className="text-[12px] font-semibold text-primary">
+                  {t('bible.error.retry')}
+                </Text>
+              </TouchableBox>
+              <TouchableBox
+                className="min-h-[44px] justify-center"
+                accessibilityRole="button"
+                onPress={bibleParamsModal.open}
+              >
+                <Text className="text-[12px] font-semibold text-primary">
+                  {t('inlineCommentary.options')}
+                </Text>
+              </TouchableBox>
+            </Box>
+          )}
+        <Box
+          className="overflow-hidden border-continuous flex-[1]"
+          style={{ zIndex: domLayerZIndex }}
+        >
+          {useSharedDOM ? (
+            // Keep every host mounted so Android only retargets between
+            // stable native parents instead of unmounting/remounting hosts.
+            <Box
+              className="overflow-hidden border-continuous flex-[1]"
+              onLayout={handleBibleDOMHostLayout}
+            >
+              <BibleDOMPortalHost
+                name={getBibleDOMDestination(bible.id)}
+                style={{ flex: 1, zIndex: domLayerZIndex }}
+              />
+              {!isActiveBibleTab && (
+                <Box className="overflow-hidden border-continuous absolute top-[0px] left-[0px] right-[0px] bottom-[0px]">
+                  <SnapshotPlaceholder base64={bible.base64Preview} />
+                </Box>
+              )}
+            </Box>
+          ) : (
+            // Stack navigation mode: render own BibleDOMWrapper inline
+            <BibleDOMWrapper {...domProps} />
+          )}
+        </Box>
+        {!isContextFocused && (
+          <FooterInSheetProvider value={!!isFormSheet}>
+            <BibleFooter
+              bibleAtom={bibleAtom}
+              disabled={isLoading}
+              book={book}
+              chapter={chapter}
+              chapterVerses={
+                mainReadingQuery.isPlaceholderData || !mainChapterData ? undefined : verses
               }
-        }
-        annotation={{
-          hasSelection: annotationMode.hasSelection,
-          selection: annotationMode.selection,
-          onApplyAnnotation: handleApplyAnnotation,
-          onClearSelection: annotationMode.clearSelection,
-          onEraseAnnotations: handleEraseAnnotations,
-          onClose: handleExitAnnotationMode,
-          selectedAnnotation: annotationMode.selectedAnnotation,
-          onChangeAnnotationColor: annotationMode.changeAnnotationColor,
-          onChangeAnnotationType: annotationMode.changeAnnotationType,
-          onDeleteAnnotation: handleDeleteAnnotation,
-          onClearAnnotationSelection: annotationMode.clearAnnotationSelection,
-          onNotePress: handleAnnotationNotePress,
-          onTagsPress: handleAnnotationTagsPress,
-          onRelationsPress: handleAnnotationRelationsPress,
-          tagsCount: Object.keys(annotationMode.selectedAnnotation?.tags || {}).length,
-          relationsCount: annotationRelationCount,
-          version: parallelVersions.length > 0 ? annotationMode.version : undefined,
-          annotatedVersion: annotationMode.version,
-          entryVerseKey: annotationEntryVerseKey,
-          isEnabled: isAnnotating,
-        }}
-      />
-      <CrossVersionAnnotationsModal
-        sheetRef={crossVersionModal.getRef()}
-        verseKey={crossVersionModalData?.verseKey ?? null}
-        versions={crossVersionModalData?.versions ?? []}
-        onSwitchVersion={handleCrossVersionSwitchVersion}
-        onOpenInNewTab={handleCrossVersionOpenInNewTab}
-        onClose={() => setCrossVersionModalData(null)}
-      />
-      <VerseTagsModal
-        ref={verseTagsModal.getRef()}
-        verseKey={verseTagsModalKey}
-        version={displayedVersions}
-      />
-      <CanonicalBibleNoteSheet
-        sheetRef={canonicalBibleNoteModal.getRef()}
-        note={canonicalBibleNote}
-        onReferencePress={handleCanonicalBibleReferencePress}
-      />
-      <StrongSelectionSheet
-        sheetRef={strongSelectionModalRef}
-        version={strongSelectionData?.version}
-        book={strongSelectionData?.book}
-        chapter={strongSelectionData?.chapter}
-        verse={strongSelectionData?.verse}
-        word={strongSelectionData?.word}
-        identities={strongSelectionData?.identities ?? []}
-        morphologies={strongSelectionData?.morphologies ?? []}
-        onDismissStart={startClosingStrongSelection}
-        onClose={closeStrongSelection}
-      />
+              coverage={coverageData}
+              goToPrevChapter={goToPrevAvailableChapter}
+              goToNextChapter={goToNextAvailableChapter}
+              goToChapter={goToChapter}
+              version={version}
+              isInTab={isInTab}
+            />
+          </FooterInSheetProvider>
+        )}
+        <CreateEntityRelationModal
+          ref={createRelationModal.getRef()}
+          sourceEndpoint={createRelationSourceEndpoint}
+          onCreated={handleRelationCreatedFromSelection}
+        />
+        <ResourcesModal
+          resourceModalRef={resourceModal.getRef()}
+          bibleAtom={bibleAtom}
+          resourceType={resourceType}
+          onChangeResourceType={onChangeResourceType}
+          isSelectionMode={isSelectionMode}
+          selectedVersion={resourceModalSelection?.selectedVersion ?? selectionVersion}
+          selectedVerses={resourceModalSelection?.selectedVerses}
+          onChangeVerse={changeResourceModalVerse}
+        />
+        <BibleParamsModal modalRef={bibleParamsModal.getRef()} />
+        <AddToStudyModal
+          sheetRef={addToStudyModal.getRef()}
+          onSelectStudy={handleSelectStudy}
+          reference={selectedVersesReference}
+        />
+        <VerseFormatSheet
+          sheetRef={verseFormatModal.getRef()}
+          onSelectFormat={handleSelectFormat}
+          reference={pendingVerseData?.verseData.title || selectedVersesReference}
+        />
+        <BookmarkModal
+          sheetRef={bookmarkModalRef}
+          onClose={() => {
+            setSelectedVerseForBookmark(null)
+            setEditingBookmark(null)
+          }}
+          book={selectedVerseForBookmark?.book ?? editingBookmark?.book}
+          chapter={selectedVerseForBookmark?.chapter ?? editingBookmark?.chapter}
+          verse={selectedVerseForBookmark?.verse ?? editingBookmark?.verse}
+          version={selectedVerseForBookmark?.version ?? version}
+          existingBookmark={editingBookmark || undefined}
+        />
+        <BibleSelectionSheet
+          ref={selectionSheet.getRef()}
+          isAnnotating={isAnnotating}
+          verses={
+            hidePersonalBibleData
+              ? null
+              : {
+                  isSelectionMode,
+                  selectedVerseHighlightColor,
+                  onChangeResourceType: val => {
+                    setResourceModalSelection(null)
+                    onChangeResourceType(val)
+                    resourceModal.open()
+                  },
+                  onCreateNoteClick: toggleCreateNote,
+                  onCreateLinkClick: toggleCreateLink,
+                  onCreateStudyRelationClick: toggleCreateStudyRelation,
+                  addHighlight: addHiglightAndOpenQuickTags,
+                  addTag,
+                  removeHighlight: () => {
+                    dispatch(removeHighlight({ selectedVerses }))
+                  },
+                  clearSelectedVerses: actions.clearSelectedVerses,
+                  selectedVerses,
+                  selectAllVerses,
+                  version: selectionVersion,
+                  onAddToStudy: handleOpenAddToStudy,
+                  onSelectStudy: handleSelectStudy,
+                  onAddBookmark: handleAddBookmark,
+                  onPinVerses: handlePinVerses,
+                  focusVerses,
+                }
+          }
+          annotation={{
+            hasSelection: annotationMode.hasSelection,
+            selection: annotationMode.selection,
+            onApplyAnnotation: handleApplyAnnotation,
+            onClearSelection: annotationMode.clearSelection,
+            onEraseAnnotations: handleEraseAnnotations,
+            onClose: handleExitAnnotationMode,
+            selectedAnnotation: annotationMode.selectedAnnotation,
+            onChangeAnnotationColor: annotationMode.changeAnnotationColor,
+            onChangeAnnotationType: annotationMode.changeAnnotationType,
+            onDeleteAnnotation: handleDeleteAnnotation,
+            onClearAnnotationSelection: annotationMode.clearAnnotationSelection,
+            onNotePress: handleAnnotationNotePress,
+            onTagsPress: handleAnnotationTagsPress,
+            onRelationsPress: handleAnnotationRelationsPress,
+            tagsCount: Object.keys(annotationMode.selectedAnnotation?.tags || {}).length,
+            relationsCount: annotationRelationCount,
+            version: parallelVersions.length > 0 ? annotationMode.version : undefined,
+            annotatedVersion: annotationMode.version,
+            entryVerseKey: annotationEntryVerseKey,
+            isEnabled: isAnnotating,
+          }}
+        />
+        <CrossVersionAnnotationsModal
+          sheetRef={crossVersionModal.getRef()}
+          verseKey={crossVersionModalData?.verseKey ?? null}
+          versions={crossVersionModalData?.versions ?? []}
+          onSwitchVersion={handleCrossVersionSwitchVersion}
+          onOpenInNewTab={handleCrossVersionOpenInNewTab}
+          onClose={() => setCrossVersionModalData(null)}
+        />
+        <VerseTagsModal
+          ref={verseTagsModal.getRef()}
+          verseKey={verseTagsModalKey}
+          version={displayedVersions}
+        />
+        <CanonicalBibleNoteSheet
+          sheetRef={canonicalBibleNoteModal.getRef()}
+          note={canonicalBibleNote}
+          onReferencePress={handleCanonicalBibleReferencePress}
+        />
+        <StrongSelectionSheet
+          sheetRef={strongSelectionModalRef}
+          version={strongSelectionData?.version}
+          book={strongSelectionData?.book}
+          chapter={strongSelectionData?.chapter}
+          verse={strongSelectionData?.verse}
+          word={strongSelectionData?.word}
+          identities={strongSelectionData?.identities ?? []}
+          morphologies={strongSelectionData?.morphologies ?? []}
+          onDismissStart={startClosingStrongSelection}
+          onClose={closeStrongSelection}
+        />
+      </RightInsetCleared>
     </BibleViewport>
   )
 }

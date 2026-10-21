@@ -1,4 +1,5 @@
 import { Platform, useWindowDimensions } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 // Share the tablet layout across platforms; narrower windows use mobile navigation.
 export const WORKSPACE_SIDEBAR_BREAKPOINT = 768
@@ -21,3 +22,6 @@ export const workspaceSidebarVariant: WorkspaceSidebarVariant =
 
 export const useResponsiveWorkspace = () =>
   useWindowDimensions().width >= WORKSPACE_SIDEBAR_BREAKPOINT
+
+/** The sidebar also covers the left safe area, under a landscape iPhone's camera. */
+export const useWorkspaceSidebarWidth = () => WORKSPACE_SIDEBAR_WIDTH + useSafeAreaInsets().left

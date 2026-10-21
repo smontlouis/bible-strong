@@ -57,6 +57,22 @@ export const usePageBottomInset = () => {
   return useContext(PageBottomInsetContext) ?? bottomBarHeight
 }
 
+/**
+ * Set by the container that clears the right safe area (a landscape iPhone's camera), so the
+ * containers nested in it do not clear it again.
+ */
+const RightInsetClearedContext = createContext(false)
+
+/** Read the right safe area left to clear, and mark it cleared for the children. */
+export const useRightInsetToClear = () => {
+  const insets = useSafeAreaInsets()
+  return useContext(RightInsetClearedContext) ? 0 : insets.right
+}
+
+export const RightInsetCleared = ({ children }: { children: React.ReactNode }) => (
+  <RightInsetClearedContext.Provider value>{children}</RightInsetClearedContext.Provider>
+)
+
 export const SafeAreaBox = ({
   isPadding = true,
   reserveBottom = false,
@@ -74,21 +90,31 @@ export const SafeAreaBox = ({
   reserveBottom?: boolean
 }) => {
   const insets = useSafeAreaInsets()
+  const rightInset = useRightInsetToClear()
   const { bottomBarHeight } = useBottomBarHeightInTab()
   const bottomSpace = isPadding ? bottomBarHeight : insets.bottom
   return (
     <Box
       {...props}
       style={[
+        // The right inset clears a landscape iPhone's camera; the workspace sidebar covers the left.
         isPadding
-          ? { paddingTop: insets.top, paddingBottom: reserveBottom ? bottomSpace : 0 }
-          : { marginTop: insets.top, marginBottom: reserveBottom ? bottomSpace : 0 },
+          ? {
+              paddingTop: insets.top,
+              paddingRight: rightInset,
+              paddingBottom: reserveBottom ? bottomSpace : 0,
+            }
+          : {
+              marginTop: insets.top,
+              marginRight: rightInset,
+              marginBottom: reserveBottom ? bottomSpace : 0,
+            },
         style,
       ]}
       className={twMerge('flex-1 bg-reverse overflow-hidden border-continuous', className)}
     >
       <PageBottomInsetContext.Provider value={reserveBottom ? 0 : bottomSpace}>
-        {children}
+        <RightInsetCleared>{children}</RightInsetCleared>
       </PageBottomInsetContext.Provider>
     </Box>
   )

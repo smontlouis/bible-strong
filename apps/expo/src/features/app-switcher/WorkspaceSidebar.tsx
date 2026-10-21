@@ -40,7 +40,7 @@ import TabIcon, { tabIconColorConfig } from './utils/getIconByTabType'
 import { useOpenInNewTab } from './utils/useOpenInNewTab'
 import { useAvailableUpdatesIndicator } from '~features/resources/useAvailableUpdates'
 import { floatingShadow, radii } from '~common/ui/surfaces'
-import { WORKSPACE_SIDEBAR_WIDTH, workspaceSidebarVariant } from './utils/useResponsiveWorkspace'
+import { useWorkspaceSidebarWidth, workspaceSidebarVariant } from './utils/useResponsiveWorkspace'
 
 const sidebarFrameClassName = {
   inset: 'bg-canvas',
@@ -67,6 +67,7 @@ const WorkspaceSidebar = ({
   const { t } = useTranslation()
   const { hasUnseenUpdates } = useAvailableUpdatesIndicator()
   const insets = useSafeAreaInsets()
+  const sidebarWidth = useWorkspaceSidebarWidth()
   const { colorScheme } = useCurrentThemeSelector()
   const rowHeight = Platform.OS === 'web' ? 32 : 44
   const labelStyle = { color: colorScheme === 'dark' ? '#e3e3e3' : '#3c4043' }
@@ -111,9 +112,11 @@ const WorkspaceSidebar = ({
           style={{
             paddingTop: insets.top,
             paddingBottom: insets.bottom,
+            // Keep the rows clear of a landscape iPhone's camera.
+            paddingLeft: insets.left,
             ...(workspaceSidebarVariant === 'floating'
               ? { borderRadius: radii.control, ...floatingShadow }
-              : { width: WORKSPACE_SIDEBAR_WIDTH }),
+              : { width: sidebarWidth }),
           }}
         >
           <HStack className="overflow-hidden border-continuous items-center pl-[20px] pr-[8px] py-[10px]">

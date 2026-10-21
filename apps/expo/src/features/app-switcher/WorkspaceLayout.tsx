@@ -23,11 +23,12 @@ import { radii } from '~common/ui/surfaces'
 import {
   useResponsiveWorkspace,
   WORKSPACE_FRAME_GAP,
-  WORKSPACE_SIDEBAR_WIDTH,
+  useWorkspaceSidebarWidth,
   workspaceSidebarVariant,
 } from './utils/useResponsiveWorkspace'
 import { getWorkspacePageForPath, workspacePagePath } from './workspaceRoutes'
 import {
+  WORKSPACE_SIDEBAR_BUTTON_HEIGHT,
   WORKSPACE_SIDEBAR_BUTTON_WIDTH,
   WorkspaceHeaderInsetProvider,
 } from './workspaceHeaderInset'
@@ -37,6 +38,9 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
   const insets = useSafeAreaInsets()
+  const sidebarWidth = useWorkspaceSidebarWidth()
+  // A hidden sidebar still covers the left safe area, so the content's edge never moves.
+  const collapsedSidebarWidth = insets.left
   useLayoutEffect(() => {
     finishPageTransition()
   }, [pathname])
@@ -53,11 +57,7 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
   const sidebarBesideContent = isWide && !overlayMode && !sidebarHidden
   const inset = isWide && workspaceSidebarVariant === 'inset'
   // The inset panel keeps its gap on the left only when no sidebar sits beside it.
-  const contentLeft = sidebarBesideContent
-    ? WORKSPACE_SIDEBAR_WIDTH
-    : inset
-      ? WORKSPACE_FRAME_GAP
-      : 0
+  const contentLeft = sidebarBesideContent ? sidebarWidth : inset ? WORKSPACE_FRAME_GAP : 0
   useEffect(() => {
     setOverlayOpen(false)
   }, [overlayMode, isWide, pathname])
@@ -98,7 +98,7 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
           pointerEvents={sidebarVisible ? 'auto' : 'none'}
           aria-hidden={!sidebarVisible}
           style={{
-            width: overlayMode || sidebarVisible ? WORKSPACE_SIDEBAR_WIDTH : 0,
+            width: overlayMode || sidebarVisible ? sidebarWidth : collapsedSidebarWidth,
             overflow: 'hidden',
             alignSelf: 'stretch',
             ...(overlayMode
@@ -108,7 +108,7 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
                   top: 0,
                   bottom: 0,
                   zIndex: 30,
-                  transform: [{ translateX: sidebarVisible ? 0 : -WORKSPACE_SIDEBAR_WIDTH }],
+                  transform: [{ translateX: sidebarVisible ? 0 : -sidebarWidth }],
                 }
               : {}),
           }}
@@ -116,12 +116,10 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
           <Box
             testID="workspace-sidebar-inner"
             style={{
-              width: WORKSPACE_SIDEBAR_WIDTH,
+              width: sidebarWidth,
               flex: 1,
               ...(workspaceSidebarVariant === 'floating' ? { padding: WORKSPACE_FRAME_GAP } : {}),
-              transform: [
-                { translateX: !overlayMode && !sidebarVisible ? -WORKSPACE_SIDEBAR_WIDTH : 0 },
-              ],
+              transform: [{ translateX: !overlayMode && !sidebarVisible ? -sidebarWidth : 0 }],
             }}
           >
             <WorkspaceSidebar
@@ -171,8 +169,11 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
           <Box className="absolute left-0 z-20 bg-transparent" style={{ top: insets.top }}>
             <TouchableBox
               testID="workspace-sidebar-toggle"
-              className="items-center justify-center h-[54px]"
-              style={{ width: WORKSPACE_SIDEBAR_BUTTON_WIDTH }}
+              className="items-center justify-center"
+              style={{
+                width: WORKSPACE_SIDEBAR_BUTTON_WIDTH,
+                height: WORKSPACE_SIDEBAR_BUTTON_HEIGHT,
+              }}
               onPress={toggleSidebar}
               accessibilityRole="button"
               accessibilityLabel={t(

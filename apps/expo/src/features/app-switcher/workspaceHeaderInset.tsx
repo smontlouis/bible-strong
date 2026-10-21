@@ -2,6 +2,7 @@ import { createContext, useContext, type ReactNode } from 'react'
 
 /** Width of the sidebar button set at the left of a wide workspace's page header. */
 export const WORKSPACE_SIDEBAR_BUTTON_WIDTH = 44
+export const WORKSPACE_SIDEBAR_BUTTON_HEIGHT = 54
 
 const WorkspaceHeaderInsetContext = createContext(0)
 
