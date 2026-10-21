@@ -39,9 +39,15 @@ import ViewGroupsModal from './BottomTabBar/ViewGroupsModal'
 import TabIcon, { tabIconColorConfig } from './utils/getIconByTabType'
 import { useOpenInNewTab } from './utils/useOpenInNewTab'
 import { useAvailableUpdatesIndicator } from '~features/resources/useAvailableUpdates'
-import { WORKSPACE_SIDEBAR_WIDTH } from './utils/useResponsiveWorkspace'
+import { floatingShadow, radii } from '~common/ui/surfaces'
+import { WORKSPACE_SIDEBAR_WIDTH, workspaceSidebarVariant } from './utils/useResponsiveWorkspace'
+
+const sidebarFrameClassName = {
+  inset: 'bg-canvas',
+  floating: 'bg-surface-raised',
+  sidebar: 'bg-canvas border-r-[1px] border-border',
+}[workspaceSidebarVariant]
 interface WorkspaceSidebarProps {
-  onCollapse: () => void
   onSelectContent?: () => void
   activePage?: 'home' | 'settings' | null
   isContentActive?: boolean
@@ -50,7 +56,6 @@ interface WorkspaceSidebarProps {
 }
 
 const WorkspaceSidebar = ({
-  onCollapse,
   openHome,
   openMenu,
   activePage,
@@ -102,11 +107,13 @@ const WorkspaceSidebar = ({
     >
       {(previewGroups, foldedGroupId) => (
         <Box
-          className="flex-1 min-h-0 border-continuous overflow-hidden bg-canvas border-r-[1px] border-border"
+          className={`flex-1 min-h-0 border-continuous overflow-hidden ${sidebarFrameClassName}`}
           style={{
             paddingTop: insets.top,
             paddingBottom: insets.bottom,
-            width: WORKSPACE_SIDEBAR_WIDTH,
+            ...(workspaceSidebarVariant === 'floating'
+              ? { borderRadius: radii.control, ...floatingShadow }
+              : { width: WORKSPACE_SIDEBAR_WIDTH }),
           }}
         >
           <HStack className="overflow-hidden border-continuous items-center pl-[20px] pr-[8px] py-[10px]">
@@ -122,15 +129,6 @@ const WorkspaceSidebar = ({
                 accessible={false}
               />
               <Text className="flex-1 ml-[10px] font-bold text-[15px]">Bible Strong</Text>
-            </TouchableBox>
-            <TouchableBox
-              className="overflow-hidden border-continuous items-center justify-center"
-              onPress={onCollapse}
-              accessibilityRole="button"
-              accessibilityLabel={t('workspace.hideSidebar')}
-              style={{ width: 40, height: 40 }}
-            >
-              <FeatherIcon name="sidebar" size={18} color="grey" />
             </TouchableBox>
           </HStack>
           <ScrollView

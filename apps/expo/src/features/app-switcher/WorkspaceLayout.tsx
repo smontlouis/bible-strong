@@ -6,6 +6,7 @@ import type { ReactNode } from 'react'
 import { useEffect, useLayoutEffect, useState } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import { Platform } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 import {
   useWorkspaceRoutePanel,
@@ -18,13 +19,24 @@ import SharedBibleDOM from '~features/bible/SharedBibleDOM'
 import CachedTabScreens from './CachedTabScreens'
 import WorkspaceSidebar from './WorkspaceSidebar'
 import { TabContextProvider } from './context/TabContext'
-import { useResponsiveWorkspace, WORKSPACE_SIDEBAR_WIDTH } from './utils/useResponsiveWorkspace'
+import { radii } from '~common/ui/surfaces'
+import {
+  useResponsiveWorkspace,
+  WORKSPACE_FRAME_GAP,
+  WORKSPACE_SIDEBAR_WIDTH,
+  workspaceSidebarVariant,
+} from './utils/useResponsiveWorkspace'
 import { getWorkspacePageForPath, workspacePagePath } from './workspaceRoutes'
+import {
+  WORKSPACE_SIDEBAR_BUTTON_WIDTH,
+  WorkspaceHeaderInsetProvider,
+} from './workspaceHeaderInset'
 
 export default function WorkspaceLayout({ children }: { children: ReactNode }) {
   const { t } = useTranslation()
   const router = useRouter()
   const pathname = usePathname()
+  const insets = useSafeAreaInsets()
   useLayoutEffect(() => {
     finishPageTransition()
   }, [pathname])
@@ -38,25 +50,25 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
     if (Platform.OS === 'web') setSidebarDocked(panel.sidebarDocked)
   }, [panel.sidebarDocked, setSidebarDocked])
   const sidebarVisible = isWide && (overlayMode ? overlayOpen : !sidebarHidden)
+  const sidebarBesideContent = isWide && !overlayMode && !sidebarHidden
+  const inset = isWide && workspaceSidebarVariant === 'inset'
+  // The inset panel keeps its gap on the left only when no sidebar sits beside it.
+  const contentLeft = sidebarBesideContent
+    ? WORKSPACE_SIDEBAR_WIDTH
+    : inset
+      ? WORKSPACE_FRAME_GAP
+      : 0
   useEffect(() => {
     setOverlayOpen(false)
   }, [overlayMode, isWide, pathname])
   // Web sheets render through a body portal, outside the workspace DOM tree.
   useEffect(() => {
     if (Platform.OS !== 'web') return
-    document.documentElement.style.setProperty(
-      '--workspace-restore-inset',
-      isWide && (overlayMode || sidebarHidden) ? '44px' : '0px'
-    )
-    document.documentElement.style.setProperty(
-      '--workspace-content-left',
-      `${isWide && !overlayMode && !sidebarHidden ? WORKSPACE_SIDEBAR_WIDTH : 0}px`
-    )
+    document.documentElement.style.setProperty('--workspace-content-left', `${contentLeft}px`)
     return () => {
       document.documentElement.style.removeProperty('--workspace-content-left')
-      document.documentElement.style.removeProperty('--workspace-restore-inset')
     }
-  }, [isWide, overlayMode, sidebarHidden, sidebarVisible])
+  }, [contentLeft])
 
   const isWorkspace = pathname === '/'
   const visitPage = (page: 'home' | 'settings') => {
@@ -67,15 +79,17 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
       )
   }
 
+  const toggleSidebar = () => {
+    if (overlayMode) setOverlayOpen(value => !value)
+    else setSidebarHidden(value => !value)
+  }
+
   return (
     <HStack className="flex-1 bg-canvas overflow-hidden">
       <GlobalCommandPalette />
       <WorkspaceKeyboardShortcuts
         toggleSidebar={() => {
-          if (isWide) {
-            if (overlayMode) setOverlayOpen(value => !value)
-            else setSidebarHidden(value => !value)
-          }
+          if (isWide) toggleSidebar()
         }}
       />
       {isWide && (
@@ -104,13 +118,13 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
             style={{
               width: WORKSPACE_SIDEBAR_WIDTH,
               flex: 1,
+              ...(workspaceSidebarVariant === 'floating' ? { padding: WORKSPACE_FRAME_GAP } : {}),
               transform: [
                 { translateX: !overlayMode && !sidebarVisible ? -WORKSPACE_SIDEBAR_WIDTH : 0 },
               ],
             }}
           >
             <WorkspaceSidebar
-              onCollapse={() => (overlayMode ? setOverlayOpen(false) : setSidebarHidden(true))}
               openHome={() => visitPage('home')}
               openMenu={() => visitPage('settings')}
               activePage={getWorkspacePageForPath(pathname)}
@@ -135,60 +149,83 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
           onPress={() => setOverlayOpen(false)}
         />
       )}
-      <Box testID="workspace-main-surface" className="flex-1 min-w-0">
-        {isWide && !sidebarVisible && (
-          <Box className="absolute left-0 top-0 z-20 bg-transparent">
+      <Box
+        testID="workspace-main-surface"
+        className={
+          inset
+            ? 'flex-1 min-w-0 overflow-hidden bg-background border border-border'
+            : 'flex-1 min-w-0'
+        }
+        style={
+          inset
+            ? {
+                margin: WORKSPACE_FRAME_GAP,
+                marginLeft: sidebarBesideContent ? 0 : WORKSPACE_FRAME_GAP,
+                borderRadius: radii.control,
+              }
+            : undefined
+        }
+      >
+        {/* Page headers leave this button's room, so it never moves their content. */}
+        {isWide && (
+          <Box className="absolute left-0 z-20 bg-transparent" style={{ top: insets.top }}>
             <TouchableBox
-              className="items-center justify-center w-[44px] h-[54px]"
-              onPress={() => (overlayMode ? setOverlayOpen(true) : setSidebarHidden(false))}
+              testID="workspace-sidebar-toggle"
+              className="items-center justify-center h-[54px]"
+              style={{ width: WORKSPACE_SIDEBAR_BUTTON_WIDTH }}
+              onPress={toggleSidebar}
               accessibilityRole="button"
-              accessibilityLabel={t('workspace.showSidebar')}
+              accessibilityLabel={t(
+                sidebarVisible ? 'workspace.hideSidebar' : 'workspace.showSidebar'
+              )}
             >
               <FeatherIcon name="sidebar" size={18} />
             </TouchableBox>
           </Box>
         )}
-        <Box className="flex-1 min-h-0">
-          {isWide && (
+        <WorkspaceHeaderInsetProvider value={isWide ? WORKSPACE_SIDEBAR_BUTTON_WIDTH : 0}>
+          <Box className="flex-1 min-h-0">
+            {isWide && (
+              <Box
+                testID="workspace-reader-motion"
+                dataSet={Platform.OS === 'web' ? { assistantSurface: 'reader' } : undefined}
+                className="absolute inset-0"
+                style={{
+                  display: isWorkspace || panel.showsStudy ? 'flex' : 'none',
+                  right: panel.open ? panel.reservedWidth : 0,
+                }}
+              >
+                <TabContextProvider>
+                  <CachedTabScreens />
+                  <SharedBibleDOM />
+                </TabContextProvider>
+              </Box>
+            )}
             <Box
-              testID="workspace-reader-motion"
-              dataSet={Platform.OS === 'web' ? { assistantSurface: 'reader' } : undefined}
-              className="absolute inset-0"
+              testID={panel.showsStudy ? 'workspace-panel-slot' : undefined}
+              dataSet={
+                Platform.OS === 'web'
+                  ? { assistantSurface: panel.showsStudy ? 'panel' : 'reader' }
+                  : undefined
+              }
+              className="flex-1 overflow-hidden"
               style={{
-                display: isWorkspace || panel.showsStudy ? 'flex' : 'none',
-                right: panel.open ? panel.reservedWidth : 0,
+                display: isWide && isWorkspace ? 'none' : 'flex',
+                ...(panel.showsStudy
+                  ? {
+                      position: 'absolute',
+                      top: 0,
+                      bottom: 0,
+                      right: 0,
+                      width: panel.reservedWidth,
+                    }
+                  : undefined),
               }}
             >
-              <TabContextProvider>
-                <CachedTabScreens />
-                <SharedBibleDOM />
-              </TabContextProvider>
+              {children}
             </Box>
-          )}
-          <Box
-            testID={panel.showsStudy ? 'workspace-panel-slot' : undefined}
-            dataSet={
-              Platform.OS === 'web'
-                ? { assistantSurface: panel.showsStudy ? 'panel' : 'reader' }
-                : undefined
-            }
-            className="flex-1 overflow-hidden"
-            style={{
-              display: isWide && isWorkspace ? 'none' : 'flex',
-              ...(panel.showsStudy
-                ? {
-                    position: 'absolute',
-                    top: 0,
-                    bottom: 0,
-                    right: 0,
-                    width: panel.reservedWidth,
-                  }
-                : undefined),
-            }}
-          >
-            {children}
           </Box>
-        </Box>
+        </WorkspaceHeaderInsetProvider>
       </Box>
     </HStack>
   )

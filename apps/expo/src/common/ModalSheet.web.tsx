@@ -8,6 +8,7 @@ import { FeatherIcon } from './ui/Icon'
 import type { ModalSheetProps } from './ModalSheet'
 import './modal-sheet.css'
 import { readSheetHeader } from './readSheetHeader'
+import { WithoutWorkspaceHeaderInset } from '~features/app-switcher/workspaceHeaderInset'
 
 export default function ModalSheet({
   ref,
@@ -107,7 +108,9 @@ export default function ModalSheet({
             </Modal.Header>
             {heading?.subTitle && <div className="bs-modal-subtitle">{heading.subTitle}</div>}
             {heading?.children}
-            <Modal.Body className="bs-modal-body">{children}</Modal.Body>
+            <Modal.Body className="bs-modal-body">
+              <WithoutWorkspaceHeaderInset>{children}</WithoutWorkspaceHeaderInset>
+            </Modal.Body>
             {Footer && (
               <Modal.Footer className="bs-modal-footer">
                 <Footer />

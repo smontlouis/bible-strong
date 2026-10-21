@@ -65,6 +65,7 @@ import InterlinearMark from './InterlinearMark'
 import type { BibleTextModeKind } from './BibleTextModeSheets'
 import type { BibleTextModeColumn } from '~helpers/bibleColumnTextModes'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
+import { useWorkspaceHeaderInset } from '~features/app-switcher/workspaceHeaderInset'
 interface BibleHeaderProps {
   bibleAtom: PrimitiveAtom<BibleTab>
   isFormSheet?: boolean
@@ -100,6 +101,7 @@ const Header = ({
   const isSmall = dimensions.screen.width < 400
   const actions = useBibleTabActions(bibleAtom)
   const insets = useSafeAreaInsets()
+  const workspaceHeaderInset = useWorkspaceHeaderInset()
   const { openBookSelector, openVersionSelector } = useBookAndVersionSelector()
   const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
@@ -548,6 +550,7 @@ const Header = ({
       style={[
         {
           paddingTop: TOP_INSET,
+          paddingLeft: workspaceHeaderInset,
           zIndex: nativeHeaderZIndex,
           borderBottomWidth: StyleSheet.hairlineWidth,
         },

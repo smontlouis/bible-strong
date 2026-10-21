@@ -1,4 +1,4 @@
-@import "tw-shimmer";
+@import 'tw-shimmer';
 
 /* macOS browsers thicken text with their default smoothing; grayscale smoothing draws the
    fonts at their designed weight, as native apps do. Other platforms ignore it. */
@@ -58,14 +58,6 @@ html {
   left: var(--bible-selection-left, var(--workspace-content-left, 0px)) !important;
 }
 
-/* Reserve only header space for the floating navigation control. */
-[data-testid='workspace-page-header'] {
-  padding-left: var(--workspace-restore-inset, 0px);
-}
-[data-testid='workspace-route-panel'] {
-  --workspace-restore-inset: 0px;
-}
-
 /* Keep the sidebar mounted while it slides fully out of the workspace. */
 [data-testid='workspace-sidebar-motion'] {
   transition:
@@ -85,10 +77,15 @@ html {
 [data-testid='workspace-sidebar-backdrop'] {
   transition: opacity 200ms ease;
 }
+/* The inset panel regains its left gap as the sidebar slides away. */
+[data-testid='workspace-main-surface'] {
+  transition: margin-left 240ms cubic-bezier(0.2, 0, 0, 1);
+}
 @media (prefers-reduced-motion: reduce) {
   [data-testid='workspace-sidebar-motion'],
   [data-testid='workspace-sidebar-inner'],
-  [data-testid='workspace-sidebar-backdrop'] {
+  [data-testid='workspace-sidebar-backdrop'],
+  [data-testid='workspace-main-surface'] {
     transition: none;
   }
 }

@@ -1,7 +1,11 @@
 import { useRootNavigationState, useSegments } from 'expo-router'
 import { atom, useAtomValue } from 'jotai'
 import { Platform, useWindowDimensions } from 'react-native'
-import { WORKSPACE_SIDEBAR_WIDTH } from '~features/app-switcher/utils/useResponsiveWorkspace'
+import {
+  WORKSPACE_FRAME_GAP,
+  WORKSPACE_SIDEBAR_WIDTH,
+  workspaceSidebarVariant,
+} from '~features/app-switcher/utils/useResponsiveWorkspace'
 import { resolveWorkspaceLayout } from './workspaceLayoutPolicy'
 export { WORKSPACE_ROUTE_PANEL_WIDTH } from './workspaceLayoutPolicy'
 
@@ -21,7 +25,8 @@ export function useWorkspaceRoutePanel() {
   const enabled = Platform.OS === 'web' && width >= WORKSPACE_ROUTE_PANEL_BREAKPOINT
   const open = enabled && panelRoutes.has(segments[0] as string)
   const { sidebarDocked, panelWidth } = resolveWorkspaceLayout({
-    width,
+    // The inset panel gives up its frame gap on both sides.
+    width: workspaceSidebarVariant === 'inset' ? width - 2 * WORKSPACE_FRAME_GAP : width,
     sidebarWidth: WORKSPACE_SIDEBAR_WIDTH,
     panelOpen: open,
     sidebarHidden,

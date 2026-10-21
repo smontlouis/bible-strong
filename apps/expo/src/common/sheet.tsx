@@ -25,6 +25,7 @@ import Box, { FadingText, type BoxProps, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text, { type TextProps } from '~common/ui/Text'
 import { useTheme } from '~themes/ThemeProvider'
+import { WithoutWorkspaceHeaderInset } from '~features/app-switcher/workspaceHeaderInset'
 export type SheetSnapPoint = NonNullable<TrueSheetProps['detents']>[number]
 export type SheetScrollableOptions = NonNullable<TrueSheetProps['scrollableOptions']>
 
@@ -371,7 +372,7 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
           runAfterDismiss()
         }}
       >
-        {children}
+        <WithoutWorkspaceHeaderInset>{children}</WithoutWorkspaceHeaderInset>
       </TrueSheet>
     </SheetContext.Provider>
   )

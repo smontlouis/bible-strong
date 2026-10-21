@@ -14,6 +14,9 @@ jest.mock('react-native', () => ({
   useWindowDimensions: () => ({ width: 1600 }),
 }))
 jest.mock('jotai', () => ({ useAtom: () => [false, jest.fn()], useSetAtom: () => jest.fn() }))
+jest.mock('react-native-safe-area-context', () => ({
+  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+}))
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
 jest.mock('~navigation/pageTransition', () => ({
   finishPageTransition: jest.fn(),
@@ -44,6 +47,8 @@ jest.mock('../context/TabContext', () => ({ TabContextProvider: 'TabContextProvi
 jest.mock('../utils/useResponsiveWorkspace', () => ({
   useResponsiveWorkspace: () => true,
   WORKSPACE_SIDEBAR_WIDTH: 260,
+  WORKSPACE_FRAME_GAP: 8,
+  workspaceSidebarVariant: 'inset',
 }))
 
 function sidebarIsActive() {

@@ -40,6 +40,7 @@ import type {
 import Box, { FadingText, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
+import { WithoutWorkspaceHeaderInset } from '~features/app-switcher/workspaceHeaderInset'
 
 type SheetContextValue = {
   footerHeight: number
@@ -256,9 +257,11 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
             />
           </>
         )}
-        {renderedHeader}
-        {children}
-        {renderedFooter}
+        <WithoutWorkspaceHeaderInset>
+          {renderedHeader}
+          {children}
+          {renderedFooter}
+        </WithoutWorkspaceHeaderInset>
       </BottomSheetModal>
     </SheetContext.Provider>
   )

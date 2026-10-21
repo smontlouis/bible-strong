@@ -104,6 +104,7 @@ import {
   getSearchAnalyticsInputKind,
 } from './searchAnalyticsModel'
 import { createSearchExperienceController } from './searchExperience'
+import { useWorkspaceHeaderInset } from '~features/app-switcher/workspaceHeaderInset'
 type Props = {
   searchValue: string
   setSearchValue: (value: string) => void
@@ -138,6 +139,7 @@ const SQLiteSearchScreen = ({
   onSaveDraft,
   onFiltersChange,
 }: Props) => {
+  const workspaceHeaderInset = useWorkspaceHeaderInset()
   const { t, i18n } = useTranslation()
   const theme = useTheme()
   const keyboardFooterBottom = useKeyboardFooterBottom(SEARCH_ALPHABET_FOOTER_HEIGHT)
@@ -1304,7 +1306,7 @@ const SQLiteSearchScreen = ({
       <Box
         testID="workspace-page-header"
         className="border-separator"
-        style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
+        style={{ borderBottomWidth: StyleSheet.hairlineWidth, paddingLeft: workspaceHeaderInset }}
       >
         <PageContent>
           <HStack className="items-center gap-[4px] pl-[20px] pt-[6px] pb-[4px]">

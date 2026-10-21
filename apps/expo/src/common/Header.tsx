@@ -7,6 +7,7 @@ import Back from '~common/Back'
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from './ui/Icon'
+import { useWorkspaceHeaderInset } from '~features/app-switcher/workspaceHeaderInset'
 interface Props {
   maxWidth?: number
   background?: boolean
@@ -37,6 +38,7 @@ const Header = ({
   children,
   ...props
 }: Props) => {
+  const workspaceHeaderInset = useWorkspaceHeaderInset()
   return (
     <Box
       {...props}
@@ -45,7 +47,7 @@ const Header = ({
         'overflow-hidden border-continuous border-separator',
         background ? 'bg-reverse' : ''
       )}
-      style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
+      style={{ borderBottomWidth: StyleSheet.hairlineWidth, paddingLeft: workspaceHeaderInset }}
     >
       <PageContent style={maxWidth ? { maxWidth } : undefined}>
         <Box
