@@ -3,6 +3,8 @@ import {
   getChapterRowScrollOffset,
   getListChapterGridHeight,
   getListChapterLayout,
+  getRevealChaptersOffset,
+  isExpandedBookAboveViewport,
 } from '../bookSelectorScroll'
 
 const phone = { windowWidth: 390, viewportHeight: 600 }
@@ -71,5 +73,56 @@ describe('getListChapterGridHeight', () => {
     expect(getListChapterGridHeight(150, 1024)).toBe(22 * 60 + 21 * 10 + 20)
     // Jude: a single chapter
     expect(getListChapterGridHeight(1, 390)).toBe(60 + 20)
+  })
+})
+
+describe('isExpandedBookAboveViewport', () => {
+  // Psalms, the 19th book, ends at 19 * 46 + 22 rows of chapters on a tablet
+  const psalms = { bookIndex: 18, chapterCount: 150, windowWidth: 1024 }
+  const psalmsBottom = 19 * 46 + getListChapterGridHeight(150, 1024)
+
+  it('is true once the list is scrolled past the book and its chapters', () => {
+    expect(isExpandedBookAboveViewport({ ...psalms, scrollOffset: psalmsBottom })).toBe(true)
+  })
+
+  it('is false while any part of the book is on screen, or without an expanded book', () => {
+    expect(isExpandedBookAboveViewport({ ...psalms, scrollOffset: psalmsBottom - 1 })).toBe(false)
+    expect(isExpandedBookAboveViewport({ ...psalms, bookIndex: -1, scrollOffset: 10_000 })).toBe(
+      false
+    )
+  })
+})
+
+describe('getRevealChaptersOffset', () => {
+  // Revelation, the last of 66 books, with 22 chapters in four rows on a phone
+  const revelation = { bookIndex: 65, chapterCount: 22, windowWidth: 390, viewportHeight: 600 }
+  const revelationTop = 65 * 46
+  const gridHeight = getListChapterGridHeight(22, 390)
+
+  it('keeps the offset while the whole grid is on screen', () => {
+    expect(getRevealChaptersOffset({ ...revelation, scrollOffset: revelationTop - 100 })).toBe(
+      revelationTop - 100
+    )
+  })
+
+  it('scrolls just enough to show the grid below the screen', () => {
+    // The title sits at the bottom of the screen, its chapters hidden under it
+    const scrollOffset = revelationTop + 46 - 600
+
+    expect(getRevealChaptersOffset({ ...revelation, scrollOffset })).toBe(
+      revelationTop + 46 + gridHeight - 600
+    )
+  })
+
+  it('stops at the title when the grid is taller than the screen', () => {
+    expect(
+      getRevealChaptersOffset({
+        bookIndex: 18,
+        chapterCount: 150,
+        windowWidth: 390,
+        viewportHeight: 600,
+        scrollOffset: 0,
+      })
+    ).toBe(18 * 46)
   })
 })

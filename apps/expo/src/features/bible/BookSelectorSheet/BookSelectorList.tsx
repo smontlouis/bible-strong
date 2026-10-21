@@ -12,12 +12,18 @@ import { BookShortItem } from './BookShortItem'
 import ChapterGrid from './ChapterGrid'
 import { getBookCorpus } from '~helpers/bibleBookCatalog'
 
+export interface BookListMetrics {
+  scrollOffset: number
+  viewportHeight: number
+}
+
 interface BookSelectorListProps {
   initialScrollOffset: number
   expandedBook: SharedValue<number | null>
   data: Book[]
   bookSelectorData?: BibleTab['data']
   flatListRef: React.RefObject<FlatList | null>
+  listMetrics: React.RefObject<BookListMetrics>
   chaptersByBook?: Record<number, number[]>
   renderedChapterBookNumbers: number[]
   instantBookNumber: number | null
@@ -31,6 +37,7 @@ export const BookSelectorList = ({
   expandedBook,
   bookSelectorData,
   flatListRef,
+  listMetrics,
   chaptersByBook,
   renderedChapterBookNumbers,
   instantBookNumber,
@@ -66,6 +73,7 @@ export const BookSelectorList = ({
   useEffect(() => {
     if (!hasMountedRef.current) {
       hasMountedRef.current = true
+      listMetrics.current.scrollOffset = mountScrollOffset
       return
     }
     if (data.length === 0) return
@@ -77,7 +85,7 @@ export const BookSelectorList = ({
     }, 100)
 
     return () => clearTimeout(scrollTimer)
-  }, [data.length, flatListRef, initialScrollOffset])
+  }, [data.length, flatListRef, initialScrollOffset, listMetrics, mountScrollOffset])
 
   if (selectionMode === 'grid') {
     if (gridBook) {
@@ -128,9 +136,13 @@ export const BookSelectorList = ({
       contentOffset={{ x: 0, y: mountScrollOffset }}
       // Every book is rendered at once, so the offset lands on laid out rows
       initialNumToRender={data.length}
-      maintainVisibleContentPosition={{
-        minIndexForVisible: 0,
+      onLayout={event => {
+        listMetrics.current.viewportHeight = event.nativeEvent.layout.height
       }}
+      onScroll={event => {
+        listMetrics.current.scrollOffset = event.nativeEvent.contentOffset.y
+      }}
+      scrollEventThrottle={16}
       contentContainerStyle={{
         paddingBottom: insets.bottom,
       }}

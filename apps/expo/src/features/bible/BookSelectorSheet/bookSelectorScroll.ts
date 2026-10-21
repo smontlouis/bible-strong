@@ -28,6 +28,41 @@ export const getListChapterGridHeight = (chapterCount: number, windowWidth: numb
   )
 }
 
+interface ListBookInput {
+  bookIndex: number
+  chapterCount: number
+  windowWidth: number
+  scrollOffset: number
+}
+
+// Whether an expanded book, the only one, ends above the part of the list on screen
+export const isExpandedBookAboveViewport = ({
+  bookIndex,
+  chapterCount,
+  windowWidth,
+  scrollOffset,
+}: ListBookInput) =>
+  bookIndex >= 0 &&
+  (bookIndex + 1) * BOOK_ITEM_HEIGHT + getListChapterGridHeight(chapterCount, windowWidth) <=
+    scrollOffset
+
+// Keeps `scrollOffset` while the only expanded book's grid is on screen, otherwise scrolls just
+// enough to show it whole without pushing the book's title off the top
+export const getRevealChaptersOffset = ({
+  bookIndex,
+  chapterCount,
+  windowWidth,
+  scrollOffset,
+  viewportHeight,
+}: ListBookInput & { viewportHeight: number }) => {
+  const bookTop = BOOK_ITEM_HEIGHT * Math.max(bookIndex, 0)
+  const gridBottom =
+    bookTop + BOOK_ITEM_HEIGHT + getListChapterGridHeight(chapterCount, windowWidth)
+  if (viewportHeight <= 0 || gridBottom <= scrollOffset + viewportHeight) return scrollOffset
+
+  return Math.max(scrollOffset, Math.min(bookTop, gridBottom - viewportHeight))
+}
+
 interface ChapterRowScrollInput {
   chapterIndex: number
   itemsPerRow: number

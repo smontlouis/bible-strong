@@ -56,6 +56,7 @@ const genesis = books.find(book => book.Numero === 1)!
 const psalms = books.find(book => book.Numero === 19)!
 const expandedBook = { get: jest.fn(), set: jest.fn() }
 const flatListRef = { current: null }
+const listMetrics = { current: { scrollOffset: 0, viewportHeight: 0 } }
 const onBookSelect = jest.fn()
 const onGridBookSelect = jest.fn()
 
@@ -87,6 +88,7 @@ const renderList = (gridBook: (typeof books)[number] | null = null) => {
       expandedBook={expandedBook as never}
       bookSelectorData={undefined}
       flatListRef={flatListRef}
+      listMetrics={listMetrics}
       chaptersByBook={{ 1: [1, 3, 5], 19: [1, 2, 150] }}
       renderedChapterBookNumbers={[1]}
       instantBookNumber={null}
@@ -133,6 +135,7 @@ describe('BookSelectorList', () => {
         expandedBook={expandedBook as never}
         bookSelectorData={{ selectedBook: psalms, selectedChapter: 119 } as never}
         flatListRef={flatListRef}
+        listMetrics={listMetrics}
         renderedChapterBookNumbers={[19]}
         instantBookNumber={19}
         onBookSelect={onBookSelect}
@@ -162,6 +165,7 @@ describe('BookSelectorList', () => {
         expandedBook={expandedBook as never}
         bookSelectorData={{ selectedBook: psalms, selectedChapter: 119 } as never}
         flatListRef={flatListRef}
+        listMetrics={listMetrics}
         renderedChapterBookNumbers={[19]}
         instantBookNumber={19}
         onBookSelect={onBookSelect}
@@ -184,6 +188,7 @@ describe('BookSelectorList', () => {
         expandedBook={expandedBook as never}
         bookSelectorData={undefined}
         flatListRef={flatListRef}
+        listMetrics={listMetrics}
         chaptersByBook={{ 1: [1, 3, 5], 19: [1, 2, 150] }}
         renderedChapterBookNumbers={[]}
         instantBookNumber={null}

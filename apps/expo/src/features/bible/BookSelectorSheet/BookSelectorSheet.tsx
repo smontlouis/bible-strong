@@ -1,5 +1,5 @@
 import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useAtomValue, useSetAtom, useStore } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { DeviceEventEmitter, FlatList, useWindowDimensions } from 'react-native'
@@ -11,8 +11,13 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { HelpTip } from '~features/tips/HelpTip'
 import { bookSelectorSelectionModeAtom, bookSelectorSortAtom, bookSelectorVersesAtom } from './atom'
-import { getBookListScrollOffset } from './bookSelectorScroll'
-import { BookSelectorList } from './BookSelectorList'
+import {
+  getBookListScrollOffset,
+  getListChapterGridHeight,
+  getRevealChaptersOffset,
+  isExpandedBookAboveViewport,
+} from './bookSelectorScroll'
+import { BookSelectorList, type BookListMetrics } from './BookSelectorList'
 import { BookSelectorParams } from './BookSelectorParams'
 import { BOOK_SELECTION_EVENT, SelectionEvent } from './constants'
 import VerseSheet, { tempSelectedBookAtom, tempSelectedChapterAtom } from './VerseSheet'
@@ -35,6 +40,8 @@ export { bookSelectorDataAtom } from './state'
 
 // Room taken above the list by the sheet header and its help tip
 const SHEET_HEADER_ALLOWANCE = 120
+// How long a book's chapters take to open or close, as AccordionItem animates them
+const CHAPTERS_ANIMATION_DURATION = 300
 
 const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
   const expandedBook = useSharedValue<number | null>(null)
@@ -45,6 +52,9 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
   const [instantBookNumber, setInstantBookNumber] = useState<number | null>(null)
   const collapseTimeouts = useRef<Record<number, ReturnType<typeof setTimeout>>>({})
   const flatListRef = useRef<FlatList>(null)
+  const listMetrics = useRef<BookListMetrics>({ scrollOffset: 0, viewportHeight: 0 })
+  const revealTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const pendingScrollOffset = useRef<number | null>(null)
   const isPresentedRef = useRef(false)
   const { width: windowWidth, height: windowHeight } = useWindowDimensions()
   const insets = useSafeAreaInsets()
@@ -176,6 +186,7 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
   useEffect(
     () => () => {
       Object.values(collapseTimeouts.current).forEach(clearTimeout)
+      clearTimeout(revealTimeout.current)
     },
     []
   )
@@ -205,12 +216,42 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
     collapseTimeouts.current[bookNumber] = setTimeout(() => {
       setRenderedChapterBookNumbers(current => current.filter(value => value !== bookNumber))
       delete collapseTimeouts.current[bookNumber]
-    }, 300)
+    }, CHAPTERS_ANIMATION_DURATION)
+  }
+
+  // Applied once the render that moved the books is committed, so the list shifts with them
+  useLayoutEffect(() => {
+    const offset = pendingScrollOffset.current
+    if (offset === null) return
+
+    pendingScrollOffset.current = null
+    listMetrics.current.scrollOffset = offset
+    flatListRef.current?.scrollToOffset({ offset, animated: false })
+  })
+
+  const getChapterCount = (book: Book) =>
+    coverageData?.chaptersByBook?.[book.Numero]?.length ?? book.Chapitres
+
+  // Once its grid has opened, scrolls the list so the grid of the book just expanded is on screen
+  const scheduleChaptersReveal = (book: Book, delay: number) => {
+    clearTimeout(revealTimeout.current)
+    revealTimeout.current = setTimeout(() => {
+      const { scrollOffset, viewportHeight } = listMetrics.current
+      const offset = getRevealChaptersOffset({
+        bookIndex: data.findIndex(item => item.Numero === book.Numero),
+        chapterCount: getChapterCount(book),
+        windowWidth,
+        scrollOffset,
+        viewportHeight,
+      })
+      if (offset !== scrollOffset) flatListRef.current?.scrollToOffset({ offset, animated: true })
+    }, delay)
   }
 
   const handleBookSelect = (book: Book) => {
     const currentExpandedBookNumber = expandedBookNumber
     setInstantBookNumber(null)
+    clearTimeout(revealTimeout.current)
 
     if (currentExpandedBookNumber === book.Numero) {
       expandedBook.set(null)
@@ -219,17 +260,42 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
       return
     }
 
-    if (currentExpandedBookNumber !== null) {
-      scheduleChapterUnmount(currentExpandedBookNumber)
-    }
+    const expandedIndex = data.findIndex(item => item.Numero === currentExpandedBookNumber)
+    const expandedChapterCount = expandedIndex >= 0 ? getChapterCount(data[expandedIndex]) : 0
+    const { scrollOffset } = listMetrics.current
+    // A book expanded above the screen gives its place to the tapped one in a single render,
+    // and the list scrolls back by the chapters that left: the books on screen stay put. Animated
+    // apart, the list would shrink below the scroll position at its end and jump
+    const swapsAtOnce = isExpandedBookAboveViewport({
+      bookIndex: expandedIndex,
+      chapterCount: expandedChapterCount,
+      windowWidth,
+      scrollOffset,
+    })
 
-    clearTimeout(collapseTimeouts.current[book.Numero])
-    delete collapseTimeouts.current[book.Numero]
-    setRenderedChapterBookNumbers(current =>
-      current.includes(book.Numero) ? current : [...current, book.Numero]
-    )
+    if (swapsAtOnce) {
+      Object.values(collapseTimeouts.current).forEach(clearTimeout)
+      collapseTimeouts.current = {}
+      setRenderedChapterBookNumbers([book.Numero])
+      setInstantBookNumber(book.Numero)
+      pendingScrollOffset.current = Math.max(
+        0,
+        scrollOffset - getListChapterGridHeight(expandedChapterCount, windowWidth)
+      )
+    } else {
+      if (currentExpandedBookNumber !== null) {
+        scheduleChapterUnmount(currentExpandedBookNumber)
+      }
+      clearTimeout(collapseTimeouts.current[book.Numero])
+      delete collapseTimeouts.current[book.Numero]
+      setRenderedChapterBookNumbers(current =>
+        current.includes(book.Numero) ? current : [...current, book.Numero]
+      )
+    }
     expandedBook.set(book.Numero)
     setExpandedBookNumber(book.Numero)
+    // Once the swap is laid out, or once the chapters have finished opening
+    scheduleChaptersReveal(book, swapsAtOnce ? 50 : CHAPTERS_ANIMATION_DURATION)
   }
 
   return (
@@ -246,6 +312,7 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
           expandedBook.set(null)
           setExpandedBookNumber(null)
           setInstantBookNumber(null)
+          clearTimeout(revealTimeout.current)
           setGridBook(null)
           Object.values(collapseTimeouts.current).forEach(clearTimeout)
           collapseTimeouts.current = {}
@@ -287,6 +354,7 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
           expandedBook={expandedBook}
           bookSelectorData={bookSelectorData}
           flatListRef={flatListRef}
+          listMetrics={listMetrics}
           chaptersByBook={coverageData?.chaptersByBook}
           renderedChapterBookNumbers={renderedChapterBookNumbers}
           instantBookNumber={instantBookNumber}
