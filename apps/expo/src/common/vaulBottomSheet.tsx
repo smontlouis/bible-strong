@@ -27,6 +27,7 @@ import {
   type ViewStyle,
 } from 'react-native'
 import { Drawer } from 'vaul'
+import { radii } from '~common/ui/surfaces'
 
 export type BottomSheetMethods = {
   snapToIndex: (index: number) => void
@@ -91,8 +92,8 @@ const defaultContentStyle: React.CSSProperties = {
   right: 0,
   padding: '0 16px',
   backgroundColor: '#fff',
-  borderTopLeftRadius: 10,
-  borderTopRightRadius: 10,
+  borderTopLeftRadius: radii.sheet,
+  borderTopRightRadius: radii.sheet,
   zIndex: 1000,
 }
 

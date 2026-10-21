@@ -3,6 +3,7 @@ import { ScrollView, type ScrollViewProps } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '~themes/ThemeProvider'
 import { FeatherIcon } from '~common/ui/Icon'
+import { floatingShadow, radii } from '~common/ui/surfaces'
 import { useHorizontalWheel } from './horizontalScroll/useHorizontalWheel.web'
 
 export default function HorizontalControlScrollView({
@@ -41,12 +42,12 @@ export default function HorizontalControlScrollView({
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: 0,
-                border: `1px solid ${theme.colors.border}`,
-                borderRadius: 8,
-                background: theme.colors.reverse,
+                border: 0,
+                borderRadius: radii.tile,
+                background: theme.colors.surfaceRaised,
                 color: theme.colors.primary,
                 cursor: 'pointer',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+                ...floatingShadow,
               }}
             >
               <FeatherIcon

@@ -2,6 +2,7 @@ import React from 'react'
 
 import { TouchableBox } from './Box'
 import { FeatherIcon } from './Icon'
+import { floatingShadow } from './surfaces'
 
 type FeatherIconName = React.ComponentProps<typeof FeatherIcon>['name']
 
@@ -16,10 +17,11 @@ const Fab = ({
 }) => {
   return (
     <TouchableBox
-      className="overflow-hidden border-continuous w-[50px] h-[50px] rounded-[30px] bg-primary items-center justify-center"
+      className="overflow-hidden border-continuous w-[50px] h-[50px] rounded-full bg-primary items-center justify-center"
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="button"
       onPress={onPress}
+      style={floatingShadow}
     >
       <FeatherIcon name={icon} size={18} color="white" />
     </TouchableBox>

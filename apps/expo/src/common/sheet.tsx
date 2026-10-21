@@ -212,7 +212,7 @@ const SheetItem = ({ children, tag, onPress, ...props }: SheetItemProps) => (
   >
     <Text {...props}>{children}</Text>
     {Boolean(tag) && (
-      <Box className="overflow-hidden border-continuous ml-[10px] p-[3px] bg-light-grey rounded-[3px]">
+      <Box className="overflow-hidden border-continuous ml-[10px] p-[3px] bg-light-grey rounded-[4px]">
         <Text className="text-[12px] text-grey" style={{ flexDirection: 'column-reverse' }}>
           {tag}
         </Text>

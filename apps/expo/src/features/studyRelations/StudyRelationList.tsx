@@ -130,7 +130,7 @@ const TargetIcon = ({ type }: { type: RelationEndpoint['type'] }) => {
 }
 
 const MissingTargetWarningIcon = () => (
-  <Box className="overflow-hidden border-continuous items-center justify-center mr-[6px] absolute top-[20px] left-[35px] bg-reverse rounded-[100px] p-[4px]">
+  <Box className="overflow-hidden border-continuous items-center justify-center mr-[6px] absolute top-[20px] left-[35px] bg-reverse rounded-full p-[4px]">
     <FeatherIcon name="alert-triangle" size={12} color="secondary" />
   </Box>
 )
@@ -445,7 +445,7 @@ const StudyRelationList = ({
 
     return (
       <Box className="overflow-hidden border-continuous" key={model.relation.id}>
-        <Box className="border-continuous overflow-hidden absolute top-[0px] left-[20px] border-l-[4px] border-b-[4px] rounded-bl-[50px] h-[35px] w-[25px] border-border" />
+        <Box className="border-continuous overflow-hidden absolute top-[0px] left-[20px] border-l-[4px] border-b-[4px] rounded-bl-full h-[35px] w-[25px] border-border" />
         {index !== sectionLength - 1 && (
           <Box className="border-continuous overflow-hidden absolute top-[0px] bottom-[0px] left-[20px] border-l-[4px] w-[25px] border-border" />
         )}

@@ -50,7 +50,7 @@ const VerseAccordion = ({ noteVerses, version }: VerseAccordionProps) => {
   }
 
   return (
-    <Box className="border-continuous overflow-visible bg-opacity5 rounded-[14px]">
+    <Box className="border-continuous overflow-visible bg-opacity5 rounded-[12px]">
       <TouchableBox
         className="overflow-hidden border-continuous flex-row items-center py-[12px] px-[16px]"
         accessibilityLabel={reference}

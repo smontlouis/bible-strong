@@ -36,7 +36,7 @@ const SocialButton = (
   const theme = themeOverride ?? contextTheme
   const { color } = props
   const resolvedClassName = twMerge(
-    'flex-row rounded-[48px] h-[48px] items-center justify-center pl-[10px] pr-[10px] flex-[1]',
+    'flex-row rounded-full h-[48px] items-center justify-center pl-[10px] pr-[10px] flex-[1]',
     className
   )
   return (

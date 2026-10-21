@@ -132,7 +132,7 @@ export default function AssistantComposer() {
       // Above the keyboard there is no home indicator to clear.
       style={{ marginBottom: 0, paddingBottom: keyboardVisible ? 8 : insets.bottom + 4 }}
     >
-      <ComposerPrimitive.Root className="border-border bg-reverse rounded-[22px] border px-2 pb-2 pt-1">
+      <ComposerPrimitive.Root className="border-border bg-reverse rounded-[24px] border px-2 pb-2 pt-1">
         <AssistantComposerInput
           multiline
           maxLength={4000}

@@ -25,7 +25,7 @@ const RemovableChip = ({ label, onRemove }: { label: string; onRemove: () => voi
 
   return (
     <AnimatedBox
-      className="overflow-hidden border-continuous flex-row bg-primary rounded-[20px] px-[12px] py-[5px] items-center"
+      className="overflow-hidden border-continuous flex-row bg-primary rounded-full px-[12px] py-[5px] items-center"
       entering={FadeIn}
       exiting={FadeOut}
       layout={LinearTransition}

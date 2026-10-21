@@ -50,7 +50,7 @@ export const ChangelogTag = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const { type } = props
-  const resolvedClassName = twMerge('ml-[10px] p-[3px] rounded-[3px]', className)
+  const resolvedClassName = twMerge('ml-[10px] p-[3px] rounded-[4px]', className)
   return (
     <View
       {...props}

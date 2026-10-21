@@ -27,7 +27,7 @@ const SheetSearchInput = ({
     <Box className="overflow-visible border-continuous">
       <Box
         dataSet={{ focusGroup: 'true' }}
-        className="border-continuous overflow-visible flex-row items-center justify-center px-[14px] rounded-[14px] bg-[rgba(0,0,0,0.1)] mt-[0px] mb-[5px] h-[44px]"
+        className="border-continuous overflow-visible flex-row items-center justify-center px-[14px] rounded-[12px] bg-[rgba(0,0,0,0.1)] mt-[0px] mb-[5px] h-[44px]"
       >
         <Icon.Feather
           color={theme.colors.default}

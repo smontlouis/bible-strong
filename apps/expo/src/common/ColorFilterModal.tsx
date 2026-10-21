@@ -21,7 +21,7 @@ const ColorCircle = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const { color } = props
-  const resolvedClassName = twMerge('w-[24px] h-[24px] rounded-[6px] mr-[12px]', className)
+  const resolvedClassName = twMerge('w-[24px] h-[24px] rounded-[8px] mr-[12px]', className)
   return (
     <View
       {...props}

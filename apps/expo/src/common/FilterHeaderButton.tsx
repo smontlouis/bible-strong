@@ -48,7 +48,7 @@ export const FilterHeaderButtonContent = ({
       }
     >
       {activeFilterCount ? (
-        <HStack className="bg-primary min-w-[50px] h-[22px] rounded-[13px] items-stretch">
+        <HStack className="bg-primary min-w-[50px] h-[22px] rounded-full items-stretch">
           <HStack className="min-w-[28px] pl-[8px] pr-[6px] items-center justify-center">
             {activeFilterCount === 1 && activeFilterIcon ? (
               <FeatherIcon name={activeFilterIcon} size={14} color="reverse" />

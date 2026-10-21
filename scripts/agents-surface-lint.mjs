@@ -12,6 +12,8 @@ const baselineUrl = new URL('./agents-surface-baseline.json', import.meta.url)
 const allowedRadii = new Set([0, 4, 8, 12, 16, 24, 999])
 const exceptionPattern = /^\s*\/\/\s*surface-allow:\s+\S/
 const sharedSurfacesFile = 'apps/expo/src/common/ui/surfaces.ts'
+// The playground is a developer screen, not a surface users see: its mock-ups stay out of the rules.
+const playgroundDir = 'apps/expo/src/features/playground/'
 
 const classRadiusPattern = /\brounded(?:-[tblrsexy]{1,2})?-\[(\d+(?:\.\d+)?)px\]/g
 const styleRadiusPattern =
@@ -47,6 +49,7 @@ const sourceFiles = git([
     file =>
       file.startsWith('apps/expo/src/') &&
       !file.includes('/__tests__/') &&
+      !file.startsWith(playgroundDir) &&
       file !== sharedSurfacesFile &&
       existsSync(file)
   )

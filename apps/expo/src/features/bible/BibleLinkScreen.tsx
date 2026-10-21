@@ -478,7 +478,7 @@ const BibleLinkScreen = () => {
         </KeyboardAvoidingView>
         {!isEditing && isYoutubeLink && (
           <Box
-            className="overflow-hidden border-continuous absolute right-[20px]"
+            className="overflow-visible border-continuous absolute right-[20px]"
             style={{ bottom: insets.bottom + 20 }}
           >
             <Fab

@@ -35,7 +35,7 @@ const Badge = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const resolvedClassName = twMerge(
-    'flex-row items-center px-[10px] py-[5px] rounded-[15px] border-[1px] border-[#F59E0B] bg-reverse',
+    'flex-row items-center px-[10px] py-[5px] rounded-full border-[1px] border-[#F59E0B] bg-reverse',
     className
   )
   return (

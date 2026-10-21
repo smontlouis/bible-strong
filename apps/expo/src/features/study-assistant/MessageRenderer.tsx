@@ -59,7 +59,7 @@ export function UserMessage() {
         {({ part }) => {
           if (part.type === 'text')
             return (
-              <Box className="bg-light-grey rounded-[18px] px-4 py-[10px]">
+              <Box className="bg-light-grey rounded-[16px] px-4 py-[10px]">
                 <Text selectable>{part.text}</Text>
               </Box>
             )
