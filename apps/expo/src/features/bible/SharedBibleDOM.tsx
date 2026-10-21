@@ -113,11 +113,10 @@ const SharedBibleDOM = () => {
   return (
     <View style={[StyleSheet.absoluteFill, { zIndex: -9999, pointerEvents: 'none' }]}>
       <PortalHost name={SHARED_BIBLE_DOM_PARK_HOST} style={StyleSheet.absoluteFill} />
-      <Portal key={`${destination}-${portalLayoutKey}`} hostName={destination}>
-        <BibleDOMWrapper
-          key={`${bibleDomRemountSignal}-${destination}-${portalLayoutKey}`}
-          {...props}
-        />
+      {/* A change of size remounts the WebView (orientation); a change of tab only moves it,
+          so switching tabs keeps the page loaded instead of reloading it. */}
+      <Portal key={portalLayoutKey} hostName={destination}>
+        <BibleDOMWrapper key={`${bibleDomRemountSignal}-${portalLayoutKey}`} {...props} />
       </Portal>
     </View>
   )
