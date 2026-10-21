@@ -1,7 +1,7 @@
 import { compactWorkspaceDrawerAtom } from '../workspaceViewTracking'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import React, { useEffect, useRef, useState } from 'react'
-import { useWindowDimensions } from 'react-native'
+import { StyleSheet, useWindowDimensions } from 'react-native'
 import { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 import Box, { AnimatedBox } from '~common/ui/Box'
 import BottomTabBar from '~features/app-switcher/BottomTabBar/BottomTabBar'
@@ -121,7 +121,11 @@ const AppSwitcherScreenWrapper = () => {
           <AppSwitcherScreen openHome={openHome} openMenu={openMenu} />
         </Box>
 
-        <Box className="overflow-hidden border-continuous" style={{ width: drawerWidth }}>
+        {/* The menu drawer leaves a strip of the switcher visible; a hairline marks its edge. */}
+        <Box
+          className="overflow-hidden border-continuous border-separator"
+          style={{ width: drawerWidth, borderLeftWidth: StyleSheet.hairlineWidth }}
+        >
           {hasOpenedMenu && <More closeMenu={closeMenu} />}
         </Box>
       </AnimatedBox>

@@ -33,7 +33,6 @@ import Box, {
   HStack,
   TouchableBox,
 } from '~common/ui/Box'
-import { FormSheetHandle } from '~common/ui/FormSheetScreen'
 import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 import Text, { AnimatedText } from '~common/ui/Text'
 import {
@@ -477,8 +476,6 @@ const Header = ({
           borderBottomWidth: StyleSheet.hairlineWidth,
         }}
       >
-        {isFormSheet && <FormSheetHandle />}
-
         <HStack
           className="overflow-hidden border-continuous mx-auto items-center w-[100%]"
           style={{ maxWidth: PAGE_CONTENT_MAX_WIDTH }}
@@ -519,8 +516,6 @@ const Header = ({
           borderBottomWidth: StyleSheet.hairlineWidth,
         }}
       >
-        {isFormSheet && <FormSheetHandle />}
-
         <HStack
           className="overflow-hidden border-continuous mx-auto items-center w-[100%]"
           style={{ maxWidth: PAGE_CONTENT_MAX_WIDTH }}
@@ -568,8 +563,6 @@ const Header = ({
       entering={FadeIn}
       exiting={FadeOut}
     >
-      {isFormSheet && <FormSheetHandle />}
-
       <HStack
         className="overflow-hidden border-continuous mx-auto items-center w-[100%]"
         style={{ maxWidth: PAGE_CONTENT_MAX_WIDTH }}

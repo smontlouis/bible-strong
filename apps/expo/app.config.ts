@@ -171,7 +171,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     ['@react-native-google-signin/google-signin'],
-    ['react-native-edge-to-edge'],
+    // Pages run under the navigation bar; the system scrim over its three-button form showed as a
+    // band over the canvas. SystemBars styles the buttons with the theme instead.
+    ['react-native-edge-to-edge', { android: { enforceNavigationBarContrast: false } }],
   ],
   extra: {
     resourceApiUrl: process.env.EXPO_PUBLIC_RESOURCE_API_URL,
