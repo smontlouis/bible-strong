@@ -10,7 +10,7 @@ const colors: typeof defaultColors = {
   surface: 'rgb(245,242,227)',
   surfaceRaised: 'rgb(245,242,227)',
   separator: 'rgba(72,54,35,0.16)',
-  grey: 'rgb(171, 138, 106)',
+  grey: 'rgb(116, 94, 72)',
   darkGrey: 'rgba(72,54,35,0.5)',
   primary: 'rgb(125,123,168)',
   lightPrimary: 'rgb(228, 228, 245)',
