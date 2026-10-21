@@ -61,10 +61,14 @@ route pushed over it elsewhere. Native screens publish their context through the
 stored in MMKV under the web's per-account key.
 
 Avatar. `StrobiAvatar.tsx` renders the same `strobi.avatar.json` with `@bible-strong/avatar-core`
-and `react-native-svg`. The core samples a frame on the JS thread at 30 fps and the paths
-reach the native views through Reanimated shared values. Do not update the paths with
-`setNativeProps`: measured in development on the iOS simulator, it cost about 64 ms per frame
-against about 2 ms with shared values.
+and `react-native-svg`. The core samples a frame at 30 fps on the UI thread, in a Reanimated
+frame callback (Bundle Mode forwards the package there, see `babel.config.js`), and writes the
+paths into shared values; the callback pauses while the app is not active. Do not sample it on
+the JS thread again: a `requestAnimationFrame` loop there cost 12–19 % CPU at rest and, with the
+app in background where nothing paces `requestAnimationFrame`, spun at 100 % CPU while the heap
+grew by about 40 MB a minute until taps no longer reached JavaScript (2026-10-21). Do not update
+the paths with `setNativeProps` either: measured in development on the iOS simulator, it cost
+about 64 ms per frame against about 2 ms with shared values.
 
 Dictation. `dictationAudio.ts` captures mono PCM16 with `expo-audio`'s native audio stream and
 feeds the same `LiveDictationAdapter` as the web. The microphone is requested on first use and
