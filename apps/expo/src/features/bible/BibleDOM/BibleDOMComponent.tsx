@@ -16,7 +16,7 @@ import { createGlobalStyles } from 'goober/global'
 import { m, useReducedMotion } from 'motion/react'
 import Feather from '@expo/vector-icons/Feather'
 import { domMax, LazyMotion } from 'motion/react'
-import React, { useEffect, useEffectEvent, useState, useRef } from 'react'
+import React, { useEffect, useEffectEvent, useMemo, useState, useRef } from 'react'
 import { Verse as TVerse } from '~common/types'
 import { floatingShadow, radii } from '~common/ui/surfaces'
 import {
@@ -755,10 +755,14 @@ const LoadedBibleContent = ({
   const isParallelVerseMode = Boolean(parallelVerses?.length)
   const displayedVersions = [version, ...(parallelVerses ?? []).map(parallel => parallel.id)]
   const displayedVersionsKey = displayedVersions.join(',')
-  const versesByVersion: Record<string, TVerse[]> = {
-    ...Object.fromEntries((parallelVerses ?? []).map(parallel => [parallel.id, parallel.verses])),
-    [version]: verses,
-  }
+  // Kept between renders: the highlight layer measures the page again whenever it changes
+  const versesByVersion = useMemo<Record<string, TVerse[]>>(
+    () => ({
+      ...Object.fromEntries((parallelVerses ?? []).map(parallel => [parallel.id, parallel.verses])),
+      [version]: verses,
+    }),
+    [parallelVerses, version, verses]
+  )
   const redWordsByVersion = { ...parallelRedWords, [version]: redWords ?? null }
 
   // Clear tokens cache and selection when versions change to avoid stale word indices

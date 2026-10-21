@@ -235,6 +235,18 @@ const isSameRects = (
       rect.height === b[index].height
   )
 
+// Every field drawn: a pass that measures the same highlights keeps the same state
+const isSameHighlightRects = (a: HighlightRect[], b: HighlightRect[]) =>
+  a.length === b.length &&
+  a.every(
+    (rect, index) =>
+      rect.id === b[index].id &&
+      rect.color === b[index].color &&
+      rect.annotationType === b[index].annotationType &&
+      rect.isDimmed === b[index].isDimmed
+  ) &&
+  isSameRects(a, b)
+
 export type HandlePositions = {
   start: { x: number; y: number } | null
   end: { x: number; y: number } | null
@@ -431,9 +443,13 @@ export function useAnnotationHighlights({
       const rects = calculateAnnotationRects()
       const container = containerRef.current
       const isRTLLayout = container ? getComputedStyle(container).direction === 'rtl' : false
+      const handles = calculateVerseSelectionHandles(isRTLLayout)
       setIsRTL(isRTLLayout)
-      setHighlightRects(rects)
-      setVerseSelectionHandles(calculateVerseSelectionHandles(isRTLLayout))
+      // Setting equal rects anew would render again, run this pass again, and loop every frame
+      setHighlightRects(previous => (isSameHighlightRects(previous, rects) ? previous : rects))
+      setVerseSelectionHandles(previous =>
+        JSON.stringify(previous) === JSON.stringify(handles) ? previous : handles
+      )
     }
 
     requestAnimationFrame(() => {
