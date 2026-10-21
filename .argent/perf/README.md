@@ -50,8 +50,9 @@ or on the user's iPhone 15 Pro Max.
 |---|---|
 | JS thread at rest, production build | 1 % (the avatar now samples its frames on the UI thread) |
 | Production app in background | 1.2–1.6 % CPU, state S, memory going down |
-| Main thread at rest | about 14 % spent in the avatar's frame callback (open question) |
-| Bible WebView at rest | still 15–19 % CPU: an internal loop of the page, no props are sent at rest |
+| Main thread at rest | about 14 % in the avatar's frame callback; 0 once the greyed button has fallen asleep (frame callback stopped) |
+| Bible WebView at rest | 22–37 % CPU from a render loop (`useAnnotationHighlights` stored equal rects each frame, `versesByVersion` rebuilt each render), then 0 requestAnimationFrame and 0 % CPU |
+| Strong page, Essentiel → Approfondi (dev) | 3 renders of about 520 ms (the classical Greek preview linked the Bible references of a whole 23 KB article, 432 ms) → 1 render of 17–19 ms (only the start the 5 lines show, 17 ms the first time, cached after) |
 | WebView injections (dev): select verse / highlight | 2 (0.4 KB) / 1 (2 KB) |
 | WebView injections (dev), 4 parallel versions: chapter change / tab switch | 5 (47 KB) / 8 (36 KB), no WebView reload |
 | Highlights screen opening (dev React commits) | 282 + 93 + 198 + 228 ms |
@@ -75,6 +76,14 @@ xcrun xctrace record --template 'Time Profiler' --attach <pid> --time-limit 30s 
 ```
 
 ## Dev-client instrumentation (Metro debugger)
+
+Probe every WebView of the app (requestAnimationFrame calls and DOM mutations over 2 s, or the
+running CSS animations): inject a script with `Commands.injectJavaScript(fiber.stateNode.canonical.publicInstance, js)`
+on each `RNCWebView` host fiber, and have it answer with
+`window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'PERFPROBE', data }))`. The Expo DOM
+wrapper forwards unknown message types to `addGlobalDomEventListener` (module
+`expo/build/dom/global-events`), where a listener collects them. A WebView's `console.log` does not
+reach Metro.
 
 Count what React Native pushes into the Bible WebView (module ids differ per bundle; look them up
 with `__r.getModules()` and the verbose name `RNCWebViewNativeComponent`):
