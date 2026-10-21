@@ -109,11 +109,6 @@
     "shadow": 0,
     "ground": 0
   },
-  "apps/expo/src/common/ui/FormSheetScreen.tsx": {
-    "radius": 1,
-    "shadow": 0,
-    "ground": 0
-  },
   "apps/expo/src/common/ui/NewChip.tsx": {
     "radius": 1,
     "shadow": 0,
