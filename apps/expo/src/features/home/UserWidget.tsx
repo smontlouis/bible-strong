@@ -9,6 +9,7 @@ import { twMerge } from '~common/ui/classNames'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Paragraph from '~common/ui/Paragraph'
+import { runAfterInteractions } from '~helpers/runAfterInteractions'
 import useLogin from '~helpers/useLogin'
 import type { Theme as AppTheme } from '~themes'
 import { useTheme } from '~themes/ThemeProvider'
@@ -17,6 +18,7 @@ import VerseOfTheDay, { VERSE_CARD_HEIGHT } from './VerseOfTheDay'
 import { VISIBLE_VERSE_OF_THE_DAY_OFFSETS } from './verseOfTheDayPolicy'
 
 const visibleVerseOffsets = [...VISIBLE_VERSE_OF_THE_DAY_OFFSETS]
+const todayOffset = visibleVerseOffsets[visibleVerseOffsets.length - 1]
 
 const Container = (
   componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
@@ -40,18 +42,27 @@ const UserWidget = () => {
   const [carouselWidth, setCarouselWidth] = React.useState(0)
   const [activeVerseIndex, setActiveVerseIndex] = React.useState(visibleVerseOffsets.length - 1)
   const { width: windowWidth } = useWindowDimensions()
+  // Today's card shows on the first frame; the carousel and the previous days mount once the
+  // home has opened, so opening it builds one card instead of five.
+  const [showPreviousDays, setShowPreviousDays] = React.useState(false)
+  React.useEffect(() => {
+    const task = runAfterInteractions(() => setShowPreviousDays(true))
+    return () => task.cancel()
+  }, [])
 
   return (
     <Container>
       <OfflineNotice />
       <Box
         className="border-continuous overflow-visible items-center justify-center w-[100%]"
+        // Keep the carousel's room before it can measure, so the sections below never move.
+        style={{ height: VERSE_CARD_HEIGHT }}
         onLayout={({ nativeEvent }) => {
           const nextWidth = Math.round(nativeEvent.layout.width)
           setCarouselWidth(currentWidth => (currentWidth === nextWidth ? currentWidth : nextWidth))
         }}
       >
-        {carouselWidth > 0 && (
+        {showPreviousDays && carouselWidth > 0 ? (
           <Carousel
             layout={{
               type: 'vertical-stack',
@@ -92,6 +103,11 @@ const UserWidget = () => {
             )}
             defaultIndex={visibleVerseOffsets.length - 1}
           />
+        ) : (
+          // Where the carousel lays today's card: its 20px gutters, at the front of the stack.
+          <Box className="w-[100%] px-[20px]">
+            <VerseOfTheDay addDay={todayOffset} />
+          </Box>
         )}
       </Box>
     </Container>
