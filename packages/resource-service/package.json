@@ -23,6 +23,7 @@
     "import:all": "tsx src/publication/publicationCli.ts import-all",
     "import:catalog": "tsx src/publication/publicationCli.ts import-catalog",
     "import:catalog:hosted": "tsx src/publication/publicationCli.ts import-catalog-hosted",
+    "commentary:sections:backfill": "tsx src/publication/commentaryChapterSectionsBackfillCli.ts",
     "publish:r2": "tsx src/publication/r2PublicationCli.ts",
     "publish:r2:changed": "tsx src/publication/r2PublicationCli.ts --changed",
     "encrypt:offline": "dotenv -e .env.resource-publication.local -- tsx src/publication/encryptedOfflineArchiveCli.ts",

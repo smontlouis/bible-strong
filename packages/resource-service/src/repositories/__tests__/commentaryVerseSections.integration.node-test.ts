@@ -13,6 +13,7 @@ import type { Kysely } from 'kysely'
 import { createIsolatedPostgres } from '../../database/__tests__/isolatedPostgresTestSupport'
 import type { ResourceDatabase } from '../../database/types'
 import { makeResourceWebHandler } from '../../http/app'
+import { backfillCommentaryChapterSections } from '../commentaryChapterSections'
 import { importPublicationBundle } from '../publicationImporter'
 import { makeKyselySupplementaryRepository } from '../supplementaryRepository'
 
@@ -55,6 +56,13 @@ const insertCommentary = async (
     content,
   }))
   if (rows.length) await database.insertInto('commentary_verses').values(rows).execute()
+  // The importer writes the sections of each chapter with the comments.
+  if (status === 'active' && rows.length) {
+    await backfillCommentaryChapterSections(database, {
+      resourceIdentity: `commentary:${collection}:${language}`,
+      apply: true,
+    })
+  }
 }
 
 type VerseSections = {
@@ -133,10 +141,11 @@ const sectionsFromOneRead = async (
 }
 
 describe('Commentary sections of a verse', { skip: !runIntegration }, () => {
-  it('reads the chapter of every commentary in one statement', async () => {
+  it('reads the closest section of every commentary in one statement', async () => {
     const isolated = await createIsolatedPostgres(connectionString, 'verse_sections', 1)
     const { database } = isolated
     let statements = 0
+    let transferred = ''
     const repository = makeKyselySupplementaryRepository(
       database.withPlugin({
         transformQuery(args) {
@@ -144,6 +153,7 @@ describe('Commentary sections of a verse', { skip: !runIntegration }, () => {
           return args.node
         },
         async transformResult(args) {
+          transferred += JSON.stringify(args.result.rows)
           return args.result
         },
       })
@@ -175,46 +185,74 @@ describe('Commentary sections of a verse', { skip: !runIntegration }, () => {
       await insertCommentary(database, 'draft', 'fr', 'staged', { '43-3-16': 'Not published' })
 
       statements = 0
-      const chapters = await Effect.runPromise(
-        repository.findCommentaryChapters({
+      transferred = ''
+      const commentaries = await Effect.runPromise(
+        repository.findCommentaryVerseSections({
           collections: ['verses', 'missing', 'silent', 'draft', 'paragraphs'],
           language: 'fr',
           book: 43,
           chapter: 3,
+          verse: 16,
         })
       )
       assert.equal(statements, 1)
-      assert.deepEqual(
-        chapters.map(chapter => [
-          chapter.collection,
-          chapter.revision,
-          Object.keys(chapter.comments).length,
-        ]),
-        [
-          ['verses', 'verses-fr-active', 3],
-          ['silent', 'silent-fr-active', 0],
-          ['paragraphs', 'paragraphs-fr-active', 22],
-        ]
-      )
-      assert.deepEqual(chapters[0]?.comments, {
-        '15': 'Overview<hr>That whosoever',
-        '16': 'Overview<hr>For God so loved<hr>The world',
-        '17': 'Overview',
-      })
+      assert.deepEqual(commentaries, [
+        {
+          collection: 'verses',
+          revision: 'verses-fr-active',
+          section: { slug: '16-16', startVerse: 16, endVerse: 16, content: 'For God so loved' },
+        },
+        { collection: 'silent', revision: 'silent-fr-active' },
+        {
+          collection: 'paragraphs',
+          revision: 'paragraphs-fr-active',
+          section: { slug: '9-21', startVerse: 9, endVerse: 21, content: 'La foi' },
+        },
+      ])
+      // Only the sections shown leave the database, not the comments of the chapter.
+      assert.doesNotMatch(transferred, /Nicodème|That whosoever|The world/u)
 
       statements = 0
       assert.deepEqual(
         await Effect.runPromise(
-          repository.findCommentaryChapters({
+          repository.findCommentaryVerseSections({
             collections: [],
             language: 'fr',
             book: 43,
             chapter: 3,
+            verse: 16,
           })
         ),
         []
       )
       assert.equal(statements, 0)
+
+      // A publication imported before the sections were written is refused, not silent.
+      await database
+        .deleteFrom('commentary_chapter_sections')
+        .where('publication_id', 'in', eb =>
+          eb
+            .selectFrom('resource_publications')
+            .select('id')
+            .where('resource_identity', '=', 'commentary:silent:fr')
+        )
+        .execute()
+      const refused = await Effect.runPromise(
+        Effect.either(
+          repository.findCommentaryVerseSections({
+            collections: ['verses', 'silent'],
+            language: 'fr',
+            book: 43,
+            chapter: 3,
+            verse: 16,
+          })
+        )
+      )
+      assert.equal(refused._tag, 'Left')
+      await backfillCommentaryChapterSections(database, {
+        resourceIdentity: 'commentary:silent:fr',
+        apply: true,
+      })
 
       // The route answers like the chapter reads it replaces, for every verse.
       const web = makeResourceWebHandler(undefined, undefined, { supplementary: repository })

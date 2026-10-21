@@ -2,7 +2,9 @@
 
 ## Status
 
-Accepted
+Accepted. Amended on 2026-10-21 by
+[ADR-0087](./0087-write-the-sections-of-a-commentary-chapter-at-publication.md): the sections
+are written at publication, and the read no longer loads the comments of the chapter.
 
 ## Context
 

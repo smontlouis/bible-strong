@@ -158,6 +158,23 @@ for (const normalized of [false, true]) {
           })
         )
       const indexRequest = { book: 1, chapter: 1, resources: [{ resourceId, language: 'fr' }] }
+      // The section a verse page shows, read from the sections written at publication.
+      const verseSection = async () => {
+        const response = await app.handler(
+          new Request(
+            `http://localhost/v1/commentaries/verses/1-1-2/sections?language=fr&commentaries=${resourceId}`
+          )
+        )
+        assert.equal(response.status, 200)
+        const payload = (await response.json()) as {
+          sections: { slug: string; content: string; resource: { revision: string } }[]
+        }
+        return payload.sections.map(section => [
+          section.resource.revision,
+          section.slug,
+          section.content,
+        ])
+      }
       try {
         const first = await writeFixture(path.join(root, 'first'), resourceId, 'first', normalized)
         assert.equal(
@@ -170,6 +187,7 @@ for (const normalized of [false, true]) {
             .status,
           'unchanged'
         )
+        assert.deepEqual(await verseSection(), [['first', '1-2', first.content]])
         const indexResponse = await post('reading-index', indexRequest)
         assert.equal(indexResponse.status, 200)
         const index = Schema.decodeUnknownSync(CommentaryReadingIndexResponse)(
@@ -198,8 +216,14 @@ for (const normalized of [false, true]) {
           Effect.runPromise(importPublicationBundle(path.join(root, 'invalid'), database))
         )
         assert.equal((await post('reading-section', sectionRequest)).status, 200)
-        await writeFixture(path.join(root, 'second'), resourceId, 'second', normalized)
+        const second = await writeFixture(
+          path.join(root, 'second'),
+          resourceId,
+          'second',
+          normalized
+        )
         await Effect.runPromise(importPublicationBundle(path.join(root, 'second'), database))
+        assert.deepEqual(await verseSection(), [['second', '1-2', second.content]])
         assert.equal((await post('reading-section', sectionRequest)).status, 404)
         const refreshed = Schema.decodeUnknownSync(CommentaryReadingIndexResponse)(
           await (await post('reading-index', indexRequest)).json()

@@ -35,6 +35,7 @@
     "resources:import-all": "yarn workspace @bible-strong/resource-service import:all",
     "resources:import-catalog": "yarn workspace @bible-strong/resource-service import:catalog",
     "resources:import-catalog:hosted": "yarn workspace @bible-strong/resource-service import:catalog:hosted",
+    "resources:commentaries:sections:backfill": "yarn workspace @bible-strong/resource-service commentary:sections:backfill",
     "resources:r2:publish-changed": "yarn workspace @bible-strong/resource-service publish:r2:changed",
     "resources:r2:publish-changed:prod": "RESOURCE_R2_BUCKET=bible-strong-resource-artifacts-prod yarn resources:r2:publish-changed",
     "resources:offline:encrypt": "yarn workspace @bible-strong/resource-service encrypt:offline",

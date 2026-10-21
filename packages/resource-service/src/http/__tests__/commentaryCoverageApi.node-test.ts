@@ -22,7 +22,7 @@ const supplementary: SupplementaryRepositoryService = {
         resourceIdentity: `commentary:${input.resourceId}:${input.language}`,
       })
     ),
-  findCommentaryChapters: () => Effect.succeed([]),
+  findCommentaryVerseSections: () => Effect.succeed([]),
   findCommentaryCoverage: input =>
     Effect.succeed({
       ...input,

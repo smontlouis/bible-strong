@@ -8,10 +8,7 @@ import {
 } from '@bible-strong/resource-domain/contracts/commentaryReadingContract'
 import { Context, Data, Effect } from 'effect'
 
-import {
-  buildCommentaryChapterSections,
-  closestCommentarySection,
-} from '@bible-strong/resource-domain/commentary-chapter-sections'
+import type { CommentaryChapterSection } from '@bible-strong/resource-domain/commentary-chapter-sections'
 import {
   CommentaryChapterResponseDto,
   CommentaryCoverageResponseDto,
@@ -30,12 +27,6 @@ export type CommentaryVerseLookup = {
 }
 export type CommentaryChapterLookup = {
   collection: string
-  language: SupplementaryLanguage
-  book: number
-  chapter: number
-}
-export type CommentaryChaptersLookup = {
-  collections: readonly string[]
   language: SupplementaryLanguage
   book: number
   chapter: number
@@ -108,14 +99,17 @@ export type SupplementaryRepositoryService = {
     input: CommentaryChapterLookup
   ) => Effect.Effect<ActiveCommentaryChapter, SupplementaryRepositoryError>
   /**
-   * The comments of one chapter in several commentaries, read together. A commentary
-   * without an active publication is left out; one that says nothing on the chapter has
-   * no comments.
+   * For several commentaries, the section of the chapter that bears most closely on a verse
+   * (`closestCommentarySection`), read together from the sections written at publication. A
+   * commentary without an active publication is left out; one that does not comment the
+   * verse has no section.
    */
-  findCommentaryChapters: (
-    input: CommentaryChaptersLookup
-  ) => Effect.Effect<
-    readonly { collection: string; revision: string; comments: Record<string, string> }[],
+  findCommentaryVerseSections: (input: CommentaryVerseSectionsLookup) => Effect.Effect<
+    readonly {
+      collection: string
+      revision: string
+      section?: CommentaryChapterSection
+    }[],
     SupplementaryRepositoryFailure
   >
   findCommentaryCoverage: (
@@ -162,31 +156,28 @@ export const readCommentaryChapter = (input: CommentaryChapterLookup) =>
   })
 
 /**
- * For each commentary, the section the public site shows on a verse: the sections of the
- * chapter are built as the site builds them, and the closest one is kept.
- *
- * Sections are built for the catalog identity of a commentary. A publication is named like
- * it, except one edition that is not the anthology read by source document.
+ * For each commentary, the section the public site shows on a verse: the closest among the
+ * sections of the chapter, built at publication as the site builds them (ADR-0087).
  */
 export const readCommentaryVerseSections = (input: CommentaryVerseSectionsLookup) =>
   Effect.gen(function* () {
     const repository = yield* SupplementaryRepository
-    const chapters = yield* repository.findCommentaryChapters(input)
-    const published = new Map(chapters.map(chapter => [chapter.collection, chapter]))
+    const commentaries = yield* repository.findCommentaryVerseSections(input)
+    const published = new Map(commentaries.map(commentary => [commentary.collection, commentary]))
     return new CommentaryVerseSectionsResponseDto({
       verseKey: `${input.book}-${input.chapter}-${input.verse}`,
       sections: input.collections.flatMap(collection => {
-        const chapter = published.get(collection)
-        const section =
-          chapter &&
-          closestCommentarySection(
-            buildCommentaryChapterSections(collection, chapter.comments),
-            input.verse
-          )
-        return section
+        const commentary = published.get(collection)
+        const section = commentary?.section
+        return commentary && section
           ? [
               new CommentaryVerseSectionDto({
-                resource: revisionDto('commentary', collection, input.language, chapter.revision),
+                resource: revisionDto(
+                  'commentary',
+                  collection,
+                  input.language,
+                  commentary.revision
+                ),
                 slug: section.slug,
                 startVerse: section.startVerse,
                 endVerse: section.endVerse,

@@ -1,12 +1,16 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
+import {
+  buildCommentaryChapterSections,
+  closestCommentarySection,
+} from '@bible-strong/resource-domain/commentary-chapter-sections'
 import { Effect } from 'effect'
 
 import {
   SupplementaryContentNotFound,
   SupplementaryRepositoryFailure,
-  type CommentaryChaptersLookup,
+  type CommentaryVerseSectionsLookup,
   type SupplementaryRepositoryService,
 } from '../../domain/supplementary'
 import { resourceApiCacheTtlSeconds } from '../../runtime/resourceApiCache'
@@ -37,7 +41,7 @@ const CHAPTERS: Record<string, { revision: string; comments: Record<string, stri
   jfb: { revision: 'jfb-r1', comments: {} },
 }
 
-const reads: CommentaryChaptersLookup[] = []
+const reads: CommentaryVerseSectionsLookup[] = []
 const supplementary: SupplementaryRepositoryService = {
   findCommentaryReadingIndex: unavailable,
   findCommentaryReadingSection: unavailable,
@@ -45,7 +49,8 @@ const supplementary: SupplementaryRepositoryService = {
   findCommentaryChapter: unavailable,
   findCommentaryCoverage: unavailable,
   findCrossReferences: unavailable,
-  findCommentaryChapters: input => {
+  // The sections written at publication, picked like the repository picks them.
+  findCommentaryVerseSections: input => {
     reads.push(input)
     if (input.book === 99) {
       return Effect.fail(new SupplementaryRepositoryFailure({ cause: new Error('password=x') }))
@@ -53,7 +58,12 @@ const supplementary: SupplementaryRepositoryService = {
     return Effect.succeed(
       input.collections.flatMap(collection => {
         const chapter = input.book === 43 && input.chapter === 3 && CHAPTERS[collection]
-        return chapter ? [{ collection, ...chapter }] : []
+        if (!chapter) return []
+        const section = closestCommentarySection(
+          buildCommentaryChapterSections(collection, chapter.comments),
+          input.verse
+        )
+        return [{ collection, revision: chapter.revision, ...(section ? { section } : {}) }]
       })
     )
   },

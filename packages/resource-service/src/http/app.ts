@@ -1311,7 +1311,7 @@ const unavailableSupplementaryRepository: SupplementaryRepositoryService = {
         resourceIdentity: `commentary:${input.collection}:${input.language}`,
       })
     ),
-  findCommentaryChapters: () => Effect.succeed([]),
+  findCommentaryVerseSections: () => Effect.succeed([]),
   findCommentaryCoverage: input =>
     Effect.fail(
       new ActiveSupplementaryPublicationUnavailable({

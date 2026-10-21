@@ -30,6 +30,7 @@ import {
   type CanonicalTimelinePublication,
 } from '../publication/publicationBundle'
 import { getPublicationIdentityProjection } from '../publication/publicationIdentity'
+import { commentaryChapterSectionRows } from './commentaryChapterSections'
 
 export class PublicationImportFailure extends Data.TaggedError('PublicationImportFailure')<{
   readonly code: 'VALIDATION_FAILED' | 'REVISION_COLLISION'
@@ -941,6 +942,17 @@ export const importPublicationBundle = (
                     excerpt: index[ordinal].excerpt,
                     content: section.content,
                   }))
+                )
+                await insertChunks(
+                  transaction,
+                  'commentary_chapter_sections',
+                  commentaryChapterSectionRows({
+                    publicationId: publication.id,
+                    resourceIdentity,
+                    book,
+                    chapter,
+                    comments,
+                  })
                 )
               }
             } else if (canonical.format === 'bible-strong-canonical-cross-references') {

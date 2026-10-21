@@ -232,6 +232,13 @@
       "when": 1791444291875,
       "tag": "0035_strong_lexicon_entries_ustrong_lookup",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1792611565657,
+      "tag": "0036_commentary_chapter_sections",
+      "breakpoints": true
     }
   ]
 }

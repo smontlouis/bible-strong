@@ -386,6 +386,33 @@ export const commentaryReadingSections = pgTable(
   ]
 )
 
+/**
+ * The sections of each chapter as the public site addresses them, written at publication
+ * (ADR-0087), so that the section a verse shows is read without the comments of its chapter.
+ * `ordinal` is the place of a section among those of its chapter.
+ */
+export const commentaryChapterSections = pgTable(
+  'commentary_chapter_sections',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    book: integer('book').notNull(),
+    chapter: integer('chapter').notNull(),
+    ordinal: integer('ordinal').notNull(),
+    slug: text('slug').notNull(),
+    start_verse: integer('start_verse').notNull(),
+    end_verse: integer('end_verse').notNull(),
+    content: text('content').notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'commentary_chapter_sections_primary',
+      columns: [table.publication_id, table.book, table.chapter, table.ordinal],
+    }),
+  ]
+)
+
 export const crossReferenceLinks = pgTable(
   'cross_reference_links',
   {

@@ -15,9 +15,6 @@ const crossReferenceIdentity = 'cross-references:fr'
 const commentaryIdentity = (collection: string, language: string) =>
   `commentary:${collection}:${language}`
 
-// The longest chapter of a Bible has 176 verses; verse 0 is the introduction of a chapter.
-const COMMENTARY_CHAPTER_LAST_VERSE = 200
-
 export const buildCommentaryCoverage = (verseKeys: readonly string[]) => {
   const chapters = new Map<number, Set<number>>()
   for (const verseKey of verseKeys) {
@@ -191,34 +188,51 @@ export const makeKyselySupplementaryRepository = (
           ),
         }
       }),
-    // The publications and their comments of the chapter in one statement: a commentary
-    // that says nothing on the chapter still answers with its revision.
-    //
-    // The comments are asked for by their keys, which the index serves, where a pattern on
-    // the key is tested on every verse of each commentary. The importer only accepts keys
-    // written `book-chapter-verse` without leading zeros, and no chapter of a Bible reaches
-    // the last verse asked for.
-    findCommentaryChapters: input =>
+    // The section of each commentary that bears most closely on the verse, as
+    // `closestCommentarySection` picks it among the sections of the chapter: of those that
+    // cover the verse, the one on the fewest verses, then the one that starts last, then the
+    // first in the chapter. A commentary that does not comment the verse still answers with
+    // its revision. The sections are written at publication (ADR-0087); a publication that
+    // has none was imported before and is refused rather than answered as silent.
+    findCommentaryVerseSections: input =>
       Effect.gen(function* () {
         if (input.collections.length === 0) return []
-        const prefix = `${input.book}-${input.chapter}-`
-        const verseKeys = Array.from(
-          { length: COMMENTARY_CHAPTER_LAST_VERSE + 1 },
-          (_, verse) => `${prefix}${verse}`
-        )
-        const rows = yield* tryDatabasePromise('supplementary.commentary.read-chapters', () =>
+        const rows = yield* tryDatabasePromise('supplementary.commentary.read-verse-sections', () =>
           database
             .selectFrom('resource_publications')
-            .leftJoin('commentary_verses', join =>
-              join
-                .onRef('commentary_verses.publication_id', '=', 'resource_publications.id')
-                .on(sql<boolean>`commentary_verses.verse_key = ANY (${verseKeys}::text[])`)
+            .leftJoinLateral(
+              nested =>
+                nested
+                  .selectFrom('commentary_chapter_sections')
+                  .select(['slug', 'start_verse', 'end_verse', 'content'])
+                  .whereRef(
+                    'commentary_chapter_sections.publication_id',
+                    '=',
+                    'resource_publications.id'
+                  )
+                  .where('commentary_chapter_sections.book', '=', input.book)
+                  .where('commentary_chapter_sections.chapter', '=', input.chapter)
+                  .where('commentary_chapter_sections.end_verse', '>', 0)
+                  .where('commentary_chapter_sections.start_verse', '<=', input.verse)
+                  .where('commentary_chapter_sections.end_verse', '>=', input.verse)
+                  .orderBy(sql`end_verse - start_verse`)
+                  .orderBy('commentary_chapter_sections.start_verse', 'desc')
+                  .orderBy('commentary_chapter_sections.ordinal')
+                  .limit(1)
+                  .as('section'),
+              join => join.onTrue()
             )
             .select([
               'resource_publications.resource_identity',
               'resource_publications.revision',
-              'commentary_verses.verse_key',
-              'commentary_verses.content',
+              sql<boolean>`EXISTS (
+                SELECT 1 FROM commentary_chapter_sections written
+                 WHERE written.publication_id = resource_publications.id
+              )`.as('sections_written'),
+              'section.slug',
+              'section.start_verse',
+              'section.end_verse',
+              'section.content',
             ])
             .where(
               'resource_publications.resource_identity',
@@ -228,25 +242,37 @@ export const makeKyselySupplementaryRepository = (
             .where('resource_publications.status', '=', 'active')
             .execute()
         ).pipe(Effect.mapError(cause => new SupplementaryRepositoryFailure({ cause })))
+        const unwritten = rows.find(row => !row.sections_written)
+        if (unwritten) {
+          return yield* new SupplementaryRepositoryFailure({
+            cause: new Error(`COMMENTARY_CHAPTER_SECTIONS_MISSING ${unwritten.resource_identity}`),
+          })
+        }
         return input.collections.flatMap(collection => {
-          const published = rows.filter(
-            row => row.resource_identity === commentaryIdentity(collection, input.language)
+          const row = rows.find(
+            candidate =>
+              candidate.resource_identity === commentaryIdentity(collection, input.language)
           )
-          return published.length
-            ? [
-                {
-                  collection,
-                  revision: published[0]!.revision,
-                  comments: Object.fromEntries(
-                    published.flatMap(row =>
-                      row.verse_key === null || row.content === null
-                        ? []
-                        : [[row.verse_key.slice(prefix.length), row.content]]
-                    )
-                  ),
-                },
-              ]
-            : []
+          if (!row) return []
+          return [
+            {
+              collection,
+              revision: row.revision,
+              ...(row.slug !== null &&
+              row.start_verse !== null &&
+              row.end_verse !== null &&
+              row.content !== null
+                ? {
+                    section: {
+                      slug: row.slug,
+                      startVerse: row.start_verse,
+                      endVerse: row.end_verse,
+                      content: row.content,
+                    },
+                  }
+                : {}),
+            },
+          ]
         })
       }),
     findCommentaryCoverage: input =>

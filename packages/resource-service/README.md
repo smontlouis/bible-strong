@@ -579,6 +579,12 @@ commentary that does not comment the verse is left out; one without an active pu
 is named in `unavailable`. The sections are those of the chapter page of the public site,
 built and chosen by `@bible-strong/resource-domain/commentary-chapter-sections`
 ([ADR-0073](../../docs/adr/0073-read-the-commentary-sections-of-a-verse-in-one-read.md)).
+The importer writes the sections of each chapter in `commentary_chapter_sections`, and the
+read takes the closest one from there without loading the comments of the chapter
+([ADR-0087](../../docs/adr/0087-write-the-sections-of-a-commentary-chapter-at-publication.md)).
+A publication imported before has its sections written from its comments by
+`yarn resources:commentaries:sections:backfill --all --mode hosted --apply` (without
+`--apply`, it only counts them); until then its verse sections are refused.
 
 A simple Strong entry and the entry cards of a batch are read in one statement, like a
 detailed entry; the concordance reads of a Strong Bible resolve their publication and their
