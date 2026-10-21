@@ -2,7 +2,7 @@ import * as Icon from '@expo/vector-icons'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { View } from 'react-native'
+import { useWindowDimensions, View } from 'react-native'
 import { Carousel } from 'react-native-reanimated-carousel'
 import { twMerge } from '~common/ui/classNames'
 
@@ -39,6 +39,7 @@ const Container = (
 const UserWidget = () => {
   const [carouselWidth, setCarouselWidth] = React.useState(0)
   const [activeVerseIndex, setActiveVerseIndex] = React.useState(visibleVerseOffsets.length - 1)
+  const { width: windowWidth } = useWindowDimensions()
 
   return (
     <Container>
@@ -55,6 +56,9 @@ const UserWidget = () => {
             layout={{
               type: 'vertical-stack',
               exitDirection: 'right',
+              // The default is the window width read once at load: a card exiting after a rotation
+              // to landscape would stop half on screen.
+              exitDistance: windowWidth,
               spacing: -10,
               scaleStep: 0.04,
               rotation: 0,
