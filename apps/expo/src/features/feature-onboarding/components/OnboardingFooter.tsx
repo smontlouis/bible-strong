@@ -22,7 +22,7 @@ const OnboardingFooter = ({ currentStep, totalSteps, onBack, onNext }: Props) =>
       layout={LinearTransition}
     >
       <AnimatedTouchableBox
-        className="overflow-hidden border-continuous py-[10px] px-[20px] rounded-[20px] border-[1px] border-border"
+        className="overflow-hidden border-continuous py-[10px] px-[20px] rounded-full border-[1px] border-border"
         onPress={onBack}
         disabled={isFirstStep}
         style={[
@@ -44,7 +44,7 @@ const OnboardingFooter = ({ currentStep, totalSteps, onBack, onNext }: Props) =>
       <PaginationDots currentStep={currentStep} totalSteps={totalSteps} />
 
       <AnimatedTouchableBox
-        className="overflow-hidden border-continuous py-[10px] px-[20px] rounded-[20px] bg-primary"
+        className="overflow-hidden border-continuous py-[10px] px-[20px] rounded-full bg-primary"
         onPress={onNext}
         layout={LinearTransition}
       >

@@ -579,7 +579,7 @@ ${currentNote.description}
       </KeyboardAvoidingView>
       {!isEditing && (
         <Box
-          className="overflow-hidden border-continuous absolute right-[20px]"
+          className="overflow-visible border-continuous absolute right-[20px]"
           style={{ bottom: (isFormSheet ? insets.bottom : bottomBarHeight) + 20 }}
         >
           <Fab

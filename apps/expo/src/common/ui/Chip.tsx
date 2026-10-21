@@ -20,7 +20,7 @@ const StyledChip = (
   const theme = themeOverride ?? contextTheme
   const { isSelected } = props
   const resolvedClassName = twMerge(
-    'rounded-[20px] pt-[5px] pb-[5px] pl-[12px] pr-[12px] mr-[5px] mb-[5px]',
+    'rounded-full pt-[5px] pb-[5px] pl-[12px] pr-[12px] mr-[5px] mb-[5px]',
     className
   )
   return (
@@ -29,16 +29,7 @@ const StyledChip = (
       className={resolvedClassName}
       style={
         [
-          {
-            backgroundColor: isSelected ? theme.colors.primary : theme.colors.lightPrimary,
-            ...(isSelected && {
-              shadowColor: theme.colors.default,
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.3,
-              shadowRadius: 2,
-              elevation: 1,
-            }),
-          },
+          { backgroundColor: isSelected ? theme.colors.primary : theme.colors.lightPrimary },
           props.style,
         ] as UIComponentProps<typeof View>['style']
       }

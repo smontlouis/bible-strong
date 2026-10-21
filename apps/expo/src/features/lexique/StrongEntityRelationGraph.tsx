@@ -657,7 +657,7 @@ const GraphSatelliteContent = ({
         </VStack>
         {back && (
           <Box
-            className="overflow-hidden border-continuous w-[20px] h-[20px] absolute rounded-[20px] bg-light-grey items-center justify-center"
+            className="overflow-hidden border-continuous w-[20px] h-[20px] absolute rounded-full bg-light-grey items-center justify-center"
             style={getBackIndicatorPosition(positionIndex ?? 0)}
           >
             <FeatherIcon name="chevron-left" color="primary" size={14} />
@@ -1656,7 +1656,7 @@ export const StrongEntityRelationGraph = ({
 
   return (
     <VStack
-      className="border-continuous overflow-visible border-[1px] border-border rounded-[20px] bg-reverse"
+      className="border-continuous overflow-visible rounded-[16px] bg-reverse"
       pointerEvents={isResetting ? 'none' : 'auto'}
     >
       <Box

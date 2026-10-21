@@ -16,6 +16,8 @@ import Box from '~common/ui/Box'
 import { LinkBox } from '~common/Link'
 import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
+import { colorWithOpacity } from '~themes/colorValues'
+import { useTheme } from '~themes/ThemeProvider'
 const LangButton = ({
   children,
   onPress,
@@ -25,24 +27,21 @@ const LangButton = ({
   onPress: () => void
   isSelected: boolean
 }) => {
+  const theme = useTheme()
   return (
     <LinkBox onPress={onPress}>
       <Box
         className={twMerge(
           'overflow-hidden border-continuous',
           twMerge(
-            isSelected ? 'bg-primary' : 'bg-reverse',
-            'overflow-hidden border-continuous px-[15px] py-[7px] rounded-[20px] my-[10px] mr-[10px]'
+            isSelected && 'bg-primary',
+            'overflow-hidden border-continuous px-[15px] py-[7px] rounded-full my-[10px] mr-[10px]'
           )
         )}
-        style={{
-          shadowColor: 'rgb(89,131,240)',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 7,
-          elevation: 1,
-          overflow: 'visible',
-        }}
+        // Unselected, the chip takes the neutral tint of the secondary button.
+        style={
+          isSelected ? undefined : { backgroundColor: colorWithOpacity(theme.colors.default, 0.07) }
+        }
       >
         <Text className={twMerge(isSelected ? 'text-reverse' : 'text-grey', 'text-center')}>
           {children}

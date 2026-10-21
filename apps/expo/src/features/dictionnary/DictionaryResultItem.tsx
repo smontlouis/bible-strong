@@ -30,12 +30,12 @@ const DictionnaryResultItem = ({ word }: Props) => {
             right: 0,
             top: 0,
             height,
-            borderRadius: 3,
+            borderRadius: 8,
           }}
         >
           <LinearGradient start={[0.1, 0.2]} style={{ height }} colors={[color1, color2]} />
         </Box>
-        <Box className="overflow-hidden border-continuous bg-[rgba(0,0,0,0.1)] px-[3px] py-[2px] rounded-[20px]">
+        <Box className="overflow-hidden border-continuous bg-[rgba(0,0,0,0.1)] px-[3px] py-[2px] rounded-full">
           <Text className="text-[7px]" style={{ color: 'white' }}>
             Mot
           </Text>

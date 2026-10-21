@@ -13,7 +13,7 @@ export const LineHeightIcon = ({ isSelected, gap }: { isSelected: boolean; gap: 
       style={{ gap: gap }}
     >
       <Box
-        className="overflow-hidden border-continuous rounded-[10px]"
+        className="overflow-hidden border-continuous rounded-full"
         style={{
           width: width,
           height: height,
@@ -21,7 +21,7 @@ export const LineHeightIcon = ({ isSelected, gap }: { isSelected: boolean; gap: 
         }}
       />
       <Box
-        className="overflow-hidden border-continuous rounded-[10px]"
+        className="overflow-hidden border-continuous rounded-full"
         style={{
           width: width,
           height: height,
@@ -29,7 +29,7 @@ export const LineHeightIcon = ({ isSelected, gap }: { isSelected: boolean; gap: 
         }}
       />
       <Box
-        className="overflow-hidden border-continuous rounded-[10px]"
+        className="overflow-hidden border-continuous rounded-full"
         style={{
           width: width,
           height: height,

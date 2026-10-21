@@ -42,7 +42,7 @@ const IconContainer = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const resolvedClassName = twMerge(
-    'w-[100px] h-[100px] rounded-[50px] bg-light-primary justify-center items-center mb-[30px]',
+    'w-[100px] h-[100px] rounded-full bg-light-primary justify-center items-center mb-[30px]',
     className
   )
   return (
@@ -61,7 +61,7 @@ const ErrorBox = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const resolvedClassName = twMerge(
-    'bg-light-grey p-[15px] rounded-[10px] mb-[20px] w-[100%]',
+    'bg-light-grey p-[15px] rounded-[12px] mb-[20px] w-[100%]',
     className
   )
   return (

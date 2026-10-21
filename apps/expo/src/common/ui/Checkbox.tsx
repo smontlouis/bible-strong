@@ -41,7 +41,7 @@ const Checkbox = ({
       className={twMerge(
         'overflow-hidden border-continuous',
         twMerge(
-          'overflow-hidden border-continuous rounded-[6px] border-[2px] items-center justify-center',
+          'overflow-hidden border-continuous rounded-[4px] border-[2px] items-center justify-center',
           boxProps.className
         )
       )}

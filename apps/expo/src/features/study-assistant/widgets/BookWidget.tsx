@@ -150,7 +150,7 @@ export default function BookWidget({ widget }: { widget: Descriptor }) {
                     },
                   })
                 }
-                className="bg-light-grey h-[36px] w-[36px] items-center justify-center rounded-[10px]"
+                className="bg-light-grey h-[36px] w-[36px] items-center justify-center rounded-[8px]"
               >
                 <Text className="text-[13px]">{i + 1}</Text>
               </TouchableBox>

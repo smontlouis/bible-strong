@@ -486,7 +486,7 @@ const DictionnaryDetailScreen = ({
                 const selected = isCurrentSource(source)
                 return (
                   <TouchableBox
-                    className="overflow-hidden border-continuous border-[1px] rounded-[14px] px-[8px] py-[4px] mr-[6px]"
+                    className="overflow-hidden border-continuous border-[1px] rounded-full px-[8px] py-[4px] mr-[6px]"
                     key={`${source.resource.work}:${source.resource.language}:${source.id}`}
                     disabled={selected}
                     onPress={() =>

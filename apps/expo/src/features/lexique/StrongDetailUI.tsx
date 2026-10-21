@@ -92,7 +92,7 @@ export const StrongLevelSwitch = <T extends string>({
   value: T
   onChange: (value: T) => void
 }) => (
-  <HStack className="overflow-hidden border-continuous bg-light-grey rounded-[10px] p-[2px] gap-[2px]">
+  <HStack className="overflow-hidden border-continuous bg-light-grey rounded-[12px] p-[2px] gap-[2px]">
     {options.map(option => {
       const selected = option.value === value
       return (
@@ -148,7 +148,7 @@ export const StrongLexicalRelationCard = ({
     accessibilityRole="link"
     accessibilityLabel={`${relation.gloss}, ${relation.stepCode}`}
   >
-    <HStack className="overflow-hidden border-continuous bg-light-grey rounded-[17px] px-[15px] py-[13px] items-center gap-[12px]">
+    <HStack className="overflow-hidden border-continuous bg-light-grey rounded-[16px] px-[15px] py-[13px] items-center gap-[12px]">
       <VStack className="overflow-hidden border-continuous flex-[1] gap-[3px]">
         <Text className="text-tertiary text-[12px]">
           {relation.label} · {relation.stepCode}
@@ -415,7 +415,7 @@ export const StrongEntitySummaryCard = ({
             <HStack className="overflow-hidden border-continuous gap-[6px] flex-wrap">
               {entity.strongCodes.map(code => (
                 <TouchableBox
-                  className="overflow-hidden border-continuous bg-light-grey rounded-[10px] px-[7px] py-[3px] flex-row items-center gap-[2px]"
+                  className="overflow-hidden border-continuous bg-light-grey rounded-full px-[7px] py-[3px] flex-row items-center gap-[2px]"
                   key={code}
                   onPress={() => onOpenStrong(code)}
                   activeOpacity={0.7}
@@ -492,7 +492,7 @@ export const StrongEntityRelationList = ({
             [{ opacity: !relation.targetUniqueName ? 0.6 : 1 }],
           ]}
         >
-          <HStack className="overflow-hidden border-continuous bg-light-grey rounded-[14px] px-[13px] py-[11px] gap-[10px] items-center">
+          <HStack className="overflow-hidden border-continuous bg-light-grey rounded-[16px] px-[13px] py-[11px] gap-[10px] items-center">
             <VStack className="overflow-hidden border-continuous flex-[1] gap-[2px]">
               <Text className="font-bold">{relation.targetName}</Text>
               <Text className="text-tertiary text-[11px]">

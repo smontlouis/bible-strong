@@ -70,10 +70,10 @@ const StrongEntityPage = ({
 
       {ENTITY_LOCATION_VISIBLE && !!place && (
         <StrongEditorialSection title={t('strongDetail.entity.location')} separated>
-          <VStack className="overflow-hidden border-continuous bg-light-grey rounded-[18px] p-[16px] gap-[8px]">
+          <VStack className="overflow-hidden border-continuous bg-light-grey rounded-[16px] p-[16px] gap-[8px]">
             <HStack className="overflow-hidden border-continuous items-center gap-[10px]">
               <Box
-                className="overflow-hidden border-continuous rounded-[21px] bg-light-primary items-center justify-center"
+                className="overflow-hidden border-continuous rounded-full bg-light-primary items-center justify-center"
                 style={{ width: 42, height: 42 }}
               >
                 <FeatherIcon name="map-pin" color="primary" size={20} />

@@ -395,7 +395,7 @@ export default function StudiesDomWrapper({
               accessibilityRole="button"
               accessibilityLabel={i18n.t('Choisir dans la Bible')}
               onPress={openBibleVersePicker}
-              className="overflow-hidden border-continuous items-center justify-center w-[44px] h-[44px] rounded-[14px] bg-[rgba(0,0,0,0.1)]"
+              className="overflow-hidden border-continuous items-center justify-center w-[44px] h-[44px] rounded-[12px] bg-[rgba(0,0,0,0.1)]"
             >
               <FeatherIcon name="book-open" size={20} />
             </TouchableBox>

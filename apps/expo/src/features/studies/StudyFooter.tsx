@@ -22,6 +22,7 @@ import Border from '~common/ui/Border'
 import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
+import { floatingShadow } from '~common/ui/surfaces'
 import Text from '~common/ui/Text'
 import { recentColorsAtom } from './atom'
 
@@ -55,7 +56,7 @@ const StudyFooterPopover = ({
   width: number
 }) => (
   <AnimatedBox
-    className="border-continuous overflow-visible absolute bg-reverse rounded-[12px] border-[1px] border-border"
+    className="border-continuous overflow-visible absolute bg-surface-raised rounded-[12px]"
     entering={FadeInDown}
     exiting={FadeOutDown}
     style={{
@@ -64,11 +65,7 @@ const StudyFooterPopover = ({
       top: Platform.OS === 'web' ? bottom : undefined,
       left: left,
       right: right,
-      shadowColor: 'rgb(89,131,240)',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 7,
-      elevation: 1,
+      ...floatingShadow,
       overflow: 'visible',
     }}
   >
@@ -145,9 +142,9 @@ const SelectHeading = ({
       style={{ zIndex: isOpen ? 20 : 0 }}
     >
       <TouchableBox className="overflow-hidden border-continuous" onPress={onToggle}>
-        <Box className="overflow-hidden border-continuous flex-row items-center justify-center rounded-[20px] bg-light-primary py-[4px] px-[7px]">
+        <Box className="overflow-hidden border-continuous flex-row items-center justify-center rounded-full bg-light-primary py-[4px] px-[7px]">
           <Text className="text-[15px] font-bold text-primary">{t(getHeaderTitle())}</Text>
-          <Box className="overflow-hidden border-continuous ml-[5px] rounded-[20px] bg-primary w-[18px] h-[18px] items-center justify-center">
+          <Box className="overflow-hidden border-continuous ml-[5px] rounded-full bg-primary w-[18px] h-[18px] items-center justify-center">
             <FeatherIcon name="chevron-up" color="reverse" size={18} />
           </Box>
         </Box>
@@ -263,7 +260,7 @@ const SelectMore = ({
           {colorModal ? (
             <Box className="overflow-hidden border-continuous p-[20px]">
               <TouchableBox
-                className="overflow-hidden border-continuous bg-light-grey px-[10px] py-[5px] rounded-[20px]"
+                className="overflow-hidden border-continuous bg-light-grey px-[10px] py-[5px] rounded-full"
                 onPress={handleResetColor}
               >
                 <Text className="text-center text-[12px]">{t('reset')}</Text>
