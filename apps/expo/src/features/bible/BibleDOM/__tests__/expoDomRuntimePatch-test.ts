@@ -118,7 +118,9 @@ describe('Expo DOM runtime patch', () => {
 
     expect(wrapperSource).toContain('function serializeMarshalledProps(marshalled)')
     expect(wrapperSource).toContain('partial: true')
-    expect(wrapperSource).toContain('if (!changed && removed.length === 0 && !namesChanged) return;')
+    expect(wrapperSource).toContain(
+      'if (!changed && removed.length === 0 && !namesChanged) return;'
+    )
     expect(onLoadSource.slice(0, 120)).toContain('emitProps(true)')
     expect(domReadySource.slice(0, 160)).toContain('emitProps(true)')
   })
