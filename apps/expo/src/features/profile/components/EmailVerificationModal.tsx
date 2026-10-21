@@ -69,7 +69,7 @@ const WarningIcon = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const resolvedClassName = twMerge('bg-quart rounded-[20px] p-[8px]', className)
+  const resolvedClassName = twMerge('bg-quart rounded-full p-[8px]', className)
   return (
     <Box
       {...props}
@@ -88,7 +88,7 @@ const ResendButton = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const resolvedClassName = twMerge(
-    'py-[12px] px-[20px] bg-primary rounded-[10px] items-center',
+    'py-[12px] px-[20px] bg-primary rounded-full items-center',
     className
   )
   return (

@@ -13,7 +13,7 @@ export const Chip = ({
       className={twMerge(
         'overflow-hidden border-continuous',
         twMerge(
-          'overflow-hidden border-continuous px-[6px] py-[3px] max-w-[90px] rounded-[6px] bg-light-primary items-center justify-center flex-row',
+          'overflow-hidden border-continuous px-[6px] py-[3px] max-w-[90px] rounded-[8px] bg-light-primary items-center justify-center flex-row',
           props.className
         )
       )}

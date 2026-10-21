@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useTheme } from '~themes/ThemeProvider'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
+import { radii } from '~common/ui/surfaces'
 export default function PanelTextForm({
   initialValue,
   label,
@@ -27,7 +28,7 @@ export default function PanelTextForm({
           color: theme.colors.default,
           borderColor: theme.colors.border,
           borderWidth: 2,
-          borderRadius: 10,
+          borderRadius: radii.control,
           padding: 12,
           fontSize: 16,
         }}

@@ -104,7 +104,7 @@ const AccountMigrationModal = ({
               'overflow-hidden border-continuous',
               twMerge(
                 isFailure ? 'bg-light-secondary' : 'bg-light-primary',
-                'overflow-hidden border-continuous rounded-[44px] items-center justify-center mb-[28px]'
+                'overflow-hidden border-continuous rounded-full items-center justify-center mb-[28px]'
               )
             )}
             style={{ width: 88, height: 88 }}

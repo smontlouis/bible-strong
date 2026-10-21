@@ -16,7 +16,7 @@ const Fab = ({
 }) => {
   return (
     <TouchableBox
-      className="overflow-hidden border-continuous w-[50px] h-[50px] rounded-[30px] bg-primary items-center justify-center"
+      className="overflow-hidden border-continuous w-[50px] h-[50px] rounded-full bg-primary items-center justify-center"
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="button"
       onPress={onPress}

@@ -10,6 +10,7 @@ import Header from '~common/Header'
 import Box, { VStack } from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import ScrollView from '~common/ui/ScrollView'
+import { radii } from '~common/ui/surfaces'
 import Text from '~common/ui/Text'
 import { formatPassageMediaDuration, getPassageMediaById } from '~features/bible/passageMedia'
 import { IS_FORM_SHEET } from '~helpers/constants'
@@ -49,17 +50,8 @@ const PassageMediaPlayerScreen = () => {
               style={{ width: playerWidth }}
             >
               <Box
-                className="border-continuous overflow-hidden rounded-[14px] border-[1px] border-border bg-light-grey"
-                style={{
-                  width: playerWidth,
-                  height: playerHeight,
-                  shadowColor: 'rgb(89,131,240)',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 7,
-                  elevation: 1,
-                  overflow: 'visible',
-                }}
+                className="border-continuous overflow-hidden rounded-[16px] bg-light-grey"
+                style={{ width: playerWidth, height: playerHeight }}
               >
                 <YoutubePlayer
                   height={playerHeight}
@@ -75,8 +67,8 @@ const PassageMediaPlayerScreen = () => {
                       return url === 'about:blank' || url.startsWith(YOUTUBE_PLAYER_BASE_URL)
                     },
                   }}
-                  viewContainerStyle={{ borderRadius: 14, overflow: 'hidden' }}
-                  webViewStyle={{ borderRadius: 14, overflow: 'hidden' }}
+                  viewContainerStyle={{ borderRadius: radii.card, overflow: 'hidden' }}
+                  webViewStyle={{ borderRadius: radii.card, overflow: 'hidden' }}
                 />
               </Box>
               <VStack className="overflow-hidden border-continuous gap-[7px] px-[2px]">

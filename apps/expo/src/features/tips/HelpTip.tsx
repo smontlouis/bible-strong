@@ -4,6 +4,7 @@ import { twMerge } from '~common/ui/classNames'
 import { TouchableOpacity } from 'react-native'
 import { BoxProps, HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import { floatingShadow } from '~common/ui/surfaces'
 import Text from '~common/ui/Text'
 import { dismissTipAtom, useTip } from './atom'
 import { useSetAtom } from 'jotai/react'
@@ -29,18 +30,22 @@ export const HelpTip = ({
 
   return (
     <HStack
+      // The tip floats over the list that scrolls beneath it.
       style={[
         {
-          backgroundColor: resolveThemeColor(stylingTheme, type === 'info' ? 'opacity50' : 'quart'),
+          backgroundColor: resolveThemeColor(
+            stylingTheme,
+            type === 'info' ? 'surfaceRaised' : 'quart'
+          ),
+          ...floatingShadow,
         },
         props.style,
-        { boxShadow: '0 0 5px 0 rgba(0, 0, 0, 0.1)', borderRadius: 10 },
       ]}
       {...props}
       className={twMerge(
         'overflow-hidden border-continuous',
         twMerge(
-          'overflow-hidden border-continuous px-[14px] py-[10px] mx-[10px] gap-[10px] items-center',
+          'overflow-hidden border-continuous rounded-[12px] px-[14px] py-[10px] mx-[10px] gap-[10px] items-center',
           props.className
         )
       )}

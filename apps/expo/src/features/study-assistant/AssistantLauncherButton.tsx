@@ -302,6 +302,7 @@ const styles = StyleSheet.create({
     borderWidth: RING_WIDTH,
   },
   // Casts Expo's shadow: black at 40%, 8 pt of blur, 4 pt down.
+  // surface-allow: the launcher keeps the shadow of Expo's button, which gives the avatar its lift.
   disc: {
     position: 'absolute',
     width: DISC_SIZE,

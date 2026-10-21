@@ -36,7 +36,7 @@ export const FormSheetHandle = () => {
       style={{ height: FORM_SHEET_GRABBER_HEIGHT }}
     >
       <Box
-        className="overflow-hidden border-continuous w-[38px] h-[5px] rounded-[20px] bg-default"
+        className="overflow-hidden border-continuous w-[38px] h-[5px] rounded-full bg-default"
         style={{ opacity: 0.5 }}
       />
     </Box>

@@ -30,15 +30,7 @@ const PassageMediaLibraryCard = ({ item, episodeNumber, thumbnailWidth, onPress 
     >
       <Box
         className="border-continuous overflow-visible rounded-[12px]"
-        style={{
-          width: thumbnailWidth,
-          shadowColor: 'rgb(89,131,240)',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 7,
-          elevation: 1,
-          overflow: 'visible',
-        }}
+        style={{ width: thumbnailWidth }}
       >
         <Box
           className="border-continuous overflow-visible rounded-[12px] border-[1px] border-border bg-light-grey"

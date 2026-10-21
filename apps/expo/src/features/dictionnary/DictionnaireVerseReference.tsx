@@ -21,7 +21,7 @@ const StyledView = (
   const theme = themeOverride ?? contextTheme
   const { isSelected } = props
   const resolvedClassName = twMerge(
-    'rounded-[5px] pl-[3px] pr-[3px] mb-[5px] overflow-hidden',
+    'rounded-[4px] pl-[3px] pr-[3px] mb-[5px] overflow-hidden',
     className
   )
   return (

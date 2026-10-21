@@ -37,7 +37,7 @@ const EntityRelationsScreen = () => {
         rightComponent={
           endpoint ? (
             <TouchableBox
-              className="overflow-hidden border-continuous mr-[15px] rounded-[18px] bg-primary w-[28px] h-[28px] items-center justify-center"
+              className="overflow-hidden border-continuous mr-[15px] rounded-full bg-primary w-[28px] h-[28px] items-center justify-center"
               onPress={() => createRelationModal.open()}
             >
               <FeatherIcon name="plus" size={16} color="reverse" />

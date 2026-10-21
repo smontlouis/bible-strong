@@ -322,7 +322,7 @@ const LocalMigrationGate = ({
         testID="migration-inspection-error"
       >
         <Box
-          className="overflow-hidden border-continuous rounded-[32px] bg-light-secondary items-center justify-center mb-[24px]"
+          className="overflow-hidden border-continuous rounded-full bg-light-secondary items-center justify-center mb-[24px]"
           style={{ width: 64, height: 64 }}
         >
           <FeatherIcon name="alert-triangle" size={28} color="secondary" />

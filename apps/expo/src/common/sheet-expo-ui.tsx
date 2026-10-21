@@ -39,6 +39,7 @@ import type {
 } from '~common/sheet'
 import Box, { FadingText, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import { floatingShadow } from '~common/ui/surfaces'
 import Text from '~common/ui/Text'
 
 type SheetContextValue = {
@@ -227,7 +228,7 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
             paddingRight: 0,
             marginLeft: 'auto',
             marginRight: 'auto',
-            boxShadow: '0 -4px 24px rgba(0, 0, 0, 0.10), 0 -1px 4px rgba(0, 0, 0, 0.04)',
+            ...floatingShadow,
             ...(webContainerBounds
               ? {
                   '--bible-selection-left': `${webContainerBounds.left}px`,

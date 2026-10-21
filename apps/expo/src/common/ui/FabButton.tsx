@@ -20,7 +20,7 @@ const StyledLink = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const resolvedClassName = twMerge(
-    'bg-primary w-[50px] h-[50px] rounded-[30px] justify-center items-center flex-row absolute right-[30px]',
+    'bg-primary w-[50px] h-[50px] rounded-full justify-center items-center flex-row absolute right-[30px]',
     className
   )
   return (

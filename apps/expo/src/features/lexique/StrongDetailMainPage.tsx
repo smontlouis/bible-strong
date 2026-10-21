@@ -118,7 +118,7 @@ const HighlightedVerse = ({
     <Text style={getScaledStrongTextStyle(20, 30, readingTypography)}>
       {text.slice(0, highlight.start)}
       <Text
-        className="bg-light-primary text-primary font-bold rounded-[5px] px-[3px]"
+        className="bg-light-primary text-primary font-bold rounded-[4px] px-[3px]"
         style={getScaledStrongTextStyle(20, 30, readingTypography)}
       >
         {text.slice(highlight.start, highlight.end)}

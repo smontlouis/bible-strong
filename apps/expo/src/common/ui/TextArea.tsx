@@ -14,7 +14,7 @@ const StyledTextArea = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const resolvedClassName = twMerge(
-    'text-default border-border border-[2px] rounded-[10px] max-h-[300px] min-h-[150px] px-[15px] py-[30px]',
+    'text-default border-border border-[2px] rounded-[12px] max-h-[300px] min-h-[150px] px-[15px] py-[30px]',
     className
   )
   return (

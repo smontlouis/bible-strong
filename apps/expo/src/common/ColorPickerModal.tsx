@@ -18,6 +18,7 @@ import ColorEditModal from '~common/ColorEditModal'
 import HighlightTypeIndicator from '~common/HighlightTypeIndicator'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import IconTile from '~common/ui/IconTile'
 import Text from '~common/ui/Text'
 import { MAX_CUSTOM_COLORS } from '~helpers/constants'
 import { EMPTY_OBJECT } from '~helpers/emptyReferences'
@@ -473,9 +474,9 @@ const ColorPickerModal = ({ inline = false }: { inline?: boolean }) => {
               {customHighlightColors.length < MAX_CUSTOM_COLORS && (
                 <TouchableOpacity accessibilityRole="button" onPress={openAddModal}>
                   <Box className="overflow-hidden border-continuous flex-row items-center p-[15px]">
-                    <Box className="overflow-hidden border-continuous w-[30px] h-[30px] rounded-[10px] bg-light-primary mr-[10px] items-center justify-center">
+                    <IconTile tint="primary" className="mr-[10px]">
                       <FeatherIcon name="plus" size={20} color="primary" />
-                    </Box>
+                    </IconTile>
                     <Text className="font-bold text-primary text-[14px]">
                       {t('Ajouter une couleur')}
                     </Text>

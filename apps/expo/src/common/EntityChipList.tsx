@@ -21,7 +21,7 @@ const StyledChip = (
   const { theme: _themeOverride, className, ...props } = componentProps
 
   const resolvedClassName = twMerge(
-    'rounded-[20px] bg-light-primary pt-[3px] pb-[3px] pl-[7px] pr-[7px] mr-[5px] mb-[2px] mt-[5px]',
+    'rounded-full bg-light-primary pt-[3px] pb-[3px] pl-[7px] pr-[7px] mr-[5px] mb-[2px] mt-[5px]',
     className
   )
   return (
