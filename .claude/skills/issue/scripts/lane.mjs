@@ -3,16 +3,22 @@
 // (ou émulateur Android du PC), Metro sur un port dédié, app ouverte dessus.
 //
 //   node lane.mjs template [--from <udid>]       crée le simulateur modèle bs-template
+//   node lane.mjs template --refresh [--keep-booted]  y installe les derniers builds dev et prod
+//   node lane.mjs template --shutdown            éteint bs-template (après une connexion à la main)
 //   node lane.mjs start <slug> [--android]       worktree + install + appareil + Metro + ouverture
 //   node lane.mjs worktree <slug>                étape 1 : worktree et .env (quelques secondes)
 //   node lane.mjs install <slug>                 étape 2 : yarn install complet (plusieurs minutes)
 //   node lane.mjs device <slug> [--android]      étape 3 : clone, boot, installation du .app
-//   node lane.mjs metro <slug>                   étape 4 : Metro sur le port du couloir
+//   node lane.mjs metro <slug> [--prod]          étape 4 : Metro sur le port du couloir
+//                                                (--prod : bundle sans mode dev et minifié)
 //   node lane.mjs open <slug>                    ouvre l'app du couloir sur son Metro
+//   node lane.mjs prod <slug>                    lance l'app de production et lui fait prendre l'OTA
 //   node lane.mjs status [slug]                  état des couloirs
 //   node lane.mjs stop <slug>                    arrête Metro et le tunnel Android
 //   node lane.mjs cleanup <slug> [--force]       stop + supprime simulateur et worktree
-//   node lane.mjs save-build [--from <app>]      range le dernier dev client simulateur dans ~/Builds
+//   node lane.mjs save-build [--prod] [--from <app>]
+//                                                range le dernier build simulateur dans ~/Builds
+//                                                (dev client, ou app de production avec --prod)
 //
 // L'état de chaque couloir vit hors du repo, dans ~/.cache/bible-strong-issues/<slug>.json.
 
@@ -30,6 +36,15 @@ const MIN_FREE_GB = 15
 const ANDROID_SERIAL = process.env.ANDROID_PC_SERIAL ?? 'emulator-5554'
 const ANDROID_PACKAGE = process.env.ANDROID_PC_PACKAGE ?? 'com.smontlouis.biblestrong'
 const IOS_DEV_BUNDLE_ID = 'com.smontlouis.biblestrong.dev'
+const IOS_PROD_BUNDLE_ID = 'com.smontlouis.biblestrong'
+// Deux sortes de builds simulateur vivent dans ~/Builds : le dev client (Debug, il charge le
+// Metro du couloir) et l'app de production (Release, environnement production : elle montre ce
+// qui est publié et reçoit les OTA du canal production).
+const BUILD_KINDS = {
+  dev: { bundleId: IOS_DEV_BUNDLE_ID, product: 'Debug-iphonesimulator/devBibleStrong.app' },
+  prod: { bundleId: IOS_PROD_BUNDLE_ID, product: 'Release-iphonesimulator/BibleStrong.app' },
+}
+const TEMPLATE_BUILDS = path.join(STATE_DIR, 'template', `${TEMPLATE_NAME}.json`)
 // Fichiers dont un changement depuis le build du .app peut demander un nouveau dev client.
 const NATIVE_PATHS = [
   'apps/expo/package.json',
@@ -188,11 +203,16 @@ const devClientUrl = (port, scheme = 'exp+bible-strong') =>
 
 // ---------- build du dev client ----------
 
-const newestApp = () => {
+const newestApp = (kind = 'dev') => {
   if (!fs.existsSync(BUILDS_DIR)) return null
   const apps = fs
     .readdirSync(BUILDS_DIR)
-    .filter(name => name.endsWith('.app') && name.includes('simulator'))
+    .filter(
+      name =>
+        name.startsWith(`bible-strong-${kind}-`) &&
+        name.endsWith('.app') &&
+        name.includes('-simulator-')
+    )
     .map(name => ({ name, file: path.join(BUILDS_DIR, name) }))
     .map(app => ({ ...app, mtime: fs.statSync(app.file).mtimeMs }))
     .sort((a, b) => b.mtime - a.mtime)
@@ -230,14 +250,12 @@ const nativeWarnings = (app, worktree) => {
 const DERIVED_DATA = path.join(os.homedir(), 'Library/Developer/Xcode/DerivedData')
 const plistValue = (file, key) => tryRun('plutil', ['-extract', key, 'raw', file])
 
-// Dernier dev client simulateur compilé par Xcode (expo run:ios), tous checkouts confondus.
-const newestDerivedApp = () => {
+// Dernier build simulateur de cette sorte compilé par Xcode (expo run:ios), tous checkouts confondus.
+const newestDerivedApp = kind => {
   if (!fs.existsSync(DERIVED_DATA)) return null
   const apps = fs
     .readdirSync(DERIVED_DATA)
-    .map(name =>
-      path.join(DERIVED_DATA, name, 'Build/Products/Debug-iphonesimulator/devBibleStrong.app')
-    )
+    .map(name => path.join(DERIVED_DATA, name, 'Build/Products', BUILD_KINDS[kind].product))
     .filter(file => fs.existsSync(file))
     .map(file => ({ file, mtime: fs.statSync(file).mtimeMs }))
     .sort((a, b) => b.mtime - a.mtime)
@@ -251,18 +269,25 @@ const checkoutOfApp = appFile => {
   return workspace?.includes(marker) ? workspace.slice(0, workspace.indexOf(marker)) : null
 }
 
-// Range le dev client sous le nom que `device` et nativeWarnings savent lire :
-// bible-strong-dev-<version>-simulator-<sha>.app
+// Range un build simulateur sous le nom que `device` et nativeWarnings savent lire :
+// bible-strong-<dev|prod>-<version>-simulator-<sha>.app
 const cmdSaveBuild = () => {
-  const appFile = flagValue('--from') ?? newestDerivedApp()
-  if (!appFile || !fs.existsSync(appFile))
-    fail("aucun devBibleStrong.app dans DerivedData : compile d'abord avec `yarn expo run:ios`")
+  const requestedKind = flags.has('--prod') ? 'prod' : 'dev'
+  const appFile = flagValue('--from') ?? newestDerivedApp(requestedKind)
+  if (!appFile || !fs.existsSync(appFile)) {
+    fail(
+      requestedKind === 'prod'
+        ? "aucun BibleStrong.app Release dans DerivedData : compile d'abord avec `dotenv -c production -- yarn expo run:ios --configuration Release`"
+        : "aucun devBibleStrong.app dans DerivedData : compile d'abord avec `yarn expo run:ios`"
+    )
+  }
   if (!appFile.includes('iphonesimulator')) fail(`${appFile} n'est pas un build simulateur`)
 
   const info = path.join(appFile, 'Info.plist')
   const bundleId = plistValue(info, 'CFBundleIdentifier')
-  if (bundleId !== IOS_DEV_BUNDLE_ID)
-    fail(`bundle ${bundleId} : on ne range que ${IOS_DEV_BUNDLE_ID}`)
+  const kind = Object.keys(BUILD_KINDS).find(name => BUILD_KINDS[name].bundleId === bundleId)
+  if (!kind)
+    fail(`bundle ${bundleId} : on ne range que ${IOS_DEV_BUNDLE_ID} et ${IOS_PROD_BUNDLE_ID}`)
   const version = plistValue(info, 'CFBundleShortVersionString')
   if (!version) fail(`version introuvable dans ${info}`)
 
@@ -281,10 +306,14 @@ const cmdSaveBuild = () => {
   // Un build fait avant de commiter ses propres changements natifs passe ici aussi : on avertit.
   if (lastNativeCommit * 1000 > fs.statSync(appFile).mtimeMs)
     log("ATTENTION : du code natif a été commité après ce build ; vérifie que le build l'inclut")
-  if (plistValue(path.join(appFile, 'Expo.plist'), 'EXUpdatesCodeSigningCertificate'))
+  const expoPlist = path.join(appFile, 'Expo.plist')
+  if (kind === 'dev' && plistValue(expoPlist, 'EXUpdatesCodeSigningCertificate'))
     log('ATTENTION : ce dev client exige un Metro lancé avec --private-key-path')
+  const channel = plistValue(expoPlist, 'EXUpdatesRequestHeaders.expo-channel-name')
+  if (kind === 'prod' && channel !== 'production')
+    log(`ATTENTION : canal OTA « ${channel ?? 'aucun'} » ; compile avec \`dotenv -c production\``)
 
-  const name = `bible-strong-dev-${version}-simulator-${sha}.app`
+  const name = `bible-strong-${kind}-${version}-simulator-${sha}.app`
   const target = path.join(BUILDS_DIR, name)
   if (fs.existsSync(target)) {
     log(`déjà rangé : ${target}`)
@@ -298,7 +327,70 @@ const cmdSaveBuild = () => {
 
 // ---------- étapes ----------
 
+const readTemplateBuilds = () => {
+  try {
+    return JSON.parse(fs.readFileSync(TEMPLATE_BUILDS, 'utf8'))
+  } catch {
+    return {}
+  }
+}
+
+// Installe les derniers builds rangés ; les données des apps (dont la session) sont gardées.
+// `skip` donne, par sorte, le nom du build déjà présent : on ne le réinstalle pas.
+const installNewestApps = (udid, skip = {}) => {
+  const installed = {}
+  for (const kind of Object.keys(BUILD_KINDS)) {
+    const app = newestApp(kind)
+    if (!app) {
+      log(`aucun build ${kind} simulateur dans ${BUILDS_DIR}`)
+      continue
+    }
+    installed[kind] = app.name
+    if (skip[kind] === app.name) {
+      log(`${app.name} déjà installé par le modèle`)
+      continue
+    }
+    log(`installation de ${app.name} (les données de l'app sont gardées)`)
+    run('xcrun', ['simctl', 'install', udid, app.file], { stdio: 'inherit' })
+  }
+  return installed
+}
+
+const shutdownTemplate = template => {
+  if (simByUdid(template.udid).state !== 'Shutdown')
+    run('simslim', ['shutdown', template.udid], { stdio: 'inherit' })
+  log(`${TEMPLATE_NAME} éteint : les couloirs peuvent le cloner`)
+}
+
+// Après chaque nouveau build natif rangé par save-build : le modèle reçoit les derniers dev et
+// prod, et les couloirs suivants les héritent sans les réinstaller.
+const refreshTemplate = () => {
+  const template = simByName(TEMPLATE_NAME)
+  if (!template) fail(`${TEMPLATE_NAME} absent : lance d'abord \`node lane.mjs template\``)
+  if (template.state !== 'Booted') run('simslim', ['boot', template.udid], { stdio: 'inherit' })
+  const installed = installNewestApps(template.udid)
+  fs.mkdirSync(path.dirname(TEMPLATE_BUILDS), { recursive: true })
+  fs.writeFileSync(
+    TEMPLATE_BUILDS,
+    `${JSON.stringify({ ...installed, refreshedAt: new Date().toISOString() }, null, 2)}\n`
+  )
+  if (flags.has('--keep-booted')) {
+    tryRun('open', ['-a', 'Simulator', '--args', '-CurrentDeviceUDID', template.udid])
+    log(
+      `${TEMPLATE_NAME} reste allumé : connecte-toi dans les apps, puis \`node lane.mjs template --shutdown\``
+    )
+    return
+  }
+  shutdownTemplate(template)
+}
+
 const cmdTemplate = () => {
+  if (flags.has('--refresh')) return refreshTemplate()
+  if (flags.has('--shutdown')) {
+    const template = simByName(TEMPLATE_NAME)
+    if (!template) fail(`${TEMPLATE_NAME} absent`)
+    return shutdownTemplate(template)
+  }
   if (simByName(TEMPLATE_NAME))
     fail(`${TEMPLATE_NAME} existe déjà ; supprime-le d'abord pour le recréer`)
   const from =
@@ -418,22 +510,16 @@ const cmdDevice = slug => {
   state.simUdid = sim.udid
   state.simName = simName
 
-  const app = newestApp()
-  if (!app) {
-    log(`aucun .app dans ${BUILDS_DIR} : on garde le dev client hérité du modèle`)
+  const installed = installNewestApps(sim.udid, readTemplateBuilds())
+  state.bundleId = IOS_DEV_BUNDLE_ID
+  if (!installed.dev) {
+    log(`aucun dev client dans ${BUILDS_DIR} : on garde celui hérité du modèle`)
   } else {
-    log(`installation de ${app.name} (les données de l'app sont gardées)`)
-    run('xcrun', ['simctl', 'install', sim.udid, app.file], { stdio: 'inherit' })
-    state.app = app.name
-    state.bundleId =
-      tryRun('plutil', [
-        '-extract',
-        'CFBundleIdentifier',
-        'raw',
-        path.join(app.file, 'Info.plist'),
-      ]) || IOS_DEV_BUNDLE_ID
+    state.app = installed.dev
+    const app = newestApp('dev')
     for (const warning of nativeWarnings(app, state.worktree)) log(`ATTENTION : ${warning}`)
   }
+  if (installed.prod) state.prodApp = installed.prod
   tryRun('open', ['-a', 'Simulator', '--args', '-CurrentDeviceUDID', sim.udid])
 
   writeState(state)
@@ -442,11 +528,19 @@ const cmdDevice = slug => {
 }
 
 const cmdMetro = async slug => {
-  const state = loadOrInitState(slug)
+  let state = loadOrInitState(slug)
   if (!fs.existsSync(state.worktree)) fail("pas de worktree : lance d'abord `worktree` ou `start`")
+  // --prod : le dev client reçoit un bundle sans mode dev et minifié, proche de la production.
+  const mode = flags.has('--prod') ? 'prod' : 'dev'
   if (state.port && pidAlive(state.metroPid) && (await metroRunning(state.port))) {
-    log(`Metro tourne déjà sur ${state.port} (pid ${state.metroPid})`)
-    return state
+    if ((state.metroMode ?? 'dev') === mode) {
+      log(`Metro tourne déjà sur ${state.port} (pid ${state.metroPid}, mode ${mode})`)
+      return state
+    }
+    log(`Metro tourne en mode ${state.metroMode ?? 'dev'} : redémarrage en mode ${mode}`)
+    state = cmdStop(slug)
+    for (let i = 0; i < 15 && (await metroRunning(state.port)); i += 1)
+      await new Promise(resolve => setTimeout(resolve, 1000))
   }
   state.port = await pickPort(slug)
   const logFile = path.join(STATE_DIR, `${slug}.metro.log`)
@@ -454,11 +548,20 @@ const cmdMetro = async slug => {
   const out = fs.openSync(logFile, 'w')
   const child = spawn(
     'yarn',
-    ['workspace', '@bible-strong/expo', 'start', '--port', String(state.port), '--clear'],
+    [
+      'workspace',
+      '@bible-strong/expo',
+      'start',
+      '--port',
+      String(state.port),
+      '--clear',
+      ...(mode === 'prod' ? ['--no-dev', '--minify'] : []),
+    ],
     { cwd: state.worktree, detached: true, stdio: ['ignore', out, out] }
   )
   child.unref()
   state.metroPid = child.pid
+  state.metroMode = mode
   state.metroLog = logFile
   writeState(state)
   log(`Metro démarre sur ${state.port} (pid ${child.pid}, log ${logFile})`)
@@ -503,6 +606,125 @@ const cmdOpen = slug => {
     run('xcrun', ['simctl', 'openurl', state.simUdid, devClientUrl(state.port, bundleId)])
   }
   log(`app ouverte sur Metro ${state.port}`)
+}
+
+// ---------- app de production et OTA ----------
+
+// Statuts d'expo-updates (UpdateStatus) : 1 téléchargée prête, 2 lançable, 5 embarquée.
+const READY_STATUSES = new Set([1, 2])
+const normalizeUpdateId = id => id.replaceAll('-', '').toUpperCase()
+
+const expoUpdates = dbFile => {
+  if (!fs.existsSync(dbFile)) return []
+  const rows = tryRun('sqlite3', [
+    '-separator',
+    '|',
+    dbFile,
+    'select hex(id), commit_time, status, last_accessed from updates',
+  ])
+  return (rows ?? '')
+    .split('\n')
+    .filter(Boolean)
+    .map(row => {
+      const [id, commitTime, status, lastAccessed] = row.split('|')
+      return {
+        id,
+        commitTime: Number(commitTime),
+        status: Number(status),
+        lastAccessed: Number(lastAccessed),
+      }
+    })
+}
+const launchedUpdate = updates =>
+  [...updates].sort((a, b) => b.lastAccessed - a.lastAccessed)[0] ?? null
+
+// Dernière mise à jour publiée pour le runtime et le canal de l'app installée.
+const latestPublishedUpdateId = async appDir => {
+  const expoPlist = path.join(appDir, 'Expo.plist')
+  const url = plistValue(expoPlist, 'EXUpdatesURL')
+  const runtime = plistValue(expoPlist, 'EXUpdatesRuntimeVersion')
+  const channel = plistValue(expoPlist, 'EXUpdatesRequestHeaders.expo-channel-name')
+  if (!url || !runtime || !channel) return null
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'expo-platform': 'ios',
+        'expo-runtime-version': runtime,
+        'expo-channel-name': channel,
+        'expo-protocol-version': '1',
+        accept: 'application/expo+json',
+      },
+    })
+    const id = (await response.text()).match(/"id":"([0-9a-f-]{36})"/)?.[1]
+    return id ? normalizeUpdateId(id) : null
+  } catch {
+    return null
+  }
+}
+
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+const launchProd = udid =>
+  run('xcrun', ['simctl', 'launch', '--terminate-running-process', udid, IOS_PROD_BUNDLE_ID])
+
+// L'app de production vérifie l'OTA une fois par lancement et ne la garde que si le
+// téléchargement va au bout au premier plan ; elle l'applique au lancement suivant. On la laisse
+// au premier plan jusqu'à ce que la mise à jour soit dans sa base, puis on la relance dessus.
+const cmdProd = async slug => {
+  const state = readState(slug)
+  if (!state?.simUdid) fail('couloir sans simulateur : lance `device` ou `start`')
+  const udid = state.simUdid
+  if (simByUdid(udid)?.state !== 'Booted') run('simslim', ['boot', udid], { stdio: 'inherit' })
+
+  let appDir = tryRun('xcrun', ['simctl', 'get_app_container', udid, IOS_PROD_BUNDLE_ID])
+  if (!appDir) {
+    const app = newestApp('prod')
+    if (!app) fail(`aucune app de production simulateur dans ${BUILDS_DIR} (save-build --prod)`)
+    log(`installation de ${app.name} : absente du modèle, elle ne sera pas connectée`)
+    run('xcrun', ['simctl', 'install', udid, app.file], { stdio: 'inherit' })
+    appDir = run('xcrun', ['simctl', 'get_app_container', udid, IOS_PROD_BUNDLE_ID])
+  }
+  const dataDir = run('xcrun', ['simctl', 'get_app_container', udid, IOS_PROD_BUNDLE_ID, 'data'])
+  const dbFile = path.join(dataDir, 'Library/Application Support/.expo-internal/expo-v11.db')
+
+  const latest = await latestPublishedUpdateId(appDir)
+  log(latest ? `dernière OTA publiée : ${latest}` : 'dernière OTA publiée inconnue')
+  launchProd(udid)
+  await sleep(5000)
+  if (latest && launchedUpdate(expoUpdates(dbFile))?.id === latest) {
+    log("l'app de production tourne déjà sur la dernière OTA")
+    return
+  }
+
+  log("téléchargement de l'OTA : l'app reste au premier plan (3 min au plus)")
+  const deadline = Date.now() + 180_000
+  let downloaded = null
+  while (Date.now() < deadline && !downloaded) {
+    await sleep(3000)
+    const updates = expoUpdates(dbFile)
+    const launched = launchedUpdate(updates)
+    downloaded =
+      updates.find(update =>
+        latest
+          ? update.id === latest && READY_STATUSES.has(update.status)
+          : READY_STATUSES.has(update.status) && update.commitTime > (launched?.commitTime ?? 0)
+      ) ?? null
+  }
+  if (!downloaded) {
+    fail(
+      "aucune OTA téléchargée en 3 min. Sur simulateur, la vérification au lancement ne télécharge pas (vu le 2026-10-21) : touche Paramètres › Vérifier les mises à jour, attends « Mise à jour effectuée », puis relance `prod`. Une app installée à neuf (hors modèle) doit d'abord passer son accueil de premier lancement."
+    )
+  }
+
+  log(`OTA ${downloaded.id} téléchargée : relance de l'app dessus`)
+  const relaunchedAt = Date.now()
+  launchProd(udid)
+  await sleep(5000)
+  const running = launchedUpdate(expoUpdates(dbFile))
+  if (running?.id === downloaded.id && running.lastAccessed >= relaunchedAt - 1000) {
+    log(`l'app de production tourne sur l'OTA ${downloaded.id}`)
+  } else {
+    log(`ATTENTION : l'app a redémarré sur ${running?.id ?? 'inconnu'}, pas sur ${downloaded.id}`)
+  }
 }
 
 const cmdStop = slug => {
@@ -586,6 +808,8 @@ const main = async () => {
       return cmdMetro(requireSlug())
     case 'open':
       return cmdOpen(requireSlug())
+    case 'prod':
+      return cmdProd(requireSlug())
     case 'start': {
       const slug = requireSlug()
       cmdWorktree(slug)
@@ -612,8 +836,9 @@ const main = async () => {
       console.log(
         fs
           .readFileSync(new URL(import.meta.url), 'utf8')
+          .split('\n\nimport ')[0]
           .split('\n')
-          .slice(1, 17)
+          .slice(1)
           .join('\n')
       )
       process.exit(command ? 1 : 0)

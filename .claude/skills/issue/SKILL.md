@@ -14,9 +14,25 @@ All lane plumbing goes through one script. Define it once per shell command (it 
 LANE="$(git rev-parse --path-format=absolute --git-common-dir)/../.claude/skills/issue/scripts/lane.mjs"
 ```
 
-Subcommands: `template`, `start`, `worktree`, `install`, `device`, `metro`, `open`, `status`, `stop`, `cleanup`, `save-build`. `node "$LANE"` prints the help. Lane state lives in `~/.cache/bible-strong-issues/<slug>.json` (worktree, branch, `simUdid`, `port`, Metro log).
+Subcommands: `template`, `start`, `worktree`, `install`, `device`, `metro`, `open`, `prod`, `status`, `stop`, `cleanup`, `save-build`. `node "$LANE"` prints the help. Lane state lives in `~/.cache/bible-strong-issues/<slug>.json` (worktree, branch, `simUdid`, `port`, Metro log).
 
-Dev clients: `device` installs the newest `*simulator*.app` of `~/Builds/bible-strong/` (by build date), named `bible-strong-dev-<version>-simulator-<sha>.app`; the version and sha let it warn when the lane's native code no longer matches. After any iOS dev-client build (`yarn expo run:ios`, in the main checkout or a lane), run `node "$LANE" save-build`: it takes the newest `devBibleStrong.app` of Xcode's DerivedData (or `--from <app>`), finds the checkout and commit that built it, refuses uncommitted native changes, and copies it there under that name. Nothing creates these builds on its own: the folder only holds what was saved.
+### Builds and the template
+
+Two kinds of simulator builds live in `~/Builds/bible-strong/`, by build date:
+
+- **dev client**, `bible-strong-dev-<version>-simulator-<sha>.app` (Debug, bundle `com.smontlouis.biblestrong.dev`). It loads the lane's Metro: it shows the lane's code.
+- **production app**, `bible-strong-prod-<version>-simulator-<sha>.app` (Release, environment production, bundle `com.smontlouis.biblestrong`). It shows what is published and takes the OTA of the `production` channel, not the lane's code. The store `.ipa` cannot run on a simulator; this is its simulator twin, built with `dotenv -c production -- yarn expo run:ios --configuration Release` on a simulator.
+
+`bs-template` holds both, each signed in to the user's account, so every lane inherits the two sessions. The user signs in themselves; never type their credentials.
+
+**After every new native build (dev or prod), refresh the template**, so the next lanes get it:
+
+1. `node "$LANE" save-build` (dev client) or `node "$LANE" save-build --prod` (production app): it takes the newest matching `.app` of Xcode's DerivedData (or `--from <app>`), finds the checkout and commit that built it, refuses uncommitted native changes, and copies it there under that name. Nothing creates these builds on its own: the folder only holds what was saved.
+2. `node "$LANE" template --refresh`: boots `bs-template`, installs the newest dev and prod over it (app data and sessions kept), records them in `~/.cache/bible-strong-issues/template/bs-template.json`, and shuts it down. With `--keep-booted` it stays on for a sign-in; then `node "$LANE" template --shutdown`.
+
+A JavaScript-only change needs no build: the dev client gets it from Metro, the production app from an OTA.
+
+`device` installs, over the clone, any newer build than the template's and warns, from the dev client's version and sha, when the lane's native code no longer matches it.
 
 ## 1. Frame the issue
 
@@ -57,6 +73,9 @@ Wait for `[lane] PRÊT` (or `node "$LANE" status`). Then:
 - iOS: argent tools (`mcp__argent__*`), device = the lane's `simUdid`. Android: `mcp__argent-android__*`, device `emulator-5554`.
 - Metro debugger: `debugger-connect` with `port` = the lane's port. Pass the device id explicitly: several simulators can be booted, so never pick "the booted one".
 - App not on Metro or showing the dev launcher: `node "$LANE" open <slug>`. Metro died: `node "$LANE" metro <slug>`, then `open`. Metro log: the `metroLog` path in the state.
+- Most tests run on the dev client. Two ways to look at « production », only when the test needs it:
+  - **The lane's code with production performance** (no dev mode, minified bundle): `node "$LANE" metro <slug> --prod`, then `open`. Back to dev mode: `metro <slug>` without the flag. Only a native performance question (profiling) needs a Release build of the worktree.
+  - **The app as users get it**: `node "$LANE" prod <slug>`. It launches the production app, keeps it in the foreground until the latest published OTA is in its expo-updates database (3 min at most), relaunches it on that OTA and confirms it runs. The app checks for updates once per launch and keeps a download only if it finishes in the foreground, so never judge the production app before this command reports the OTA running. On simulators the launch check did not download at all (seen 2026-10-21, cause unknown): when `prod` reports no OTA, tap Paramètres › « Vérifier les mises à jour » in the app with argent, wait for « Mise à jour effectuée », then run `prod` again; it relaunches the app on the downloaded update.
 - Run the test plan agreed in step 3, plus the relevant smoke paths of `docs/agents/smoke-tests.md`.
 - Screenshots: take them with argent at the meaningful moments (result after the change, edge cases, errors). Copy the ones that prove the result into `apps/expo/.scratch/issue/` of the worktree (git-ignored), with names that say what they show, and show them to the user with `SendUserFile`. They stay with the agent: **not** in the PR.
 - Static checks per `docs/agents/validation.md` for the touched workspaces. For the Expo app: `yarn workspace @bible-strong/expo typecheck`, `yarn workspace @bible-strong/expo lint`, and the **whole** Jest suite (`apps/expo/node_modules/.bin/jest`, about 80 s) before saying tests pass.
