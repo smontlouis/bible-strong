@@ -38,6 +38,7 @@ export const checkAndApplyAutomaticUpdate = async ({
 
 type AutomaticUpdaterOptions = AutomaticUpdateOptions & {
   onError: (error: unknown) => void
+  onRetry?: () => void
 }
 
 /**
@@ -50,8 +51,9 @@ export const createAutomaticUpdater = () => {
   let announced = false
   let reported = false
 
-  return async ({ onError, notifyAvailable, ...options }: AutomaticUpdaterOptions) => {
+  return async ({ onError, onRetry, notifyAvailable, ...options }: AutomaticUpdaterOptions) => {
     if (state !== 'idle') return
+    if (reported) onRetry?.()
     state = 'running'
     try {
       await checkAndApplyAutomaticUpdate({
@@ -88,6 +90,7 @@ export const useAutomaticUpdates = () => {
         notifyAvailable: toast.info,
         notifyReady: toast.success,
         onError: error => appLogger.captureError('startup', 'automatic_update.failed', error),
+        onRetry: () => appLogger.info('startup', 'automatic_update.retry'),
       })
 
     attempt()

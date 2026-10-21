@@ -103,7 +103,9 @@ describe('createAutomaticUpdater', () => {
     expect(options.onError).toHaveBeenCalledTimes(1)
     expect(options.notifyReady).not.toHaveBeenCalled()
 
-    await update(options)
+    const onRetry = jest.fn()
+    await update({ ...options, onRetry })
+    expect(onRetry).toHaveBeenCalledTimes(1)
     expect(options.updates.fetchUpdateAsync).toHaveBeenCalledTimes(2)
     expect(options.notifyAvailable).toHaveBeenCalledTimes(1)
     expect(options.notifyReady).toHaveBeenCalledTimes(1)
