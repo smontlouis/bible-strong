@@ -6,6 +6,7 @@ import type { ReactNode } from 'react'
 import { useEffect, useLayoutEffect, useState } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import { Platform } from 'react-native'
+import { cubicBezier, useReducedMotion } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 import {
@@ -13,7 +14,7 @@ import {
   workspaceSidebarDockedAtom,
   workspaceSidebarHiddenAtom,
 } from '~navigation/useWorkspaceRoutePanel'
-import Box, { HStack, TouchableBox } from '~common/ui/Box'
+import Box, { AnimatedBox, HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import SharedBibleDOM from '~features/bible/SharedBibleDOM'
 import CachedTabScreens from './CachedTabScreens'
@@ -33,6 +34,9 @@ import {
   WorkspaceHeaderInsetProvider,
 } from './workspaceHeaderInset'
 
+// global.web.css animates the sidebar on the web; native runs the same motion through Reanimated.
+const SidebarMotionBox = Platform.OS === 'web' ? Box : AnimatedBox
+
 export default function WorkspaceLayout({ children }: { children: ReactNode }) {
   const { t } = useTranslation()
   const router = useRouter()
@@ -41,6 +45,14 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
   const sidebarWidth = useWorkspaceSidebarWidth()
   // A hidden sidebar still covers the left safe area, so the content's edge never moves.
   const collapsedSidebarWidth = insets.left
+  const reduceMotion = useReducedMotion()
+  const sidebarTransition =
+    Platform.OS === 'web'
+      ? {}
+      : {
+          transitionDuration: reduceMotion ? 0 : 240,
+          transitionTimingFunction: cubicBezier(0.2, 0, 0, 1),
+        }
   useLayoutEffect(() => {
     finishPageTransition()
   }, [pathname])
@@ -93,11 +105,13 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
         }}
       />
       {isWide && (
-        <Box
+        <SidebarMotionBox
           testID="workspace-sidebar-motion"
           pointerEvents={sidebarVisible ? 'auto' : 'none'}
           aria-hidden={!sidebarVisible}
           style={{
+            ...sidebarTransition,
+            ...(Platform.OS === 'web' ? {} : { transitionProperty: 'width' }),
             width: overlayMode || sidebarVisible ? sidebarWidth : collapsedSidebarWidth,
             overflow: 'hidden',
             alignSelf: 'stretch',
@@ -113,9 +127,11 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
               : {}),
           }}
         >
-          <Box
+          <SidebarMotionBox
             testID="workspace-sidebar-inner"
             style={{
+              ...sidebarTransition,
+              ...(Platform.OS === 'web' ? {} : { transitionProperty: 'transform' }),
               width: sidebarWidth,
               flex: 1,
               ...(workspaceSidebarVariant === 'floating' ? { padding: WORKSPACE_FRAME_GAP } : {}),
@@ -132,8 +148,8 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
                 if (!isWorkspace) router.push('/')
               }}
             />
-          </Box>
-        </Box>
+          </SidebarMotionBox>
+        </SidebarMotionBox>
       )}
       {isWide && overlayMode && (
         <TouchableBox

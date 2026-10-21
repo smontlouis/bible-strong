@@ -14,6 +14,10 @@ jest.mock('react-native', () => ({
   useWindowDimensions: () => ({ width: 1600 }),
 }))
 jest.mock('jotai', () => ({ useAtom: () => [false, jest.fn()], useSetAtom: () => jest.fn() }))
+jest.mock('react-native-reanimated', () => ({
+  cubicBezier: () => 'cubic-bezier',
+  useReducedMotion: () => false,
+}))
 jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }))
