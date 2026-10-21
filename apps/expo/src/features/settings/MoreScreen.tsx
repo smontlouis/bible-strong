@@ -145,7 +145,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
     resolveUniverseColors(theme.colors, universe).background
 
   return (
-    <SafeAreaBox className="border-continuous overflow-hidden border-l-[1px] border-border bg-canvas">
+    <SafeAreaBox className="border-continuous overflow-hidden bg-canvas">
       <Header
         title={t(inWorkspace ? 'settings.settings' : 'Plus')}
         onCustomBackPress={closeMenu}
