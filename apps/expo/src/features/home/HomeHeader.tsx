@@ -42,7 +42,7 @@ const HomeHeader = () => {
       style={{ paddingTop: sidebarButtonClearance }}
     >
       <Box className="min-w-0" style={search ? { flexGrow: 1, flexBasis: 240 } : { flex: 1 }}>
-        <Text className="text-[12px] leading-[16px] font-bold uppercase tracking-[1.5px] text-tertiary">
+        <Text className="text-[12px] leading-[16px] font-medium uppercase tracking-[1.5px] text-grey">
           {date}
         </Text>
         <Text

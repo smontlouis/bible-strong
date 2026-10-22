@@ -1,5 +1,5 @@
 import { DomUtils, parseDocument } from 'htmlparser2'
-import { hasChildren, isTag, isText, type AnyNode } from 'domhandler'
+import { hasChildren, isComment, isTag, isText, type AnyNode } from 'domhandler'
 import type { MixedStyleDeclaration } from '@native-html/render'
 import { scaleFontSize } from '~features/bible/BibleDOM/scaleFontSize'
 import { scaleLineHeight } from '~features/bible/BibleDOM/scaleLineHeight'
@@ -32,8 +32,25 @@ const blockedTags = new Set([
   'svg',
   'math',
 ])
-/** One HTML contract for both engines: preserve text/links, discard active markup and inline styles. */
-export function cleanReadingHTML(html: string): string {
+/** Classes of the blocks that open and close a text, whose outer margins a card drops. */
+export const readingEdgeClasses = { first: 'reading-first', last: 'reading-last' } as const
+
+// Marks the first (or last) block of a text and, inside it, its own first (or last) block: the
+// margins of all of them would otherwise stack at the edge of the card.
+const markEdge = (nodes: AnyNode[], className: string, fromEnd: boolean) => {
+  const edge = (fromEnd ? [...nodes].reverse() : nodes).find(
+    node => !isComment(node) && !(isText(node) && !node.data.trim())
+  )
+  if (!edge || !isTag(edge)) return
+  edge.attribs.class = [edge.attribs.class, className].filter(Boolean).join(' ')
+  markEdge(edge.children, className, fromEnd)
+}
+
+/**
+ * One HTML contract for both engines: preserve text/links, discard active markup and inline
+ * styles. `trimEdges` marks the opening and closing blocks with `readingEdgeClasses`.
+ */
+export function cleanReadingHTML(html: string, { trimEdges = false } = {}): string {
   const document = parseDocument(html)
   const clean = (nodes: AnyNode[]) => {
     for (const node of [...nodes]) {
@@ -63,7 +80,12 @@ export function cleanReadingHTML(html: string): string {
   }
   clean(document.children)
   const body = DomUtils.findOne(node => node.name === 'body', document.children, true)
-  return DomUtils.getInnerHTML(body ?? document)
+  const root = body ?? document
+  if (trimEdges) {
+    markEdge(root.children, readingEdgeClasses.first, false)
+    markEdge(root.children, readingEdgeClasses.last, true)
+  }
+  return DomUtils.getInnerHTML(root)
 }
 
 export function readingHtmlStyles(
@@ -144,6 +166,16 @@ export function readingHtmlCSS(
         .join('; ')
       return `${selector} ${tag} { ${declarations}; }`
     })
+    .concat(
+      `${selector} .${readingEdgeClasses.first} { margin-top: 0; }`,
+      `${selector} .${readingEdgeClasses.last} { margin-bottom: 0; }`
+    )
     .join('\n')
+}
+
+/** The native engine's counterpart of the edge rules of `readingHtmlCSS`. */
+export const readingEdgeStyles = {
+  [readingEdgeClasses.first]: { marginTop: 0 },
+  [readingEdgeClasses.last]: { marginBottom: 0 },
 }
 export { webFontFamily }

@@ -19,6 +19,8 @@ type Props = {
   onSizeChange: (height: number) => Promise<void>
   typography?: ReadingTypography
   padded?: boolean
+  /** Drops the outer margins of the opening and closing blocks, for a text set in a card. */
+  trimEdges?: boolean
   dom?: DOMProps
 }
 
@@ -29,12 +31,13 @@ export default function HTMLContentDOM({
   onSizeChange,
   typography = defaultReadingTypography,
   padded = true,
+  trimEdges = false,
 }: Props) {
   useFonts({ 'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf') })
   const instanceId = useId()
   const selector = `.editorial-html[data-reading-id="${instanceId}"]`
   const containerRef = useRef<HTMLDivElement>(null)
-  const content = cleanReadingHTML(html)
+  const content = cleanReadingHTML(html, { trimEdges })
 
   useEffect(() => {
     if (!IS_DOM) return

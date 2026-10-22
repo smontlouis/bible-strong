@@ -31,7 +31,7 @@ export default function WidgetFrame({
     '--sw-accent': colors.link,
   }
   // In the thread a widget is set off by its light grey fill, its inner panels are white;
-  // expanded, it is an opaque dialog whose panels are grey.
+  // expanded, it is a raised dialog whose panels are grey.
   const style = {
     ...palette,
     '--sw-surface': colors.lightGrey,
@@ -39,7 +39,7 @@ export default function WidgetFrame({
   } as CSSProperties
   const dialogStyle = {
     ...palette,
-    '--sw-surface': colors.reverse,
+    '--sw-surface': colors.surfaceRaised,
     '--sw-soft': colors.lightGrey,
   } as CSSProperties
   return (

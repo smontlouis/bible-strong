@@ -81,6 +81,7 @@ export default function SwitchableHTMLView({
           html={value}
           typography={typography}
           colors={colors}
+          trimEdges={!padded}
           onLinkClicked={onLink}
         />
       ) : (
@@ -101,6 +102,7 @@ export default function SwitchableHTMLView({
             typography={typography}
             colors={colors}
             padded={false}
+            trimEdges={!padded}
             onLinkClicked={async payload => {
               onLink(payload)
             }}

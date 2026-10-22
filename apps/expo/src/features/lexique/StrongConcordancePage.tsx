@@ -205,7 +205,7 @@ const StrongConcordancePage = ({
       recycleItems
       contentContainerStyle={[
         pageContentStyle,
-        { maxWidth: 600, paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 + bottomInset },
+        { maxWidth: 600, paddingHorizontal: 20, paddingBottom: 90 + bottomInset },
       ]}
       keyExtractor={verse => `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`}
       onEndReached={() => {
@@ -258,7 +258,8 @@ const StrongConcordancePage = ({
           )}
         </>
       }
-      ListHeaderComponentStyle={{ paddingBottom: 15 }}
+      // LegendList adds a top padding of its content to the rows, not above the header.
+      ListHeaderComponentStyle={{ paddingTop: 22, paddingBottom: 15 }}
       ListEmptyComponent={
         concordanceQuery.isPending ? (
           placeholders

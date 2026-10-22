@@ -250,8 +250,8 @@ const MeditationCollectionContent = ({ plan, onReadingSlicePress }: Props) => {
                       )}
                       <Box className="flex-1 gap-[6px]">
                         {isToday && (
-                          <Box className="self-start bg-light-primary rounded-[8px] px-[8px] py-[3px]">
-                            <Text className="text-link text-[10px] font-bold uppercase">
+                          <Box className="self-start bg-light-primary rounded-full px-[9px] py-[2px]">
+                            <Text className="text-link text-[12px] font-semibold">
                               {t('dailyReading.today')}
                             </Text>
                           </Box>

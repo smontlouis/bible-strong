@@ -5,6 +5,7 @@ import {
   type CommentaryCatalogEntry,
   type CommentaryLanguage,
 } from '@bible-strong/resource-catalog/commentaries'
+import { colorWithOpacity } from '~themes/colorValues'
 import { useTheme } from '~themes/ThemeProvider'
 import React from 'react'
 import { Platform, SectionList, TouchableOpacity } from 'react-native'
@@ -385,7 +386,11 @@ const CommentarySelectorSheet = ({ sheetRef, inline = false, onOpenDetails }: Pr
           }}
           ListHeaderComponent={
             limitReached ? (
-              <Box className="overflow-hidden border-continuous mx-[20px] mt-[12px] px-[14px] py-[10px] bg-light-grey rounded-[12px]">
+              // A warning takes a tint of its own colour, which reads the same in every theme.
+              <Box
+                className="overflow-hidden border-continuous mx-[20px] mt-[12px] px-[14px] py-[10px] rounded-[12px]"
+                style={{ backgroundColor: colorWithOpacity(theme.colors.quart, 0.1) }}
+              >
                 <Text className="text-quart text-[12px]">
                   {t('commentaries.selector.limit', { max: MAX_SELECTED_COMMENTARIES })}
                 </Text>

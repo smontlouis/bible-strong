@@ -4,6 +4,7 @@ import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import type { ReactNode } from 'react'
 import { Pressable } from 'react-native'
 import Box from '~common/ui/Box'
+import { useSheetWellColor } from '~common/ui/SheetWell'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 
@@ -30,9 +31,8 @@ const BibleDisplayModeCard = ({
   children,
 }: Props) => {
   const stylingTheme = useStylingTheme()
-  // Half-transparent grounds: the sheet's blur shows through, as on the other sheets
-  const translucent = (color: 'reverse' | 'lightGrey') =>
-    colorWithOpacity(resolveThemeColor(stylingTheme, color), 0.5)
+  // The card is a well of the glass sheet; its preview sits on an ink tint inside it.
+  const wellColor = useSheetWellColor()
 
   return (
     <Pressable
@@ -53,15 +53,12 @@ const BibleDisplayModeCard = ({
           flexGrow: 1,
           backgroundColor: selected
             ? colorWithOpacity(resolveThemeColor(stylingTheme, 'primary'), 0.12)
-            : translucent('reverse'),
+            : wellColor,
         }}
       >
         <Box
-          className="h-[92px] items-center justify-center overflow-hidden border-continuous rounded-[12px]"
-          style={{
-            backgroundColor: translucent(selected ? 'reverse' : 'lightGrey'),
-            opacity: unavailable ? 0.45 : 1,
-          }}
+          className="h-[92px] items-center justify-center overflow-hidden border-continuous rounded-[12px] bg-opacity5"
+          style={{ opacity: unavailable ? 0.45 : 1 }}
         >
           {children}
         </Box>

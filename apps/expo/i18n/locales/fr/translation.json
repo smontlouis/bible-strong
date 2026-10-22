@@ -279,7 +279,7 @@
   "bible.chapterEntities.groups": "Groupes",
   "bible.chapterEntities.supernatural": "Monde surnaturel",
   "bible.chapterEntities.others": "Autres",
-  "bible.chapterEntities.open": "Voir la fiche de {{name}}",
+  "bible.chapterEntities.open": "{{name}}, voir la fiche",
   "bible.chapterEntities.empty": "Aucune entité identifiée dans ce chapitre.",
   "strongLexicon.biblicalEntities": "Entités bibliques",
   "strongLexicon.biblicalEntitiesDescription": "Personnes, lieux, groupes et relations",

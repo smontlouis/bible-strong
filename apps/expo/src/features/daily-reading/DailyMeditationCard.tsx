@@ -71,7 +71,7 @@ const DailyMeditationCard = ({
       <Box
         className={`flex-row items-center justify-between gap-[12px] ${desktop ? 'flex-wrap' : ''}`}
       >
-        <Text className="text-grey font-bold text-[12px] uppercase tracking-[1.5px]">
+        <Text className="text-grey text-[12px] font-medium uppercase tracking-[1.5px]">
           {addDay === 0
             ? t('dailyReading.meditationOfTheDay')
             : dayLabels[-addDay]

@@ -18,6 +18,7 @@ import {
 import { createAvatar } from '@bible-strong/avatar-react'
 import '@bible-strong/avatar-react/styles.css'
 import { selectUserLoginInfo } from '~redux/selectors/user'
+import { floatingShadow } from '~common/ui/surfaces'
 import { resolveFontFamily } from '~themes/styleValues'
 import { toast } from '~helpers/toast'
 import i18n from '~i18n'
@@ -258,13 +259,16 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
   })
   const vars = {
     fontFamily: resolveFontFamily(fontFamily.text),
-    '--as-surface': colors.reverse,
+    // The panel floats above the page: the raised level and the one floating shadow.
+    '--as-surface': colors.surfaceRaised,
     '--as-ink': colors.default,
     '--as-muted': colors.grey,
     '--as-accent': colors.primary,
     '--as-link': colors.link,
     '--as-soft': colors.lightGrey,
     '--as-border': colors.border,
+    '--as-line': colors.separator,
+    '--as-floating-shadow': floatingShadow.boxShadow,
   } as CSSProperties
   const shortcuts =
     context &&

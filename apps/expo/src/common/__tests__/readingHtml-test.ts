@@ -106,3 +106,20 @@ it('estimates rendered HTML height from text length, blocks and paragraph spacin
   ).toBe((3 + 1 + 1) * 30 + 20)
   expect(estimateReadingHtmlHeight('', typography, 200)).toBe(0)
 })
+
+it('marks the blocks that open and close the text, down to the innermost one', () => {
+  const html = cleanReadingHTML(
+    '\n<div><p>Un</p><p>Deux</p></div>\n<!-- note --><p class="verse">Trois</p>\n',
+    { trimEdges: true }
+  )
+  const document = parseDocument(html)
+  const [div, first, second, third] = DomUtils.findAll(
+    node => ['div', 'p'].includes(node.name),
+    document.children
+  )
+  expect(div.attribs.class).toBe('reading-first')
+  expect(first.attribs.class).toBe('reading-first')
+  expect(second.attribs.class).toBeUndefined()
+  expect(third.attribs.class).toBe('verse reading-last')
+  expect(cleanReadingHTML('<p>Un</p>')).toBe('<p>Un</p>')
+})
