@@ -395,7 +395,7 @@ Flow:
 
 ## Ressources Bibliques
 
-Routes: `/lexique`, `/strong`, `/concordance`, `/concordance-by-book`, `/dictionnaire`, `/dictionnary-detail`, `/dictionnaire-verse-detail`, `/nave`, `/nave-detail`, `/nave-warning`, `/commentaries`.
+Routes: `/lexique`, `/strong`, `/concordance`, `/concordance-by-book`, `/dictionnaire`, `/dictionnary-detail`, `/dictionnaire-verse-detail`, `/nave`, `/nave-detail`, `/commentaries`.
 
 But: approfondir un passage depuis des ressources lexicales, thématiques, dictionnaires et commentaires.
 
@@ -426,7 +426,6 @@ But: approfondir un passage depuis des ressources lexicales, thématiques, dicti
 |---|---|
 | `/nave` | Liste des thèmes Nave et recherche. |
 | `/nave-detail` | Détail d'un thème et références bibliques. |
-| `/nave-warning` | Avertissement langue/contenu pour utilisateurs FR. |
 
 États: avertissement FR, base absente, liste alphabétique, recherche, détail HTML, tags, partage, liens vers Bible ou autre thème.
 
@@ -486,7 +485,7 @@ Modes:
 
 ## Plans De Lecture
 
-Routes: `/plans`, `/my-plan-list`, `/plan`, `/plan-slice`.
+Routes: `/plans`, `/plan`, `/plan-slice`.
 
 But: découvrir, suivre et terminer des plans annuels ou de méditation.
 
@@ -495,7 +494,6 @@ But: découvrir, suivre et terminer des plans annuels ou de méditation.
 | Route | Utilité |
 |---|---|
 | `/plans` | Sélection entre exploration et plans de l'utilisateur. |
-| `/my-plan-list` | Liste des plans suivis localement. |
 | `/plan` | Détail d'un plan: sections, progression, menu. |
 | `/plan-slice` | Lecture immersive d'une tranche de plan. |
 
@@ -719,14 +717,12 @@ Routes: `/faq`, `/support`, `/changelog`.
 | `/dictionnaire-verse-detail` | `DictionnaireVerseDetailScreen` | Verset ouvert depuis le dictionnaire. |
 | `/nave` | `NaveScreen` | Thèmes Nave. |
 | `/nave-detail` | `NaveDetailScreen` | Détail thème Nave. |
-| `/nave-warning` | `NaveWarningScreen` | Avertissement Nave. |
 | `/commentaries` | `CommentariesScreen` | Commentaires bibliques. |
 | `/search` | `SearchScreen` | Recherche globale. |
 | `/local-search` | `SQLiteSearchScreen` | Recherche SQLite locale. |
 | `/studies` | `StudiesScreen` | Liste/onglet études. |
 | `/edit-study` | `EditStudyScreen` | Édition d'étude. |
 | `/plans` | `PlanSelectScreen` | Sélection de plans. |
-| `/my-plan-list` | `MyPlanListScreen` | Mes plans. |
 | `/plan` | `PlanScreen` | Détail plan. |
 | `/plan-slice` | `PlanSliceScreen` | Lecture d'une tranche. |
 | `/timeline-home` | `TimelineHomeScreen` | Accueil timeline. |

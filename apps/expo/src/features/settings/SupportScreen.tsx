@@ -26,12 +26,12 @@ const SupportScreen = () => {
             Hello !
           </Text>
           <Paragraph className="mb-[20px]" scaleLineHeight={-1}>
-            Avant toute chose, merci d'envisager de m'aider.
+            Avant toute chose, merci d’envisager de m’aider.
           </Paragraph>
           <Paragraph className="mb-[20px]" scaleLineHeight={-1}>
-            Plus vous êtes nombreux, plus le coût des serveurs augmente. L'application est
-            développée sur mon temps libre et est totalement gratuite. Dieu m'a donné un don, et
-            c'est un plaisir pour moi de l'utiliser à sa gloire.
+            Plus vous êtes nombreux, plus le coût des serveurs augmente. L’application est
+            développée sur mon temps libre et est totalement gratuite. Dieu m’a donné un don, et
+            c’est un plaisir pour moi de l’utiliser à sa gloire.
           </Paragraph>
           <Paragraph className="mb-[20px]" scaleLineHeight={-1}>
             Si vous souhaitez me soutenir, vous pouvez le faire de deux façons. Soit par{' '}
@@ -46,25 +46,25 @@ const SupportScreen = () => {
               className="text-primary font-bold"
               onPress={() => Linking.openURL('https://www.paypal.me/smontlouis')}
             >
-              Paypal
+              PayPal
             </Paragraph>
             .
           </Paragraph>
           <Paragraph className="mb-[20px]" scaleLineHeight={-1}>
             Tipeee vous permet de soutenir en une fois ou mensuellement. Lorsque vous soutenez
-            quelqu'un mensuellement, vous pouvez donner 1€ par mois par exemple.
+            quelqu’un mensuellement, vous pouvez donner 1 € par mois par exemple.
           </Paragraph>
           <Paragraph className="mb-[20px]" scaleLineHeight={-1}>
-            Juste 1€ par mois ! Et comme dit le proverbe martiniquais :{' '}
-            <Paragraph className="text-quart">"Sé grèn diri ka fè sak diri."</Paragraph>, "Ce sont
-            les grains de riz qui font les sacs de riz.", autrement dit, l’accumulation de petites
-            choses font de grandes choses.
+            Juste 1 € par mois ! Et comme dit le proverbe martiniquais :{' '}
+            <Paragraph className="text-quart">« Sé grèn diri ka fè sak diri. »</Paragraph>, « Ce
+            sont les grains de riz qui font les sacs de riz. », autrement dit, l’accumulation de
+            petites choses font de grandes choses.
           </Paragraph>
           <Paragraph className="mb-[20px]" scaleLineHeight={-1}>
-            Vous trouverez plus d'informations sur mon parcours et ma motivation sur ma page Tipeee.
+            Vous trouverez plus d’informations sur mon parcours et ma motivation sur ma page Tipeee.
           </Paragraph>
           <Paragraph className="mb-[20px]" scaleLineHeight={-1}>
-            Merci de m'avoir lu et bonne étude !
+            Merci de m’avoir lu et bonne étude !
           </Paragraph>
         </Box>
         <ListSection>
@@ -78,7 +78,7 @@ const SupportScreen = () => {
             href="https://www.paypal.me/smontlouis"
             icon={<FeatherIcon name="credit-card" size={18} color="primary" />}
             iconTint="primary"
-            label="Lien paypal"
+            label="Lien PayPal"
           />
         </ListSection>
       </ScrollView>

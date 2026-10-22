@@ -174,7 +174,7 @@ const ExportButton = ({ onSaved }: { onSaved: (file: ExistingFileInfo) => void }
 
   return (
     <Button style={{ width: 130, marginTop: 16 }} reverse small onPress={sync} disabled={isSyncing}>
-      <Text className="text-[15px]">{isSyncing ? 'Export...' : t('app.export')}</Text>
+      <Text className="text-[15px]">{isSyncing ? `${t('app.export')}…` : t('app.export')}</Text>
     </Button>
   )
 }

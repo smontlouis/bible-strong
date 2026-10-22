@@ -87,8 +87,6 @@ L'ancienne route d'un jour (`/plan-slice`) ouvre la page du plan sur ce jour.
 ```
 plans/
 ├── Screens/
-│   ├── MyPlanListScreen      # Liste des plans de l'utilisateur
-│   ├── ExploreScreen         # Découverte de nouveaux plans
 │   ├── PlanScreen            # Détail d'un plan, jour par jour
 │   ├── PlanEntityScreen      # Page d'un texte, d'une image ou d'une vidéo
 │   └── PlanSelectScreen      # Sélection d'un plan
@@ -163,13 +161,9 @@ interface PlanState {
 
 ## Utilisation
 
-### Explorer et ajouter un plan
+### Ajouter un plan
 
 ```typescript
-// Navigation vers l'exploration
-navigation.navigate('ExploreScreen')
-
-// Ajouter un plan
 await dispatch(fetchPlan(planId))
 ```
 

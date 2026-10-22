@@ -222,11 +222,9 @@ export type MainStackProps = {
   FAQ: undefined
   Nave: NaveScreenProps
   NaveDetail: NaveDetailScreenProps
-  NaveWarning: undefined
   ToggleCompareVerses: undefined
   Plan: PlanScreenProps
   Plans: undefined
-  MyPlanList: undefined
   PlanSlice: PlanSliceScreenProps
   Timeline: TimelineScreenProps
   TimelineHome: undefined

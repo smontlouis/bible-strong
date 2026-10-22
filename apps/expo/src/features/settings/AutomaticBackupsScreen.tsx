@@ -156,7 +156,7 @@ const AutoBackupsList = () => {
     <>
       <Box className="flex-row justify-between items-center gap-[12px] ml-[24px] mr-[20px] mb-[9px]">
         <Text className="flex-1 text-[13px] text-grey">
-          {t('backups.count', { count: backups.length })} -{' '}
+          {t('backups.count', { count: backups.length })} ·{' '}
           {(backups.reduce((acc, b) => acc + b.size, 0) / 1024).toFixed(0)} KB
         </Text>
         <Button
@@ -166,7 +166,7 @@ const AutoBackupsList = () => {
           style={{ paddingHorizontal: 10 }}
         >
           <Text className="text-[13px] font-bold text-white">
-            {isFetching ? '...' : t('backups.refresh')}
+            {isFetching ? '…' : t('backups.refresh')}
           </Text>
         </Button>
       </Box>

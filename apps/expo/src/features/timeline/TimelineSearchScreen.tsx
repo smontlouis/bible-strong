@@ -106,7 +106,7 @@ const TimelineSearchScreen = () => {
           ? { message: t('Aucun résultat') }
           : {
               icon: require('~assets/images/empty-state-icons/search.svg'),
-              message: t('Faites une recherche dans la Bible !'),
+              message: t('timeline.search.prompt'),
             })}
       />
     )
@@ -147,9 +147,7 @@ const TimelineSearchScreen = () => {
           ListHeaderComponent={
             results.length > 0 ? (
               <ListSectionTitle className="ml-[20px] mt-[16px] mb-[6px]">
-                {t('{{nbHits}} occurences trouvées dans la bible', {
-                  nbHits: results.length,
-                })}
+                {t('timeline.search.resultCount', { count: results.length })}
               </ListSectionTitle>
             ) : null
           }
