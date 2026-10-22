@@ -391,6 +391,63 @@ describe('resourceAvailability', () => {
     })
   })
 
+  it('removes an old database copy SQLite cannot read, so it can be downloaded again', async () => {
+    const path = 'file:///docs/SQLite/fr/dictionnaire.sqlite'
+    const discardUnreadableCopy = jest.fn(async () => undefined)
+    mockInitLanguageDirs.mockResolvedValue(undefined)
+    mockGetDbPath.mockReturnValue(path)
+    mockGetInfoAsync.mockResolvedValue({
+      exists: true,
+      uri: path,
+      isDirectory: false,
+      size: 1,
+      modificationTime: 0,
+    })
+    mockGetManagedDatabase.mockReturnValue({
+      init: jest.fn(async () => {
+        throw new Error(
+          "Call to function 'NativeDatabase.execAsync' has been rejected.\n→ Caused by: database disk image is malformed"
+        )
+      }),
+      get: jest.fn(() => undefined),
+      discardUnreadableCopy,
+    } as unknown as ReturnType<typeof dbManager.getDB>)
+
+    await expect(
+      getLocalResourceAvailability({ kind: 'database', databaseId: 'DICTIONNAIRE', language: 'fr' })
+    ).resolves.toEqual({
+      status: 'missing',
+      resource: { kind: 'database', databaseId: 'DICTIONNAIRE', language: 'fr' },
+      expectedPath: path,
+    })
+    expect(discardUnreadableCopy).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps a copy that failed for another reason as corrupt', async () => {
+    const path = 'file:///docs/SQLite/fr/mhy.sqlite'
+    const discardUnreadableCopy = jest.fn(async () => undefined)
+    mockGetDbPath.mockReturnValue(path)
+    mockGetInfoAsync.mockResolvedValue({
+      exists: true,
+      uri: path,
+      isDirectory: false,
+      size: 1,
+      modificationTime: 0,
+    })
+    mockGetManagedDatabase.mockReturnValue({
+      init: jest.fn(async () => {
+        throw new Error('database is locked')
+      }),
+      get: jest.fn(() => undefined),
+      discardUnreadableCopy,
+    } as unknown as ReturnType<typeof dbManager.getDB>)
+
+    await expect(
+      getLocalResourceAvailability({ kind: 'database', databaseId: 'MHY', language: 'fr' })
+    ).resolves.toMatchObject({ status: 'corrupt' })
+    expect(discardUnreadableCopy).not.toHaveBeenCalled()
+  })
+
   it('uses canonical child identities for pericope and red-word availability', async () => {
     const dependencies = createDependencies({
       files: new Set(['file:///docs/bible-dby-pericope.json', 'file:///docs/red-words-DBY.json']),

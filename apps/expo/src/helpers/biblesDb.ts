@@ -2,6 +2,8 @@ import * as FileSystem from 'expo-file-system/legacy'
 import * as Sentry from '@sentry/react-native'
 import * as SQLite from 'expo-sqlite'
 import { getSharedSqliteDirPath } from '~helpers/databaseTypes'
+import { appLogger } from '~helpers/agentObservability'
+import { isMalformedDatabaseError, isReleasedHandleError } from '~helpers/sqliteErrors'
 import { databaseBiblesName } from '~helpers/databases'
 import { sanitizeFtsQuery } from '~helpers/bibleSearchQuery'
 import {
@@ -200,6 +202,7 @@ export async function openBiblesDb(): Promise<SQLite.SQLiteDatabase> {
       await instance.execAsync(`
         PRAGMA journal_mode = WAL;
         PRAGMA synchronous = NORMAL;
+        PRAGMA busy_timeout = ${WRITE_LOCK_TIMEOUT_MS};
 
         CREATE TABLE IF NOT EXISTS verses (
           id INTEGER PRIMARY KEY,
@@ -433,8 +436,8 @@ async function ensureBibleSearchIndex(database: SQLite.SQLiteDatabase): Promise<
     ftsColumns.some(column => column.name === 'stemmed_text')
 
   if (requiresRebuild) {
-    await database.withExclusiveTransactionAsync(async () => {
-      await database.execAsync(`
+    await database.withExclusiveTransactionAsync(async txn => {
+      await txn.execAsync(`
         DROP TABLE IF EXISTS verses_fts_vocab;
         DROP TABLE IF EXISTS verses_fts;
         CREATE VIRTUAL TABLE verses_fts USING fts5(
@@ -460,29 +463,50 @@ async function ensureBibleSearchIndex(database: SQLite.SQLiteDatabase): Promise<
 }
 
 // ---------------------------------------------------------------------------
-// Error wrapper — logs + reports to Sentry, then re-throws
+// Writes — one at a time, each version replaced in one transaction
 // ---------------------------------------------------------------------------
 
-/**
- * Detect errors thrown when an SQLite handle was released mid-operation
- * (typically due to a concurrent close/reset).
- *
- * Matches only the specific "already released" wording — the Expo bridge
- * prefixes every native rejection with "Call to function 'NativeDatabase.*'
- * has been rejected" (see expo#28176), so matching NativeDatabase/
- * NativeStatement would also retry on unrelated SQLite errors like
- * "no such table" and mask real bugs.
- */
-function isReleasedHandleError(e: unknown): boolean {
-  const msg = e instanceof Error ? e.message : String(e)
-  if (msg.includes('already released')) return true
-  const cause = (e as { cause?: unknown })?.cause
-  if (cause) {
-    const causeMsg = cause instanceof Error ? cause.message : String(cause)
-    if (causeMsg.includes('already released')) return true
-  }
-  return false
+// A write waits this long for another connection's transaction instead of failing at once with
+// "database is locked". Installs and removals also queue behind each other (`withWriteLock`).
+const WRITE_LOCK_TIMEOUT_MS = 10_000
+
+let writeQueue: Promise<unknown> = Promise.resolve()
+
+function withWriteLock<T>(fn: () => Promise<T>): Promise<T> {
+  const run = writeQueue.then(fn, fn)
+  writeQueue = run.catch(() => undefined)
+  return run
 }
+
+/**
+ * Removes a version from the search index, which the content table does not update by itself.
+ * An install interrupted before installs were atomic could leave the index without rows the
+ * verses still have; deleting them again then fails as "malformed". Rebuilding the index from
+ * the verses repairs it, inside the same transaction.
+ */
+async function deleteVersionFromSearchIndex(
+  txn: SQLite.SQLiteDatabase,
+  version: string
+): Promise<void> {
+  const deleteVersion = () =>
+    txn.runAsync(
+      `INSERT INTO verses_fts(verses_fts, rowid, text, normalized_text)
+       SELECT 'delete', id, text, normalized_text FROM verses WHERE version = ?`,
+      [version]
+    )
+  try {
+    await deleteVersion()
+  } catch (error) {
+    if (!isMalformedDatabaseError(error)) throw error
+    appLogger.warn('database', 'bibles.search_index_rebuilt', { version, error })
+    await txn.execAsync("INSERT INTO verses_fts(verses_fts) VALUES('rebuild')")
+    await deleteVersion()
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Error wrapper — logs + reports to Sentry, then re-throws
+// ---------------------------------------------------------------------------
 
 async function withDbError<T>(operation: string, fn: () => Promise<T>): Promise<T> {
   for (let attempt = 0; attempt < 2; attempt++) {
@@ -784,13 +808,15 @@ export function setBibleVersionTextIdentity(
   version: string,
   identity: { textRevision: string; textSha256: string }
 ): Promise<void> {
-  return withDbError(`setBibleVersionTextIdentity(${version})`, async () => {
-    const d = await getDb()
-    await d.runAsync(
-      'UPDATE versions_meta SET text_revision = ?, text_sha256 = ? WHERE version = ?',
-      [identity.textRevision, identity.textSha256, version]
-    )
-  })
+  return withDbError(`setBibleVersionTextIdentity(${version})`, () =>
+    withWriteLock(async () => {
+      const d = await getDb()
+      await d.runAsync(
+        'UPDATE versions_meta SET text_revision = ?, text_sha256 = ? WHERE version = ?',
+        [identity.textRevision, identity.textSha256, version]
+      )
+    })
+  )
 }
 
 /**
@@ -802,7 +828,8 @@ export function setBibleVersionTextIdentity(
  *   "2": { ... }
  * }
  *
- * Uses withExclusiveTransactionAsync for safe bulk insert.
+ * The whole replacement is one transaction on its own connection: an interrupted install leaves
+ * the previous text, and readers keep seeing it until the commit.
  */
 export interface InsertBibleOptions {
   onInsertProgress?: (progress: number) => void
@@ -823,170 +850,171 @@ export function insertBibleVersion(
   jsonData: BibleJsonData,
   options?: InsertBibleOptions
 ): Promise<void> {
-  return withDbError(`insertBibleVersion(${version})`, async () => {
-    const d = await getDb()
+  return withDbError(`insertBibleVersion(${version})`, () =>
+    withWriteLock(async () => {
+      const d = await getDb()
 
-    await d.withExclusiveTransactionAsync(async () => {
-      // Delete existing data for this version first (re-download case)
-      // Remove FTS entries before deleting verses (content-sync table needs explicit delete)
-      await d.runAsync(
-        `INSERT INTO verses_fts(verses_fts, rowid, text, normalized_text)
-       SELECT 'delete', id, text, normalized_text FROM verses WHERE version = ?`,
-        [version]
-      )
-      await d.runAsync('DELETE FROM verses WHERE version = ?', [version])
-      await d.runAsync('DELETE FROM versions_meta WHERE version = ?', [version])
+      await d.withExclusiveTransactionAsync(async txn => {
+        await txn.execAsync(`PRAGMA busy_timeout = ${WRITE_LOCK_TIMEOUT_MS}`)
+        // Delete existing data for this version first (re-download case)
+        await deleteVersionFromSearchIndex(txn, version)
+        await txn.runAsync('DELETE FROM verses WHERE version = ?', [version])
+        await txn.runAsync('DELETE FROM versions_meta WHERE version = ?', [version])
 
-      let totalCount = 0
-      const BATCH_SIZE = 500
+        let totalCount = 0
+        const BATCH_SIZE = 500
 
-      // Collect all rows first
-      const canonicalPublication = isCanonicalBibleJsonData(jsonData) ? jsonData : undefined
-      if (canonicalPublication && canonicalPublication.applicationVersionId !== version) {
-        throw new Error(
-          `CANONICAL_BIBLE_VERSION_MISMATCH:${canonicalPublication.applicationVersionId}:${version}`
-        )
-      }
-      const versesData: BibleVerseImportData =
-        canonicalPublication?.verses ?? (jsonData as LegacyBibleJsonData)
-      const allRows: [
-        string,
-        number,
-        number,
-        number,
-        string,
-        string,
-        string,
-        string,
-        string,
-        string,
-      ][] = []
-      let canonicalNoteCount = 0
-      let canonicalHeadingCount = 0
-      for (const { bookNumber, chapterNumber, verseNumber, verseData } of getImportableBibleVerses(
-        versesData
-      )) {
-        if (typeof verseData === 'string') {
+        // Collect all rows first
+        const canonicalPublication = isCanonicalBibleJsonData(jsonData) ? jsonData : undefined
+        if (canonicalPublication && canonicalPublication.applicationVersionId !== version) {
+          throw new Error(
+            `CANONICAL_BIBLE_VERSION_MISMATCH:${canonicalPublication.applicationVersionId}:${version}`
+          )
+        }
+        const versesData: BibleVerseImportData =
+          canonicalPublication?.verses ?? (jsonData as LegacyBibleJsonData)
+        const allRows: [
+          string,
+          number,
+          number,
+          number,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+        ][] = []
+        let canonicalNoteCount = 0
+        let canonicalHeadingCount = 0
+        for (const {
+          bookNumber,
+          chapterNumber,
+          verseNumber,
+          verseData,
+        } of getImportableBibleVerses(versesData)) {
+          if (typeof verseData === 'string') {
+            allRows.push([
+              version,
+              bookNumber,
+              chapterNumber,
+              verseNumber,
+              verseData,
+              getOfflineNormalizedSearchText(version, verseData),
+              '[]',
+              '[]',
+              '[]',
+              '[]',
+            ])
+            continue
+          }
+          canonicalNoteCount += verseData.notes?.length ?? 0
+          canonicalHeadingCount += verseData.headings?.length ?? 0
           allRows.push([
             version,
             bookNumber,
             chapterNumber,
             verseNumber,
-            verseData,
-            getOfflineNormalizedSearchText(version, verseData),
-            '[]',
-            '[]',
-            '[]',
-            '[]',
+            verseData.text,
+            getOfflineNormalizedSearchText(version, verseData.text),
+            JSON.stringify(verseData.startTags ?? []),
+            JSON.stringify(verseData.layout ?? []),
+            JSON.stringify(verseData.notes ?? []),
+            JSON.stringify(verseData.headings ?? []),
           ])
-          continue
         }
-        canonicalNoteCount += verseData.notes?.length ?? 0
-        canonicalHeadingCount += verseData.headings?.length ?? 0
-        allRows.push([
-          version,
-          bookNumber,
-          chapterNumber,
-          verseNumber,
-          verseData.text,
-          getOfflineNormalizedSearchText(version, verseData.text),
-          JSON.stringify(verseData.startTags ?? []),
-          JSON.stringify(verseData.layout ?? []),
-          JSON.stringify(verseData.notes ?? []),
-          JSON.stringify(verseData.headings ?? []),
-        ])
-      }
-      if (canonicalPublication && allRows.length !== canonicalPublication.verseCount) {
-        throw new Error(
-          `CANONICAL_BIBLE_VERSE_COUNT_MISMATCH:${allRows.length}:${canonicalPublication.verseCount}`
-        )
-      }
-      if (
-        options?.publicationMetadata &&
-        allRows.length !== options.publicationMetadata.verseCount
-      ) {
-        throw new Error(
-          `BIBLE_PUBLICATION_VERSE_COUNT_MISMATCH:${allRows.length}:${options.publicationMetadata.verseCount}`
-        )
-      }
-      if (
-        canonicalPublication?.headingCount !== undefined &&
-        canonicalHeadingCount !== canonicalPublication.headingCount
-      ) {
-        throw new Error(
-          `CANONICAL_BIBLE_HEADING_COUNT_MISMATCH:${canonicalHeadingCount}:${canonicalPublication.headingCount}`
-        )
-      }
-      if (
-        canonicalPublication?.noteCount !== undefined &&
-        canonicalNoteCount !== canonicalPublication.noteCount
-      ) {
-        throw new Error(
-          `CANONICAL_BIBLE_NOTE_COUNT_MISMATCH:${canonicalNoteCount}:${canonicalPublication.noteCount}`
-        )
-      }
-
-      const totalBatches = Math.ceil(allRows.length / BATCH_SIZE)
-
-      // Batch insert
-      for (let i = 0; i < allRows.length; i += BATCH_SIZE) {
-        // Check for cancellation between batches
-        if (options?.isCancelled?.()) {
-          throw new Error('CANCELLED')
+        if (canonicalPublication && allRows.length !== canonicalPublication.verseCount) {
+          throw new Error(
+            `CANONICAL_BIBLE_VERSE_COUNT_MISMATCH:${allRows.length}:${canonicalPublication.verseCount}`
+          )
+        }
+        if (
+          options?.publicationMetadata &&
+          allRows.length !== options.publicationMetadata.verseCount
+        ) {
+          throw new Error(
+            `BIBLE_PUBLICATION_VERSE_COUNT_MISMATCH:${allRows.length}:${options.publicationMetadata.verseCount}`
+          )
+        }
+        if (
+          canonicalPublication?.headingCount !== undefined &&
+          canonicalHeadingCount !== canonicalPublication.headingCount
+        ) {
+          throw new Error(
+            `CANONICAL_BIBLE_HEADING_COUNT_MISMATCH:${canonicalHeadingCount}:${canonicalPublication.headingCount}`
+          )
+        }
+        if (
+          canonicalPublication?.noteCount !== undefined &&
+          canonicalNoteCount !== canonicalPublication.noteCount
+        ) {
+          throw new Error(
+            `CANONICAL_BIBLE_NOTE_COUNT_MISMATCH:${canonicalNoteCount}:${canonicalPublication.noteCount}`
+          )
         }
 
-        const batch = allRows.slice(i, i + BATCH_SIZE)
-        const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(', ')
-        const flatParams: (string | number)[] = []
-        for (const row of batch) {
-          flatParams.push(...row)
-        }
+        const totalBatches = Math.ceil(allRows.length / BATCH_SIZE)
 
-        await d.runAsync(
-          `INSERT INTO verses (
+        // Batch insert
+        for (let i = 0; i < allRows.length; i += BATCH_SIZE) {
+          // Check for cancellation between batches
+          if (options?.isCancelled?.()) {
+            throw new Error('CANCELLED')
+          }
+
+          const batch = allRows.slice(i, i + BATCH_SIZE)
+          const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(', ')
+          const flatParams: (string | number)[] = []
+          for (const row of batch) {
+            flatParams.push(...row)
+          }
+
+          await txn.runAsync(
+            `INSERT INTO verses (
              version, book, chapter, verse, text, normalized_text, start_tags_json, layout_json,
              notes_json, headings_json
            )
            VALUES ${placeholders}`,
-          flatParams
-        )
-        totalCount += batch.length
+            flatParams
+          )
+          totalCount += batch.length
 
-        // Report progress after each batch
-        const batchIndex = Math.floor(i / BATCH_SIZE) + 1
-        options?.onInsertProgress?.(batchIndex / totalBatches)
-      }
+          // Report progress after each batch
+          const batchIndex = Math.floor(i / BATCH_SIZE) + 1
+          options?.onInsertProgress?.(batchIndex / totalBatches)
+        }
 
-      // Populate FTS index for this version
-      await d.runAsync(
-        `INSERT INTO verses_fts(rowid, text, normalized_text)
+        // Populate FTS index for this version
+        await txn.runAsync(
+          `INSERT INTO verses_fts(rowid, text, normalized_text)
        SELECT id, text, normalized_text FROM verses WHERE version = ?`,
-        [version]
-      )
+          [version]
+        )
 
-      // Record metadata
-      const publicationMetadata = canonicalPublication ?? options?.publicationMetadata
-      await d.runAsync(
-        `INSERT INTO versions_meta(
+        // Record metadata
+        const publicationMetadata = canonicalPublication ?? options?.publicationMetadata
+        await txn.runAsync(
+          `INSERT INTO versions_meta(
            version, installed_at, verse_count, text_revision,
            text_sha256, source_sha256, schema_version, resource_generation
          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          version,
-          Date.now(),
-          totalCount,
-          publicationMetadata?.textRevision ?? null,
-          publicationMetadata?.textSha256 ?? null,
-          publicationMetadata?.sourceSha256 ?? null,
-          publicationMetadata?.schemaVersion ?? null,
-          options?.publicationMetadata?.resourceGeneration ?? null,
-        ]
-      )
-      await options?.beforeCommit?.()
-    })
+          [
+            version,
+            Date.now(),
+            totalCount,
+            publicationMetadata?.textRevision ?? null,
+            publicationMetadata?.textSha256 ?? null,
+            publicationMetadata?.sourceSha256 ?? null,
+            publicationMetadata?.schemaVersion ?? null,
+            options?.publicationMetadata?.resourceGeneration ?? null,
+          ]
+        )
+        await options?.beforeCommit?.()
+      })
 
-    console.log(`[BiblesDB] Inserted version ${version}`)
-  })
+      console.log(`[BiblesDB] Inserted version ${version}`)
+    })
+  )
 }
 
 function parseCanonicalJsonArray<T>(value: string): T[] {
@@ -1023,23 +1051,20 @@ function isCanonicalBibleJsonData(data: BibleJsonData): data is CanonicalBibleJs
  * Remove a Bible version from the database.
  */
 export function removeBibleVersion(version: string): Promise<void> {
-  return withDbError(`removeBibleVersion(${version})`, async () => {
-    const d = await getDb()
+  return withDbError(`removeBibleVersion(${version})`, () =>
+    withWriteLock(async () => {
+      const d = await getDb()
 
-    await d.withExclusiveTransactionAsync(async () => {
-      // Remove FTS entries first (content-sync table needs explicit delete)
-      await d.runAsync(
-        `INSERT INTO verses_fts(verses_fts, rowid, text, normalized_text)
-         SELECT 'delete', id, text, normalized_text FROM verses WHERE version = ?`,
-        [version]
-      )
+      await d.withExclusiveTransactionAsync(async txn => {
+        await txn.execAsync(`PRAGMA busy_timeout = ${WRITE_LOCK_TIMEOUT_MS}`)
+        await deleteVersionFromSearchIndex(txn, version)
+        await txn.runAsync('DELETE FROM verses WHERE version = ?', [version])
+        await txn.runAsync('DELETE FROM versions_meta WHERE version = ?', [version])
+      })
 
-      await d.runAsync('DELETE FROM verses WHERE version = ?', [version])
-      await d.runAsync('DELETE FROM versions_meta WHERE version = ?', [version])
+      console.log(`[BiblesDB] Removed version ${version}`)
     })
-
-    console.log(`[BiblesDB] Removed version ${version}`)
-  })
+  )
 }
 
 // ---------------------------------------------------------------------------
