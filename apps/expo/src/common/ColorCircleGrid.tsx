@@ -95,7 +95,9 @@ const ColorCircleGrid = ({
         contentContainerStyle={{
           flexDirection: 'row',
           alignItems: 'center',
-          ...(Platform.OS === 'web' && { flexGrow: 1, justifyContent: 'center' as const }),
+          // The row is sized for 500 pt at most, so a wider iPad sheet centres it.
+          flexGrow: 1,
+          justifyContent: 'center',
           paddingVertical: scrollPadding?.vertical,
           paddingHorizontal: scrollPadding?.horizontal,
         }}

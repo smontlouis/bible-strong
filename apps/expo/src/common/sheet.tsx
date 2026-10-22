@@ -35,6 +35,10 @@ type SheetContextValue = {
   setFooterHeight: React.Dispatch<React.SetStateAction<number>>
 }
 
+// Without a width, iOS gives a sheet the page-sheet size on iPad, which spreads across most of a
+// landscape screen. Android and Web already stop TrueSheet at 640.
+const IPAD_SHEET_MAX_WIDTH = Platform.OS === 'ios' && Platform.isPad ? 640 : undefined
+
 const SheetContext = React.createContext<SheetContextValue>({
   footerHeight: 0,
   hasFooter: false,
@@ -343,7 +347,7 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
           : undefined)}
         cornerRadius={cornerRadius}
         maxContentHeight={height}
-        maxContentWidth={maxWidth}
+        maxContentWidth={maxWidth ?? IPAD_SHEET_MAX_WIDTH}
         scrollable={scrollable}
         scrollableOptions={scrollableOptions}
         blurOptions={{
