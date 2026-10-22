@@ -33,7 +33,7 @@ const ProfileScreen = () => {
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 40 + bottomInset }}
       >
-        <Box className="web:w-full web:max-w-[500px] web:self-center">
+        <Box className="w-full max-w-[500px] self-center">
           <Box className="px-[24px] mb-[28px]">
             <ProfileHeader />
           </Box>
