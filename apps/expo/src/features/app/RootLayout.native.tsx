@@ -18,6 +18,7 @@ import { CurrentTheme } from '~common/types'
 import { ResourceAccessProvider } from '~features/resources/resourceAccess'
 import { appLogger } from '~helpers/agentObservability'
 import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
+import { filterSentryEvent } from '~helpers/sentryEventFilter'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { configureQueryManagers, queryClient } from '~helpers/queryClient'
 import { initializeResourceAppCheck } from '~helpers/resourceAppCheck'
@@ -86,12 +87,14 @@ const initSentry = () => {
   sentryInitialized = true
   Sentry.init({
     dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-    // Error events are low-volume and operationally critical. Do not sample them,
-    // especially during startup where a single failed migration can block the app.
+    // Bugs are never sampled, especially during startup where a single failed migration can
+    // block the app. Expected conditions (offline, cancelled requests, App Check) and repeats
+    // are filtered by `filterSentryEvent`.
     sampleRate: 1,
     sendDefaultPii: false,
     maxBreadcrumbs: 100,
     ignoreErrors: ignoreSentryErrors,
+    beforeSend: filterSentryEvent,
   })
   appLogger.info('startup', 'sentry.init')
 }
