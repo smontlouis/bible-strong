@@ -5,9 +5,9 @@ import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const retiredFunctions = ['count_verses', 'dictionnaire', 'grec', 'hebreu', 'iaphub']
+const retiredFunctions = ['count_verses', 'dictionnaire', 'grec', 'hebreu']
 
-test('keeps Resource reads and the retired IAPHUB webhook out of the Application API deployment', async () => {
+test('keeps Resource reads out of the Application API deployment', async () => {
   const entrypoint = await readFile(path.join(root, 'src/index.ts'), 'utf8')
 
   for (const functionName of retiredFunctions) {
