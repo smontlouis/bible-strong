@@ -92,6 +92,18 @@ export const fetchPlan = createAsyncThunk(
   }
 )
 
+// Runs at each launch: it reads only the followed plans, one read each, instead of the whole
+// catalog. The screens that show the catalog read it themselves.
+const readOnlineLastUpdate = async (planId: string) => {
+  try {
+    const snapshot = await getDoc(doc(firebaseDb, 'plans', planId))
+    return (snapshot.data() as OnlinePlan | undefined)?.lastUpdate
+  } catch {
+    // Unknown: the plan is downloaded again, as when the catalog could not be read.
+    return undefined
+  }
+}
+
 export const updatePlans = createAsyncThunk(
   'plan/updatesPlans',
   async (arg, { dispatch, getState }) => {
@@ -101,15 +113,14 @@ export const updatePlans = createAsyncThunk(
       return
     }
 
-    await dispatch(fetchPlans())
-    const onlinePlans = (getState() as RootState).plan.onlinePlans
+    const onlineLastUpdates = await Promise.all(
+      myPlans.map(myPlan => readOnlineLastUpdate(myPlan.id))
+    )
 
     const planIdsNeedsUpdate = myPlans
-      .filter(myPlan => {
+      .filter((myPlan, index) => {
         const myPlanLastUpdate = myPlan.lastUpdate
-        const onlinePlanLastUpdate = onlinePlans.find(
-          onlinePlan => onlinePlan.id === myPlan.id
-        )?.lastUpdate
+        const onlinePlanLastUpdate = onlineLastUpdates[index]
 
         if (myPlanLastUpdate && onlinePlanLastUpdate) {
           if (myPlanLastUpdate < onlinePlanLastUpdate) {

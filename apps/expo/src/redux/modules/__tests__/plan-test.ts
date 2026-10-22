@@ -1,5 +1,5 @@
 // Mock react-native before other imports
-import { getDoc, getDocs } from '~helpers/firebase'
+import { collection, doc, getDoc, getDocs } from '~helpers/firebase'
 import reducer, {
   cacheImage,
   removePlan,
@@ -12,6 +12,7 @@ import reducer, {
   fetchPlan,
   startPlan,
   setPlanReminder,
+  updatePlans,
 } from '../plan'
 import { RECEIVE_LIVE_UPDATES, IMPORT_DATA, USER_LOGOUT } from '../user'
 import type { Plan, OngoingPlan, OnlinePlan, Section, ReadingSlice } from '~common/types'
@@ -629,4 +630,44 @@ it('reuses a recent plan catalog for screens, and reads it again on refresh or o
   } finally {
     now.mockRestore()
   }
+})
+
+it('checks only the followed plans at launch and downloads again those updated online', async () => {
+  jest.mocked(getDoc).mockReset()
+  jest.mocked(getDocs).mockReset()
+  jest.mocked(collection).mockClear()
+  jest.mocked(doc).mockImplementation(((_db: unknown, ...path: string[]) => ({
+    path: path.join('/'),
+  })) as never)
+  const onlineLastUpdates: Record<string, number> = { 'plan-1': 200, 'plan-2': 100 }
+  jest.mocked(getDoc).mockImplementation((async (reference: { path: string }) => {
+    const id = reference.path.split('/')[1]
+    return { data: () => ({ ...createPlan(id), lastUpdate: onlineLastUpdates[id] }) }
+  }) as never)
+  jest.mocked(getDocs).mockResolvedValue({
+    empty: false,
+    docs: [{ data: () => createSection('section-1') }],
+    metadata: { fromCache: false },
+  } as never)
+  const myPlans: Plan[] = [
+    { ...createPlan('plan-1'), lastUpdate: 100 },
+    { ...createPlan('plan-2'), lastUpdate: 100 },
+  ]
+  let state = { plan: { ...reducer(undefined, { type: '@@INIT' }), myPlans } }
+  const getState = () => state
+  const dispatch: jest.Mock = jest.fn((action: unknown) => {
+    if (typeof action === 'function') return action(dispatch, getState, undefined)
+    state = { plan: reducer(state.plan, action as { type: string }) }
+    return action
+  })
+
+  await updatePlans()(dispatch as never, getState, undefined)
+
+  // One read per followed plan, plus the download of the updated one: never the catalog.
+  expect(collection).not.toHaveBeenCalledWith(expect.anything(), 'plans')
+  expect(getDoc).toHaveBeenCalledTimes(3)
+  expect(getDocs).toHaveBeenCalledTimes(1)
+  expect(state.plan.myPlans.find(plan => plan.id === 'plan-1')?.lastUpdate).toBe(200)
+  expect(state.plan.myPlans.find(plan => plan.id === 'plan-2')?.lastUpdate).toBe(100)
+  expect(state.plan.onlinePlans).toEqual([])
 })
