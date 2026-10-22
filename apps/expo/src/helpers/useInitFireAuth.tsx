@@ -1,11 +1,16 @@
 import { useSetAtom } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
 import { useEffect, useRef, useState } from 'react'
+import { AppState } from 'react-native'
 import { useDispatch, useStore } from 'react-redux'
 import { toast } from '~helpers/toast'
 import FireAuth, { type FireAuthProfile } from '~helpers/FireAuth'
-import { autoBackupManager } from '~helpers/AutoBackupManager'
+import { autoBackupManager, type BackupTrigger } from '~helpers/AutoBackupManager'
+import { createAuthSessionRecovery } from '~helpers/authSessionRecovery'
+import { runAllCleanups } from '~helpers/cleanupRegistry'
 import { clearAccountCacheAfterLogout } from '~helpers/clearAccountCacheAfterLogout'
+import { getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
+import { firestoreSyncOutbox } from '~helpers/firestoreSyncOutbox'
 import i18n from '~i18n'
 import * as UserActions from '~redux/modules/user'
 import { resetUserAtomsAtom } from '../state/app'
@@ -27,6 +32,7 @@ import {
   getAuthenticatedUserId,
   guestAdoptionRepository,
 } from '~helpers/guestDataAdoptionRuntime'
+import { getLostSessionUserId, setLostSessionUserId } from '~state/authSession'
 import { tabGroupsAtom } from '~state/tabs'
 
 interface AuthError {
@@ -49,6 +55,86 @@ const useInitFireAuth = () => {
   const guestAdoptionAbortRef = useRef<AbortController | undefined>(undefined)
 
   useEffect(() => {
+    /** Forgets the account the store shows, after a backup when a trigger is given. */
+    const leaveAccount = async (backupTrigger?: BackupTrigger) => {
+      const currentEntryUserId = activeEntryUserIdRef.current
+      guestAdoptionAbortRef.current?.abort()
+      guestAdoptionAbortRef.current = undefined
+      activeEntryUserIdRef.current = undefined
+      const currentState = store.getState()
+
+      if (currentEntryUserId) {
+        try {
+          const pending = guestAdoptionRepository.getPendingForUser(currentEntryUserId)
+          if (pending) {
+            guestAdoptionRepository.updateSnapshot(
+              currentEntryUserId,
+              pending.adoptionId,
+              createGuestDataSnapshot({
+                state: currentState,
+                tabGroups: getDefaultStore().get(tabGroupsAtom),
+              })
+            )
+          }
+        } catch (error) {
+          appLogger.captureError('sync', 'account_entry.logout_checkpoint_failed', error, {
+            failureStage: 'checkpoint',
+            errorCode: 'GUEST_ADOPTION_CHECKPOINT_INVALID',
+          })
+        }
+      }
+
+      // PROTECTION: Créer un backup avant de déconnecter
+      // Garantit qu'aucune donnée non-sync ne peut être perdue
+      if (backupTrigger) {
+        try {
+          console.log('[Logout] Creating backup before logout...')
+          await autoBackupManager.createBackupNow(currentState, backupTrigger)
+          console.log('[Logout] Backup created successfully')
+        } catch (error) {
+          appLogger.captureError('sync', 'logout.backup_failed', error, {
+            backupReason: backupTrigger,
+          })
+          console.error('[Logout] Failed to create backup:', error)
+          // Continue quand même avec le logout
+        }
+      }
+
+      dispatch(UserActions.onUserLogout())
+      setAccountEntryState(createAccountEntryState())
+      resetAtoms()
+      await clearAccountCacheAfterLogout()
+    }
+
+    const sessionRecovery = createAuthSessionRecovery({
+      getStoredUserId: () => store.getState().user.id || undefined,
+      getSignedInUserId: () => getCurrentAuthUser()?.uid,
+      isLogoutInProgress: () => FireAuth.isLoggingOut,
+      isAppActive: () => AppState.currentState === 'active',
+      onAppActive: callback => {
+        const subscription = AppState.addEventListener('change', status => {
+          if (status === 'active') callback()
+        })
+        return () => subscription.remove()
+      },
+      schedule: (callback, delayMs) => setTimeout(callback, delayMs),
+      cancelScheduled: handle => clearTimeout(handle as ReturnType<typeof setTimeout>),
+      backup: trigger =>
+        autoBackupManager.createBackupNow(store.getState(), trigger).catch(error => {
+          appLogger.captureError('sync', `${trigger}.backup_failed`, error)
+          return false
+        }),
+      getLostUserId: getLostSessionUserId,
+      setLostUserId: setLostSessionUserId,
+      allowParkedRetry: userId => firestoreSyncOutbox.allowParkedRetry(userId),
+      resetLocalAccount: () => {
+        // As a logout does first: the tab sync must not send the reset as the old account's edits.
+        runAllCleanups()
+        // The switch's own backup already holds the account's data.
+        return leaveAccount()
+      },
+    })
+
     const onLogin = async ({
       profile,
       accountEntryClassification,
@@ -57,6 +143,9 @@ const useInitFireAuth = () => {
       accountEntryClassification: AccountEntryClassification
     }) => {
       console.log(`[Auth] Bienvenue ${profile.displayName}.`)
+      // Another account than the one the store shows takes its place first (lost session).
+      const accountSwitch = sessionRecovery.accountSignedIn(profile.id)
+      if (accountSwitch) await accountSwitch
       guestAdoptionAbortRef.current?.abort()
       activeEntryUserIdRef.current = profile.id
       let nextEntryState = reduceAccountEntry(createAccountEntryState(), {
@@ -211,51 +300,8 @@ const useInitFireAuth = () => {
     const onUserChange = (profile: FireAuthProfile) =>
       console.log('[Auth] User changed', profile.id)
     const onLogout = async () => {
-      const currentEntryUserId = activeEntryUserIdRef.current
-      guestAdoptionAbortRef.current?.abort()
-      guestAdoptionAbortRef.current = undefined
-      activeEntryUserIdRef.current = undefined
-      const currentState = store.getState()
-
-      if (currentEntryUserId) {
-        try {
-          const pending = guestAdoptionRepository.getPendingForUser(currentEntryUserId)
-          if (pending) {
-            guestAdoptionRepository.updateSnapshot(
-              currentEntryUserId,
-              pending.adoptionId,
-              createGuestDataSnapshot({
-                state: currentState,
-                tabGroups: getDefaultStore().get(tabGroupsAtom),
-              })
-            )
-          }
-        } catch (error) {
-          appLogger.captureError('sync', 'account_entry.logout_checkpoint_failed', error, {
-            failureStage: 'checkpoint',
-            errorCode: 'GUEST_ADOPTION_CHECKPOINT_INVALID',
-          })
-        }
-      }
-
-      // PROTECTION: Créer un backup avant de déconnecter
-      // Garantit qu'aucune donnée non-sync ne peut être perdue
-      try {
-        console.log('[Logout] Creating backup before logout...')
-        await autoBackupManager.createBackupNow(currentState, 'logout')
-        console.log('[Logout] Backup created successfully')
-      } catch (error) {
-        appLogger.captureError('sync', 'logout.backup_failed', error, {
-          backupReason: 'logout',
-        })
-        console.error('[Logout] Failed to create backup:', error)
-        // Continue quand même avec le logout
-      }
-
-      dispatch(UserActions.onUserLogout())
-      setAccountEntryState(createAccountEntryState())
-      resetAtoms()
-      await clearAccountCacheAfterLogout()
+      sessionRecovery.loggedOut()
+      await leaveAccount('logout')
     }
     const onError = (error: unknown) => {
       const { code } = getAuthError(error)
@@ -286,8 +332,11 @@ const useInitFireAuth = () => {
       console.log('[Auth] Error code:', code)
     }
 
-    FireAuth.init(onLogin, onUserChange, onLogout, emailVerified, onError, dispatch)
+    FireAuth.init(onLogin, onUserChange, onLogout, emailVerified, onError, dispatch, () =>
+      sessionRecovery.firebaseSignedOut()
+    )
     return () => {
+      sessionRecovery.dispose()
       guestAdoptionAbortRef.current?.abort()
       guestAdoptionAbortRef.current = undefined
     }

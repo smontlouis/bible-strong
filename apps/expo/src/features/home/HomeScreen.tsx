@@ -23,6 +23,7 @@ import HomeResumeSection from './HomeResumeSection'
 import HomeSectionTitle from './HomeSectionTitle'
 import HomeSubsectionTitle from './HomeSubsectionTitle'
 import HomeToday from './HomeToday'
+import SessionExpiredNotice from './SessionExpiredNotice'
 import { HomeLayout } from './homeLayout'
 import './homeStyles'
 import ProfileStats from '~features/profile/components/ProfileStats'
@@ -56,6 +57,7 @@ export const Home = ({ closeHome, inWorkspace = false }: HomeProps) => {
         <HomeScrollView showsVerticalScrollIndicator={false}>
           <HomeLayout>
             <HomeHeader />
+            <SessionExpiredNotice className="mt-[16px]" />
             <Box className="pt-[16px]">
               <Events />
             </Box>

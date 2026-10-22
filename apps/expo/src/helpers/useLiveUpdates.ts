@@ -33,7 +33,8 @@ import {
   migrateLegacyPersistedValue,
 } from '../migrations/legacyPersistedReferences'
 import { appLogger } from './agentObservability'
-import { firestoreSyncOutbox } from './firestoreSyncOutbox'
+import { getCurrentAuthUser } from './firebaseAuthRuntime'
+import { firestoreSyncOutbox, isPermissionDeniedError } from './firestoreSyncOutbox'
 import {
   getPendingStudyTargets,
   getPendingSubcollectionTargets,
@@ -85,6 +86,23 @@ export const cleanupFirestoreSubscriptions = () => {
 // Register cleanup function with the registry (breaks require cycle with FireAuth)
 registerCleanup('firestoreSubscriptions', cleanupFirestoreSubscriptions)
 
+/**
+ * A listener refused because Firebase no longer holds this account (its session ended) is expected:
+ * the account stops syncing until the reader signs in again. Only other refusals are reported.
+ */
+const reportListenerFailure = (
+  userId: string,
+  event: string,
+  error: unknown,
+  payload?: Record<string, string>
+) => {
+  if (isPermissionDeniedError(error) && getCurrentAuthUser()?.uid !== userId) {
+    appLogger.warn('sync', `${event}.signed_out`, payload)
+    return
+  }
+  appLogger.captureError('sync', event, error, payload)
+}
+
 interface AccountMigrationCoordinator {
   enabled: boolean
   runBeforeSync(userId: string, state: RootState): Promise<boolean>
@@ -92,7 +110,8 @@ interface AccountMigrationCoordinator {
 }
 
 const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigrationCoordinator) => {
-  const { isLogged, user } = useLogin()
+  // While the session is lost, nothing comes from the server and the queue waits for the account.
+  const { isLogged, isSessionLost, user } = useLogin()
   const isLoggedPrev = usePrevious(isLogged)
   const dispatch = useDispatch()
   const migrationRunRef = useRef<Promise<boolean> | undefined>(undefined)
@@ -113,11 +132,12 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
   const readConnectionStatus = useEffectEvent(() => connectionStatus)
 
   useEffect(() => {
-    if (!enabled || !isLogged || !user.id || connectionStatus !== 'internet') return
+    if (!enabled || !isLogged || isSessionLost || !user.id || connectionStatus !== 'internet')
+      return
     firestoreSyncOutbox.resumeReplay(user.id)
     void firestoreSyncOutbox.replay(user.id)
     return () => firestoreSyncOutbox.cancelReplay(user.id)
-  }, [connectionStatus, enabled, isLogged, user.id])
+  }, [connectionStatus, enabled, isLogged, isSessionLost, user.id])
 
   useEffect(() => {
     // Captured when the listeners are set up: the studies callback keeps these values
@@ -139,7 +159,7 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
     }
 
     const setupListeners = async () => {
-      if (!enabled || !isLogged || isLoading !== false || !user.id) {
+      if (!enabled || !isLogged || isSessionLost || isLoading !== false || !user.id) {
         return
       }
       const userId = user.id
@@ -333,7 +353,7 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
           },
           error => {
             console.warn(`[LiveUpdates] ${collection} sync unavailable, using local data`, error)
-            appLogger.captureError('sync', 'account_sync.subscription_failed', error, {
+            reportListenerFailure(userId, 'account_sync.subscription_failed', error, {
               collection,
             })
             if (isTrackedSyncCollection(collection)) markCollectionAnswered(collection)
@@ -420,17 +440,22 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
         },
         error => {
           console.warn('[LiveUpdates] Studies sync unavailable, using local data', error)
-          appLogger.captureError('sync', 'account_sync.studies_subscription_failed', error)
+          reportListenerFailure(userId, 'account_sync.studies_subscription_failed', error)
           markCollectionAnswered('studies')
         }
       )
     }
 
-    if (enabled && isLogged && isLoading === false) {
+    if (enabled && isLogged && !isSessionLost && isLoading === false) {
       setupListeners()
     } else {
       // Cleanup when user logs out (detected via isLogged change)
       cleanupFirestoreSubscriptions()
+      // A session lost during the first sync: the local data is all there is until the reader
+      // signs in again, so the screens stop waiting for the server.
+      if (isSessionLost && store.getState().user.sync?.isLoading) {
+        dispatch(finishUserDataSync())
+      }
     }
 
     return () => {
@@ -445,7 +470,7 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
       cleanupFirestoreSubscriptions()
     }
     // resumeToken only restarts the subscription; dispatch is the store's stable dispatch.
-  }, [enabled, isLogged, isLoading, resumeToken, user.id, dispatch])
+  }, [enabled, isLogged, isSessionLost, isLoading, resumeToken, user.id, dispatch])
 }
 
 export default useLiveUpdates

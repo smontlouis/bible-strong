@@ -16,7 +16,9 @@ import { useTranslation } from 'react-i18next'
 const RegisterScreen = () => {
   const theme = useTheme()
   const router = useRouter()
-  const { isLogged } = useLogin()
+  const { isLogged, isSessionLost } = useLogin()
+  // A lost session still shows the account: the screen stays until the reader signs in again.
+  const isSignedIn = isLogged && !isSessionLost
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -24,11 +26,11 @@ const RegisterScreen = () => {
   const { t } = useTranslation()
 
   useEffect(() => {
-    if (isLogged) {
+    if (isSignedIn) {
       // Go back two screens (register -> login -> previous)
       router.dismiss(2)
     }
-  }, [isLogged, router])
+  }, [isSignedIn, router])
 
   const onRegister = async () => {
     if (!username || !email || !password) {

@@ -56,6 +56,7 @@ type OnLoginCallback = (payload: {
 }) => void
 type OnUserChangeCallback = (profile: FireAuthProfile) => void
 type VoidCallback = () => void
+type LogoutCallback = () => void | Promise<void>
 type AuthErrorCallback = (error: unknown) => void
 type AccountEntryProvider = 'apple.com' | 'google.com' | 'password' | 'custom-token'
 
@@ -68,7 +69,10 @@ export class WebFireAuth {
   user: User | null = null
   profile: FireAuthProfile | null = null
   onUserChange: OnUserChangeCallback | null = null
-  onLogout: VoidCallback | null = null
+  onLogout: LogoutCallback | null = null
+  /** Firebase reports no user at launch while the store may still show an account. */
+  onSignedOut: VoidCallback | null = null
+  isLoggingOut = false
   onEmailVerified: VoidCallback | null = null
   onLogin: OnLoginCallback | null = null
   onError: AuthErrorCallback | null = null
@@ -116,14 +120,16 @@ export class WebFireAuth {
   async init(
     onLogin: OnLoginCallback,
     onUserChange: OnUserChangeCallback,
-    onLogout: VoidCallback,
+    onLogout: LogoutCallback,
     onEmailVerified: VoidCallback,
     onError: AuthErrorCallback,
-    _dispatch: AppDispatch
+    _dispatch: AppDispatch,
+    onSignedOut?: VoidCallback
   ) {
     this.onLogin = onLogin
     this.onUserChange = onUserChange
     this.onLogout = onLogout
+    this.onSignedOut = onSignedOut ?? null
     this.onEmailVerified = onEmailVerified
     this.onError = onError
 
@@ -139,6 +145,10 @@ export class WebFireAuth {
           tokenManager.reset()
           Sentry.getCurrentScope().setUser(null)
           this.onLogout?.()
+        } else {
+          // A browser may be shared, so a session ended in use signs out above; at launch the
+          // store keeps the account it shows, for the reader to sign in again.
+          this.onSignedOut?.()
         }
         return
       }
@@ -338,16 +348,26 @@ export class WebFireAuth {
   }
 
   logout = async () => {
-    await signOut(getAuth(firebaseApp))
-    void identifyAnalyticsUser(null)
-    if (this.user) {
-      runAllCleanups()
-      this.user = null
-      this.profile = null
-      this.previousEmailVerified = false
-      tokenManager.reset()
-      Sentry.getCurrentScope().setUser(null)
-      this.onLogout?.()
+    this.isLoggingOut = true
+    const hadUser = Boolean(this.user)
+    try {
+      await signOut(getAuth(firebaseApp))
+      void identifyAnalyticsUser(null)
+      if (this.user) {
+        runAllCleanups()
+        this.user = null
+        this.profile = null
+        this.previousEmailVerified = false
+        tokenManager.reset()
+        Sentry.getCurrentScope().setUser(null)
+        this.onLogout?.()
+      } else if (!hadUser) {
+        // A lost session: Firebase held no user, so no sign-out event forgets the account shown.
+        runAllCleanups()
+        await this.onLogout?.()
+      }
+    } finally {
+      this.isLoggingOut = false
     }
     toast(i18n.t('Vous êtes déconnecté.'))
   }

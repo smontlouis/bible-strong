@@ -5,6 +5,8 @@ export type BackupTrigger =
   | 'manual'
   | 'pre_migration'
   | 'account_entry'
+  | 'session_lost'
+  | 'account_switch'
 
 export interface BackupInfo {
   filename: string

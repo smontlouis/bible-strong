@@ -54,6 +54,7 @@ type OnLoginCallback = (payload: {
 }) => void
 type OnUserChangeCallback = (profile: FireAuthProfile) => void
 type VoidCallback = () => void
+type LogoutCallback = () => void | Promise<void>
 type AuthErrorCallback = (error: unknown) => void
 type AccountEntryProvider = 'apple.com' | 'google.com' | 'password' | 'custom-token'
 type ClassifiedAuthAttempt = {
@@ -77,7 +78,13 @@ const FireAuth = class {
 
   onUserChange: OnUserChangeCallback | null = null
 
-  onLogout: VoidCallback | null = null
+  onLogout: LogoutCallback | null = null
+
+  /** Firebase reports no user: an explicit logout, or a session Firebase ended on its own. */
+  onSignedOut: VoidCallback | null = null
+
+  /** Until the store has forgotten the account, Firebase's sign-out is this logout. */
+  isLoggingOut = false
 
   onEmailVerified: VoidCallback | null = null
 
@@ -140,13 +147,15 @@ const FireAuth = class {
   async init(
     onLogin: OnLoginCallback,
     onUserChange: OnUserChangeCallback,
-    onLogout: VoidCallback,
+    onLogout: LogoutCallback,
     onEmailVerified: VoidCallback,
     onError: AuthErrorCallback,
-    dispatch: AppDispatch
+    dispatch: AppDispatch,
+    onSignedOut?: VoidCallback
   ) {
     this.onUserChange = onUserChange
     this.onLogout = onLogout
+    this.onSignedOut = onSignedOut ?? null
     this.onEmailVerified = onEmailVerified
     this.onLogin = onLogin
     this.onError = onError
@@ -243,9 +252,11 @@ const FireAuth = class {
         return
       }
 
-      console.log('[Auth] No user, do nothing...')
+      // The store keeps the account: a session Firebase ended on its own is the reader's to renew.
+      console.log('[Auth] No user')
       this.user = null
       this.previousEmailVerified = false
+      this.onSignedOut?.()
     })
   }
 
@@ -546,6 +557,7 @@ const FireAuth = class {
     })
 
   logout = async () => {
+    this.isLoggingOut = true
     // Cleanup Firestore subscriptions BEFORE signOut to avoid permission-denied errors
     runAllCleanups()
 
@@ -556,7 +568,9 @@ const FireAuth = class {
 
     // Sign-out successful.
     this.user = null
-    this.onLogout?.()
+    void Promise.resolve(this.onLogout?.()).finally(() => {
+      this.isLoggingOut = false
+    })
 
     // Reset token manager state
     tokenManager.reset()

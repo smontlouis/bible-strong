@@ -1,10 +1,14 @@
 import React from 'react'
 import { act, create } from 'react-test-renderer'
 
+import { firestoreSyncOutbox } from '~helpers/firestoreSyncOutbox'
 import useLiveUpdates from '~helpers/useLiveUpdates'
 
 const mockDispatch = jest.fn()
 const mockCaptureError = jest.fn()
+const mockWarn = jest.fn()
+let mockIsSessionLost = false
+let mockSignedInUserId: string | undefined = 'user-1'
 const mockOnSnapshot = jest.fn((..._args: unknown[]) => jest.fn())
 let mockHasStudies = false
 let mockPreviousIsLogged = false
@@ -28,7 +32,7 @@ jest.mock('@sentry/react-native', () => ({
 
 jest.mock('~helpers/useLogin', () => ({
   __esModule: true,
-  default: () => ({ isLogged: true, user: { id: 'user-1' } }),
+  default: () => ({ isLogged: true, isSessionLost: mockIsSessionLost, user: { id: 'user-1' } }),
 }))
 
 jest.mock('~helpers/usePrevious', () => ({
@@ -40,7 +44,14 @@ jest.mock('~helpers/useConnection', () => ({
 }))
 
 jest.mock('~helpers/agentObservability', () => ({
-  appLogger: { captureError: (...args: unknown[]) => mockCaptureError(...args) },
+  appLogger: {
+    captureError: (...args: unknown[]) => mockCaptureError(...args),
+    warn: (...args: unknown[]) => mockWarn(...args),
+  },
+}))
+
+jest.mock('~helpers/firebaseAuthRuntime', () => ({
+  getCurrentAuthUser: () => (mockSignedInUserId ? { uid: mockSignedInUserId } : null),
 }))
 
 jest.mock('~helpers/cleanupRegistry', () => ({
@@ -63,6 +74,8 @@ jest.mock('~helpers/firestoreSubcollections', () => ({
 
 let mockPendingEntries: unknown[] = []
 jest.mock('~helpers/firestoreSyncOutbox', () => ({
+  isPermissionDeniedError: (error: { code?: string }) =>
+    error?.code === 'firestore/permission-denied',
   firestoreSyncOutbox: {
     getPending: () => mockPendingEntries,
     replay: jest.fn(async () => undefined),
@@ -97,9 +110,10 @@ jest.mock('~redux/modules/user', () => ({
 }))
 
 let mockLocalBible: Record<string, unknown> = {}
+let mockSyncLoading = false
 jest.mock('~redux/store', () => ({
   store: {
-    getState: () => ({ user: { sync: { isLoading: false }, bible: mockLocalBible } }),
+    getState: () => ({ user: { sync: { isLoading: mockSyncLoading }, bible: mockLocalBible } }),
   },
 }))
 
@@ -121,6 +135,9 @@ describe('useLiveUpdates account-entry gate', () => {
     mockLocalBible = {}
     mockHasStudies = false
     mockPreviousIsLogged = false
+    mockIsSessionLost = false
+    mockSignedInUserId = 'user-1'
+    mockSyncLoading = false
     jest.spyOn(console, 'log').mockImplementation(() => undefined)
     jest.spyOn(console, 'error').mockImplementation(() => undefined)
   })
@@ -483,6 +500,92 @@ describe('useLiveUpdates account-entry gate', () => {
 
     await act(async () => {
       renderer.unmount()
+    })
+  })
+
+  describe('while the session is lost', () => {
+    const Harness = () => {
+      useLiveUpdates({ enabled: true, runBeforeSync: async () => true, resumeToken: 0 })
+      return null
+    }
+
+    it('starts no listener and replays nothing, then resumes once the reader signs in again', async () => {
+      mockIsSessionLost = true
+      mockSignedInUserId = undefined
+
+      let renderer!: ReturnType<typeof create>
+      await act(async () => {
+        renderer = create(<Harness />)
+        await new Promise(resolve => setTimeout(resolve, 0))
+      })
+
+      expect(mockSubscribeToSubcollection).not.toHaveBeenCalled()
+      expect(mockOnSnapshot).not.toHaveBeenCalled()
+      expect(firestoreSyncOutbox.resumeReplay).not.toHaveBeenCalled()
+
+      mockIsSessionLost = false
+      mockSignedInUserId = 'user-1'
+      await act(async () => {
+        renderer.update(<Harness />)
+        await new Promise(resolve => setTimeout(resolve, 0))
+      })
+
+      expect(firestoreSyncOutbox.resumeReplay).toHaveBeenCalledWith('user-1')
+      expect(mockSubscribeToSubcollection).toHaveBeenCalledTimes(1)
+
+      await act(async () => {
+        renderer.unmount()
+      })
+    })
+
+    it('stops the screens waiting when the session is lost during the first sync', async () => {
+      mockIsSessionLost = true
+      mockSyncLoading = true
+
+      let renderer!: ReturnType<typeof create>
+      await act(async () => {
+        renderer = create(<Harness />)
+      })
+
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'user/finish-sync' })
+
+      await act(async () => {
+        renderer.unmount()
+      })
+    })
+
+    it('does not report the refusals of listeners Firebase signed out of', async () => {
+      let renderer!: ReturnType<typeof create>
+      await act(async () => {
+        renderer = create(<Harness />)
+        await new Promise(resolve => setTimeout(resolve, 0))
+      })
+      const onError = mockSubscribeToSubcollection.mock.calls[0][3] as (error: unknown) => void
+      const refusal = Object.assign(new Error('permission-denied'), {
+        code: 'firestore/permission-denied',
+      })
+
+      mockSignedInUserId = undefined
+      act(() => onError(refusal))
+      expect(mockCaptureError).not.toHaveBeenCalled()
+      expect(mockWarn).toHaveBeenCalledWith(
+        'sync',
+        'account_sync.subscription_failed.signed_out',
+        expect.objectContaining({ collection: 'bookmarks' })
+      )
+
+      mockSignedInUserId = 'user-1'
+      act(() => onError(refusal))
+      expect(mockCaptureError).toHaveBeenCalledWith(
+        'sync',
+        'account_sync.subscription_failed',
+        refusal,
+        expect.objectContaining({ collection: 'bookmarks' })
+      )
+
+      await act(async () => {
+        renderer.unmount()
+      })
     })
   })
 })

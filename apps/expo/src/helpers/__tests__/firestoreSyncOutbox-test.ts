@@ -2,6 +2,7 @@ import {
   createFirestoreSyncOutbox,
   decodeFirestoreSyncData,
   encodeFirestoreSyncData,
+  isPermissionDeniedError,
   runFirestoreSyncIntentsSerialized,
   type FirestoreSyncOutboxStorage,
 } from '../firestoreSyncOutbox'
@@ -515,6 +516,46 @@ describe('FirestoreSyncOutbox', () => {
 
       expect(execute).toHaveBeenCalledTimes(1)
       expect(nextLaunch.getPending('user-1')).toEqual([])
+    })
+
+    it('tries it once more when the account signs in again during the launch', async () => {
+      const storage = createStorage()
+      let refusing = true
+      const execute = jest.fn(async () => {
+        if (refusing) throw permissionDenied()
+      })
+      const outbox = createFirestoreSyncOutbox({
+        storage,
+        execute,
+        now: () => 100,
+        schedule: noSchedule,
+      })
+      outbox.enqueue('user-1', studyIntent('First'))
+      outbox.resumeReplay('user-1')
+      await outbox.replay('user-1')
+      expect(outbox.isParked('user-1', studyIntent('First'))).toBe(true)
+
+      // Released once already at this launch: a new resume alone keeps it aside.
+      outbox.resumeReplay('user-1')
+      expect(outbox.isParked('user-1', studyIntent('First'))).toBe(true)
+
+      refusing = false
+      outbox.allowParkedRetry('user-1')
+      outbox.resumeReplay('user-1')
+      await outbox.replay('user-1')
+
+      expect(execute).toHaveBeenCalledTimes(2)
+      expect(outbox.getPending('user-1')).toEqual([])
+    })
+
+    it('recognizes the refusal of the web SDK', () => {
+      expect(
+        isPermissionDeniedError(
+          Object.assign(new Error('Missing or insufficient permissions.'), {
+            code: 'permission-denied',
+          })
+        )
+      ).toBe(true)
     })
 
     it('releases it when a direct write of the same target succeeds', async () => {

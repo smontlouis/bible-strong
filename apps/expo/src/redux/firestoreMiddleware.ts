@@ -155,6 +155,12 @@ const enqueueSyncIntents = (userId: string, intents: FirestoreSyncIntent[]) => {
   intents.forEach(intent => firestoreSyncOutbox.enqueue(userId, intent))
 }
 
+// Behind any write of the same targets still in flight, so an older failure cannot queue over it.
+const queueSyncIntents = (userId: string, intents: FirestoreSyncIntent[]) =>
+  runFirestoreSyncIntentsSerialized(userId, intents, async () =>
+    enqueueSyncIntents(userId, intents)
+  )
+
 const executeUserBibleSyncOperation = async ({
   operation,
   userId,
@@ -189,6 +195,7 @@ const executeUserBibleSyncOperationGroups = async ({
   bible,
   deleteMarker,
   state,
+  queueOnly,
 }: {
   operations: UserBibleSyncOperation[]
   userId: string
@@ -196,6 +203,7 @@ const executeUserBibleSyncOperationGroups = async ({
   bible: RootState['user']['bible']
   deleteMarker: unknown
   state: RootState
+  queueOnly: boolean
 }) => {
   for (const group of groupUserBibleSyncOperations(operations)) {
     const fallbackIntents = group.operations.flatMap(operation =>
@@ -206,6 +214,10 @@ const executeUserBibleSyncOperationGroups = async ({
         deleteMarker,
       })
     )
+    if (queueOnly) {
+      await queueSyncIntents(userId, fallbackIntents)
+      continue
+    }
     await handleSyncWithRetry(
       async () => {
         for (const operation of group.operations) {
@@ -569,27 +581,47 @@ const firestoreMiddleware: Middleware = store => next => async action => {
   const result = next(action)
   const state = store.getState() as RootState
 
-  // Check auth early before expensive diff computation
-  if (!state.user.id) {
+  // Writes belong to the account the store shows. Check it before the expensive diff.
+  const userId = state.user.id
+  if (!userId) {
     return result
   }
 
-  const currentUser = getCurrentAuthUser()
-  if (!currentUser) {
-    return result
-  }
-  if (!isAccountMigrationWriteAllowedFor(currentUser.uid)) {
+  // Firebase holds another account, or none (session lost, or not restored yet): the rules would
+  // refuse the write, so the same intents wait in the queue until this account signs in again.
+  const queueOnly = getCurrentAuthUser()?.uid !== userId
+  if (!queueOnly && !isAccountMigrationWriteAllowedFor(userId)) {
     return result
   }
 
   const deleteMarker = deleteField()
   const diffState = diff(oldState, state, deleteMarker) as SyncDiffState
 
-  const userId = currentUser.uid
   const { user, plan } = state
   const userDocRef = doc(firebaseDb, 'users', userId)
 
-  if (isAccountMigrationOutgoingOnlyFor(userId)) {
+  /** Writes now, or queues the same intents while this account is not signed in. */
+  const syncIntents = (
+    actionName: string,
+    intents: FirestoreSyncIntent[],
+    write: () => Promise<unknown>
+  ): Promise<unknown> =>
+    queueOnly
+      ? queueSyncIntents(userId, intents)
+      : handleSyncWithRetry(
+          async () => {
+            await write()
+          },
+          userId,
+          actionName,
+          state,
+          () => enqueueSyncIntents(userId, intents),
+          intents
+        )
+
+  // Queued edits are journaled as before a migration check, which this account runs (from the
+  // server) once signed in again: a migration found then keeps them.
+  if (queueOnly || isAccountMigrationOutgoingOnlyFor(userId)) {
     const previousBible = oldState.user.bible as unknown as Record<
       string,
       Record<string, unknown> | undefined
@@ -630,14 +662,7 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       data,
       merge: true,
     }
-    await handleSyncWithRetry(
-      () => setDoc(userDocRef, data, { merge: true }),
-      userId,
-      'plan_sync',
-      state,
-      () => firestoreSyncOutbox.enqueue(userId, intent),
-      [intent]
-    )
+    await syncIntents('plan_sync', [intent], () => setDoc(userDocRef, data, { merge: true }))
     return result
   }
 
@@ -681,15 +706,8 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       merge: true,
       ...(mergeFields ? { mergeFields } : {}),
     }
-    await handleSyncWithRetry(
-      async () => {
-        await setDoc(userDocRef, data, mergeFields ? { mergeFields } : { merge: true })
-      },
-      userId,
-      'settings_sync',
-      state,
-      () => firestoreSyncOutbox.enqueue(userId, intent),
-      [intent]
+    await syncIntents('settings_sync', [intent], () =>
+      setDoc(userDocRef, data, mergeFields ? { mergeFields } : { merge: true })
     )
     return result
   }
@@ -711,15 +729,8 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       merge: true,
     }
 
-    await handleSyncWithRetry(
-      async () => {
-        await setDoc(userDocRef, data, { merge: true })
-      },
-      userId,
-      'custom_colors_sync',
-      state,
-      () => firestoreSyncOutbox.enqueue(userId, intent),
-      [intent]
+    await syncIntents('custom_colors_sync', [intent], () =>
+      setDoc(userDocRef, data, { merge: true })
     )
     return result
   }
@@ -736,6 +747,7 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       bible: user.bible,
       deleteMarker,
       state,
+      queueOnly,
     })
     return result
   }
@@ -752,6 +764,7 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       bible: user.bible,
       deleteMarker,
       state,
+      queueOnly,
     })
     return result
   }
@@ -768,6 +781,7 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       bible: user.bible,
       deleteMarker,
       state,
+      queueOnly,
     })
     return result
   }
@@ -784,6 +798,7 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       bible: user.bible,
       deleteMarker,
       state,
+      queueOnly,
     })
     return result
   }
@@ -800,6 +815,7 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       bible: user.bible,
       deleteMarker,
       state,
+      queueOnly,
     })
     return result
   }
@@ -816,6 +832,7 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       bible: user.bible,
       deleteMarker,
       state,
+      queueOnly,
     })
     return result
   }
@@ -832,6 +849,7 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       bible: user.bible,
       deleteMarker,
       state,
+      queueOnly,
     })
     return result
   }
@@ -847,6 +865,10 @@ const firestoreMiddleware: Middleware = store => next => async action => {
         bible: user.bible,
         deleteMarker,
       })
+      if (queueOnly) {
+        await queueSyncIntents(userId, fallbackIntents)
+        continue
+      }
       await handleSyncWithRetry(
         async () => {
           await executeUserBibleSyncOperation({
@@ -885,9 +907,10 @@ const firestoreMiddleware: Middleware = store => next => async action => {
             userId,
           })
 
-          // Already refused by the server: the edit joins the queued write, without a new refusal.
-          if (firestoreSyncOutbox.isParked(userId, intent)) {
-            firestoreSyncOutbox.enqueue(userId, intent)
+          // Already refused by the server, or not signed in as this account: the edit joins the
+          // queued write, without a new refusal.
+          if (queueOnly || firestoreSyncOutbox.isParked(userId, intent)) {
+            await queueSyncIntents(userId, [intent])
             return
           }
 
@@ -930,6 +953,10 @@ const firestoreMiddleware: Middleware = store => next => async action => {
           const intent: FirestoreSyncIntent = {
             kind: 'document-delete',
             path: ['studies', studyId],
+          }
+          if (queueOnly) {
+            await queueSyncIntents(userId, [intent])
+            return
           }
 
           try {
@@ -999,49 +1026,38 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       })
     }
 
-    await handleSyncWithRetry(
-      async () => {
-        // 1. Migrer les données vers les sous-collections
-        await migrateImportedDataToSubcollections(userId, {
-          bookmarks: bible?.bookmarks,
-          highlights: bible?.highlights,
-          notes: bible?.notes,
-          links: bible?.links,
-          tags: bible?.tags,
-          strongsHebreu: bible?.strongsHebreu,
-          strongsGrec: bible?.strongsGrec,
-          words: bible?.words,
-          naves: bible?.naves,
-          wordAnnotations: bible?.wordAnnotations,
-          relations: bible?.relations,
-          relationIndex: bible?.relationIndex,
-          relationPairs: bible?.relationPairs,
-        })
+    await syncIntents('import_data', importFallbackIntents, async () => {
+      // 1. Migrer les données vers les sous-collections
+      await migrateImportedDataToSubcollections(userId, {
+        bookmarks: bible?.bookmarks,
+        highlights: bible?.highlights,
+        notes: bible?.notes,
+        links: bible?.links,
+        tags: bible?.tags,
+        strongsHebreu: bible?.strongsHebreu,
+        strongsGrec: bible?.strongsGrec,
+        words: bible?.words,
+        naves: bible?.naves,
+        wordAnnotations: bible?.wordAnnotations,
+        relations: bible?.relations,
+        relationIndex: bible?.relationIndex,
+        relationPairs: bible?.relationPairs,
+      })
 
-        // 2. Sync settings dans le document user
-        if (bible?.settings) {
-          await setDoc(
-            userDocRef,
-            { bible: { settings: removeUndefinedVariables(bible.settings) } },
-            { merge: true }
-          )
-        }
+      // 2. Sync settings dans le document user
+      if (bible?.settings) {
+        await setDoc(
+          userDocRef,
+          { bible: { settings: removeUndefinedVariables(bible.settings) } },
+          { merge: true }
+        )
+      }
 
-        // 3. Sync plan
-        if (importedPlan) {
-          await setDoc(
-            userDocRef,
-            { plan: removeUndefinedVariables(importedPlan) },
-            { merge: true }
-          )
-        }
-      },
-      userId,
-      'import_data',
-      state,
-      () => enqueueSyncIntents(userId, importFallbackIntents),
-      importFallbackIntents
-    )
+      // 3. Sync plan
+      if (importedPlan) {
+        await setDoc(userDocRef, { plan: removeUndefinedVariables(importedPlan) }, { merge: true })
+      }
+    })
 
     // 4. Sync studies (collection séparée)
     if (studies && Object.keys(studies).length > 0) {
@@ -1053,6 +1069,10 @@ const firestoreMiddleware: Middleware = store => next => async action => {
               path: ['studies', studyId],
               data: removeUndefinedVariables(study) as unknown as SyncRecord,
               merge: true,
+            }
+            if (queueOnly) {
+              await queueSyncIntents(userId, [intent])
+              return
             }
             await runFirestoreSyncIntentsSerialized(userId, [intent], async () => {
               try {

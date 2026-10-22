@@ -388,6 +388,8 @@ export type BackupTrigger =
   | 'manual' // Déclenché manuellement par l'utilisateur
   | 'pre_migration' // Avant migration vers sous-collections Firestore
   | 'account_entry' // Avant adoption ou hydratation lors de l'entrée dans un compte
+  | 'session_lost' // Session Firebase perdue alors que l'app montre encore le compte
+  | 'account_switch' // Avant de remplacer le compte affiché par celui que Firebase vient de connecter
 
 export interface BackupData {
   version: number

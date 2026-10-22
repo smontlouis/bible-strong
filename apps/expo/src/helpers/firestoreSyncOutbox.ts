@@ -65,7 +65,12 @@ export const isPermissionDeniedError = (error: unknown): boolean => {
   const code =
     error && typeof error === 'object' && 'code' in error ? String(error.code) : undefined
   const message = error instanceof Error ? error.message : ''
-  return code === 'firestore/permission-denied' || message.includes('permission-denied')
+  // The native SDK prefixes the code; the web SDK does not, nor names it in its message.
+  return (
+    code === 'firestore/permission-denied' ||
+    code === 'permission-denied' ||
+    message.includes('permission-denied')
+  )
 }
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
@@ -264,6 +269,11 @@ export const createFirestoreSyncOutbox = ({
     )
   }
 
+  /** The account signed in again during this launch: what the server refused gets one more try. */
+  const allowParkedRetry = (userId: string) => {
+    usersReleasedThisLaunch.delete(userId)
+  }
+
   const isParked = (userId: string, intent: FirestoreSyncIntent) => {
     const id = entryId(userId, intent)
     return read().some(entry => entry.id === id && entry.parkedAt !== undefined)
@@ -390,6 +400,7 @@ export const createFirestoreSyncOutbox = ({
   }
 
   return {
+    allowParkedRetry,
     cancelReplay,
     enqueue: (userId: string, intent: FirestoreSyncIntent) => enqueue(userId, intent),
     getPending,

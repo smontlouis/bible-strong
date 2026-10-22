@@ -16,14 +16,16 @@ const LoginScreen = () => {
   const stylingTheme = useStylingTheme()
 
   const router = useRouter()
-  const { isLogged } = useLogin()
+  const { isLogged, isSessionLost } = useLogin()
   const { t } = useTranslation()
+  // A lost session still shows the account: the screen stays until the reader signs in again.
+  const isSignedIn = isLogged && !isSessionLost
 
   useEffect(() => {
-    if (isLogged) {
+    if (isSignedIn) {
       goBackOrHome(router)
     }
-  }, [isLogged, router])
+  }, [isSignedIn, router])
 
   return (
     <Container>

@@ -21,6 +21,9 @@ light tint they were drawn on.
 1. **Header**: date, greeting, and the avatar to the profile. On the wide Web home the
    sidebar already shows the account, so the command-palette search (`HomeSearch.web.tsx`,
    ⌘K / Ctrl K) takes the avatar's place and wraps below the greeting in a narrow column.
+   Below it, only while Firebase has ended the session of the account shown, a card says the
+   edits stay on the device and offers « Se reconnecter » (`SessionExpiredNotice`); offline it
+   drops the button, since signing in needs a connection.
 2. **Aujourd’hui**: the verse or meditation of the day. Touch screens swipe the five days in a
    carousel (`UserWidget`). The wide Web home pages through the same days with previous/next
    buttons and dots, shows the full text and animates the card height

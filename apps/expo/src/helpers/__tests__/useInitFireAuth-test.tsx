@@ -6,7 +6,7 @@ import useInitFireAuth from '~helpers/useInitFireAuth'
 
 const mockDispatch = jest.fn()
 const mockResetAtoms = jest.fn()
-const mockCreateBackupNow = jest.fn<Promise<boolean>, []>()
+const mockCreateBackupNow = jest.fn<Promise<boolean>, unknown[]>()
 const mockInit = jest.fn()
 const mockCreateGuestDataSnapshot = jest.fn()
 const mockCreateGuestSnapshotImportData = jest.fn()
@@ -16,8 +16,38 @@ const mockGetPendingForUser = jest.fn()
 const mockBeginAdoption = jest.fn()
 const mockUpdateAdoptionSnapshot = jest.fn()
 const mockToastWarning = jest.fn()
+const mockRunAllCleanups = jest.fn()
+const mockAllowParkedRetry = jest.fn()
 const guestState = { user: { id: '', bible: {} }, plan: { ongoingPlans: [] } }
 const guestSnapshot = { schemaVersion: 1, id: 'snapshot-1' }
+let mockStoreState: { user: { id: string; bible: object }; plan: object } = guestState
+let mockSignedInUserId: string | undefined
+let mockLostUserId: string | undefined
+
+jest.mock('react-native', () => ({
+  AppState: { currentState: 'active', addEventListener: () => ({ remove: () => undefined }) },
+}))
+
+jest.mock('~helpers/firebaseAuthRuntime', () => ({
+  getCurrentAuthUser: () => (mockSignedInUserId ? { uid: mockSignedInUserId } : null),
+}))
+
+jest.mock('~helpers/firestoreSyncOutbox', () => ({
+  firestoreSyncOutbox: {
+    allowParkedRetry: (...args: unknown[]) => mockAllowParkedRetry(...args),
+  },
+}))
+
+jest.mock('~helpers/cleanupRegistry', () => ({
+  runAllCleanups: () => mockRunAllCleanups(),
+}))
+
+jest.mock('~state/authSession', () => ({
+  getLostSessionUserId: () => mockLostUserId,
+  setLostSessionUserId: (userId?: string) => {
+    mockLostUserId = userId
+  },
+}))
 
 jest.mock('jotai/react', () => ({
   useSetAtom: () => mockResetAtoms,
@@ -33,19 +63,20 @@ jest.mock('~state/app', () => ({
 
 jest.mock('react-redux', () => ({
   useDispatch: () => mockDispatch,
-  useStore: () => ({ getState: () => guestState }),
+  useStore: () => ({ getState: () => mockStoreState }),
 }))
 
 jest.mock('~helpers/FireAuth', () => ({
   __esModule: true,
   default: {
     init: (...args: unknown[]) => mockInit(...args),
+    isLoggingOut: false,
   },
 }))
 
 jest.mock('~helpers/AutoBackupManager', () => ({
   autoBackupManager: {
-    createBackupNow: () => mockCreateBackupNow(),
+    createBackupNow: (...args: unknown[]) => mockCreateBackupNow(...args),
   },
 }))
 
@@ -112,6 +143,9 @@ describe('useInitFireAuth account-entry orchestration', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockStoreState = guestState
+    mockSignedInUserId = undefined
+    mockLostUserId = undefined
     mockGetPending.mockReturnValue(undefined)
     mockGetPendingForUser.mockReturnValue(undefined)
     mockCreateGuestDataSnapshot.mockReturnValue(guestSnapshot)
@@ -157,8 +191,9 @@ describe('useInitFireAuth account-entry orchestration', () => {
     }) => Promise<void>
 
     const onLogout = mockInit.mock.calls[0][2] as () => Promise<void>
+    const onSignedOut = mockInit.mock.calls[0][6] as () => void
 
-    return { getState: () => state!, onLogin, onLogout }
+    return { getState: () => state!, onLogin, onLogout, onSignedOut }
   }
 
   it('keeps an existing account gated until the safety backup settles', async () => {
@@ -332,5 +367,105 @@ describe('useInitFireAuth account-entry orchestration', () => {
       phase: 'hydrating-account',
       userId: 'user-b',
     })
+  })
+})
+
+describe('useInitFireAuth lost session', () => {
+  const lostAccountState = {
+    user: { id: 'user-a', bible: { highlights: { '1-1-1': {} } } },
+    plan: { ongoingPlans: [] },
+  }
+
+  beforeAll(() => {
+    ;(
+      globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }
+    ).IS_REACT_ACT_ENVIRONMENT = true
+  })
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockStoreState = lostAccountState
+    mockSignedInUserId = undefined
+    mockLostUserId = undefined
+    mockGetPendingForUser.mockReturnValue(undefined)
+    mockCreateBackupNow.mockResolvedValue(true)
+    mockDispatch.mockImplementation((action: { type: string }) => {
+      if (action.type === 'user/logout') mockStoreState = guestState
+      return action
+    })
+    jest.spyOn(console, 'log').mockImplementation(() => undefined)
+    jest.spyOn(console, 'error').mockImplementation(() => undefined)
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
+    jest.restoreAllMocks()
+  })
+
+  const render = async () => {
+    await act(async () => {
+      create(
+        React.createElement(() => {
+          useInitFireAuth()
+          return null
+        })
+      )
+    })
+    return {
+      onLogin: mockInit.mock.calls[0][0] as (payload: {
+        profile: typeof profile
+        accountEntryClassification: AccountEntryClassification
+      }) => Promise<void>,
+      onSignedOut: mockInit.mock.calls[0][6] as () => void,
+    }
+  }
+
+  it('keeps the account and backs it up when Firebase signs out on its own', async () => {
+    const controller = await render()
+    jest.useFakeTimers()
+
+    controller.onSignedOut()
+    jest.advanceTimersByTime(3000)
+
+    expect(mockLostUserId).toBe('user-a')
+    expect(mockCreateBackupNow).toHaveBeenCalledWith(lostAccountState, 'session_lost')
+    expect(mockDispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'user/logout' }))
+  })
+
+  it('resumes the same account with its local data', async () => {
+    mockLostUserId = 'user-a'
+    const controller = await render()
+
+    await act(async () => {
+      await controller.onLogin({
+        profile: { ...profile, id: 'user-a' },
+        accountEntryClassification: 'existing-account',
+      })
+    })
+
+    expect(mockLostUserId).toBeUndefined()
+    expect(mockAllowParkedRetry).toHaveBeenCalledWith('user-a')
+    expect(mockDispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'user/logout' }))
+    expect(mockRunAllCleanups).not.toHaveBeenCalled()
+  })
+
+  it('backs up and forgets the account shown before another account enters', async () => {
+    mockLostUserId = 'user-a'
+    const controller = await render()
+
+    await act(async () => {
+      await controller.onLogin({ profile, accountEntryClassification: 'existing-account' })
+    })
+
+    expect(mockCreateBackupNow.mock.calls[0]).toEqual([lostAccountState, 'account_switch'])
+    expect(mockRunAllCleanups).toHaveBeenCalledTimes(1)
+    expect(mockResetAtoms).toHaveBeenCalledTimes(1)
+    const actionTypes = mockDispatch.mock.calls.map(([action]) => action.type)
+    expect(actionTypes.indexOf('user/logout')).toBeGreaterThan(-1)
+    expect(actionTypes.indexOf('user/logout')).toBeLessThan(actionTypes.indexOf('user/login'))
+    // The new account starts from a guest state: nothing of the first one is adopted.
+    expect(mockCreateBackupNow.mock.calls[1]).toEqual([guestState, 'account_entry'])
+    expect(mockLostUserId).toBeUndefined()
+    expect(mockAllowParkedRetry).not.toHaveBeenCalled()
   })
 })

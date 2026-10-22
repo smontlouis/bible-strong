@@ -58,7 +58,7 @@ const InitHooks = (_props: InitHooksProps) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const store = useStore<RootState>()
-  const { isLogged, user } = useLogin()
+  const { isLogged, isSessionLost, user } = useLogin()
   const accountEntryHydrationEnabled = canStartRemoteHydration(accountEntryState)
   const accountMigrations = useAccountMigrations({
     getCurrentState: store.getState,
@@ -208,9 +208,12 @@ const InitHooks = (_props: InitHooksProps) => {
     runBeforeSync: accountMigrations.runBeforeSync,
     resumeToken: accountMigrations.resumeToken,
   })
+  // While the session is lost nothing comes from the server, and local changes wait in the queue.
   useTabGroupsSync({
-    incomingEnabled: accountEntryHydrationEnabled && accountMigrations.isAccountSyncReady,
-    outgoingEnabled: accountEntryHydrationEnabled && accountMigrations.isAccountWriteReady,
+    incomingEnabled:
+      accountEntryHydrationEnabled && accountMigrations.isAccountSyncReady && !isSessionLost,
+    outgoingEnabled:
+      (accountEntryHydrationEnabled && accountMigrations.isAccountWriteReady) || isSessionLost,
   })
   useAppRatingCheck()
 
