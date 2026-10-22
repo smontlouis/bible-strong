@@ -38,9 +38,13 @@ export const createFormSheetOptions = (
     }
   }
 
+  // On iPhone an undimmed sheet leaves the page behind it to scroll and read. On iPad the sheet
+  // stands in front of the page and takes its room, so it always keeps the dimmed overlay.
+  const { sheetLargestUndimmedDetentIndex, ...sharedOverrides } = restOverrides
   return {
     ...defaultFormSheetOptions,
-    ...restOverrides,
+    ...sharedOverrides,
+    ...(Platform.OS === 'ios' && Platform.isPad ? {} : { sheetLargestUndimmedDetentIndex }),
     contentStyle: contentStyle ? [defaultContentStyle, contentStyle] : defaultContentStyle,
   }
 }
