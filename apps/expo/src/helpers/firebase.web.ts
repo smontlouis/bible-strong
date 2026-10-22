@@ -7,7 +7,10 @@ import {
   getDocs,
   getFirestore,
   increment as firestoreIncrement,
+  initializeFirestore,
   onSnapshot,
+  persistentLocalCache,
+  persistentMultipleTabManager,
   query,
   setDoc,
   orderBy,
@@ -24,7 +27,20 @@ import { getStorage, ref } from 'firebase/storage'
 import type { ResourceLanguage, DatabaseId } from '~helpers/databaseTypes'
 import { firebaseApp } from './firebaseApp.web'
 
-export const firebaseDb = getFirestore(firebaseApp)
+// The cache survives reloads, as in the native apps: a listener attached again within 30 minutes
+// is billed only for the documents that changed, instead of the whole account.
+const createFirestore = () => {
+  try {
+    return initializeFirestore(firebaseApp, {
+      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+    })
+  } catch {
+    // Already started for this app, for instance when the module is evaluated again.
+    return getFirestore(firebaseApp)
+  }
+}
+
+export const firebaseDb = createFirestore()
 export const storageRef = ref(getStorage(firebaseApp))
 export const increment = firestoreIncrement(1)
 

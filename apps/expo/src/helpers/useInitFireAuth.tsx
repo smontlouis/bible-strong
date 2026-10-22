@@ -5,6 +5,7 @@ import { useDispatch, useStore } from 'react-redux'
 import { toast } from '~helpers/toast'
 import FireAuth, { type FireAuthProfile } from '~helpers/FireAuth'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
+import { clearAccountCacheAfterLogout } from '~helpers/clearAccountCacheAfterLogout'
 import i18n from '~i18n'
 import * as UserActions from '~redux/modules/user'
 import { resetUserAtomsAtom } from '../state/app'
@@ -254,6 +255,7 @@ const useInitFireAuth = () => {
       dispatch(UserActions.onUserLogout())
       setAccountEntryState(createAccountEntryState())
       resetAtoms()
+      await clearAccountCacheAfterLogout()
     }
     const onError = (error: unknown) => {
       const { code } = getAuthError(error)
