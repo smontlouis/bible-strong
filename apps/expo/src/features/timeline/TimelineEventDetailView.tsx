@@ -7,6 +7,7 @@ import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import ScrollView from '~common/ui/ScrollView'
+import { STUDY_COLUMN_MAX_WIDTH } from '~common/ui/StudySection'
 import useTimelineLanguage from './useTimelineLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { getPublicSiteUrl } from '~helpers/publicSiteLinks'
@@ -79,12 +80,14 @@ const TimelineEventDetailContent = ({
 
   if (!event) {
     return (
-      <FormSheetScreen isFormSheet={isFormSheet}>
-        <Header title={t('Chronologie de la Bible')} hasBackButton={hasBackButton} />
-        <Empty
-          icon={require('~assets/images/empty-state-icons/search.svg')}
-          message={t("Cet événement n'est plus disponible.")}
-        />
+      <FormSheetScreen className="bg-canvas" isFormSheet={isFormSheet}>
+        <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
+          <Header title={t('Chronologie de la Bible')} hasBackButton={hasBackButton} />
+          <Empty
+            icon={require('~assets/images/empty-state-icons/search.svg')}
+            message={t("Cet événement n'est plus disponible.")}
+          />
+        </Box>
       </FormSheetScreen>
     )
   }
@@ -113,34 +116,40 @@ const TimelineEventDetailContent = ({
   ]
 
   return (
-    <FormSheetScreen isFormSheet={isFormSheet}>
-      <Header
-        title={title}
-        hasBackButton={hasBackButton}
-        onCustomBackPress={onBack}
-        rightComponent={
-          <MenuView
-            tabActions
-            actions={menuActions}
-            onPressAction={({ nativeEvent }) => {
-              if (runResourceShareAction(nativeEvent.event, share)) return
-              menuItems?.find(item => item.label === nativeEvent.event)?.onSelect()
-            }}
-          >
-            <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[54px]">
-              <FeatherIcon name="more-vertical" size={18} />
-            </Box>
-          </MenuView>
-        }
-      />
-      <ScrollView>
-        <EventDetailsContent
-          languageOverride={languageOverride}
-          assistantScope={assistantScope}
-          {...event}
-          onOpenEvent={onOpenEvent}
+    // A form sheet has no container of its own: the box inside carries the ground there.
+    <FormSheetScreen className="bg-canvas" isFormSheet={isFormSheet}>
+      <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
+        <Header
+          title={t('Chronologie de la Bible')}
+          hasBackButton={hasBackButton}
+          onCustomBackPress={onBack}
+          rightComponent={
+            <MenuView
+              tabActions
+              actions={menuActions}
+              onPressAction={({ nativeEvent }) => {
+                if (runResourceShareAction(nativeEvent.event, share)) return
+                menuItems?.find(item => item.label === nativeEvent.event)?.onSelect()
+              }}
+            >
+              <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[54px]">
+                <FeatherIcon name="more-vertical" size={18} />
+              </Box>
+            </MenuView>
+          }
         />
-      </ScrollView>
+        <ScrollView
+          backgroundColor="canvas"
+          contentContainerStyle={{ maxWidth: STUDY_COLUMN_MAX_WIDTH + 40, paddingHorizontal: 20 }}
+        >
+          <EventDetailsContent
+            languageOverride={languageOverride}
+            assistantScope={assistantScope}
+            {...event}
+            onOpenEvent={onOpenEvent}
+          />
+        </ScrollView>
+      </Box>
     </FormSheetScreen>
   )
 }

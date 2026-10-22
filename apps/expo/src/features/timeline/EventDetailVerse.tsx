@@ -2,6 +2,7 @@ import React from 'react'
 import { VerseSlice as VerseSliceProps } from 'src/common/types'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
+import Text from '~common/ui/Text'
 import { useVersesToContent } from '~features/plans/plan.hooks'
 import Loading from '~common/Loading'
 import Link from '~common/Link'
@@ -12,7 +13,7 @@ const EventDetailVerse = ({ verses }: VerseSliceProps) => {
 
   if (status === 'Pending') {
     return (
-      <Box className="overflow-hidden border-continuous h-[200px]">
+      <Box className="overflow-hidden border-continuous h-[120px]">
         <Loading />
       </Box>
     )
@@ -20,7 +21,7 @@ const EventDetailVerse = ({ verses }: VerseSliceProps) => {
 
   if (status === 'Rejected') {
     return (
-      <Box className="overflow-hidden border-continuous items-center justify-center p-[20px]">
+      <Box className="overflow-hidden border-continuous items-center justify-center p-[16px]">
         <Paragraph scaleLineHeight={1}>
           {t("Il semblerait que ce chapitre n'existe pas dans cette version.")}
         </Paragraph>
@@ -31,12 +32,8 @@ const EventDetailVerse = ({ verses }: VerseSliceProps) => {
   if (status === 'Resolved' && content) {
     return (
       <Link {...content.viewMore}>
-        <Box className="overflow-hidden border-continuous pb-[20px]">
-          <Box className="overflow-hidden border-continuous">
-            <Paragraph className="text-grey" fontFamily="title" scale={-1}>
-              {content.bookName}
-            </Paragraph>
-          </Box>
+        <Box className="overflow-hidden border-continuous px-[16px] py-[12px] gap-[4px]">
+          <Text className="text-[13px] text-grey">{content.bookName}</Text>
           <Paragraph>
             {content.verses.slice(0, 3).map(c => {
               const { h1, h2, h3, h4 } = c.Pericope
@@ -72,7 +69,7 @@ const EventDetailVerse = ({ verses }: VerseSliceProps) => {
                 </React.Fragment>
               )
             })}
-            {content.verses.length > 3 && <Paragraph>...</Paragraph>}
+            {content.verses.length > 3 && <Paragraph>…</Paragraph>}
           </Paragraph>
         </Box>
       </Link>
