@@ -48,6 +48,10 @@ jest.mock('~helpers/useLogin', () => ({
   __esModule: true,
   default: () => ({ isLogged: true, user: { id: 'test-user' } }),
 }))
+let mockSignedInUserId: string | undefined = 'test-user'
+jest.mock('~helpers/firebaseAuthRuntime', () => ({
+  getCurrentAuthUser: () => (mockSignedInUserId ? { uid: mockSignedInUserId } : null),
+}))
 jest.mock('~helpers/cleanupRegistry', () => ({ registerCleanup: jest.fn() }))
 jest.mock('~helpers/storage', () => ({ storage: { getBoolean: () => true } }))
 jest.mock('~helpers/firestoreSubcollections', () => ({
@@ -115,6 +119,7 @@ beforeEach(async () => {
   jest.clearAllMocks()
   jest.mocked(isMigrationInProgress).mockReturnValue(false)
   jest.mocked(firestoreSyncOutbox.getPending).mockReturnValue([])
+  mockSignedInUserId = 'test-user'
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
   store.set(tabGroupsAtom, [makeGroup(['a']), makeGroup(['x'], 'other')])
   await act(async () => {
@@ -137,6 +142,18 @@ test('sends a close immediately following an incoming open, without echoing the 
     'tabGroups',
     'default',
     expect.objectContaining({ tabs: [expect.objectContaining({ id: 'a' })] })
+  )
+})
+
+test('queues a change instead of writing it while the Firebase session is not this account', async () => {
+  mockSignedInUserId = undefined
+  await local(makeGroup(['a', 'b']), store.get(tabGroupsAtom)[1])
+  await advance(SYNC_DEBOUNCE_MS)
+
+  expect(writeToSubcollection).not.toHaveBeenCalled()
+  expect(firestoreSyncOutbox.enqueue).toHaveBeenCalledWith(
+    'test-user',
+    expect.objectContaining({ kind: 'subcollection', collection: 'tabGroups' })
   )
 })
 

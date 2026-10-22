@@ -443,4 +443,122 @@ describe('FirestoreSyncOutbox', () => {
       expect.objectContaining({ data: { bible: { settings: { theme: 'new' } } } })
     )
   })
+
+  describe('when the server refuses a write', () => {
+    const permissionDenied = () =>
+      Object.assign(
+        new Error(
+          '[firestore/permission-denied] The caller does not have permission to execute the specified operation.'
+        ),
+        { code: 'firestore/permission-denied' }
+      )
+    const studyIntent = (title: string) => ({
+      kind: 'document-set' as const,
+      path: ['studies', 'study-1'],
+      data: { title },
+      merge: true,
+    })
+
+    it('keeps the write aside instead of retrying it, newer values included', async () => {
+      const storage = createStorage()
+      const scheduled: (() => void)[] = []
+      const execute = jest.fn(async () => {
+        throw permissionDenied()
+      })
+      const outbox = createFirestoreSyncOutbox({
+        storage,
+        execute,
+        now: () => 100,
+        schedule: callback => scheduled.push(callback),
+      })
+      outbox.enqueue('user-1', studyIntent('First'))
+      outbox.resumeReplay('user-1')
+      scheduled.length = 0
+
+      await outbox.replay('user-1')
+      outbox.enqueue('user-1', studyIntent('Second'))
+      await outbox.replay('user-1')
+
+      expect(execute).toHaveBeenCalledTimes(1)
+      expect(scheduled).toEqual([])
+      expect(outbox.isParked('user-1', studyIntent('Third'))).toBe(true)
+      expect(outbox.getPending('user-1')[0]).toEqual(
+        expect.objectContaining({
+          parkedAt: 100,
+          intent: expect.objectContaining({ data: { title: 'Second' } }),
+        })
+      )
+    })
+
+    it('tries it once more at the next launch', async () => {
+      const storage = createStorage()
+      const refusing = createFirestoreSyncOutbox({
+        storage,
+        execute: async () => {
+          throw permissionDenied()
+        },
+        now: () => 100,
+        schedule: noSchedule,
+      })
+      refusing.enqueue('user-1', studyIntent('First'))
+      await refusing.replay('user-1')
+
+      const execute = jest.fn(async () => undefined)
+      const nextLaunch = createFirestoreSyncOutbox({
+        storage,
+        execute,
+        now: () => 200,
+        schedule: noSchedule,
+      })
+      nextLaunch.resumeReplay('user-1')
+      await nextLaunch.replay('user-1')
+
+      expect(execute).toHaveBeenCalledTimes(1)
+      expect(nextLaunch.getPending('user-1')).toEqual([])
+    })
+
+    it('releases it when a direct write of the same target succeeds', async () => {
+      const storage = createStorage()
+      const outbox = createFirestoreSyncOutbox({
+        storage,
+        execute: async () => {
+          throw permissionDenied()
+        },
+        now: () => 100,
+        schedule: noSchedule,
+      })
+      outbox.enqueue('user-1', studyIntent('First'))
+      await outbox.replay('user-1')
+
+      outbox.supersedePending('user-1', studyIntent('Second'))
+
+      expect(outbox.isParked('user-1', studyIntent('Second'))).toBe(false)
+    })
+  })
+
+  it('sends nothing while another account, or none, is signed in', async () => {
+    const storage = createStorage()
+    const scheduled: { callback: () => void; delayMs: number }[] = []
+    const execute = jest.fn(async () => undefined)
+    let signedInUserId: string | undefined
+    const outbox = createFirestoreSyncOutbox({
+      storage,
+      execute,
+      now: () => 100,
+      schedule: (callback, delayMs) => scheduled.push({ callback, delayMs }),
+      isAccountSignedIn: userId => signedInUserId === userId,
+    })
+    outbox.enqueue('user-1', { kind: 'document-delete', path: ['studies', 'study-1'] })
+    outbox.resumeReplay('user-1')
+    scheduled.length = 0
+
+    await outbox.replay('user-1')
+    expect(execute).not.toHaveBeenCalled()
+    expect(outbox.getPending('user-1')[0]).toEqual(expect.objectContaining({ attempts: 0 }))
+    expect(scheduled.map(({ delayMs }) => delayMs)).toEqual([30_000])
+
+    signedInUserId = 'user-1'
+    await outbox.replay('user-1')
+    expect(execute).toHaveBeenCalledTimes(1)
+  })
 })

@@ -34,6 +34,13 @@ import {
 } from '../migrations/legacyPersistedReferences'
 import { appLogger } from './agentObservability'
 import { firestoreSyncOutbox } from './firestoreSyncOutbox'
+import {
+  getPendingStudyTargets,
+  getPendingSubcollectionTargets,
+  isPendingWriteTarget,
+  keepPendingWrites,
+  withoutPendingWriteTargets,
+} from './pendingWritesOverlay'
 import { useConnectionStatus } from './useConnection'
 
 let isFirstSnapshotListener = true
@@ -287,20 +294,39 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
               })
             }
 
+            const isInitialLoad =
+              isFirstAuthoritativeSnapshot ||
+              (changes.fromCache &&
+                Object.keys(canonicalAdded).length === Object.keys(canonical.data).length)
+            const pending = getPendingSubcollectionTargets(
+              firestoreSyncOutbox.getPending(userId),
+              collection
+            )
+            const localCollection = (
+              store.getState().user.bible as unknown as Record<
+                string,
+                SubcollectionData | undefined
+              >
+            )[collection]
+
             // Dispatch l'update pour cette collection spécifique
             dispatch(
               receiveSubcollectionUpdates({
                 collection,
-                data: canonical.data as SubcollectionData,
+                data: keepPendingWrites(
+                  canonical.data as SubcollectionData,
+                  localCollection,
+                  pending
+                ),
                 changes: {
-                  added: canonicalAdded as SubcollectionData,
-                  modified: canonicalModified as SubcollectionData,
-                  removed: changes.removed,
+                  added: withoutPendingWriteTargets(canonicalAdded as SubcollectionData, pending),
+                  modified: withoutPendingWriteTargets(
+                    canonicalModified as SubcollectionData,
+                    pending
+                  ),
+                  removed: changes.removed.filter(id => !isPendingWriteTarget(pending, id)),
                 },
-                isInitialLoad:
-                  isFirstAuthoritativeSnapshot ||
-                  (changes.fromCache &&
-                    Object.keys(canonicalAdded).length === Object.keys(canonical.data).length),
+                isInitialLoad,
                 fromCache: changes.fromCache,
               })
             )
@@ -336,6 +362,9 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
           }
           if (source === 'Local' || !querySnapshot) return
 
+          // A study a queued write will still change keeps its local value (a refused or
+          // signed-out write is not in Firestore yet).
+          const pendingStudies = getPendingStudyTargets(firestoreSyncOutbox.getPending(userId))
           if (studiesSyncMode.isNewlyLogged || !studiesSyncMode.hasStudies) {
             const studies = {} as { [key: string]: Study }
             querySnapshot.forEach((docSnap: QueryDocumentSnapshot) => {
@@ -344,11 +373,16 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
             })
 
             console.log('[LiveUpdates] Add all studies')
-            dispatch(addStudies(studies))
+            dispatch(
+              addStudies(
+                keepPendingWrites(studies, store.getState().user.bible.studies, pendingStudies)
+              )
+            )
           } else {
             querySnapshot.docChanges().forEach((change: DocumentChange) => {
               // Ignore first listener adding all documents
               if (isFirstSnapshotListener) return
+              if (isPendingWriteTarget(pendingStudies, change.doc.id)) return
 
               // Already in Firestore: the store takes them without writing them back.
               if (change.type === 'added') {

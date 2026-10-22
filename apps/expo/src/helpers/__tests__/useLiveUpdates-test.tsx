@@ -61,8 +61,10 @@ jest.mock('~helpers/firestoreSubcollections', () => ({
   subscribeToSubcollection: (...args: unknown[]) => mockSubscribeToSubcollection(...args),
 }))
 
+let mockPendingEntries: unknown[] = []
 jest.mock('~helpers/firestoreSyncOutbox', () => ({
   firestoreSyncOutbox: {
+    getPending: () => mockPendingEntries,
     replay: jest.fn(async () => undefined),
     cancelReplay: jest.fn(),
     resumeReplay: jest.fn(),
@@ -94,9 +96,10 @@ jest.mock('~redux/modules/user', () => ({
   }),
 }))
 
+let mockLocalBible: Record<string, unknown> = {}
 jest.mock('~redux/store', () => ({
   store: {
-    getState: () => ({ user: { sync: { isLoading: false } } }),
+    getState: () => ({ user: { sync: { isLoading: false }, bible: mockLocalBible } }),
   },
 }))
 
@@ -114,6 +117,8 @@ describe('useLiveUpdates account-entry gate', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockSubcollectionOnChange = undefined
+    mockPendingEntries = []
+    mockLocalBible = {}
     mockHasStudies = false
     mockPreviousIsLogged = false
     jest.spyOn(console, 'log').mockImplementation(() => undefined)
@@ -403,6 +408,78 @@ describe('useLiveUpdates account-entry gate', () => {
     expect(
       mockDispatch.mock.calls.filter(([action]) => action.type === 'user/mark-loaded')
     ).toEqual([[{ type: 'user/mark-loaded', payload: { collection: 'bookmarks' } }]])
+
+    await act(async () => {
+      renderer.unmount()
+    })
+  })
+
+  it('keeps a local document a queued write will still send', async () => {
+    mockLocalBible = {
+      bookmarks: { local: { id: 'local', name: 'Not sent yet' } },
+      studies: { study: { id: 'study', title: 'Local edit' } },
+    }
+    mockPendingEntries = [
+      {
+        userId: 'user-1',
+        intent: {
+          kind: 'subcollection',
+          collection: 'bookmarks',
+          set: { local: { id: 'local' } },
+          delete: ['gone'],
+        },
+      },
+      {
+        userId: 'user-1',
+        intent: { kind: 'document-set', path: ['studies', 'study'], data: {}, merge: true },
+      },
+    ]
+    const runBeforeSync = jest.fn(async () => true)
+    const Harness = () => {
+      useLiveUpdates({ enabled: true, runBeforeSync, resumeToken: 0 })
+      return null
+    }
+
+    let renderer!: ReturnType<typeof create>
+    await act(async () => {
+      renderer = create(<Harness />)
+      await Promise.resolve()
+    })
+
+    act(() => {
+      mockSubcollectionOnChange?.(
+        { remote: { id: 'remote' }, gone: { id: 'gone' } },
+        {
+          added: { remote: { id: 'remote' }, gone: { id: 'gone' } },
+          modified: {},
+          removed: [],
+          fromCache: false,
+          isFirstSnapshot: true,
+        }
+      )
+    })
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'user/receive-subcollection',
+      payload: expect.objectContaining({
+        isInitialLoad: true,
+        data: { remote: { id: 'remote' }, local: { id: 'local', name: 'Not sent yet' } },
+        changes: { added: { remote: { id: 'remote' } }, modified: {}, removed: [] },
+      }),
+    })
+
+    const onStudies = mockOnSnapshot.mock.calls[1]?.[1] as (snapshot: unknown) => void
+    act(() => {
+      onStudies({
+        metadata: { hasPendingWrites: false },
+        forEach: (callback: (doc: unknown) => void) =>
+          callback({ data: () => ({ id: 'study', title: 'Server' }) }),
+        docChanges: () => [],
+      })
+    })
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'user/add-studies',
+      payload: { study: { id: 'study', title: 'Local edit' } },
+    })
 
     await act(async () => {
       renderer.unmount()

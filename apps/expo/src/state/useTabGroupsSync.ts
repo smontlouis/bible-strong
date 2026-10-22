@@ -34,6 +34,7 @@ import {
 } from '~helpers/firestoreSyncOutbox'
 import { registerCleanup } from '~helpers/cleanupRegistry'
 import useLogin from '~helpers/useLogin'
+import { getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
 import { isMigrationInProgress } from './migration'
 import {
   recordAccountMigrationDeletedDocuments,
@@ -104,6 +105,15 @@ export const useTabGroupsSync = ({
 
     const persistChanges = async (changes: TabGroupChanges) => {
       const intent = changesToIntent(changes)
+      // The rules accept only the signed-in account: with the session lost, the changes wait in
+      // the queue instead of being refused on every edit.
+      if (getCurrentAuthUser()?.uid !== userId) {
+        firestoreSyncOutbox.enqueue(
+          userId,
+          changesToIntent(new Map([...changes, ...queue.getOutstanding()]))
+        )
+        return
+      }
       try {
         await runFirestoreSyncIntentsSerialized(userId, [intent], async () => {
           try {

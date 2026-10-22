@@ -6,6 +6,7 @@ import { tokenManager } from '~helpers/TokenManager'
 import {
   firestoreSyncOutbox,
   runFirestoreSyncIntentsSerialized,
+  setFirestoreSyncOutboxAccountCheck,
   type FirestoreSyncIntent,
 } from '~helpers/firestoreSyncOutbox'
 
@@ -121,6 +122,7 @@ import {
 } from './modules/plan'
 import { canonicalizeImportedDataForFirestore } from './firestoreImportDataCanonicalization'
 import { buildCompareSettingsWrite } from './compareSelectionSync'
+import { createStudySyncIntent } from './studySyncIntent'
 import {
   groupUserBibleSyncOperations,
   planBookmarkSync,
@@ -145,6 +147,9 @@ type SyncDiffState = {
     }
   }
 }
+
+// The queue replays an account's writes only while that account is signed in, as writes here do.
+setFirestoreSyncOutboxAccountCheck(userId => getCurrentAuthUser()?.uid === userId)
 
 const enqueueSyncIntents = (userId: string, intents: FirestoreSyncIntent[]) => {
   intents.forEach(intent => firestoreSyncOutbox.enqueue(userId, intent))
@@ -873,15 +878,17 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       await Promise.all(
         Object.entries(studies).map(async ([studyId, obj]) => {
           const studyDocRef = doc(firebaseDb, 'studies', studyId)
-          const studyContent = state.user.bible.studies[studyId]?.content?.ops
-          const intent: FirestoreSyncIntent = {
-            kind: 'document-set',
-            path: ['studies', studyId],
-            data: {
-              ...(removeUndefinedVariables(obj) as SyncRecord),
-              content: { ops: studyContent || [] },
-            },
-            merge: true,
+          const intent = createStudySyncIntent({
+            studyId,
+            changes: obj,
+            study: state.user.bible.studies[studyId],
+            userId,
+          })
+
+          // Already refused by the server: the edit joins the queued write, without a new refusal.
+          if (firestoreSyncOutbox.isParked(userId, intent)) {
+            firestoreSyncOutbox.enqueue(userId, intent)
+            return
           }
 
           try {

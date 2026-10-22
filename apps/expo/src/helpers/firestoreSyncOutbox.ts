@@ -4,6 +4,8 @@ import { storage as defaultStorage } from './storage'
 
 const STORAGE_KEY = 'firestore_sync_outbox_v1'
 const MAX_BACKOFF_MS = 5 * 60 * 1000
+// While another account (or none) is signed in, nothing of this account's queue would be accepted.
+const SIGNED_OUT_RETRY_MS = 30 * 1000
 
 export type SerializableDocument = Record<string, unknown>
 const DELETE_FIELD_MARKER = '__bibleStrongFirestoreDeleteField__'
@@ -36,6 +38,11 @@ export type FirestoreSyncOutboxEntry = {
   attempts: number
   nextAttemptAt: number
   generation: number
+  /**
+   * The server refused the write (permission-denied): retrying would be refused again, so the
+   * entry waits, with the local data intact, for the next launch to try it once more.
+   */
+  parkedAt?: number
 }
 
 export interface FirestoreSyncOutboxStorage {
@@ -50,6 +57,15 @@ type FirestoreSyncOutboxDependencies = {
   now(): number
   schedule?(callback: () => void, delayMs: number): unknown
   cancelScheduled?(handle: unknown): void
+  /** Whether the signed-in Firebase account is this one: the rules accept nothing else. */
+  isAccountSignedIn?(userId: string): boolean
+}
+
+export const isPermissionDeniedError = (error: unknown): boolean => {
+  const code =
+    error && typeof error === 'object' && 'code' in error ? String(error.code) : undefined
+  const message = error instanceof Error ? error.message : ''
+  return code === 'firestore/permission-denied' || message.includes('permission-denied')
 }
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
@@ -201,10 +217,12 @@ export const createFirestoreSyncOutbox = ({
   now,
   schedule = (callback, delayMs) => setTimeout(callback, delayMs),
   cancelScheduled = handle => clearTimeout(handle as ReturnType<typeof setTimeout>),
+  isAccountSignedIn = () => true,
 }: FirestoreSyncOutboxDependencies) => {
   const replayPromises = new Map<string, Promise<void>>()
   const scheduledReplays = new Map<string, unknown>()
   const activeUsers = new Set<string>()
+  const usersReleasedThisLaunch = new Set<string>()
 
   const read = () => parseEntries(storage.getString(STORAGE_KEY))
   const write = (entries: FirestoreSyncOutboxEntry[]) => {
@@ -226,13 +244,48 @@ export const createFirestoreSyncOutbox = ({
 
   const resumeReplay = (userId: string) => {
     activeUsers.add(userId)
+    if (!usersReleasedThisLaunch.has(userId)) {
+      usersReleasedThisLaunch.add(userId)
+      releaseParked(userId)
+    }
     scheduleNextReplay(userId)
+  }
+
+  /** Gives refused writes one more try, once per launch: rules or ownership may have changed. */
+  const releaseParked = (userId: string) => {
+    const entries = read()
+    if (!entries.some(entry => entry.userId === userId && entry.parkedAt !== undefined)) return
+    write(
+      entries.map(entry =>
+        entry.userId === userId && entry.parkedAt !== undefined
+          ? { ...entry, parkedAt: undefined, nextAttemptAt: now() }
+          : entry
+      )
+    )
+  }
+
+  const isParked = (userId: string, intent: FirestoreSyncIntent) => {
+    const id = entryId(userId, intent)
+    return read().some(entry => entry.id === id && entry.parkedAt !== undefined)
+  }
+
+  const scheduleAfter = (userId: string, delayMs: number) => {
+    const handle = schedule(() => {
+      scheduledReplays.delete(userId)
+      if (!activeUsers.has(userId)) return
+      void replay(userId)
+    }, delayMs)
+    scheduledReplays.set(userId, handle)
   }
 
   const scheduleNextReplay = (userId: string) => {
     cancelReplay(userId)
     activeUsers.add(userId)
-    const nextAttemptAt = Math.min(...getPending(userId).map(entry => entry.nextAttemptAt))
+    const nextAttemptAt = Math.min(
+      ...getPending(userId)
+        .filter(entry => entry.parkedAt === undefined)
+        .map(entry => entry.nextAttemptAt)
+    )
     if (!Number.isFinite(nextAttemptAt)) return
     const handle = schedule(
       () => {
@@ -245,7 +298,7 @@ export const createFirestoreSyncOutbox = ({
     scheduledReplays.set(userId, handle)
   }
 
-  const enqueue = (userId: string, intent: FirestoreSyncIntent) => {
+  const enqueue = (userId: string, intent: FirestoreSyncIntent, release = false) => {
     const entries = read()
     const encodedIntent = encodeFirestoreSyncData(intent) as FirestoreSyncIntent
     const id = entryId(userId, encodedIntent)
@@ -268,6 +321,8 @@ export const createFirestoreSyncOutbox = ({
       attempts: 0,
       nextAttemptAt: now(),
       generation: (existing?.generation ?? 0) + 1,
+      // A newer value for a refused target is refused too: it joins the parked entry.
+      ...(existing?.parkedAt !== undefined && !release ? { parkedAt: existing.parkedAt } : {}),
     }
 
     if (existingIndex === -1) entries.push(entry)
@@ -276,10 +331,11 @@ export const createFirestoreSyncOutbox = ({
     if (activeUsers.has(userId)) scheduleNextReplay(userId)
   }
 
+  // A direct write of the same target succeeded: the server accepts it again.
   const supersedePending = (userId: string, intent: FirestoreSyncIntent) => {
     const id = entryId(userId, intent)
     if (!read().some(entry => entry.id === id)) return
-    enqueue(userId, intent)
+    enqueue(userId, intent, true)
   }
 
   const replay = async (userId: string): Promise<void> => {
@@ -287,7 +343,18 @@ export const createFirestoreSyncOutbox = ({
     if (existingReplay) return existingReplay
 
     const replayPromise = (async () => {
-      const dueEntries = getPending(userId).filter(entry => entry.nextAttemptAt <= now())
+      if (!isAccountSignedIn(userId)) {
+        // Sent now, every entry would be refused and counted as a failure: wait for the account.
+        if (activeUsers.has(userId) && getPending(userId).length > 0) {
+          cancelReplay(userId)
+          activeUsers.add(userId)
+          scheduleAfter(userId, SIGNED_OUT_RETRY_MS)
+        }
+        return
+      }
+      const dueEntries = getPending(userId).filter(
+        entry => entry.parkedAt === undefined && entry.nextAttemptAt <= now()
+      )
       for (const entry of dueEntries) {
         try {
           await execute(entry)
@@ -296,18 +363,20 @@ export const createFirestoreSyncOutbox = ({
               candidate => candidate.id !== entry.id || candidate.generation !== entry.generation
             )
           )
-        } catch {
+        } catch (error) {
           const entries = read()
           const index = entries.findIndex(
             candidate => candidate.id === entry.id && candidate.generation === entry.generation
           )
           if (index === -1) continue
           const attempts = entries[index].attempts + 1
-          entries[index] = {
-            ...entries[index],
-            attempts,
-            nextAttemptAt: now() + Math.min(1000 * 2 ** (attempts - 1), MAX_BACKOFF_MS),
-          }
+          entries[index] = isPermissionDeniedError(error)
+            ? { ...entries[index], attempts, parkedAt: now() }
+            : {
+                ...entries[index],
+                attempts,
+                nextAttemptAt: now() + Math.min(1000 * 2 ** (attempts - 1), MAX_BACKOFF_MS),
+              }
           write(entries)
         }
       }
@@ -320,7 +389,15 @@ export const createFirestoreSyncOutbox = ({
     return replayPromise
   }
 
-  return { cancelReplay, enqueue, getPending, replay, resumeReplay, supersedePending }
+  return {
+    cancelReplay,
+    enqueue: (userId: string, intent: FirestoreSyncIntent) => enqueue(userId, intent),
+    getPending,
+    isParked,
+    replay,
+    resumeReplay,
+    supersedePending,
+  }
 }
 
 const firestoreSyncTargetTails = new Map<string, Promise<void>>()
@@ -382,6 +459,13 @@ const executeFirestoreSyncOutboxEntry = async ({
   )
 }
 
+let accountCheck: (userId: string) => boolean = () => true
+
+/** Set where the native auth module is already loaded (the sync middleware), not here. */
+export const setFirestoreSyncOutboxAccountCheck = (check: (userId: string) => boolean) => {
+  accountCheck = check
+}
+
 export const firestoreSyncOutbox = createFirestoreSyncOutbox({
   storage: defaultStorage,
   execute: entry =>
@@ -393,4 +477,5 @@ export const firestoreSyncOutbox = createFirestoreSyncOutbox({
       await executeFirestoreSyncOutboxEntry(entry)
     }),
   now: Date.now,
+  isAccountSignedIn: userId => accountCheck(userId),
 })
