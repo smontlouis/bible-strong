@@ -806,7 +806,7 @@
   "strongLexicon.greekDictionary": "Dictionnaire grec détaillé",
   "strongLexicon.greekDictionaryDescription": "Notices LSJ/TFLSJ et traductions françaises",
   "strongDetail.media.title": "Vidéo liée à ce mot",
-  "strongDetail.entity.open": "Voir la fiche de {{name}}",
+  "strongDetail.entity.open": "Voir la fiche complète",
   "strongDetail.entity.context": "Contexte biblique",
   "strongDetail.related.title": "Mots liés",
   "strongDetail.related.open": "Voir tous les mots liés",

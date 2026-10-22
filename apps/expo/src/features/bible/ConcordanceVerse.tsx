@@ -52,6 +52,8 @@ const Container = (
 }
 
 type Props = {
+  /** Classes of the row, after its defaults: a card's row drops the bottom border for a hairline. */
+  className?: string
   onOpenVerse: (verse: Verse) => void
   t: TFunction<'translation', undefined>
   verse: Verse
@@ -61,6 +63,7 @@ type Props = {
 }
 
 const ConcordanceVerse = ({
+  className,
   verse,
   onOpenVerse,
   t,
@@ -78,6 +81,7 @@ const ConcordanceVerse = ({
 
   return (
     <Container
+      className={className}
       accessibilityRole="button"
       accessibilityLabel={`${bookName} ${chapterNumber}:${verseNumber}`}
       onPress={() => onOpenVerse(verse)}

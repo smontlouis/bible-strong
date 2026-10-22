@@ -4,7 +4,7 @@ import { useTheme } from '~themes/ThemeProvider'
 import { AnimatePresence } from '@alloc/moti'
 import React, { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, Image, Pressable } from 'react-native'
+import { ActivityIndicator, Image, Pressable, StyleSheet } from 'react-native'
 import Svg, { Line } from 'react-native-svg'
 import { useQueryClient } from '@tanstack/react-query'
 import { scheduleOnRN } from 'react-native-worklets'
@@ -549,7 +549,7 @@ const EntityGraphNode = ({
       className={twMerge(
         'overflow-hidden border-continuous',
         twMerge(
-          center ? 'bg-light-primary' : 'bg-light-grey',
+          center ? 'bg-light-primary' : 'bg-canvas',
           center ? 'border-primary' : 'border-border',
           'overflow-visible items-center justify-center'
         )
@@ -643,7 +643,7 @@ const GraphSatelliteContent = ({
             {displayName}
           </Text>
           <HStack
-            className="overflow-hidden border-continuous bg-light-grey rounded-[12px] px-[7px] py-[3px] mt-[3px] items-center gap-[3px]"
+            className="overflow-hidden border-continuous bg-canvas rounded-[12px] px-[7px] py-[3px] mt-[3px] items-center gap-[3px]"
             style={{ maxWidth: SATELLITE_WIDTH }}
           >
             <IonIcon name={visual.icon} color={visual.color} size={10} />
@@ -657,7 +657,7 @@ const GraphSatelliteContent = ({
         </VStack>
         {back && (
           <Box
-            className="overflow-hidden border-continuous w-[20px] h-[20px] absolute rounded-full bg-light-grey items-center justify-center"
+            className="overflow-hidden border-continuous w-[20px] h-[20px] absolute rounded-full bg-canvas items-center justify-center"
             style={getBackIndicatorPosition(positionIndex ?? 0)}
           >
             <FeatherIcon name="chevron-left" color="primary" size={14} />
@@ -900,7 +900,7 @@ const GraphPageButton = ({
     style={pressedOpacityStyle}
   >
     <Box
-      className="overflow-hidden border-continuous rounded-[16px] bg-light-grey items-center justify-center"
+      className="overflow-hidden border-continuous rounded-full bg-canvas items-center justify-center"
       style={{ opacity: disabled ? 0.4 : 1, width: 32, height: 32 }}
     >
       <FeatherIcon name={icon} color="primary" size={18} />
@@ -937,7 +937,7 @@ const GraphHistoryButton = ({
       style={pressedOpacityStyle}
     >
       <Box
-        className="overflow-hidden border-continuous rounded-[16px] bg-light-grey items-center justify-center"
+        className="overflow-hidden border-continuous rounded-full bg-canvas items-center justify-center"
         style={{ width: 32, height: 32 }}
       >
         {loading ? (
@@ -971,7 +971,8 @@ const GraphFooter = ({
 
   return (
     <HStack
-      className="border-continuous overflow-hidden items-center justify-center py-[6px] gap-[12px] relative border-t-[1px] border-border"
+      className="border-continuous overflow-hidden items-center justify-center py-[6px] gap-[12px] relative border-separator"
+      style={{ borderTopWidth: StyleSheet.hairlineWidth }}
       accessibilityLabel={t('strongDetail.entity.graphPage', {
         current: pageIndex + 1,
         count: pageCount,
@@ -1096,7 +1097,7 @@ const GraphCenterNode = ({
                 accessibilityLabel={t('strongDetail.entity.viewProfile')}
                 style={pressedOpacityStyle}
               >
-                <HStack className="overflow-hidden border-continuous bg-light-grey rounded-[12px] px-[7px] py-[3px] mt-[3px] items-center gap-[2px]">
+                <HStack className="overflow-hidden border-continuous bg-canvas rounded-[12px] px-[7px] py-[3px] mt-[3px] items-center gap-[2px]">
                   <Text className="text-tertiary text-[9px] font-bold">
                     {t('strongDetail.entity.viewProfile')}
                   </Text>
@@ -1656,7 +1657,7 @@ export const StrongEntityRelationGraph = ({
 
   return (
     <VStack
-      className="border-continuous overflow-visible rounded-[16px] bg-reverse"
+      className="border-continuous overflow-visible rounded-[16px] bg-surface"
       pointerEvents={isResetting ? 'none' : 'auto'}
     >
       <Box

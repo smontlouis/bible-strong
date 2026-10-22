@@ -11,7 +11,10 @@ import type {
   StrongLexiconEntity,
   StrongLexiconEntityRelation,
 } from '~features/resources/strongLexiconAccess'
+import Card from '~common/ui/Card'
 import {
+  STRONG_COLUMN_MAX_WIDTH,
+  StrongCardBody,
   StrongEditorialSection,
   StrongEntityRelationList,
   StrongEntitySummaryCard,
@@ -57,20 +60,29 @@ const StrongEntityPage = ({
       style={{ flex: 1 }}
       contentContainerStyle={[
         pageContentStyle,
-        { maxWidth: 600, paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 + bottomInset },
+        {
+          maxWidth: STRONG_COLUMN_MAX_WIDTH + 40,
+          paddingHorizontal: 20,
+          paddingTop: 22,
+          paddingBottom: 90 + bottomInset,
+        },
       ]}
     >
-      <StrongEntitySummaryCard
-        entity={entity}
-        expanded
-        readingTypography={readingTypography}
-        onOpenBibleReference={onOpenBibleReference}
-        onOpenStrong={onOpenStrong}
-      />
+      <Card>
+        <StrongCardBody>
+          <StrongEntitySummaryCard
+            entity={entity}
+            expanded
+            readingTypography={readingTypography}
+            onOpenBibleReference={onOpenBibleReference}
+            onOpenStrong={onOpenStrong}
+          />
+        </StrongCardBody>
+      </Card>
 
       {ENTITY_LOCATION_VISIBLE && !!place && (
-        <StrongEditorialSection title={t('strongDetail.entity.location')} separated>
-          <VStack className="overflow-hidden border-continuous bg-light-grey rounded-[16px] p-[16px] gap-[8px]">
+        <StrongEditorialSection title={t('strongDetail.entity.location')}>
+          <VStack className="overflow-hidden border-continuous gap-[8px]">
             <HStack className="overflow-hidden border-continuous items-center gap-[10px]">
               <Box
                 className="overflow-hidden border-continuous rounded-full bg-light-primary items-center justify-center"
@@ -113,7 +125,7 @@ const StrongEntityPage = ({
       )}
 
       {graph.length > 0 && (
-        <StrongEditorialSection title={t('strongDetail.entity.relationships')} separated>
+        <StrongEditorialSection title={t('strongDetail.entity.relationships')} surface="none">
           <StrongEntityRelationGraph
             languageOverride={language}
             entity={entity}
@@ -131,7 +143,7 @@ const StrongEntityPage = ({
               ? t('strongDetail.entity.allRelationships')
               : t('strongDetail.entity.relationships')
           }
-          separated
+          surface="none"
         >
           <StrongEntityRelationList relations={remaining} onOpenEntity={onOpenEntityRelation} />
         </StrongEditorialSection>

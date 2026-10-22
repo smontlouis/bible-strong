@@ -33,6 +33,7 @@ jest.mock('~common/ui/Box', () => ({
   usePageBottomInset: () => 0,
 }))
 jest.mock('~features/bible/ConcordanceVerse', () => 'ConcordanceVerse')
+jest.mock('~common/ui/ListSection', () => ({ ListSeparator: 'ListSeparator' }))
 const entry: StrongLexiconEntry = {
   id: 266,
   selectedIdentity: { kind: 'dstrong', code: 'G0266' },

@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { formatStrongDisplayCode } from '~helpers/strongIdentities'
 
 import StrongDictionaryPage from './StrongDictionaryPage'
 import StrongEntryRouteScaffold from './StrongEntryRouteScaffold'
@@ -18,12 +19,17 @@ const StrongDictionaryRouteScreen = ({ context, isFormSheet }: Props) => {
 
   return (
     <StrongEntryRouteScaffold
+      className="bg-canvas"
       context={context}
       entryState={entryState}
       isFormSheet={isFormSheet}
       subTitle={
         entryState.entry
-          ? [entryState.entry.stepCode, entryState.entry.original, entryState.entry.gloss]
+          ? [
+              formatStrongDisplayCode(entryState.entry.stepCode),
+              entryState.entry.original,
+              entryState.entry.gloss,
+            ]
               .filter(Boolean)
               .join(' · ')
           : undefined

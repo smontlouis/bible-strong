@@ -20,6 +20,7 @@ const StrongRelatedRouteScreen = ({ context, isFormSheet }: Props) => {
 
   return (
     <StrongEntryRouteScaffold
+      className="bg-canvas"
       context={context}
       entryState={entryState}
       isFormSheet={isFormSheet}

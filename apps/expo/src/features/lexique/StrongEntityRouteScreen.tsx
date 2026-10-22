@@ -51,6 +51,7 @@ const StrongEntityRouteScreen = ({ context, entityKey, isFormSheet = false }: Pr
 
   return (
     <StrongEntryRouteScaffold
+      className="bg-canvas"
       context={context}
       entryState={entryState}
       isFormSheet={isFormSheet}

@@ -24,6 +24,13 @@ export const createStrongIdentity = (
   }
 }
 
+/**
+ * A Strong code as the reader knows it: « G26 », « H430 », « H802G » for a split sense. The stored
+ * code pads the number with zeros (G0026) for sorting; the zeros mean nothing to the reader.
+ */
+export const formatStrongDisplayCode = (code: string): string =>
+  code.replace(/^([HGhg])0*(?=\d)/u, (_, prefix: string) => prefix.toUpperCase())
+
 export const createStrongIdentityForBook = (
   reference: string | number,
   book: number

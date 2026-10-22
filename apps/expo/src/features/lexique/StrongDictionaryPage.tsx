@@ -3,9 +3,13 @@ import React from 'react'
 import { ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import Empty from '~common/Empty'
-import { VStack, usePageBottomInset } from '~common/ui/Box'
+import { usePageBottomInset } from '~common/ui/Box'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
-import { StrongEditorialHtml, StrongEyebrow } from './StrongDetailUI'
+import {
+  STRONG_COLUMN_MAX_WIDTH,
+  StrongEditorialHtml,
+  StrongEditorialSection,
+} from './StrongDetailUI'
 type Props = {
   entry: StrongLexiconEntry
   onOpenBibleReference: (osis: string) => void
@@ -25,18 +29,22 @@ const StrongDictionaryPage = ({ entry, onOpenBibleReference, onOpenStrong }: Pro
       style={{ flex: 1 }}
       contentContainerStyle={[
         pageContentStyle,
-        { maxWidth: 600, paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 + bottomInset },
+        {
+          maxWidth: STRONG_COLUMN_MAX_WIDTH + 40,
+          paddingHorizontal: 20,
+          paddingTop: 22,
+          paddingBottom: 90 + bottomInset,
+        },
       ]}
     >
-      <VStack className="overflow-hidden border-continuous gap-[14px]">
-        <StrongEyebrow>{resource.source}</StrongEyebrow>
+      <StrongEditorialSection title={resource.source} className="mt-[0px]">
         <StrongEditorialHtml
           selectable
           value={resource.contentHtml}
           onOpenBibleReference={onOpenBibleReference}
           onOpenStrong={onOpenStrong}
         />
-      </VStack>
+      </StrongEditorialSection>
     </ScrollView>
   )
 }
