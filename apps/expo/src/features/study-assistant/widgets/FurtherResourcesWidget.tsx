@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import type { FurtherResourcesWidget as Descriptor } from '@bible-strong/ai-contract/contract'
 import Box, { TouchableBox } from '~common/ui/Box'
@@ -43,8 +44,8 @@ export default function FurtherResourcesWidget({ widget }: { widget: Descriptor 
               accessibilityRole="button"
               disabled={missing}
               onPress={() => navigate(suggestionRoute(item))}
-              className="border-border flex-row items-center gap-3 border-b px-3 py-[10px]"
-              style={{ opacity: missing ? 0.5 : 1 }}
+              className="border-separator flex-row items-center gap-3 px-3 py-[10px]"
+              style={{ borderBottomWidth: StyleSheet.hairlineWidth, opacity: missing ? 0.5 : 1 }}
             >
               <FeatherIcon
                 name={item.kind === 'media' ? 'video' : 'book-open'}

@@ -55,7 +55,7 @@ function ContextChip() {
       <TouchableBox
         accessibilityRole="button"
         onPress={() => session.changeFollowReading(true)}
-        className="border-border mr-2 h-[30px] justify-center rounded-full border px-3"
+        className="bg-light-grey mr-2 h-[30px] justify-center rounded-full px-3"
       >
         <Text className="text-grey text-[13px]">{t('assistant.modal.followReading')}</Text>
       </TouchableBox>

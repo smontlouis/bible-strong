@@ -69,7 +69,7 @@ function ThreadStatus() {
               prompt={t(`assistant.modal.prompt.${key}`)}
               send
               disabled={busy || !ready}
-              className="border-border flex-row items-center gap-2 rounded-[12px] border px-4 py-3"
+              className="bg-light-grey flex-row items-center gap-2 rounded-[12px] px-4 py-3"
             >
               <Text className="text-primary">›</Text>
               <Text className="flex-1 text-[15px]">{t(`assistant.modal.action.${key}`)}</Text>

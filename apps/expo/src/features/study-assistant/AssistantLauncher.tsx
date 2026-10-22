@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native'
 import { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
@@ -73,7 +74,10 @@ function SheetHeader() {
   const { session, open, historyOpen, setHistoryOpen } = useAssistantSheet()
   const { current, busy } = session
   return (
-    <HStack className="border-border min-h-[50px] items-center border-b pl-3 pr-2">
+    <HStack
+      className="border-separator min-h-[50px] items-center pl-3 pr-2"
+      style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
+    >
       {historyOpen ? (
         <TouchableBox
           accessibilityRole="button"

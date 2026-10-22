@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import type {
   SourceGroupWidget as Descriptor,
@@ -17,7 +18,10 @@ function SourceCard({ source }: { source: StudySource }) {
     { showSource } = useAssistantSheet()
   const title = sourceDisplayTitle(source)
   return (
-    <Box className="border-border border-b px-3 py-[10px]">
+    <Box
+      className="border-separator px-3 py-[10px]"
+      style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
+    >
       <HStack className="items-center gap-2">
         <FeatherIcon name="file-text" size={15} color="grey" />
         <TouchableBox
@@ -35,9 +39,7 @@ function SourceCard({ source }: { source: StudySource }) {
           onPress={() => navigate(sourceRoute(source))}
         />
       </HStack>
-      <Text className="text-grey mt-1 text-[11px] font-semibold uppercase">
-        {t('assistant.widgets.sourceExcerpt')}
-      </Text>
+      <Text className="text-grey mt-1 text-[12px]">{t('assistant.widgets.sourceExcerpt')}</Text>
       <Text className="text-[14px] leading-[22px]" numberOfLines={8}>
         {source.excerpt}
       </Text>

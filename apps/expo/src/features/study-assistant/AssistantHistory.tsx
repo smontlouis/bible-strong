@@ -1,4 +1,4 @@
-import { Alert } from 'react-native'
+import { Alert, StyleSheet } from 'react-native'
 import { ThreadListItemPrimitive, ThreadListPrimitive } from '@assistant-ui/react-native'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -19,7 +19,10 @@ function HistoryRow({ threadId }: { threadId: string }) {
   const exchanges = Math.floor(messageCount / 2)
   const title = conversation.title || t('assistant.modal.newChat')
   return (
-    <ThreadListItemPrimitive.Root className="border-border flex-row items-center border-b">
+    <ThreadListItemPrimitive.Root
+      className="border-separator flex-row items-center "
+      style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
+    >
       <ThreadListItemPrimitive.Trigger disabled={session.busy} className="flex-1 py-3 pl-5">
         <Text className="text-[15px] font-semibold" numberOfLines={1}>
           {title}

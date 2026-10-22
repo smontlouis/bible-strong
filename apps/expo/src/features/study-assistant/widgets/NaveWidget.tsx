@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import type { NaveWidget as Descriptor } from '@bible-strong/ai-contract/contract'
 import Box, { HStack } from '~common/ui/Box'
@@ -29,7 +30,10 @@ export default function NaveWidget({ widget }: { widget: Descriptor }) {
           }}
         />
       </Box>
-      <HStack className="border-border items-center justify-between border-t px-3 py-2">
+      <HStack
+        className="border-separator items-center justify-between px-3 py-2"
+        style={{ borderTopWidth: StyleSheet.hairlineWidth }}
+      >
         <Text className="text-grey text-[12px]">Nave · {widget.language.toUpperCase()}</Text>
         <WidgetOpenButton
           label={t('assistant.widgets.openTopic')}

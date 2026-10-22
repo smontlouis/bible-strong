@@ -22,7 +22,7 @@ export default function ErrorState({
     <Box
       accessibilityRole={retrying ? undefined : 'alert'}
       accessibilityLiveRegion="polite"
-      className="border-border my-3 flex-row gap-3 rounded-[12px] border p-3"
+      className="bg-light-grey my-3 flex-row gap-3 rounded-[12px] p-3"
     >
       {retrying ? (
         <ActivityIndicator size="small" color={colors.grey} />

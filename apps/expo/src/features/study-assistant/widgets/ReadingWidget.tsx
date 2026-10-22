@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import type { ReadingWidget as Descriptor } from '@bible-strong/ai-contract/contract'
 import Box from '~common/ui/Box'
@@ -86,10 +87,11 @@ export default function ReadingWidget({ widget }: { widget: Descriptor }) {
           </>
         )}
         {!!widget.reflection && (
-          <Box className="border-border mt-2 border-t pt-2">
-            <Text className="text-grey text-[11px] font-semibold uppercase">
-              {t('assistant.widgets.reflection')}
-            </Text>
+          <Box
+            className="border-separator mt-2 pt-2"
+            style={{ borderTopWidth: StyleSheet.hairlineWidth }}
+          >
+            <Text className="text-grey text-[12px]">{t('assistant.widgets.reflection')}</Text>
             <Text className="text-[14px] leading-[22px]">{widget.reflection}</Text>
           </Box>
         )}

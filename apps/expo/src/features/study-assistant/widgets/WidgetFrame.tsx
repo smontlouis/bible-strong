@@ -1,5 +1,5 @@
 import { useState, type ComponentProps, type ReactNode } from 'react'
-import { ActivityIndicator } from 'react-native'
+import { ActivityIndicator, StyleSheet } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -24,12 +24,16 @@ export default function WidgetFrame({
   leading?: ReactNode
 }) {
   return (
-    <Box className="border-border bg-reverse my-2 overflow-hidden rounded-[16px] border">
-      <HStack className="border-border items-center gap-[10px] border-b px-3 py-[10px]">
+    // On the opaque sheet, a widget is set off by its light grey fill alone: no outline.
+    <Box className="bg-light-grey my-2 overflow-hidden rounded-[16px]">
+      <HStack
+        className="border-separator items-center gap-[10px] px-3 py-[10px]"
+        style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
+      >
         {leading || <FeatherIcon name={icon} size={17} color="primary" />}
         <Box className="flex-1">
-          <Text className="text-grey text-[11px] font-semibold uppercase">{eyebrow}</Text>
-          <Text className="text-[15px] font-bold" numberOfLines={2}>
+          <Text className="text-grey text-[12px]">{eyebrow}</Text>
+          <Text className="text-[15px] font-semibold" numberOfLines={2}>
             {title}
           </Text>
         </Box>
@@ -125,7 +129,10 @@ export function WidgetNotice({ children }: { children: string }) {
 export function WidgetDisclosure({ title, children }: { title: string; children: ReactNode }) {
   const [open, setOpen] = useState(false)
   return (
-    <Box className="border-border mt-2 border-t pt-2">
+    <Box
+      className="border-separator mt-2 pt-2"
+      style={{ borderTopWidth: StyleSheet.hairlineWidth }}
+    >
       <TouchableBox
         accessibilityRole="button"
         accessibilityState={{ expanded: open }}

@@ -68,7 +68,7 @@ export default function BookWidget({ widget }: { widget: Descriptor }) {
                     params: { workId: item.workId, language: widget.language },
                   })
                 }
-                className="bg-light-grey flex-row items-center gap-3 rounded-[12px] p-3"
+                className="bg-reverse flex-row items-center gap-3 rounded-[12px] p-3"
               >
                 <FeatherIcon name="play" size={18} color="primary" />
                 <Box className="flex-1">
@@ -150,7 +150,7 @@ export default function BookWidget({ widget }: { widget: Descriptor }) {
                     },
                   })
                 }
-                className="bg-light-grey h-[36px] w-[36px] items-center justify-center rounded-[8px]"
+                className="bg-reverse h-[36px] w-[36px] items-center justify-center rounded-[8px]"
               >
                 <Text className="text-[13px]">{i + 1}</Text>
               </TouchableBox>

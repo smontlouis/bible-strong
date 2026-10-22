@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -69,7 +70,10 @@ function PassageCard({
       },
     })
   return (
-    <Box className="border-border border-b px-3 py-[10px]">
+    <Box
+      className="border-separator px-3 py-[10px]"
+      style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
+    >
       <HStack className="items-center gap-2">
         <TouchableBox accessibilityRole="button" onPress={open} className="shrink">
           <Text className="text-primary text-[14px] font-semibold" numberOfLines={1}>
@@ -143,7 +147,10 @@ export default function PassageWidget({ widget }: { widget: Descriptor }) {
       eyebrow={t(`assistant.widgets.${translation ? widget.kind : 'passages'}`)}
     >
       {translation && (
-        <Box className="border-border gap-1 border-b px-3 py-2">
+        <Box
+          className="border-separator gap-1 px-3 py-2"
+          style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
+        >
           <TouchableBox
             accessibilityRole="checkbox"
             accessibilityState={{ checked: differences }}
