@@ -4,7 +4,9 @@ import { Verse as TVerse } from '~common/types'
 import { WordToken, getTokenByWordIndex } from '~helpers/wordTokenizer'
 
 /** The background of selected text: words in annotation mode, whole verses otherwise */
-export const TEXT_SELECTION_COLOR = 'rgba(0, 122, 255, 0.3)'
+export const TEXT_SELECTION_COLOR = 'rgba(0, 122, 255, 0.18)'
+/** The corner radius of selected text, the same as a background highlight */
+export const TEXT_SELECTION_RADIUS = '4px'
 
 export interface WordPosition {
   verseKey: string

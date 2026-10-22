@@ -3,7 +3,7 @@ import { convertHex } from './convertHex'
 import { RootStyles } from './BibleDOMWrapper'
 import { HIGHLIGHT_BACKGROUND_OPACITY, getContrastTextColor } from '../../../helpers/highlightUtils'
 import { isDarkTheme, noSelect } from './utils'
-import { TEXT_SELECTION_COLOR } from './AnnotationMode/selectionUtils'
+import { TEXT_SELECTION_COLOR, TEXT_SELECTION_RADIUS } from './AnnotationMode/selectionUtils'
 
 export type HighlightType = 'background' | 'textColor' | 'underline'
 
@@ -122,7 +122,7 @@ export const ContainerText = styled('span')<
     background: isSelected
       ? `${selectionLayer}, ${highlightStyles.background}`
       : highlightStyles.background,
-    borderRadius: highlightStyles.borderRadius,
+    borderRadius: isSelected ? TEXT_SELECTION_RADIUS : highlightStyles.borderRadius,
     color: highlightStyles.color,
     padding: '4px',
     WebkitBoxDecorationBreak: 'clone',

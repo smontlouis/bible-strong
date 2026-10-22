@@ -2,6 +2,7 @@
 
 // surface-allow: drawn on the text, not surfaces (pen circle glow, annotation ring, handles)
 import { styled, keyframes } from 'goober'
+import { TEXT_SELECTION_RADIUS } from './selectionUtils'
 
 /** Parse a hex color string to [r, g, b] array */
 function hexToRgb(hex: string): [number, number, number] {
@@ -194,7 +195,7 @@ export const HighlightRectDiv = styled('div')<{
     left: `${$left}px`,
     width: `${$width}px`,
     height: `${$height}px`,
-    borderRadius: '2px',
+    borderRadius: isSelection ? TEXT_SELECTION_RADIUS : '2px',
     boxSizing: 'border-box',
     pointerEvents: 'none',
     opacity: $isDimmed ? 0.18 : 1,
