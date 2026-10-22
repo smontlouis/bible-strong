@@ -40,7 +40,15 @@ export function useWorkspaceRoutePanel() {
     baseIndex >= 0 && workspaceState?.key
       ? { key: workspaceState.key, count: routes.length - 1 - baseIndex }
       : undefined
+  // Under a sheet the page that stays on screen is the base route, not the sheet's own path.
+  const basePath =
+    baseRoute && baseIndex < routes.length - 1
+      ? baseRoute.name === 'index'
+        ? '/'
+        : `/${baseRoute.name}`
+      : undefined
   return {
+    basePath,
     sidebarDocked: Platform.OS === 'web' ? sidebarDocked : true,
     closeTarget,
     enabled,

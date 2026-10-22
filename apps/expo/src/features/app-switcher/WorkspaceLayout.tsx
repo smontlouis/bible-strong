@@ -83,6 +83,10 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
   }, [contentLeft])
 
   const isWorkspace = pathname === '/'
+  // A form sheet opened over a tab leaves the tab on screen and selected in the sidebar.
+  const basePath = panel.basePath ?? pathname
+  const showsReader = basePath === '/' || panel.showsStudy
+  const sheetOverReader = Platform.OS !== 'web' && basePath === '/' && !isWorkspace
   const visitPage = (page: 'home' | 'settings') => {
     setOverlayOpen(false)
     if (pathname !== workspacePagePath[page])
@@ -141,8 +145,8 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
             <WorkspaceSidebar
               openHome={() => visitPage('home')}
               openMenu={() => visitPage('settings')}
-              activePage={getWorkspacePageForPath(pathname)}
-              isContentActive={isWorkspace || panel.showsStudy}
+              activePage={getWorkspacePageForPath(basePath)}
+              isContentActive={showsReader}
               onSelectContent={() => {
                 setOverlayOpen(false)
                 if (!isWorkspace) router.push('/')
@@ -208,8 +212,11 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
                 dataSet={Platform.OS === 'web' ? { assistantSurface: 'reader' } : undefined}
                 className="absolute inset-0"
                 style={{
-                  display: isWorkspace || panel.showsStudy ? 'flex' : 'none',
+                  display: showsReader ? 'flex' : 'none',
                   right: panel.open ? panel.reservedWidth : 0,
+                  // The stack stays mounted to present the sheet, but its empty index screen
+                  // must not cover the tab; UIKit presents the sheet above both.
+                  zIndex: sheetOverReader ? 1 : undefined,
                 }}
               >
                 <TabContextProvider>

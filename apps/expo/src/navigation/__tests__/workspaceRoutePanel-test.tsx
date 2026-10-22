@@ -108,3 +108,12 @@ it('falls back to the workspace for a directly opened panel', () => {
   mockRoutes = [{ name: '(explore)' }]
   expect(readPanel()?.closeTarget).toBeUndefined()
 })
+it('names the page that stays under native sheets', () => {
+  mockPlatform = 'ios'
+  mockRoutes = [{ name: 'index' }, { name: 'strong' }, { name: '(explore)' }]
+  expect(readPanel()?.basePath).toBe('/')
+  mockRoutes = [{ name: 'index' }, { name: 'home' }, { name: 'strong' }]
+  expect(readPanel()?.basePath).toBe('/home')
+  mockRoutes = [{ name: 'index' }, { name: 'home' }]
+  expect(readPanel()?.basePath).toBeUndefined()
+})
