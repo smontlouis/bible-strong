@@ -349,8 +349,9 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
         blurOptions={{
           intensity: 90,
         }}
+        // No colour on iOS: the system glass shows the page through the sheet. Android has no glass.
         backgroundColor={
-          backgroundColor || Platform.OS === 'android' ? theme.colors.reverse : undefined
+          backgroundColor ?? (Platform.OS === 'android' ? theme.colors.reverse : undefined)
         }
         detached={detached}
         detachedOffset={detachedOffset}

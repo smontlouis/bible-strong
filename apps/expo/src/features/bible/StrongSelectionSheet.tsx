@@ -4,6 +4,7 @@ import HorizontalControlScrollView from '~common/HorizontalControlScrollView'
 import StrongSelectionContainer from './StrongSelectionContainer'
 import { twMerge } from '~common/ui/classNames'
 import { resolveThemeColor, colorWithOpacity } from '~themes/colorValues'
+import SheetWell from '~common/ui/SheetWell'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import StrongPreviewFade from './StrongPreviewFade'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
@@ -59,27 +60,18 @@ type StrongSelectionSheetProps = {
   onClose: () => void
 }
 
-// An inner panel of the sheet, on the same translucent well as the previews: no outline.
+// An inner panel of the sheet, on the same translucent well as the previews.
 const StrongDownloadPromptCard = ({
   children,
   gap = 0,
 }: {
   children: React.ReactNode
   gap?: number
-}) => {
-  const stylingTheme = useStylingTheme()
-  return (
-    <VStack
-      className="border-continuous overflow-hidden rounded-[12px] px-[14px] py-[14px]"
-      style={{
-        gap: gap,
-        backgroundColor: colorWithOpacity(resolveThemeColor(stylingTheme, 'lightGrey'), 0.5),
-      }}
-    >
-      {children}
-    </VStack>
-  )
-}
+}) => (
+  <SheetWell className="px-[14px] py-[14px]" style={{ gap }}>
+    {children}
+  </SheetWell>
+)
 
 const StrongSelectionSheet = ({
   sheetRef,
