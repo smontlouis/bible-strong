@@ -29,7 +29,7 @@ const AnnotationSheetContent = (props: AnnotationToolbarProps) => {
     onRelationsPress,
     tagsCount = 0,
     relationsCount = 0,
-    version,
+    annotatedVersion,
   } = props
   const { t } = useTranslation()
   const typeLabels = useAnnotationTypeLabels()
@@ -54,12 +54,12 @@ const AnnotationSheetContent = (props: AnnotationToolbarProps) => {
             <Text className="font-bold text-[18px] flex-shrink" numberOfLines={1}>
               {t('Annotation')}
             </Text>
-            {version && (
+            {annotatedVersion && (
               <Box
                 className="rounded-full px-[7px] py-[2px] bg-light-grey"
                 testID="annotation-toolbar-version"
               >
-                <Text className="text-[13px] font-bold text-primary">{version}</Text>
+                <Text className="text-[13px] font-bold text-primary">{annotatedVersion}</Text>
               </Box>
             )}
           </HStack>

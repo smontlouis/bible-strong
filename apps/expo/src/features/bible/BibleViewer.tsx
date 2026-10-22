@@ -1873,7 +1873,6 @@ const BibleViewer = ({
             onRelationsPress: handleAnnotationRelationsPress,
             tagsCount: Object.keys(annotationMode.selectedAnnotation?.tags || {}).length,
             relationsCount: annotationRelationCount,
-            version: parallelVersions.length > 0 ? annotationMode.version : undefined,
             annotatedVersion: annotationMode.version,
             entryVerseKey: annotationEntryVerseKey,
             isEnabled: isAnnotating,

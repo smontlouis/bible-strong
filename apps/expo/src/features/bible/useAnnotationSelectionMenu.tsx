@@ -59,7 +59,6 @@ export default function useAnnotationSelectionMenu(
     onRelationsPress,
     tagsCount = 0,
     relationsCount = 0,
-    version,
     annotatedVersion,
     entryVerseKey,
     isEnabled,
@@ -86,7 +85,7 @@ export default function useAnnotationSelectionMenu(
   const anchor = current ?? lastAnchor ?? { verseKey: entryVerseKey }
   const target: VerseMenuTarget = {
     ...anchor,
-    version: selection?.version ?? annotatedVersion ?? version ?? '',
+    version: selection?.version ?? annotatedVersion ?? '',
   }
 
   const menu: SelectionMenuValue = {
@@ -175,12 +174,12 @@ export default function useAnnotationSelectionMenu(
       ),
       headerContent: (
         <HStack className="px-3 pb-[6px] items-center gap-[6px]">
-          {version && (
+          {annotatedVersion && (
             <Box
               className="rounded-full px-[6px] py-[1px] bg-light-grey"
               testID="annotation-toolbar-version"
             >
-              <Text className="text-[11px] font-bold text-primary">{version}</Text>
+              <Text className="text-[11px] font-bold text-primary">{annotatedVersion}</Text>
             </Box>
           )}
           <Text className="flex-1 text-[12px] text-tertiary" numberOfLines={2}>
@@ -221,7 +220,6 @@ export default function useAnnotationSelectionMenu(
                     })
                   }
                   layout="grid"
-                  gridAlign="start"
                   circleSize={22}
                 />
               </Box>

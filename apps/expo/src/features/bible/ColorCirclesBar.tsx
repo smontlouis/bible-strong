@@ -141,7 +141,6 @@ const ColorCirclesBar = ({
         showAddButton
         onAddPress={handleOpenColorPicker}
         layout={compact ? 'grid' : 'scroll'}
-        gridAlign="start"
         circleSize={compact ? 22 : undefined}
       />
 

@@ -168,8 +168,8 @@ const Header = ({
       },
       { language: readingLanguage }
     ),
-    ...(isParallel && annotatedVersion ? [annotatedVersion] : []),
-    t('Annotation'),
+    // Annotations belong to the version they are made on
+    ...(annotatedVersion ? [annotatedVersion] : []),
   ].join(' · ')
 
   // Check if current chapter has a bookmark

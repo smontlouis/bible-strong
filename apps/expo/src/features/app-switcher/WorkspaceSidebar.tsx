@@ -134,11 +134,10 @@ const WorkspaceSidebar = ({
               <Text className="flex-1 ml-[10px] font-bold text-[15px]">Bible Strong</Text>
             </TouchableBox>
           </HStack>
+          {/* A desktop scrollbar would take its width from the right margin of the rows only. */}
           <ScrollView
-            style={{
-              flex: 1,
-              ...(Platform.OS === 'web' ? { scrollbarGutter: 'stable' } : {}),
-            }}
+            style={{ flex: 1 }}
+            showsVerticalScrollIndicator={Platform.OS !== 'web'}
             contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 8, gap: 8 }}
           >
             {[

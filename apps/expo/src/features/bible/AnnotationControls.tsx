@@ -31,9 +31,7 @@ export type AnnotationToolbarProps = {
   onRelationsPress?: () => void
   tagsCount?: number
   relationsCount?: number
-  // Parallel reading: the version being annotated
-  version?: string
-  /** The version the session annotates, shown or not. */
+  /** The version the session annotates, named beside the reference: annotations belong to it alone. */
   annotatedVersion?: string
   /** Desktop menu: the verse the session started from, where the menu opens until words are chosen. */
   entryVerseKey?: string
