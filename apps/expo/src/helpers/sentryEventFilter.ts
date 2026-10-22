@@ -14,7 +14,7 @@ const MAX_REPORTED_FAILURES = 500
 // A cancelled request is not a failure: typing in the search cancels the previous query.
 const cancelledRequestCodes = new Set(['RESOURCE_REQUEST_ABORTED', 'ABORTERROR'])
 
-// Conditions of the device or its network, already shown to the reader with a retry.
+// Conditions of the device or its network, not bugs: a lost connection, a slow one, a full disk.
 // Responses of our own API keep their own `RESOURCE_API_HTTP_*` report and are not listed here.
 const expectedConditionCodes = new Set([
   'OFFLINE',
@@ -24,6 +24,8 @@ const expectedConditionCodes = new Set([
   'RESOURCE_TEMPORARY_UNAVAILABLE',
   'RESOURCE_REQUEST_TIMEOUT',
   'RESOURCE_DOWNLOAD_TIMEOUT',
+  'RESOURCE_STORAGE_FULL',
+  'ACCOUNT_SYNC_INITIAL_LOAD_TIMEOUT',
 ])
 
 const isAppCheckCode = (code: string) =>
@@ -62,9 +64,6 @@ const isUnhandled = (event: ErrorEvent) =>
   event.level === 'fatal' ||
   (event.exception?.values ?? []).some(exception => exception.mechanism?.handled === false)
 
-// Startup and migration failures can block the app: they are never sampled away.
-const isCriticalArea = (event: ErrorEvent) => event.tags?.['diagnostic.area'] === 'startup'
-
 const failureKey = (event: ErrorEvent) => {
   const exceptions = event.exception?.values ?? []
   // Sentry lists the thrown error last, after the errors it wraps.
@@ -100,8 +99,8 @@ export const createSentryEventFilter = ({
     if (reportedFailures.size >= MAX_REPORTED_FAILURES) reportedFailures.clear()
     reportedFailures.add(key)
 
-    if (isCriticalArea(event)) return event
-
+    // Startup and migration failures are sampled too when they only describe the device: an
+    // outage of our own service still shows through the kept 5%.
     const codes = eventErrorCodes(event, hint)
     if (codes.some(code => cancelledRequestCodes.has(code))) return null
     if (codes.some(code => expectedConditionCodes.has(code) || isAppCheckCode(code))) {

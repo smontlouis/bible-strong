@@ -88,7 +88,7 @@ describe('Sentry event filter', () => {
     expect(kept?.tags?.['diagnostic.sample_rate']).toBe(EXPECTED_CONDITION_SAMPLE_RATE)
   })
 
-  it('keeps every startup failure, whatever its cause', () => {
+  it('keeps every startup failure that is not a condition of the device', () => {
     const filter = createSentryEventFilter({ random: droppedSample })
 
     expect(
@@ -96,12 +96,35 @@ describe('Sentry event filter', () => {
         errorEvent({
           area: 'startup',
           event: 'app_migration.failed',
-          errorCode: 'RESOURCE_APPCHECK_TOKEN_ERROR',
-          value: 'RESOURCE_APPCHECK_TOKEN_ERROR',
+          errorCode: 'LEGACY_REPLACEMENT_NOT_COMPATIBLE',
+          value: 'LEGACY_REPLACEMENT_NOT_COMPATIBLE',
         }),
         {}
       )
     ).not.toBeNull()
+  })
+
+  it.each([
+    errorEvent({
+      area: 'startup',
+      event: 'app_migration.failed',
+      errorCode: 'RESOURCE_OFFLINE',
+      value: 'RESOURCE_OFFLINE (Unable to resolve host "api.bible-strong.app")',
+    }),
+    errorEvent({
+      area: 'startup',
+      event: 'app_migration.failed',
+      errorCode: 'RESOURCE_STORAGE_FULL',
+      value: 'RESOURCE_STORAGE_FULL (write failed: ENOSPC (No space left on device))',
+    }),
+    errorEvent({
+      area: 'sync',
+      event: 'account_sync.initial_load_timeout',
+      value: 'ACCOUNT_SYNC_INITIAL_LOAD_TIMEOUT',
+    }),
+  ])('samples conditions of the device, at startup too', event => {
+    expect(createSentryEventFilter({ random: droppedSample })({ ...event }, {})).toBeNull()
+    expect(createSentryEventFilter({ random: keptSample })({ ...event }, {})).not.toBeNull()
   })
 
   it.each([

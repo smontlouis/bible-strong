@@ -18,6 +18,7 @@ import { installManagedResource } from '~helpers/managedResourceInstallation'
 import { refreshPersistedDownloadItem } from '~helpers/persistedDownloadItem'
 import { completeInterlinearDownloadPlan } from '~helpers/downloadItemFactory'
 import { appLogger } from '~helpers/agentObservability'
+import { isStorageFullError } from '~helpers/resourceDeviceCondition'
 import { offlineResourceRegistry } from '~features/resources/resourceAvailability'
 import { isInterlinearCapableBibleVersion } from '~helpers/interlinearBiblePublications'
 import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
@@ -25,6 +26,9 @@ import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
 const PERSIST_KEY = 'downloadQueue'
 const MAX_RETRIES = 2
 const PERSIST_DEBOUNCE_MS = 2000
+
+// A full disk stays full: downloading the archive again would fail the same way.
+const isWorthRetrying = (error: unknown) => !isStorageFullError(error)
 
 // ---------------------------------------------------------------------------
 // DownloadManager — singleton
@@ -112,21 +116,28 @@ class DownloadManager {
     this.schedulePersist()
   }
 
-  /** Retry a failed item. */
+  /** Retry a failed item, and the failed or cancelled dependency that blocked it. */
   retry(itemId: string): void {
     const states = new Map(this.jotaiStore.get(downloadItemStatesAtom))
     const state = states.get(itemId)
     if (!state || state.status !== 'failed') return
 
-    this.cancelledIds.delete(itemId)
-    states.set(itemId, {
-      ...state,
-      item: refreshPersistedDownloadItem(state.item),
-      status: 'queued',
-      downloadProgress: 0,
-      insertProgress: 0,
-      error: undefined,
-    })
+    const requeue = (id: string, current: DownloadItemState) => {
+      this.cancelledIds.delete(id)
+      states.set(id, {
+        ...current,
+        item: refreshPersistedDownloadItem(current.item),
+        status: 'queued',
+        downloadProgress: 0,
+        insertProgress: 0,
+        error: undefined,
+      })
+    }
+    requeue(itemId, state)
+    const dependency = state.item.dependsOnId ? states.get(state.item.dependsOnId) : undefined
+    if (dependency && (dependency.status === 'failed' || dependency.status === 'cancelled')) {
+      requeue(dependency.item.id, dependency)
+    }
     this.jotaiStore.set(downloadItemStatesAtom, states)
     this.schedulePersist()
     this.processQueue()
@@ -227,20 +238,24 @@ class DownloadManager {
         const states = this.jotaiStore.get(downloadItemStatesAtom)
         const { next, blocked } = getDownloadQueueDecision(states, onlineManager.isOnline())
         if (blocked) {
-          appLogger.captureError(
-            'download',
-            'queue.dependency_failed',
-            new Error('DOWNLOAD_DEPENDENCY_FAILED'),
-            {
-              resourceId: blocked.item.id,
-              dependencyResourceId: blocked.item.dependsOnId,
-            }
-          )
-          this.updateItemStatus(
-            blocked.item.id,
-            'failed',
-            `Dependency failed: ${blocked.item.dependsOnId}`
-          )
+          const dependency = blocked.item.dependsOnId
+            ? states.get(blocked.item.dependsOnId)
+            : undefined
+          // The dependency's own failure is already reported: this one is only its consequence.
+          appLogger.warn('download', 'queue.dependency_failed', {
+            resourceId: blocked.item.id,
+            dependencyResourceId: blocked.item.dependsOnId,
+            dependencyStatus: dependency?.status,
+          })
+          if (dependency?.status === 'cancelled') {
+            this.updateItemStatus(blocked.item.id, 'cancelled')
+          } else {
+            this.updateItemStatus(
+              blocked.item.id,
+              'failed',
+              dependency?.error ?? `Dependency failed: ${blocked.item.dependsOnId}`
+            )
+          }
           continue
         }
 
@@ -319,7 +334,7 @@ class DownloadManager {
       // Auto-retry up to MAX_RETRIES
       const states = new Map(this.jotaiStore.get(downloadItemStatesAtom))
       const current = states.get(item.id)
-      if (current && current.item.retryCount < MAX_RETRIES) {
+      if (current && current.item.retryCount < MAX_RETRIES && isWorthRetrying(e)) {
         appLogger.warn('download', 'resource.retry_scheduled', {
           resourceId: item.id,
           resourceType: item.type,

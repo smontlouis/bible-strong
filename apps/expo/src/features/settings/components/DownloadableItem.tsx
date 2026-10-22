@@ -13,6 +13,7 @@ import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import type { DownloadItemState } from '~state/downloadQueue'
 import { downloadManager } from '~helpers/downloadManager'
 import { useResourcePublicationStatus } from '~helpers/useResourcePublicationStatus'
+import { getDownloadFailureMessageKey } from '~helpers/resourceDeviceCondition'
 import { DOWNLOAD_LIST_LAYOUT } from './downloadListLayout'
 interface DownloadableItemProps {
   itemId: string
@@ -85,6 +86,7 @@ const DownloadableItem = ({
     isInvalid,
     needsUpdate: effectiveNeedsUpdate,
   })
+  const failureMessageKey = getDownloadFailureMessageKey(queueState?.error)
 
   const handlePress = () => {
     if (isSelectMode) {
@@ -215,7 +217,7 @@ const DownloadableItem = ({
             )}
             {visualState === 'failed' && queueState?.error && (
               <Text className="text-[12px] text-quart mt-[2px]" numberOfLines={1}>
-                {queueState.error}
+                {failureMessageKey ? t(failureMessageKey) : queueState.error}
               </Text>
             )}
             {visualState === 'invalid' && (

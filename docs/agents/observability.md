@@ -62,8 +62,9 @@ reopening content already held in the UI query cache may not trigger another rea
 - Error-event sampling is `1.0`: bugs are never sampled. `src/helpers/sentryEventFilter.ts` (`beforeSend`) then trims handled errors that are not bugs:
   - each handled failure (area, event, and error code, or the message when there is no code) is sent at most once per launch; later ones stay as breadcrumbs;
   - cancelled requests (`RESOURCE_REQUEST_ABORTED`, `AbortError`) are never sent;
-  - expected conditions (offline, temporary unavailability, request and download timeouts, App Check failures) are sent for 5% of launches, tagged `diagnostic.sample_rate` — multiply their counts by 20;
-  - crashes and every failure in the `startup` area (migrations included) are never sampled away. Responses of the Resource API keep their own `resource_api.protected_request_failed` report.
+  - expected conditions (offline, temporary unavailability, request and download timeouts, a full disk, a first account sync slower than 15 seconds, App Check failures) are sent for 5% of launches, tagged `diagnostic.sample_rate` — multiply their counts by 20. This applies to the `startup` area too, migrations included;
+  - crashes are never sampled away, nor is any other startup failure. Responses of the Resource API keep their own `resource_api.protected_request_failed` report.
+- Native download errors are classified before they are reported (`src/helpers/resourceDeviceCondition.ts`): Android's `FileSystemLegacyModule` and iOS's `ERR_FILESYSTEM_CANNOT_DOWNLOAD` become `RESOURCE_OFFLINE`, `RESOURCE_DOWNLOAD_TIMEOUT` or `RESOURCE_STORAGE_FULL`, with the native message kept after the code.
 - Default PII collection is disabled. The authenticated Sentry user is limited to the Firebase user ID and email; diagnostic contexts must not include profile data or user-generated content.
 - The root UI is wrapped with `Sentry.wrap`.
 - `src/common/ErrorBoundary.tsx` captures render crashes and shows a fallback.

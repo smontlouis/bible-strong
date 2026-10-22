@@ -103,6 +103,7 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
     (state: RootState) => Object.keys(state.user.bible.studies).length > 0
   )
   const readStudiesSyncMode = useEffectEvent(() => ({ isNewlyLogged, hasStudies }))
+  const readConnectionStatus = useEffectEvent(() => connectionStatus)
 
   useEffect(() => {
     if (!enabled || !isLogged || !user.id || connectionStatus !== 'internet') return
@@ -120,8 +121,15 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
     currentUnsubscribeStudies = undefined
     currentSubcollectionUnsubscribes = []
     let syncFallbackTimeout: ReturnType<typeof setTimeout> | undefined
+    let slowSyncReportTimeout: ReturnType<typeof setTimeout> | undefined
     let disposed = false
     const authoritativeSubcollections = new Set<string>()
+    // Collections whose listener answered, from the server, the cache or local pending writes.
+    const answeredCollections = new Set<UserDataSyncCollection>()
+    const markCollectionAnswered = (collection: UserDataSyncCollection) => {
+      answeredCollections.add(collection)
+      dispatch(markUserDataSyncCollectionLoaded({ collection }))
+    }
 
     const setupListeners = async () => {
       if (!enabled || !isLogged || isLoading !== false || !user.id) {
@@ -130,6 +138,8 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
       const userId = user.id
 
       dispatch(startUserDataSync())
+      const syncStartedAt = Date.now()
+      // Screens waiting for the account data stop waiting after this delay, migrations included.
       syncFallbackTimeout = setTimeout(() => {
         const sync = store.getState().user.sync
         if (!sync?.isLoading) {
@@ -137,12 +147,6 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
         }
 
         console.warn('[LiveUpdates] User data sync timed out, keeping local data visible')
-        appLogger.captureError(
-          'sync',
-          'account_sync.initial_load_timeout',
-          new Error('ACCOUNT_SYNC_INITIAL_LOAD_TIMEOUT'),
-          { timeoutMs: SYNC_FALLBACK_TIMEOUT_MS }
-        )
         dispatch(finishUserDataSync())
       }, SYNC_FALLBACK_TIMEOUT_MS)
 
@@ -171,6 +175,27 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
         if (!disposed) dispatch(finishUserDataSync())
         return
       }
+      const accountMigrationDurationMs = Date.now() - syncStartedAt
+
+      // Only the listeners are measured: the migration check before them has its own reports.
+      slowSyncReportTimeout = setTimeout(() => {
+        const missingCollections = TRACKED_SYNC_COLLECTIONS.filter(
+          collection => !answeredCollections.has(collection)
+        )
+        if (!missingCollections.length) return
+
+        appLogger.captureError(
+          'sync',
+          'account_sync.initial_load_timeout',
+          new Error('ACCOUNT_SYNC_INITIAL_LOAD_TIMEOUT'),
+          {
+            timeoutMs: SYNC_FALLBACK_TIMEOUT_MS,
+            missingCollections,
+            accountMigrationDurationMs,
+            connectionStatus: readConnectionStatus(),
+          }
+        )
+      }, SYNC_FALLBACK_TIMEOUT_MS)
 
       // Subscribe to user document (settings, subscription, etc.)
       currentUnsubscribeUsers = onSnapshot(doc(firebaseDb, 'users', userId), docSnapshot => {
@@ -226,6 +251,7 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
           userId,
           collection,
           (data, changes) => {
+            if (isTrackedSyncCollection(collection)) answeredCollections.add(collection)
             // Skip updates while migration is in progress to prevent race conditions
             // Migration writes in chunks, and between chunks the listener could fire
             // with incomplete/stale data, overwriting the correctly-imported Redux state
@@ -284,11 +310,18 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
             appLogger.captureError('sync', 'account_sync.subscription_failed', error, {
               collection,
             })
-            if (isTrackedSyncCollection(collection)) {
-              dispatch(markUserDataSyncCollectionLoaded({ collection }))
-            }
+            if (isTrackedSyncCollection(collection)) markCollectionAnswered(collection)
           },
-          { includeMetadataChanges: true }
+          {
+            includeMetadataChanges: true,
+            // Local writes not yet confirmed hold back the snapshot, not the screens: the store
+            // already shows them.
+            onPendingWrites: () => {
+              if (isTrackedSyncCollection(collection) && !answeredCollections.has(collection)) {
+                markCollectionAnswered(collection)
+              }
+            },
+          }
         )
         currentSubcollectionUnsubscribes.push(unsubscribe)
       }
@@ -298,6 +331,9 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
         query(collection(firebaseDb, 'studies'), where('user.id', '==', userId)),
         querySnapshot => {
           const source = querySnapshot?.metadata.hasPendingWrites ? 'Local' : 'Server'
+          if (source === 'Local' && !answeredCollections.has('studies')) {
+            markCollectionAnswered('studies')
+          }
           if (source === 'Local' || !querySnapshot) return
 
           if (studiesSyncMode.isNewlyLogged || !studiesSyncMode.hasStudies) {
@@ -346,12 +382,12 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
           }
 
           isFirstSnapshotListener = false
-          dispatch(markUserDataSyncCollectionLoaded({ collection: 'studies' }))
+          markCollectionAnswered('studies')
         },
         error => {
           console.warn('[LiveUpdates] Studies sync unavailable, using local data', error)
           appLogger.captureError('sync', 'account_sync.studies_subscription_failed', error)
-          dispatch(markUserDataSyncCollectionLoaded({ collection: 'studies' }))
+          markCollectionAnswered('studies')
         }
       )
     }
@@ -367,6 +403,9 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
       disposed = true
       if (syncFallbackTimeout) {
         clearTimeout(syncFallbackTimeout)
+      }
+      if (slowSyncReportTimeout) {
+        clearTimeout(slowSyncReportTimeout)
       }
       // Cleanup on unmount
       cleanupFirestoreSubscriptions()

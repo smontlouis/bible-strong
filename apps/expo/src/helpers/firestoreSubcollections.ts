@@ -469,7 +469,11 @@ export function subscribeToSubcollection(
   collectionName: SubcollectionName,
   onChange: SubcollectionChangeCallback,
   onError?: SubcollectionErrorCallback,
-  options?: { includeMetadataChanges?: boolean }
+  options?: {
+    includeMetadataChanges?: boolean
+    /** Called for each snapshot held back because it carries local writes not yet confirmed. */
+    onPendingWrites?: () => void
+  }
 ): () => void {
   let currentUnsubscribe: (() => void) | null = null
   let isDisposed = false
@@ -488,6 +492,7 @@ export function subscribeToSubcollection(
 
         // Ignorer les changements locaux
         if (snapshot.metadata.hasPendingWrites) {
+          options?.onPendingWrites?.()
           return
         }
 

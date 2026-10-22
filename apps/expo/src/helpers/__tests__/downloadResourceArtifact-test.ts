@@ -293,4 +293,27 @@ describe('R2 resource artifact download', () => {
     ).rejects.toThrow('RESOURCE_DOWNLOAD_TIMEOUT')
     expect(mockCancelAsync).toHaveBeenCalled()
   })
+
+  it('reports a lost connection during the native download as RESOURCE_OFFLINE', async () => {
+    mockDownloadAsync.mockRejectedValueOnce(
+      Object.assign(
+        new Error(
+          'Unable to resolve host "api.bible-strong.app": No address associated with hostname'
+        ),
+        { code: 'FileSystemLegacyModule' }
+      )
+    )
+
+    await expect(
+      downloadResourceArtifact({
+        url: 'https://api.bible-strong.app/v1/offline-artifacts/databases/nave.sqlite.zip',
+        archiveSha256: 'a'.repeat(64),
+        destinationPath: '/tmp/nave.zip',
+      })
+    ).rejects.toMatchObject({
+      code: 'RESOURCE_OFFLINE',
+      message: expect.stringMatching(/^RESOURCE_OFFLINE \(Unable to resolve host/),
+    })
+    expect(mockCaptureError).not.toHaveBeenCalled()
+  })
 })

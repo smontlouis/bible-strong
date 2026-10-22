@@ -4,6 +4,7 @@ import { act, create } from 'react-test-renderer'
 import useLiveUpdates from '~helpers/useLiveUpdates'
 
 const mockDispatch = jest.fn()
+const mockCaptureError = jest.fn()
 const mockOnSnapshot = jest.fn((..._args: unknown[]) => jest.fn())
 let mockHasStudies = false
 let mockPreviousIsLogged = false
@@ -36,6 +37,10 @@ jest.mock('~helpers/usePrevious', () => ({
 
 jest.mock('~helpers/useConnection', () => ({
   useConnectionStatus: () => 'internet',
+}))
+
+jest.mock('~helpers/agentObservability', () => ({
+  appLogger: { captureError: (...args: unknown[]) => mockCaptureError(...args) },
 }))
 
 jest.mock('~helpers/cleanupRegistry', () => ({
@@ -147,7 +152,7 @@ describe('useLiveUpdates account-entry gate', () => {
       'bookmarks',
       expect.any(Function),
       expect.any(Function),
-      { includeMetadataChanges: true }
+      expect.objectContaining({ includeMetadataChanges: true })
     )
     expect(mockOnSnapshot).toHaveBeenCalledTimes(2)
 
@@ -313,6 +318,91 @@ describe('useLiveUpdates account-entry gate', () => {
       payload: 'study-3',
       meta: { localOnly: true },
     })
+
+    await act(async () => {
+      renderer.unmount()
+    })
+  })
+
+  it('measures only the listeners when it reports a slow first sync', async () => {
+    jest.useFakeTimers()
+    const runBeforeSync = jest.fn(
+      () => new Promise<boolean>(resolve => setTimeout(() => resolve(true), 20_000))
+    )
+    const Harness = () => {
+      useLiveUpdates({ enabled: true, runBeforeSync, resumeToken: 0 })
+      return null
+    }
+
+    let renderer!: ReturnType<typeof create>
+    await act(async () => {
+      renderer = create(<Harness />)
+    })
+    // A slow migration check is not a slow sync.
+    await act(async () => {
+      jest.advanceTimersByTime(20_000)
+    })
+    expect(mockCaptureError).not.toHaveBeenCalled()
+    expect(mockSubscribeToSubcollection).toHaveBeenCalled()
+
+    act(() => {
+      mockSubcollectionOnChange?.(
+        {},
+        { added: {}, modified: {}, removed: [], fromCache: false, isFirstSnapshot: true }
+      )
+    })
+    await act(async () => {
+      jest.advanceTimersByTime(15_000)
+    })
+
+    expect(mockCaptureError).toHaveBeenCalledWith(
+      'sync',
+      'account_sync.initial_load_timeout',
+      expect.any(Error),
+      expect.objectContaining({
+        accountMigrationDurationMs: 20_000,
+        connectionStatus: 'internet',
+        missingCollections: expect.arrayContaining(['studies']),
+      })
+    )
+    const [, , , context] = mockCaptureError.mock.calls[0] as [
+      string,
+      string,
+      Error,
+      { missingCollections: string[] },
+    ]
+    expect(context.missingCollections).not.toContain('bookmarks')
+
+    await act(async () => {
+      renderer.unmount()
+    })
+    jest.useRealTimers()
+  })
+
+  it('stops waiting for a collection held back by local writes', async () => {
+    const runBeforeSync = jest.fn(async () => true)
+    const Harness = () => {
+      useLiveUpdates({ enabled: true, runBeforeSync, resumeToken: 0 })
+      return null
+    }
+
+    let renderer!: ReturnType<typeof create>
+    await act(async () => {
+      renderer = create(<Harness />)
+      await Promise.resolve()
+    })
+
+    const options = mockSubscribeToSubcollection.mock.calls[0]?.[4] as {
+      onPendingWrites: () => void
+    }
+    act(() => {
+      options.onPendingWrites()
+      options.onPendingWrites()
+    })
+
+    expect(
+      mockDispatch.mock.calls.filter(([action]) => action.type === 'user/mark-loaded')
+    ).toEqual([[{ type: 'user/mark-loaded', payload: { collection: 'bookmarks' } }]])
 
     await act(async () => {
       renderer.unmount()

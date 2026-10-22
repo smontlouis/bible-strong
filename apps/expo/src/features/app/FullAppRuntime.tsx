@@ -137,7 +137,8 @@ const AutomaticUpdates = () => {
 }
 
 const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
-  useKeepAwake()
+  // On Android the activity can be gone when the root unmounts; releasing the lock then rejects.
+  useKeepAwake(undefined, { suppressDeactivateWarnings: true })
 
   useEffect(() => {
     runAfterInteractions(() => {
