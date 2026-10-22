@@ -148,6 +148,14 @@ export default function useAnnotationSelectionMenu(
   const screens: Record<string, PanelScreen> = {
     actions: {
       title: t('Annotation'),
+      titleAccessory: annotatedVersion ? (
+        <Box
+          className="rounded-full px-[6px] py-[1px] bg-light-grey shrink-0"
+          testID="annotation-toolbar-version"
+        >
+          <Text className="text-[11px] font-bold text-primary">{annotatedVersion}</Text>
+        </Box>
+      ) : undefined,
       width: BIBLE_SELECTION_MENU_WIDTH,
       headerRight: (
         <>
@@ -173,19 +181,9 @@ export default function useAnnotationSelectionMenu(
         </>
       ),
       headerContent: (
-        <HStack className="px-3 pb-[6px] items-center gap-[6px]">
-          {annotatedVersion && (
-            <Box
-              className="rounded-full px-[6px] py-[1px] bg-light-grey"
-              testID="annotation-toolbar-version"
-            >
-              <Text className="text-[11px] font-bold text-primary">{annotatedVersion}</Text>
-            </Box>
-          )}
-          <Text className="flex-1 text-[12px] text-tertiary" numberOfLines={2}>
-            {reference}
-          </Text>
-        </HStack>
+        <Text className="px-3 pb-[6px] text-[12px] text-tertiary" numberOfLines={2}>
+          {reference}
+        </Text>
       ),
       content: nav => {
         navigation.current = nav

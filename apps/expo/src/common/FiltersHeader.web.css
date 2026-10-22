@@ -60,6 +60,17 @@
   gap: 10px;
   padding: 0 8px;
 }
+.bs-filter-heading .bs-panel-title {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+/* The accessory follows the title, which still shortens before it. */
+.bs-filter-heading .bs-panel-title h2 {
+  flex: 0 1 auto;
+}
 .bs-filter-heading h2 {
   flex: 1;
   margin: 0;

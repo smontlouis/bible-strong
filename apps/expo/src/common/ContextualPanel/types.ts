@@ -13,6 +13,8 @@ export type PanelNavigation = {
 }
 export type PanelScreen = {
   title: string
+  /** Web: shown right after the title, such as a badge that qualifies it. */
+  titleAccessory?: ReactNode
   hideHeader?: boolean
   /** Optional web width for this screen; height follows its content. */
   width?: number

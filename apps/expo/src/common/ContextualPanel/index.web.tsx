@@ -132,13 +132,16 @@ function PanelFrameLayout({
                     <FeatherIcon name="arrow-left" size={17} />
                   </button>
                 )}
-                {active ? (
-                  <Popover.Heading style={{ fontFamily: webFontFamily(theme.fontFamily.title) }}>
-                    {screen.title}
-                  </Popover.Heading>
-                ) : (
-                  <h2>{screen.title}</h2>
-                )}
+                <div className="bs-panel-title">
+                  {active ? (
+                    <Popover.Heading style={{ fontFamily: webFontFamily(theme.fontFamily.title) }}>
+                      {screen.title}
+                    </Popover.Heading>
+                  ) : (
+                    <h2>{screen.title}</h2>
+                  )}
+                  {screen.titleAccessory}
+                </div>
                 {screen.headerRight}
                 <div ref={setActionTarget} style={{ display: 'contents' }} />
               </div>
