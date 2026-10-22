@@ -8,7 +8,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
-import Spacer from '~common/ui/Spacer'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import PlanItem from '~features/plans/MyPlanListScreen/MyPlanItem'
 import { useComputedPlanItems } from '~features/plans/plan.hooks'
@@ -16,6 +15,8 @@ import { NewTab, TabItem } from '../../../../state/tabs'
 import NewTabContent from './NewTabContent'
 import { useTheme } from '~themes/ThemeProvider'
 import { SelectBibleReferenceModalProvider } from './SelectBibleReferenceModalProvider'
+import SheetWell from '~common/ui/SheetWell'
+import { ListSeparator } from '~common/ui/ListSection'
 export interface NewTabScreenProps {
   newAtom: PrimitiveAtom<NewTab>
 }
@@ -63,12 +64,12 @@ const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
         <Sheet ref={planSelectorRef} snapPoints={[1]} header={<SheetHeader title={t('Plans')} />}>
           <SheetScrollView>
             {plans.length ? (
-              <Box className="overflow-hidden border-continuous px-[20px] py-[20px]">
+              <SheetWell className="mx-[20px] my-[20px]">
                 {plans.map((plan, index) => (
                   <React.Fragment key={plan.id}>
+                    {index > 0 && <ListSeparator />}
                     <PlanItem
                       {...plan}
-                      onPlainGround
                       onPress={() => {
                         planSelectorRef.current?.dismiss()
                         setTab(tab => ({
@@ -79,10 +80,9 @@ const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
                         }))
                       }}
                     />
-                    {index < plans.length - 1 && <Spacer />}
                   </React.Fragment>
                 ))}
-              </Box>
+              </SheetWell>
             ) : (
               <Empty
                 icon={require('~assets/images/empty-state-icons/plan.svg')}

@@ -599,6 +599,7 @@
   "Réessayer": "",
   "bibleOfflineDetails.checking": "Vérification…",
   "bibleOfflineDetails.indexOptionSubtitle": "Hébreu et grec · +{{size}}",
+  "bibleOfflineDetails.indexOptionTitle": "Inclure l’index avec la Bible",
   "bibleOfflineDetails.download": "Télécharger",
   "bibleOfflineDetails.bibleDownloaded": "Bible téléchargée",
   "bibleOfflineDetails.downloadSize": "Télécharger {{size}}",

@@ -3,6 +3,7 @@ import { create, type ReactTestRenderer } from 'react-test-renderer'
 import { useBibleBookmarkScreens } from '../useBibleBookmarkScreens'
 
 const mockDispatch = jest.fn()
+jest.mock('react-native', () => ({ StyleSheet: { hairlineWidth: 0.5 } }))
 jest.mock('react-redux', () => ({ useDispatch: () => mockDispatch, useSelector: () => [] }))
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
 jest.mock('~redux/modules/user', () => ({

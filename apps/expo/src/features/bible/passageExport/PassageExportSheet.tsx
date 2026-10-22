@@ -1,4 +1,3 @@
-import { useTheme } from '~themes/ThemeProvider'
 import * as FileSystem from 'expo-file-system/legacy'
 import * as Sharing from 'expo-sharing'
 import { forwardRef, useContext, useEffect, useImperativeHandle, useRef, useState } from 'react'
@@ -20,6 +19,7 @@ import {
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import type { VerseIds } from '~common/types'
 import Box, { TouchableBox } from '~common/ui/Box'
+import SheetWell, { useSheetWellColor } from '~common/ui/SheetWell'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -69,18 +69,20 @@ type ExportFilterButtonProps = {
 
 const ExportFilterButton = ({ label, value, onPress, screen }: ExportFilterButtonProps) => {
   const navigation = useContext(PanelNavigationContext)
+  const sheetWellColor = useSheetWellColor()
   return (
     <TouchableBox
-      className="border-continuous overflow-hidden flex-[1] min-w-[0px] p-[13px] bg-light-grey rounded-[12px]"
+      className="border-continuous overflow-hidden flex-[1] min-w-[0px] p-[13px] rounded-[12px]"
+      style={{ backgroundColor: sheetWellColor }}
       accessibilityRole="button"
       accessibilityLabel={`${label}, ${value}`}
       onPress={() => (screen && navigation?.openScreen ? navigation.openScreen(screen) : onPress())}
     >
-      <Text className="font-bold text-[11px] text-grey" numberOfLines={1}>
-        {label.toUpperCase()}
+      <Text className="text-[12px] text-grey" numberOfLines={1}>
+        {label}
       </Text>
       <Box className="overflow-hidden border-continuous flex-row items-center mt-[5px] gap-[6px]">
-        <Text className="flex-[1] font-bold text-[14px]" numberOfLines={1}>
+        <Text className="flex-[1] font-semibold text-[15px]" numberOfLines={1}>
           {value}
         </Text>
         <FeatherIcon name="chevron-down" size={16} color="grey" />
@@ -106,7 +108,6 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
     const generationQueueRef = useRef<Promise<void>>(Promise.resolve())
     const { t } = useTranslation()
     const resources = useResourceAccess()
-    const theme = useTheme()
     const insets = useSafeAreaInsets()
     const notes = useSelector((state: RootState) => state.user.bible.notes)
     const links = useSelector((state: RootState) => state.user.bible.links)
@@ -398,7 +399,6 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
         <Container
           ref={sheetRef}
           snapPoints={[1]}
-          backgroundColor={theme.colors.reverse}
           header={<SheetHeader title={t('passageExport.title')} />}
           footer={footer}
           onPresent={() => {
@@ -469,17 +469,17 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
                 </Text>
               )}
               {hasIncompleteSync && (
-                <Box className="overflow-hidden border-continuous p-[12px] rounded-[12px] bg-light-grey">
+                <SheetWell className="p-[12px]">
                   <Text
                     className="text-grey text-[12px]"
                     style={{ flexDirection: 'column-reverse' }}
                   >
                     {t('passageExport.syncWarning')}
                   </Text>
-                </Box>
+                </SheetWell>
               )}
               {result?.missingVerseTextKeys.length ? (
-                <Box className="overflow-hidden border-continuous p-[12px] rounded-[12px] bg-light-grey">
+                <SheetWell className="p-[12px]">
                   <Text
                     className="text-grey text-[12px]"
                     style={{ flexDirection: 'column-reverse' }}
@@ -488,19 +488,19 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
                       count: result.missingVerseTextKeys.length,
                     })}
                   </Text>
-                </Box>
+                </SheetWell>
               ) : null}
               {result?.hasSkippedInvalidData ? (
-                <Box className="overflow-hidden border-continuous p-[12px] rounded-[12px] bg-light-grey">
+                <SheetWell className="p-[12px]">
                   <Text
                     className="text-grey text-[12px]"
                     style={{ flexDirection: 'column-reverse' }}
                   >
                     {t('passageExport.invalidDataSkipped')}
                   </Text>
-                </Box>
+                </SheetWell>
               ) : null}
-              <Box className="overflow-hidden border-continuous p-[16px] rounded-[12px] bg-light-grey">
+              <SheetWell className="p-[16px]">
                 <Text
                   className="text-[13px] leading-[20px]"
                   selectable
@@ -512,7 +512,7 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
                       ? preview
                       : t('passageExport.empty')}
                 </Text>
-              </Box>
+              </SheetWell>
             </Box>
           </SheetScrollView>
         </Container>

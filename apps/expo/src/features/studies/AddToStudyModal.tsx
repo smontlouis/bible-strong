@@ -3,7 +3,7 @@ import Sheet from '~common/ContextualPanel/ContextualSheet'
 import distanceInWords from 'date-fns/formatDistance'
 import React, { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { TouchableOpacity } from 'react-native'
+import { StyleSheet, TouchableOpacity } from 'react-native'
 import { shallowEqual, useSelector } from 'react-redux'
 import SheetSearchInput from '~common/SheetSearchInput'
 import Empty from '~common/Empty'
@@ -52,10 +52,13 @@ const AddToStudyModal = ({ sheetRef, onSelectStudy, reference, onClose }: AddToS
 
   const renderNewStudyButton = () => (
     <TouchableOpacity accessibilityRole="button" onPress={handleCreateNewStudy}>
-      <HStack className="border-continuous overflow-hidden py-[16px] px-[20px] border-b-[2px] border-light-grey items-center">
+      <HStack
+        className="border-continuous overflow-hidden py-[14px] px-[20px] border-separator items-center"
+        style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
+      >
         <FeatherIcon name="plus-circle" size={24} color="primary" />
         <Box className="overflow-hidden border-continuous flex-[1] ml-[16px]">
-          <Text className="text-[16px] font-bold text-primary">{t('study.newStudy')}</Text>
+          <Text className="text-[15px] font-semibold text-primary">{t('study.newStudy')}</Text>
         </Box>
         <FeatherIcon name="arrow-right" size={20} color="primary" />
       </HStack>
@@ -69,12 +72,15 @@ const AddToStudyModal = ({ sheetRef, onSelectStudy, reference, onClose }: AddToS
 
     return (
       <TouchableOpacity accessibilityRole="button" onPress={() => handleSelectStudy(item.id)}>
-        <HStack className="border-continuous overflow-hidden py-[16px] px-[20px] border-b-[1px] border-light-grey items-center">
+        <HStack
+          className="border-continuous overflow-hidden py-[12px] px-[20px] border-separator items-center"
+          style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
+        >
           <Box className="overflow-hidden border-continuous flex-[1]">
-            <Text className="text-[16px] font-bold" numberOfLines={1}>
+            <Text className="text-[15px]" numberOfLines={1}>
               {item.title}
             </Text>
-            <Text className="text-[13px] text-tertiary mt-[4px]">
+            <Text className="text-[13px] text-grey mt-[2px]">
               {t('Il y a {{formattedDate}}', { formattedDate })}
             </Text>
           </Box>

@@ -8,6 +8,7 @@ import IconTile from '~common/ui/IconTile'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
+import { StyleSheet } from 'react-native'
 export type AvailableUpdateItem = {
   id: string
   name: string
@@ -80,7 +81,10 @@ export const AvailableUpdatesSheet = ({
         keyExtractor={item => item.id}
         contentContainerStyle={{ paddingBottom: 16 }}
         renderItem={({ item }) => (
-          <Box className="border-continuous overflow-hidden px-[20px] py-[14px] flex-row items-center gap-[12px] border-b-[1px] border-separator">
+          <Box
+            className="border-continuous overflow-hidden px-[20px] py-[14px] flex-row items-center gap-[12px] border-separator"
+            style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
+          >
             <IconTile tint="primary">
               <FeatherIcon name="refresh-cw" size={16} color="primary" />
             </IconTile>

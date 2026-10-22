@@ -8,7 +8,11 @@ let mockSettings = {
   inlineCommentaries: ['egw-writings:en'],
   inlineCommentariesEnabled: undefined as boolean | undefined,
 }
-jest.mock('react-native', () => ({ Platform: { OS: 'ios' }, ScrollView: 'ScrollView' }))
+jest.mock('react-native', () => ({
+  Platform: { OS: 'ios' },
+  ScrollView: 'ScrollView',
+  StyleSheet: { hairlineWidth: 0.5 },
+}))
 jest.mock('react-redux', () => ({
   useDispatch: () => mockDispatch,
   useSelector: (selector: (state: unknown) => unknown) =>

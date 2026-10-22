@@ -1,8 +1,7 @@
-import { resolveFontFamily } from '~themes/styleValues'
-import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React from 'react'
 import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
+import Card from '~common/ui/Card'
+import { ListSectionTitle } from '~common/ui/ListSection'
 import NaveModalItem from './NaveModalItem'
 import type { NaveTopicReference } from '~features/resources/naveAccess'
 interface NaveModalForVerseProps {
@@ -11,28 +10,21 @@ interface NaveModalForVerseProps {
 }
 
 const NaveModalForVerse = ({ items, label }: NaveModalForVerseProps) => {
-  const stylingTheme = useStylingTheme()
-
   if (!items?.length) {
     return null
   }
 
   return (
-    <Box className="overflow-hidden border-continuous px-[14px] py-[13px] rounded-[16px] bg-surface">
-      <Text
-        className="text-[14px] text-grey"
-        style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-      >
-        {label}
-      </Text>
-      <Box className="overflow-hidden border-continuous flex-row flex-wrap gap-[5px] mt-[5px]">
+    <Box className="overflow-hidden border-continuous">
+      <ListSectionTitle>{label}</ListSectionTitle>
+      <Card className="px-[14px] py-[13px] flex-row flex-wrap gap-[6px]">
         {items.map(item => (
           <NaveModalItem
             key={item.normalizedName}
             item={{ name: item.name, name_lower: item.normalizedName }}
           />
         ))}
-      </Box>
+      </Card>
     </Box>
   )
 }

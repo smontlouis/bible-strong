@@ -1,3 +1,4 @@
+import React from 'react'
 import { type RefObject, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking } from 'react-native'
@@ -10,6 +11,9 @@ import { toast } from '~helpers/toast'
 import { buildSupportEmail, SUPPORT_EMAIL } from './contactDeveloper'
 import { copySupportEmail } from './supportClipboard'
 import { getSupportDiagnostics } from './supportDiagnostics'
+import SheetWell from '~common/ui/SheetWell'
+import IconTile, { ICON_TILE_SIZE } from '~common/ui/IconTile'
+import { ListSeparator } from '~common/ui/ListSection'
 
 export default function ContactDeveloperSheet({
   modalRef,
@@ -63,21 +67,27 @@ export default function ContactDeveloperSheet({
       <SheetView>
         <Box className="gap-3 px-5 py-4">
           <Text className="text-grey text-sm">{t('contact.intro')}</Text>
-          {choices.map(choice => (
-            <TouchableBox
-              key={choice.label}
-              accessibilityRole="button"
-              accessibilityLabel={choice.label}
-              accessibilityState={{ disabled: busy }}
-              disabled={busy}
-              onPress={() => openEmail(choice)}
-              className="flex-row items-center gap-3 rounded-2xl bg-light-grey p-4"
-            >
-              <FeatherIcon name={choice.icon} size={22} color="primary" />
-              <Text className="flex-1 font-semibold">{choice.label}</Text>
-              <FeatherIcon name="chevron-right" size={20} color="grey" />
-            </TouchableBox>
-          ))}
+          <SheetWell>
+            {choices.map((choice, index) => (
+              <React.Fragment key={choice.label}>
+                {index > 0 && <ListSeparator inset={14 + ICON_TILE_SIZE + 12} />}
+                <TouchableBox
+                  accessibilityRole="button"
+                  accessibilityLabel={choice.label}
+                  accessibilityState={{ disabled: busy }}
+                  disabled={busy}
+                  onPress={() => openEmail(choice)}
+                  className="flex-row items-center gap-[12px] px-[14px] py-[11px]"
+                >
+                  <IconTile tint="primary">
+                    <FeatherIcon name={choice.icon} size={16} color="primary" />
+                  </IconTile>
+                  <Text className="flex-1 text-[15px]">{choice.label}</Text>
+                  <FeatherIcon name="chevron-right" size={18} color="grey" />
+                </TouchableBox>
+              </React.Fragment>
+            ))}
+          </SheetWell>
           <Text className="text-grey text-xs">{t('contact.diagnosticNotice')}</Text>
           {fallback && (
             <TouchableBox
@@ -90,10 +100,11 @@ export default function ContactDeveloperSheet({
                   toast.error(t('contact.copyFailed'))
                 }
               }}
-              className="gap-1 rounded-2xl border border-border p-4"
             >
-              <Text className="text-primary font-semibold">{t('contact.copyEmail')}</Text>
-              <Text className="text-grey text-sm">{SUPPORT_EMAIL}</Text>
+              <SheetWell className="gap-1 p-4">
+                <Text className="text-primary font-semibold">{t('contact.copyEmail')}</Text>
+                <Text className="text-grey text-sm">{SUPPORT_EMAIL}</Text>
+              </SheetWell>
             </TouchableBox>
           )}
         </Box>

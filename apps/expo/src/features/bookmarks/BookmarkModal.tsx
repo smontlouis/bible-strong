@@ -21,6 +21,8 @@ import Button from '~common/ui/Button'
 import { IonIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
+import { ListSectionTitle } from '~common/ui/ListSection'
+import { useSheetWellColor } from '~common/ui/SheetWell'
 import { toast } from '~helpers/toast'
 import {
   addBookmark,
@@ -44,8 +46,10 @@ const BookmarkListItem = (
   const { theme: themeOverride, className, ...props } = componentProps
   const theme = themeOverride ?? contextTheme
   const { isSelected } = props
+  // A row on the sheet's glass sits in a translucent well; the selected one is tinted and ringed.
+  const sheetWellColor = useSheetWellColor()
   const resolvedClassName = twMerge(
-    'flex-row items-center p-[12px] mb-[8px] rounded-[8px] border-primary',
+    'flex-row items-center p-[12px] mb-[8px] rounded-[12px] border-primary',
     className
   )
   return (
@@ -55,7 +59,7 @@ const BookmarkListItem = (
       style={
         [
           {
-            backgroundColor: isSelected ? theme.colors.lightPrimary : theme.colors.lightGrey,
+            backgroundColor: isSelected ? theme.colors.lightPrimary : sheetWellColor,
             borderWidth: isSelected ? 2 : 0,
           },
           props.style,
@@ -277,7 +281,7 @@ const BookmarkModal = ({
         {mode === 'select' ? (
           // Selection mode - show list of existing bookmarks
           <Box className="overflow-hidden border-continuous">
-            <Text className="font-bold mb-[10px]">{t('Déplacer un marque-page existant')}</Text>
+            <ListSectionTitle>{t('Déplacer un marque-page existant')}</ListSectionTitle>
             {existingBookmarks.map(bm => (
               <BookmarkListItem key={bm.id} onPress={() => handleSelectExistingBookmark(bm)}>
                 <IonIcon name="bookmark" size={18} color={bm.color} />

@@ -66,7 +66,7 @@ const FeatureOnboardingModal = () => {
     <Sheet modalTitle={step?.title} ref={ref} dismissible={false} onDismiss={handleClose}>
       <SheetView>
         <TouchableBox
-          className="border-continuous overflow-hidden items-center justify-center rounded-full bg-reverse border-[1px] border-border absolute top-[10px] right-[10px] z-[1000]"
+          className="border-continuous overflow-hidden items-center justify-center rounded-full bg-opacity5 absolute top-[10px] right-[10px] z-[1000]"
           accessibilityLabel={t('Fermer')}
           accessibilityRole="button"
           onPress={() => {

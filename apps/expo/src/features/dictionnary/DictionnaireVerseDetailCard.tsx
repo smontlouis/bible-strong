@@ -1,4 +1,3 @@
-import { resolveThemeColor, resolveFontFamily, colorWithOpacity } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { useQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai'
@@ -8,6 +7,9 @@ import Empty from '~common/Empty'
 import Loading from '~common/Loading'
 import type { Verse } from '~common/types'
 import Box, { TouchableBox } from '~common/ui/Box'
+import Card from '~common/ui/Card'
+import { ListSectionTitle } from '~common/ui/ListSection'
+import { resolveUniverseColors } from '~themes/universeColors'
 import Text from '~common/ui/Text'
 import { SheetScrollView } from '~common/sheet'
 import ResourceVerseContext, {
@@ -37,6 +39,7 @@ const DictionnaireVerseDetailScreen = ({
   selectedVersion: string
 }) => {
   const stylingTheme = useStylingTheme()
+  const dictionaryUniverse = resolveUniverseColors(stylingTheme.colors, 'dictionary')
 
   const resources = useResourceAccess()
   const { t } = useTranslation()
@@ -122,17 +125,9 @@ const DictionnaireVerseDetailScreen = ({
               },
             ].map(section =>
               section.concepts.length > 0 ? (
-                <Box
-                  className="overflow-hidden border-continuous px-[14px] py-[13px] rounded-[16px] bg-surface"
-                  key={section.key}
-                >
-                  <Text
-                    className="text-[14px] text-grey"
-                    style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-                  >
-                    {section.title}
-                  </Text>
-                  <Box className="overflow-hidden border-continuous flex-row flex-wrap gap-[5px] mt-[5px]">
+                <Box className="overflow-hidden border-continuous" key={section.key}>
+                  <ListSectionTitle>{section.title}</ListSectionTitle>
+                  <Card className="px-[14px] py-[13px] flex-row flex-wrap gap-[6px]">
                     {section.concepts.map(concept => {
                       const source = pickPreferredDictionarySource(concept.sources, resourceLang)
                       if (!source) return null
@@ -159,23 +154,14 @@ const DictionnaireVerseDetailScreen = ({
                             })
                           }
                           activeOpacity={0.55}
-                          style={{
-                            backgroundColor: colorWithOpacity(
-                              resolveThemeColor(stylingTheme, 'secondary'),
-                              0.1
-                            ),
-                          }}
+                          // The dictionary's colour tints the chip; the text stays readable in default.
+                          style={{ backgroundColor: dictionaryUniverse.background }}
                         >
-                          <Text
-                            className="text-[14px] text-secondary"
-                            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-                          >
-                            {concept.label}
-                          </Text>
+                          <Text className="text-[14px]">{concept.label}</Text>
                         </TouchableBox>
                       )
                     })}
-                  </Box>
+                  </Card>
                 </Box>
               ) : null
             )}

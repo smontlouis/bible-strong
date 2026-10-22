@@ -180,7 +180,7 @@ const SortableCommentary = ({
               })}
             >
               <Box
-                className="border-continuous overflow-hidden rounded-full items-center justify-center bg-reverse border-[1px] border-border"
+                className="border-continuous overflow-hidden rounded-full items-center justify-center bg-opacity5"
                 style={{ width: 18, height: 18 }}
               >
                 <FeatherIcon name="x" size={12} color="tertiary" />

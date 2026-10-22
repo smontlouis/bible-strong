@@ -1,6 +1,5 @@
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import type { CommentaryCatalogEntry } from '@bible-strong/resource-catalog/commentaries'
-import { useTheme } from '~themes/ThemeProvider'
 import React from 'react'
 import { StyleSheet } from 'react-native'
 
@@ -8,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { SheetScrollView, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import Box, { TouchableBox } from '~common/ui/Box'
+import SheetWell, { useSheetWellColor } from '~common/ui/SheetWell'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import Progress from '~common/ui/Progress'
@@ -46,7 +46,7 @@ const formatMegabytes = (bytes: number, language: string) =>
 const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
   const { t, i18n } = useTranslation()
   const confirmDeletion = useConfirmDialog()
-  const theme = useTheme()
+  const sheetWellColor = useSheetWellColor()
   const isConnected = useConnection()
   const identity = projection
     ? {
@@ -97,7 +97,7 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
   }
 
   return (
-    <Sheet ref={sheetRef} backgroundColor={theme.colors.reverse}>
+    <Sheet ref={sheetRef}>
       <SheetScrollView
         contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 22, paddingBottom: 32 }}
       >
@@ -109,10 +109,10 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
             size={68}
           />
           <Box className="overflow-hidden border-continuous flex-[1] gap-[6px]">
-            <Text className="text-[22px] font-bold" numberOfLines={3}>
+            <Text className="text-[22px] font-semibold" numberOfLines={3}>
               {entry.title}
             </Text>
-            <Text className="text-tertiary text-[13px]" numberOfLines={2}>
+            <Text className="text-grey text-[13px]" numberOfLines={2}>
               {entry.author}
             </Text>
           </Box>
@@ -126,30 +126,24 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
           }}
         >
           <Box className="overflow-hidden border-continuous flex-[1] items-center gap-[4px]">
-            <Text className="text-tertiary text-[9px] font-bold">
-              {t('bibleOfflineDetails.language').toUpperCase()}
-            </Text>
-            <Text className="text-[13px] font-bold">{languageLabel}</Text>
+            <Text className="text-grey text-[12px]">{t('bibleOfflineDetails.language')}</Text>
+            <Text className="text-[15px] font-semibold">{languageLabel}</Text>
           </Box>
           <Box
             className="overflow-hidden border-continuous bg-separator"
             style={{ width: StyleSheet.hairlineWidth }}
           />
           <Box className="overflow-hidden border-continuous flex-[1] items-center gap-[4px]">
-            <Text className="text-tertiary text-[9px] font-bold">
-              {t('commentaries.details.tradition').toUpperCase()}
-            </Text>
-            <Text className="text-[13px] font-bold text-center">{entry.tradition}</Text>
+            <Text className="text-grey text-[12px]">{t('commentaries.details.tradition')}</Text>
+            <Text className="text-[15px] font-semibold text-center">{entry.tradition}</Text>
           </Box>
           <Box
             className="overflow-hidden border-continuous bg-separator"
             style={{ width: StyleSheet.hairlineWidth }}
           />
           <Box className="overflow-hidden border-continuous flex-[1] items-center gap-[4px]">
-            <Text className="text-tertiary text-[9px] font-bold">
-              {t('bibleOfflineDetails.installedSize').toUpperCase()}
-            </Text>
-            <Text className="text-[13px] font-bold">{size}</Text>
+            <Text className="text-grey text-[12px]">{t('bibleOfflineDetails.installedSize')}</Text>
+            <Text className="text-[15px] font-semibold">{size}</Text>
           </Box>
         </Box>
 
@@ -162,12 +156,9 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
           style={{ flexWrap: 'wrap' }}
         >
           {entry.tags.map(tag => (
-            <Box
-              className="overflow-hidden border-continuous px-[10px] py-[6px] bg-light-grey rounded-full"
-              key={tag}
-            >
+            <SheetWell className="px-[10px] py-[6px] rounded-full" key={tag}>
               <Text className="text-[12px]">{tag}</Text>
-            </Box>
+            </SheetWell>
           ))}
         </Box>
 
@@ -175,22 +166,22 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
           className="border-continuous overflow-hidden mt-[20px] pt-[16px] border-separator"
           style={{ borderTopWidth: StyleSheet.hairlineWidth }}
         >
-          <Text className="text-tertiary text-[12px]">{entry.rights}</Text>
+          <Text className="text-grey text-[12px]">{entry.rights}</Text>
         </Box>
 
         {downloading ? (
-          <Box className="overflow-hidden border-continuous mt-[22px] p-[16px] bg-light-grey rounded-[12px] flex-row items-center">
+          <SheetWell className="mt-[22px] p-[16px] flex-row items-center">
             <Progress progress={Math.max(progress, 0.04)} size={30} thickness={3} />
-            <Text className="ml-[12px] flex-[1] font-bold">{Math.round(progress * 100)} %</Text>
+            <Text className="ml-[12px] flex-[1] font-semibold">{Math.round(progress * 100)} %</Text>
             <TouchableBox
               className="overflow-hidden border-continuous px-[8px] py-[6px]"
               onPress={() => downloadManager.cancel(itemId)}
             >
-              <Text className="text-quart font-bold">{t('bibleOfflineDetails.cancel')}</Text>
+              <Text className="text-quart font-semibold">{t('bibleOfflineDetails.cancel')}</Text>
             </TouchableBox>
-          </Box>
+          </SheetWell>
         ) : (
-          <Box className="overflow-hidden border-continuous mt-[22px] p-[16px] bg-light-grey rounded-[12px] flex-row items-center gap-[10px]">
+          <Box className="overflow-hidden border-continuous mt-[22px] flex-row items-center gap-[10px]">
             <Box className="overflow-hidden border-continuous flex-[1]">
               <Button
                 onPress={download}
@@ -220,11 +211,11 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
             </Box>
             {installed && (
               <TouchableBox
-                className="border-continuous overflow-hidden items-center justify-center bg-reverse rounded-full"
+                className="border-continuous overflow-hidden items-center justify-center rounded-full"
                 accessibilityRole="button"
                 accessibilityLabel={t('commentaries.selector.removeOffline')}
                 onPress={remove}
-                style={{ width: 48, height: 48 }}
+                style={{ width: 48, height: 48, backgroundColor: sheetWellColor }}
               >
                 <FeatherIcon name="trash-2" size={20} color="quart" />
               </TouchableBox>

@@ -1,4 +1,4 @@
-import { ScrollView } from 'react-native'
+import { ScrollView, StyleSheet } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { COMMENTARY_CATALOG_BY_ID } from '@bible-strong/resource-catalog/commentaries'
@@ -53,7 +53,11 @@ export default function InlineCommentarySettings({ onManage }: { onManage?: () =
           const checked = enabled.includes(id)
           const disabled = !checked && limitReached
           return (
-            <HStack key={id} className="items-center" style={{ opacity: disabled ? 0.45 : 1 }}>
+            <HStack
+              key={id}
+              className="items-center border-separator"
+              style={{ opacity: disabled ? 0.45 : 1, borderTopWidth: StyleSheet.hairlineWidth }}
+            >
               <TouchableBox
                 disabled={disabled}
                 accessibilityRole="checkbox"
@@ -66,7 +70,7 @@ export default function InlineCommentarySettings({ onManage }: { onManage?: () =
                     )
                   )
                 }
-                className="flex-1 flex-row items-center gap-[12px] p-[16px] rounded-lg hover:bg-light-grey"
+                className="flex-1 flex-row items-center gap-[12px] p-[16px] rounded-[12px] hover:bg-light-grey"
               >
                 <Checkbox checked={checked} />
                 <Box className="flex-1 gap-[4px]">

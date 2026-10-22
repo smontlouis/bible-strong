@@ -1,7 +1,8 @@
-import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { TouchableOpacity, View } from 'react-native'
+import { TouchableOpacity, View, type ViewProps } from 'react-native'
+import IconTile, { ICON_TILE_SIZE } from '~common/ui/IconTile'
+import { ListSeparator } from '~common/ui/ListSection'
 import { useSelector } from 'react-redux'
 import { twMerge } from '~common/ui/classNames'
 
@@ -21,49 +22,14 @@ import {
   TaggedItem,
   type DisplayedVersions,
 } from '~redux/selectors/bible'
-import type { Theme as AppTheme } from '~themes'
 
-const ItemRow = (
-  componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
-    theme?: AppTheme
-    className?: string
-  }
-) => {
-  const { theme: _themeOverride, className, ...props } = componentProps
-
-  const resolvedClassName = twMerge(
-    'flex-row items-center p-[15px] border-b-[1px] border-b-border',
-    className
-  )
-  return (
-    <View
-      {...props}
-      className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof View>['style']}
-    />
-  )
-}
-
-const IconContainer = (
-  componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
-    theme?: AppTheme
-    className?: string
-  }
-) => {
-  const { theme: _themeOverride, className, ...props } = componentProps
-
-  const resolvedClassName = twMerge(
-    'w-[36px] h-[36px] rounded-[12px] bg-light-grey items-center justify-center mr-[12px]',
-    className
-  )
-  return (
-    <View
-      {...props}
-      className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof View>['style']}
-    />
-  )
-}
+/** A row of the sheet, with a hairline from where its text starts. */
+const ItemRow = ({ children, className, ...props }: ViewProps & { className?: string }) => (
+  <View {...props} className={twMerge('flex-row items-center px-[16px] py-[12px]', className)}>
+    {children}
+    <ListSeparator inset={16 + ICON_TILE_SIZE + 12} overlay />
+  </View>
+)
 
 interface VerseTagsModalProps {
   verseKey: string | null
@@ -118,13 +84,13 @@ const TaggedItemRow = ({ item, onEditTags }: { item: TaggedItem; onEditTags: () 
   return (
     <TouchableOpacity accessibilityRole="button" onPress={onEditTags}>
       <ItemRow>
-        <IconContainer>
+        <IconTile tint={item.type === 'annotation' ? 'secondary' : 'primary'} className="mr-[12px]">
           <FeatherIcon
             name={icon}
-            size={18}
+            size={16}
             color={item.type === 'annotation' ? 'secondary' : 'primary'}
           />
-        </IconContainer>
+        </IconTile>
         <Box className="overflow-hidden border-continuous flex-[1]">
           <HStack className="overflow-hidden border-continuous gap-[6px] items-center">
             <Text className="font-bold text-[14px]">{label}</Text>

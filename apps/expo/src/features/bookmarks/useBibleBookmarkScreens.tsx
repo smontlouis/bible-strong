@@ -20,6 +20,7 @@ import books from '~assets/bible_versions/books-desc'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 import { getBookmarkVerse } from './bookmarkVerse'
+import { StyleSheet } from 'react-native'
 
 export function useBibleBookmarkScreens(
   book: number,
@@ -100,7 +101,10 @@ export function useBibleBookmarkScreens(
               )}
             </Box>
             {bookmarks.length > 0 && (
-              <Box className="flex-row items-center gap-3 px-3 pt-3 pb-2 border-t border-border">
+              <Box
+                className="flex-row items-center gap-3 px-3 pt-3 pb-2 border-separator"
+                style={{ borderTopWidth: StyleSheet.hairlineWidth }}
+              >
                 <Text className="flex-1 text-[12px] text-tertiary">
                   {t('Déplacer un marque-page existant')}
                 </Text>

@@ -106,9 +106,7 @@ const SelectedVersesModal = ({
             className="overflow-hidden border-continuous gap-[10px] w-[100%] items-center justify-center pt-[10px]"
             style={{ paddingBottom: BOTTOM_INSET }}
           >
-            <Text className="font-bold text-[18px] text-center">
-              {selectedVersesTitle.toUpperCase()}
-            </Text>
+            <Text className="font-semibold text-[18px] text-center">{selectedVersesTitle}</Text>
             <TouchableIcon
               accessibilityLabel={t('Continuer')}
               name="arrow-right"

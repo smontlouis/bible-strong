@@ -47,6 +47,7 @@ jest.mock('react-native', () => {
   return {
     Alert: { alert: jest.fn() },
     Platform: { OS: 'ios' },
+    StyleSheet: { hairlineWidth: 0.5 },
     Switch: (props: Record<string, unknown>) => ReactModule.createElement('Switch', props),
   }
 })
@@ -65,6 +66,22 @@ jest.mock('~common/ui/Box', () => {
     TouchableBox: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
       ReactModule.createElement('TouchableBox', props, children),
   }
+})
+
+jest.mock('~common/ui/SheetWell', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return {
+    __esModule: true,
+    default: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
+      ReactModule.createElement('SheetWell', props, children),
+    useSheetWellColor: () => 'rgba(0,0,0,0.5)',
+  }
+})
+
+jest.mock('~common/ui/IconTile', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
+    ReactModule.createElement('IconTile', props, children)
 })
 
 jest.mock('~common/ui/Button', () => {

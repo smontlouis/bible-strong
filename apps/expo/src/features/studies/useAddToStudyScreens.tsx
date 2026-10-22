@@ -16,6 +16,7 @@ import distanceInWords from 'date-fns/formatDistance'
 import { getDateLocale } from '~helpers/languageUtils'
 import useLanguage from '~helpers/useLanguage'
 import { useMountTime } from '~helpers/useMountTime'
+import { StyleSheet } from 'react-native'
 
 /**
  * The screens that add the selected verses to a study: pick a study (or a new one), then the
@@ -61,7 +62,8 @@ export function useAddToStudyScreens({
           {matches.map(study => (
             <TouchableBox
               key={study.id}
-              className="w-full p-3 border-b border-border"
+              className="w-full p-3 border-separator"
+              style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
               accessibilityRole="button"
               onPress={() => {
                 setSelected({ id: study.id, title: study.title })
