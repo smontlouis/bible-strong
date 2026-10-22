@@ -3,6 +3,7 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import PassageContextButton, { PlanPassageBanner } from '../PassageContextButton'
 
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
+jest.mock('react-native', () => ({ StyleSheet: { hairlineWidth: 0.5 } }))
 jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 30, bottom: 20 }),
 }))

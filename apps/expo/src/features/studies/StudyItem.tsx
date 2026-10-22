@@ -98,12 +98,12 @@ const StudyItem = ({
                 params: { studyId: study.id },
               })}
         >
-          <Text className="text-dark-grey text-[10px] mt-[6px]">
+          <Text className="text-grey text-[12px] mt-[6px]">
             {t('Il y a {{formattedDate}}', { formattedDate })}
           </Text>
           {study.content ? (
             <>
-              <Text className="font-bold text-[16px] mt-[4px]">{study.title}</Text>
+              <Text className="font-semibold text-[16px] mt-[4px]">{study.title}</Text>
 
               <Paragraph className="mt-[10px]" scale={-3}>
                 {truncate(
@@ -116,7 +116,9 @@ const StudyItem = ({
             </>
           ) : (
             <>
-              <Text className="font-bold text-[16px] mt-[4px] text-border">{t('Étude vide')}</Text>
+              <Text className="font-semibold text-[16px] mt-[4px] text-grey">
+                {t('Étude vide')}
+              </Text>
             </>
           )}
         </StudyLink>

@@ -24,10 +24,10 @@ export default function ExternalLinkCard({
   } catch {}
   const image = link.ogData?.image
   return (
-    <Box className="bg-reverse border border-border rounded-[16px] p-[16px] gap-[20px]">
+    <Box className="gap-[20px]">
       <HStack className="items-center gap-[8px]">
         <FeatherIcon name="link" size={16} color="tertiary" />
-        <Text className="flex-1 text-[13px] text-tertiary" numberOfLines={1}>
+        <Text className="flex-1 text-[13px] text-grey" numberOfLines={1}>
           {hostname}
         </Text>
         {onEdit && (
@@ -35,7 +35,7 @@ export default function ExternalLinkCard({
             accessibilityRole="button"
             accessibilityLabel={t('accessibility.editLink')}
             onPress={onEdit}
-            className="p-[6px] rounded-lg hover:bg-light-grey"
+            className="p-[6px] rounded-[8px] hover:bg-light-grey"
           >
             <FeatherIcon name="edit-2" size={18} color="tertiary" />
           </TouchableBox>
@@ -43,7 +43,9 @@ export default function ExternalLinkCard({
       </HStack>
       <HStack className="items-start gap-[14px]">
         <Box className="flex-1 min-w-0 gap-[14px]">
-          <Text className="font-bold text-[20px] leading-[26px]">{getLinkDisplayTitle(link)}</Text>
+          <Text className="font-semibold text-[20px] leading-[26px]">
+            {getLinkDisplayTitle(link)}
+          </Text>
           {!!link.ogData?.description && (
             <Text className="text-[14px] leading-[22px] text-grey">{link.ogData.description}</Text>
           )}
@@ -60,7 +62,7 @@ export default function ExternalLinkCard({
       <TouchableBox
         accessibilityRole="button"
         onPress={onOpen}
-        className="bg-primary rounded-[12px] min-h-[44px] px-[12px] py-[12px] flex-row items-center justify-center gap-[8px]"
+        className="bg-primary rounded-full min-h-[44px] px-[16px] py-[12px] flex-row items-center justify-center gap-[8px]"
       >
         <FeatherIcon name="external-link" size={16} color="reverse" />
         <Text className="text-reverse text-[14px] font-medium shrink">

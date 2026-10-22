@@ -33,7 +33,7 @@ const PassageMediaLibraryCard = ({ item, episodeNumber, thumbnailWidth, onPress 
         style={{ width: thumbnailWidth }}
       >
         <Box
-          className="border-continuous overflow-visible rounded-[12px] border-[1px] border-border bg-light-grey"
+          className="border-continuous overflow-visible rounded-[12px] bg-light-grey"
           style={{ aspectRatio: 16 / 9 }}
         >
           <Image
@@ -48,7 +48,7 @@ const PassageMediaLibraryCard = ({ item, episodeNumber, thumbnailWidth, onPress 
         </Box>
       </Box>
       <VStack className="overflow-hidden border-continuous flex-[1] gap-[4px] py-[2px]">
-        <Text className="font-bold text-primary text-[12px] leading-[15px]">
+        <Text className="text-grey text-[13px] leading-[16px]">
           {t('passageMediaLibrary.episode', { number: episodeNumber })}
         </Text>
         <Text

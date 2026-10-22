@@ -66,7 +66,8 @@ const OfflineSetupResourceOption = ({
   let description = option.description
   if (option.descriptionKey) description = t(option.descriptionKey)
 
-  const selectedBorderColor = selected ? palette.accent : palette.itemBorder
+  // A border marks the choice only: an option not chosen keeps its width in transparent.
+  const selectedBorderColor = selected ? palette.accent : 'transparent'
   const checkboxBorderColor = selected ? palette.accent : palette.description
   const checkboxBackground = selected ? palette.accent : palette.itemSurface
   const pressMotion = OFFLINE_SETUP_MOTION.detail.resourceItem

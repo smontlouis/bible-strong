@@ -13,7 +13,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai/react'
 import { collapsedWorkspaceGroupsAtom } from '~state/workspacePreferences'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Image, Platform, ScrollView } from 'react-native'
+import { Image, Platform, ScrollView, StyleSheet } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { SheetRef } from '~common/sheet'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
@@ -45,7 +45,7 @@ import { useWorkspaceSidebarWidth, workspaceSidebarVariant } from './utils/useRe
 const sidebarFrameClassName = {
   inset: 'bg-canvas',
   floating: 'bg-surface-raised',
-  sidebar: 'bg-canvas border-r-[1px] border-border',
+  sidebar: 'bg-canvas border-separator',
 }[workspaceSidebarVariant]
 interface WorkspaceSidebarProps {
   onSelectContent?: () => void
@@ -110,6 +110,8 @@ const WorkspaceSidebar = ({
         <Box
           className={`flex-1 min-h-0 border-continuous overflow-hidden ${sidebarFrameClassName}`}
           style={{
+            // The docked sidebar is set off from the page by a hairline.
+            borderRightWidth: workspaceSidebarVariant === 'sidebar' ? StyleSheet.hairlineWidth : 0,
             paddingTop: insets.top,
             paddingBottom: insets.bottom,
             // Keep the rows clear of a landscape iPhone's camera.

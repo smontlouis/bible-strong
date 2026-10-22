@@ -53,7 +53,7 @@ const OfflineSetupSectionTitle = ({
   if (!collapsible) {
     return (
       <Text
-        className="text-[11px] font-bold uppercase px-[4px]"
+        className="text-[13px] px-[4px]"
         style={{
           color:
             resolveThemeColor(stylingTheme, palette.description) || stylingTheme.colors.default,
@@ -75,7 +75,7 @@ const OfflineSetupSectionTitle = ({
     >
       <HStack className="overflow-hidden border-continuous items-center justify-between px-[4px] py-[4px]">
         <Text
-          className="text-[11px] font-bold uppercase"
+          className="text-[13px]"
           style={{
             color:
               resolveThemeColor(stylingTheme, palette.description) || stylingTheme.colors.default,

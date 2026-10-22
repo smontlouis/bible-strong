@@ -13,6 +13,7 @@ jest.mock('react-i18next', () => ({
 }))
 jest.mock('~common/Link', () => 'Link')
 jest.mock('~common/ui/Box', () => 'Box')
+jest.mock('~common/ui/SheetWell', () => 'SheetWell')
 jest.mock('~common/ui/Text', () => 'Text')
 jest.mock('~common/ui/Icon', () => ({ FeatherIcon: 'Icon' }))
 jest.mock('~common/ui/Switch', () => 'Switch')

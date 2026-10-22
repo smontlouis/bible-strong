@@ -8,7 +8,7 @@ import { type SheetRef } from '~common/sheet'
 import ParamsModal from '~features/plans/PlanSliceScreen/ParamsModal'
 import ReadingDatePicker from './ReadingDatePicker'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { ActivityIndicator, Platform, ScrollView, Share } from 'react-native'
+import { ActivityIndicator, Platform, ScrollView, Share, StyleSheet } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import Header from '~common/Header'
 import ContextualMenu from '~common/ContextualPanel/ContextualMenu'
@@ -155,8 +155,9 @@ export const MeditationReader = ({
         <Box className={wide ? 'flex-row items-start gap-[40px]' : 'gap-[28px]'}>
           <Box
             className={
-              wide ? 'w-[176px] shrink-0 border-r border-border pr-[24px] gap-[24px]' : 'gap-[20px]'
+              wide ? 'w-[176px] shrink-0 border-separator pr-[24px] gap-[24px]' : 'gap-[20px]'
             }
+            style={wide ? { borderRightWidth: StyleSheet.hairlineWidth } : undefined}
           >
             {isWeb && (
               <Link
@@ -192,11 +193,12 @@ export const MeditationReader = ({
               <Box
                 className={
                   wide
-                    ? 'border-t border-border pt-[20px] gap-[12px]'
+                    ? 'border-separator pt-[20px] gap-[12px]'
                     : isWeb
-                      ? 'flex-row items-center justify-between border-t border-border pt-[16px]'
+                      ? 'flex-row items-center justify-between border-separator pt-[16px]'
                       : 'flex-row items-center justify-between'
                 }
+                style={wide || isWeb ? { borderTopWidth: StyleSheet.hairlineWidth } : undefined}
               >
                 {!wide && (
                   <Link

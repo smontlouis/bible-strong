@@ -32,9 +32,9 @@ const ForgotPasswordScreen = ({ theme }: { theme: Theme }) => {
   }
 
   return (
-    <Container>
+    <Container className="bg-canvas">
       <Header hasBackButton title={t('forgotPassword.title')} />
-      <ScrollView>
+      <ScrollView backgroundColor="canvas">
         <Box className="overflow-hidden border-continuous p-[20px] web:w-full web:max-w-[500px] web:self-center">
           <Text className="text-grey">{t('forgotPassword.description')}</Text>
           <Spacer size={2} />

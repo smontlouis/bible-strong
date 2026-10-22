@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native'
 import type { ComponentProps, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -26,12 +27,13 @@ const PassageSubheader = ({
   const collapsed = !isFormSheet && isFullScreen
   return (
     <AnimatedBox
-      className="absolute left-0 right-0 border-b-[1px] border-border bg-reverse"
+      className="absolute left-0 right-0 border-separator bg-reverse"
       pointerEvents={collapsed ? 'none' : 'auto'}
       accessibilityElementsHidden={collapsed}
       importantForAccessibility={collapsed ? 'no-hide-descendants' : 'auto'}
       style={{
         top: isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT + insets.top,
+        borderBottomWidth: StyleSheet.hairlineWidth,
         height: PASSAGE_CONTEXT_HEADER_HEIGHT,
         zIndex: 1,
         opacity: collapsed ? 0 : 1,

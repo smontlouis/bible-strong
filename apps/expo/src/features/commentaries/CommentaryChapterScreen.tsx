@@ -1,3 +1,5 @@
+import { StudyRowsCard } from '~common/ui/StudySection'
+import CommentarySectionRow, { formatCommentarySectionRange } from './CommentarySectionRow'
 import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import { commentaryContext } from '~features/study-assistant/resourceContext'
 import CommentIcon from '~common/CommentIcon'
@@ -43,49 +45,6 @@ import {
   parseCommentaryResourceParams,
   type CommentaryScreenRouteParams,
 } from './commentaryResourceParams'
-const formatRange = (start: number, end: number, introductionLabel: string) => {
-  if (start === 0 && end === 0) return introductionLabel
-  return start === end ? `${start}` : `${start}–${end}`
-}
-
-type CommentarySectionCardProps = {
-  section: {
-    id: string
-    rangeStartVerse: number
-    rangeEndVerse: number
-    preview: string
-  }
-  introductionLabel: string
-  onPress: () => void
-}
-
-const CommentarySectionCard = ({
-  section,
-  introductionLabel,
-  onPress,
-}: CommentarySectionCardProps) => (
-  <TouchableBox
-    className="overflow-hidden border-continuous bg-surface rounded-[16px] px-[17px] py-[14px]"
-    activeOpacity={0.62}
-    onPress={onPress}
-    accessibilityRole="button"
-  >
-    <Box className="overflow-hidden border-continuous flex-row items-start">
-      <Box className="overflow-hidden border-continuous px-[10px] py-[5px] rounded-full bg-light-primary">
-        <Text className="text-primary font-bold text-[12px]">
-          {formatRange(section.rangeStartVerse, section.rangeEndVerse, introductionLabel)}
-        </Text>
-      </Box>
-      <Box className="overflow-hidden border-continuous ml-[13px] flex-[1]">
-        <Text className="text-grey text-[14px] leading-[20px]" numberOfLines={2}>
-          {section.preview}
-        </Text>
-      </Box>
-      <FeatherIcon name="chevron-right" size={20} color="grey" />
-    </Box>
-  </TouchableBox>
-)
-
 const CommentaryChapterScreen = ({
   routeParams,
   onChapterChange,
@@ -358,20 +317,29 @@ const CommentaryChapterScreen = ({
               message={t('commentaries.resource.emptyChapter')}
             />
           ) : (
-            <Box className="overflow-hidden border-continuous mt-[16px] gap-[12px]">
-              {groupedSections.directSections.map(section => (
-                <CommentarySectionCard
-                  key={section.id}
-                  section={section}
-                  introductionLabel={t('commentaries.resource.introduction')}
-                  onPress={() => openSection(section.id)}
-                />
-              ))}
+            <Box className="overflow-hidden border-continuous mt-[16px] gap-[16px]">
+              {groupedSections.directSections.length > 0 && (
+                <StudyRowsCard>
+                  {groupedSections.directSections.map(section => (
+                    <CommentarySectionRow
+                      key={section.id}
+                      rangeLabel={formatCommentarySectionRange(
+                        t,
+                        section.rangeStartVerse,
+                        section.rangeEndVerse,
+                        t('commentaries.resource.introduction')
+                      )}
+                      preview={section.preview}
+                      onPress={() => openSection(section.id)}
+                    />
+                  ))}
+                </StudyRowsCard>
+              )}
 
               {focusVerse !== undefined && groupedSections.chapterContextSections.length > 0 ? (
-                <>
+                <StudyRowsCard>
                   <TouchableBox
-                    className="overflow-hidden border-continuous bg-surface rounded-[16px] px-[17px] py-[14px]"
+                    className="overflow-hidden border-continuous flex-row items-center gap-[12px] px-[16px] py-[12px]"
                     activeOpacity={0.62}
                     onPress={() =>
                       setExpandedChapterContextKey(currentKey =>
@@ -381,36 +349,38 @@ const CommentaryChapterScreen = ({
                     accessibilityRole="button"
                     accessibilityState={{ expanded: chapterContextExpanded }}
                   >
-                    <Box className="overflow-hidden border-continuous flex-row items-center justify-between">
-                      <Box className="overflow-hidden border-continuous flex-[1]">
-                        <Text className="font-bold text-[14px]">
-                          {t('commentaries.resource.chapterContext')}
-                        </Text>
-                        <Text className="mt-[3px] text-grey text-[12px]">
-                          {t('commentaries.resource.sectionCount', {
-                            count: groupedSections.chapterContextSections.length,
-                          })}
-                        </Text>
-                      </Box>
-                      <FeatherIcon
-                        name={chapterContextExpanded ? 'chevron-up' : 'chevron-down'}
-                        size={20}
-                        color="grey"
-                      />
+                    <Box className="overflow-hidden border-continuous flex-[1] gap-[2px]">
+                      <Text className="text-[15px]">
+                        {t('commentaries.resource.chapterContext')}
+                      </Text>
+                      <Text className="text-grey text-[13px]">
+                        {t('commentaries.resource.sectionCount', {
+                          count: groupedSections.chapterContextSections.length,
+                        })}
+                      </Text>
                     </Box>
+                    <FeatherIcon
+                      name={chapterContextExpanded ? 'chevron-up' : 'chevron-down'}
+                      size={18}
+                      color="grey"
+                    />
                   </TouchableBox>
-
                   {chapterContextExpanded
                     ? groupedSections.chapterContextSections.map(section => (
-                        <CommentarySectionCard
+                        <CommentarySectionRow
                           key={section.id}
-                          section={section}
-                          introductionLabel={t('commentaries.resource.introduction')}
+                          rangeLabel={formatCommentarySectionRange(
+                            t,
+                            section.rangeStartVerse,
+                            section.rangeEndVerse,
+                            t('commentaries.resource.introduction')
+                          )}
+                          preview={section.preview}
                           onPress={() => openSection(section.id)}
                         />
                       ))
                     : null}
-                </>
+                </StudyRowsCard>
               ) : null}
             </Box>
           )}

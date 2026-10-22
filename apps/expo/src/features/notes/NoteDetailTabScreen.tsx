@@ -8,7 +8,7 @@ import { produce } from 'immer'
 import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
 import React, { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Platform, ScrollView, Share } from 'react-native'
+import { Platform, ScrollView, Share, StyleSheet } from 'react-native'
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
@@ -510,7 +510,7 @@ ${currentNote.description}
               onRelationPress={() => noteEndpoint && openEntityRelations(noteEndpoint)}
             />
             {isAnnotationNote && annotation ? (
-              <Box className="overflow-hidden border-continuous bg-opacity5 rounded-[8px] py-[12px] px-[16px]">
+              <Box className="overflow-hidden border-continuous bg-opacity5 rounded-[12px] py-[12px] px-[16px]">
                 <Text className="text-[14px] text-grey mb-[4px]">{t('Texte annoté')}</Text>
                 <Text className="text-[16px] font-semibold">
                   {annotation.ranges.map(r => r.text).join(' ')}
@@ -572,7 +572,10 @@ ${currentNote.description}
           </Box>
         </ScrollView>
         {isEditing && (
-          <HStack className="border-border px-[20px] py-[10px] justify-end border-t-[1px] gap-[10px] bg-reverse">
+          <HStack
+            className="border-separator px-[20px] py-[10px] justify-end gap-[10px] bg-reverse"
+            style={{ borderTopWidth: StyleSheet.hairlineWidth }}
+          >
             <Button reverse onPress={cancelEditing}>
               {t('Annuler')}
             </Button>

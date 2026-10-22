@@ -46,10 +46,10 @@ const CommentaryIdentity = ({
       size={56}
     />
     <Box className="overflow-hidden border-continuous flex-[1] gap-[3px]">
-      <Text className="text-[19px] leading-[23px] font-bold" numberOfLines={2}>
+      <Text className="text-[19px] leading-[23px] font-semibold" numberOfLines={2}>
         {entry.title}
       </Text>
-      <Text className="text-tertiary text-[13px]" numberOfLines={1}>
+      <Text className="text-grey text-[13px]" numberOfLines={1}>
         {entry.author}
       </Text>
     </Box>

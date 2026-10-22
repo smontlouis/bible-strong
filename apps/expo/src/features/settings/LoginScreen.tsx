@@ -28,9 +28,9 @@ const LoginScreen = () => {
   }, [isSignedIn, router])
 
   return (
-    <Container>
+    <Container className="bg-canvas">
       <Header hasBackButton title={t('Se connecter')} />
-      <ScrollView>
+      <ScrollView backgroundColor="canvas">
         <Box className="overflow-hidden border-continuous p-[20px] web:w-full web:max-w-[500px] web:self-center">
           <Text
             className="text-[30px] mb-[30px]"

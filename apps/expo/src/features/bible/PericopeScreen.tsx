@@ -51,6 +51,10 @@ type PericopeVerse = {
 type PericopeChapter = Record<string, PericopeVerse>
 type PericopeBook = Record<string, PericopeChapter>
 
+/** « CHAPITRE » is stored in capitals for the reading languages; the list sets it in sentence case. */
+const toSentenceCase = (value: string) =>
+  value.charAt(0).toLocaleUpperCase() + value.slice(1).toLocaleLowerCase()
+
 const PericopeHeading = (
   componentProps: Omit<UIComponentProps<typeof Paragraph>, keyof { size: number } | 'theme'> &
     Omit<{ size: number }, 'theme'> & { theme?: AppTheme; className?: string }
@@ -215,8 +219,8 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
                 Object.entries(pericopeBook).map(([chapterKey, chapterObject]) => (
                   <Fragment key={chapterKey}>
                     {!!Object.keys(chapterObject).length && (
-                      <Text className="text-tertiary text-[12px] mb-[10px]">
-                        {translateForReading('CHAPITRE', version)} {chapterKey}
+                      <Text className="text-grey text-[13px] mb-[10px]" accessibilityRole="header">
+                        {toSentenceCase(translateForReading('CHAPITRE', version))} {chapterKey}
                       </Text>
                     )}
                     {Object.entries(chapterObject).map(([verseKey, verseObject]) => {

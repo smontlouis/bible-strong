@@ -94,7 +94,7 @@ const AccountMigrationModal = ({
       onRequestClose={() => undefined}
     >
       <Box
-        className="overflow-hidden border-continuous flex-[1] items-center justify-center bg-reverse px-[30px] py-[40px]"
+        className="overflow-hidden border-continuous flex-[1] items-center justify-center bg-canvas px-[30px] py-[40px]"
         accessibilityViewIsModal
         testID="account-migration-modal"
       >
@@ -132,7 +132,7 @@ const AccountMigrationModal = ({
           {!isFailure && presentation.kind === 'active' && (
             <VStack className="overflow-hidden border-continuous w-[100%] gap-[10px]">
               <HStack className="overflow-hidden border-continuous justify-between items-center">
-                <Text className="font-bold text-[14px]">{t('migration.progress')}</Text>
+                <Text className="text-[13px] text-grey">{t('migration.progress')}</Text>
                 <Text className="text-primary font-bold">{Math.round(progress * 100)}%</Text>
               </HStack>
               <View
@@ -162,7 +162,7 @@ const AccountMigrationModal = ({
 
           {isFailure && (
             <VStack className="overflow-hidden border-continuous w-[100%] gap-[12px]">
-              <Box className="overflow-hidden border-continuous p-[14px] rounded-[12px] bg-light-grey">
+              <Box className="overflow-hidden border-continuous p-[14px] rounded-[16px] bg-surface">
                 <Text
                   className="text-dark-grey text-[12px] text-center"
                   testID="account-migration-error-code"

@@ -306,7 +306,7 @@ const LocalMigrationGate = ({
   if (state.kind === 'checking') {
     return (
       <Container
-        className="flex-[1] bg-reverse items-center justify-center"
+        className="flex-[1] bg-canvas items-center justify-center"
         testID="migration-checking"
       >
         <ActivityIndicator accessibilityLabel={t('Chargement...')} />
@@ -318,7 +318,7 @@ const LocalMigrationGate = ({
   if (state.kind === 'inspection-error') {
     return (
       <Container
-        className="px-[28px] flex-[1] bg-reverse items-center justify-center"
+        className="px-[28px] flex-[1] bg-canvas items-center justify-center"
         testID="migration-inspection-error"
       >
         <Box
@@ -364,7 +364,7 @@ const LocalMigrationGate = ({
     migrationFailurePresentation[getMigrationFailureKind(snapshot.errorCode, looksOffline)]
 
   return (
-    <Container className="flex-[1] bg-reverse" isPadding={false} testID="migration-gate">
+    <Container className="flex-[1] bg-canvas" isPadding={false} testID="migration-gate">
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,
@@ -416,13 +416,13 @@ const LocalMigrationGate = ({
           {isConfirmation && (
             <>
               <HStack className="overflow-hidden border-continuous mt-[24px] gap-[12px]">
-                <Box className="overflow-hidden border-continuous flex-[1] p-[16px] rounded-[16px] bg-light-grey">
+                <Box className="overflow-hidden border-continuous flex-[1] p-[16px] rounded-[16px] bg-surface">
                   <Text className="text-dark-grey text-[12px]">{t('migration.downloadSize')}</Text>
                   <Text className="font-bold mt-[4px]">
                     {formatBytes(downloadBytes, i18n.language)}
                   </Text>
                 </Box>
-                <Box className="overflow-hidden border-continuous flex-[1] p-[16px] rounded-[16px] bg-light-grey">
+                <Box className="overflow-hidden border-continuous flex-[1] p-[16px] rounded-[16px] bg-surface">
                   <Text className="text-dark-grey text-[12px]">
                     {t('migration.reclaimedSpace')}
                   </Text>
@@ -434,7 +434,7 @@ const LocalMigrationGate = ({
 
               {resources.length > 0 && (
                 <VStack className="overflow-hidden border-continuous mt-[24px] gap-[10px]">
-                  <Text className="font-bold text-[14px]">{t('migration.resourcesToInstall')}</Text>
+                  <Text className="text-[13px] text-grey">{t('migration.resourcesToInstall')}</Text>
                   {resources.map(resource => (
                     <HStack
                       className="overflow-hidden border-continuous items-center gap-[10px]"
@@ -451,7 +451,7 @@ const LocalMigrationGate = ({
                       </Text>
                     </HStack>
                   ))}
-                  <Box className="overflow-hidden border-continuous mt-[8px] p-[16px] rounded-[16px] bg-light-grey">
+                  <Box className="overflow-hidden border-continuous mt-[8px] p-[16px] rounded-[16px] bg-surface">
                     <Text className="text-grey text-[13px] leading-[19px]">
                       {t('migration.useOnlineDescription')}
                     </Text>
@@ -464,7 +464,7 @@ const LocalMigrationGate = ({
           {isWorking && (
             <VStack className="overflow-hidden border-continuous mt-[28px] gap-[10px]">
               <HStack className="overflow-hidden border-continuous items-center justify-between">
-                <Text className="font-bold text-[14px]">{t('migration.progress')}</Text>
+                <Text className="text-[13px] text-grey">{t('migration.progress')}</Text>
                 <Text className="text-primary font-bold">{Math.round(progress * 100)}%</Text>
               </HStack>
               <View
@@ -485,7 +485,7 @@ const LocalMigrationGate = ({
           )}
 
           {hasFailure && (
-            <Box className="overflow-hidden border-continuous mt-[24px] p-[16px] bg-light-grey rounded-[16px]">
+            <Box className="overflow-hidden border-continuous mt-[24px] p-[16px] bg-surface rounded-[16px]">
               <Text className="text-grey text-[13px] leading-[19px]">
                 {t('migration.continueWithoutWarning')}
               </Text>

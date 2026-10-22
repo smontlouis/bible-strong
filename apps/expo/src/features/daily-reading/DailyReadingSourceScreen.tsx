@@ -10,7 +10,7 @@ import Header from '~common/Header'
 import Link from '~common/Link'
 import type { OnlinePlan } from '~common/types'
 import Border from '~common/ui/Border'
-import Box from '~common/ui/Box'
+import Box, { usePageBottomInset } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -104,6 +104,7 @@ type SourceItem =
 const DailyReadingSourceScreen = ({ embedded = false }: { embedded?: boolean }) => {
   const Layout = embedded ? Box : Container
   const { t, i18n } = useTranslation()
+  const bottomInset = usePageBottomInset()
   const router = useRouter()
   const { collectionId, language } = useLocalSearchParams<{
     collectionId?: string
@@ -188,7 +189,7 @@ const DailyReadingSourceScreen = ({ embedded = false }: { embedded?: boolean }) 
       )}
       <SectionList<SourceItem>
         style={{ flex: 1 }}
-        contentContainerStyle={[pageContentStyle, { paddingBottom: 24 }]}
+        contentContainerStyle={[pageContentStyle, { paddingBottom: 24 + bottomInset }]}
         sections={sections}
         stickySectionHeadersEnabled
         keyExtractor={item => item.id}

@@ -33,11 +33,11 @@ const PassageMediaPlayerScreen = () => {
   const playerHeight = (playerWidth * 9) / 16
 
   return (
-    <FormSheetScreen isFormSheet={IS_FORM_SHEET}>
-      <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
-        <Header background title={item?.title ?? t('passageMediaLibrary.playerTitle')} />
+    <FormSheetScreen className="bg-canvas" isFormSheet={IS_FORM_SHEET}>
+      <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
+        <Header title={item?.title ?? t('passageMediaLibrary.playerTitle')} />
         <ScrollView
-          backgroundColor="lightGrey"
+          backgroundColor="canvas"
           contentInsetAdjustmentBehavior="automatic"
           contentContainerStyle={{ alignItems: 'center', paddingHorizontal: 16, paddingTop: 24 }}
         >
@@ -47,7 +47,7 @@ const PassageMediaPlayerScreen = () => {
               style={{ width: playerWidth }}
             >
               <Box
-                className="border-continuous overflow-hidden rounded-[16px] bg-light-grey"
+                className="border-continuous overflow-hidden rounded-[16px] bg-surface"
                 style={{ width: playerWidth, height: playerHeight }}
               >
                 <YoutubePlayer

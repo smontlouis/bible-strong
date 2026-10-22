@@ -1,3 +1,4 @@
+import SheetWell from '~common/ui/SheetWell'
 import { DateTimePicker } from '@expo/ui/community/datetime-picker'
 import { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Platform } from 'react-native'
@@ -48,7 +49,7 @@ const ReminderSettings = ({
     if (allowed) onChange('07:00')
   }
   return (
-    <Box className="bg-light-grey rounded-[12px] p-[20px] gap-[12px]">
+    <SheetWell className="p-[20px] gap-[12px]">
       <Box className="flex-row items-center justify-between gap-[16px]">
         <Box className="flex-1 flex-row items-center gap-[8px]">
           {showIcon && Platform.OS !== 'web' && (
@@ -139,7 +140,7 @@ const ReminderSettings = ({
             )}
         </>
       )}
-    </Box>
+    </SheetWell>
   )
 }
 export default ReminderSettings

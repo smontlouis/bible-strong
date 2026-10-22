@@ -1,3 +1,5 @@
+import { StudyRowsCard } from '~common/ui/StudySection'
+import CommentarySectionRow, { formatCommentarySectionRange } from './CommentarySectionRow'
 import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import { commentaryContext } from '~features/study-assistant/resourceContext'
 import CommentIcon from '~common/CommentIcon'
@@ -330,13 +332,17 @@ const CommentaryResourceTabScreen = ({
                 message={t('commentaries.resource.emptyChapter')}
               />
             ) : (
-              <Box className="overflow-hidden border-continuous mt-[16px] gap-[12px]">
-                {query.data.sections.map(candidate => {
-                  return (
-                    <TouchableBox
-                      className="overflow-hidden border-continuous bg-surface rounded-[16px] px-[17px] py-[14px]"
+              <Box className="overflow-hidden border-continuous mt-[16px]">
+                <StudyRowsCard>
+                  {query.data.sections.map(candidate => (
+                    <CommentarySectionRow
                       key={candidate.id}
-                      activeOpacity={0.62}
+                      rangeLabel={formatCommentarySectionRange(
+                        t,
+                        candidate.rangeStartVerse,
+                        candidate.rangeEndVerse
+                      )}
+                      preview={candidate.preview}
                       onPress={() =>
                         pushRouteOnce({
                           pathname: '/commentary-entry',
@@ -348,25 +354,9 @@ const CommentaryResourceTabScreen = ({
                           },
                         })
                       }
-                      accessibilityRole="button"
-                    >
-                      <Box className="overflow-hidden border-continuous flex-row items-start">
-                        <Box className="overflow-hidden border-continuous px-[10px] py-[5px] rounded-full bg-light-primary">
-                          <Text className="text-primary font-bold text-[12px]">
-                            {formatRange(candidate.rangeStartVerse, candidate.rangeEndVerse)}
-                          </Text>
-                        </Box>
-                        <Text
-                          className="ml-[13px] flex-[1] text-grey text-[14px] leading-[20px]"
-                          numberOfLines={2}
-                        >
-                          {candidate.preview}
-                        </Text>
-                        <FeatherIcon name="chevron-right" size={20} color="grey" />
-                      </Box>
-                    </TouchableBox>
-                  )
-                })}
+                    />
+                  ))}
+                </StudyRowsCard>
               </Box>
             )}
           </ScrollView>

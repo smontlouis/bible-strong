@@ -7,6 +7,7 @@ import { SectionList, useWindowDimensions } from 'react-native'
 import Header from '~common/Header'
 import Box, { SafeAreaBox, usePageBottomInset, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { ListSectionTitle } from '~common/ui/ListSection'
 import {
   getPassageMediaLibrary,
   type ResolvedPassageMediaLibraryItem,
@@ -118,13 +119,8 @@ const PassageMediaLibraryScreen = () => {
           </VStack>
         }
         renderSectionHeader={({ section }) => (
-          <Box className="overflow-hidden border-continuous bg-reverse pt-[30px] pb-[20px]">
-            <Text
-              className="text-[19px]"
-              style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-            >
-              {section.title}
-            </Text>
+          <Box className="overflow-hidden border-continuous bg-reverse pt-[22px] pb-[4px]">
+            <ListSectionTitle className="ml-[0px]">{section.title}</ListSectionTitle>
           </Box>
         )}
         renderItem={({ item, index }) => (
