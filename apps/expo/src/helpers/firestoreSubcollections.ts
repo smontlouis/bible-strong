@@ -30,6 +30,15 @@ export const USER_DATA_SUBCOLLECTION_NAMES: UserDataSubcollectionName[] =
   SUBCOLLECTION_NAMES.filter((name): name is UserDataSubcollectionName => name !== 'tabGroups')
 
 /**
+ * Sous-collections écoutées en direct. `relationIndex` et `relationPairs` en sont exclues :
+ * l'app les reconstruit à partir de `relations` à chaque réception, et chaque lecture de leur
+ * copie Firestore était facturée pour rien.
+ */
+export const LIVE_SUBCOLLECTION_NAMES = USER_DATA_SUBCOLLECTION_NAMES.filter(
+  name => name !== 'relationIndex' && name !== 'relationPairs'
+)
+
+/**
  * Taille maximale d'un batch Firestore (on utilise 400 pour avoir de la marge)
  */
 const BATCH_CHUNK_SIZE = 400

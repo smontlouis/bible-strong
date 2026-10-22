@@ -4,7 +4,9 @@ import { act, create } from 'react-test-renderer'
 import useLiveUpdates from '~helpers/useLiveUpdates'
 
 const mockDispatch = jest.fn()
-const mockOnSnapshot = jest.fn(() => jest.fn())
+const mockOnSnapshot = jest.fn((..._args: unknown[]) => jest.fn())
+let mockHasStudies = false
+let mockPreviousIsLogged = false
 let mockSubcollectionOnChange: ((data: unknown, changes: unknown) => void) | undefined
 const mockSubscribeToSubcollection = jest.fn((...args: unknown[]) => {
   mockSubcollectionOnChange = args[2] as typeof mockSubcollectionOnChange
@@ -13,7 +15,10 @@ const mockSubscribeToSubcollection = jest.fn((...args: unknown[]) => {
 
 jest.mock('react-redux', () => ({
   useDispatch: () => mockDispatch,
-  useSelector: () => false,
+  useSelector: (selector: (state: unknown) => unknown) =>
+    selector({
+      user: { isLoading: false, bible: { studies: mockHasStudies ? { study: {} } : {} } },
+    }),
 }))
 
 jest.mock('@sentry/react-native', () => ({
@@ -26,7 +31,7 @@ jest.mock('~helpers/useLogin', () => ({
 }))
 
 jest.mock('~helpers/usePrevious', () => ({
-  usePrevious: () => false,
+  usePrevious: () => mockPreviousIsLogged,
 }))
 
 jest.mock('~helpers/useConnection', () => ({
@@ -43,11 +48,11 @@ jest.mock('~helpers/firebase', () => ({
   collection: jest.fn(() => ({})),
   query: jest.fn(() => ({})),
   where: jest.fn(() => ({})),
-  onSnapshot: (..._args: unknown[]) => mockOnSnapshot(),
+  onSnapshot: (...args: unknown[]) => mockOnSnapshot(...args),
 }))
 
 jest.mock('~helpers/firestoreSubcollections', () => ({
-  USER_DATA_SUBCOLLECTION_NAMES: ['bookmarks'],
+  LIVE_SUBCOLLECTION_NAMES: ['bookmarks'],
   subscribeToSubcollection: (...args: unknown[]) => mockSubscribeToSubcollection(...args),
 }))
 
@@ -61,7 +66,11 @@ jest.mock('~helpers/firestoreSyncOutbox', () => ({
 
 jest.mock('~redux/modules/user', () => ({
   addStudies: (payload: unknown) => ({ type: 'user/add-studies', payload }),
-  deleteStudy: (payload: unknown) => ({ type: 'user/delete-study', payload }),
+  deleteStudy: (payload: unknown, options?: unknown) => ({
+    type: 'user/delete-study',
+    payload,
+    meta: options,
+  }),
   finishUserDataSync: () => ({ type: 'user/finish-sync' }),
   markUserDataSyncCollectionLoaded: (payload: unknown) => ({
     type: 'user/mark-loaded',
@@ -73,7 +82,11 @@ jest.mock('~redux/modules/user', () => ({
     payload,
   }),
   startUserDataSync: () => ({ type: 'user/start-sync' }),
-  updateStudy: (payload: unknown) => ({ type: 'user/update-study', payload }),
+  updateStudy: (payload: unknown, options?: unknown) => ({
+    type: 'user/update-study',
+    payload,
+    meta: options,
+  }),
 }))
 
 jest.mock('~redux/store', () => ({
@@ -96,6 +109,8 @@ describe('useLiveUpdates account-entry gate', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockSubcollectionOnChange = undefined
+    mockHasStudies = false
+    mockPreviousIsLogged = false
     jest.spyOn(console, 'log').mockImplementation(() => undefined)
     jest.spyOn(console, 'error').mockImplementation(() => undefined)
   })
@@ -239,6 +254,64 @@ describe('useLiveUpdates account-entry gate', () => {
         isInitialLoad: true,
         fromCache: false,
       }),
+    })
+
+    await act(async () => {
+      renderer.unmount()
+    })
+  })
+
+  it('takes study changes from another install without writing them back', async () => {
+    mockHasStudies = true
+    mockPreviousIsLogged = true
+    const runBeforeSync = jest.fn(async () => true)
+    const Harness = () => {
+      useLiveUpdates({ enabled: true, runBeforeSync, resumeToken: 0 })
+      return null
+    }
+
+    let renderer!: ReturnType<typeof create>
+    await act(async () => {
+      renderer = create(<Harness />)
+      await new Promise(resolve => setTimeout(resolve, 0))
+    })
+
+    const onStudies = mockOnSnapshot.mock.calls[1]?.[1] as (snapshot: unknown) => void
+    const studiesSnapshot = (changes: unknown[]) => ({
+      metadata: { hasPendingWrites: false },
+      forEach: jest.fn(),
+      docChanges: () => changes,
+    })
+    const change = (type: string, id: string) => ({
+      type,
+      doc: { data: () => ({ id, title: 'Remote' }) },
+    })
+    act(() => {
+      // The first snapshot repeats the studies already in the store.
+      onStudies(studiesSnapshot([]))
+      onStudies(
+        studiesSnapshot([
+          change('added', 'study-1'),
+          change('modified', 'study-2'),
+          change('removed', 'study-3'),
+        ])
+      )
+    })
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'user/update-study',
+      payload: { id: 'study-1', title: 'Remote' },
+      meta: { localOnly: true },
+    })
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'user/update-study',
+      payload: { id: 'study-2', title: 'Remote' },
+      meta: { localOnly: true },
+    })
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'user/delete-study',
+      payload: 'study-3',
+      meta: { localOnly: true },
     })
 
     await act(async () => {

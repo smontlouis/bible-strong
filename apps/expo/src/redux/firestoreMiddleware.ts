@@ -80,7 +80,12 @@ import {
   toggleSettingsShareQuotes,
   toggleSettingsShareVerseNumbers,
 } from './modules/user/settings'
-import { deleteStudy, publishStudyAction, updateStudy } from './modules/user/studies'
+import {
+  deleteStudy,
+  isLocalOnlyStudyAction,
+  publishStudyAction,
+  updateStudy,
+} from './modules/user/studies'
 import { addTag, removeTag, toggleTagEntity, updateTag } from './modules/user/tags'
 
 import { diff } from '~helpers/deep-obj'
@@ -859,6 +864,7 @@ const firestoreMiddleware: Middleware = store => next => async action => {
 
   // ========== STUDIES SYNC (collection séparée) ==========
   if (isStudyUpdateAction(action)) {
+    if (isLocalOnlyStudyAction(action)) return result
     if (!diffState?.user?.bible?.studies) return result
 
     const { studies } = diffState.user.bible
@@ -906,6 +912,7 @@ const firestoreMiddleware: Middleware = store => next => async action => {
   }
 
   if (deleteStudy.match(action)) {
+    if (isLocalOnlyStudyAction(action)) return result
     if (!diffState?.user?.bible?.studies) return result
     const { studies } = diffState.user.bible
 

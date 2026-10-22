@@ -1,7 +1,13 @@
 // Mock react-native before other imports
 import type { Bookmark } from '~common/types'
 import userReducer, { UserState, Study, StudiesObj } from '../user'
-import { updateStudy, addStudies, deleteStudy, publishStudyAction } from '../user/studies'
+import {
+  updateStudy,
+  addStudies,
+  deleteStudy,
+  isLocalOnlyStudyAction,
+  publishStudyAction,
+} from '../user/studies'
 
 jest.mock('react-native', () => ({
   Appearance: {
@@ -430,6 +436,27 @@ describe('Studies Reducer', () => {
       } as UserState
       const newState = userReducer(state, addStudies({}))
       expect(Object.keys(newState.bible.studies)).toHaveLength(0)
+    })
+  })
+
+  describe('changes received from another install', () => {
+    it('are applied to the store like local changes', () => {
+      const created = userReducer(
+        initialState,
+        updateStudy({ id: 'study-1', title: 'Remote Study' }, { localOnly: true })
+      )
+      expect(created.bible.studies['study-1'].title).toBe('Remote Study')
+
+      const deleted = userReducer(created, deleteStudy('study-1', { localOnly: true }))
+      expect(deleted.bible.studies['study-1']).toBeUndefined()
+    })
+
+    it('are the only Study changes kept out of Firestore', () => {
+      expect(isLocalOnlyStudyAction(updateStudy({ id: 'study-1' }, { localOnly: true }))).toBe(true)
+      expect(isLocalOnlyStudyAction(deleteStudy('study-1', { localOnly: true }))).toBe(true)
+      expect(isLocalOnlyStudyAction(updateStudy({ id: 'study-1' }))).toBe(false)
+      expect(isLocalOnlyStudyAction(deleteStudy('study-1'))).toBe(false)
+      expect(isLocalOnlyStudyAction(publishStudyAction('study-1'))).toBe(false)
     })
   })
 

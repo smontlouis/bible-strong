@@ -8,7 +8,11 @@ import {
 } from '../user/studyRelations'
 import { addNoteAction } from '../user/notes'
 import { addWordAnnotationAction, removeWordAnnotationAction } from '../user/wordAnnotations'
-import { normalizeRelation } from '~features/studyRelations/domain'
+import {
+  normalizeRelation,
+  rebuildRelationIndexes,
+  rebuildRelationPairs,
+} from '~features/studyRelations/domain'
 
 const mockSetTabGroups = jest.fn()
 
@@ -307,6 +311,26 @@ describe('study relation reducer', () => {
 
     expect(nextState.bible.relations).toEqual({})
     expect(nextState.sync.loaded.relations).toBe(true)
+  })
+
+  it('rebuilds the relation projections from a relation received from another install', () => {
+    const relation = createRelation({ id: 'remote-relation' })
+
+    const nextState = userReducer(
+      initialState,
+      receiveSubcollectionUpdates({
+        collection: 'relations',
+        data: { [relation.id]: relation },
+        changes: { added: { [relation.id]: relation }, modified: {}, removed: [] },
+        isInitialLoad: false,
+      })
+    )
+
+    // The app no longer listens to the Firestore copies of these projections.
+    expect(Object.keys(nextState.bible.relationIndex).length).toBeGreaterThan(0)
+    expect(nextState.bible.relationIndex).toEqual(rebuildRelationIndexes(nextState.bible.relations))
+    expect(Object.keys(nextState.bible.relationPairs).length).toBeGreaterThan(0)
+    expect(nextState.bible.relationPairs).toEqual(rebuildRelationPairs(nextState.bible.relations))
   })
 
   it('backfills relations from pre-migration note data when importing a backup', () => {

@@ -18,18 +18,33 @@ export type StudyMutation = {
   tags?: Study['tags']
 }
 
+// `localOnly` marks a change received from another install: it is already in Firestore, and
+// writing it back would cost a write and could overwrite a newer edit made meanwhile.
+type StudyActionOptions = { localOnly?: boolean }
+
 // RTK Action Creators
-export const updateStudy = createAction(UPDATE_STUDY, (payload: StudyMutation) => ({
-  payload,
-}))
+export const updateStudy = createAction(
+  UPDATE_STUDY,
+  (payload: StudyMutation, options?: StudyActionOptions) => ({
+    payload,
+    meta: { localOnly: options?.localOnly ?? false },
+  })
+)
 
 export const addStudies = createAction(ADD_STUDIES, (payload: { [key: string]: Study }) => ({
   payload,
 }))
 
-export const deleteStudy = createAction(DELETE_STUDY, (id: string) => ({
-  payload: id,
-}))
+export const deleteStudy = createAction(
+  DELETE_STUDY,
+  (id: string, options?: StudyActionOptions) => ({
+    payload: id,
+    meta: { localOnly: options?.localOnly ?? false },
+  })
+)
+
+export const isLocalOnlyStudyAction = (action: { type: string }): boolean =>
+  (updateStudy.match(action) || deleteStudy.match(action)) && action.meta.localOnly
 
 export const publishStudyAction = createAction(
   PUBLISH_STUDY,

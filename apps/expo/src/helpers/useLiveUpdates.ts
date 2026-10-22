@@ -22,9 +22,9 @@ import useLogin from './useLogin'
 import { usePrevious } from './usePrevious'
 import {
   batchWriteSubcollection,
+  LIVE_SUBCOLLECTION_NAMES,
   subscribeToSubcollection,
   type SubcollectionData,
-  USER_DATA_SUBCOLLECTION_NAMES,
 } from './firestoreSubcollections'
 import { store } from '~redux/store'
 import { isMigrationInProgress } from '~state/migration'
@@ -221,7 +221,7 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
       })
 
       // Subscribe to each subcollection
-      for (const collection of USER_DATA_SUBCOLLECTION_NAMES) {
+      for (const collection of LIVE_SUBCOLLECTION_NAMES) {
         const unsubscribe = subscribeToSubcollection(
           userId,
           collection,
@@ -314,26 +314,33 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
               // Ignore first listener adding all documents
               if (isFirstSnapshotListener) return
 
+              // Already in Firestore: the store takes them without writing them back.
               if (change.type === 'added') {
                 console.log('[LiveUpdates] Added study:', change.doc.data().id)
 
                 dispatch(
-                  updateStudy({
-                    ...(change.doc.data() as StudyMutation),
-                  })
+                  updateStudy(
+                    {
+                      ...(change.doc.data() as StudyMutation),
+                    },
+                    { localOnly: true }
+                  )
                 )
               }
               if (change.type === 'modified') {
                 console.log('[LiveUpdates] Modified study:', change.doc.data().id)
                 dispatch(
-                  updateStudy({
-                    ...(change.doc.data() as StudyMutation),
-                  })
+                  updateStudy(
+                    {
+                      ...(change.doc.data() as StudyMutation),
+                    },
+                    { localOnly: true }
+                  )
                 )
               }
               if (change.type === 'removed') {
                 console.log('[LiveUpdates] Removed study:', change.doc.data().id)
-                dispatch(deleteStudy(change.doc.data().id))
+                dispatch(deleteStudy(change.doc.data().id, { localOnly: true }))
               }
             })
           }

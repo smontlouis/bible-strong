@@ -1,4 +1,8 @@
-import { batchWriteSubcollection, subscribeToSubcollection } from '../firestoreSubcollections'
+import {
+  batchWriteSubcollection,
+  LIVE_SUBCOLLECTION_NAMES,
+  subscribeToSubcollection,
+} from '../firestoreSubcollections'
 import { onSnapshot, writeBatch } from '../firebase'
 
 const mockCaptureError = jest.fn()
@@ -168,6 +172,27 @@ describe('firestoreSubcollections', () => {
       2,
       {},
       expect.objectContaining({ fromCache: false, isFirstSnapshot: false })
+    )
+  })
+
+  it('listens to relations but not to the projections rebuilt from them', () => {
+    expect(LIVE_SUBCOLLECTION_NAMES).toContain('relations')
+    expect(LIVE_SUBCOLLECTION_NAMES).not.toContain('relationIndex')
+    expect(LIVE_SUBCOLLECTION_NAMES).not.toContain('relationPairs')
+    expect(LIVE_SUBCOLLECTION_NAMES).not.toContain('tabGroups')
+    expect(LIVE_SUBCOLLECTION_NAMES).toEqual(
+      expect.arrayContaining([
+        'bookmarks',
+        'highlights',
+        'notes',
+        'links',
+        'tags',
+        'strongsHebreu',
+        'strongsGrec',
+        'words',
+        'naves',
+        'wordAnnotations',
+      ])
     )
   })
 })
