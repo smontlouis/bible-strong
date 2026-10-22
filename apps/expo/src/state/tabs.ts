@@ -34,7 +34,7 @@ import {
   type BibleTextModeColumn,
 } from '~helpers/bibleColumnTextModes'
 import { migrateLegacyBibleTabData } from '../migrations/legacyBibleVersionMigration'
-import { omitSessionTabPreview, withoutLegacyTabPreview } from './tabPreview'
+import { omitSessionTabPreview, withTabPreviewUri, withoutLegacyTabPreview } from './tabPreview'
 import { appLogger } from '~helpers/agentObservability'
 import { useBibleRouteNavigation } from './bibleRouteNavigation'
 import { getSelectedVersesVersion, setSelectedVersesVersion } from './bibleSelectionVersion'
@@ -615,6 +615,16 @@ export const tabsAtom = atom(
       typeof newTabsOrUpdater === 'function' ? newTabsOrUpdater(currentTabs) : newTabsOrUpdater
 
     set(tabGroupsAtom, updateTabGroupTabs(groups, activeId, newTabs))
+  }
+)
+
+// Sets the preview of a tab without marking its group as changed (see `withTabPreviewUri`).
+export const setTabPreviewAtom = atom(
+  null,
+  (get, set, { tabId, uri }: { tabId: string; uri: string }) => {
+    const groups = get(tabGroupsAtom)
+    const next = withTabPreviewUri(groups, tabId, uri)
+    if (next !== groups) set(tabGroupsAtom, next)
   }
 )
 

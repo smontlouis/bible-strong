@@ -1,4 +1,4 @@
-import type { TabBase } from './tabs'
+import type { TabBase, TabGroup } from './tabs'
 
 /** Tabs saved before previews became files carried the JPEG inline, as base64. */
 type LegacyTabPreview = { base64Preview?: unknown }
@@ -36,3 +36,21 @@ export const omitSessionTabPreview = (key: string, value: unknown) =>
   key === 'previewUri' && typeof value === 'string' && isSessionTabPreview(value)
     ? undefined
     : value
+
+/**
+ * The groups with the preview of one tab replaced. A preview is not a change of the tab:
+ * the group keeps its `updatedAt`, so the sync sees nothing to send to Firestore. Returns
+ * the same groups when the tab is absent or already shows this preview.
+ */
+export const withTabPreviewUri = (groups: TabGroup[], tabId: string, uri: string): TabGroup[] => {
+  let changed = false
+  const next = groups.map(group => {
+    const index = group.tabs.findIndex(tab => tab.id === tabId)
+    if (index === -1 || group.tabs[index]!.previewUri === uri) return group
+    changed = true
+    const tabs = group.tabs.slice()
+    tabs[index] = { ...tabs[index]!, previewUri: uri }
+    return { ...group, tabs }
+  })
+  return changed ? next : groups
+}

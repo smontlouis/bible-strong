@@ -1,10 +1,9 @@
 import { PixelRatio, Platform, type View } from 'react-native'
 import { runAfterInteractions } from '~helpers/runAfterInteractions'
-import produceDraft from 'immer'
 import { useSetAtom, useStore } from 'jotai/react'
 import { captureRef } from 'react-native-view-shot'
 import useDynamicRefs from '~helpers/useDynamicRefs'
-import { tabGroupsAtom, tabsAtom } from '../../../state/tabs'
+import { setTabPreviewAtom, tabGroupsAtom, tabsAtom } from '../../../state/tabs'
 import {
   deleteTabPreviewFile,
   isTabPreviewReferenced,
@@ -37,7 +36,7 @@ const measurePreviewSize = (view: View) =>
 
 const useTakeActiveTabSnapshot = () => {
   const store = useStore()
-  const setTabs = useSetAtom(tabsAtom)
+  const setTabPreview = useSetAtom(setTabPreviewAtom)
   const [getRef] = useDynamicRefs<View>()
 
   const captureSnapshot = async (activeTabIndex: number, activeAtomId: string) => {
@@ -82,13 +81,8 @@ const useTakeActiveTabSnapshot = () => {
     }
 
     const previousUri = tab.previewUri
-    setTabs(
-      produceDraft(draft => {
-        if (draft[activeTabIndex]) {
-          draft[activeTabIndex].previewUri = uri
-        }
-      })
-    )
+    // A new picture of the tab is not a change to sync: the group keeps its date.
+    setTabPreview({ tabId: tab.id, uri })
     settleTabPreviewFile(uri)
 
     // The capture overwrote the file of this tab. A tab opened as a copy of another may still

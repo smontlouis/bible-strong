@@ -15,6 +15,20 @@ const mockTabGroupsAtom = atom(get => [
   { id: 'active', tabs: get(mockTabsAtom) } as TabGroup,
   { id: 'other', tabs: get(mockOtherGroupTabsAtom) } as TabGroup,
 ])
+const mockSetTabPreviewAtom = atom(
+  null,
+  (get, set, { tabId, uri }: { tabId: string; uri: string }) => {
+    for (const tabsAtom of [mockTabsAtom, mockOtherGroupTabsAtom]) {
+      const tabs = get(tabsAtom)
+      if (tabs.some(item => item.id === tabId)) {
+        set(
+          tabsAtom,
+          tabs.map(item => (item.id === tabId ? { ...item, previewUri: uri } : item))
+        )
+      }
+    }
+  }
+)
 const mockView = {
   measure: (callback: (x: number, y: number, width: number, height: number) => void) =>
     callback(0, 0, 390, 844),
@@ -32,6 +46,9 @@ jest.mock('~state/tabs', () => ({
   },
   get tabGroupsAtom() {
     return mockTabGroupsAtom
+  },
+  get setTabPreviewAtom() {
+    return mockSetTabPreviewAtom
   },
 }))
 jest.mock('~helpers/useDynamicRefs', () => ({
