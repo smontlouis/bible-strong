@@ -112,6 +112,11 @@
   max-height: min(420px, 65vh);
   overflow-y: auto;
 }
+/* Cancels the popover's padding; the bottom corners follow its radius, inside its border. */
+.bs-filter-options-flush {
+  margin: 0 -8px -8px;
+  border-radius: 0 0 13px 13px;
+}
 .bs-filter-row {
   display: flex;
   align-items: center;

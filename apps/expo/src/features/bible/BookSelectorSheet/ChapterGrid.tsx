@@ -8,6 +8,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Book } from '~assets/bible_versions/books-desc'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { colorWithOpacity } from '~themes/colorValues'
+import { useTheme } from '~themes/ThemeProvider'
 import { getChapterRowScrollOffset } from './bookSelectorScroll'
 import { BOOK_SELECTION_EVENT } from './constants'
 interface ChapterGridProps {
@@ -25,6 +27,7 @@ const TOP_PADDING = 16
 
 const ChapterGrid = ({ book, chapters: availableChapters, selectedChapter }: ChapterGridProps) => {
   const { t } = useTranslation()
+  const theme = useTheme()
   const { width: windowWidth } = useWindowDimensions()
   const insets = useSafeAreaInsets()
   const scrollViewRef = useRef<ScrollView>(null)
@@ -91,13 +94,7 @@ const ChapterGrid = ({ book, chapters: availableChapters, selectedChapter }: Cha
 
         return (
           <TouchableBox
-            className={twMerge(
-              'overflow-hidden border-continuous',
-              twMerge(
-                isSelected ? 'bg-light-grey' : 'bg-opacity5',
-                'overflow-hidden border-continuous items-center rounded-[8px] justify-center'
-              )
-            )}
+            className="overflow-hidden border-continuous items-center rounded-[8px] justify-center"
             key={chapter}
             testID={`book-selector-chapter-${book.Numero}-${chapter}`}
             accessibilityLabel={`${t('Chapitre')} ${chapter}`}
@@ -106,12 +103,20 @@ const ChapterGrid = ({ book, chapters: availableChapters, selectedChapter }: Cha
             activeOpacity={0.7}
             onLongPress={() => emitSelection('longPress', chapter)}
             onPress={() => emitSelection('select', chapter)}
-            style={{ width: ITEM_SIZE, height: ITEM_SIZE }}
+            style={{
+              width: ITEM_SIZE,
+              height: ITEM_SIZE,
+              backgroundColor: isSelected
+                ? colorWithOpacity(theme.colors.primary, 0.12)
+                : theme.colors.opacity5,
+            }}
           >
             <Box className="overflow-hidden border-continuous absolute left-[0px] top-[0px] right-[0px] bottom-[0px] items-center justify-center">
               <Text
-                className={twMerge(isSelected ? 'text-primary' : 'text-default', 'text-center')}
-                style={{ fontWeight: isSelected ? 'bold' : undefined }}
+                className={twMerge(
+                  isSelected ? 'text-primary font-semibold' : 'text-default',
+                  'text-center'
+                )}
               >
                 {chapter}
               </Text>

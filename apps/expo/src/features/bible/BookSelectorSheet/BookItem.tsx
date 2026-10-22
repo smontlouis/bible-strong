@@ -8,7 +8,10 @@ import { SharedValue, useDerivedValue } from 'react-native-reanimated'
 import { Book } from '~assets/bible_versions/books-desc'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import { ListSeparator } from '~common/ui/ListSection'
 import Text from '~common/ui/Text'
+import { colorWithOpacity } from '~themes/colorValues'
+import { useTheme } from '~themes/ThemeProvider'
 import AccordionItem from './AccordionItem'
 import {
   BOOK_ITEM_HEIGHT,
@@ -34,6 +37,7 @@ interface BookItemProps {
 }
 
 export const itemHeight = BOOK_ITEM_HEIGHT
+const ROW_PADDING_LEFT = 20
 
 const BookItem = memo(
   ({
@@ -48,6 +52,8 @@ const BookItem = memo(
     expandsInstantly,
   }: BookItemProps) => {
     const { t } = useTranslation()
+    const theme = useTheme()
+    const currentTint = colorWithOpacity(theme.colors.primary, 0.12)
     const { width: windowWidth } = useWindowDimensions()
     const isExpanded = useDerivedValue(() => expandedBook.get() === book.Numero)
 
@@ -89,21 +95,18 @@ const BookItem = memo(
           onPress={() => onBookSelect(book)}
         >
           <HStack
-            className={twMerge(
-              'overflow-hidden border-continuous',
-              twMerge(
-                isSelected ? 'bg-light-grey' : 'bg-[transparent]',
-                'overflow-hidden border-continuous px-[20px] items-center'
-              )
-            )}
-            style={{ height: itemHeight }}
+            className="overflow-hidden border-continuous items-center pr-[20px]"
+            style={{
+              height: itemHeight,
+              paddingLeft: ROW_PADDING_LEFT,
+              backgroundColor: isSelected ? currentTint : undefined,
+            }}
           >
             <Text
               className={twMerge(
-                isSelected ? 'text-primary' : 'text-default',
+                isSelected ? 'text-primary font-semibold' : 'text-default',
                 'text-[16px] flex-[1]'
               )}
-              style={{ fontWeight: isSelected ? 'bold' : undefined }}
             >
               {bookName}
             </Text>
@@ -114,7 +117,7 @@ const BookItem = memo(
               }}
               animate={chevronAnimation as never}
             >
-              <FeatherIcon color="grey" name="chevron-down" size={24} style={{ opacity: 0.5 }} />
+              <FeatherIcon color="grey" name="chevron-down" size={18} />
             </MotiView>
           </HStack>
         </TouchableOpacity>
@@ -152,11 +155,11 @@ const BookItem = memo(
                     onLongPress={() => handleLongPressChapterSelect(chapter)}
                   >
                     <Box
-                      className={twMerge(
-                        isSelectedChapter ? 'bg-light-grey' : 'bg-opacity5',
-                        'overflow-hidden border-continuous rounded-[8px] h-[60px] items-center justify-center'
-                      )}
-                      style={{ width: ITEM_WIDTH }}
+                      className="overflow-hidden border-continuous rounded-[8px] h-[60px] items-center justify-center"
+                      style={{
+                        width: ITEM_WIDTH,
+                        backgroundColor: isSelectedChapter ? currentTint : theme.colors.opacity5,
+                      }}
                     >
                       <Box
                         className="overflow-hidden border-continuous"
@@ -170,13 +173,10 @@ const BookItem = memo(
                       >
                         <Text
                           className={twMerge(
-                            isSelectedChapter ? 'text-primary' : 'text-default',
+                            isSelectedChapter ? 'text-primary font-semibold' : 'text-default',
                             'text-center'
                           )}
-                          style={{
-                            width: ITEM_WIDTH,
-                            fontWeight: isSelectedChapter ? 'bold' : undefined,
-                          }}
+                          style={{ width: ITEM_WIDTH }}
                         >
                           {chapter}
                         </Text>
@@ -188,6 +188,8 @@ const BookItem = memo(
             </HStack>
           </AccordionItem>
         )}
+        {/* Under the book and its open chapters, which belong to it */}
+        <ListSeparator inset={ROW_PADDING_LEFT} overlay />
       </Box>
     )
   },

@@ -3,13 +3,14 @@ import { twMerge } from '~common/ui/classNames'
 import { colorWithOpacity, resolveThemeColor } from '~themes/colorValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React, { useEffectEvent } from 'react'
-import { Linking, Platform, StyleSheet, TouchableOpacity } from 'react-native'
+import { Linking, Platform, TouchableOpacity } from 'react-native'
 import { useQuery } from '@tanstack/react-query'
 import { getDefaultStore } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import Box from '~common/ui/Box'
 import Checkbox from '~common/ui/Checkbox'
 import { FeatherIcon } from '~common/ui/Icon'
+import { ListSeparator } from '~common/ui/ListSection'
 import Progress from '~common/ui/Progress'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
@@ -74,10 +75,7 @@ const VersionItemContainer = ({
       }}
     >
       {children}
-      <Box
-        className="absolute bottom-[0px] right-[0px] bg-separator"
-        style={{ left: separatorInset, height: StyleSheet.hairlineWidth }}
-      />
+      <ListSeparator inset={separatorInset} overlay />
     </Box>
   )
 

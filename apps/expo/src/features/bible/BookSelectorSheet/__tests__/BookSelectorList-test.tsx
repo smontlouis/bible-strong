@@ -4,13 +4,33 @@ import books from '~assets/bible_versions/books-desc'
 import { BookSelectorList } from '../BookSelectorList'
 
 let mockSelectionMode: 'grid' | 'list' = 'list'
+let mockSort: 'alphabetical' | 'canonical' = 'canonical'
 
 jest.mock('jotai/react', () => ({
-  useAtomValue: () => mockSelectionMode,
+  useAtomValue: (atom: symbol) =>
+    atom.description === 'bookSelectorSortAtom' ? mockSort : mockSelectionMode,
 }))
 
 jest.mock('../atom', () => ({
   bookSelectorSelectionModeAtom: Symbol('bookSelectorSelectionModeAtom'),
+  bookSelectorSortAtom: Symbol('bookSelectorSortAtom'),
+}))
+
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}))
+
+jest.mock('~common/ui/Box', () => ({
+  __esModule: true,
+  default: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
+    jest.requireActual<typeof import('react')>('react').createElement('Box', props, children),
+}))
+
+jest.mock('~common/ui/ListSection', () => ({
+  ListSectionTitle: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
+    jest
+      .requireActual<typeof import('react')>('react')
+      .createElement('ListSectionTitle', props, children),
 }))
 
 jest.mock('react-native-safe-area-context', () => ({
@@ -54,6 +74,7 @@ jest.mock('../ChapterGrid', () => ({
 
 const genesis = books.find(book => book.Numero === 1)!
 const psalms = books.find(book => book.Numero === 19)!
+const matthew = books.find(book => book.Numero === 40)!
 const expandedBook = { get: jest.fn(), set: jest.fn() }
 const flatListRef = { current: null }
 const listMetrics = { current: { scrollOffset: 0, viewportHeight: 0 } }
@@ -105,6 +126,7 @@ describe('BookSelectorList', () => {
       globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }
     ).IS_REACT_ACT_ENVIRONMENT = true
     mockSelectionMode = 'list'
+    mockSort = 'canonical'
     onBookSelect.mockClear()
     onGridBookSelect.mockClear()
   })
@@ -204,6 +226,46 @@ describe('BookSelectorList', () => {
     })
 
     expect(onGridBookSelect).toHaveBeenCalledWith(genesis)
+  })
+
+  it('heads each testament of the grid with its title, in the canon order only', () => {
+    mockSelectionMode = 'grid'
+    const renderGrid = () =>
+      createRenderer(
+        <BookSelectorList
+          data={[genesis, psalms, matthew]}
+          initialScrollOffset={0}
+          expandedBook={expandedBook as never}
+          bookSelectorData={undefined}
+          flatListRef={flatListRef}
+          listMetrics={listMetrics}
+          renderedChapterBookNumbers={[]}
+          instantBookNumber={null}
+          onBookSelect={onBookSelect}
+          gridBook={null}
+          onGridBookSelect={onGridBookSelect}
+        />
+      )
+
+    const canonical = renderGrid()
+    const titles = canonical.root.findAllByType('ListSectionTitle' as never)
+    expect(titles.map(title => title.props.children)).toEqual([
+      'Ancien Testament',
+      'Nouveau Testament',
+    ])
+    const groups = canonical.root
+      .findAll(
+        node => node.type === ('Box' as never) && node.props.className?.includes('flex-wrap')
+      )
+      .map(group =>
+        group.findAllByType('BookShortItem' as never).map(item => item.props.book.Numero)
+      )
+    expect(groups).toEqual([[1, 19], [40]])
+
+    mockSort = 'alphabetical'
+    const alphabetical = renderGrid()
+    expect(alphabetical.root.findAllByType('ListSectionTitle' as never)).toHaveLength(0)
+    expect(alphabetical.root.findAllByType('BookShortItem' as never)).toHaveLength(3)
   })
 
   it('passes partial coverage to the selected grid book', () => {

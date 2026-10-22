@@ -43,6 +43,10 @@ jest.mock('~common/ui/Box', () => ({
       .createElement('TouchableBox', props, children),
 }))
 
+jest.mock('~themes/ThemeProvider', () => ({
+  useTheme: () => ({ colors: { primary: 'rgb(0,0,0)' } }),
+}))
+
 jest.mock('~common/ui/Text', () => ({
   __esModule: true,
   default: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>

@@ -18,6 +18,7 @@ export default function ContextualSheet({
   panelScreens,
   panelInitialScreen,
   panelInitialStack,
+  panelFlush,
   onPresent,
   onDismissStart,
   onDismiss,
@@ -122,6 +123,7 @@ export default function ContextualSheet({
               </>
             ),
             content: () => children,
+            flush: panelFlush,
             footer: Footer ? <Footer {...({} satisfies SheetFooterProps)} /> : undefined,
           },
         }}

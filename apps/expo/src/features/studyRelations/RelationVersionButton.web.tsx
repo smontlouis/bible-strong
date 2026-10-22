@@ -68,6 +68,7 @@ export default function RelationVersionButton({
           navigation.openScreen({
             title: t('Version'),
             width: 500,
+            flush: true,
             content: () => <VersionChoices version={version} onVersionChange={onVersionChange} />,
           })
         else onPress?.(event)

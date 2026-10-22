@@ -31,8 +31,28 @@ export const ListSectionTitle = ({
 )
 
 /** A hairline between two rows, starting where the row's text starts. */
-export const ListSeparator = ({ inset = ROW_PADDING }: { inset?: number }) => (
-  <Box className="bg-separator" style={{ height: StyleSheet.hairlineWidth, marginLeft: inset }} />
+export const ListSeparator = ({
+  inset = ROW_PADDING,
+  overlay = false,
+}: {
+  inset?: number
+  /** Laid over the bottom edge of the row that holds it: the row keeps its height. */
+  overlay?: boolean
+}) => (
+  <Box
+    className="bg-separator"
+    style={
+      overlay
+        ? {
+            position: 'absolute',
+            left: inset,
+            right: 0,
+            bottom: 0,
+            height: StyleSheet.hairlineWidth,
+          }
+        : { height: StyleSheet.hairlineWidth, marginLeft: inset }
+    }
+  />
 )
 
 type ListSectionProps = {

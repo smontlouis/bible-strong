@@ -18,6 +18,8 @@ export type PanelScreen = {
   hideHeader?: boolean
   /** Optional web width for this screen; height follows its content. */
   width?: number
+  /** Web: the content runs to the panel's sides and bottom, as a list whose rows keep their own margins. */
+  flush?: boolean
   onEnter?: () => void
   content: (navigation: PanelNavigation) => ReactNode
   headerLeft?: ReactNode

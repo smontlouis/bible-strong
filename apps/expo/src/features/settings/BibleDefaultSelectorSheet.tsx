@@ -76,6 +76,7 @@ const BibleDefaultSelectorSheet = ({
       <Sheet
         ref={sheetRef}
         panelWidth={500}
+        panelFlush
         panelHeaderRight={
           <FiltersHeader
             buttonOnly

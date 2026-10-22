@@ -9,9 +9,16 @@ import { useTranslation } from 'react-i18next'
 import Box from '~common/ui/Box'
 import Checkbox from '~common/ui/Checkbox'
 import { FeatherIcon } from '~common/ui/Icon'
+import { ListSeparator } from '~common/ui/ListSection'
 import Text from '~common/ui/Text'
 import { useResourceAccess } from '~features/resources/resourceAccess'
+import { colorWithOpacity } from '~themes/colorValues'
+import { useTheme } from '~themes/ThemeProvider'
 import type { Props } from './VersionSelectorItem'
+
+const ROW_PADDING_LEFT = 20
+const CHECKBOX_SLOT = 42
+
 const VersionSelectorItem = ({
   version,
   isSelected,
@@ -22,6 +29,7 @@ const VersionSelectorItem = ({
   onOpenInterlinear,
 }: Props) => {
   const { t } = useTranslation()
+  const theme = useTheme()
   const resources = useResourceAccess()
   const identity =
     selectionRequirement === 'strong'
@@ -31,9 +39,15 @@ const VersionSelectorItem = ({
   const showInterlinearCapability = showStrongIndex && isInterlinearCapableBibleVersion(version.id)
 
   return (
+    // With a checkbox, the box says a version is chosen: the row takes no tint.
     <Box
-      className="border-continuous overflow-hidden border-b-[1px] border-border"
-      style={{ borderLeftWidth: isSelected ? 3 : 0 }}
+      className="border-continuous overflow-hidden"
+      style={{
+        backgroundColor:
+          isSelected && !showSelectionCheckbox
+            ? colorWithOpacity(theme.colors.primary, 0.12)
+            : undefined,
+      }}
     >
       <TouchableOpacity
         accessibilityRole={showSelectionCheckbox ? 'checkbox' : 'button'}
@@ -45,11 +59,14 @@ const VersionSelectorItem = ({
         onPress={() => onChange?.(version.id)}
       >
         <Box
-          className="border-continuous overflow-hidden min-h-[72px] flex-row items-center px-[20px] py-[12px]"
-          style={{ opacity: available ? 1 : 0.42 }}
+          className="border-continuous overflow-hidden min-h-[72px] flex-row items-center pr-[20px] py-[12px]"
+          style={{ paddingLeft: ROW_PADDING_LEFT, opacity: available ? 1 : 0.42 }}
         >
           {showSelectionCheckbox && (
-            <Box className="overflow-hidden border-continuous w-[42px] items-center justify-center">
+            <Box
+              className="overflow-hidden border-continuous items-center justify-center"
+              style={{ width: CHECKBOX_SLOT }}
+            >
               <Checkbox checked={Boolean(isSelected)} size={22} />
             </Box>
           )}
@@ -99,6 +116,10 @@ const VersionSelectorItem = ({
           <InterlinearShortcut onPress={() => onOpenInterlinear(version.id)} />
         </Box>
       )}
+      <ListSeparator
+        inset={showSelectionCheckbox ? ROW_PADDING_LEFT + CHECKBOX_SLOT : ROW_PADDING_LEFT}
+        overlay
+      />
     </Box>
   )
 }

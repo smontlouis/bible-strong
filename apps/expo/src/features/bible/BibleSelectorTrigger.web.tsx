@@ -6,9 +6,13 @@ import { useAtomValue } from 'jotai'
 import { useQuery } from '@tanstack/react-query'
 import ContextualPanel from '~common/ContextualPanel'
 import PanelSearch from '~common/ContextualPanel/PanelSearch'
-import PanelAction from '~common/ContextualPanel/PanelAction'
 import Box, { TouchableBox } from '~common/ui/Box'
+import { twMerge } from '~common/ui/classNames'
+import { FeatherIcon } from '~common/ui/Icon'
+import { ListSeparator } from '~common/ui/ListSection'
 import Text from '~common/ui/Text'
+import { colorWithOpacity } from '~themes/colorValues'
+import { useTheme } from '~themes/ThemeProvider'
 import type { SheetRef } from '~common/sheet'
 import { getBooksForCanon, isBibleCanonId } from '~helpers/bibleBookCatalog'
 import { getBibleVersionCanonId, versions } from '~helpers/bibleVersions'
@@ -49,6 +53,7 @@ function VersionPanel({
         screens={{
           versions: {
             title: t('Version'),
+            flush: true,
             headerRight: (
               <FiltersHeader
                 buttonOnly
@@ -101,6 +106,44 @@ function VersionPanel({
     </>
   )
 }
+const BOOK_ROW_PADDING_LEFT = 20
+
+/** A book of the list: a row of a continuous list, split from the next by a hairline. */
+function BookRow({
+  label,
+  selected,
+  onPress,
+}: {
+  label: string
+  selected: boolean
+  onPress: () => void
+}) {
+  const theme = useTheme()
+  return (
+    <TouchableBox
+      className="w-full flex-row items-center gap-3 py-[12px] pr-[14px]"
+      style={{
+        paddingLeft: BOOK_ROW_PADDING_LEFT,
+        backgroundColor: selected ? colorWithOpacity(theme.colors.primary, 0.12) : undefined,
+      }}
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      onPress={onPress}
+    >
+      <Text
+        className={twMerge(
+          'flex-1 text-[16px]',
+          selected ? 'text-primary font-semibold' : 'text-default'
+        )}
+      >
+        {label}
+      </Text>
+      <FeatherIcon name="chevron-right" size={18} color="grey" />
+      <ListSeparator inset={BOOK_ROW_PADDING_LEFT} overlay />
+    </TouchableBox>
+  )
+}
+
 /**
  * Scrolls its content to the middle of the panel each time the panel screen holding it is shown:
  * a hidden screen has no size, so the size it takes when shown is the signal.
@@ -138,6 +181,7 @@ export function useBookPanelScreens({
   ) => void
 }) {
   const { t } = useTranslation()
+  const theme = useTheme()
   const resources = useResourceAccess()
   const openTab = useOpenInNewTab()
   const verseMode = useAtomValue(bookSelectorVersesAtom)
@@ -193,6 +237,7 @@ export function useBookPanelScreens({
     screens: {
       books: {
         title: t('Livres'),
+        flush: true,
         headerRight: (
           <BookSelectorParams includeLayout={false} includeVerses={forceVerses === undefined} />
         ),
@@ -208,10 +253,9 @@ export function useBookPanelScreens({
               )
               .map(item => {
                 const action = (
-                  <PanelAction
+                  <BookRow
                     key={item.Numero}
                     label={nameOf(item)}
-                    nested
                     selected={item.Numero === data.selectedBook.Numero}
                     onPress={() => {
                       setBook(item)
@@ -242,7 +286,12 @@ export function useBookPanelScreens({
               return (
                 <TouchableBox
                   key={value}
-                  className={`w-[48px] h-[48px] rounded-md items-center justify-center ${isCurrent ? 'bg-light-primary' : 'bg-opacity5'}`}
+                  className="w-[48px] h-[48px] rounded-[8px] items-center justify-center"
+                  style={{
+                    backgroundColor: isCurrent
+                      ? colorWithOpacity(theme.colors.primary, 0.12)
+                      : theme.colors.opacity5,
+                  }}
                   accessibilityRole="button"
                   accessibilityLabel={t('Chapitre') + ' ' + value}
                   accessibilityState={{ selected: isCurrent }}
@@ -260,7 +309,9 @@ export function useBookPanelScreens({
                     nav.close()
                   }}
                 >
-                  <Text className={isCurrent ? 'text-primary font-bold' : undefined}>{value}</Text>
+                  <Text className={isCurrent ? 'text-primary font-semibold' : undefined}>
+                    {value}
+                  </Text>
                 </TouchableBox>
               )
             })}
@@ -282,7 +333,7 @@ export function useBookPanelScreens({
             ).map(verse => (
               <TouchableBox
                 key={verse}
-                className="w-[40px] h-[40px] rounded-md bg-opacity5 items-center justify-center"
+                className="w-[40px] h-[40px] rounded-[8px] bg-opacity5 items-center justify-center"
                 accessibilityRole="button"
                 accessibilityLabel={t('Verset') + ' ' + verse}
                 onPress={() => {

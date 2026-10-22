@@ -147,7 +147,13 @@ function PanelFrameLayout({
               </div>
               {screen.headerContent}
               <div ref={setContentTarget} />
-              <div className="bs-filter-options">{content}</div>
+              <div
+                className={
+                  screen.flush ? 'bs-filter-options bs-filter-options-flush' : 'bs-filter-options'
+                }
+              >
+                {content}
+              </div>
               {screen.footer}
             </PanelTransition>
           </HeaderContentContext.Provider>

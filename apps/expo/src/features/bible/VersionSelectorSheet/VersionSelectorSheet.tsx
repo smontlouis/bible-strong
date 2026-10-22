@@ -87,6 +87,7 @@ const VersionSelectorSheet = ({ sheetRef }: VersionSelectorSheetProps) => {
       <Sheet
         ref={sheetRef}
         panelWidth={500}
+        panelFlush
         panelHeaderRight={
           <FiltersHeader
             buttonOnly

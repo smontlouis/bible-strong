@@ -9,17 +9,10 @@ interface BookShortItemProps {
   /** The book's name in the reading's language. */
   bookName: string
   isSelected: boolean
-  isNT: boolean
   onChange: (book: Book) => void
 }
 
-export const BookShortItem = ({
-  book,
-  bookName,
-  isSelected,
-  isNT,
-  onChange,
-}: BookShortItemProps) => {
+export const BookShortItem = ({ book, bookName, isSelected, onChange }: BookShortItemProps) => {
   const shortName = bookName.replace(/\s/g, '').substr(0, 3)
 
   return (
@@ -35,10 +28,9 @@ export const BookShortItem = ({
     >
       <Text
         className={twMerge(
-          isSelected ? 'text-primary' : isNT ? 'text-quart' : 'text-default',
+          isSelected ? 'text-primary font-semibold' : 'text-default',
           'text-[16px]'
         )}
-        style={{ fontWeight: isSelected ? 'bold' : 'normal' }}
       >
         {shortName}
       </Text>

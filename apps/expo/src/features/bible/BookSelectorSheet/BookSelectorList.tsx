@@ -1,8 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { FlatList, ScrollView } from 'react-native'
-import { bookSelectorSelectionModeAtom } from './atom'
+import { bookSelectorSelectionModeAtom, bookSelectorSortAtom } from './atom'
 import { useAtomValue } from 'jotai/react'
 import { Book } from '~assets/bible_versions/books-desc'
+import Box from '~common/ui/Box'
+import { ListSectionTitle } from '~common/ui/ListSection'
 import { getReadingBookName } from '~helpers/readingLanguage'
 import BookItem from './BookItem'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -10,7 +13,7 @@ import { SharedValue } from 'react-native-reanimated'
 import { BibleTab } from 'src/state/tabs'
 import { BookShortItem } from './BookShortItem'
 import ChapterGrid from './ChapterGrid'
-import { getBookCorpus } from '~helpers/bibleBookCatalog'
+import { isBookInTestament } from '~helpers/bibleBookCatalog'
 
 export interface BookListMetrics {
   scrollOffset: number
@@ -45,8 +48,10 @@ export const BookSelectorList = ({
   gridBook,
   onGridBookSelect,
 }: BookSelectorListProps) => {
+  const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const selectionMode = useAtomValue(bookSelectorSelectionModeAtom)
+  const isAlphabetical = useAtomValue(bookSelectorSortAtom) === 'alphabetical'
 
   const renderItem = ({ item: book }: { item: Book }) => {
     const isSelected = book.Numero === bookSelectorData?.selectedBook.Numero
@@ -102,27 +107,46 @@ export const BookSelectorList = ({
       )
     }
 
+    // In the canon's order, each testament has its title; sorted by name, the books mix
+    const groups = isAlphabetical
+      ? [{ key: 'all', title: undefined, books: data }]
+      : [
+          {
+            key: 'old',
+            title: t('Ancien Testament'),
+            books: data.filter(book => !isBookInTestament(book.Numero, 'new')),
+          },
+          {
+            key: 'new',
+            title: t('Nouveau Testament'),
+            books: data.filter(book => isBookInTestament(book.Numero, 'new')),
+          },
+        ]
+
     return (
-      <ScrollView
-        contentContainerStyle={{
-          flexWrap: 'wrap',
-          flexDirection: 'row',
-          alignItems: 'flex-start',
-          justifyContent: 'flex-start',
-          paddingTop: 10,
-          paddingBottom: insets.bottom,
-        }}
-      >
-        {data.map(book => (
-          <BookShortItem
-            isNT={getBookCorpus(book.Numero) === 'new'}
-            key={book.Numero}
-            onChange={onGridBookSelect}
-            book={book}
-            bookName={getReadingBookName(book, bookSelectorData?.selectedVersion)}
-            isSelected={book.Numero === bookSelectorData?.selectedBook.Numero}
-          />
-        ))}
+      <ScrollView contentContainerStyle={{ paddingTop: 10, paddingBottom: insets.bottom }}>
+        {groups.map(group =>
+          group.books.length ? (
+            <Box key={group.key}>
+              {group.title ? (
+                <ListSectionTitle className="ml-[20px] mt-[12px] mb-[4px]">
+                  {group.title}
+                </ListSectionTitle>
+              ) : null}
+              <Box className="flex-row flex-wrap items-start">
+                {group.books.map(book => (
+                  <BookShortItem
+                    key={book.Numero}
+                    onChange={onGridBookSelect}
+                    book={book}
+                    bookName={getReadingBookName(book, bookSelectorData?.selectedVersion)}
+                    isSelected={book.Numero === bookSelectorData?.selectedBook.Numero}
+                  />
+                ))}
+              </Box>
+            </Box>
+          ) : null
+        )}
       </ScrollView>
     )
   }
