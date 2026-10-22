@@ -862,6 +862,7 @@ const StrongBibleApiLive = HttpApiBuilder.group(ResourceApi, 'strongBibles', han
           reference: path.reference,
           limit: urlParams.limit,
           cursor: urlParams.cursor,
+          offset: urlParams.offset,
           allBooks: urlParams.allBooks === 'true',
           lexemeId: urlParams.lexemeId,
         }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),

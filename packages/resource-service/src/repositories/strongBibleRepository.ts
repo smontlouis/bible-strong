@@ -37,6 +37,18 @@ type BiblePublicationMetadata = {
 
 const metadataFrom = (value: Record<string, unknown>) => value as StrongBiblePublicationMetadata
 
+// The fields of an index and of the Bible it was aligned on that a read compares or names.
+// The metadata of a Bible also holds its coverage, about 18 KB, which no read here uses. A
+// field absent from the metadata stays absent.
+const publicationMetadata = (column: 'metadata' | 'resource_publications.metadata') =>
+  sql<Record<string, unknown>>`jsonb_strip_nulls(jsonb_build_object(
+    'dataset_id', ${sql.ref(column)} -> 'dataset_id',
+    'resource_revision', ${sql.ref(column)} -> 'resource_revision',
+    'text_revision', ${sql.ref(column)} -> 'text_revision',
+    'text_sha256', ${sql.ref(column)} -> 'text_sha256',
+    'strong_revision', ${sql.ref(column)} -> 'strong_revision'
+  ))`
+
 const revisionFrom = (publication: {
   revision: string
   metadata: Record<string, unknown>
@@ -199,7 +211,7 @@ export const makeKyselyStrongBibleRepository = (
         .select([
           'resource_publications.id',
           'resource_publications.revision',
-          'resource_publications.metadata',
+          publicationMetadata('resource_publications.metadata').as('metadata'),
           'resource_publications.resource_identity',
           'strong_bible_identities.identity_id',
           'strong_bible_identities.kind',
@@ -382,7 +394,7 @@ export const makeKyselyStrongBibleRepository = (
         const gathered = yield* tryDatabasePromise('strong-bible.counts-batch.read', () =>
           sql<ReferenceCountRows>`
             WITH publications AS MATERIALIZED (
-              SELECT id, revision, metadata, resource_identity
+              SELECT id, revision, ${publicationMetadata('metadata')} AS metadata, resource_identity
                 FROM resource_publications
                WHERE resource_identity IN (${index}, ${`bible-text:${input.versionId}`})
                  AND status = 'active'
@@ -590,6 +602,7 @@ export const makeKyselyStrongBibleRepository = (
             .orderBy('strong_bible_span_identities.book')
             .orderBy('strong_bible_span_identities.chapter')
             .orderBy('strong_bible_span_identities.verse')
+            .offset(input.offset ?? 0)
             .limit(limit + 1)
             .execute()
         ).pipe(Effect.mapError(cause => new StrongBibleRepositoryFailure({ cause })))

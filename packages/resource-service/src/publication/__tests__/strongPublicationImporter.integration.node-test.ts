@@ -78,6 +78,18 @@ describe('Strong Bible publication import', { skip: !runIntegration }, () => {
         [[1, 1, 1]]
       )
       assert.equal(occurrences.nextCursor, undefined)
+      // A page further on passes over the occurrences before it.
+      const later = await Effect.runPromise(
+        repository.findOccurrences({
+          versionId: 'LSG',
+          book: 1,
+          reference: 'H0430',
+          limit: 1,
+          offset: 1,
+          allBooks: true,
+        })
+      )
+      assert.deepEqual(later.verses, [])
       assert.deepEqual(lemmas.lemmas, [
         { id: 1, lemma: 'Dieu', partOfSpeech: 'N', occurrenceCount: 1 },
       ])

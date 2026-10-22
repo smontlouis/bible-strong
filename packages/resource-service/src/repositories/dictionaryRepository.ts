@@ -2,6 +2,7 @@ import { Effect } from 'effect'
 import { sql, type Kysely } from 'kysely'
 
 import { tryDatabasePromise } from '../database/databaseEffect'
+import { likeLiteral } from '../database/likePattern'
 import { makeNeonDatabase, type NeonDatabaseConfig } from '../database/neonDatabase'
 import {
   ActiveDictionaryPublicationUnavailable,
@@ -130,7 +131,10 @@ export const makeKyselyDictionaryRepository = (
               publication.resource_identity,
               publication.revision,
               publication.language,
-              publication.metadata,
+              -- The names a source shows, rather than the whole metadata on every entry.
+              publication.metadata->>'resource_id' AS resource_id,
+              publication.metadata->>'title' AS title,
+              publication.metadata->>'abbreviation' AS abbreviation,
               entry.entry_id,
               entry.word,
               entry.normalized_word
@@ -149,7 +153,7 @@ export const makeKyselyDictionaryRepository = (
               (array_agg(word ORDER BY (language = ${input.language}) DESC, normalized_word, resource_identity, entry_id))[1] AS label,
               (array_agg(normalized_word ORDER BY (language = ${input.language}) DESC, normalized_word, resource_identity, entry_id))[1] AS normalized_label,
               max(correspondence_id) AS correspondence_id,
-              bool_or(${search ?? null}::text IS NULL OR word ILIKE ${search ? `%${search}%` : null} OR normalized_word ILIKE ${search ? `%${search}%` : null}) AS matches_search
+              bool_or(${search ?? null}::text IS NULL OR word ILIKE ${search ? `%${likeLiteral(search)}%` : null} OR normalized_word ILIKE ${search ? `%${likeLiteral(search)}%` : null}) AS matches_search
             FROM active_entries
             GROUP BY group_key
             HAVING bool_or(language = ${input.language})
@@ -158,7 +162,7 @@ export const makeKyselyDictionaryRepository = (
             SELECT group_key, label, normalized_label, correspondence_id
             FROM directory_keys
             WHERE matches_search
-              AND (${initial ?? null}::text IS NULL OR normalized_label ILIKE ${initial ? `${initial}%` : null})
+              AND (${initial ?? null}::text IS NULL OR normalized_label ILIKE ${initial ? `${likeLiteral(initial)}%` : null})
               AND (
                 ${cursor?.[0] ?? null}::text IS NULL
                 OR normalized_label > ${cursor?.[0] ?? null}
@@ -177,9 +181,9 @@ export const makeKyselyDictionaryRepository = (
                 'work', split_part(entry.resource_identity, ':', 2),
                 'language', entry.language,
                 'revision', entry.revision,
-                'resourceId', entry.metadata->>'resource_id',
-                'title', entry.metadata->>'title',
-                'abbreviation', entry.metadata->>'abbreviation',
+                'resourceId', entry.resource_id,
+                'title', entry.title,
+                'abbreviation', entry.abbreviation,
                 'id', entry.entry_id,
                 'word', entry.word,
                 'normalizedWord', entry.normalized_word
@@ -239,11 +243,11 @@ export const makeKyselyDictionaryRepository = (
           query = query.where(
             'normalized_word',
             'ilike',
-            `${input.initial.trim().toLocaleLowerCase()}%`
+            `${likeLiteral(input.initial.trim().toLocaleLowerCase())}%`
           )
         }
         if (input.search?.trim()) {
-          const search = `%${input.search.trim()}%`
+          const search = `%${likeLiteral(input.search.trim())}%`
           query = query.where(eb =>
             eb.or([eb('word', 'ilike', search), eb('normalized_word', 'ilike', search)])
           )

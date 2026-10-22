@@ -1,5 +1,5 @@
 import { Effect } from 'effect'
-import type { Kysely } from 'kysely'
+import { sql, type Kysely } from 'kysely'
 
 import type { ResourceLanguage } from '@bible-strong/resource-domain/interlinear-bible'
 import type {
@@ -130,7 +130,15 @@ export const makeKyselyInterlinearBibleRepository = (
         () =>
           database
             .selectFrom('resource_publications')
-            .select(['revision', 'metadata'])
+            // Only the revisions compared below, not the 18 KB coverage of the Bible.
+            .select([
+              'revision',
+              sql<Record<string, unknown>>`jsonb_strip_nulls(jsonb_build_object(
+                'resource_revision', metadata -> 'resource_revision',
+                'text_revision', metadata -> 'text_revision',
+                'text_sha256', metadata -> 'text_sha256'
+              ))`.as('metadata'),
+            ])
             .where('resource_identity', '=', `bible-text:${versionId}`)
             .where('status', '=', 'active')
             .executeTakeFirst()

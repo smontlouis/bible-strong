@@ -2,6 +2,7 @@ import { Effect } from 'effect'
 import { type Kysely } from 'kysely'
 
 import { tryDatabasePromise } from '../database/databaseEffect'
+import { likeLiteral } from '../database/likePattern'
 import { makeNeonDatabase, type NeonDatabaseConfig } from '../database/neonDatabase'
 import type { ResourceDatabase } from '../database/types'
 import {
@@ -79,7 +80,7 @@ export const makeKyselyNaveRepository = (
           .select(['normalized_name', 'name', 'initial'])
           .where('publication_id', '=', publication.id)
         if (input.initial) query = query.where('initial', '=', input.initial)
-        if (input.search) query = query.where('name', 'ilike', `%${input.search.trim()}%`)
+        if (input.search) query = query.where('name', 'ilike', `%${likeLiteral(input.search.trim())}%`)
         if (cursor) {
           query = query.where(eb =>
             eb.or([

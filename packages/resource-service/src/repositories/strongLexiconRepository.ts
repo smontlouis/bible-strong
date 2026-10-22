@@ -7,6 +7,7 @@ import { sql, type Kysely, type RawBuilder } from 'kysely'
 import { normalizeBibleSearchText } from '@bible-strong/resource-domain/bible-search-input'
 
 import { tryDatabasePromise } from '../database/databaseEffect'
+import { likeLiteral } from '../database/likePattern'
 import { makeNeonDatabase, type NeonDatabaseConfig } from '../database/neonDatabase'
 import type { ResourceDatabase } from '../database/types'
 import {
@@ -2593,12 +2594,21 @@ export const makeKyselyStrongLexiconRepository = (
         const filters = [
           input.identities === 'all' ? sql<boolean>`true` : sql<boolean>`representative_rank = 1`,
         ]
+        // The rank is only read to keep representatives: listing every entry skips the window
+        // over the whole lexicon, which also kept the filters of a page out of it.
+        const representativeRank =
+          input.identities === 'all'
+            ? sql`1`
+            : sql`row_number() OVER (
+                PARTITION BY e.language, COALESCE(NULLIF(e.u_strong, ''), e.entry_id::text)
+                ORDER BY CASE WHEN i.step_code=e.u_strong THEN 0 ELSE 1 END, e.entry_id
+              )`
         const candidateFilters = [sql<boolean>`e.publication_id=${core.id}`]
         if (input.lexicalLanguage) {
           candidateFilters.push(sql<boolean>`e.language = ${input.lexicalLanguage}`)
         }
         if (search) {
-          const pattern = `%${normalizeBibleSearchText(search)}%`
+          const pattern = `%${likeLiteral(normalizeBibleSearchText(search))}%`
           candidateFilters.push(
             sql<boolean>`(
               bible_search_normalize(coalesce(e.payload->>'original', '') || ' ' || coalesce(nullif(e.payload->>'classicTransliteration', ''), e.payload->>'transliteration', '') || ' ' || coalesce(e.payload->>'gloss', '') || ' ' || e.e_strong || ' ' || e.d_strong || ' ' || e.u_strong) LIKE ${pattern}
@@ -2608,7 +2618,7 @@ export const makeKyselyStrongLexiconRepository = (
           )
         }
         if (prefix) {
-          const pattern = `${prefix.toLocaleLowerCase()}%`
+          const pattern = `${likeLiteral(prefix.toLocaleLowerCase())}%`
           candidateFilters.push(
             input.language === 'fr'
               ? sql<boolean>`lower(coalesce(nullif(tr.payload->>'gloss', ''), e.payload->>'gloss', '')) LIKE ${pattern}`
@@ -2649,10 +2659,7 @@ export const makeKyselyStrongLexiconRepository = (
                      THEN COALESCE(NULLIF(tr.payload->>'gloss', ''), e.payload->>'gloss', '')
                      ELSE COALESCE(e.payload->>'gloss', '')
                    END) AS sort_gloss,
-                   row_number() OVER (
-                     PARTITION BY e.language, COALESCE(NULLIF(e.u_strong, ''), e.entry_id::text)
-                     ORDER BY CASE WHEN i.step_code=e.u_strong THEN 0 ELSE 1 END, e.entry_id
-                   ) AS representative_rank
+                   ${representativeRank} AS representative_rank
               FROM strong_lexicon_entries e
               JOIN strong_lexicon_entry_identities i
                 ON i.publication_id=e.publication_id AND i.step_entry_id=e.entry_id

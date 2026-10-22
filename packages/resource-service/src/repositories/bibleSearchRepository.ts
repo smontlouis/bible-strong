@@ -193,7 +193,13 @@ export const makeKyselyBibleSearchRepository = (
                    replace(rp.resource_identity, 'bible-text:', '') AS version_id,
                    rp.revision,
                    rp.language,
-                   rp.metadata,
+                   -- Every result row carries its publication: only the three revisions
+                   -- the answer names, not the whole metadata and its 18 KB coverage.
+                   jsonb_strip_nulls(jsonb_build_object(
+                     'resource_revision', rp.metadata -> 'resource_revision',
+                     'text_revision', rp.metadata -> 'text_revision',
+                     'text_sha256', rp.metadata -> 'text_sha256'
+                   )) AS metadata,
                    rp.metadata -> 'canon' ->> 'id' AS canon_id,
                    ARRAY(
                      SELECT jsonb_array_elements_text(
@@ -431,10 +437,13 @@ export const makeKyselyBibleSearchRepository = (
                    target.chapter,
                    target.verse_count - source.verse_count AS verse_offset
               FROM active_publications ap
+              -- The Psalms of the publications searched and of ESV alone: a count grouped
+              -- over every publication read the whole table twice, about 450 ms each.
               JOIN (
                 SELECT publication_id, chapter, count(*)::integer AS verse_count
                   FROM bible_verses
                  WHERE book = 19
+                   AND publication_id IN (SELECT id FROM active_publications)
                  GROUP BY publication_id, chapter
               ) target ON target.publication_id = ap.id
               JOIN resource_publications source_publication
@@ -444,6 +453,12 @@ export const makeKyselyBibleSearchRepository = (
                 SELECT publication_id, chapter, count(*)::integer AS verse_count
                   FROM bible_verses
                  WHERE book = 19
+                   AND publication_id = (
+                     SELECT id
+                       FROM resource_publications
+                      WHERE resource_identity = 'bible-text:ESV'
+                        AND status = 'active'
+                   )
                  GROUP BY publication_id, chapter
               ) source
                 ON source.publication_id = source_publication.id

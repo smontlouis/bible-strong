@@ -79,7 +79,7 @@ export class StrongLexiconBrowseQuery extends Schema.Class<StrongLexiconBrowseQu
   level: Schema.optional(Schema.Literal('simple', 'detailed')),
   lexicalLanguage: Schema.optional(StrongLexicalLanguage),
   identities: Schema.optional(StrongLexiconBrowseIdentities),
-  search: Schema.optional(Schema.String),
+  search: Schema.optional(Schema.String.pipe(Schema.maxLength(200))),
   prefix: Schema.optional(Schema.String),
   limit: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 500))),
   cursor: Schema.optional(

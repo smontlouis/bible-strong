@@ -42,6 +42,7 @@ export type StrongBibleReferencesLookup = {
 export type StrongBibleOccurrencesLookup = StrongBibleIdentityLookup & {
   limit?: number
   cursor?: string
+  offset?: number
   allBooks?: boolean
   lexemeId?: number
 }

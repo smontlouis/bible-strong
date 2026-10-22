@@ -1,6 +1,7 @@
 import { Effect } from 'effect'
 import { sql, type Kysely } from 'kysely'
 
+import type { BibleVersePresentation } from '@bible-strong/resource-domain/contracts/bibleChapterContract'
 import type {
   ActiveBibleChapter,
   ActiveBibleVerseTexts,
@@ -333,7 +334,15 @@ export const makeKyselyBibleChapterRepository = (
       const rows = yield* tryDatabasePromise('bible.pericopes.read-active', () =>
         database
           .selectFrom('bible_verses')
-          .select(['book', 'chapter', 'verse', 'presentation'])
+          // The headings alone, not the notes and layout of each verse that has some.
+          .select([
+            'book',
+            'chapter',
+            'verse',
+            sql<
+              BibleVersePresentation['headings']
+            >`${sql.ref('bible_verses.presentation')} -> 'headings'`.as('headings'),
+          ])
           .where('publication_id', '=', publication.id)
           .where(
             sql<boolean>`jsonb_array_length(${sql.ref('bible_verses.presentation')} -> 'headings') > 0`
@@ -351,13 +360,13 @@ export const makeKyselyBibleChapterRepository = (
         textRevision: metadata.resource_revision ?? metadata.text_revision ?? publication.revision,
         ...(metadata.text_sha256 ? { textSha256: metadata.text_sha256 } : {}),
         verses: rows.flatMap(row =>
-          row.presentation!.headings.length > 0
+          row.headings.length > 0
             ? [
                 {
                   book: row.book!,
                   chapter: row.chapter!,
                   verse: row.verse!,
-                  headings: row.presentation!.headings,
+                  headings: row.headings,
                 },
               ]
             : []

@@ -9,7 +9,7 @@ export class TimelineLanguagePath extends Schema.Class<TimelineLanguagePath>(
 }) {}
 
 export class TimelineEventsQuery extends Schema.Class<TimelineEventsQuery>('TimelineEventsQuery')({
-  search: Schema.optional(Schema.String),
+  search: Schema.optional(Schema.String.pipe(Schema.maxLength(200))),
   limit: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 100))),
 }) {}
 

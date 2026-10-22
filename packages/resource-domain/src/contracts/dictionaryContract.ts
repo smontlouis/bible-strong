@@ -79,7 +79,7 @@ export class DictionaryEntriesQuery extends Schema.Class<DictionaryEntriesQuery>
   'DictionaryEntriesQuery'
 )({
   initial: Schema.optional(Schema.NonEmptyString),
-  search: Schema.optional(Schema.NonEmptyString),
+  search: Schema.optional(Schema.NonEmptyString.pipe(Schema.maxLength(200))),
   limit: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 500))),
   cursor: Schema.optional(DictionaryPageCursor),
 }) {}
@@ -89,7 +89,7 @@ export class DictionaryDirectoryQuery extends Schema.Class<DictionaryDirectoryQu
 )({
   language: Schema.Literal('fr', 'en'),
   initial: Schema.optional(Schema.NonEmptyString),
-  search: Schema.optional(Schema.NonEmptyString),
+  search: Schema.optional(Schema.NonEmptyString.pipe(Schema.maxLength(200))),
   limit: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 500))),
   cursor: Schema.optional(DictionaryDirectoryCursor),
 }) {}

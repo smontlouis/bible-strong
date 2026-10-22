@@ -82,6 +82,8 @@ export class StrongBibleOccurrencesQuery extends Schema.Class<StrongBibleOccurre
 )({
   limit: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 500))),
   cursor: Schema.optional(OccurrenceCursor),
+  /** How many occurrences after the cursor are passed over, so that a page is read alone. */
+  offset: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(0, 50_000))),
   allBooks: Schema.optional(Schema.Literal('true', 'false')),
   lexemeId: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.positive())),
 }) {}

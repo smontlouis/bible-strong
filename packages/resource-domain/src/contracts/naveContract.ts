@@ -23,7 +23,7 @@ export class NaveVersePath extends Schema.Class<NaveVersePath>('NaveVersePath')(
 
 export class NaveTopicsQuery extends Schema.Class<NaveTopicsQuery>('NaveTopicsQuery')({
   initial: Schema.optional(Schema.NonEmptyString),
-  search: Schema.optional(Schema.NonEmptyString),
+  search: Schema.optional(Schema.NonEmptyString.pipe(Schema.maxLength(200))),
   limit: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 500))),
   cursor: Schema.optional(NaveCursor),
 }) {}

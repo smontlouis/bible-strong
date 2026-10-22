@@ -2,6 +2,7 @@ import { Effect } from 'effect'
 import { sql, type Kysely } from 'kysely'
 
 import { tryDatabasePromise } from '../database/databaseEffect'
+import { likeLiteral } from '../database/likePattern'
 import { makeNeonDatabase, type NeonDatabaseConfig } from '../database/neonDatabase'
 import type { ResourceDatabase } from '../database/types'
 import {
@@ -83,7 +84,7 @@ export const makeKyselyTimelineRepository = (
           const search = options.search?.trim()
           if (search) {
             query = query.where(
-              sql<boolean>`unaccent(lower(title || ' ' || description || ' ' || article)) LIKE unaccent(lower(${`%${search}%`}))`
+              sql<boolean>`unaccent(lower(title || ' ' || description || ' ' || article)) LIKE unaccent(lower(${`%${likeLiteral(search)}%`}))`
             )
           }
           return query
