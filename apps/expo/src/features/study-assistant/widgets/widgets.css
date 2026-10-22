@@ -1,6 +1,5 @@
 .bs-study-widget {
   margin: 18px 0;
-  border: 1px solid var(--sw-line);
   border-radius: 16px;
   overflow: hidden;
   background: var(--sw-surface);
@@ -12,7 +11,6 @@
   align-items: center;
   gap: 10px;
   padding: 14px 16px;
-  background: var(--sw-soft);
   border-bottom: 1px solid var(--sw-line);
 }
 .bs-widget-heading > svg {
@@ -25,9 +23,7 @@
 }
 .bs-widget-heading small,
 .bs-widget-dialog small {
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 12px;
   color: var(--sw-muted);
 }
 .bs-widget-heading h3 {
@@ -139,9 +135,7 @@
   border-top: 1px solid var(--sw-line);
 }
 .bs-widget-analysis small {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-size: 12px;
   color: var(--sw-muted);
 }
 .bs-widget-analysis p {
@@ -383,10 +377,8 @@
   cursor: pointer;
 }
 .bs-widget-source-card > small {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--sw-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 .bs-widget-source-card > p {
   font-size: 13px;

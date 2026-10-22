@@ -262,6 +262,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     '--as-ink': colors.default,
     '--as-muted': colors.grey,
     '--as-accent': colors.primary,
+    '--as-link': colors.link,
     '--as-soft': colors.lightGrey,
     '--as-border': colors.border,
   } as CSSProperties

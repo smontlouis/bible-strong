@@ -298,15 +298,13 @@
   align-items: center;
   min-width: 0;
   max-width: calc(100% - 42px);
-  border: 1px solid var(--as-border);
   border-radius: 20px;
-  background: var(--as-surface);
-  padding: 1px 3px 1px 8px;
+  background: var(--as-soft);
+  padding: 2px 4px 2px 9px;
 }
 .bs-assistant-context-chip-pinned {
-  border-color: color-mix(in srgb, var(--as-accent) 55%, var(--as-border));
-  background: color-mix(in srgb, var(--as-accent) 10%, var(--as-surface));
-  color: var(--as-accent);
+  background: color-mix(in srgb, var(--as-accent) 12%, var(--as-surface));
+  color: var(--as-link);
 }
 .bs-assistant-chip-pin {
   display: grid;
