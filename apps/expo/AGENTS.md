@@ -309,7 +309,9 @@ in `ListSection`, `ListRow` and `Card`; a continuous list
 runs full width on the page ground. A page that scrolls runs to the bottom edge: the shared
 `ScrollView`, `FlatList` and `SectionList` pad their content with `usePageBottomInset()`, a raw
 scroll view does it itself, and only a page with fixed bottom content passes `reserveBottom` to
-its container. Take radii from `radii` and the one shadow from
+its container. On a tablet the sidebar button sits over every page's top left: build a page
+header with `Header` or `FiltersHeader`, or pad a header of its own with
+`useWorkspaceHeaderInset()`. Take radii from `radii` and the one shadow from
 `floatingShadow` in `~common/ui/surfaces`. `yarn agents:styles:check` refuses new
 departures; when a change removes some, lower `scripts/agents-surface-baseline.json`
 with `node scripts/agents-surface-lint.mjs --update-baseline`.

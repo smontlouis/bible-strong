@@ -10,6 +10,7 @@ import type { Theme as AppTheme } from '~themes'
 import Back from '~common/Back'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { useWorkspaceHeaderInset } from '~features/app-switcher/workspaceHeaderInset'
 
 const HeaderBox = (
   componentProps: Omit<UIComponentProps<typeof Box>, 'theme'> & {
@@ -54,9 +55,10 @@ interface PericopeHeaderProps {
 
 function PericopeHeader({ hasBackButton, title }: PericopeHeaderProps) {
   const stylingTheme = useStylingTheme()
+  const workspaceHeaderInset = useWorkspaceHeaderInset()
 
   return (
-    <HeaderBox className="overflow-visible">
+    <HeaderBox className="overflow-visible" style={{ paddingLeft: workspaceHeaderInset }}>
       <PageContent className="flex-[1] items-center flex-row">
         <Box className="overflow-hidden border-continuous justify-center">
           {hasBackButton && (

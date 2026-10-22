@@ -3,7 +3,8 @@
 // Keeps the Expo app on its surface rules (design-system/project/README.md, "The app"):
 // corner radii from one scale, one shared shadow for what floats, and a page that uses the canvas
 // gives it to its root container. Existing departures are frozen per file in
-// agents-surface-baseline.json and may only go down.
+// agents-surface-baseline.json and may only go down. A page header also leaves the tablet sidebar
+// button its room, with no baseline: none departs from it.
 
 import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
@@ -22,6 +23,11 @@ const shadowPattern = /\bshadowColor\s*:|\belevation\s*:\s*\d|\bshadow-\[|\bboxS
 const canvasPattern = /\bbg-canvas\b|backgroundColor="canvas"|\bbg="canvas"|\bcolors\.canvas\b/
 const rootWrapperPattern = /<(FormSheetScreen|Container|SafeAreaBox)\b([^>]*)>/g
 const kinds = ['radius', 'shadow', 'ground']
+// On a tablet the sidebar button sits at the top left of every page. A file that draws the back
+// button reads the room to leave it, or is a sheet that clears that room.
+const backImportPattern = /from ['"]~common\/Back['"]/
+const headerInsetPattern = /\buseWorkspaceHeaderInset\(|\bWithoutWorkspaceHeaderInset\b/
+const headerInsetExceptionPattern = /^\s*\/\/\s*header-inset-allow:\s+\S/m
 
 const git = args => {
   const result = spawnSync('git', args, { encoding: 'utf8' })
@@ -101,6 +107,15 @@ const stale = Object.entries(baseline).flatMap(([file, counts]) =>
   })
 )
 
+const headerInsetMisses = sourceFiles.filter(file => {
+  const source = readFileSync(file, 'utf8')
+  return (
+    backImportPattern.test(source) &&
+    !headerInsetPattern.test(source) &&
+    !headerInsetExceptionPattern.test(source)
+  )
+})
+
 const sortedCurrent = Object.fromEntries(
   Object.entries(current).sort(([a], [b]) => a.localeCompare(b))
 )
@@ -115,6 +130,17 @@ if (process.argv.includes('--update-baseline')) {
   writeFileSync(baselineUrl, JSON.stringify(sortedCurrent, null, 2) + '\n')
   console.log(`Surface baseline written: ${Object.keys(sortedCurrent).length} files.`)
   process.exit(0)
+}
+
+if (headerInsetMisses.length > 0) {
+  console.error('Back buttons drawn under the tablet sidebar button:')
+  for (const file of headerInsetMisses) console.error(`- ${file}`)
+  console.error(
+    '\nBuild the page header with Header or FiltersHeader from ~common, or pad its left with ' +
+      'useWorkspaceHeaderInset(). A sheet clears that room with WithoutWorkspaceHeaderInset; ' +
+      'another exception states `// header-inset-allow: <reason>`.'
+  )
+  process.exit(1)
 }
 
 if (increases.length > 0) {

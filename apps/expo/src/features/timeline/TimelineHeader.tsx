@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Back from '~common/Back'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { useWorkspaceHeaderInset } from '~features/app-switcher/workspaceHeaderInset'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import {
   RESOURCE_SHARE_ICONS,
@@ -93,9 +94,11 @@ const TimelineHeader = ({
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const topInset = isFormSheet ? 0 : insets.top
+  // The header floats over the period's canvas, so it keeps its own look rather than the shared Header.
+  const workspaceHeaderInset = useWorkspaceHeaderInset()
 
   return (
-    <HeaderBox topInset={topInset}>
+    <HeaderBox topInset={topInset} style={{ paddingLeft: workspaceHeaderInset }}>
       <PageContent className="flex-[1] flex-row">
         <Box className="overflow-hidden border-continuous items-center justify-center">
           {hasBackButton && (
