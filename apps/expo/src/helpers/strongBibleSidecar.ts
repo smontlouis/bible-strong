@@ -705,7 +705,13 @@ const verifyExtractedStrongBibleSidecar = async (
       classifyStrongBibleSidecarMetadata(snapshot.metadata, expected, baseMetadata) ===
       'incompatible'
     ) {
-      throw new Error(`STRONG_BIBLE_BASE_REVISION_INCOMPATIBLE:${versionId}`)
+      // The revisions tell an older installed text from a text installed without a record.
+      throw Object.assign(new Error(`STRONG_BIBLE_BASE_REVISION_INCOMPATIBLE:${versionId}`), {
+        diagnostic: {
+          installedTextRevision: baseMetadata.textRevision || 'unknown',
+          indexTextRevision: snapshot.metadata.textRevision,
+        },
+      })
     }
     validateStrongBibleSidecarSnapshot(snapshot, expected)
   } finally {

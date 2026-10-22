@@ -47,12 +47,15 @@ jest.mock('~helpers/databases', () => ({
 }))
 
 import {
+  completeDownloadPlan,
   completeInterlinearDownloadPlan,
   createInterlinearSidecarDownloadPlan,
   createBibleDownloadItem,
   createDatabaseDownloadItem,
   createOfflineCopyDownloadItem,
   createOfflineCopyDownloadPlan,
+  createStrongLexiconModuleDownloadItem,
+  createStrongSidecarDownloadItem,
   createStrongSidecarDownloadPlan,
   dedupeDownloadItems,
 } from '../downloadItemFactory'
@@ -198,6 +201,71 @@ describe('Strong Bible download planning', () => {
       'bible:DBY',
       'bible-strong:DBY',
     ])
+  })
+})
+
+describe('queue completion of download plans', () => {
+  const catalogDby = BUNDLED_MOBILE_RESOURCE_CATALOG.resources['bible:DBY']!
+  const catalogCore = BUNDLED_MOBILE_RESOURCE_CATALOG.resources['strong-lexicon:core']!
+
+  beforeEach(() => {
+    mockInstalledArchives.clear()
+  })
+
+  it('brings the published Bible before a Strong index queued alone for an older one', () => {
+    mockInstalledArchives.set('bible:DBY', 'older-archive')
+
+    const plan = completeDownloadPlan([createStrongSidecarDownloadItem('DBY')])
+
+    expect(plan.map(item => item.id)).toEqual(['bible:DBY', 'bible-strong:DBY'])
+    expect(plan[1]?.dependsOnId).toBe('bible:DBY')
+  })
+
+  it('queues the index alone over the published Bible', () => {
+    mockInstalledArchives.set('bible:DBY', catalogDby.archiveSha256)
+
+    const plan = completeDownloadPlan([createStrongSidecarDownloadItem('DBY')])
+
+    expect(plan.map(item => item.id)).toEqual(['bible-strong:DBY'])
+    expect(plan[0]?.dependsOnId).toBeUndefined()
+  })
+
+  it('makes an index depend on its Bible when both are asked for', () => {
+    const plan = completeDownloadPlan([
+      createBibleDownloadItem('DBY'),
+      createStrongSidecarDownloadItem('DBY'),
+    ])
+
+    expect(plan.map(item => item.id)).toEqual(['bible:DBY', 'bible-strong:DBY'])
+    expect(plan[1]?.dependsOnId).toBe('bible:DBY')
+  })
+
+  it('brings the lexicon core before entities when the core is not installed', () => {
+    const plan = completeDownloadPlan([createStrongLexiconModuleDownloadItem('entities')])
+
+    expect(plan.map(item => item.id)).toEqual(['strong-lexicon:core', 'strong-lexicon:entities'])
+    expect(plan[1]?.dependsOnId).toBe('strong-lexicon:core')
+  })
+
+  it.each([
+    ['its archive is the published one', true, false],
+    ['the registry verified it at the catalog revision', false, true],
+  ])('queues entities alone when the core is current: %s', (_case, recorded, verified) => {
+    if (recorded) mockInstalledArchives.set('strong-lexicon:core', catalogCore.archiveSha256)
+
+    const plan = completeDownloadPlan([createStrongLexiconModuleDownloadItem('entities')], {
+      isInstalledAtCatalogRevision: () => verified,
+    })
+
+    expect(plan.map(item => item.id)).toEqual(['strong-lexicon:entities'])
+  })
+
+  it('leaves standalone lexicons alone', () => {
+    expect(
+      completeDownloadPlan([createStrongLexiconModuleDownloadItem('simple-fr')]).map(
+        item => item.id
+      )
+    ).toEqual(['strong-lexicon:simple-fr'])
   })
 })
 

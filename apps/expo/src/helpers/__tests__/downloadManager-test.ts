@@ -5,6 +5,7 @@ const mockInstallManagedResource = jest.fn((_item: unknown, _callbacks: unknown)
   Promise.resolve()
 )
 const mockCaptureError = jest.fn()
+const mockCompleteDownloadPlan = jest.fn((items: unknown, _readers: unknown) => items)
 const mockWarn = jest.fn()
 
 jest.mock('expo-file-system/legacy', () => ({}))
@@ -29,7 +30,8 @@ jest.mock('~helpers/persistedDownloadItem', () => ({
   refreshPersistedDownloadItem: (item: unknown) => item,
 }))
 jest.mock('~helpers/downloadItemFactory', () => ({
-  completeInterlinearDownloadPlan: (items: unknown) => items,
+  completeDownloadPlan: (items: unknown, readers: unknown) =>
+    mockCompleteDownloadPlan(items, readers),
 }))
 jest.mock('~helpers/agentObservability', () => ({
   appLogger: {
@@ -96,6 +98,8 @@ describe('download manager', () => {
     mockInstallManagedResource.mockResolvedValue(undefined)
     mockCaptureError.mockClear()
     mockWarn.mockClear()
+    mockCompleteDownloadPlan.mockReset()
+    mockCompleteDownloadPlan.mockImplementation(items => items)
   })
 
   it('does not report again the dependent of a failed download', async () => {
@@ -168,6 +172,55 @@ describe('download manager', () => {
       'resource.install_failed',
       expect.anything(),
       expect.objectContaining({ resourceId: 'bible:LSG' })
+    )
+  })
+
+  it('retries a refused Strong index with the Bible it needs', async () => {
+    const bible = createItem('bible:LSG')
+    const index = {
+      ...createItem('bible-strong:LSG'),
+      type: 'bible-strong-sidecar',
+    } as DownloadItem
+    mockCompleteDownloadPlan.mockImplementation(items =>
+      (items as DownloadItem[]).some(item => item.id === index.id)
+        ? [bible, { ...index, dependsOnId: bible.id }]
+        : items
+    )
+    store.set(
+      downloadItemStatesAtom,
+      new Map([
+        [index.id, createState(index, 'failed', 'STRONG_BIBLE_BASE_REVISION_INCOMPATIBLE:LSG')],
+      ])
+    )
+
+    downloadManager.retry(index.id)
+    await flushQueue()
+
+    expect(
+      mockInstallManagedResource.mock.calls.map(([item]) => (item as DownloadItem).id)
+    ).toEqual([bible.id, index.id])
+    expect(statusOf(index.id)?.status).toBe('completed')
+  })
+
+  it('reports a refused combination once, with its revisions, without retrying it', async () => {
+    mockInstallManagedResource.mockRejectedValue(
+      Object.assign(new Error('STRONG_BIBLE_BASE_REVISION_INCOMPATIBLE:LSG'), {
+        diagnostic: { installedTextRevision: 'unknown', indexTextRevision: 'lsg-2026-10' },
+      })
+    )
+
+    downloadManager.enqueue([createItem('bible-strong:LSG')])
+    await flushQueue()
+
+    expect(mockInstallManagedResource).toHaveBeenCalledTimes(1)
+    expect(mockCaptureError).toHaveBeenCalledWith(
+      'download',
+      'resource.install_failed',
+      expect.anything(),
+      expect.objectContaining({
+        installedTextRevision: 'unknown',
+        indexTextRevision: 'lsg-2026-10',
+      })
     )
   })
 })

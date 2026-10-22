@@ -153,7 +153,7 @@ import AndroidWebViewWarningModal from '../AndroidWebViewWarningModal'
 import { downloadManager } from '~helpers/downloadManager'
 import {
   createBibleDownloadItem,
-  createStrongLexiconModuleDownloadPlan,
+  createStrongLexiconModuleDownloadItem,
 } from '~helpers/downloadItemFactory'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { resetBiblesDb } from '~helpers/biblesDb'
@@ -735,12 +735,9 @@ export const BibleDOMWrapper = ({
       case DOWNLOAD_CHAPTER_ENTITIES: {
         if (Platform.OS === 'web') break
         if (!chapterEntityModuleStatus || chapterEntityModuleStatus === 'available') break
-        downloadManager.enqueue(
-          createStrongLexiconModuleDownloadPlan(
-            'entities',
-            chapterEntityModuleStatus !== 'core-missing'
-          )
-        )
+        // The entities status says nothing of the core until entities are installed: the queue
+        // brings the core when it is not installed at the catalog revision.
+        downloadManager.enqueue([createStrongLexiconModuleDownloadItem('entities')])
         break
       }
       case DISMISS_CONTEXTUAL_INFORMATION: {

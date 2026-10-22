@@ -16,7 +16,7 @@ import { getDownloadQueueDecision } from '~helpers/downloadQueueScheduling'
 import { reconcileResourceInstallationJournal } from '~helpers/resourceInstallationJournal'
 import { installManagedResource } from '~helpers/managedResourceInstallation'
 import { refreshPersistedDownloadItem } from '~helpers/persistedDownloadItem'
-import { completeInterlinearDownloadPlan } from '~helpers/downloadItemFactory'
+import { completeDownloadPlan } from '~helpers/downloadItemFactory'
 import { appLogger } from '~helpers/agentObservability'
 import { isStorageFullError } from '~helpers/resourceDeviceCondition'
 import { offlineResourceRegistry } from '~features/resources/resourceAvailability'
@@ -27,8 +27,25 @@ const PERSIST_KEY = 'downloadQueue'
 const MAX_RETRIES = 2
 const PERSIST_DEBOUNCE_MS = 2000
 
-// A full disk stays full: downloading the archive again would fail the same way.
-const isWorthRetrying = (error: unknown) => !isStorageFullError(error)
+// A full disk stays full and a refused combination stays refused: downloading the archive
+// again would fail the same way.
+const deterministicFailurePattern =
+  /_INCOMPATIBLE\b|:(?:core-missing|incompatible)$|SCHEMA_MISMATCH/
+const isWorthRetrying = (error: unknown) =>
+  !isStorageFullError(error) &&
+  !(error instanceof Error && deterministicFailurePattern.test(error.message))
+
+// Technical facts an install error carries for its report (revisions, not content).
+const errorDiagnostic = (error: unknown): Record<string, unknown> => {
+  const diagnostic =
+    error && typeof error === 'object' && 'diagnostic' in error ? error.diagnostic : undefined
+  return diagnostic && typeof diagnostic === 'object' ? { ...diagnostic } : {}
+}
+
+const isInstalledAtCatalogRevision = (resourceId: string) => {
+  const entry = offlineResourceRegistry.get(resourceId)
+  return entry?.availability.status === 'available' && !entry.updateAvailable
+}
 
 // ---------------------------------------------------------------------------
 // DownloadManager — singleton
@@ -56,29 +73,7 @@ class DownloadManager {
   /** Add items to the queue. Deduplicates by id. Starts processing. */
   enqueue(requestedItems: DownloadItem[]): void {
     const states = new Map(this.jotaiStore.get(downloadItemStatesAtom))
-    // Whatever asked for it, BHG and its indexes move to the catalog revision together.
-    const items = completeInterlinearDownloadPlan(requestedItems)
-
-    for (const item of items) {
-      // Skip if already queued/downloading/inserting
-      const existing = states.get(item.id)
-      if (
-        existing &&
-        (existing.status === 'queued' ||
-          existing.status === 'downloading' ||
-          existing.status === 'inserting')
-      ) {
-        continue
-      }
-
-      states.set(item.id, {
-        item,
-        status: 'queued',
-        downloadProgress: 0,
-        insertProgress: 0,
-      })
-    }
-
+    this.queueWithDependencies(states, requestedItems)
     this.jotaiStore.set(downloadItemStatesAtom, states)
     this.schedulePersist()
     this.processQueue()
@@ -122,22 +117,12 @@ class DownloadManager {
     const state = states.get(itemId)
     if (!state || state.status !== 'failed') return
 
-    const requeue = (id: string, current: DownloadItemState) => {
-      this.cancelledIds.delete(id)
-      states.set(id, {
-        ...current,
-        item: refreshPersistedDownloadItem(current.item),
-        status: 'queued',
-        downloadProgress: 0,
-        insertProgress: 0,
-        error: undefined,
-      })
-    }
-    requeue(itemId, state)
+    const items = [refreshPersistedDownloadItem(state.item)]
     const dependency = state.item.dependsOnId ? states.get(state.item.dependsOnId) : undefined
     if (dependency && (dependency.status === 'failed' || dependency.status === 'cancelled')) {
-      requeue(dependency.item.id, dependency)
+      items.unshift(refreshPersistedDownloadItem(dependency.item))
     }
+    this.queueWithDependencies(states, items)
     this.jotaiStore.set(downloadItemStatesAtom, states)
     this.schedulePersist()
     this.processQueue()
@@ -146,24 +131,12 @@ class DownloadManager {
   /** Retry all failed items. */
   retryAllFailed(): void {
     const states = new Map(this.jotaiStore.get(downloadItemStatesAtom))
-    let changed = false
+    const failedItems = Array.from(states.values())
+      .filter(state => state.status === 'failed')
+      .map(state => refreshPersistedDownloadItem(state.item))
 
-    for (const [id, state] of states) {
-      if (state.status === 'failed') {
-        this.cancelledIds.delete(id)
-        states.set(id, {
-          ...state,
-          item: refreshPersistedDownloadItem(state.item),
-          status: 'queued',
-          downloadProgress: 0,
-          insertProgress: 0,
-          error: undefined,
-        })
-        changed = true
-      }
-    }
-
-    if (changed) {
+    if (failedItems.length > 0) {
+      this.queueWithDependencies(states, failedItems)
       this.jotaiStore.set(downloadItemStatesAtom, states)
       this.schedulePersist()
       this.processQueue()
@@ -201,6 +174,13 @@ class DownloadManager {
       }
 
       if (states.size > 0) {
+        // Items queued by an older version may lack a dependency it did not know about.
+        this.queueWithDependencies(
+          states,
+          Array.from(states.values())
+            .filter(state => state.status === 'queued')
+            .map(state => state.item)
+        )
         this.jotaiStore.set(downloadItemStatesAtom, states)
         this.processQueue()
       }
@@ -222,6 +202,29 @@ class DownloadManager {
 
     this.jotaiStore.set(downloadItemStatesAtom, states)
     this.schedulePersist()
+  }
+
+  /** Queues items with what they need to install first (see `completeDownloadPlan`). */
+  private queueWithDependencies(
+    states: Map<string, DownloadItemState>,
+    requestedItems: DownloadItem[]
+  ): void {
+    for (const item of completeDownloadPlan(requestedItems, { isInstalledAtCatalogRevision })) {
+      const existing = states.get(item.id)
+      if (existing?.status === 'downloading' || existing?.status === 'inserting') continue
+      if (existing?.status === 'queued') {
+        if (item.dependsOnId && item.dependsOnId !== existing.item.dependsOnId) {
+          states.set(item.id, {
+            ...existing,
+            item: { ...existing.item, dependsOnId: item.dependsOnId },
+          })
+        }
+        continue
+      }
+
+      this.cancelledIds.delete(item.id)
+      states.set(item.id, { item, status: 'queued', downloadProgress: 0, insertProgress: 0 })
+    }
   }
 
   // -----------------------------------------------------------------------
@@ -355,6 +358,7 @@ class DownloadManager {
           resourceId: item.id,
           resourceType: item.type,
           retryCount: current?.item.retryCount ?? item.retryCount,
+          ...errorDiagnostic(e),
         })
         this.updateItemStatus(item.id, 'failed', errorMessage || 'Unknown error')
       }

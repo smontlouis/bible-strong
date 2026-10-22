@@ -1,3 +1,4 @@
+import { isStandaloneStrongModule } from '@bible-strong/resource-domain/strong-lexicon'
 import type { DownloadItem } from '~state/downloadQueue'
 import { isSharedDB, type DatabaseId, type ResourceLanguage } from '~helpers/databaseTypes'
 import { versions, type Version } from '~helpers/bibleVersions'
@@ -218,6 +219,101 @@ export const createStrongSidecarDownloadPlan = (
 
   return [bible, { ...sidecar, dependsOnId: bible.id }, ...lexicon]
 }
+
+const insertDependency = (
+  plan: DownloadItem[],
+  dependent: DownloadItem,
+  dependency: DownloadItem
+): void => {
+  if (!plan.some(item => item.id === dependency.id)) {
+    plan.splice(
+      plan.findIndex(item => item.id === dependent.id),
+      0,
+      dependency
+    )
+  }
+  const index = plan.findIndex(item => item.id === dependent.id)
+  plan[index] = { ...plan[index], dependsOnId: dependency.id }
+}
+
+/**
+ * A Strong index is built for the Bible the catalog publishes with it: whatever asked for the
+ * index, that Bible comes first when another archive (or none) is installed. Alone, the index
+ * would be downloaded in full and then refused.
+ */
+export const completeStrongIndexDownloadPlan = (
+  items: DownloadItem[],
+  readInstalled: InstalledArchiveReader = resourceId => resourcePublicationStore.read(resourceId)
+): DownloadItem[] => {
+  const plan = [...items]
+  for (const sidecar of items) {
+    if (sidecar.type !== 'bible-strong-sidecar') continue
+    const bibleId = createOfflineCopyId({ kind: 'bible', versionId: sidecar.versionId })
+    const planned = plan.find(item => item.id === bibleId)
+    if (planned) {
+      insertDependency(plan, sidecar, planned)
+      continue
+    }
+    const bible = createBibleDownloadItem(sidecar.versionId)
+    if (readInstalled(bible.id)?.archiveSha256 === bible.expectedArchiveSha256) continue
+    insertDependency(plan, sidecar, bible)
+  }
+  return plan
+}
+
+/**
+ * A lexicon module other than the standalone ones is validated against the core it was built
+ * for: the core comes first unless it is installed at the catalog revision.
+ */
+export const completeStrongLexiconDownloadPlan = (
+  items: DownloadItem[],
+  isCoreCurrent: (core: DownloadItem) => boolean
+): DownloadItem[] => {
+  const plan = [...items]
+  const coreId = createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'core' })
+  for (const lexiconModule of items) {
+    if (
+      lexiconModule.type !== 'strong-lexicon-module' ||
+      isStandaloneStrongModule(lexiconModule.strongLexiconModuleId)
+    ) {
+      continue
+    }
+    const planned = plan.find(item => item.id === coreId)
+    if (planned) {
+      insertDependency(plan, lexiconModule, planned)
+      continue
+    }
+    const core = createStrongLexiconModuleDownloadItem('core')
+    if (isCoreCurrent(core)) continue
+    insertDependency(plan, lexiconModule, core)
+  }
+  return plan
+}
+
+/**
+ * Completes what the queue receives with what each item needs to install (ADR-0079): the
+ * published Bible of a Strong index, the core of a lexicon module, BHG and its indexes together.
+ * Applied on every enqueue and retry, so a plan made elsewhere cannot skip a dependency.
+ */
+export const completeDownloadPlan = (
+  items: DownloadItem[],
+  {
+    readInstalled = resourceId => resourcePublicationStore.read(resourceId),
+    isInstalledAtCatalogRevision = () => false,
+  }: {
+    readInstalled?: InstalledArchiveReader
+    isInstalledAtCatalogRevision?: (resourceId: string) => boolean
+  } = {}
+): DownloadItem[] =>
+  completeStrongLexiconDownloadPlan(
+    completeStrongIndexDownloadPlan(
+      completeInterlinearDownloadPlan(items, readInstalled),
+      readInstalled
+    ),
+    core =>
+      readInstalled(core.id)?.archiveSha256 === core.expectedArchiveSha256 ||
+      isInstalledAtCatalogRevision(core.id)
+  )
 
 export const dedupeDownloadItems = (items: DownloadItem[]): DownloadItem[] => [
   ...new Map(items.map(item => [item.id, item])).values(),
