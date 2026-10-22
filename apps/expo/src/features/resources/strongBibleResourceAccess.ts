@@ -312,6 +312,8 @@ type HttpStrongBibleResourceAdapterOptions = {
 }
 
 const STRONG_BIBLE_AVAILABILITY_STALE_TIME_MS = 6 * 60 * 60 * 1000
+const STRONG_BIBLE_CHAPTER_CACHE_SIZE = 8
+const STRONG_BIBLE_CHAPTER_CACHE_TIME_MS = 30 * 60 * 1000
 
 const normalizeBaseUrl = (value: string) => value.replace(/\/+$/, '')
 
@@ -451,7 +453,47 @@ export const createHttpStrongBibleResourceAdapter = ({
         .replace(/^([HGhg])0*(?=\d)/u, (_, prefix: string) => prefix.toUpperCase())
     )
 
-  const loadChapter = async (versionId: StrongBibleVersionId, book: number, chapter: number) => {
+  // A chapter read for one verse serves the next ones, and the reader that read it first:
+  // the last few chapters stay in memory instead of being asked again (ADR-0088).
+  const chapterCache = new Map<string, { expiresAt: number; promise: Promise<unknown> }>()
+  const remember = <A>(key: string, load: () => Promise<A>): Promise<A> => {
+    const cached = chapterCache.get(key)
+    if (cached && cached.expiresAt > now()) return cached.promise as Promise<A>
+    const promise = load().catch(error => {
+      if (chapterCache.get(key)?.promise === promise) chapterCache.delete(key)
+      throw error
+    })
+    chapterCache.delete(key)
+    chapterCache.set(key, { expiresAt: now() + STRONG_BIBLE_CHAPTER_CACHE_TIME_MS, promise })
+    while (chapterCache.size > STRONG_BIBLE_CHAPTER_CACHE_SIZE) {
+      chapterCache.delete(chapterCache.keys().next().value!)
+    }
+    return promise
+  }
+  const loadBibleChapter = (versionId: StrongBibleVersionId, book: number, chapter: number) => {
+    const key = `bible:${versionId}:${book}:${chapter}`
+    const promise = remember(key, () => bibleChapterAdapter.loadChapter(versionId, book, chapter))
+    // A chapter that could not be read is asked again next time.
+    void promise.then(
+      result => {
+        if (result.status !== 'available' && chapterCache.get(key)?.promise === promise) {
+          chapterCache.delete(key)
+        }
+      },
+      () => undefined
+    )
+    return promise
+  }
+
+  const loadChapter = (versionId: StrongBibleVersionId, book: number, chapter: number) =>
+    remember(`strong:${versionId}:${book}:${chapter}`, () =>
+      loadStrongChapter(versionId, book, chapter)
+    )
+  const loadStrongChapter = async (
+    versionId: StrongBibleVersionId,
+    book: number,
+    chapter: number
+  ) => {
     const response = await get(
       `/v1/strong-bibles/${encodeURIComponent(versionId)}/books/${book}/chapters/${chapter}`,
       StrongBibleChapterDto
@@ -541,7 +583,7 @@ export const createHttpStrongBibleResourceAdapter = ({
       try {
         const [chapter, bibleChapter] = await Promise.all([
           loadChapter(versionId, request.book, request.chapter),
-          bibleChapterAdapter.loadChapter(versionId, request.book, request.chapter),
+          loadBibleChapter(versionId, request.book, request.chapter),
         ])
         if (bibleChapter.status !== 'available') throw bibleChapterUnavailableError(bibleChapter)
         if (

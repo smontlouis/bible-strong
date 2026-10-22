@@ -15,6 +15,7 @@ import { openSQLiteDatabase } from '~helpers/sqlite'
 import {
   CommentaryChapterResponseDto,
   CommentaryCoverageResponseDto,
+  CommentaryVerseSectionsResponseDto,
 } from './supplementaryContract'
 import { ResourceAccessError, resourceAccessErrorFromHttpResponse } from './resourceAccessError'
 import { getLocalResourceAvailability, offlineResourceRegistry } from './resourceAvailability'
@@ -60,8 +61,27 @@ export type CommentaryResourceCoverage = {
   chaptersByBook: Record<number, number[]>
 }
 
+/** How a commentary begins on one verse: the section of it that bears most closely on it. */
+export type CommentaryVerseExcerpt = {
+  resourceId: string
+  language: ResourceLanguage
+  title: string
+  rangeStartVerse: number
+  rangeEndVerse: number
+  preview: string
+}
+
 export type CommentaryAccess = {
   loadChapter: (request: CommentaryChapterRequest) => Promise<CommentaryChapter>
+  /**
+   * The excerpt of each commentary on one verse, in the order asked. An offline copy is read
+   * from its chapter; the others come from the Resource API in one small read per language,
+   * not as whole chapters (ADR-0088).
+   */
+  loadVerseExcerpts?: (request: {
+    verseKey: string
+    resources: readonly CommentaryResourceSelection[]
+  }) => Promise<CommentaryVerseExcerpt[]>
   loadResourceChapter: (
     request: CommentaryResourceSelection & { book: number; chapter: number }
   ) => Promise<CommentaryResourceChapter>
@@ -83,6 +103,12 @@ export type CommentaryChapterSource = {
     publicationId: string,
     language: ResourceLanguage
   ) => Promise<Pick<CommentaryResourceCoverage, 'books' | 'chaptersByBook'>>
+  /** The section of each publication that bears most closely on a verse, in one read. */
+  loadVerseSections?: (
+    publicationIds: readonly string[],
+    language: ResourceLanguage,
+    verseKey: string
+  ) => Promise<{ publicationId: string; startVerse: number; endVerse: number; content: string }[]>
 }
 
 const buildCommentaryCoverage = (chapterIds: readonly string[]) => {
@@ -287,6 +313,51 @@ export const createHttpCommentaryChapterSource = ({
           throw new ResourceAccessError('INTEGRITY_FAILURE')
         }
         return decodeSerializedComments(decoded.serializedComments)
+      } catch (error) {
+        if (error instanceof ResourceAccessError) throw error
+        throw new ResourceAccessError(
+          (await isOfflineFailure()) ? 'NETWORK_OFFLINE' : 'TEMPORARY_UNAVAILABLE'
+        )
+      } finally {
+        clearTimeout(timeout)
+      }
+    },
+    async loadVerseSections(publicationIds, language, verseKey) {
+      if (!(await isOnline())) throw new ResourceAccessError('NETWORK_OFFLINE')
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), timeoutMs)
+      try {
+        const query = new URLSearchParams({ language, commentaries: publicationIds.join(',') })
+        const response = await fetcher(
+          `${normalizedBaseUrl}/v1/commentaries/verses/${encodeURIComponent(verseKey)}/sections?${query}`,
+          { headers: { accept: 'application/json' }, signal: controller.signal }
+        )
+        const payload: unknown = await response.json().catch(() => undefined)
+        if (!response.ok) {
+          const code =
+            payload && typeof payload === 'object' && 'code' in payload ? payload.code : undefined
+          throw resourceAccessErrorFromHttpResponse('TEMPORARY_UNAVAILABLE', response, code)
+        }
+        let decoded: Schema.Schema.Type<typeof CommentaryVerseSectionsResponseDto>
+        try {
+          decoded = Schema.decodeUnknownSync(CommentaryVerseSectionsResponseDto)(payload)
+        } catch {
+          throw new ResourceAccessError('INTEGRITY_FAILURE')
+        }
+        if (decoded.verseKey !== verseKey) throw new ResourceAccessError('INTEGRITY_FAILURE')
+        return decoded.sections.flatMap(section =>
+          section.resource.language === language &&
+          publicationIds.includes(section.resource.resourceId)
+            ? [
+                {
+                  publicationId: section.resource.resourceId,
+                  startVerse: section.startVerse,
+                  endVerse: section.endVerse,
+                  content: section.content,
+                },
+              ]
+            : []
+        )
       } catch (error) {
         if (error instanceof ResourceAccessError) throw error
         throw new ResourceAccessError(
@@ -543,6 +614,91 @@ export const createCommentaryAccess = ({
       })
 
       return { book, chapter, commentsByVerse, unavailableResources }
+    },
+    async loadVerseExcerpts({ verseKey, resources }) {
+      const [book, chapter, verse] = verseKey.split('-').map(Number)
+      if (![book, chapter, verse].every(value => Number.isSafeInteger(value) && value > 0)) {
+        throw new ResourceAccessError('NOT_FOUND')
+      }
+      const entries = resources.flatMap(({ resourceId, language }) => {
+        const entry = COMMENTARY_CATALOG_BY_ID.get(resourceId)
+        return entry?.languages.includes(language) ? [{ entry, language }] : []
+      })
+      const excerpts = new Map<string, CommentaryVerseExcerpt>()
+      const remaining: typeof entries = []
+      // An offline copy answers from its chapter, with the same sections the commentary shows.
+      await Promise.all(
+        entries.map(async selection => {
+          const { entry, language } = selection
+          try {
+            const comments = await local.loadResourceChapter(
+              entry.publicationId,
+              language,
+              book,
+              chapter
+            )
+            const closest = buildCommentaryResourceSections({
+              entry,
+              language,
+              book,
+              chapter,
+              comments,
+            })
+              .filter(
+                section =>
+                  section.rangeEndVerse > 0 &&
+                  section.rangeStartVerse <= verse &&
+                  verse <= section.rangeEndVerse
+              )
+              .sort(
+                (left, right) =>
+                  left.rangeEndVerse -
+                  left.rangeStartVerse -
+                  (right.rangeEndVerse - right.rangeStartVerse)
+              )[0]
+            if (closest) {
+              excerpts.set(`${entry.id}:${language}`, {
+                resourceId: entry.id,
+                language,
+                title: entry.title,
+                rangeStartVerse: closest.rangeStartVerse,
+                rangeEndVerse: closest.rangeEndVerse,
+                preview: closest.preview,
+              })
+            }
+          } catch {
+            remaining.push(selection)
+          }
+        })
+      )
+      if (remaining.length && remote?.loadVerseSections && (await isOnline())) {
+        const languages = [...new Set(remaining.map(({ language }) => language))]
+        await Promise.all(
+          languages.map(async language => {
+            const asked = remaining.filter(selection => selection.language === language)
+            const sections = await remote.loadVerseSections!(
+              asked.map(({ entry }) => entry.publicationId),
+              language,
+              verseKey
+            ).catch(() => [])
+            for (const section of sections) {
+              const selection = asked.find(
+                ({ entry }) => entry.publicationId === section.publicationId
+              )
+              if (!selection || section.endVerse < 1) continue
+              excerpts.set(`${selection.entry.id}:${language}`, {
+                resourceId: selection.entry.id,
+                language,
+                title: selection.entry.title,
+                rangeStartVerse: Math.max(1, section.startVerse),
+                rangeEndVerse: section.endVerse,
+                preview: createCommentaryPreview(section.content),
+              })
+            }
+          })
+        )
+      }
+      return entries.flatMap(({ entry, language }) => excerpts.get(`${entry.id}:${language}`) ?? [])
     },
     async loadResourceChapter({ resourceId, language, book, chapter }) {
       if (

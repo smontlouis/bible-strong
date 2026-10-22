@@ -16,7 +16,8 @@
     "./strong-definition-comparison": "./src/strongDefinitionComparison.ts",
     "./strong-definition-presentation": "./src/strongDefinitionPresentation.ts",
     "./strong-identities": "./src/strongIdentities.ts",
-    "./strong-lexicon": "./src/strongLexicon.ts"
+    "./strong-lexicon": "./src/strongLexicon.ts",
+    "./verse-study": "./src/verseStudy.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

@@ -44,6 +44,7 @@ type DictionaryVerseEntriesDto = {
     word: string
     normalizedWord: string
     evidenceKind: string
+    correspondenceId?: string
   }[]
 }
 

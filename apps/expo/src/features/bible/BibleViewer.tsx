@@ -28,6 +28,10 @@ import {
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
+import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
+import type { StrongIdentity } from '~helpers/strongIdentities'
+import type { FocusStudyAction } from './focusStudy/focusVerseStudyTypes'
+import { useFocusVerseStudy } from './focusStudy/useFocusVerseStudy'
 import { type SheetRef } from '~common/sheet'
 import type { Bookmark } from '~common/types'
 import { BibleResource, Pericope, SelectedCode, Verse, VerseIds } from '~common/types'
@@ -718,8 +722,114 @@ const BibleViewer = ({
   const chapterEntities = chapterEntitiesQuery.data ?? []
   const chapterEntitiesLoaded = chapterEntitiesQuery.isSuccess
 
-  // Shared Bible DOM: detect if this tab is the active Bible tab
   const activeBibleTabId = useAtomValue(activeBibleTabIdAtom)
+  // Under a verse in focus the reader gathers its study, one verse at a time (ADR-0088).
+  const [studiedVerse, setStudiedVerse] = useState<number | null>(null)
+  const studyVerses = [...new Set((focusVerses ?? []).map(Number))].sort(
+    (left, right) => left - right
+  )
+  const currentStudyVerse =
+    studiedVerse !== null && studyVerses.includes(studiedVerse) ? studiedVerse : studyVerses[0]
+  const studyVerseKey = `${book.Numero}-${chapter}-${currentStudyVerse}`
+  const focusStudy = useFocusVerseStudy({
+    // Only the reader on screen reads it: a tab kept in the background waits to be shown.
+    enabled:
+      isContextFocused &&
+      currentStudyVerse !== undefined &&
+      !planPassage &&
+      (isFormSheet || activeBibleTabId === bible.id),
+    verseKey: studyVerseKey,
+    studyVerses,
+    version,
+  })
+  const focusStudyTranslations = focusStudy && {
+    title: t('bible.focusStudy.title', { reference: verseToReference([studyVerseKey]) }),
+    versions: t('bible.focusStudy.versions'),
+    compareAll: t('bible.focusStudy.compareAll'),
+    chooseVersions: t('bible.focusStudy.chooseVersions'),
+    words: t('bible.focusStudy.words'),
+    wordsAll: t(
+      focusStudy.wordCount === 1
+        ? 'bible.focusStudy.wordsAll_one'
+        : 'bible.focusStudy.wordsAll_other',
+      { count: focusStudy.wordCount }
+    ),
+    references: t('bible.focusStudy.references'),
+    referencesAll: t(
+      focusStudy.referenceCount === 1
+        ? 'bible.focusStudy.referencesAll_one'
+        : 'bible.focusStudy.referencesAll_other',
+      { count: focusStudy.referenceCount }
+    ),
+    commentaries: t('bible.focusStudy.commentaries'),
+    commentariesAll: t(
+      focusStudy.commentaryCount === 1
+        ? 'bible.focusStudy.commentariesAll_one'
+        : 'bible.focusStudy.commentariesAll_other',
+      { count: focusStudy.commentaryCount }
+    ),
+    topics: t('bible.focusStudy.topics'),
+    dictionary: t('bible.focusStudy.dictionary'),
+    studyVerse: t('bible.focusStudy.studyVerse'),
+  }
+  const handleFocusStudyAction = (action: FocusStudyAction) => {
+    switch (action.kind) {
+      case 'study-verse':
+        setStudiedVerse(action.verse)
+        return
+      case 'open-resource':
+        openResourceForVerse(action.resource, studyVerseKey)
+        return
+      case 'open-reference': {
+        const [referenceBook, referenceChapter, referenceVerse] = action.verseKey.split('-')
+        pushRouteOnce({
+          pathname: '/bible-view',
+          params: {
+            contextDisplayMode: 'focused',
+            book: referenceBook,
+            chapter: referenceChapter,
+            verse: referenceVerse,
+          },
+        })
+        return
+      }
+      case 'open-word':
+        pushRouteOnce(
+          createStrongDetailRoute('index', {
+            book: book.Numero,
+            reference: action.identityCode,
+            identityKind: action.identityKind as StrongIdentity['kind'],
+            identityCode: action.identityCode,
+            bibleVersion: version,
+            bibleChapter: chapter,
+          })
+        )
+        return
+      case 'open-topic':
+        pushRouteOnce({
+          pathname: '/nave-detail',
+          params: { name_lower: action.nameLower, name: action.name },
+        })
+        return
+      case 'open-dictionary': {
+        const { entry } = action
+        pushRouteOnce({
+          pathname: '/dictionnary-detail',
+          params: {
+            word: entry.word,
+            entryId: String(entry.entryId),
+            work: entry.work,
+            resourceId: entry.resourceId,
+            dictionaryTitle: entry.title,
+            language: entry.language,
+            ...(entry.correspondenceId ? { correspondenceId: entry.correspondenceId } : {}),
+          },
+        })
+      }
+    }
+  }
+
+  // Shared Bible DOM: detect if this tab is the active Bible tab
   const setSharedProps = useSetAtom(sharedBibleDOMPropsAtom)
   const setBibleDOMHostLayouts = useSetAtom(bibleDOMHostLayoutsAtom)
   const isActiveBibleTab = !isFormSheet && activeBibleTabId === bible.id
@@ -1525,6 +1635,9 @@ const BibleViewer = ({
     },
     chapterEntities,
     chapterEntitiesLoaded,
+    focusStudy,
+    focusStudyTranslations,
+    onFocusStudyAction: handleFocusStudyAction,
     chapterEntityModuleStatus,
     chapterEntityDownloadState,
     onDisableContextualInformation: () => dispatch(setSettingsContextualInformationDisplay(false)),

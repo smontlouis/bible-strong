@@ -1,19 +1,24 @@
+import {
+  crossReferenceVerses as namedCrossReferenceVerses,
+  MAIN_BIBLE_VERSIONS,
+  VERSE_STUDY_LIMITS,
+  verseDictionaryEntries as namedDictionaryEntries,
+  type VerseKey,
+} from '@bible-strong/resource-domain/verse-study'
 import type { ResourceLanguage } from '../resources/publicSite'
+
+export {
+  MAIN_BIBLE_VERSIONS,
+  verseKey,
+  type VerseKey,
+} from '@bible-strong/resource-domain/verse-study'
 
 // What a verse page gathers around its verse, and the choices that keep it readable.
 
-/** The best-known Bibles of each language: a verse is quoted in a few of them, not in all. */
-export const MAIN_BIBLE_VERSIONS: Record<ResourceLanguage, readonly string[]> = {
-  fr: ['LSG', 'S21', 'BDS', 'NEG79', 'DBY'],
-  en: ['KJV', 'NIV', 'ESV', 'NKJV', 'NLT'],
-}
-
 /** How many other Bibles a verse is quoted in. */
-export const OTHER_VERSION_COUNT = 4
+export const OTHER_VERSION_COUNT = VERSE_STUDY_LIMITS.page.otherVersions
 /** How many commentaries a verse page quotes; the others stay a link away. */
-export const VERSE_COMMENTARY_COUNT = 5
-export const VERSE_CROSS_REFERENCE_COUNT = 16
-export const VERSE_DICTIONARY_WORD_COUNT = 10
+export const VERSE_COMMENTARY_COUNT = VERSE_STUDY_LIMITS.page.commentaries
 /** How many verses are read before and after the verse. */
 export const VERSE_CONTEXT_SPAN = 2
 
@@ -50,52 +55,13 @@ export const quoteVerseText = (text: string): string => text.replace(/\s+/gu, ' 
 export const hasVerseText = (text: string | undefined): text is string =>
   /[\p{L}\p{N}]/u.test(text ?? '')
 
-export type VerseKey = { book: number; chapter: number; verse: number }
+/** The passages a verse page quotes under its verse, at most sixteen (ADR-0088). */
+export const crossReferenceVerses = (references: readonly string[], self: VerseKey): VerseKey[] =>
+  namedCrossReferenceVerses(references, self, VERSE_STUDY_LIMITS.page.crossReferences)
 
-export const verseKey = ({ book, chapter, verse }: VerseKey): string =>
-  `${book}-${chapter}-${verse}`
-
-const LAST_BOOK = 66
-
-/**
- * The passages a list of cross-references names. The list mixes the words of the verse a
- * group of references bears on (`"God."`) with verse keys (`"45-5-8"`): the keys are kept,
- * each once, without the verse itself and without what is not a verse of the canon.
- */
-export const crossReferenceVerses = (references: readonly string[], self: VerseKey): VerseKey[] => {
-  const seen = new Set([verseKey(self)])
-  const verses: VerseKey[] = []
-  for (const reference of references) {
-    const match = /^(\d+)-(\d+)-(\d+)$/u.exec(reference)
-    if (!match) continue
-    const [book, chapter, verse] = match.slice(1).map(Number) as [number, number, number]
-    if (book < 1 || book > LAST_BOOK || chapter < 1 || verse < 1 || seen.has(reference)) continue
-    seen.add(reference)
-    verses.push({ book, chapter, verse })
-    if (verses.length === VERSE_CROSS_REFERENCE_COUNT) break
-  }
-  return verses
-}
-
-type DictionaryEvidence = { normalizedWord: string; evidenceKind: string }
-
-/**
- * The dictionary articles worth naming under a verse: those on a word of the verse first,
- * then those that cite it, one per word, a handful in all.
- */
-export const verseDictionaryEntries = <Entry extends DictionaryEvidence>(
+/** The dictionary articles a verse page names, ten words at most (ADR-0088). */
+export const verseDictionaryEntries = <
+  Entry extends { normalizedWord: string; evidenceKind: string; correspondenceId?: string },
+>(
   entries: readonly Entry[]
-): Entry[] => {
-  const seen = new Set<string>()
-  return [...entries]
-    .sort(
-      (left, right) =>
-        Number(right.evidenceKind === 'verse-name') - Number(left.evidenceKind === 'verse-name')
-    )
-    .filter(entry => {
-      if (seen.has(entry.normalizedWord)) return false
-      seen.add(entry.normalizedWord)
-      return true
-    })
-    .slice(0, VERSE_DICTIONARY_WORD_COUNT)
-}
+): Entry[] => namedDictionaryEntries(entries, VERSE_STUDY_LIMITS.page.dictionaryWords)

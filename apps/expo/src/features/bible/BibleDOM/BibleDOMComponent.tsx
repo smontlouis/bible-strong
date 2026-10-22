@@ -51,6 +51,7 @@ import {
   RETRY_BIBLE_RESOURCE,
   DOWNLOAD_CHAPTER_ENTITIES,
   DISMISS_CONTEXTUAL_INFORMATION,
+  FOCUS_STUDY_ACTION,
   PLAN_DAY_STEP,
   DOM_COMPONENT_MOUNTED,
 } from './dispatch'
@@ -86,6 +87,7 @@ import { withColorAlpha } from './themeOverlayColor'
 import { getScrollTargetVerse } from './verseRenderingModel'
 import { shouldSuppressVerseGestures } from '~helpers/interlinearDisplayMode'
 import ChapterEntities from './ChapterEntities'
+import FocusVerseStudy from './FocusVerseStudy'
 import ChapterOpening from './ChapterOpening'
 import { getOverlayLayoutTransition } from './overlayStagger'
 import PlanDayStepCard, { type PlanDayStepView } from './PlanDayStepCard'
@@ -204,6 +206,8 @@ type Props = Pick<
   | 'inlineCommentaries'
   | 'chapterEntities'
   | 'chapterEntitiesLoaded'
+  | 'focusStudy'
+  | 'focusStudyTranslations'
   | 'chapterEntityModuleStatus'
   | 'chapterEntityDownloadState'
 > & {
@@ -696,6 +700,8 @@ const LoadedBibleContent = ({
   inlineCommentaries,
   chapterEntities,
   chapterEntitiesLoaded,
+  focusStudy,
+  focusStudyTranslations,
   chapterEntityModuleStatus,
   chapterEntityDownloadState,
   chapterEntityTranslations,
@@ -1736,6 +1742,16 @@ const LoadedBibleContent = ({
                 </m.div>
               </ColumnsBlock>
             </HorizontalScrollWrapper>
+            {isContextFocused && focusStudy && focusStudyTranslations && !annotationMode && (
+              <FocusVerseStudy
+                study={focusStudy}
+                translations={focusStudyTranslations}
+                settings={settings}
+                onAction={focusAction => {
+                  void dispatch({ type: FOCUS_STUDY_ACTION, payload: focusAction })
+                }}
+              />
+            )}
             <ChapterEntities
               entities={chapterEntities}
               loaded={chapterEntitiesLoaded}
