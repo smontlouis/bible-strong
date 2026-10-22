@@ -2537,7 +2537,7 @@ __metadata:
     "@internationalized/date": "npm:^3.12.4"
     "@invertase/react-native-apple-authentication": "npm:^2.3.0"
     "@legendapp/list": "npm:^2.0.19"
-    "@lodev09/react-native-true-sheet": "patch:@lodev09/react-native-true-sheet@npm%3A3.10.1#~/.yarn/patches/@lodev09-react-native-true-sheet-npm-3.10.1-3266b32d31.patch"
+    "@lodev09/react-native-true-sheet": "patch:@lodev09/react-native-true-sheet@npm%3A3.10.1#~/.yarn/patches/@lodev09-react-native-true-sheet-npm-3.10.1-b130d06fd7.patch"
     "@lottiefiles/dotlottie-react": "npm:^0.13.5"
     "@native-html/render": "npm:^1.0.3"
     "@notifee/react-native": "npm:^7.8.2"
@@ -8370,9 +8370,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lodev09/react-native-true-sheet@patch:@lodev09/react-native-true-sheet@npm%3A3.10.1#~/.yarn/patches/@lodev09-react-native-true-sheet-npm-3.10.1-3266b32d31.patch":
+"@lodev09/react-native-true-sheet@patch:@lodev09/react-native-true-sheet@npm%3A3.10.1#~/.yarn/patches/@lodev09-react-native-true-sheet-npm-3.10.1-b130d06fd7.patch":
   version: 3.10.1
-  resolution: "@lodev09/react-native-true-sheet@patch:@lodev09/react-native-true-sheet@npm%3A3.10.1#~/.yarn/patches/@lodev09-react-native-true-sheet-npm-3.10.1-3266b32d31.patch::version=3.10.1&hash=3c2318"
+  resolution: "@lodev09/react-native-true-sheet@patch:@lodev09/react-native-true-sheet@npm%3A3.10.1#~/.yarn/patches/@lodev09-react-native-true-sheet-npm-3.10.1-b130d06fd7.patch::version=3.10.1&hash=c20942"
   peerDependencies:
     "@gorhom/bottom-sheet": ">=5"
     "@react-navigation/native": ">=7"
@@ -8389,7 +8389,7 @@ __metadata:
       optional: true
     react-native-worklets:
       optional: true
-  checksum: 10c0/a2f75af8896083431fbb85d07b65207d897b571515d12f6a84e88d5d689e3351314aa5e745caef2a07cd3ec11a84f4b8be93279906cfe4c00be0543ee08fc2a2
+  checksum: 10c0/c4284e9e860a6361edc52ab3ae662bf0d8f93fdc134ce372eb2100a91e969862e10d423a03c11cf04bcfa9ce8be7931e6909b3ab79ccb1aa622595991511434f
   languageName: node
   linkType: hard
 

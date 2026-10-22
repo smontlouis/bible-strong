@@ -92,7 +92,7 @@
     "@internationalized/date": "^3.12.4",
     "@invertase/react-native-apple-authentication": "^2.3.0",
     "@legendapp/list": "^2.0.19",
-    "@lodev09/react-native-true-sheet": "patch:@lodev09/react-native-true-sheet@npm%3A3.10.1#~/.yarn/patches/@lodev09-react-native-true-sheet-npm-3.10.1-3266b32d31.patch",
+    "@lodev09/react-native-true-sheet": "patch:@lodev09/react-native-true-sheet@npm%3A3.10.1#~/.yarn/patches/@lodev09-react-native-true-sheet-npm-3.10.1-b130d06fd7.patch",
     "@lottiefiles/dotlottie-react": "^0.13.5",
     "@native-html/render": "^1.0.3",
     "@notifee/react-native": "^7.8.2",

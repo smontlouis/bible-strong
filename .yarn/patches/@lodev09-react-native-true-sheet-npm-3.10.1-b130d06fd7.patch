@@ -1,0 +1,39 @@
+diff --git a/ios/TrueSheetView.mm b/ios/TrueSheetView.mm
+index cfd1c37..946b51e 100644
+--- a/ios/TrueSheetView.mm
++++ b/ios/TrueSheetView.mm
+@@ -157,6 +157,15 @@ using namespace facebook::react;
+   return concreteComponentDescriptorProvider<TrueSheetViewComponentDescriptor>();
+ }
+ 
++- (void)updateLayoutMetrics:(const LayoutMetrics &)layoutMetrics
++           oldLayoutMetrics:(const LayoutMetrics &)oldLayoutMetrics {
++  [super updateLayoutMetrics:layoutMetrics oldLayoutMetrics:oldLayoutMetrics];
++
++  // RN 0.88+ resets layout metrics on recycle, so the next mount force-applies
++  // `hidden` from the display type and would reveal this host over the screen.
++  self.hidden = YES;
++}
++
+ - (void)updateProps:(Props::Shared const &)props oldProps:(Props::Shared const &)oldProps {
+   [super updateProps:props oldProps:oldProps];
+ 
+diff --git a/ios/core/TrueSheetKeyboardObserver.mm b/ios/core/TrueSheetKeyboardObserver.mm
+index 6aed44b1fe7b837e3bac9355b4abd8c9a87e139e..af15da92021b842595c4fff92282992cbe9bc9f7 100644
+--- a/ios/core/TrueSheetKeyboardObserver.mm
++++ b/ios/core/TrueSheetKeyboardObserver.mm
+@@ -81,6 +81,14 @@
+   CGRect keyboardFrameInWindow = [window convertRect:keyboardFrame fromWindow:nil];
+   CGFloat keyboardHeight = MAX(0, window.bounds.size.height - keyboardFrameInWindow.origin.y);
+ 
++  // A regular-size window (an iPad in full screen) floats the sheet, and UIKit already moves it
++  // above the keyboard: lifting the footer and the content again would cover the sheet's content.
++  UITraitCollection *windowTraits = window.traitCollection;
++  if (windowTraits.horizontalSizeClass == UIUserInterfaceSizeClassRegular &&
++      windowTraits.verticalSizeClass == UIUserInterfaceSizeClassRegular) {
++    keyboardHeight = 0;
++  }
++
+   _currentHeight = keyboardHeight;
+ 
+   for (id<TrueSheetKeyboardObserverDelegate> delegate in _delegates) {
