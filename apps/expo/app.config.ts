@@ -6,6 +6,20 @@ const APP_VERSION = '28.0.0'
 const [majorVersion, minorVersion] = APP_VERSION.split('.')
 const RUNTIME_VERSION = `${majorVersion}.${minorVersion}`
 
+// Icon fonts built into the Android app. Loaded at run time, a font file an update copied can
+// be empty on disk, and every icon of that family stays blank. Each family is named as
+// @expo/vector-icons checks it with Font.isLoaded, so the icons never load it again. The plugin
+// resolves the path as a module when it is not a file of the project.
+const vectorIconFont = (fontFamily: string, file: string) => ({
+  fontFamily,
+  fontDefinitions: [
+    {
+      path: `@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/${file}`,
+      weight: 400,
+    },
+  ],
+})
+
 // The families of public pages a link opens in the application.
 const PUBLIC_RESOURCE_PATHS = [
   '/bible/',
@@ -132,6 +146,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           './src/assets/fonts/LiterataBook-Regular.otf',
           './src/assets/fonts/eina-03-bold.otf',
         ],
+        android: {
+          fonts: [
+            vectorIconFont('feather', 'Feather.ttf'),
+            vectorIconFont('ionicons', 'Ionicons.ttf'),
+          ],
+        },
       },
     ],
     [

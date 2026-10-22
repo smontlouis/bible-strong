@@ -11,6 +11,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { versions } from '~helpers/bibleVersions'
 import { timeout } from '~helpers/timeout'
+import { appLogger } from '~helpers/agentObservability'
 import { ttsVoiceAtom } from './atom'
 import AudioChip from './AudioChip'
 export interface TTSVoiceButtonProps extends BoxProps {
@@ -58,9 +59,17 @@ const TTSVoiceButton = ({ currentVersion, ...props }: TTSVoiceButtonProps) => {
   useEffect(() => {
     ;(async () => {
       await timeout(1000)
-      const v = await Speech.getAvailableVoicesAsync()
-      setVoices(v)
+      try {
+        setVoices(await Speech.getAvailableVoicesAsync())
+      } catch (error) {
+        // Some Android speech engines list no voices at all. Speaking with a named voice then
+        // fails natively, so the engine's default voice is used.
+        appLogger.warn('unknown', 'tts.voices_unavailable', { error })
+        setVoices([])
+        setSelectedVoice('default')
+      }
     })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once; the atom setter is stable
   }, [])
 
   const isActive = selectedVoice !== 'default'
