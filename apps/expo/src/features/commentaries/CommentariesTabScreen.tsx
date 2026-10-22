@@ -3,6 +3,7 @@ import { commentaryCollectionContext } from '~features/study-assistant/resourceC
 import CommentIcon from '~common/CommentIcon'
 import { pageContentStyle } from '~common/ui/PageContent'
 import { useQuery } from '@tanstack/react-query'
+import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import MenuView from '~features/commentaries/CommentaryMenu'
 import React, { useEffect, useEffectEvent } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -65,6 +66,7 @@ const useComments = (verse: string) => {
     enabled: validVerse && selectedResources.length > 0,
     networkMode: 'always',
     retry: false,
+    ...staticResourceQueryOptions,
   })
 
   return {

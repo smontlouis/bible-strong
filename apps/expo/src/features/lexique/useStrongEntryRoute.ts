@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getSimpleStrongModuleId } from '@bible-strong/resource-domain/strong-lexicon'
 import { getPrimaryStrongLexiconAvailability } from '~features/resources/layeredStrongLexiconAccess'
 import { useQuery } from '@tanstack/react-query'
+import { staticResourceQueryOptions } from '~helpers/queryOptions'
 
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { StrongDetailRouteContext } from './strongDetailRoutes'
@@ -17,6 +18,7 @@ export const useStrongEntryRoute = (context: StrongDetailRouteContext, progressi
     queryFn: () =>
       getPrimaryStrongLexiconAvailability(resources.strongLexicon, languageState.language),
     networkMode: 'always',
+    ...staticResourceQueryOptions,
   })
   const staged = progressive && Boolean(resources.strongLexicon.loadEntryExtras)
   const entryKey = JSON.stringify([languageState.language, identity])
@@ -37,6 +39,7 @@ export const useStrongEntryRoute = (context: StrongDetailRouteContext, progressi
       ),
     enabled: Boolean(identity),
     networkMode: 'always',
+    ...staticResourceQueryOptions,
   })
 
   const initialReady = Boolean(entryQuery.data) && coreAvailability.data?.status === 'available'
@@ -60,6 +63,7 @@ export const useStrongEntryRoute = (context: StrongDetailRouteContext, progressi
     queryFn: () => resources.strongLexicon.loadEntryExtras!(identity!, languageState.language),
     enabled: canLoadExtras && backgroundReady,
     networkMode: 'always',
+    ...staticResourceQueryOptions,
   })
   // Extras never replace lexical text, relations or identity: Essential stays stable.
   const entry =

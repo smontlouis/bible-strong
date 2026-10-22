@@ -10,7 +10,7 @@ import { useQuery } from '@tanstack/react-query'
 import { subscribeToHardwareBackPress } from '~helpers/hardwareBackPress'
 import { TimelineTab, useIsCurrentTab } from '~state/tabs'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import { getEvents } from './events'
+import { timelineEventsQueryOptions } from './timelineEventsQuery'
 import TimelineEventDetailView from './TimelineEventDetailView'
 import TimelineHomeScreen from './TimelineHomeScreen'
 import TimelineScreen from './TimelineScreen'
@@ -26,10 +26,7 @@ const TimelineTabScreen = ({ timelineAtom }: Props) => {
   const language = useTimelineLanguage()
   const [timelineTab, setTimelineTab] = useAtom(timelineAtom)
   const isCurrentTab = useIsCurrentTab()
-  const { data: sections } = useQuery({
-    queryKey: ['timeline'],
-    queryFn: getEvents,
-  })
+  const { data: sections } = useQuery(timelineEventsQueryOptions)
 
   const eventsWithSection = sections?.flatMap((section, sectionIndex) =>
     section.events.map(event => ({ ...event, sectionIndex }))

@@ -153,7 +153,7 @@ export default function StudiesDOMComponent({
     element?.addEventListener('study-message', receive)
     return () => element?.removeEventListener('study-message', receive)
   }, [onEditorMessage])
-  const blockSelectionCleanupRef = useRef<() => void>(() => undefined)
+  const editorCleanupRef = useRef<() => void>(() => undefined)
   const initialContent = decodeDeltaContent(encodedContentToDisplay, contentToDisplay)
 
   function onChangeText(delta: unknown, oldDelta: unknown, source: unknown): void {
@@ -170,10 +170,22 @@ export default function StudiesDOMComponent({
     )
   }
 
-  function addTextChangeEventToEditor(): void {
+  function addTextChangeEventToEditor(): () => void {
     const quill = quillRef.current!
+    const onTextChange = debounce(onChangeText, 500)
 
-    quill.on('text-change', debounce(onChangeText, 500))
+    quill.on('text-change', onTextChange)
+    // The app saves the Study after a longer pause, and at once when the page leaves the
+    // foreground: the last change reaches it without waiting when the editor loses focus or
+    // the page is hidden.
+    quill.on('selection-change', range => {
+      if (!range) onTextChange.flush()
+    })
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') onTextChange.flush()
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
   }
 
   function loadEditor(options: { fontFamily: string; language: string }): void {
@@ -200,13 +212,17 @@ export default function StudiesDOMComponent({
     quill.focus()
     quill.setContents(initialContent, Quill.sources.SILENT)
 
-    addTextChangeEventToEditor()
-    blockSelectionCleanupRef.current = installStudyBlockSelection(quill)
+    const removeTextChangeListeners = addTextChangeEventToEditor()
+    const removeBlockSelection = installStudyBlockSelection(quill)
+    editorCleanupRef.current = () => {
+      removeTextChangeListeners()
+      removeBlockSelection()
+    }
   }
 
   useEffect(() => {
     loadEditor({ fontFamily, language })
-    return () => blockSelectionCleanupRef.current()
+    return () => editorCleanupRef.current()
   }, [])
 
   useEffect(() => {

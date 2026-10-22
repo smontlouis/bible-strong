@@ -5,7 +5,7 @@ import { TimelineSection as TimelineSectionProps, ShallowTimelineSection } from 
 import { useLocalSearchParams } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
-import { getEvents } from './events'
+import { timelineEventsQueryOptions } from './timelineEventsQuery'
 import Box from '~common/ui/Box'
 import TimelineResourceBoundary from './TimelineResourceBoundary'
 const omitEvents = ({ events, ...rest }: TimelineSectionProps): ShallowTimelineSection => rest
@@ -30,10 +30,7 @@ const Timeline = ({
 
   const [current, setCurrent] = React.useState(goTo)
   const [entrance, setEntrance] = React.useState<0 | 1>(1)
-  const { data: events } = useQuery({
-    queryKey: ['timeline'],
-    queryFn: getEvents,
-  })
+  const { data: events } = useQuery(timelineEventsQueryOptions)
   const currentSectionIndex = events?.length
     ? Math.min(Math.max(current, 0), events.length - 1)
     : current

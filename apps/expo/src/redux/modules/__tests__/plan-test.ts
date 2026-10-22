@@ -596,3 +596,37 @@ it('accepts a server-confirmed empty collection', async () => {
   const result = await fetchPlan({ id: 'book', enroll: false })(jest.fn(), jest.fn(), undefined)
   expect(fetchPlan.fulfilled.match(result)).toBe(true)
 })
+
+it('reuses a recent plan catalog for screens, and reads it again on refresh or once it is old', async () => {
+  jest.mocked(getDocs).mockReset()
+  jest.mocked(getDocs).mockResolvedValue({ docs: [{ data: () => ({ id: 'plan-1' }) }] } as never)
+  let state = { plan: reducer(undefined, { type: '@@INIT' }) }
+  const getState = () => state
+  const dispatch = jest.fn((action: { type: string }) => {
+    state = { plan: reducer(state.plan, action) }
+    return action
+  })
+  const run = (options?: { reuseRecent?: boolean }) =>
+    fetchPlans(options)(dispatch as never, getState, undefined)
+  const skipped = (action: Awaited<ReturnType<typeof run>>) =>
+    fetchPlans.rejected.match(action) && action.meta.condition
+  const now = jest.spyOn(Date, 'now')
+  try {
+    now.mockReturnValue(1_000_000)
+    expect(fetchPlans.fulfilled.match(await run({ reuseRecent: true }))).toBe(true)
+    expect(getDocs).toHaveBeenCalledTimes(1)
+
+    // Another screen reuses it, also while a read is still running.
+    expect(skipped(await run({ reuseRecent: true }))).toBe(true)
+    const refresh = run()
+    expect(skipped(await run({ reuseRecent: true }))).toBe(true)
+    await refresh
+    expect(getDocs).toHaveBeenCalledTimes(2)
+
+    now.mockReturnValue(1_000_000 + 6 * 60 * 60 * 1000)
+    expect(fetchPlans.fulfilled.match(await run({ reuseRecent: true }))).toBe(true)
+    expect(getDocs).toHaveBeenCalledTimes(3)
+  } finally {
+    now.mockRestore()
+  }
+})

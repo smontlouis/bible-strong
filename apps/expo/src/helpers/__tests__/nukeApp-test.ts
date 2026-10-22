@@ -24,7 +24,7 @@ jest.mock('../storage', () => ({
   storage: { clearAll: jest.fn() },
 }))
 jest.mock('../../redux/store', () => ({
-  persistor: { purge: jest.fn(async () => {}) },
+  persistor: { flush: jest.fn(async () => {}), pause: jest.fn(), purge: jest.fn(async () => {}) },
 }))
 
 const mockAsyncStorageClear = jest.requireMock('@react-native-async-storage/async-storage')

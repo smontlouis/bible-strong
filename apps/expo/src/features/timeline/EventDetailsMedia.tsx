@@ -11,7 +11,7 @@ import Paragraph from '~common/ui/Paragraph'
 import { useQuery } from '@tanstack/react-query'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import EventDetailVerse from './EventDetailVerse'
-import { getEvents } from './events'
+import { timelineEventsQueryOptions } from './timelineEventsQuery'
 import { getTimelineImageUri } from './timelineImage'
 import { TimelineEvent, TimelineEventDetail } from './types'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
@@ -31,10 +31,7 @@ const Media = ({
   const sliderWidth = size.width
   const imageWidth = Math.max(0, sliderWidth * 0.8)
 
-  const { data: events } = useQuery({
-    queryKey: ['timeline'],
-    queryFn: getEvents,
-  })
+  const { data: events } = useQuery(timelineEventsQueryOptions)
 
   const flattenedEvents = events?.reduce((acc: TimelineEvent[], curr, sectionIndex) => {
     return [...acc, ...curr.events.map(event => ({ ...event, sectionIndex }))]

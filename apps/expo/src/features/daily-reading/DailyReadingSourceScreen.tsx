@@ -140,7 +140,7 @@ const DailyReadingSourceScreen = ({ embedded = false }: { embedded?: boolean }) 
   ]
 
   useEffect(() => {
-    dispatch(fetchPlans())
+    dispatch(fetchPlans({ reuseRecent: true }))
   }, [dispatch])
 
   const sections: { key: string; title?: string; data: SourceItem[] }[] = [

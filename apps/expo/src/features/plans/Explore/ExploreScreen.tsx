@@ -60,7 +60,7 @@ const ExploreScreen = () => {
   const plans = useSelector(selectSortedOnlinePlans)
 
   React.useEffect(() => {
-    dispatch(fetchPlans())
+    dispatch(fetchPlans({ reuseRecent: true }))
   }, [dispatch])
 
   if (status === 'Rejected') {

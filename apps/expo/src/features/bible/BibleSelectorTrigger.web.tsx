@@ -15,6 +15,8 @@ import { getBibleVersionCanonId, versions } from '~helpers/bibleVersions'
 import { getChapterVerseCountFromCoverage } from '~helpers/bibleCoverage'
 import { getReadingBookName } from '~helpers/readingLanguage'
 import { useResourceAccess } from '~features/resources/resourceAccess'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { bookSelectorVersesAtom, bookSelectorSortAtom } from './BookSelectorSheet/atom'
@@ -145,9 +147,11 @@ export function useBookPanelScreens({
   const [book, setBook] = useState(data.selectedBook)
   const [chapter, setChapter] = useState(data.selectedChapter)
   const coverageQuery = useQuery({
-    queryKey: ['selector-panel-coverage', data.selectedVersion],
+    // The same coverage as the other Bible selectors, read once for all of them.
+    queryKey: resourceQueryKeys.bibleCoverage(data.selectedVersion),
     queryFn: () => resources.bibleContent.loadCoverage(data.selectedVersion),
     enabled: !coverage,
+    ...staticResourceQueryOptions,
   })
   const actualCoverage = coverage ?? coverageQuery.data
   const canon = actualCoverage?.canon?.id

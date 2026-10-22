@@ -20,15 +20,24 @@ type EmailVerificationModalProps = {
 const EmailVerificationModal = ({ modalRef }: EmailVerificationModalProps) => {
   const { t } = useTranslation()
   const [isSending, setIsSending] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
 
-  // Poll for email verification every 5 seconds
+  // The account is reloaded every 5 seconds only while this sheet is shown, until the address
+  // is verified (the sheet is only offered for an unverified address).
   useEffect(() => {
+    if (!isOpen) return
+    let verified = false
     const interval = setInterval(() => {
-      FireAuth.checkEmailVerification()
+      if (verified) return
+      void FireAuth.checkEmailVerification().then(isVerified => {
+        if (!isVerified) return
+        verified = true
+        clearInterval(interval)
+      })
     }, 5000)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [isOpen])
 
   const handleResend = async () => {
     setIsSending(true)
@@ -36,7 +45,11 @@ const EmailVerificationModal = ({ modalRef }: EmailVerificationModalProps) => {
   }
 
   return (
-    <Sheet ref={modalRef} header={<SheetHeader title={t('profile.emailNotVerified')} />}>
+    <Sheet
+      ref={modalRef}
+      header={<SheetHeader title={t('profile.emailNotVerified')} />}
+      onOpenChange={setIsOpen}
+    >
       <VStack className="overflow-hidden border-continuous gap-[20px] px-[20px] py-[20px]">
         <Box className="overflow-hidden border-continuous flex-row items-center gap-[12px]">
           <WarningIcon>

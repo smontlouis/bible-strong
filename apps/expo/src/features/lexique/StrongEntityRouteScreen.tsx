@@ -2,6 +2,7 @@ import { useLocalSearchParams } from 'expo-router'
 import { entityContext } from '~features/study-assistant/referenceContext'
 import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import { useQuery } from '@tanstack/react-query'
+import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import { useTranslation } from 'react-i18next'
 
 import { useResourceAccess } from '~features/resources/resourceAccess'
@@ -33,12 +34,14 @@ const StrongEntityRouteScreen = ({ context, entityKey, isFormSheet = false }: Pr
     queryKey: ['strong-lexicon', 'availability', 'entities'],
     queryFn: () => resources.strongLexicon.getModuleAvailability('entities'),
     networkMode: 'always',
+    ...staticResourceQueryOptions,
   })
   const entityQuery = useQuery({
     queryKey: ['strong-lexicon', 'entity', language, entityKey],
     queryFn: () => resources.strongLexicon.loadEntity(entityKey!, language),
     enabled: Boolean(entityKey && availabilityQuery.data?.status === 'available'),
     networkMode: 'always',
+    ...staticResourceQueryOptions,
   })
   useAssistantResourceContext('panel', entityContext(entityQuery.data, language))
   const availability = availabilityQuery.data ?? {

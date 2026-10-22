@@ -1,6 +1,8 @@
 import { onlineManager } from '@tanstack/react-query'
 import type { NetInfoState } from '@react-native-community/netinfo'
 import { configureQueryManagers, queryClient } from '../queryClient'
+import { resourceQueryKeys } from '../resourceQueryKeys'
+import { refetchResourceOnReconnect, retryUnlessRefused } from '../resourceQueryRecovery'
 
 let mockNetInfoListener: ((state: Partial<NetInfoState>) => void) | undefined
 
@@ -45,5 +47,20 @@ describe('configureQueryManagers', () => {
     emit(true, true)
     expect(onlineManager.isOnline()).toBe(true)
     expect(onOnline).not.toHaveBeenCalled()
+  })
+})
+
+describe('resource query defaults', () => {
+  it('keeps resource reads for the session and leaves refused requests to the reader', () => {
+    const defaults = queryClient.defaultQueryOptions({
+      queryKey: resourceQueryKeys.bibleReferences('1-1-1'),
+    })
+    expect(defaults.staleTime).toBe(Infinity)
+    expect(defaults.refetchOnWindowFocus).toBe(refetchResourceOnReconnect)
+    expect(defaults.retry).toBe(retryUnlessRefused)
+    // User data keeps the library's freshness rules.
+    const userDefaults = queryClient.defaultQueryOptions({ queryKey: ['events', 'fr'] })
+    expect(userDefaults.staleTime).toBeUndefined()
+    expect(userDefaults.refetchOnWindowFocus).toBeUndefined()
   })
 })

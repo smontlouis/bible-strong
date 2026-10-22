@@ -38,6 +38,7 @@ import {
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import { createStrongSelectionPreviewCard } from './strongSelectionPreviewCard'
 import {
@@ -124,6 +125,7 @@ const StrongSelectionSheet = ({
     queryKey: ['strong-lexicon', 'availability', getSimpleStrongModuleId(resourceLanguage)],
     queryFn: () => getPrimaryStrongLexiconAvailability(resources.strongLexicon, resourceLanguage),
     networkMode: 'always',
+    ...staticResourceQueryOptions,
   })
   const coreAvailable = availabilityQuery.data?.status === 'available'
   const previewQuery = useQuery({
@@ -138,6 +140,7 @@ const StrongSelectionSheet = ({
     enabled: coreAvailable && identities.length > 0,
     networkMode: 'always',
     placeholderData: keepPreviousData,
+    ...staticResourceQueryOptions,
   })
   const displayedPreviews = previewQuery.data?.previews
   const displayedMorphologies = previewQuery.data?.morphologies ?? morphologies

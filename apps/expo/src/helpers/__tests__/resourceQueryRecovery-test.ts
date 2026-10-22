@@ -1,11 +1,21 @@
 import { onlineManager, QueryClient, QueryObserver } from '@tanstack/react-query'
-import { refetchResourceOnReconnect } from '../resourceQueryRecovery'
+import {
+  isRefusedResourceRequest,
+  refetchResourceOnReconnect,
+  retryUnlessRefused,
+} from '../resourceQueryRecovery'
 import { resourceQueryKeys } from '../resourceQueryKeys'
+import { ResourceAccessError } from '~features/resources/resourceAccessError'
 
 it.each([
   ['unavailable', { status: 'unavailable' }],
   ['failed chapter', { success: false, error: { type: 'RESOURCE_OFFLINE' } }],
   ['unavailable infinite page', { pages: [{ status: 'unavailable' }] }],
+  ['module missing offline', { status: 'missing', moduleId: 'simple-fr' }],
+  [
+    'partly unavailable commentary chapter',
+    { commentsByVerse: {}, unavailableResources: [{ resourceId: 'MHY' }] },
+  ],
   ['thrown error', new Error('offline')],
 ])('recovers a cached %s on reconnection despite infinite freshness', async (_, failure) => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -94,4 +104,29 @@ it('recovers an unavailable read when reopening a screen that missed reconnectio
     unsubscribe()
     client.clear()
   }
+})
+
+describe('automatic retries of resource requests', () => {
+  const refused = (httpStatus: number, retryAfterSeconds?: number) =>
+    new ResourceAccessError('TEMPORARY_UNAVAILABLE', ['retry'], {
+      httpStatus,
+      ...(retryAfterSeconds === undefined ? {} : { retryAfterSeconds }),
+    })
+
+  it('retries a server or network failure once', () => {
+    expect(retryUnlessRefused(0, refused(500))).toBe(true)
+    expect(retryUnlessRefused(0, new ResourceAccessError('NETWORK_OFFLINE'))).toBe(true)
+    expect(retryUnlessRefused(0, new Error('firestore'))).toBe(true)
+    expect(retryUnlessRefused(1, refused(500))).toBe(false)
+  })
+
+  it('leaves refused requests and requests to wait to the reader', () => {
+    expect(isRefusedResourceRequest(refused(404))).toBe(true)
+    expect(isRefusedResourceRequest(refused(403))).toBe(true)
+    expect(isRefusedResourceRequest(refused(429, 60))).toBe(true)
+    expect(isRefusedResourceRequest(refused(503, 30))).toBe(true)
+    expect(retryUnlessRefused(0, refused(429, 60))).toBe(false)
+    expect(retryUnlessRefused(0, refused(503, 30))).toBe(false)
+    expect(retryUnlessRefused(0, refused(400))).toBe(false)
+  })
 })

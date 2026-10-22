@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import type { Verse } from '~common/types'
 import { getPassageMediaForStrong } from '~features/bible/passageMedia'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import verseToReference from '~helpers/verseToReference'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { RootState } from '~redux/modules/reducer'
@@ -165,6 +166,7 @@ const StrongMainScreen = ({
       coreAvailability.data?.status === 'available'
     ),
     networkMode: 'always',
+    ...staticResourceQueryOptions,
   })
   useEffect(() => {
     if (!entry || recordedHistoryReferenceRef.current === entry.stepCode) return

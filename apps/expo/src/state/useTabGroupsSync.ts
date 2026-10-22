@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { AppState } from 'react-native'
 import { getDefaultStore } from 'jotai/vanilla'
 import debounce from 'debounce'
 import * as Sentry from '@sentry/react-native'
@@ -52,7 +53,9 @@ const changesToIntent = (changes: TabGroupChanges): FirestoreSyncIntent => ({
   delete: [...changes].filter(([, group]) => !group).map(([id]) => id),
 })
 
-const SYNC_DEBOUNCE_MS = 1000
+// Each write sends whole groups, and every chapter turn changes one: a group is written once the
+// reader has stayed on a chapter for a while, or as the app leaves the foreground.
+export const SYNC_DEBOUNCE_MS = 20_000
 
 // Store unsubscribe function at module level for cleanup before logout
 let currentTabGroupsUnsubscribe: (() => void) | null = null
@@ -136,6 +139,10 @@ export const useTabGroupsSync = ({
       void queue.flush()
     }
     const debouncedSync = debounce(flush, SYNC_DEBOUNCE_MS)
+    // The app may be ended without notice in the background: send what is waiting first.
+    const appStateSubscription = AppState.addEventListener('change', status => {
+      if (status !== 'active') debouncedSync.flush()
+    })
 
     const applyRemoteGroups = (groups: TabGroup[]) => {
       const retryingIds = new Set<string>()
@@ -297,6 +304,7 @@ export const useTabGroupsSync = ({
       disposed = true
       unsubscribeLocal()
       unsubscribeRemote?.()
+      appStateSubscription.remove()
       if (currentTabGroupsUnsubscribe === cleanup) currentTabGroupsUnsubscribe = null
       debouncedSync.clear()
       const pending = queue.dispose()

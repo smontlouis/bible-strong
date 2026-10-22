@@ -39,8 +39,12 @@ export const nukeApp = async (): Promise<void> => {
     console.log('[Nuke] closeBiblesDb failed:', e)
   }
 
-  // 3. Purge redux-persist first so it doesn't rewrite MMKV on unmount
+  // 3. Purge redux-persist first so it doesn't rewrite MMKV on unmount. Its writes are throttled:
+  // what is still waiting is written and later changes are no longer recorded, so that no write
+  // lands after MMKV is cleared.
   try {
+    await persistor.flush()
+    persistor.pause()
     await persistor.purge()
   } catch (e) {
     console.log('[Nuke] persistor.purge failed:', e)

@@ -27,8 +27,10 @@ const useStudyStatus = (study: Study) => {
   const query = useQuery({
     queryKey: ['published-study-status', study.id],
     queryFn: async () => {
-      const response = await fetch(url)
-      return response.status
+      // Only the status of the public page is needed, not the page itself.
+      const response = await fetch(url, { method: 'HEAD' })
+      if (response.status !== 405 && response.status !== 501) return response.status
+      return (await fetch(url)).status
     },
     enabled: study.published,
     ...remoteQueryOptions,

@@ -4,13 +4,14 @@ import { AppState, Platform } from 'react-native'
 import { connectionStatusFromNetInfo, isOfflineFailureFromNetInfo } from './useConnection'
 import { isOfflineModeForced } from './runtimeConfig'
 import { resourceQueryKeys } from './resourceQueryKeys'
-import { refetchResourceOnReconnect } from './resourceQueryRecovery'
+import { retryUnlessRefused } from './resourceQueryRecovery'
+import { staticResourceQueryOptions } from './queryOptions'
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       networkMode: 'offlineFirst',
-      retry: 1,
+      retry: retryUnlessRefused,
     },
     mutations: {
       networkMode: 'online',
@@ -18,11 +19,9 @@ export const queryClient = new QueryClient({
   },
 })
 
-queryClient.setQueryDefaults(resourceQueryKeys.all(), {
-  refetchOnReconnect: refetchResourceOnReconnect,
-  // An inactive screen may miss the reconnect event while its failure stays cached.
-  refetchOnMount: refetchResourceOnReconnect,
-})
+// An inactive screen may miss the reconnect event while its failure stays cached, hence the
+// recovery on mount and on return to the foreground too.
+queryClient.setQueryDefaults(resourceQueryKeys.all(), staticResourceQueryOptions)
 
 let managersConfigured = false
 

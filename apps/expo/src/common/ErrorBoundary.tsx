@@ -14,6 +14,7 @@ import Container from '~common/ui/Container'
 import Text from '~common/ui/Text'
 import useLogin from '~helpers/useLogin'
 import { appLogger } from '~helpers/agentObservability'
+import { persistor } from '~redux/store'
 type ErrorBoundaryState = {
   hasError: boolean
   error: Error | null
@@ -130,7 +131,8 @@ Date: ${new Date().toISOString()}
   const handleReset = () => {
     logout()
     setTimeout(() => {
-      Updates.reloadAsync()
+      // State writes are throttled: the signed-out state is written before the reload.
+      void persistor.flush().finally(() => Updates.reloadAsync())
     }, 1000)
   }
 

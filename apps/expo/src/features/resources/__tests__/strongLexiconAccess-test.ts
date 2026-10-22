@@ -168,6 +168,65 @@ describe('strongLexiconAccess', () => {
     expect(cards.map(card => card.stepCode)).toEqual(['H0430G', 'H0776G'])
   })
 
+  it('sends equal lists of codes as equal addresses and keeps the requested order', async () => {
+    const fetcher = jest.fn(async (url: string) => {
+      const path = new URL(url).pathname
+      if (path.endsWith('/morphologies')) {
+        const codes = new URL(url).searchParams.get('codes')!.split(',')
+        return new Response(
+          JSON.stringify({
+            resource: { revision: 'core-r1' },
+            morphologies: codes.map(code => ({ code, meaning: `meaning of ${code}` })),
+          }),
+          { status: 200 }
+        )
+      }
+      return new Response(JSON.stringify({ resource: { revision: 'entities-r1' }, entities: [] }), {
+        status: 200,
+      })
+    })
+    const access = createHttpStrongLexiconAccess({
+      baseUrl: 'https://resources.test',
+      fetcher: fetcher as typeof fetch,
+      isOnline: async () => true,
+    })
+
+    const morphologies = await access.loadMorphologies([' HVqp3ms', 'HNcmpa', 'HVqp3ms', ''], 'fr')
+    await access.loadChapterEntities(1, 1, 'fr', ['G2316', 'G0001', 'G2316'])
+
+    expect(morphologies.map(morphology => morphology.code)).toEqual([
+      'HVqp3ms',
+      'HNcmpa',
+      'HVqp3ms',
+    ])
+    expect(new URL(fetcher.mock.calls[0][0]).searchParams.get('codes')).toBe('HNcmpa,HVqp3ms')
+    expect(new URL(fetcher.mock.calls[1][0]).searchParams.get('strongCodes')).toBe('G0001,G2316')
+  })
+
+  it('asks for the same entry cards address whatever the order of the identities', async () => {
+    const fetcher = jest.fn(
+      async (_url: string) => new Response(JSON.stringify({ entries: [] }), { status: 200 })
+    )
+    const access = createHttpStrongLexiconAccess({
+      baseUrl: 'https://resources.test',
+      fetcher: fetcher as typeof fetch,
+      isOnline: async () => true,
+    })
+
+    await access.loadEntryCards(
+      [
+        { kind: 'strong', code: 'H776' },
+        { kind: 'strong', code: 'H0430' },
+        { kind: 'strong', code: 'H0776' },
+      ],
+      'fr'
+    )
+
+    expect(new URL(fetcher.mock.calls[0][0]).searchParams.get('identities')).toBe(
+      'strong:H0430,strong:H0776'
+    )
+  })
+
   it('normalizes unpadded identities for offline cards', async () => {
     const cards = await localStrongLexiconAccess.loadEntryCards(
       [{ kind: 'strong', code: 'H413' }],

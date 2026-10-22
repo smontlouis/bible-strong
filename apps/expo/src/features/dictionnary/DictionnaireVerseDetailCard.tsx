@@ -20,7 +20,7 @@ import {
 } from '~features/resources/dictionaryAccess'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { resourceFailureFromAccessError } from '~features/resources/resourceFailure'
-import { localQueryOptions } from '~helpers/queryOptions'
+import { localQueryOptions, staticResourceQueryOptions } from '~helpers/queryOptions'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import {
@@ -68,6 +68,7 @@ const DictionnaireVerseDetailScreen = ({
     queryKey: ['dictionary-passage-entries', verseKey, resourceLang],
     queryFn: () => resources.dictionary.discoverPassageEntries(verseKey, resourceLang),
     ...localQueryOptions,
+    ...staticResourceQueryOptions,
   })
   const entries = anchorsQuery.data ?? []
   const presentConcepts = groupDictionaryPassageEntries(

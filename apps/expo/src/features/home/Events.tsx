@@ -5,7 +5,7 @@ import { HStack, VStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { radii } from '~common/ui/surfaces'
 import Text from '~common/ui/Text'
-import { collection, firebaseDb, getDocs, query, where } from '~helpers/firebase'
+import { collection, firebaseDb, getDocs, limit, query, where } from '~helpers/firebase'
 import { useQuery } from '@tanstack/react-query'
 import { remoteQueryOptions } from '~helpers/queryOptions'
 import { getLanguage } from '~i18n'
@@ -45,16 +45,22 @@ export const normalizeEventDate = (value: FirestoreTimestamp | undefined): Date 
   return Number.isFinite(normalized.getTime()) ? normalized : null
 }
 
+// The home shows the first published event of the language only. Without an explicit order,
+// Firestore returns the matches by document id: the first one is the same with `limit(1)`.
 const getEvents = async (language: string) => {
   const events = await getDocs(
     query(
       collection(firebaseDb, 'events'),
       where('status', '==', 'published'),
-      where('lang', '==', language)
+      where('lang', '==', language),
+      limit(1)
     )
   )
   return events.docs.map((x: { data: () => unknown }) => x.data() as Event)
 }
+
+// Events are published by hand, rarely: the home reads them again at most once an hour.
+const EVENTS_STALE_TIME_MS = 60 * 60 * 1000
 
 const EventPeriod = ({ event }: { event: Event }) => {
   const locale = getDateLocale(getLanguage())
@@ -100,6 +106,7 @@ export const Events = () => {
   const { data: events } = useQuery({
     queryKey: ['events', language],
     queryFn: () => getEvents(language),
+    staleTime: EVENTS_STALE_TIME_MS,
     ...remoteQueryOptions,
   })
 

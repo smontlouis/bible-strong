@@ -10,7 +10,7 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useQuery } from '@tanstack/react-query'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import { getEvents } from './events'
+import { timelineEventsQueryOptions } from './timelineEventsQuery'
 import TimelineEventDetailView from './TimelineEventDetailView'
 import { TimelineEvent } from './types'
 import { IS_FORM_SHEET } from '~helpers/constants'
@@ -23,10 +23,7 @@ const EventScreen = () => {
   const params = useLocalSearchParams<{ slug?: string; language?: string }>()
   const language =
     params.language === 'fr' || params.language === 'en' ? params.language : preferredLanguage
-  const { data: sections, isPending: metadataPending } = useQuery({
-    queryKey: ['timeline'],
-    queryFn: getEvents,
-  })
+  const { data: sections, isPending: metadataPending } = useQuery(timelineEventsQueryOptions)
 
   const eventsWithSection = sections?.flatMap((section, sectionIndex) =>
     section.events.map(event => ({ ...event, sectionIndex }))

@@ -41,10 +41,32 @@ const docsArr = async (collectionName: string) => {
   return snapshot.docs.map((x: QueryDocumentSnapshot) => x.data())
 }
 
-export const fetchPlans = createAsyncThunk('plan/fetchPlans', async () => {
-  const results = (await docsArr('plans')) as OnlinePlan[]
-  return results
-})
+// The catalog changes rarely and each read loads the whole collection: a screen that shows it
+// reuses a catalog read in the last hours, or one still loading. A refresh or a retry reads it.
+export const PLAN_CATALOG_MAX_AGE_MS = 6 * 60 * 60 * 1000
+let planCatalogReadAt: number | undefined
+
+export const fetchPlans = createAsyncThunk(
+  'plan/fetchPlans',
+  async (_options: { reuseRecent?: boolean } | void) => {
+    const results = (await docsArr('plans')) as OnlinePlan[]
+    planCatalogReadAt = Date.now()
+    return results
+  },
+  {
+    condition: (options, { getState }) => {
+      if (!options?.reuseRecent) return true
+      const { onlineStatus, onlinePlans } = (getState() as RootState).plan
+      if (onlineStatus === 'Pending') return false
+      return !(
+        onlineStatus === 'Resolved' &&
+        onlinePlans.length > 0 &&
+        planCatalogReadAt !== undefined &&
+        Date.now() - planCatalogReadAt < PLAN_CATALOG_MAX_AGE_MS
+      )
+    },
+  }
+)
 
 export const fetchPlan = createAsyncThunk(
   'plan/fetchPlan',

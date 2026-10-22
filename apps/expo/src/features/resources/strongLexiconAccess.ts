@@ -43,6 +43,7 @@ import {
 import { resolveHybridResourceSource } from './hybridResourcePolicy'
 import { ResourceAccessError, resourceAccessErrorFromHttpResponse } from './resourceAccessError'
 import { normalizeBibleSearchText } from '~helpers/bibleSearchInput'
+import { canonicalListParameter } from '~helpers/canonicalListParameter'
 
 export type {
   StrongLexiconChapterEntity,
@@ -1359,9 +1360,10 @@ export const createHttpStrongLexiconAccess = ({
       }))
       const params = new URLSearchParams({
         language,
-        identities: normalizedIdentities
-          .map(identity => `${identity.kind}:${identity.code}`)
-          .join(','),
+        // Cards are matched back to each identity below: the list is sent as a set.
+        identities: canonicalListParameter(
+          normalizedIdentities.map(identity => `${identity.kind}:${identity.code}`)
+        ).join(','),
       })
       const response = await get(
         `/v1/strong-lexicon/entries/batch?${params}`,
@@ -1395,12 +1397,21 @@ export const createHttpStrongLexiconAccess = ({
       }))
     },
     async loadMorphologies(codes, language) {
-      if (!codes.length) return []
+      // The server ignores blank codes and answers each code once, under the code requested.
+      const requestedCodes = codes.map(code => code.trim()).filter(Boolean)
+      if (!requestedCodes.length) return []
       const response = await get(
-        `/v1/strong-lexicon/morphologies?${languageQuery(language)}&codes=${encodeURIComponent(codes.join(','))}`,
+        `/v1/strong-lexicon/morphologies?${languageQuery(language)}&codes=${encodeURIComponent(canonicalListParameter(requestedCodes).join(','))}`,
         StrongLexiconMorphologyResponseDto
       )
-      return [...response.morphologies]
+      // Back in the order and with the repetitions of the request.
+      const morphologiesByCode = new Map(
+        response.morphologies.map(morphology => [morphology.code, morphology])
+      )
+      return requestedCodes.flatMap(code => {
+        const morphology = morphologiesByCode.get(code)
+        return morphology ? [morphology] : []
+      })
     },
     async loadEntity(uniqueName, language) {
       try {
@@ -1418,7 +1429,11 @@ export const createHttpStrongLexiconAccess = ({
       const bookCode = getTipnrBookCode(book)
       if (!bookCode) return []
       const query = new URLSearchParams({ language })
-      if (strongCodes.length) query.set('strongCodes', strongCodes.join(','))
+      // The server reads the codes as a set.
+      const requestedCodes = canonicalListParameter(
+        strongCodes.map(code => code.trim()).filter(Boolean)
+      )
+      if (requestedCodes.length) query.set('strongCodes', requestedCodes.join(','))
       const response = await get(
         `/v1/strong-lexicon/entities/chapters/${bookCode}/${chapter}?${query}`,
         StrongLexiconChapterEntitiesResponseDto

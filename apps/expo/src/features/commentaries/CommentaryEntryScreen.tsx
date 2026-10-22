@@ -1,6 +1,7 @@
 import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import { commentaryContext } from '~features/study-assistant/resourceContext'
 import { useQuery } from '@tanstack/react-query'
+import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -75,6 +76,7 @@ const CommentaryEntryScreen = ({
     enabled: Boolean(parsed && params.sectionId),
     networkMode: 'always',
     retry: false,
+    ...staticResourceQueryOptions,
   })
 
   useAssistantResourceContext(

@@ -121,7 +121,7 @@ const ReadingPlansScreen = ({ filters }: { filters: ReadingPlanFilters }) => {
   const active = plans.filter(plan => isActive(plan.id))
   const discoverable = filterReadingPlans(plans, filters)
   useEffect(() => {
-    dispatch(fetchPlans())
+    dispatch(fetchPlans({ reuseRecent: true }))
   }, [dispatch])
   return (
     <ScrollView

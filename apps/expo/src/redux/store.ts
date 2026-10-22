@@ -10,7 +10,7 @@ import {
 import type { PersistedState } from 'redux-persist/es/types'
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2'
 import devToolsEnhancer from 'redux-devtools-expo-dev-plugin'
-import { Platform } from 'react-native'
+import { AppState, Platform } from 'react-native'
 
 import firestoreMiddleware from './firestoreMiddleware'
 import { logger, crashReporter } from './logMiddleware'
@@ -26,6 +26,10 @@ import {
 } from '~features/commentaries/commentarySelection'
 
 type RootReducerState = ReturnType<typeof reducer>
+// The whole `user` slice (highlights, notes, Studies…) is serialized at each write: changes are
+// written at most once a second, and at once when the app leaves the foreground (see below).
+export const PERSIST_THROTTLE_MS = 1000
+
 type HotModule = NodeJS.Module & {
   hot?: {
     accept: (callback: () => void) => void
@@ -39,6 +43,7 @@ function configureStore() {
     storage: mmkvStorage,
     stateReconciler: autoMergeLevel2,
     version: 38,
+    throttle: PERSIST_THROTTLE_MS,
     // debug: true,
     blacklist: ['plan'],
     migrate: createMigrate(migrations as unknown as Parameters<typeof createMigrate>[0], {
@@ -110,6 +115,11 @@ function configureStore() {
     if (persistenceStarted) return
     persistenceStarted = true
     persistor.persist()
+    // The app may be ended without notice once in the background: what is waiting is written now,
+    // after the other listeners of the same change (such as a Study saving its last edit).
+    AppState.addEventListener('change', status => {
+      if (status !== 'active') void Promise.resolve().then(() => persistor.flush())
+    })
   }
   // persistor.purge() // Purge async storage
   // storage.clearAll()

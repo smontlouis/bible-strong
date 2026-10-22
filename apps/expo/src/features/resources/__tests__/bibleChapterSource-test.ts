@@ -583,3 +583,100 @@ describe('HTTP Bible chapter adapter', () => {
     )
   })
 })
+
+describe('HTTP Bible chapters batch', () => {
+  const chapterDto = (versionId: string, text: string) => ({
+    resource: { kind: 'bible-text', versionId, revision: `${versionId}-r1` },
+    book: 1,
+    chapter: 1,
+    verses: [
+      { number: 1, text, presentation: { startTags: [], layout: [], notes: [], headings: [] } },
+    ],
+  })
+  const json = (body: unknown, status = 200, headers: Record<string, string> = {}) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { 'content-type': 'application/json', ...headers },
+    })
+  const http = (fetcher: jest.Mock) =>
+    createHttpBibleChapterAdapter({
+      baseUrl: 'http://localhost:8787',
+      fetcher,
+      isOnline: async () => true,
+    })
+
+  it('asks for the same address whatever the column order and keeps the columns in order', async () => {
+    const fetcher = jest
+      .fn()
+      .mockResolvedValue(
+        json({ chapters: [chapterDto('DBY', 'Darby'), chapterDto('LSG', 'Segond')] })
+      )
+
+    const results = await http(fetcher).loadChapters!(['LSG', 'DBY', 'LSG'], 1, 1)
+
+    expect(fetcher).toHaveBeenCalledTimes(1)
+    expect(fetcher.mock.calls[0][0]).toBe(
+      'http://localhost:8787/v1/bibles/chapters?versions=DBY%2CLSG&book=1&chapter=1'
+    )
+    expect(
+      results.map(result => (result.status === 'available' ? result.verses[0].Texte : null))
+    ).toEqual(['Segond', 'Darby', 'Segond'])
+  })
+
+  it.each([
+    ['an overloaded server', json({ code: 'RESOURCE_UNAVAILABLE' }, 503, { 'retry-after': '30' })],
+    ['a rate limit', json({ code: 'RESOURCE_RATE_LIMITED' }, 429, { 'retry-after': '60' })],
+    ['a server error', json({}, 500)],
+  ])('gives %s to every column without asking for each version', async (_, response) => {
+    const fetcher = jest.fn().mockResolvedValue(response)
+
+    const results = await http(fetcher).loadChapters!(['LSG', 'DBY'], 1, 1)
+
+    expect(fetcher).toHaveBeenCalledTimes(1)
+    expect(results).toHaveLength(2)
+    expect(results.every(result => result.status === 'unavailable')).toBe(true)
+    expect(results[0]).toBe(results[1])
+  })
+
+  it('does not ask for each version when the network fails', async () => {
+    const fetcher = jest.fn().mockRejectedValue(new TypeError('Network request failed'))
+
+    await expect(http(fetcher).loadChapters!(['LSG', 'DBY'], 1, 1)).resolves.toEqual([
+      { status: 'unavailable', reason: 'temporary-unavailable' },
+      { status: 'unavailable', reason: 'temporary-unavailable' },
+    ])
+    expect(fetcher).toHaveBeenCalledTimes(1)
+  })
+
+  it('reads each version alone when the batch is refused for one version', async () => {
+    const fetcher = jest
+      .fn()
+      .mockResolvedValueOnce(json({ code: 'BIBLE_UNSUPPORTED' }, 404))
+      .mockResolvedValueOnce(json(chapterDto('LSG', 'Segond')))
+      .mockResolvedValueOnce(json({ code: 'BIBLE_UNSUPPORTED' }, 404))
+
+    const results = await http(fetcher).loadChapters!(['LSG', 'XYZ'], 1, 1)
+
+    expect(fetcher).toHaveBeenCalledTimes(3)
+    expect(results[0]).toMatchObject({ status: 'available' })
+    expect(results[1]).toMatchObject({ status: 'unavailable', reason: 'resource-unsupported' })
+  })
+
+  it('asks for verse texts in reading order', async () => {
+    const fetcher = jest.fn().mockResolvedValue(
+      json({
+        resource: { kind: 'bible-text', versionId: 'LSG', revision: 'lsg-r1' },
+        verses: [
+          { book: 1, chapter: 2, number: 1, text: 'Two' },
+          { book: 1, chapter: 10, number: 1, text: 'Ten' },
+        ],
+      })
+    )
+
+    await http(fetcher).loadVerseTexts!('LSG', ['1-10-1', '1-2-1', '1-10-1'])
+
+    expect(fetcher.mock.calls[0][0]).toBe(
+      'http://localhost:8787/v1/bibles/LSG/verses?references=1-2-1,1-10-1'
+    )
+  })
+})
