@@ -107,7 +107,7 @@ const WorkspaceSidebar = ({
     <SidebarDragProvider
       onExpandGroup={id => setCollapsedGroups(current => current.filter(groupId => groupId !== id))}
     >
-      {(previewGroups, foldedGroupId, scrollProps) => (
+      {(previewGroups, foldGroups, scrollProps) => (
         <Box
           className={`flex-1 min-h-0 border-continuous overflow-hidden ${sidebarFrameClassName}`}
           style={{
@@ -149,8 +149,7 @@ const WorkspaceSidebar = ({
               ...(previewGroups ?? groups).filter(group => !group.isDefault),
             ].map(group => {
               const collapsed =
-                !group.isDefault &&
-                (collapsedGroups.includes(group.id) || foldedGroupId === group.id)
+                !group.isDefault && (collapsedGroups.includes(group.id) || foldGroups)
               const groupColor = group.color || '#64748b'
               const groupBackground = resolveThemeColor(stylingTheme, groupColor)!
               const groupTextColor =

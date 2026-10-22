@@ -10,9 +10,12 @@ import {
 } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, {
+  Easing,
   LinearTransition,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
+  withTiming,
   type SharedValue,
 } from 'react-native-reanimated'
 import { runOnJS } from 'react-native-worklets'
@@ -43,7 +46,8 @@ export type SidebarScrollProps = {
 export type SidebarDragProviderProps = {
   children: (
     groups?: TabGroup[],
-    foldedGroupId?: string,
+    /** True while a group is dragged: every group folds to its header. */
+    foldGroups?: boolean,
     scrollProps?: SidebarScrollProps
   ) => ReactNode
   onExpandGroup: (id: string) => void
@@ -71,6 +75,8 @@ type DragApi = {
   session: Session | null
   /** The preview's top in the sidebar: the finger's height plus where the row was grabbed. */
   previewTop: SharedValue<number>
+  /** 0 to 1: the preview fades and grows in on pickup, and back out on drop. */
+  appear: SharedValue<number>
   register: (key: string, row: Row, view: View | null) => () => void
 }
 const DragContext = createContext<DragApi | null>(null)
@@ -115,17 +121,24 @@ function PreviewTab({ tab }: { tab: TabItem }) {
 }
 function DragPreview({ session, groups }: { session: Session; groups: TabGroup[] }) {
   const theme = useTheme()
-  const { previewTop } = useContext(DragContext)!
+  const { previewTop, appear } = useContext(DragContext)!
   const { drag } = session
+  const style = useAnimatedStyle(() => ({
+    opacity: appear.get(),
+    transform: [{ translateY: previewTop.get() }, { scale: 0.94 + 0.06 * appear.get() }],
+  }))
+  // Looked up across all groups: after a drop into another group the tab has left its own.
+  const tab =
+    drag.kind === 'tab'
+      ? groups.flatMap(item => item.tabs).find(item => item.id === drag.tabId)
+      : undefined
   const group = groups.find(item => item.id === drag.groupId)
-  const style = useAnimatedStyle(() => ({ transform: [{ translateY: previewTop.get() }] }))
-  if (!group) return null
+  if (!group || (drag.kind === 'tab' && !tab)) return null
   const groupColor = resolveThemeColor(theme, group.color || '#64748b')!
   const groupTextColor =
     Color(groupColor).contrast(Color('#202124')) >= Color(groupColor).contrast(Color('#ffffff'))
       ? '#202124'
       : '#ffffff'
-  const tab = drag.kind === 'tab' ? group.tabs.find(item => item.id === drag.tabId) : undefined
   return (
     <Animated.View
       pointerEvents="none"
@@ -165,6 +178,10 @@ export function SidebarDragProvider({ children, onExpandGroup }: SidebarDragProv
   const store = useStore()
   const groups = useAtomValue(tabGroupsAtom)
   const previewTop = useSharedValue(0)
+  const appear = useSharedValue(0)
+  const reducedMotion = useReducedMotion()
+  // The preview outlives the session by its fade out.
+  const [preview, setPreview] = useState<Session | null>(null)
   const grabOffset = useSharedValue(0)
   const [session, setSession] = useState<Session | null>(null)
   const [draft, setDraft] = useState<Record<string, string[]> | null>(null)
@@ -313,6 +330,10 @@ export function SidebarDragProvider({ children, onExpandGroup }: SidebarDragProv
       width: rect.width,
     }
     setSession(sessionRef.current)
+    setPreview(sessionRef.current)
+    appear.set(
+      withTiming(1, { duration: reducedMotion ? 0 : 160, easing: Easing.out(Easing.cubic) })
+    )
     lastY.current = y
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
   }
@@ -328,6 +349,11 @@ export function SidebarDragProvider({ children, onExpandGroup }: SidebarDragProv
     draftRef.current = null
     orderRef.current = null
     setSession(null)
+    appear.set(
+      withTiming(0, { duration: reducedMotion ? 0 : 140 }, finished => {
+        if (finished) runOnJS(setPreview)(null)
+      })
+    )
     setDraft(null)
     setGroupOrder(null)
   }
@@ -407,15 +433,16 @@ export function SidebarDragProvider({ children, onExpandGroup }: SidebarDragProv
     })
 
   return (
-    <DragContext.Provider value={{ session, previewTop, register }}>
+    <DragContext.Provider value={{ session, previewTop, appear, register }}>
       <GestureDetector gesture={gesture}>
         <View ref={rootRef} collapsable={false} style={{ flex: 1 }}>
           {children(
             projectedGroups,
-            session?.drag.kind === 'group' ? session.drag.groupId : undefined,
+            // Moving a group folds them all, so the groups trade places as short headers.
+            session?.drag.kind === 'group',
             scrollProps
           )}
-          {session && <DragPreview session={session} groups={groups} />}
+          {preview && <DragPreview session={preview} groups={groups} />}
         </View>
       </GestureDetector>
     </DragContext.Provider>
