@@ -57,12 +57,23 @@ service cloud.firestore {
       allow read: if true;
     }
     match /studies/{studyId} {
-      allow read: if signedIn();
-      allow create, update: if request.resource.data.user.id == request.auth.uid;
-      allow delete: if resource.data.user.id == request.auth.uid;
+      function ownsStudy(study) {
+        return signedIn() && study.user.id == request.auth.uid;
+      }
+      // A published study is a public page. Only its author lists studies (the app queries
+      // `user.id == uid`), so nobody can enumerate other accounts' studies.
+      allow get: if resource.data.published == true || ownsStudy(resource.data);
+      allow list: if ownsStudy(resource.data);
+      allow create: if ownsStudy(request.resource.data);
+      allow update: if ownsStudy(resource.data) && ownsStudy(request.resource.data);
+      allow delete: if ownsStudy(resource.data);
     }
     match /users/{userId} {
-      allow read, write: if owns(userId);
+      allow read, delete: if owns(userId);
+      // `subscription` belongs to the server: clients never set or change it.
+      allow create: if owns(userId) && request.resource.data.get('subscription', null) == null;
+      allow update: if owns(userId)
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['subscription']);
     }
     match /users/{userId}/{collectionName}/{document=**} {
       allow read, write: if owns(userId) && collectionName != 'assistantConversations';
@@ -76,11 +87,9 @@ service cloud.firestore {
       allow create, update: if owns(userId) && validTurn();
     }
     match /users-status/{userId} {
-      allow read: if signedIn();
-      allow write: if owns(userId);
+      allow read, write: if owns(userId);
     }
     match /commentaries-FR/{commentaryId} {
-      allow write: if true;
       allow read: if true;
     }
     match /changelog/{changelog} {
@@ -91,8 +100,9 @@ service cloud.firestore {
     }
     match /plans/{document=**} {
       allow read: if true;
-      allow update: if (request.resource.data.diff(resource.data).affectedKeys()
-        .hasOnly(['downloads']));
+      // The app counts a download with increment(1), signed in or not: guests add plans too.
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['downloads'])
+        && request.resource.data.downloads == resource.data.get('downloads', 0) + 1;
     }
     match /events/{document=**} {
       allow read: if signedIn();
