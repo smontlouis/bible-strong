@@ -64,6 +64,25 @@ const isUnhandled = (event: ErrorEvent) =>
   event.level === 'fatal' ||
   (event.exception?.values ?? []).some(exception => exception.mechanism?.handled === false)
 
+// Every rejected Expo native call has the same stack (the CodedError constructor), so Sentry
+// puts them all in one issue. One issue per native function and cause instead; numbers in the
+// cause (error codes, ids, addresses) do not split it further.
+const nativeCallPattern =
+  /^Call to function '([\w.]+)' has been rejected\.(?:\s*→ Caused by: ([^\n]*))?/
+
+const withNativeCallFingerprint = (event: ErrorEvent): ErrorEvent => {
+  const exceptions = event.exception?.values ?? []
+  const match = exceptions[exceptions.length - 1]?.value?.match(nativeCallPattern)
+  if (!match) return event
+  event.fingerprint = [
+    'expo-native-call',
+    event.tags?.['diagnostic.event']?.toString() ?? '',
+    match[1],
+    (match[2] ?? '').replace(/\d+/g, '<n>').slice(0, 160),
+  ]
+  return event
+}
+
 const failureKey = (event: ErrorEvent) => {
   const exceptions = event.exception?.values ?? []
   // Sentry lists the thrown error last, after the errors it wraps.
@@ -92,7 +111,7 @@ export const createSentryEventFilter = ({
   const reportedFailures = new Set<string>()
 
   return (event, hint) => {
-    if (isUnhandled(event)) return event
+    if (isUnhandled(event)) return withNativeCallFingerprint(event)
 
     const key = failureKey(event)
     if (reportedFailures.has(key)) return null
@@ -107,7 +126,7 @@ export const createSentryEventFilter = ({
       if (random() >= expectedConditionSampleRate) return null
       event.tags = { ...event.tags, 'diagnostic.sample_rate': expectedConditionSampleRate }
     }
-    return event
+    return withNativeCallFingerprint(event)
   }
 }
 

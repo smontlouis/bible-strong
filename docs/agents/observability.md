@@ -65,6 +65,7 @@ reopening content already held in the UI query cache may not trigger another rea
   - expected conditions (offline, temporary unavailability, request and download timeouts, a full disk, a first account sync slower than 15 seconds, App Check failures) are sent for 5% of launches, tagged `diagnostic.sample_rate` — multiply their counts by 20. This applies to the `startup` area too, migrations included;
   - crashes are never sampled away, nor is any other startup failure. Responses of the Resource API keep their own `resource_api.protected_request_failed` report.
 - Native download errors are classified before they are reported (`src/helpers/resourceDeviceCondition.ts`): Android's `FileSystemLegacyModule` and iOS's `ERR_FILESYSTEM_CANNOT_DOWNLOAD` become `RESOURCE_OFFLINE`, `RESOURCE_DOWNLOAD_TIMEOUT` or `RESOURCE_STORAGE_FULL`, with the native message kept after the code.
+- A rejected Expo native call ("Call to function 'X' has been rejected") gets its own fingerprint: one Sentry issue per function, cause and `diagnostic.event`. Without it, every such rejection shares the CodedError stack and lands in one issue (BIBLE-STRONG-HXR mixed seven problems).
 - Default PII collection is disabled. The authenticated Sentry user is limited to the Firebase user ID and email; diagnostic contexts must not include profile data or user-generated content.
 - The root UI is wrapped with `Sentry.wrap`.
 - `src/common/ErrorBoundary.tsx` captures render crashes and shows a fallback.

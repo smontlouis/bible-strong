@@ -134,4 +134,36 @@ describe('Sentry event filter', () => {
   ])('keeps bugs and responses of our own API', event => {
     expect(createSentryEventFilter({ random: droppedSample })(event, {})).not.toBeNull()
   })
+
+  it('gives each rejected native call its own issue, whatever the numbers in its cause', () => {
+    const filter = createSentryEventFilter()
+    const rejection = (value: string, handled = true) =>
+      errorEvent({ area: 'unknown', event: '', value, handled })
+
+    expect(
+      filter(
+        rejection(
+          "Call to function 'NativeStatement.finalizeAsync' has been rejected.\n→ Caused by: Error code 11: database disk image is malformed",
+          false
+        ),
+        {}
+      )?.fingerprint
+    ).toEqual([
+      'expo-native-call',
+      '',
+      'NativeStatement.finalizeAsync',
+      'Error code <n>: database disk image is malformed',
+    ])
+    expect(
+      filter(
+        rejection(
+          "Call to function 'ExpoSpeech.getVoices' has been rejected.\n→ Caused by: Unable to get voices."
+        ),
+        {}
+      )?.fingerprint
+    ).toEqual(['expo-native-call', '', 'ExpoSpeech.getVoices', 'Unable to get voices.'])
+    expect(filter(errorEvent({ value: 'ARCHIVE_EXTRACTION_FAILED' }), {})?.fingerprint).toBe(
+      undefined
+    )
+  })
 })
