@@ -37,6 +37,27 @@ export const collectAnnotationTextNodes = (
   }
 }
 
+/**
+ * The offset in the verse text of a caret (a DOM boundary point) inside the verse element, counted
+ * as `collectAnnotationTextNodes` counts it, so a click and a highlight agree on its word. A caret
+ * in text the verse does not own (an inline item, a Strong reference) or between elements stands
+ * after the verse text that comes before it.
+ */
+export const getAnnotationCharOffset = (
+  verseElement: Element,
+  container: Node,
+  offset: number
+): number => {
+  const { textNodes } = collectAnnotationTextNodes(verseElement)
+  const owner = textNodes.find(item => item.node === container)
+  if (owner) return owner.startOffset + offset
+
+  const caret = document.createRange()
+  caret.setStart(container, offset)
+  const before = textNodes.filter(item => caret.comparePoint(item.node, item.node.length) <= 0)
+  return before[before.length - 1]?.endOffset ?? 0
+}
+
 export const getAnnotationInsertionPoint = (
   verseElement: Element,
   endWordIndex: number

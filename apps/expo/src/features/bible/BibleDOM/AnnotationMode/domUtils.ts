@@ -1,5 +1,7 @@
 'use dom'
 
+import { getAnnotationCharOffset } from './annotationDomText'
+
 export interface CaretInfo {
   charOffset: number
   targetElement: Element | null
@@ -54,7 +56,7 @@ export function getCaretInfoFromPoint(clientX: number, clientY: number): CaretIn
       // Only trust result if it's near where we touched (within 50px)
       if (yDistance < 50) {
         return {
-          charOffset: toGlobalCharOffset(range.startContainer as Text, range.startOffset),
+          charOffset: toGlobalCharOffset(range.startContainer, range.startOffset),
           targetElement: range.startContainer.parentElement,
         }
       }
@@ -110,7 +112,7 @@ function findWordInElementByPosition(
 }
 
 /**
- * Gets all text nodes within an element.
+ * Gets the text nodes of the verse text within an element, without the inline items placed in it.
  */
 function getTextNodesIn(element: Element): Text[] {
   const textNodes: Text[] = []
@@ -118,6 +120,7 @@ function getTextNodesIn(element: Element): Text[] {
 
   let node: Text | null
   while ((node = walker.nextNode() as Text | null)) {
+    if (isIgnoredVerseTouchTarget(node.parentElement)) continue
     // Skip empty or whitespace-only text nodes
     if (node.textContent && node.textContent.trim().length > 0) {
       textNodes.push(node)
@@ -307,32 +310,21 @@ function findClosestTextNode(
 }
 
 /**
- * Converts a text-node-local character offset to a global offset
- * relative to the verse text element (the [data-verse-text] ancestor).
+ * Converts a caret (a node and an offset in it) to a global offset relative to the verse text
+ * element (the [data-verse-text] ancestor).
  *
- * This is needed because inline elements (like red words spans or Strong's refs)
- * split the verse text into multiple DOM text nodes, but the word tokenizer
- * expects offsets relative to the full verse text string.
- *
- * When there is only a single text node (no inline spans), this is a no-op.
+ * Inline elements (red words, Strong's references, tag and note items) split the verse text into
+ * several DOM text nodes, but the word tokenizer expects offsets in the verse text string. The
+ * offset is counted as the annotation highlights count it: the text of inline items and Strong's
+ * references is not part of the verse, so a click after them lands on the word under the pointer.
  */
-function toGlobalCharOffset(textNode: Text, localOffset: number): number {
-  const verseTextEl = textNode.parentElement?.closest('[data-verse-text]')
+function toGlobalCharOffset(container: Node, localOffset: number): number {
+  const element = container instanceof Element ? container : container.parentElement
+  const verseTextEl = element?.closest('[data-verse-text]')
 
   if (!verseTextEl) return localOffset
 
-  const walker = document.createTreeWalker(verseTextEl, NodeFilter.SHOW_TEXT)
-  let offset = 0
-  let node: Text | null
-
-  while ((node = walker.nextNode() as Text | null)) {
-    if (node === textNode) {
-      return offset + localOffset
-    }
-    offset += node.textContent?.length || 0
-  }
-
-  return localOffset
+  return getAnnotationCharOffset(verseTextEl, container, localOffset)
 }
 
 /**
