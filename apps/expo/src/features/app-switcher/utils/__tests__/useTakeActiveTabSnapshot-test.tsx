@@ -112,9 +112,11 @@ it('captures a file at half size and stores its URI on the tab', async () => {
     width: 195,
     height: 422,
   })
-  const uri = `${directory}b-1000.jpg`
-  expect(store.get(mockTabsAtom).map(item => item.previewUri)).toEqual([undefined, uri])
-  expect([...mockFiles]).toEqual([uri])
+  expect(store.get(mockTabsAtom).map(item => item.previewUri)).toEqual([
+    undefined,
+    `${directory}b.jpg?v=1000`,
+  ])
+  expect([...mockFiles]).toEqual([`${directory}b.jpg`])
 })
 
 it('sizes the capture in pixels on Android', async () => {
@@ -129,27 +131,35 @@ it('sizes the capture in pixels on Android', async () => {
   )
 })
 
-it('deletes the replaced preview file right away', async () => {
-  const previous = `${directory}a-500.jpg`
-  mockFiles.add(previous)
-  const { store, snapshot } = mount([tab('a', previous)])
+it('overwrites the file of its tab and changes the version of its address', async () => {
+  mockFiles.add(`${directory}a.jpg`)
+  const { store, snapshot } = mount([tab('a', `${directory}a.jpg?v=500`)])
 
   await act(() => snapshot.captureSnapshot(0, 'a'))
 
-  expect(store.get(mockTabsAtom)[0].previewUri).toBe(`${directory}a-1000.jpg`)
-  expect(FileSystem.deleteAsync).toHaveBeenCalledWith(previous, { idempotent: true })
-  expect(mockFiles.has(previous)).toBe(false)
+  expect(store.get(mockTabsAtom)[0].previewUri).toBe(`${directory}a.jpg?v=1000`)
+  expect([...mockFiles]).toEqual([`${directory}a.jpg`])
 })
 
-it('keeps the replaced file while another tab still shows it', async () => {
-  const shared = `${directory}a-500.jpg`
-  mockFiles.add(shared)
-  const { store, snapshot } = mount([tab('a', shared)])
-  store.set(mockOtherGroupTabsAtom, [tab('copy', shared)])
+it("keeps another tab's file a copied tab showed while that tab still shows it", async () => {
+  const original = `${directory}a.jpg?v=500`
+  mockFiles.add(`${directory}a.jpg`)
+  const { store, snapshot } = mount([tab('copy', original)])
+  store.set(mockOtherGroupTabsAtom, [tab('a', original)])
 
-  await act(() => snapshot.captureSnapshot(0, 'a'))
+  await act(() => snapshot.captureSnapshot(0, 'copy'))
 
-  expect(mockFiles.has(shared)).toBe(true)
+  expect(store.get(mockTabsAtom)[0].previewUri).toBe(`${directory}copy.jpg?v=1000`)
+  expect([...mockFiles].sort()).toEqual([`${directory}a.jpg`, `${directory}copy.jpg`])
+})
+
+it("deletes another tab's file a copied tab showed once no tab shows it", async () => {
+  mockFiles.add(`${directory}a.jpg`)
+  const { snapshot } = mount([tab('copy', `${directory}a.jpg?v=500`)])
+
+  await act(() => snapshot.captureSnapshot(0, 'copy'))
+
+  expect([...mockFiles]).toEqual([`${directory}copy.jpg`])
 })
 
 it('drops the capture when its tab is gone', async () => {

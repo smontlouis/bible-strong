@@ -7,6 +7,7 @@ import {
   saveTabPreviewFile,
   settleTabPreviewFile,
   sweepTabPreviewFiles,
+  tabPreviewFilePath,
 } from '../tabPreviewFiles'
 
 const mockFiles = new Set<string>()
@@ -62,15 +63,26 @@ it('keeps previews in a directory of the document directory', () => {
   expect(TAB_PREVIEWS_DIRECTORY).toBe(directory)
 })
 
-it('moves a capture out of the temporary directory under a name of its tab', async () => {
+it('moves a capture onto the file of its tab, its address carrying the capture version', async () => {
   // iOS hands back a plain path.
   mockFiles.add('file:///tmp/ReactNative/capture.jpg')
 
   const uri = await saveTabPreviewFile('bible-1', '/tmp/ReactNative/capture.jpg')
 
-  expect(uri).toBe(`${directory}bible-1-1000.jpg`)
+  expect(uri).toBe(`${directory}bible-1.jpg?v=1000`)
   expect(FileSystem.makeDirectoryAsync).toHaveBeenCalledWith(directory, { intermediates: true })
-  expect([...mockFiles]).toEqual([uri])
+  expect([...mockFiles]).toEqual([`${directory}bible-1.jpg`])
+})
+
+it('overwrites the file of its tab at each capture, under a new version', async () => {
+  mockFiles.add(`${directory}a.jpg`)
+  mockFiles.add('file:///tmp/capture.jpg')
+  jest.mocked(Date.now).mockReturnValue(2000)
+
+  const uri = await saveTabPreviewFile('a', 'file:///tmp/capture.jpg')
+
+  expect(uri).toBe(`${directory}a.jpg?v=2000`)
+  expect([...mockFiles]).toEqual([`${directory}a.jpg`])
 })
 
 it('copies the capture when it cannot be renamed across volumes', async () => {
@@ -79,8 +91,8 @@ it('copies the capture when it cannot be renamed across volumes', async () => {
 
   const uri = await saveTabPreviewFile('tab/1', 'file:///external/cache/capture.jpg')
 
-  expect(uri).toBe(`${directory}tab_1-1000.jpg`)
-  expect([...mockFiles]).toEqual([uri])
+  expect(uri).toBe(`${directory}tab_1.jpg?v=1000`)
+  expect([...mockFiles]).toEqual([`${directory}tab_1.jpg`])
 })
 
 it('deletes the capture when it cannot be kept', async () => {
@@ -93,16 +105,15 @@ it('deletes the capture when it cannot be kept', async () => {
 })
 
 it('sweeps the files no tab refers to, in every group', async () => {
-  const kept = `${directory}a-1.jpg`
-  const keptInOtherGroup = `${directory}b-1.jpg`
-  const replaced = `${directory}a-0.jpg`
-  const closed = `${directory}c-1.jpg`
-  for (const uri of [kept, keptInOtherGroup, replaced, closed]) mockFiles.add(uri)
+  const kept = `${directory}a.jpg`
+  const keptInOtherGroup = `${directory}b.jpg`
+  const closed = `${directory}c.jpg`
+  for (const uri of [kept, keptInOtherGroup, closed]) mockFiles.add(uri)
   mockFiles.add('file:///documents/other.json')
 
   await sweepTabPreviewFiles(() => [
-    group([tab('a', kept), tab('new')]),
-    group([tab('b', keptInOtherGroup)], 'other'),
+    group([tab('a', `${kept}?v=5`), tab('new')]),
+    group([tab('b', `${keptInOtherGroup}?v=7`)], 'other'),
   ])
 
   expect([...mockFiles].sort()).toEqual(
@@ -113,28 +124,29 @@ it('sweeps the files no tab refers to, in every group', async () => {
 it('leaves a capture alone until it is set on its tab', async () => {
   mockFiles.add('file:///tmp/capture.jpg')
   const uri = await saveTabPreviewFile('a', 'file:///tmp/capture.jpg')
+  const file = tabPreviewFilePath(uri)
 
   await sweepTabPreviewFiles(() => [group([tab('a')])])
-  expect(mockFiles.has(uri)).toBe(true)
+  expect(mockFiles.has(file)).toBe(true)
 
   settleTabPreviewFile(uri)
   await sweepTabPreviewFiles(() => [group([tab('a')])])
-  expect(mockFiles.has(uri)).toBe(false)
+  expect(mockFiles.has(file)).toBe(false)
 })
 
 it('reads the groups after listing the directory', async () => {
-  const uri = `${directory}a-1.jpg`
-  mockFiles.add(uri)
+  const file = `${directory}a.jpg`
+  mockFiles.add(file)
   let groups = [group([tab('a')])]
   jest.mocked(FileSystem.readDirectoryAsync).mockImplementationOnce(async () => {
     // A capture is set on its tab while the directory is being read.
-    groups = [group([tab('a', uri)])]
-    return ['a-1.jpg']
+    groups = [group([tab('a', `${file}?v=1`)])]
+    return ['a.jpg']
   })
 
   await sweepTabPreviewFiles(() => groups)
 
-  expect(mockFiles.has(uri)).toBe(true)
+  expect(mockFiles.has(file)).toBe(true)
 })
 
 it('does nothing before the first preview is saved', async () => {
@@ -148,16 +160,19 @@ it('deletes only files of the previews directory', async () => {
   await deleteTabPreviewFile('data:image/jpeg;base64,AAAA')
   expect(FileSystem.deleteAsync).not.toHaveBeenCalled()
 
-  mockFiles.add(`${directory}a-1.jpg`)
-  await deleteTabPreviewFile(`${directory}a-1.jpg`)
+  mockFiles.add(`${directory}a.jpg`)
+  await deleteTabPreviewFile(`${directory}a.jpg?v=1`)
   expect(mockFiles.size).toBe(0)
 })
 
 it('finds previews again after iOS moved the app container', () => {
-  const current = `${directory}b-1.jpg`
+  const current = `${directory}b.jpg?v=1`
   const groups = [
     group([
-      tab('a', 'file:///var/mobile/Containers/Data/Application/OLD/Documents/tab-previews/a-1.jpg'),
+      tab(
+        'a',
+        'file:///var/mobile/Containers/Data/Application/OLD/Documents/tab-previews/a.jpg?v=1'
+      ),
       tab('b', current),
       tab('c'),
     ]),
@@ -167,7 +182,7 @@ it('finds previews again after iOS moved the app container', () => {
   const rebased = rebaseTabPreviewUris(groups)
 
   expect(rebased?.[0].tabs.map(item => item.previewUri)).toEqual([
-    `${directory}a-1.jpg`,
+    `${directory}a.jpg?v=1`,
     current,
     undefined,
   ])

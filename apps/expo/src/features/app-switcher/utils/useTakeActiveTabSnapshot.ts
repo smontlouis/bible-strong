@@ -10,6 +10,7 @@ import {
   isTabPreviewReferenced,
   saveTabPreviewFile,
   settleTabPreviewFile,
+  tabPreviewFilePath,
 } from './tabPreviewFiles'
 
 /**
@@ -90,10 +91,11 @@ const useTakeActiveTabSnapshot = () => {
     )
     settleTabPreviewFile(uri)
 
-    // The replaced picture goes at once, unless another tab still shows the same file.
+    // The capture overwrote the file of this tab. A tab opened as a copy of another may still
+    // point to that other tab's file: it goes once no tab shows it any more.
     if (
       previousUri &&
-      previousUri !== uri &&
+      tabPreviewFilePath(previousUri) !== tabPreviewFilePath(uri) &&
       !isTabPreviewReferenced(store.get(tabGroupsAtom), previousUri)
     ) {
       deleteTabPreviewFile(previousUri)

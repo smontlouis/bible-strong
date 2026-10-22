@@ -8,8 +8,18 @@ export const TAB_PREVIEWS_DIRECTORY = FileSystem.documentDirectory
   ? `${FileSystem.documentDirectory}${DIRECTORY_NAME}/`
   : null
 
-// Captures moved into the directory and not yet set on their tab: the sweep leaves them alone.
+// Captures written into the directory and not yet set on their tab: the sweep leaves them alone.
 const pendingPreviews = new Set<string>()
+
+/**
+ * The file of a preview, without the version its address carries (`?v=`). A tab has one
+ * file, named after it and overwritten by each capture; the version changes the address so
+ * that `<Image>` does not keep showing the picture it cached.
+ */
+export const tabPreviewFilePath = (uri: string) => uri.split('?')[0]!
+
+const tabPreviewFileOf = (directory: string, tabId: string) =>
+  `${directory}${tabId.replace(/[^\w-]/g, '_')}.jpg`
 
 let directoryReady: Promise<void> | undefined
 const ensureDirectory = (directory: string) => {
@@ -26,29 +36,30 @@ const ensureDirectory = (directory: string) => {
 const toFileUri = (uri: string) => (uri.startsWith('file://') ? uri : `file://${uri}`)
 
 /**
- * Moves a capture out of the temporary directory into the previews directory. Each capture
- * gets a new name, so that `<Image>` never shows a cached older picture of the tab.
- * Call `settleTabPreviewFile` once the URI is set on the tab.
+ * Moves a capture out of the temporary directory onto the preview file of its tab, replacing
+ * the previous picture, and returns the address to set on the tab: the file with the version
+ * of this capture. Call `settleTabPreviewFile` once it is set on the tab.
  */
 export const saveTabPreviewFile = async (tabId: string, capturedUri: string) => {
   const directory = TAB_PREVIEWS_DIRECTORY
   if (!directory) throw new Error('No document directory for tab previews')
 
   const from = toFileUri(capturedUri)
-  const uri = `${directory}${tabId.replace(/[^\w-]/g, '_')}-${Date.now()}.jpg`
-  pendingPreviews.add(uri)
+  const file = tabPreviewFileOf(directory, tabId)
+  pendingPreviews.add(file)
   try {
     await ensureDirectory(directory)
+    await FileSystem.deleteAsync(file, { idempotent: true })
     try {
-      await FileSystem.moveAsync({ from, to: uri })
+      await FileSystem.moveAsync({ from, to: file })
     } catch {
       // Android cannot rename across volumes, and the capture may sit in the external cache.
-      await FileSystem.copyAsync({ from, to: uri })
+      await FileSystem.copyAsync({ from, to: file })
       await FileSystem.deleteAsync(from, { idempotent: true }).catch(() => {})
     }
-    return uri
+    return `${file}?v=${Date.now()}`
   } catch (error) {
-    pendingPreviews.delete(uri)
+    pendingPreviews.delete(file)
     await FileSystem.deleteAsync(from, { idempotent: true }).catch(() => {})
     throw error
   }
@@ -56,18 +67,23 @@ export const saveTabPreviewFile = async (tabId: string, capturedUri: string) => 
 
 /** The capture is now on its tab, or was dropped: the sweep judges it like any other file. */
 export const settleTabPreviewFile = (uri: string) => {
-  pendingPreviews.delete(uri)
+  pendingPreviews.delete(tabPreviewFilePath(uri))
 }
 
-export const isTabPreviewReferenced = (groups: TabGroup[], uri: string) =>
-  groups.some(group => group.tabs.some(tab => tab.previewUri === uri))
+export const isTabPreviewReferenced = (groups: TabGroup[], uri: string) => {
+  const file = tabPreviewFilePath(uri)
+  return groups.some(group =>
+    group.tabs.some(tab => tab.previewUri && tabPreviewFilePath(tab.previewUri) === file)
+  )
+}
 
 /** Deletes one preview file. Anything outside the directory (a web data URI) is ignored. */
 export const deleteTabPreviewFile = async (uri: string) => {
-  if (!TAB_PREVIEWS_DIRECTORY || !uri.startsWith(TAB_PREVIEWS_DIRECTORY)) return
-  pendingPreviews.delete(uri)
-  await FileSystem.deleteAsync(uri, { idempotent: true }).catch(error =>
-    console.log('[TabPreviews] Could not delete', uri, error)
+  const file = tabPreviewFilePath(uri)
+  if (!TAB_PREVIEWS_DIRECTORY || !file.startsWith(TAB_PREVIEWS_DIRECTORY)) return
+  pendingPreviews.delete(file)
+  await FileSystem.deleteAsync(file, { idempotent: true }).catch(error =>
+    console.log('[TabPreviews] Could not delete', file, error)
   )
 }
 
@@ -90,7 +106,11 @@ export const sweepTabPreviewFiles = async (getGroups: () => TabGroup[]) => {
     return
   }
 
-  const referenced = new Set(getGroups().flatMap(group => group.tabs.map(tab => tab.previewUri)))
+  const referenced = new Set(
+    getGroups().flatMap(group =>
+      group.tabs.flatMap(tab => (tab.previewUri ? [tabPreviewFilePath(tab.previewUri)] : []))
+    )
+  )
   const orphans = names
     .map(name => `${directory}${name}`)
     .filter(uri => !referenced.has(uri) && !pendingPreviews.has(uri))
