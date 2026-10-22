@@ -341,6 +341,22 @@ describe('loadStrongConcordancePage', () => {
     expect(readsOf('/counts')).toHaveLength(1)
   })
 
+  it('reads a page further in the book alone, the API passing over the verses before it', async () => {
+    vi.mocked(readResource).mockImplementation(async (path, query = {}) =>
+      path.endsWith('/counts')
+        ? ({ counts: [{ book: 13, verseCount: 120 }] } as never)
+        : (answer(path, query) as never)
+    )
+
+    await loadStrongConcordancePage({ data: { language: 'fr', code: 'h0001', page: 3 } })
+
+    const occurrenceReads = vi
+      .mocked(readResource)
+      .mock.calls.filter(([path]) => path.endsWith('/occurrences'))
+    expect(occurrenceReads).toHaveLength(1)
+    expect(occurrenceReads[0]?.[1]).toMatchObject({ limit: 50, offset: '100' })
+  })
+
   it('sends the verses of a number that has a page to that page', async () => {
     stubResourceApi()
 

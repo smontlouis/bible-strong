@@ -73,3 +73,27 @@ Two things emptied the whole page cache although no page had changed:
 A republished resource therefore keeps its pages until its folders are refreshed, or for the month
 a page is kept. A deployment that changes the code of the site still renders every page again: a
 page names the scripts and styles of its build.
+
+## Amendment (2026-10-22): moves and missing pages are kept, and parameters no page reads are sent away
+
+Crawlers rendered pages the cache could not keep, each one a read of the Resource API:
+
+- **Permanent moves.** A route that sends an address to its canonical spelling, a Strong code to
+  the sense that answers it, or a commentary section to its chapter decides from the address and
+  the published resources only, often after reading them. Such a move is now kept like a page,
+  under the same tags, so that `yarn site:pages:refresh` finds it again.
+- **Missing pages.** A page that does not exist is kept an hour.
+- **Failures** are still not kept. While a page kept before is served stale, Cloudflare keeps it
+  and renders it again; a failure it kept would take its place.
+- A server function, and the page of a study, which its author publishes or withdraws at any
+  time, are still kept by no one.
+- **Parameters no page reads.** Any query string made another kept copy of a page, rendered anew.
+  The gateway now sends a read with a parameter its page does not read to the same address
+  without it, with a permanent move it answers itself (`features/resources/pageParameters.ts`).
+  The parameters a sharer adds to a link stay where they are. The commentaries of a Bible page
+  are written in their one spelling, without the ones the catalog does not know. A parameter a
+  page comes to read must be named there, or the page never sees it. Server functions and share
+  images are left alone.
+
+`robots.txt` also turns crawlers away from the server functions and from the Bible pages with
+commentaries in their text, which are not indexed.

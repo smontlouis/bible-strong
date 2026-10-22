@@ -72,6 +72,7 @@ describe('listBibleVerseSitemapUrls', () => {
       chapter: 3,
       passage: { startVerse: 1 },
       inlineCommentaries: [],
+      commentaryChoice: [],
       description: '',
     } as unknown as BiblePageData
     const canonical = buildBibleHead(page).links.find(

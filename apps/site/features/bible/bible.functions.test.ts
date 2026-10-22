@@ -98,6 +98,29 @@ describe('loadBiblePage', () => {
     expect(after.study?.context.before.map(verse => verse.verse)).toEqual([19])
   })
 
+  it('leads a note to the verse it cites, and to its place in the chapter for a range', async () => {
+    vi.mocked(readResource).mockImplementation(async path => {
+      const [, versionId, document] = /^\/v1\/bibles\/([^/]+)\/(.+)$/u.exec(path) ?? []
+      if (versionId && document === 'coverage') return coverage(versionId) as never
+      if (versionId && document === 'books/40/chapters/17') {
+        const text = chapter(versionId)
+        text.verses[1]!.presentation.notes = [
+          {
+            offset: 0,
+            order: 0,
+            markup: 'Voir <ref id="Matt.17.22-Matt.17.23">17.22-23</ref> et <ref id="Matt.17.19">17.19</ref>.',
+          },
+        ] as never[]
+        return text as never
+      }
+      return undefined as never
+    })
+    const page = await load('niv/matt/17')
+
+    expect(page.notes?.[0]?.html).toContain('<a href="/bible/niv/matt/17#v22">17.22-23</a>')
+    expect(page.notes?.[0]?.html).toContain('<a href="/bible/niv/matt/17/19">17.19</a>')
+  })
+
   it('still reads a range of verses that holds a blank one', async () => {
     expect(await load('niv/matt/17/20-22')).toMatchObject({
       passage: { startVerse: 20, endVerse: 22 },

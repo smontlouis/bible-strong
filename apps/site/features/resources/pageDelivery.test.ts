@@ -2,9 +2,12 @@ import { describe, expect, it } from 'vitest'
 import {
   addressWithoutEndSlash,
   deliveredPage,
+  MISSING_PAGE_CACHE_CONTROL,
   pageCacheKey,
   pageCacheTags,
+  permanentMove,
   readPageRefresh,
+  withSecurityHeaders,
 } from './pageDelivery'
 
 const key = (address: string, buildRevision = 'build1') =>
@@ -116,6 +119,84 @@ describe('What a rendered answer is sent with', () => {
     const delivered = deliveredPage(new Response('gone', { status: 404 }), '/nope')
     expect(delivered.status).toBe(404)
     expect(await delivered.text()).toBe('gone')
+  })
+
+  it('keeps a permanent move like a page, with its tags', () => {
+    const delivered = deliveredPage(
+      new Response(null, { status: 301, headers: { location: '/strong/fr/h0001' } }),
+      '/strong/fr/h1'
+    )
+    expect(delivered.headers.get('cache-control')).toBe(kept)
+    expect(delivered.headers.get('cache-tag')).toBe('page,path:strong,path:strong/fr,path:strong/fr/h1')
+    expect(delivered.headers.get('location')).toBe('/strong/fr/h0001')
+  })
+
+  it('keeps a missing page an hour, with its tags', () => {
+    const delivered = deliveredPage(new Response('missing', { status: 404 }), '/bible/lsg/gen/99')
+    expect(delivered.headers.get('cache-control')).toBe(MISSING_PAGE_CACHE_CONTROL)
+    expect(delivered.headers.get('cache-tag')).toBe('page,path:bible,path:bible/lsg,path:bible/lsg/gen')
+  })
+
+  it('keeps a minute a move or a missing page decided from a STALE answer', () => {
+    for (const status of [301, 404]) {
+      const delivered = deliveredPage(
+        new Response(null, { status, headers: { 'x-page-stale': '1' } }),
+        '/strong/fr/h1'
+      )
+      expect(delivered.headers.get('cache-control')).toBe('public, max-age=0, s-maxage=60')
+    }
+  })
+
+  it.each([
+    [500, '/bible/lsg/gen/1'],
+    [503, '/bible/lsg/gen/1'],
+    [302, '/bible/lsg/gen/1'],
+    [404, '/studies/abc'],
+    [404, '/fr/studies/abc'],
+    [301, '/_serverFn/abc'],
+  ])('keeps no %i answer for %s', (status, pathname) => {
+    const delivered = deliveredPage(new Response(null, { status }), pathname)
+    expect(delivered.headers.get('cache-control')).toBe('private')
+    expect(delivered.headers.has('cache-tag')).toBe(false)
+  })
+
+  it('leaves a missing page its route says how to keep', () => {
+    const delivered = deliveredPage(
+      new Response(null, { status: 404, headers: { 'cache-control': 'no-store' } }),
+      '/bible'
+    )
+    expect(delivered.headers.get('cache-control')).toBe('no-store')
+  })
+})
+
+describe('What every answer is sent with', () => {
+  it('adds the security headers', () => {
+    const secured = withSecurityHeaders(new Response('page'))
+    expect(secured.headers.get('strict-transport-security')).toBe(
+      'max-age=31536000; includeSubDomains'
+    )
+    expect(secured.headers.get('x-content-type-options')).toBe('nosniff')
+    expect(secured.headers.get('x-frame-options')).toBe('SAMEORIGIN')
+    expect(secured.headers.get('content-security-policy')).toBe("frame-ancestors 'self'")
+    expect(secured.headers.get('referrer-policy')).toBe('strict-origin-when-cross-origin')
+  })
+
+  it('keeps what an answer sets itself, and works on an answer whose headers cannot change', async () => {
+    const secured = withSecurityHeaders(
+      new Response('image', { status: 200, headers: { 'referrer-policy': 'no-referrer' } })
+    )
+    expect(secured.headers.get('referrer-policy')).toBe('no-referrer')
+    expect(await secured.text()).toBe('image')
+    const moved = withSecurityHeaders(Response.redirect('https://bible-strong.app/fr', 301))
+    expect(moved.status).toBe(301)
+    expect(moved.headers.get('x-content-type-options')).toBe('nosniff')
+  })
+
+  it('sends a permanent move the reader keeps a day', () => {
+    const move = permanentMove('https://bible-strong.app/bible/lsg/gen/1')
+    expect(move.status).toBe(301)
+    expect(move.headers.get('location')).toBe('https://bible-strong.app/bible/lsg/gen/1')
+    expect(move.headers.get('cache-control')).toBe('public, max-age=86400')
   })
 })
 

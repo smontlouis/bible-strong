@@ -507,22 +507,26 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
               ),
             verseLabel: verse => `${bibleBookName(book, language)} ${chapter}:${verse}`,
             // A cross-reference stays in the version being read, when it carries the passage.
+            // A verse leads to its page; a range is read in its chapter, from its first verse:
+            // a range has no page worth indexing, and the chapter shows it with what surrounds it.
             referenceHref: osisReference => {
               const reference = parseOsisReference(osisReference)
               if (!reference?.chapter) return undefined
               if (!coverage.chaptersByBook[String(reference.book)]?.includes(reference.chapter)) {
                 return undefined
               }
+              const isRange = reference.verse !== undefined && reference.endVerse !== undefined
+              const path = buildBiblePath({
+                versionId: version.id,
+                book: reference.book,
+                chapter: reference.chapter,
+                passage:
+                  reference.verse === undefined || isRange
+                    ? undefined
+                    : { startVerse: reference.verse },
+              })
               return withInlineCommentaries(
-                buildBiblePath({
-                  versionId: version.id,
-                  book: reference.book,
-                  chapter: reference.chapter,
-                  passage:
-                    reference.verse === undefined
-                      ? undefined
-                      : { startVerse: reference.verse, endVerse: reference.endVerse },
-                }),
+                isRange ? `${path}#v${reference.verse}` : path,
                 commentaryChoice
               )
             },

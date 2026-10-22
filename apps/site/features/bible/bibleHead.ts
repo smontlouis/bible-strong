@@ -82,9 +82,15 @@ export const buildBibleHead = (page: BiblePageData) => {
           href: absoluteSiteUrl(buildBiblePath({ ...location, gloss: alternate })),
         }))
       : []
-  // A chapter and a single verse are indexed; the endless verse ranges are not, nor is a
-  // reading with commentaries shown in the text, which only adds to the page it comes from.
-  const isVariant = passage?.endVerse !== undefined || page.inlineCommentaries.length > 0
+  // A chapter and a single verse read as text are indexed; the endless verse ranges are not,
+  // nor a single verse in another reading mode, which only repeats a line of its chapter and
+  // is in no sitemap, nor a reading with commentaries chosen for the text, which only adds to
+  // the page it comes from.
+  const isVariant =
+    passage?.endVerse !== undefined ||
+    (passage !== undefined && presentation !== 'text') ||
+    page.commentaryChoice.length > 0 ||
+    page.inlineCommentaries.length > 0
 
   return {
     meta: [

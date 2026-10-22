@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
+# Server functions answer the pages that call them, not readers.
+Disallow: /_serverFn/
+# A Bible page with commentaries in its text adds them to a page that is indexed without them.
+Disallow: /*?*commentary=
 
 Sitemap: https://bible-strong.app/sitemap.xml

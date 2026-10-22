@@ -5,9 +5,12 @@ import {
   addressWithoutEndSlash,
   deliveredPage,
   pageCacheKey,
+  permanentMove,
   readPageRefresh,
+  withSecurityHeaders,
   type PageRefresh,
 } from '@/features/resources/pageDelivery'
+import { addressWithReadParameters } from '@/features/resources/pageParameters'
 
 // The Worker the site runs as (ADR-0083, ADR-0084). Public files are answered by Cloudflare
 // before it is reached. Every other request comes to the gateway below, which hands a read
@@ -59,17 +62,36 @@ const refreshPages = async (
   return Response.json({ refreshed: selection })
 }
 
+/**
+ * The one address of what a read asks for: without a slash at its end, and, in a build,
+ * without the parameters its page does not read. Nothing when it is already there.
+ */
+const movedAddress = (url: URL): string | undefined => {
+  const trimmed = addressWithoutEndSlash(url)
+  // The development server is left every parameter: the modules it serves carry their own.
+  const cleaned = BUILD_REVISION ? addressWithReadParameters(new URL(trimmed ?? url)) : undefined
+  return cleaned ?? trimmed
+}
+
+const answer = async (
+  request: Request,
+  env: WorkerEnv,
+  ctx: WorkerExecutionContext
+): Promise<Response> => {
+  const url = new URL(request.url)
+  if (url.pathname === REFRESH_PATH) return refreshPages(request, env, ctx)
+  const isRead = request.method === 'GET' || request.method === 'HEAD'
+  const moved = isRead ? movedAddress(url) : undefined
+  if (moved) return permanentMove(moved)
+  // Only a read is kept, and nothing on the development server, which has no build.
+  if (!BUILD_REVISION || !isRead) return handler.fetch(request)
+  return ctx.exports.Pages!.fetch(request, {
+    cf: { cacheKey: pageCacheKey(url, BUILD_REVISION) },
+  } as RequestInit)
+}
+
 export default {
   async fetch(request: Request, env: WorkerEnv, ctx: WorkerExecutionContext): Promise<Response> {
-    const url = new URL(request.url)
-    if (url.pathname === REFRESH_PATH) return refreshPages(request, env, ctx)
-    const isRead = request.method === 'GET' || request.method === 'HEAD'
-    const moved = isRead ? addressWithoutEndSlash(url) : undefined
-    if (moved) return Response.redirect(moved, 301)
-    // Only a read is kept, and nothing on the development server, which has no build.
-    if (!BUILD_REVISION || !isRead) return handler.fetch(request)
-    return ctx.exports.Pages!.fetch(request, {
-      cf: { cacheKey: pageCacheKey(url, BUILD_REVISION) },
-    } as RequestInit)
+    return withSecurityHeaders(await answer(request, env, ctx))
   },
 }

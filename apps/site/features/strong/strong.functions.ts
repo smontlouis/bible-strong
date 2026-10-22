@@ -351,9 +351,9 @@ const MAX_OCCURRENCE_REQUESTS = 20
 /**
  * A window of occurrences with their verse text, in one book or across the Bible.
  *
- * The Resource API pages by position, not by number: a request continues after a given
- * verse. A window is therefore read from the start of the book it begins in, and the
- * verses before it are passed over.
+ * The Resource API pages by position: a request continues after a given verse and passes
+ * over a number of occurrences (`offset`). A window starts after the beginning of the book
+ * it begins in, the occurrences before it passed over by the API, which reads only the page.
  */
 const loadOccurrences = async (
   reads: PageReads,
@@ -384,14 +384,15 @@ const loadOccurrences = async (
   let remainingSkip = skip
   for (let request = 0; request < MAX_OCCURRENCE_REQUESTS; request += 1) {
     const query = {
-      limit: Math.min(OCCURRENCE_REQUEST_LIMIT, remainingSkip + take - window.length),
+      limit: Math.min(OCCURRENCE_REQUEST_LIMIT, take - window.length),
       cursor,
+      offset: remainingSkip ? String(remainingSkip) : undefined,
       allBooks: book === undefined ? 'true' : undefined,
     }
     const response = await reads.queue(() => readResource<StrongBibleOccurrencesDto>(path, query))
     const verses = response?.verses ?? []
-    window.push(...verses.slice(remainingSkip, remainingSkip + take - window.length))
-    remainingSkip = Math.max(0, remainingSkip - verses.length)
+    window.push(...verses.slice(0, take - window.length))
+    remainingSkip = 0
     cursor = response?.nextCursor
     if (window.length >= take || !cursor || !verses.length) break
   }
