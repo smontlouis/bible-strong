@@ -1,7 +1,13 @@
 import { getPassageContextHeaderHeight } from '../passagePreviewPresentation'
 import type { PlanDayStepView } from './PlanDayStepCard'
 import type { LabeledCommentaryChip } from './InlineCommentaryChips'
-import { OPEN_INLINE_COMMENTARY } from './dispatch'
+import { FOCUS_STUDY_ACTION, OPEN_INLINE_COMMENTARY } from './dispatch'
+import {
+  isFocusStudyAction,
+  type FocusStudyAction,
+  type FocusStudyTranslations,
+  type FocusVerseStudy,
+} from '../focusStudy/focusVerseStudyTypes'
 import { useResourcesLanguageValue } from '~state/resourcesLanguage'
 import { previewHistoryAtom } from '~features/bibleReferencePreview/state'
 import { createReaderPreview } from '~features/bibleReferencePreview/readerPreview'
@@ -344,6 +350,10 @@ export type WebViewProps = {
   onOpenInlineCommentary?: (chip: LabeledCommentaryChip) => void
   chapterEntities: StrongLexiconChapterEntity[]
   chapterEntitiesLoaded: boolean
+  /** What the reader gathers under the studied verse of a focus (ADR-0088). */
+  focusStudy?: FocusVerseStudy
+  focusStudyTranslations?: FocusStudyTranslations
+  onFocusStudyAction?: (action: FocusStudyAction) => void
   chapterEntityModuleStatus: StrongLexiconModuleAvailability['status'] | null
   chapterEntityDownloadState: BibleDOMDownloadState
   onDisableContextualInformation?: () => void
@@ -475,6 +485,9 @@ export const BibleDOMWrapper = ({
   onOpenInlineCommentary,
   chapterEntities,
   chapterEntitiesLoaded,
+  focusStudy,
+  focusStudyTranslations,
+  onFocusStudyAction,
   chapterEntityModuleStatus,
   chapterEntityDownloadState,
   onDisableContextualInformation,
@@ -685,6 +698,10 @@ export const BibleDOMWrapper = ({
           })
           toast.error(t('bible.passageMedia.openFailed'))
         }
+        break
+      }
+      case FOCUS_STUDY_ACTION: {
+        if (isFocusStudyAction(action.payload)) onFocusStudyAction?.(action.payload)
         break
       }
       case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {
@@ -1319,6 +1336,8 @@ export const BibleDOMWrapper = ({
         inlineCommentaries={inlineCommentaries}
         chapterEntities={chapterEntities}
         chapterEntitiesLoaded={chapterEntitiesLoaded}
+        focusStudy={focusStudy}
+        focusStudyTranslations={focusStudyTranslations}
         chapterEntityModuleStatus={chapterEntityModuleStatus}
         chapterEntityDownloadState={chapterEntityDownloadState}
         error={error}
