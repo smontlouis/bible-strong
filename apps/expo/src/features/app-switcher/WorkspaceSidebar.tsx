@@ -18,7 +18,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { SheetRef } from '~common/sheet'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
-import NotificationDot from '~common/ui/NotificationDot'
 import Text from '~common/ui/Text'
 import SidebarHoverActions from '~common/ui/HoverActionsRow'
 import Color from 'color'
@@ -38,7 +37,6 @@ import GroupActionsPopover from '~features/app-switcher/BottomTabBar/GroupAction
 import ViewGroupsModal from './BottomTabBar/ViewGroupsModal'
 import TabIcon, { tabIconColorConfig } from './utils/getIconByTabType'
 import { useOpenInNewTab } from './utils/useOpenInNewTab'
-import { useAvailableUpdatesIndicator } from '~features/resources/useAvailableUpdates'
 import { floatingShadow, radii } from '~common/ui/surfaces'
 import { useWorkspaceSidebarWidth, workspaceSidebarVariant } from './utils/useResponsiveWorkspace'
 
@@ -49,6 +47,8 @@ const sidebarFrameClassName = {
 }[workspaceSidebarVariant]
 interface WorkspaceSidebarProps {
   onSelectContent?: () => void
+  /** Runs when the sidebar opens a page of its own, such as one from the account menu. */
+  onNavigate?: () => void
   activePage?: 'home' | 'settings' | null
   isContentActive?: boolean
   openHome: () => void
@@ -61,17 +61,18 @@ const WorkspaceSidebar = ({
   activePage,
   isContentActive = true,
   onSelectContent,
+  onNavigate,
 }: WorkspaceSidebarProps) => {
   const stylingTheme = useStylingTheme()
 
   const { t } = useTranslation()
-  const { hasUnseenUpdates } = useAvailableUpdatesIndicator()
   const insets = useSafeAreaInsets()
   const sidebarWidth = useWorkspaceSidebarWidth()
   const { colorScheme } = useCurrentThemeSelector()
   const rowHeight = Platform.OS === 'web' ? 32 : 44
   const labelStyle = { color: colorScheme === 'dark' ? '#e3e3e3' : '#3c4043' }
   const actionSize = Platform.OS === 'web' ? 28 : 44
+  const createHeight = Platform.OS === 'web' ? 36 : 44
   const groups = useAtomValue(tabGroupsAtom)
   const activeGroupId = useAtomValue(activeGroupIdAtom)
   const activeTabId = useAtomValue(activeTabIdAtom)
@@ -396,91 +397,46 @@ const WorkspaceSidebar = ({
                 </SidebarDragGroup>
               )
             })}
-            {Platform.OS !== 'web' && groups.length < MAX_TAB_GROUPS && (
-              <TouchableBox
-                className="overflow-hidden border-continuous flex-row items-center px-[10px]"
-                onPress={() => createRef.current?.present()}
-                accessibilityRole="button"
-                style={{ minHeight: rowHeight }}
-              >
-                <FeatherIcon name="folder-plus" size={16} color="grey" />
-                <Text className="ml-[10px] text-[13px] text-grey">{t('tabs.newGroup')}</Text>
-              </TouchableBox>
-            )}
           </ScrollView>
           <Box className="border-continuous overflow-hidden px-[12px] pt-[8px] pb-[8px] gap-[4px]">
-            {Platform.OS === 'web' ? (
-              <HStack
-                className="bg-surface rounded-full items-center overflow-hidden"
-                testID="workspace-create-actions"
-              >
-                <TouchableBox
-                  className="flex-1 flex-row items-center justify-center gap-[6px] min-h-[36px] hover:bg-canvas"
-                  onPress={addTab}
-                  accessibilityRole="button"
-                  accessibilityLabel={t('tabs.new')}
-                >
-                  <FeatherIcon name="plus" size={16} color="grey" />
-                  <Text className="text-[13px]" style={labelStyle}>
-                    {t('workspace.newTabShort')}
-                  </Text>
-                </TouchableBox>
-                <Box className="w-px h-[20px] bg-separator" />
-                <TouchableBox
-                  className="flex-1 flex-row items-center justify-center gap-[6px] min-h-[36px] hover:bg-canvas"
-                  onPress={() => createRef.current?.present()}
-                  disabled={groups.length >= MAX_TAB_GROUPS}
-                  accessibilityRole="button"
-                  accessibilityLabel={t('tabs.newGroup')}
-                  accessibilityState={{ disabled: groups.length >= MAX_TAB_GROUPS }}
-                  style={{ opacity: groups.length >= MAX_TAB_GROUPS ? 0.4 : 1 }}
-                >
-                  <FeatherIcon name="folder-plus" size={16} color="grey" />
-                  <Text className="text-[13px]" style={labelStyle}>
-                    {t('workspace.newGroupShort')}
-                  </Text>
-                </TouchableBox>
-              </HStack>
-            ) : (
+            <HStack
+              className="bg-surface rounded-full items-center overflow-hidden"
+              testID="workspace-create-actions"
+            >
               <TouchableBox
-                className="overflow-hidden border-continuous flex-row items-center justify-center rounded-full bg-surface"
+                className="flex-1 flex-row items-center justify-center gap-[6px] hover:bg-canvas"
+                style={{ minHeight: createHeight }}
                 onPress={addTab}
                 accessibilityRole="button"
-                style={{ minHeight: rowHeight }}
+                accessibilityLabel={t('tabs.new')}
               >
-                <FeatherIcon name="plus" size={17} color="primary" />
-                <Text className="ml-[8px] text-[13px]" style={labelStyle}>
-                  {t('tabs.new')}
+                <FeatherIcon name="plus" size={16} color="grey" />
+                <Text className="text-[13px]" style={labelStyle}>
+                  {t('workspace.newTabShort')}
                 </Text>
               </TouchableBox>
-            )}
-            {Platform.OS === 'web' ? (
-              <Box className="mt-[4px]">
-                <SidebarAccountCard openSettings={openMenu} onSelectContent={onSelectContent} />
-              </Box>
-            ) : (
+              <Box className="w-px h-[20px] bg-separator" />
               <TouchableBox
-                className="overflow-hidden border-continuous flex-row items-center px-[10px]"
-                onPress={openMenu}
+                className="flex-1 flex-row items-center justify-center gap-[6px] hover:bg-canvas"
+                onPress={() => createRef.current?.present()}
+                disabled={groups.length >= MAX_TAB_GROUPS}
                 accessibilityRole="button"
-                accessibilityLabel={
-                  hasUnseenUpdates ? t('accessibility.settingsWithUpdates') : t('settings.settings')
-                }
-                accessibilityState={{ selected: activePage === 'settings' }}
+                accessibilityLabel={t('tabs.newGroup')}
+                accessibilityState={{ disabled: groups.length >= MAX_TAB_GROUPS }}
                 style={{
-                  minHeight: rowHeight,
-                  backgroundColor:
-                    activePage === 'settings' ? stylingTheme.colors.surface : undefined,
-                  borderRadius: 8,
+                  minHeight: createHeight,
+                  opacity: groups.length >= MAX_TAB_GROUPS ? 0.4 : 1,
                 }}
               >
-                <FeatherIcon name="settings" size={16} color="grey" />
-                <Text className="ml-[8px] text-[13px]" style={labelStyle}>
-                  {t('settings.settings')}
+                <FeatherIcon name="folder-plus" size={16} color="grey" />
+                <Text className="text-[13px]" style={labelStyle}>
+                  {t('workspace.newGroupShort')}
                 </Text>
-                {hasUnseenUpdates && <NotificationDot size={8} style={{ marginLeft: 6 }} />}
               </TouchableBox>
-            )}
+            </HStack>
+            <Box className="mt-[4px]">
+              <SidebarAccountCard openSettings={openMenu} onNavigate={onNavigate} />
+            </Box>
           </Box>
           <EditGroupModal
             sheetRef={editRef}

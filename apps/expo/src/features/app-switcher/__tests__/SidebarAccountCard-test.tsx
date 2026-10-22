@@ -1,6 +1,6 @@
 import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
-import SidebarAccountCard from '../SidebarAccountCard.web'
+import SidebarAccountCard from '../SidebarAccountCard'
 
 const mockPush = jest.fn()
 const mockLogout = jest.fn()
@@ -15,6 +15,11 @@ jest.mock('~helpers/useLogin', () => ({
     logout: mockLogout,
   }),
 }))
+jest.mock('~features/resources/useAvailableUpdates', () => ({
+  useAvailableUpdatesIndicator: () => ({ hasUnseenUpdates: false }),
+}))
+jest.mock('react-native', () => ({ Platform: { OS: 'web' } }))
+jest.mock('~common/ui/NotificationDot', () => 'b')
 jest.mock('~navigation/usePushRouteOnce', () => ({ usePushRouteOnce: () => mockPush }))
 jest.mock('~common/ConfirmDialog/useConfirmDialog', () => ({ useConfirmDialog: () => mockConfirm }))
 jest.mock('~helpers/toast', () => ({
@@ -36,8 +41,16 @@ jest.mock('~common/ContextualPanel', () => ({
   default: ({
     screens,
   }: {
-    screens: Record<string, { content: (navigation: { close: () => void }) => React.ReactNode }>
-  }) => screens.resources.content({ close: jest.fn() }),
+    screens: Record<
+      string,
+      {
+        content: (navigation: {
+          close: () => void
+          closeThen: (action: () => void) => void
+        }) => React.ReactNode
+      }
+    >
+  }) => screens.resources.content({ close: jest.fn(), closeThen: action => action() }),
 }))
 jest.mock('~themes/ThemeProvider', () => ({
   useTheme: () => ({

@@ -151,6 +151,7 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
                 setOverlayOpen(false)
                 if (!isWorkspace) router.push('/')
               }}
+              onNavigate={() => setOverlayOpen(false)}
             />
           </SidebarMotionBox>
         </SidebarMotionBox>
