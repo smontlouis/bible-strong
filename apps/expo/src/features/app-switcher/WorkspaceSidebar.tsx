@@ -107,7 +107,7 @@ const WorkspaceSidebar = ({
     <SidebarDragProvider
       onExpandGroup={id => setCollapsedGroups(current => current.filter(groupId => groupId !== id))}
     >
-      {(previewGroups, foldedGroupId) => (
+      {(previewGroups, foldedGroupId, scrollProps) => (
         <Box
           className={`flex-1 min-h-0 border-continuous overflow-hidden ${sidebarFrameClassName}`}
           style={{
@@ -139,6 +139,7 @@ const WorkspaceSidebar = ({
           </HStack>
           {/* A desktop scrollbar would take its width from the right margin of the rows only. */}
           <ScrollView
+            {...scrollProps}
             style={{ flex: 1 }}
             showsVerticalScrollIndicator={Platform.OS !== 'web'}
             contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 8, gap: 8 }}
