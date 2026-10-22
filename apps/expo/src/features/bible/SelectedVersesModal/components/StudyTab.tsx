@@ -3,7 +3,7 @@ import { useTheme } from '~themes/ThemeProvider'
 import { useTranslation } from 'react-i18next'
 import ActionsLayout from './ActionsLayout'
 import ActionItem from './ActionItem'
-import { SELECTION_SHORTCUTS } from '../selectionShortcuts'
+import { formatShortcut } from '~features/keyboard-shortcuts/keymap'
 interface StudyTabProps {
   screenWidth: number
   showStrongDetail: () => void
@@ -36,6 +36,7 @@ const StudyTab = ({
         label={t('Lexique')}
         onPress={showStrongDetail}
         disabled={moreThanOneVerseSelected}
+        shortcut={formatShortcut('lexicon')}
       />
       <ActionItem
         svgSource={require('~assets/images/tab-icons/dictionary.svg')}
@@ -43,6 +44,7 @@ const StudyTab = ({
         label={t('Dictionnaire')}
         onPress={showDictionaryDetail}
         disabled={moreThanOneVerseSelected}
+        shortcut={formatShortcut('dictionary')}
       />
       <ActionItem
         svgSource={require('~assets/images/tab-icons/nave.svg')}
@@ -50,6 +52,7 @@ const StudyTab = ({
         label={t('Thèmes')}
         onPress={onOpenNave}
         disabled={moreThanOneVerseSelected}
+        shortcut={formatShortcut('topics')}
       />
       <ActionItem
         svgSource={require('~assets/images/tab-icons/references.svg')}
@@ -57,7 +60,7 @@ const StudyTab = ({
         label={t('Références')}
         onPress={onOpenReferences}
         disabled={moreThanOneVerseSelected}
-        shortcut={SELECTION_SHORTCUTS.references}
+        shortcut={formatShortcut('references')}
       />
       <ActionItem
         svgSource={require('~assets/images/tab-icons/comment.svg')}
@@ -65,12 +68,13 @@ const StudyTab = ({
         label={t('Commentaire')}
         onPress={openCommentariesScreen}
         disabled={moreThanOneVerseSelected}
+        shortcut={formatShortcut('commentary')}
       />
       <ActionItem
         name="layers"
         label={t('Comparer')}
         onPress={compareVerses}
-        shortcut={SELECTION_SHORTCUTS.compare}
+        shortcut={formatShortcut('compare')}
       />
     </ActionsLayout>
   )

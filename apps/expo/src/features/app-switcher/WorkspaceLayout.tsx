@@ -28,6 +28,7 @@ import {
   workspaceSidebarVariant,
 } from './utils/useResponsiveWorkspace'
 import { getWorkspacePageForPath, workspacePagePath } from './workspaceRoutes'
+import { shortcutTitle } from '~features/keyboard-shortcuts/shortcutTitle'
 import {
   WORKSPACE_SIDEBAR_BUTTON_HEIGHT,
   WORKSPACE_SIDEBAR_BUTTON_WIDTH,
@@ -196,6 +197,10 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
                 height: WORKSPACE_SIDEBAR_BUTTON_HEIGHT,
               }}
               onPress={toggleSidebar}
+              ref={shortcutTitle(
+                'sidebar',
+                t(sidebarVisible ? 'workspace.hideSidebar' : 'workspace.showSidebar')
+              )}
               accessibilityRole="button"
               accessibilityLabel={t(
                 sidebarVisible ? 'workspace.hideSidebar' : 'workspace.showSidebar'

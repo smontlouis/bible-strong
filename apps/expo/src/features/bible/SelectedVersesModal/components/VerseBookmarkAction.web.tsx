@@ -10,7 +10,7 @@ import { useBibleBookmarkScreens } from '~features/bookmarks/useBibleBookmarkScr
 import { getSelectedVersesBookmarkLocation } from '~features/bible/selectedVersesActions'
 import { ACTION_ITEM_WIDTH, ICON_BOX_SIZE, ICON_SIZE } from '../constants'
 import { useSelectionMenu } from '../selectionMenuContext'
-import { SELECTION_SHORTCUTS } from '../selectionShortcuts'
+import { formatShortcut } from '~features/keyboard-shortcuts/keymap'
 import ActionItem from './ActionItem'
 import type { VerseBookmarkActionProps } from './VerseBookmarkAction'
 
@@ -27,7 +27,7 @@ export default function VerseBookmarkAction(props: VerseBookmarkActionProps) {
         onPress={() => menu.openScreen('bookmark')}
         disabled={props.disabled || !getSelectedVersesBookmarkLocation(props.selectedVerses)}
         isActive={props.isActive}
-        shortcut={SELECTION_SHORTCUTS.bookmark}
+        shortcut={formatShortcut('bookmark')}
         nested
       />
     )

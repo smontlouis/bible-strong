@@ -9,6 +9,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import ActionItem from '~features/bible/SelectedVersesModal/components/ActionItem'
 import { useSelectionMenu } from '~features/bible/SelectedVersesModal/selectionMenuContext'
 import type { AddToStudyActionProps } from './AddToStudyAction'
+import { formatShortcut } from '~features/keyboard-shortcuts/keymap'
 import { useAddToStudyScreens } from './useAddToStudyScreens'
 
 export default function AddToStudyAction({ onPress, onSelect, reference }: AddToStudyActionProps) {
@@ -24,6 +25,7 @@ export default function AddToStudyAction({ onPress, onSelect, reference }: AddTo
         tintColor={tintColor}
         label={t('study.addToStudy')}
         onPress={onPress}
+        shortcut={formatShortcut('addToStudy')}
       />
     )
   if (menu)
@@ -33,6 +35,7 @@ export default function AddToStudyAction({ onPress, onSelect, reference }: AddTo
         tintColor={tintColor}
         label={t('study.addToStudy')}
         onPress={() => menu.openScreen('study')}
+        shortcut={formatShortcut('addToStudy')}
         nested
       />
     )

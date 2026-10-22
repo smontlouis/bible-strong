@@ -8,6 +8,7 @@ import { webFontFamily } from '~helpers/webFontFamily'
 import { webThemeVariables } from '~themes/webThemeVariables'
 import { FeatherIcon } from '~common/ui/Icon'
 import type { ContextualPanelProps, PanelScreen, PanelNavigation } from './types'
+import { KEYBOARD_PASSTHROUGH } from '~features/keyboard-shortcuts/keyboardTargets'
 import { usePanelNavigation } from './usePanelNavigation'
 import PanelTransition from './PanelTransition'
 import { PanelNavigationContext } from './NavigationContext'
@@ -55,6 +56,7 @@ export default function ContextualPanel(props: ContextualPanelProps) {
           !props.nonModal && !props.anchorRef?.current?.contains(element)
         }
         isNonModal={props.nonModal}
+        {...(props.nonModal ? { [KEYBOARD_PASSTHROUGH]: '' } : {})}
         placement={props.placement ?? 'bottom'}
         shouldFlip={!props.noFlip}
         offset={8}

@@ -4,14 +4,19 @@ import { usePathname } from 'expo-router'
 import { TabCommandContext } from '~common/useTabCommands'
 import { activeTabIdAtom, appSwitcherModeAtom } from '~state/tabs'
 import { commandPaletteOpenAtom } from '~features/app-switcher/commandPalette/state'
-import { isEditingTarget } from '~features/app-switcher/keyboardShortcuts'
-import { isBibleShortcut } from './bibleKeyboardActions'
+import {
+  isBlockingOverlayOpen,
+  isEditingTarget,
+  isPassthroughPanelOpen,
+} from '~features/keyboard-shortcuts/keyboardTargets'
+import { matchShortcut, type ShortcutId } from '~features/keyboard-shortcuts/keymap'
+import type { BibleKeyboardShortcutOptions } from './useBibleKeyboardShortcut'
 
 export function useBibleKeyboardShortcut(
-  key: 'v' | 's',
+  shortcut: ShortcutId,
   tabId: string,
   run: () => void,
-  enabled = true
+  { enabled = true, repeat = false, besideVerseMenu = false }: BibleKeyboardShortcutOptions = {}
 ) {
   const ownerId = useContext(TabCommandContext)
   const activeId = useAtomValue(activeTabIdAtom)
@@ -23,12 +28,13 @@ export function useBibleKeyboardShortcut(
   useEffect(() => {
     if (!active || paletteOpen) return
     const handleKey = (event: KeyboardEvent) => {
-      if (!isBibleShortcut(event, key) || event.defaultPrevented || isEditingTarget(event.target))
-        return
       if (
-        document.querySelector(
-          '[role="dialog"], [role="alertdialog"], [role="menu"], [aria-modal="true"]'
-        )
+        !matchShortcut(event, shortcut) ||
+        (event.repeat && !repeat) ||
+        event.defaultPrevented ||
+        isEditingTarget(event.target) ||
+        isBlockingOverlayOpen() ||
+        (!besideVerseMenu && isPassthroughPanelOpen())
       )
         return
       event.preventDefault()
@@ -37,6 +43,6 @@ export function useBibleKeyboardShortcut(
     }
     document.addEventListener('keydown', handleKey, true)
     return () => document.removeEventListener('keydown', handleKey, true)
-  }, [active, paletteOpen, key, run])
+  }, [active, paletteOpen, shortcut, repeat, besideVerseMenu, run])
   return active
 }

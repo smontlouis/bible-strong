@@ -385,6 +385,14 @@
   gap: 16px;
   padding: 6px 0;
 }
+/* One keycap per key, as on the keyboard; two shortcuts of a row split by a slash. */
+.bs-command-help-shortcuts dd {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 4px;
+  color: var(--command-muted);
+}
 .bs-command-help-scopes {
   display: flex;
   flex-wrap: wrap;

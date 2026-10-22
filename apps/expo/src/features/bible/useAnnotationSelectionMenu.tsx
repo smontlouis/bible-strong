@@ -26,10 +26,12 @@ import {
   SelectionMenuContext,
   type SelectionMenu as SelectionMenuValue,
 } from './SelectedVersesModal/selectionMenuContext'
-import { isEditableTarget, type VerseMenuTarget } from './VerseMenu.web'
+import type { VerseMenuTarget } from './VerseMenu.web'
+import { isEditingTarget } from '~features/keyboard-shortcuts/keyboardTargets'
+import { findShortcut, formatShortcut, matchShortcut } from '~features/keyboard-shortcuts/keymap'
 
 /** Keys of the desktop annotation menu, shown beside each action. */
-const ANNOTATION_SHORTCUTS = { note: 'N', tags: 'T', relations: 'R' } as const
+const ANNOTATION_SHORTCUTS = ['note', 'tags', 'relation', 'erase'] as const
 
 // Its screens are named apart from those of the selected verses, which the menu showed before
 const TAGS_SCREEN = 'annotation-tags'
@@ -110,30 +112,26 @@ export default function useAnnotationSelectionMenu(
   useEffect(() => {
     if (!isShown) return
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.defaultPrevented || event.isComposing || isEditableTarget(event.target)) return
-      if (event.key === 'Escape') {
+      if (event.defaultPrevented || isEditingTarget(event.target)) return
+      if (matchShortcut(event, 'deselect')) {
         event.preventDefault()
         if (hasSelection) onClearSelection()
         else if (selectedAnnotation) onClearAnnotationSelection?.()
         else onClose()
         return
       }
-      if (!isOpen.current || event.metaKey || event.ctrlKey || event.altKey || event.repeat) return
-      if (event.key === 'Delete' || event.key === 'Backspace') {
-        if (!erase || !isEnabled) return
-        event.preventDefault()
-        erase()
-        return
-      }
-      const key = event.key.toUpperCase()
+      if (!isOpen.current || event.repeat) return
+      const action = findShortcut(event, ANNOTATION_SHORTCUTS)
       const handler =
-        key === ANNOTATION_SHORTCUTS.note && !tools.noteDisabled
-          ? onNotePress
-          : key === ANNOTATION_SHORTCUTS.tags && !tools.tagsDisabled
-            ? () => menu.openScreen('tags')
-            : key === ANNOTATION_SHORTCUTS.relations && !tools.relationsDisabled
-              ? onRelationsPress
-              : undefined
+        action === 'erase'
+          ? isEnabled && erase
+          : action === 'note' && !tools.noteDisabled
+            ? onNotePress
+            : action === 'tags' && !tools.tagsDisabled
+              ? () => menu.openScreen('tags')
+              : action === 'relation' && !tools.relationsDisabled
+                ? onRelationsPress
+                : undefined
       if (!handler) return
       event.preventDefault()
       handler()
@@ -229,7 +227,7 @@ export default function useAnnotationSelectionMenu(
                   onPress={() => onNotePress?.()}
                   disabled={tools.noteDisabled}
                   isActive={!!selectedAnnotation?.noteId}
-                  shortcut={ANNOTATION_SHORTCUTS.note}
+                  shortcut={formatShortcut('note')}
                 />
                 <ActionItem
                   name="tag"
@@ -237,7 +235,7 @@ export default function useAnnotationSelectionMenu(
                   onPress={() => menu.openScreen('tags')}
                   disabled={tools.tagsDisabled}
                   isActive={tagsCount > 0}
-                  shortcut={ANNOTATION_SHORTCUTS.tags}
+                  shortcut={formatShortcut('tags')}
                   nested
                 />
                 <ActionItem
@@ -246,7 +244,7 @@ export default function useAnnotationSelectionMenu(
                   onPress={() => onRelationsPress?.()}
                   disabled={tools.relationsDisabled}
                   isActive={relationsCount > 0}
-                  shortcut={ANNOTATION_SHORTCUTS.relations}
+                  shortcut={formatShortcut('relation')}
                 />
               </Box>
             </Box>

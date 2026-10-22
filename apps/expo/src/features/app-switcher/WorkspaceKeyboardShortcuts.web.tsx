@@ -3,7 +3,7 @@ import { resolveUniverseColors } from '~themes/universeColors'
 import TabIcon from './utils/getIconByTabType'
 import * as Dialog from '@radix-ui/react-dialog'
 import { useEffect, useRef, useState } from 'react'
-import { useAtomValue, useStore } from 'jotai/react'
+import { useAtom, useAtomValue, useStore } from 'jotai/react'
 import { useRouter, usePathname } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { activeGroupAtom, activeTabIdAtom, tabGroupsAtom, type TabItem } from '~state/tabs'
@@ -12,8 +12,17 @@ import { useTheme } from '~themes/ThemeProvider'
 import { useOpenInNewTab } from './utils/useOpenInNewTab'
 import { useCloseWorkspaceTab } from './utils/useCloseWorkspaceTab'
 import { useSlideNewTab } from './utils/useSlideNewTab'
-import { commandPaletteOpenAtom, recentCommandTabIdsAtom } from './commandPalette/state'
-import { cycleIndex, isEditingTarget, workspaceShortcut } from './keyboardShortcuts'
+import {
+  commandPaletteOpenAtom,
+  recentCommandTabIdsAtom,
+  shortcutGuideOpenAtom,
+} from './commandPalette/state'
+import ShortcutGuide from './commandPalette/ShortcutGuide.web'
+import { cycleIndex, workspaceShortcut } from './keyboardShortcuts'
+import {
+  isBlockingOverlayOpen,
+  isEditingTarget,
+} from '~features/keyboard-shortcuts/keyboardTargets'
 import './commandPalette/command-palette.css'
 
 type Candidate = {
@@ -40,6 +49,7 @@ export default function WorkspaceKeyboardShortcuts({
   const { triggerSlideNewTab } = useSlideNewTab()
   const newTab = useOpenInNewTab()
   const closeTab = useCloseWorkspaceTab()
+  const [guideOpen, setGuideOpen] = useAtom(shortcutGuideOpenAtom)
   const [session, setSession] = useState<Session | null>(null)
   const sessionRef = useRef<Session | null>(null)
   const returnFocus = useRef<HTMLElement | null>(null)
@@ -94,7 +104,7 @@ export default function WorkspaceKeyboardShortcuts({
           return
         }
         const direction =
-          shortcut === 'switcher'
+          shortcut === 'recentTabs'
             ? event.shiftKey
               ? -1
               : 1
@@ -122,22 +132,18 @@ export default function WorkspaceKeyboardShortcuts({
       )
         return
       // Do not operate on the workspace underneath another modal or open menu.
-      if (
-        document.querySelector(
-          '[role="dialog"], [role="alertdialog"], [role="menu"], [aria-modal="true"]'
-        )
-      )
-        return
+      if (isBlockingOverlayOpen()) return
       event.preventDefault()
       event.stopPropagation()
       if (event.repeat) return
       const group = store.get(activeGroupAtom)
-      if (shortcut === 'new') newTab(undefined, { autoRedirect: true })
-      else if (shortcut === 'close' && pathname === '/') {
+      if (shortcut === 'newTab') newTab(undefined, { autoRedirect: true })
+      else if (shortcut === 'closeTab' && pathname === '/') {
         const tab = group.tabs[group.activeTabIndex]
         if (tab) closeTab(group, tab.id)
       } else if (shortcut === 'sidebar') toggleSidebar()
-      else if (shortcut === 'next' || shortcut === 'previous') {
+      else if (shortcut === 'guide') setGuideOpen(true)
+      else if (shortcut === 'nextTab' || shortcut === 'previousTab') {
         const tabs = store.get(tabGroupsAtom).flatMap(group =>
           group.tabs.map(tab => ({
             id: tab.id,
@@ -148,8 +154,8 @@ export default function WorkspaceKeyboardShortcuts({
           }))
         )
         const index = tabs.findIndex(tab => tab.id === store.get(activeTabIdAtom))
-        select(tabs[cycleIndex(index, shortcut === 'next' ? 1 : -1, tabs.length)])
-      } else if (shortcut === 'switcher') {
+        select(tabs[cycleIndex(index, shortcut === 'nextTab' ? 1 : -1, tabs.length)])
+      } else if (shortcut === 'recentTabs') {
         const activeId = store.get(activeTabIdAtom)
         const recent = store.get(recentCommandTabIdsAtom)
         const tabs = store.get(tabGroupsAtom).flatMap(group =>
@@ -204,67 +210,70 @@ export default function WorkspaceKeyboardShortcuts({
     }
   })
   return (
-    <Dialog.Root
-      open={!!session}
-      onOpenChange={open => {
-        if (!open) updateSession(null)
-      }}
-    >
-      <Dialog.Portal>
-        <Dialog.Overlay className="bs-command-overlay" />
-        <Dialog.Content
-          className="bs-command-dialog bs-tab-switcher"
-          style={{
-            background: theme.colors.surfaceRaised,
-            color: theme.colors.default,
-            fontFamily: webFontFamily(theme.fontFamily.text),
-          }}
-          onOpenAutoFocus={event => {
-            event.preventDefault()
-            listRef.current?.focus()
-          }}
-          onCloseAutoFocus={event => {
-            event.preventDefault()
-            if (returnFocus.current?.isConnected) returnFocus.current.focus()
-          }}
-        >
-          <Dialog.Title style={{ fontFamily: webFontFamily(theme.fontFamily.title) }}>
-            {t('hotkeys.recentTabs')}
-          </Dialog.Title>
-          <Dialog.Description>{t('hotkeys.switcherHint')}</Dialog.Description>
-          <div
-            ref={listRef}
-            role="listbox"
-            tabIndex={-1}
-            aria-label={t('hotkeys.recentTabs')}
-            aria-activedescendant={session ? `recent-tab-${session.index}` : undefined}
+    <>
+      <ShortcutGuide open={guideOpen} onOpenChange={setGuideOpen} standalone />
+      <Dialog.Root
+        open={!!session}
+        onOpenChange={open => {
+          if (!open) updateSession(null)
+        }}
+      >
+        <Dialog.Portal>
+          <Dialog.Overlay className="bs-command-overlay" />
+          <Dialog.Content
+            className="bs-command-dialog bs-tab-switcher"
+            style={{
+              background: theme.colors.surfaceRaised,
+              color: theme.colors.default,
+              fontFamily: webFontFamily(theme.fontFamily.text),
+            }}
+            onOpenAutoFocus={event => {
+              event.preventDefault()
+              listRef.current?.focus()
+            }}
+            onCloseAutoFocus={event => {
+              event.preventDefault()
+              if (returnFocus.current?.isConnected) returnFocus.current.focus()
+            }}
           >
-            {session?.tabs.map((tab, index) => (
-              <div
-                role="option"
-                id={`recent-tab-${index}`}
-                key={tab.id}
-                aria-selected={index === session.index}
-                style={{
-                  background: index === session.index ? theme.colors.lightPrimary : undefined,
-                }}
-                onMouseMove={() => updateSession({ ...session, index })}
-                onClick={() => select(tab)}
-              >
-                <span
-                  className="bs-tab-switcher-icon"
-                  aria-hidden="true"
-                  style={{ background: resolveUniverseColors(theme.colors, tab.type).background }}
+            <Dialog.Title style={{ fontFamily: webFontFamily(theme.fontFamily.title) }}>
+              {t('hotkeys.recentTabs')}
+            </Dialog.Title>
+            <Dialog.Description>{t('hotkeys.switcherHint')}</Dialog.Description>
+            <div
+              ref={listRef}
+              role="listbox"
+              tabIndex={-1}
+              aria-label={t('hotkeys.recentTabs')}
+              aria-activedescendant={session ? `recent-tab-${session.index}` : undefined}
+            >
+              {session?.tabs.map((tab, index) => (
+                <div
+                  role="option"
+                  id={`recent-tab-${index}`}
+                  key={tab.id}
+                  aria-selected={index === session.index}
+                  style={{
+                    background: index === session.index ? theme.colors.lightPrimary : undefined,
+                  }}
+                  onMouseMove={() => updateSession({ ...session, index })}
+                  onClick={() => select(tab)}
                 >
-                  <TabIcon type={tab.type} size={16} />
-                </span>
-                <span className="bs-tab-switcher-title">{tab.title}</span>
-                <small>{tab.groupName}</small>
-              </div>
-            ))}
-          </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+                  <span
+                    className="bs-tab-switcher-icon"
+                    aria-hidden="true"
+                    style={{ background: resolveUniverseColors(theme.colors, tab.type).background }}
+                  >
+                    <TabIcon type={tab.type} size={16} />
+                  </span>
+                  <span className="bs-tab-switcher-title">{tab.title}</span>
+                  <small>{tab.groupName}</small>
+                </div>
+              ))}
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+    </>
   )
 }

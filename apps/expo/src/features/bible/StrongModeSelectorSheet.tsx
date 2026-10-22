@@ -119,7 +119,7 @@ const StrongModeSelectorSheet = ({
   }
 
   useBibleKeyboardShortcut(
-    's',
+    'strongMode',
     bible.id,
     () => {
       selectMode(
@@ -127,7 +127,7 @@ const StrongModeSelectorSheet = ({
       )
     },
     // The shortcut sets the main version's mode.
-    !inline && column === 0 && availabilityQuery.isSuccess
+    { enabled: !inline && column === 0 && availabilityQuery.isSuccess }
   )
 
   const close = () => {

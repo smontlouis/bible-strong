@@ -64,6 +64,7 @@ export const routeMapping: Record<keyof MainStackProps, string> = {
   ResourceLanguage: '/resource-language',
   BibleDefaults: '/bible-defaults',
   Theme: '/theme',
+  KeyboardShortcuts: '/keyboard-shortcuts',
   WordAnnotations: '/word-annotations',
   EntityRelations: '/entity-relations',
 }

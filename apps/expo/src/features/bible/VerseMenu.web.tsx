@@ -17,11 +17,6 @@ export type VerseMenuTarget = {
   column?: number
 }
 
-/** Typing in a field keeps its keys. */
-export const isEditableTarget = (target: EventTarget | null) =>
-  target instanceof HTMLElement &&
-  (target.isContentEditable || !!target.closest('input, textarea, select, [contenteditable]'))
-
 const getVerseElement = (root: ParentNode, { verseKey, version, column }: VerseMenuTarget) => {
   if (!verseKey) return undefined
   const elements = [...root.querySelectorAll<HTMLElement>(`[data-verse-key="${verseKey}"]`)]

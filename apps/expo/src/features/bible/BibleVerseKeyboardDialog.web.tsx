@@ -32,7 +32,7 @@ export default function BibleVerseKeyboardDialog({
     setQuery('')
     setOpen(true)
   }
-  const active = useBibleKeyboardShortcut('v', bible.id, present, !!count)
+  const active = useBibleKeyboardShortcut('goToVerse', bible.id, present, { enabled: !!count })
   useTabCommands(
     [{ id: 'go-to-verse', title: t('goToVerse'), attributes: { disabled: !count } }],
     present

@@ -9,6 +9,9 @@ export const recentCommandTabIdsAtom = atom<string[]>([])
 export const commandPaletteOpenAtom = atom(false)
 export const commandPaletteReturnFocusAtom = atom<HTMLElement | null>(null)
 
+// The shortcuts guide opened with ?, outside the palette.
+export const shortcutGuideOpenAtom = atom(false)
+
 // One-shot scope supplied by category launchers; the new-tab page stays intact.
 export const commandPaletteScopeAtom = atom<string | undefined>(undefined)
 

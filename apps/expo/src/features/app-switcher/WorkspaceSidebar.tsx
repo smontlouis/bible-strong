@@ -37,6 +37,7 @@ import GroupActionsPopover from '~features/app-switcher/BottomTabBar/GroupAction
 import ViewGroupsModal from './BottomTabBar/ViewGroupsModal'
 import TabIcon, { tabIconColorConfig } from './utils/getIconByTabType'
 import { useOpenInNewTab } from './utils/useOpenInNewTab'
+import { shortcutTitle } from '~features/keyboard-shortcuts/shortcutTitle'
 import { floatingShadow, radii } from '~common/ui/surfaces'
 import { useWorkspaceSidebarWidth, workspaceSidebarVariant } from './utils/useResponsiveWorkspace'
 
@@ -364,6 +365,12 @@ const WorkspaceSidebar = ({
                                           { opacity: selected || showActions ? 1 : 0 },
                                         ]}
                                         onPress={() => closeTab(group, tab.id)}
+                                        // The shortcut closes the active tab only.
+                                        ref={shortcutTitle(
+                                          'closeTab',
+                                          t('workspace.closeTab', { title: tab.title }),
+                                          selected
+                                        )}
                                         disabled={!selected && !showActions}
                                         accessibilityRole="button"
                                         accessibilityLabel={t('workspace.closeTab', {
@@ -407,6 +414,7 @@ const WorkspaceSidebar = ({
                 className="flex-1 flex-row items-center justify-center gap-[6px] hover:bg-canvas"
                 style={{ minHeight: createHeight }}
                 onPress={addTab}
+                ref={shortcutTitle('newTab', t('tabs.new'))}
                 accessibilityRole="button"
                 accessibilityLabel={t('tabs.new')}
               >

@@ -1,71 +1,44 @@
 import * as Dialog from '@radix-ui/react-dialog'
-import type { CSSProperties } from 'react'
+import { Fragment, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '~themes/ThemeProvider'
 import { resolveFontFamily } from '~themes/styleValues'
+import { SHORTCUT_SECTIONS, isMacPlatform, shortcutKeys } from '~features/keyboard-shortcuts/keymap'
 import { paletteScopes } from './scopes'
 import { FeatherIcon } from '~common/ui/Icon'
 
 export default function ShortcutGuide({
   open,
   onOpenChange,
+  standalone = false,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** Opened with ?, outside the palette: no trigger, and closing goes back to the page. */
+  standalone?: boolean
 }) {
   const { t } = useTranslation()
   const theme = useTheme()
-  const mac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
-  const mod = mac ? '⌘' : 'Ctrl'
-  const alt = mac ? '⌥' : 'Alt'
-  const recent = mac ? 'Ctrl' : 'Alt'
-  const sections = [
-    {
-      title: t('shortcutGuide.palette'),
-      rows: [
-        [t('shortcutGuide.toggle'), `${mod} K`],
-        [t('hotkeys.tabActions'), `${mod} ⇧ K`],
-        [t('shortcutGuide.navigate'), '↑ ↓'],
-        [t('shortcutGuide.select'), '↵'],
-        [t('shortcutGuide.close'), 'Esc'],
-        [t('shortcutGuide.removeFilter'), '⌫'],
-      ],
-    },
-    {
-      title: t('shortcutGuide.workspace'),
-      rows: [
-        [t('shortcutGuide.newTab'), `${mod} ${alt} N`],
-        [t('shortcutGuide.closeTab'), `${mod} ${alt} W`],
-        [t('shortcutGuide.previousNext'), `${alt} ↑ / ↓`],
-        [t('hotkeys.recentTabs'), `${recent} Q`],
-        [t('shortcutGuide.sidebar'), `${mod} B`],
-      ],
-      note: t('shortcutGuide.recentHint', { modifier: recent }),
-    },
-    {
-      title: t('shortcutGuide.bible'),
-      rows: [
-        [t('shortcutGuide.verse'), 'V'],
-        [t('shortcutGuide.strong'), 'S'],
-      ],
-      note: t('shortcutGuide.bibleHint'),
-    },
-  ]
+  const mac = isMacPlatform()
+  const modifier = mac ? 'Ctrl' : 'Alt'
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Trigger asChild>
-        <button
-          type="button"
-          className="bs-command-help-button"
-          aria-label={t('shortcutGuide.button')}
-          title={t('shortcutGuide.button')}
-          onKeyDown={event => event.stopPropagation()}
-        >
-          <span aria-hidden="true">
-            <FeatherIcon name="help-circle" size={18} color={theme.colors.primary} />
-          </span>
-        </button>
-      </Dialog.Trigger>
+      {!standalone && (
+        <Dialog.Trigger asChild>
+          <button
+            type="button"
+            className="bs-command-help-button"
+            aria-label={t('shortcutGuide.button')}
+            title={t('shortcutGuide.button')}
+            onKeyDown={event => event.stopPropagation()}
+          >
+            <span aria-hidden="true">
+              <FeatherIcon name="help-circle" size={18} color={theme.colors.primary} />
+            </span>
+          </button>
+        </Dialog.Trigger>
+      )}
       <Dialog.Portal>
         <Dialog.Overlay className="bs-command-overlay bs-command-help-overlay" />
         <Dialog.Content
@@ -89,25 +62,35 @@ export default function ShortcutGuide({
               <Dialog.Title>{t('shortcutGuide.title')}</Dialog.Title>
               <Dialog.Description>{t('shortcutGuide.description')}</Dialog.Description>
             </div>
-            <Dialog.Close className="bs-command-help-button" aria-label={t('shortcutGuide.back')}>
+            <Dialog.Close
+              className="bs-command-help-button"
+              aria-label={t(standalone ? 'Fermer' : 'shortcutGuide.back')}
+            >
               <span aria-hidden="true">×</span>
             </Dialog.Close>
           </header>
           <div className="bs-command-help-body" tabIndex={0}>
-            {sections.map(section => (
+            {SHORTCUT_SECTIONS.map(section => (
               <section key={section.title}>
-                <h3>{section.title}</h3>
+                <h3>{t(section.title)}</h3>
                 <dl className="bs-command-help-shortcuts">
-                  {section.rows.map(([label, keys]) => (
-                    <div key={label}>
-                      <dt>{label}</dt>
+                  {section.rows.map(row => (
+                    <div key={row.label}>
+                      <dt>{t(row.label)}</dt>
                       <dd>
-                        <kbd>{keys}</kbd>
+                        {row.shortcuts.map((id, index) => (
+                          <Fragment key={id}>
+                            {index > 0 && <span aria-hidden="true">/</span>}
+                            {shortcutKeys(id, mac).map(key => (
+                              <kbd key={key}>{key}</kbd>
+                            ))}
+                          </Fragment>
+                        ))}
                       </dd>
                     </div>
                   ))}
                 </dl>
-                {section.note && <p>{section.note}</p>}
+                {section.hint && <p>{t(section.hint, { modifier })}</p>}
               </section>
             ))}
             <section>

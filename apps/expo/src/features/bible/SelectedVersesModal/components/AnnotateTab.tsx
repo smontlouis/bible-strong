@@ -9,7 +9,7 @@ import VerseTagsAction from './VerseTagsAction'
 import VerseBookmarkAction from './VerseBookmarkAction'
 import type { VerseIds } from '~common/types'
 import type { VerseActiveStates } from '../types'
-import { SELECTION_SHORTCUTS } from '../selectionShortcuts'
+import { formatShortcut } from '~features/keyboard-shortcuts/keymap'
 
 interface AnnotateTabProps {
   selectedVerses: VerseIds
@@ -55,7 +55,7 @@ const AnnotateTab = ({
         tintColor={resolveUniverseColors(theme.colors, 'notes').foreground}
         label={t('Note')}
         onPress={onCreateNoteClick}
-        shortcut={SELECTION_SHORTCUTS.note}
+        shortcut={formatShortcut('note')}
       />
       <VerseTagsAction selectedVerses={selectedVerses} reference={reference} onPress={addTag} />
       <ActionItem
@@ -63,9 +63,14 @@ const AnnotateTab = ({
         tintColor={resolveUniverseColors(theme.colors, 'links').foreground}
         label={t('Lien')}
         onPress={onCreateLinkClick}
-        shortcut={SELECTION_SHORTCUTS.link}
+        shortcut={formatShortcut('link')}
       />
-      <ActionItem name="git-merge" label={t('Relation')} onPress={onCreateStudyRelationClick} />
+      <ActionItem
+        name="git-merge"
+        label={t('Relation')}
+        onPress={onCreateStudyRelationClick}
+        shortcut={formatShortcut('relation')}
+      />
       <VerseBookmarkAction
         selectedVerses={selectedVerses}
         version={version}
@@ -79,7 +84,7 @@ const AnnotateTab = ({
         label={t('Focus')}
         onPress={onPinVerses}
         isActive={hasFocus}
-        shortcut={SELECTION_SHORTCUTS.focus}
+        shortcut={formatShortcut('focus')}
       />
     </ActionsLayout>
   )

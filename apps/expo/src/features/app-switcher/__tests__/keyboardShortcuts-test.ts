@@ -17,26 +17,27 @@ describe('workspace keyboard shortcuts', () => {
     expect(workspaceShortcut(event, true)).toBeUndefined()
     expect(workspaceShortcut(event, false)).toBeUndefined()
     expect(workspaceShortcut({ ...event, key: 'b', metaKey: true }, true)).toBe('sidebar')
-    expect(
-      workspaceShortcut({ ...event, key: 'n', ctrlKey: true, altKey: true }, false)
-    ).toBeUndefined()
+    expect(workspaceShortcut({ ...event, key: 't', altKey: true }, false)).toBe('newTab')
   })
-  it('handles Option alternate characters on Mac', () => {
+  it('opens and closes tabs with Control on a Mac, Alt elsewhere', () => {
+    expect(workspaceShortcut(key({ key: 't', code: 'KeyT', ctrlKey: true }), true)).toBe('newTab')
+    expect(workspaceShortcut(key({ key: 'w', code: 'KeyW', ctrlKey: true }), true)).toBe('closeTab')
+    expect(workspaceShortcut(key({ key: 't', code: 'KeyT', altKey: true }), false)).toBe('newTab')
+    expect(workspaceShortcut(key({ key: 'w', code: 'KeyW', altKey: true }), false)).toBe('closeTab')
+  })
+  it('leaves the old Cmd Option combinations to the browser', () => {
     expect(
       workspaceShortcut(key({ key: '˜', code: 'KeyN', metaKey: true, altKey: true }), true)
-    ).toBe('new')
+    ).toBeUndefined()
     expect(
       workspaceShortcut(key({ key: '∑', code: 'KeyW', metaKey: true, altKey: true }), true)
-    ).toBe('close')
+    ).toBeUndefined()
   })
-  it('respects AZERTY letters, including Option-transformed W', () => {
-    expect(workspaceShortcut(key({ key: 'q', code: 'KeyA', ctrlKey: true }), true)).toBe('switcher')
-    expect(
-      workspaceShortcut(
-        key({ key: '‹', code: 'KeyZ', keyCode: 87, metaKey: true, altKey: true }),
-        true
-      )
-    ).toBe('close')
+  it('respects AZERTY letters', () => {
+    expect(workspaceShortcut(key({ key: 'q', code: 'KeyA', ctrlKey: true }), true)).toBe(
+      'recentTabs'
+    )
+    expect(workspaceShortcut(key({ key: 'w', code: 'KeyZ', ctrlKey: true }), true)).toBe('closeTab')
   })
   it('does not intercept browser tabs or OS app switching', () => {
     for (const mac of [true, false]) {
@@ -50,10 +51,7 @@ describe('workspace keyboard shortcuts', () => {
   })
   it('ignores composition and AltGr character input', () => {
     expect(
-      workspaceShortcut(
-        key({ code: 'KeyN', altKey: true, ctrlKey: true, isComposing: true }),
-        false
-      )
+      workspaceShortcut(key({ code: 'KeyT', altKey: true, isComposing: true }), false)
     ).toBeUndefined()
     expect(
       workspaceShortcut(
@@ -69,12 +67,17 @@ describe('workspace keyboard shortcuts', () => {
   })
   it('supports reverse recent switching without catching Cmd Q', () => {
     expect(workspaceShortcut(key({ code: 'KeyQ', ctrlKey: true, shiftKey: true }), true)).toBe(
-      'switcher'
+      'recentTabs'
     )
     expect(workspaceShortcut(key({ code: 'KeyQ', altKey: true, shiftKey: true }), false)).toBe(
-      'switcher'
+      'recentTabs'
     )
     expect(workspaceShortcut(key({ code: 'KeyQ', metaKey: true }), true)).toBeUndefined()
+  })
+  it('moves between tabs with Option and opens the guide with ?', () => {
+    expect(workspaceShortcut(key({ key: 'ArrowUp', altKey: true }), true)).toBe('previousTab')
+    expect(workspaceShortcut(key({ key: 'ArrowDown', altKey: true }), false)).toBe('nextTab')
+    expect(workspaceShortcut(key({ key: '?', code: 'Comma', shiftKey: true }), true)).toBe('guide')
   })
   it('wraps in both directions and handles an empty group', () => {
     expect(cycleIndex(0, -1, 3)).toBe(2)

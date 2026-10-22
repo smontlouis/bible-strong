@@ -8,7 +8,7 @@ import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useSelectionMenu } from '../selectionMenuContext'
-import { SELECTION_SHORTCUTS } from '../selectionShortcuts'
+import { formatShortcut } from '~features/keyboard-shortcuts/keymap'
 import ActionItem from './ActionItem'
 import type { VerseTagsActionProps } from './VerseTagsAction'
 
@@ -23,7 +23,7 @@ export default function VerseTagsAction(props: VerseTagsActionProps) {
         tintColor={resolveUniverseColors(theme.colors, 'tags').foreground}
         label={t('Tag')}
         onPress={() => menu.openScreen('tags')}
-        shortcut={SELECTION_SHORTCUTS.tag}
+        shortcut={formatShortcut('tags')}
         nested
       />
     )

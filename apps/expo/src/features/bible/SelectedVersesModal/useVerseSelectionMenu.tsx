@@ -8,6 +8,9 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useBibleBookmarkScreens } from '~features/bookmarks/useBibleBookmarkScreens'
 import { useAddToStudyScreens } from '~features/studies/useAddToStudyScreens'
+import { isEditingTarget } from '~features/keyboard-shortcuts/keyboardTargets'
+import { digitOf, findShortcut, matchShortcut } from '~features/keyboard-shortcuts/keymap'
+import { useColorItems } from '~helpers/useHighlightColors'
 import verseToReference from '../../../helpers/verseToReference'
 import {
   BIBLE_SELECTION_MENU_WIDTH,
@@ -15,7 +18,6 @@ import {
 } from '../bibleSelectionMenuContent'
 import ColorCirclesBar from '../ColorCirclesBar'
 import { getSelectedVersesBookmarkLocation } from '../selectedVersesActions'
-import { isEditableTarget } from '../VerseMenu.web'
 import AnnotateTab from './components/AnnotateTab'
 import SelectionMenuTabs from './components/SelectionMenuTabs'
 import ShareTab from './components/ShareTab'
@@ -25,8 +27,29 @@ import useVerseActiveStates from './hooks/useVerseActiveStates'
 import { selectedVersesTabIndexAtom } from './selectedVersesTabIndex'
 import { SelectionMenuContext, type SelectionMenu } from './selectionMenuContext'
 import { SELECTION_GROUP_WIDTH } from './selectionSheetLayout'
-import { SELECTION_SHORTCUTS, type SelectionShortcut } from './selectionShortcuts'
 import type { SelectedVersesModalProps } from './types'
+
+const SELECTION_SHORTCUTS = [
+  'highlight',
+  'removeHighlight',
+  'note',
+  'tags',
+  'link',
+  'relation',
+  'bookmark',
+  'addToStudy',
+  'focus',
+  'lexicon',
+  'dictionary',
+  'topics',
+  'references',
+  'commentary',
+  'compare',
+  'copy',
+  'selectAll',
+] as const
+
+type SelectionShortcutId = (typeof SELECTION_SHORTCUTS)[number]
 
 /**
  * The selected verses in the desktop selection menu: the colors and three groups of actions of the
@@ -101,43 +124,50 @@ export default function useVerseSelectionMenu(
   }
 
   const moreThanOneVerseSelected = Object.keys(selectedVerses).length > 1
-  const shortcuts: Partial<Record<SelectionShortcut | 'copy', (menu: SelectionMenu) => void>> = {
+  const single = !moreThanOneVerseSelected
+  // The digits pick the colours in the order of the bar above the actions.
+  const colorItems = useColorItems()
+  const shortcuts: Partial<Record<SelectionShortcutId, (event: KeyboardEvent) => void>> = {
+    highlight: event => {
+      const color = colorItems[(digitOf(event) ?? 0) - 1]?.key
+      if (!color) return
+      if (color === selectedVerseHighlightColor) removeHighlight()
+      else addHighlight(color)
+    },
+    removeHighlight: selectedVerseHighlightColor ? removeHighlight : undefined,
     note: onCreateNoteClick,
-    tag: current => current.openScreen('tags'),
+    tags: () => menu.openScreen('tags'),
     link: onCreateLinkClick,
-    bookmark: moreThanOneVerseSelected ? undefined : current => current.openScreen('bookmark'),
+    relation: onCreateStudyRelationClick,
+    bookmark: single && location ? () => menu.openScreen('bookmark') : undefined,
+    addToStudy: study.available ? () => menu.openScreen('study') : onAddToStudy,
     focus: onPinVerses,
-    references: moreThanOneVerseSelected ? undefined : onOpenReferences,
+    lexicon: single ? showStrongDetail : undefined,
+    dictionary: single ? showDictionaryDetail : undefined,
+    topics: single ? onOpenNave : undefined,
+    references: single ? onOpenReferences : undefined,
+    commentary: single ? openCommentariesScreen : undefined,
     compare: compareVerses,
     copy: copyToClipboard,
+    selectAll: selectAllVerses,
   }
 
   useEffect(() => {
     if (!isShown) return
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.defaultPrevented || event.isComposing || isEditableTarget(event.target)) return
-      if (event.key === 'Escape') {
+      if (event.defaultPrevented || isEditingTarget(event.target)) return
+      if (matchShortcut(event, 'deselect')) {
         event.preventDefault()
         clearSelectedVerses()
         return
       }
-      if (!isOpen.current) return
-      const command = event.metaKey || event.ctrlKey
-      if (command && !event.altKey && !event.shiftKey && event.key.toLowerCase() === 'c') {
-        // Copying text the reader selected by hand keeps the browser's behaviour.
-        if (!window.getSelection()?.isCollapsed || !shortcuts.copy) return
-        event.preventDefault()
-        shortcuts.copy(menu)
-        return
-      }
-      if (command || event.altKey || event.repeat) return
-      const action = (Object.keys(SELECTION_SHORTCUTS) as SelectionShortcut[]).find(
-        name => SELECTION_SHORTCUTS[name] === event.key.toUpperCase()
-      )
+      if (!isOpen.current || event.repeat) return
+      const action = findShortcut(event, SELECTION_SHORTCUTS)
       const handler = action && shortcuts[action]
-      if (!handler) return
+      // Copying text the reader selected by hand keeps the browser's behaviour.
+      if (!handler || (action === 'copy' && !window.getSelection()?.isCollapsed)) return
       event.preventDefault()
-      handler(menu)
+      handler(event)
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)

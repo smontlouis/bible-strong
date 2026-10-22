@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import Box, { RightInsetCleared, TouchableBox, useRightInsetToClear } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import BibleViewport from './BibleViewport'
+import BibleReaderShortcuts from './BibleReaderShortcuts'
 import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
 import { BibleError, BibleLoadingError } from '~helpers/bibleErrors'
 import { usePrevious } from '~helpers/usePrevious'
@@ -1615,6 +1616,16 @@ const BibleViewer = ({
       style={{ paddingRight: isFormSheet ? 0 : rightInset }}
     >
       <RightInsetCleared>
+        <BibleReaderShortcuts
+          tabId={bible.id}
+          version={selectionVersion}
+          selectedVerses={selectedVerses}
+          canChangeChapter={!isLoading && !isContextFocused && !isAnnotating}
+          canSelect={!isAnnotating && !hidePersonalBibleData}
+          onPreviousChapter={goToPrevAvailableChapter}
+          onNextChapter={goToNextAvailableChapter}
+          onSelect={verses => actions.selectAllVerses(verses, selectionVersion)}
+        />
         <BibleHeader
           onNavigateToVerse={destination => {
             // A plan keeps its passage: reaching another verse only opens the whole chapter.

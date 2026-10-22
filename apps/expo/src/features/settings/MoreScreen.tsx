@@ -248,6 +248,13 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
             icon={<FeatherIcon name="book-open" size={18} color="grey" />}
             label={t('bibleDefaults.title')}
           />
+          {Platform.OS === 'web' && (
+            <ListRow
+              route="KeyboardShortcuts"
+              icon={<FeatherIcon name="command" size={18} color="grey" />}
+              label={t('settings.keyboardShortcuts')}
+            />
+          )}
           {Platform.OS !== 'web' && (
             <ListRow
               route="Downloads"

@@ -21,6 +21,7 @@ jest.mock('~common/useTabCommands', () => ({
 
 const listeners = new Map<string, (event: KeyboardEvent) => void>()
 let mockOverlay = false
+let mockVerseMenu = false
 class ElementTarget {
   isContentEditable = false
   constructor(public editing = false) {}
@@ -37,6 +38,7 @@ beforeEach(() => {
   mockPath = '/'
   mockPalette = false
   mockOverlay = false
+  mockVerseMenu = false
   Object.defineProperty(globalThis, 'HTMLElement', { configurable: true, value: ElementTarget })
   Object.defineProperty(globalThis, 'document', {
     configurable: true,
@@ -44,7 +46,10 @@ beforeEach(() => {
       addEventListener: (name: string, handler: (event: KeyboardEvent) => void) =>
         listeners.set(name, handler),
       removeEventListener: (name: string) => listeners.delete(name),
-      querySelector: () => (mockOverlay ? {} : null),
+      // A dialog inside the menu beside the verses lets the reader's keys through.
+      querySelectorAll: () =>
+        mockOverlay || mockVerseMenu ? [{ closest: () => (mockVerseMenu ? {} : null) }] : [],
+      querySelector: () => (mockVerseMenu ? {} : null),
     },
   })
 })
@@ -56,20 +61,23 @@ afterEach(() => {
   if (originalHTMLElement) Object.defineProperty(globalThis, 'HTMLElement', originalHTMLElement)
   else Reflect.deleteProperty(globalThis, 'HTMLElement')
 })
-function Shortcut({ run }: { run: () => void }) {
-  useBibleKeyboardShortcut('s', 'bible-a', run)
+function Shortcut({ run, besideVerseMenu }: { run: () => void; besideVerseMenu?: boolean }) {
+  useBibleKeyboardShortcut(besideVerseMenu ? 'nextVerse' : 'strongMode', 'bible-a', run, {
+    besideVerseMenu,
+  })
   return null
 }
-function tree(run: () => void) {
+function tree(run: () => void, besideVerseMenu?: boolean) {
   return (
     <TabCommandContext.Provider value="bible-a">
-      <Shortcut run={run} />
+      <Shortcut run={run} besideVerseMenu={besideVerseMenu} />
     </TabCommandContext.Provider>
   )
 }
-function press(editing = false) {
+function press(editing = false, key = 's') {
   const event = {
-    key: 's',
+    key,
+    code: `Key${key.toUpperCase()}`,
     repeat: false,
     isComposing: false,
     altKey: false,
@@ -114,4 +122,15 @@ it('leaves typing, open panels and the command palette alone', () => {
   act(() => view.update(tree(run)))
   press()
   expect(run).not.toHaveBeenCalled()
+})
+it('leaves letters to the menu beside the verses unless the shortcut moves the selection', () => {
+  const run = jest.fn()
+  act(() => {
+    view = create(tree(run))
+  })
+  mockVerseMenu = true
+  expect(press().preventDefault).not.toHaveBeenCalled()
+  act(() => view.update(tree(run, true)))
+  press(false, 'j')
+  expect(run).toHaveBeenCalledTimes(1)
 })
