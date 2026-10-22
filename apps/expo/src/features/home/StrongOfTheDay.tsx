@@ -1,20 +1,10 @@
 import { getSimpleStrongModuleId } from '@bible-strong/resource-domain/strong-lexicon'
 import { getPrimaryStrongLexiconAvailability } from '~features/resources/layeredStrongLexiconAccess'
 import ResourceDiscoveryEntry from './ResourceDiscoveryEntry'
-import { resolveFontFamily } from '~themes/styleValues'
-import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
-import { LinearGradient } from 'expo-linear-gradient'
 import { useQuery } from '@tanstack/react-query'
-import React, { useState } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
-import LexiqueIcon from '~common/LexiqueIcon'
-import Link from '~common/Link'
-import Box from '~common/ui/Box'
-import Paragraph from '~common/ui/Paragraph'
-import Text from '~common/ui/Text'
-import truncate from '~helpers/truncate'
-import RandomButton from './RandomButton'
-import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
+import { WidgetContainer, WidgetLoading } from './widget'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 import { localQueryOptions } from '~helpers/queryOptions'
@@ -30,26 +20,15 @@ import {
 import ResourceDownloadWidget from './ResourceDownloadWidget'
 type StrongOfTheDayProps = {
   type: 'grec' | 'hebreu'
-  discovery?: boolean
-  color1?: string
-  color2?: string
 }
 
-const StrongOfTheDay = ({
-  type,
-  discovery = false,
-  color1 = 'rgb(69,150,220)',
-  color2 = 'rgb(89,131,240)',
-}: StrongOfTheDayProps) => {
-  const stylingTheme = useStylingTheme()
-
+const StrongOfTheDay = ({ type }: StrongOfTheDayProps) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const resourceLanguage = useAtomValue(resourcesLanguageAtom).STRONG
   const isConnected = useConnection()
   const resourceTitle = t('Lexique Strong')
 
-  const [randomSeed, setRandomSeed] = useState(0)
   const availabilityQuery = useQuery({
     queryKey: [
       ...resourceQueryKeys.strongLexiconAvailability(getSimpleStrongModuleId(resourceLanguage)),
@@ -68,7 +47,7 @@ const StrongOfTheDay = ({
     staleTime: Infinity,
   })
   const strongQuery = useQuery({
-    queryKey: ['home-strong-random', type, resourceLanguage, randomSeed, isConnected],
+    queryKey: ['home-strong-random', type, resourceLanguage, isConnected],
     queryFn: async (): Promise<StrongLexiconSearchResult | null> =>
       (await resources.strongLexicon.random(
         type === 'grec' ? 'greek' : 'hebrew',
@@ -76,7 +55,7 @@ const StrongOfTheDay = ({
       )) ?? null,
     ...localQueryOptions,
     // A remount (the home switching layout as its width changes) keeps the draw; the shuffle
-    // button draws again by changing randomSeed.
+    // button draws again by refetching.
     staleTime: Infinity,
   })
   const strongReference = strongQuery.data
@@ -165,70 +144,15 @@ const StrongOfTheDay = ({
   const { original, gloss, stepCode, language } = strongReference
   const book = language === 'greek' ? 40 : 1
 
-  if (discovery)
-    return (
-      <ResourceDiscoveryEntry
-        category={t(type === 'hebreu' ? 'Hébreu' : 'Grec')}
-        original={original}
-        title={gloss}
-        detail={{ route: 'Strong', params: { book, reference: stepCode } }}
-        isRefreshing={strongQuery.isFetching}
-        onShuffle={() => void strongQuery.refetch()}
-      />
-    )
-
   return (
-    <Link route="Strong" params={{ book, reference: stepCode }}>
-      <WidgetContainer>
-        <Box
-          className="overflow-hidden border-continuous"
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            top: 0,
-            height: itemHeight,
-          }}
-        >
-          <LinearGradient start={[0.1, 0.2]} style={{ height: 130 }} colors={[color1, color2]} />
-        </Box>
-        <RandomButton onPress={() => setRandomSeed(seed => seed + 1)} />
-        <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center mt-[20px]">
-          <Box className="overflow-hidden border-continuous bg-[rgba(0,0,0,0.1)] px-[5px] py-[3px] rounded-full">
-            <Text className="text-[10px]" style={{ color: 'white' }}>
-              {type === 'grec' ? t('Grec') : t('Hébreu')}
-            </Text>
-          </Box>
-          <Paragraph
-            scale={-2}
-            style={[
-              { fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) },
-              { color: 'white' },
-            ]}
-          >
-            {truncate(gloss, 10)}
-          </Paragraph>
-          <Paragraph
-            className="mb-[3px]"
-            style={{ color: 'white', opacity: 0.5 }}
-            scale={-3}
-            scaleLineHeight={-2}
-          >
-            {truncate(original, 10)}
-          </Paragraph>
-        </Box>
-        <Link
-          route="Lexique"
-          params={{ lexicalLanguage: type === 'grec' ? 'greek' : 'hebrew' }}
-          style={{ width: '100%' }}
-        >
-          <Box className="overflow-hidden border-continuous flex-row items-center justify-center bg-[rgba(0,0,0,0.04)] py-[10px]">
-            <LexiqueIcon style={{ marginRight: 10 }} size={20} color="white" />
-            <Text className="text-[white] font-bold text-[12px]">{t('Lexique')}</Text>
-          </Box>
-        </Link>
-      </WidgetContainer>
-    </Link>
+    <ResourceDiscoveryEntry
+      category={t(type === 'hebreu' ? 'Hébreu' : 'Grec')}
+      original={original}
+      title={gloss}
+      detail={{ route: 'Strong', params: { book, reference: stepCode } }}
+      isRefreshing={strongQuery.isFetching}
+      onShuffle={() => void strongQuery.refetch()}
+    />
   )
 }
 

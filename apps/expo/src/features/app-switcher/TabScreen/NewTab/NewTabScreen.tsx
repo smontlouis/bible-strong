@@ -14,7 +14,6 @@ import { useComputedPlanItems } from '~features/plans/plan.hooks'
 import { NewTab, TabItem } from '../../../../state/tabs'
 import NewTabContent from './NewTabContent'
 import { useTheme } from '~themes/ThemeProvider'
-import { SelectBibleReferenceModalProvider } from './SelectBibleReferenceModalProvider'
 import SheetWell from '~common/ui/SheetWell'
 import { ListSeparator } from '~common/ui/ListSection'
 export interface NewTabScreenProps {
@@ -34,65 +33,63 @@ const NewTabScreen = ({ newAtom }: NewTabScreenProps) => {
   const plans = useComputedPlanItems()
 
   return (
-    <SelectBibleReferenceModalProvider>
-      <Box className="flex-1 bg-canvas">
-        <ScrollView
+    <Box className="flex-1 bg-canvas">
+      <ScrollView
+        style={{
+          flex: 1,
+          backgroundColor: theme.colors.canvas,
+          ...(Platform.OS === 'web' ? { scrollbarGutter: 'stable' } : {}),
+        }}
+        contentInsetAdjustmentBehavior="never"
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
+        <Box
+          className="w-full self-center"
           style={{
-            flex: 1,
-            backgroundColor: theme.colors.canvas,
-            ...(Platform.OS === 'web' ? { scrollbarGutter: 'stable' } : {}),
+            maxWidth: 800,
+            paddingHorizontal: dense ? 20 : 24,
+            paddingTop: insets.top + (dense ? 24 : 44),
+            paddingBottom: bottomBarHeight + 40,
           }}
-          contentInsetAdjustmentBehavior="never"
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ flexGrow: 1 }}
         >
-          <Box
-            className="w-full self-center"
-            style={{
-              maxWidth: 800,
-              paddingHorizontal: dense ? 20 : 24,
-              paddingTop: insets.top + (dense ? 24 : 44),
-              paddingBottom: bottomBarHeight + 40,
-            }}
-          >
-            <NewTabContent
-              tabAtom={newAtom as unknown as PrimitiveAtom<TabItem>}
-              onPlanPress={() => planSelectorRef.current?.present()}
+          <NewTabContent
+            tabAtom={newAtom as unknown as PrimitiveAtom<TabItem>}
+            onPlanPress={() => planSelectorRef.current?.present()}
+          />
+        </Box>
+      </ScrollView>
+      <Sheet ref={planSelectorRef} snapPoints={[1]} header={<SheetHeader title={t('Plans')} />}>
+        <SheetScrollView>
+          {plans.length ? (
+            <SheetWell className="mx-[20px] my-[20px]">
+              {plans.map((plan, index) => (
+                <React.Fragment key={plan.id}>
+                  {index > 0 && <ListSeparator />}
+                  <PlanItem
+                    {...plan}
+                    onPress={() => {
+                      planSelectorRef.current?.dismiss()
+                      setTab(tab => ({
+                        ...tab,
+                        title: plan.title,
+                        type: 'plan',
+                        data: { planId: plan.id },
+                      }))
+                    }}
+                  />
+                </React.Fragment>
+              ))}
+            </SheetWell>
+          ) : (
+            <Empty
+              icon={require('~assets/images/empty-state-icons/plan.svg')}
+              message={t("Vous n'avez aucun plan...")}
             />
-          </Box>
-        </ScrollView>
-        <Sheet ref={planSelectorRef} snapPoints={[1]} header={<SheetHeader title={t('Plans')} />}>
-          <SheetScrollView>
-            {plans.length ? (
-              <SheetWell className="mx-[20px] my-[20px]">
-                {plans.map((plan, index) => (
-                  <React.Fragment key={plan.id}>
-                    {index > 0 && <ListSeparator />}
-                    <PlanItem
-                      {...plan}
-                      onPress={() => {
-                        planSelectorRef.current?.dismiss()
-                        setTab(tab => ({
-                          ...tab,
-                          title: plan.title,
-                          type: 'plan',
-                          data: { planId: plan.id },
-                        }))
-                      }}
-                    />
-                  </React.Fragment>
-                ))}
-              </SheetWell>
-            ) : (
-              <Empty
-                icon={require('~assets/images/empty-state-icons/plan.svg')}
-                message={t("Vous n'avez aucun plan...")}
-              />
-            )}
-          </SheetScrollView>
-        </Sheet>
-      </Box>
-    </SelectBibleReferenceModalProvider>
+          )}
+        </SheetScrollView>
+      </Sheet>
+    </Box>
   )
 }
 

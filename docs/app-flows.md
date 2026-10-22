@@ -247,7 +247,7 @@ Flows:
 
 ## Lecture Bible
 
-Routes: `/bible-view`, `/bible-select`, `/version-selector`, `/bible-verse-detail`, onglet `bible`; composants principaux: `BibleScreen`, `BibleTabScreen`, `BibleViewer`, `BibleDOM`, `BibleHeader`, `BibleFooter`.
+Routes: `/bible-view`, `/version-selector`, `/bible-verse-detail`, onglet `bible`; composants principaux: `BibleScreen`, `BibleTabScreen`, `BibleViewer`, `BibleDOM`, `BibleHeader`, `BibleFooter`.
 
 But: décrire la surface Bible. Les workflows concrets sont séparés dans `curated-flows.json` pour éviter de mélanger lecture, réglages, téléchargement, comparaison, péricopes et annotations dans un seul parcours.
 
@@ -276,7 +276,6 @@ Structure:
 
 | Route | Utilité |
 |---|---|
-| `/bible-select` | Sélection Bible livre/chapitre/verset pour un onglet Bible. |
 | `/version-selector` | Sélection de version principale ou parallèle. |
 | `/bible-verse-detail` | Détail d'un verset, navigation vers notes/liens/commentaires et actions contextuelles. |
 | `/pericope` | Navigation dans les péricopes ou sections thématiques du texte biblique. |
@@ -691,7 +690,6 @@ Routes: `/faq`, `/support`, `/changelog`.
 | `/login` | `LoginScreen` | Connexion. |
 | `/register` | `RegisterScreen` | Création de compte. |
 | `/forgot-password` | `ForgotPasswordScreen` | Réinitialisation mot de passe. |
-| `/bible-select` | `BibleSelect` | Sélection livre/chapitre/verset héritée. |
 | `/version-selector` | `VersionSelector` | Sélection version principale ou parallèle. |
 | `/bible-view` | `BibleScreen` | Lecture Bible. |
 | `/bible-verse-detail` | `BibleVerseDetailScreen` | Détail d'un verset biblique. |

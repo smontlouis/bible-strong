@@ -23,10 +23,10 @@ const HomeDiscovery = () => {
   const { t } = useTranslation()
   const { content, wide } = useHomeLayout()
   const cards = [
-    { id: 'greek', kind: 'strong' as const, entry: <StrongOfTheDay type="grec" discovery /> },
-    { id: 'hebrew', kind: 'strong' as const, entry: <StrongOfTheDay type="hebreu" discovery /> },
-    { id: 'nave', kind: 'nave' as const, entry: <NaveOfTheDay discovery /> },
-    { id: 'dictionary', kind: 'dictionary' as const, entry: <WordOfTheDay discovery /> },
+    { id: 'greek', kind: 'strong' as const, entry: <StrongOfTheDay type="grec" /> },
+    { id: 'hebrew', kind: 'strong' as const, entry: <StrongOfTheDay type="hebreu" /> },
+    { id: 'nave', kind: 'nave' as const, entry: <NaveOfTheDay /> },
+    { id: 'dictionary', kind: 'dictionary' as const, entry: <WordOfTheDay /> },
   ]
 
   const items = cards.map(card => (

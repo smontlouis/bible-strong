@@ -90,7 +90,11 @@ jest.mock('~features/resources/ResourceUnavailableView', () => {
   return (props: Record<string, unknown>) =>
     ReactModule.createElement('ResourceUnavailableView', props)
 })
-jest.mock('../RandomButton', () => () => null)
+jest.mock('../ResourceDiscoveryEntry', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return (props: Record<string, unknown>) =>
+    ReactModule.createElement('ResourceDiscoveryEntry', props)
+})
 jest.mock('../widget', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
   return {
@@ -251,8 +255,8 @@ describe('Home resource download widgets', () => {
     act(() => {
       renderer = create(<WordOfTheDay />)
     })
-    const link = renderer.root.find(node => String(node.type) === 'Link')
-    expect(link.props.params).toMatchObject({
+    const entry = renderer.root.find(node => String(node.type) === 'ResourceDiscoveryEntry')
+    expect(entry.props.detail.params).toMatchObject({
       work: 'bost',
       resourceId: 'BOST',
       entryId: '42001',

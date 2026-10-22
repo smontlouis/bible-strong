@@ -13,7 +13,6 @@ export const routeMapping: Record<keyof MainStackProps, string> = {
   More: '/more',
   Home: '/home',
   Profile: '/profile',
-  BibleSelect: '/bible-select',
   VersionSelector: '/version-selector',
   BibleVerseDetail: '/bible-verse-detail',
   BibleVerseNotes: '/bible-verse-notes',

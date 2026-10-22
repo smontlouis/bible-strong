@@ -1,17 +1,10 @@
 import ResourceDiscoveryEntry from './ResourceDiscoveryEntry'
-import { LinearGradient } from 'expo-linear-gradient'
 import { useQuery } from '@tanstack/react-query'
-import React, { useState } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
-import DictionnaireIcon from '~common/DictionnaryIcon'
-import Link from '~common/Link'
-import Box from '~common/ui/Box'
-import Paragraph from '~common/ui/Paragraph'
-import Text from '~common/ui/Text'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import useLanguage from '~helpers/useLanguage'
-import RandomButton from './RandomButton'
-import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
+import { WidgetContainer, WidgetLoading } from './widget'
 import { localQueryOptions } from '~helpers/queryOptions'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import useConnection from '~helpers/useConnection'
@@ -27,11 +20,7 @@ import {
   useOfflineResourceRegistry,
   getOfflineResourceQuerySignal,
 } from '~features/resources/useOfflineResourceRegistry'
-const DictionnaireOfTheDay = ({
-  discovery = false,
-  color1 = 'rgba(86,204,242,1)',
-  color2 = 'rgba(47,128,237,1)',
-}) => {
+const DictionnaireOfTheDay = () => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const lang = useLanguage()
@@ -47,7 +36,6 @@ const DictionnaireOfTheDay = ({
     language: lang,
   }
   const resourceSignal = getOfflineResourceQuerySignal(registry, resourceIdentity)
-  const [randomSeed, setRandomSeed] = useState(0)
   const availabilityQuery = useQuery({
     queryKey: [
       ...resourceQueryKeys.offlineDatabaseAvailability('DICTIONNAIRE', lang),
@@ -62,11 +50,11 @@ const DictionnaireOfTheDay = ({
     staleTime: Infinity,
   })
   const strongQuery = useQuery({
-    queryKey: ['home-dictionary-random', lang, work, resourceSignal, randomSeed, isConnected],
+    queryKey: ['home-dictionary-random', lang, work, resourceSignal, isConnected],
     queryFn: () => loadDictionaryWidgetEntry(resources.dictionary, lang, work),
     ...localQueryOptions,
     // A remount (the home switching layout as its width changes) keeps the draw; the shuffle
-    // button draws again by changing randomSeed.
+    // button draws again by refetching.
     staleTime: Infinity,
   })
   const strongReference = strongQuery.data
@@ -138,70 +126,24 @@ const DictionnaireOfTheDay = ({
 
   const { word } = strongReference
 
-  if (discovery)
-    return (
-      <ResourceDiscoveryEntry
-        category={t('tabs.dictionary')}
-        title={word}
-        detail={{
-          route: 'DictionnaryDetail',
-          params: {
-            word,
-            entryId: String(strongReference.id),
-            work,
-            resourceId: dictionary.resourceId,
-            dictionaryTitle: dictionary.title,
-            language: lang,
-          },
-        }}
-        isRefreshing={strongQuery.isFetching}
-        onShuffle={() => void strongQuery.refetch()}
-      />
-    )
-
   return (
-    <Link
-      route="DictionnaryDetail"
-      params={{
-        word,
-        entryId: String(strongReference.id),
-        work,
-        resourceId: dictionary.resourceId,
-        dictionaryTitle: dictionary.title,
-        language: lang,
+    <ResourceDiscoveryEntry
+      category={t('tabs.dictionary')}
+      title={word}
+      detail={{
+        route: 'DictionnaryDetail',
+        params: {
+          word,
+          entryId: String(strongReference.id),
+          work,
+          resourceId: dictionary.resourceId,
+          dictionaryTitle: dictionary.title,
+          language: lang,
+        },
       }}
-    >
-      <WidgetContainer>
-        <Box
-          className="overflow-hidden border-continuous"
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            top: 0,
-            height: itemHeight,
-          }}
-        >
-          <LinearGradient
-            start={[0.1, 0.2]}
-            style={{ height: itemHeight }}
-            colors={[color1, color2]}
-          />
-        </Box>
-        <RandomButton onPress={() => setRandomSeed(seed => seed + 1)} />
-        <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center">
-          <Paragraph className="mt-[20px] text-[white]" scale={-2} scaleLineHeight={-2}>
-            {word}
-          </Paragraph>
-        </Box>
-        <Link route="Dictionnaire" style={{ width: '100%' }}>
-          <Box className="overflow-hidden border-continuous flex-row items-center justify-center bg-[rgba(0,0,0,0.04)] py-[10px]">
-            <DictionnaireIcon style={{ marginRight: 10 }} size={20} color="white" />
-            <Text className="text-[white] font-bold text-[12px]">{t('Dictionnaires')}</Text>
-          </Box>
-        </Link>
-      </WidgetContainer>
-    </Link>
+      isRefreshing={strongQuery.isFetching}
+      onShuffle={() => void strongQuery.refetch()}
+    />
   )
 }
 
