@@ -1,10 +1,8 @@
 import { getReadingTypography, type ReadingTypography } from '~common/readingHtml'
 import { useReferencePreview } from '~features/bibleReferencePreview/state'
-import { twMerge } from '~common/ui/classNames'
 
-import PageContent from '~common/ui/PageContent'
-import Card from '~common/ui/Card'
-import { ListSectionTitle, ListSeparator } from '~common/ui/ListSection'
+import { ListSeparator } from '~common/ui/ListSection'
+import { StudyRowsCard } from '~common/ui/StudySection'
 import { formatStrongDisplayCode } from '~helpers/strongIdentities'
 import { Image } from 'expo-image'
 import { useTheme } from '~themes/ThemeProvider'
@@ -12,7 +10,6 @@ import React from 'react'
 import {
   Linking,
   Text as NativeText,
-  type LayoutChangeEvent,
   type NativeSyntheticEvent,
   type TextLayoutEventData,
 } from 'react-native'
@@ -41,150 +38,6 @@ import {
 } from './strongDetailPreview'
 import { getStrongEntityAvatarSource } from './strongEntityAvatars'
 import { isStrongOriginalUnnamed } from './strongOriginalPresentation'
-/** Where the text of a Strong page's cards starts: their inner margin and the start of their hairlines. */
-export const STRONG_CARD_INSET = 16
-
-/** The width of a Strong page's column on a wide screen. */
-export const STRONG_COLUMN_MAX_WIDTH = 600
-
-/** Rows in one card, split by hairlines that start where their text starts. */
-export const StrongRowsCard = ({ children }: { children: React.ReactNode }) => {
-  const rows = React.Children.toArray(children)
-  return (
-    <Card>
-      {rows.map((row, index) => (
-        <React.Fragment key={React.isValidElement(row) && row.key != null ? row.key : index}>
-          {index > 0 && <ListSeparator inset={STRONG_CARD_INSET} />}
-          {row}
-        </React.Fragment>
-      ))}
-    </Card>
-  )
-}
-
-/** Text set inside a card, at its inner margin. */
-export const StrongCardBody = ({
-  children,
-  className,
-}: {
-  children: React.ReactNode
-  className?: string
-}) => <VStack className={twMerge('p-[16px] gap-[12px]', className)}>{children}</VStack>
-
-/**
- * A section of a Strong page: its title on the canvas, its content in a card. `body` sets the
- * content at the card's margin, `rows` splits rows by hairlines, `none` leaves the content on the
- * canvas. With `onToggle`, the card opens on a row that names the content.
- */
-export const StrongEditorialSection = ({
-  title,
-  children,
-  onLayout,
-  subtitle,
-  expanded,
-  onToggle,
-  surface = 'body',
-  className,
-}: {
-  title: string
-  children: React.ReactNode
-  onLayout?: (event: LayoutChangeEvent) => void
-  /** The row of a section that opens: what it holds, such as the reference of a verse. */
-  subtitle?: string
-  expanded?: boolean
-  onToggle?: () => void
-  surface?: 'body' | 'rows' | 'none'
-  className?: string
-}) => (
-  <PageContent
-    className={twMerge('mt-[26px]', className)}
-    style={{ maxWidth: STRONG_COLUMN_MAX_WIDTH }}
-    onLayout={onLayout}
-  >
-    <ListSectionTitle>{title}</ListSectionTitle>
-    {onToggle ? (
-      <Card>
-        <TouchableBox
-          accessibilityRole="button"
-          accessibilityLabel={title}
-          accessibilityState={{ expanded: Boolean(expanded) }}
-          onPress={onToggle}
-          activeOpacity={0.7}
-          className="flex-row items-center gap-[12px] px-[16px] py-[12px]"
-        >
-          <Text className="flex-[1] text-[15px]" numberOfLines={1}>
-            {subtitle || title}
-          </Text>
-          <FeatherIcon name={expanded ? 'chevron-up' : 'chevron-down'} color="grey" size={18} />
-        </TouchableBox>
-        {expanded && (
-          <>
-            <ListSeparator inset={STRONG_CARD_INSET} />
-            <StrongCardBody>{children}</StrongCardBody>
-          </>
-        )}
-      </Card>
-    ) : surface === 'rows' ? (
-      <StrongRowsCard>{children}</StrongRowsCard>
-    ) : surface === 'body' ? (
-      <Card>
-        <StrongCardBody>{children}</StrongCardBody>
-      </Card>
-    ) : (
-      <VStack className="gap-[12px]">{children}</VStack>
-    )}
-  </PageContent>
-)
-
-export const StrongLevelSwitch = <T extends string>({
-  options,
-  value,
-  onChange,
-}: {
-  options: { value: T; label: string }[]
-  value: T
-  onChange: (value: T) => void
-}) => (
-  // The track is recessed into the canvas and the chosen level is raised above it, in every theme.
-  <HStack className="overflow-hidden border-continuous bg-opacity5 rounded-full p-[3px] gap-[2px]">
-    {options.map(option => {
-      const selected = option.value === value
-      return (
-        <TouchableBox
-          key={option.value}
-          accessibilityRole="button"
-          accessibilityLabel={option.label}
-          accessibilityState={{ selected }}
-          onPress={() => onChange(option.value)}
-          activeOpacity={0.7}
-          className={twMerge(
-            'overflow-hidden border-continuous flex-[1] items-center rounded-full py-[6px]',
-            selected && 'bg-surface-raised'
-          )}
-        >
-          <Text className={twMerge('text-[13px] font-semibold', !selected && 'text-grey')}>
-            {option.label}
-          </Text>
-        </TouchableBox>
-      )
-    })}
-  </HStack>
-)
-
-/** The last row of a card, which opens the page that shows all of it. */
-export const StrongPreviewLink = ({ label, onPress }: { label: string; onPress: () => void }) => (
-  <TouchableBox
-    className="flex-row items-center gap-[12px] px-[16px] py-[12px]"
-    onPress={onPress}
-    activeOpacity={0.7}
-    accessibilityRole="button"
-    accessibilityLabel={label}
-  >
-    <Text className="flex-[1] text-primary text-[15px]">{label}</Text>
-    <FeatherIcon name="chevron-right" color="grey" size={18} />
-  </TouchableBox>
-)
-
 export const StrongLexicalRelationRow = ({
   relation,
   readingTypography,
@@ -542,7 +395,7 @@ export const StrongEntityRelationList = ({
   if (!relations.length) return null
 
   return (
-    <StrongRowsCard>
+    <StudyRowsCard>
       {relations.map(relation => (
         <TouchableBox
           className="flex-row items-center gap-[12px] px-[16px] py-[11px]"
@@ -570,6 +423,6 @@ export const StrongEntityRelationList = ({
           )}
         </TouchableBox>
       ))}
-    </StrongRowsCard>
+    </StudyRowsCard>
   )
 }

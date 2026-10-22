@@ -275,7 +275,8 @@ const StrongConcordancePage = ({
       ItemSeparatorComponent={VerseSeparator}
       renderItem={({ item }) => (
         <ConcordanceVerse
-          className="border-b-0 py-[12px]"
+          className="py-[12px]"
+          separated={false}
           onOpenVerse={verse => onOpenVerse(verse, version)}
           t={t}
           concordanceFor={String(entry.baseCode)}

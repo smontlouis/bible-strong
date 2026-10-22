@@ -25,18 +25,20 @@ import type { StrongBibleLemmaStat } from '~helpers/strongBibleSidecar'
 import { formatStrongDisplayCode, getStrongReferenceNumber } from '~helpers/strongIdentities'
 import type { Verse } from '~common/types'
 import {
-  STRONG_COLUMN_MAX_WIDTH,
-  StrongCardBody,
   StrongEditorialHtml,
   StrongEditorialPreview,
-  StrongEditorialSection,
   StrongEntityRelationList,
   StrongEntitySummaryCard,
-  StrongLevelSwitch,
   StrongLexicalRelationRow,
-  StrongPreviewLink,
-  StrongRowsCard,
 } from './StrongDetailUI'
+import {
+  STUDY_COLUMN_MAX_WIDTH,
+  StudyCardBody,
+  StudyMoreRow,
+  StudyRowsCard,
+  StudySection,
+} from '~common/ui/StudySection'
+import SegmentedControl from '~common/ui/SegmentedControl'
 import { strongDefinitionLevelAtom } from './atoms'
 import { StrongEntityRelationGraph } from './StrongEntityRelationGraph'
 import {
@@ -152,12 +154,12 @@ const DefinitionBlock = ({
       {children}
     </VStack>
   ) : (
-    <StrongCardBody className="gap-[8px]">
+    <StudyCardBody className="gap-[8px]">
       <Text accessibilityRole="header" className="text-[13px] text-grey">
         {title}
       </Text>
       {children}
-    </StrongCardBody>
+    </StudyCardBody>
   )
 
 const JumpNavigationContent = ({
@@ -330,7 +332,7 @@ const StrongDetailMainPage = ({
     >
       <PageContent
         className="pt-[22px] pb-[18px] gap-[10px]"
-        style={{ maxWidth: STRONG_COLUMN_MAX_WIDTH }}
+        style={{ maxWidth: STUDY_COLUMN_MAX_WIDTH }}
       >
         <StrongEntryMetadata entry={entry} />
         <HStack className="items-center gap-[10px]">
@@ -377,7 +379,7 @@ const StrongDetailMainPage = ({
       </PageContent>
 
       <Box className="overflow-hidden border-continuous mx-[-20px] py-[8px] bg-canvas z-[10]">
-        <PageContent style={{ maxWidth: STRONG_COLUMN_MAX_WIDTH + 40 }}>
+        <PageContent style={{ maxWidth: STUDY_COLUMN_MAX_WIDTH + 40 }}>
           <JumpNavigationContent
             anchors={[
               {
@@ -409,8 +411,8 @@ const StrongDetailMainPage = ({
       </Box>
 
       {hasLevelChoice && (
-        <PageContent className="mt-[10px]" style={{ maxWidth: STRONG_COLUMN_MAX_WIDTH }}>
-          <StrongLevelSwitch
+        <PageContent className="mt-[10px]" style={{ maxWidth: STUDY_COLUMN_MAX_WIDTH }}>
+          <SegmentedControl
             options={[
               { value: 'essential', label: t('strongDetail.definition.level.essential') },
               { value: 'deep', label: t('strongDetail.definition.level.deep') },
@@ -425,7 +427,7 @@ const StrongDetailMainPage = ({
       )}
 
       {(!!contextVerse || !!contextReference) && (
-        <StrongEditorialSection
+        <StudySection
           title={t('strongDetail.context.title')}
           subtitle={[contextReference, contextVersion].filter(Boolean).join(' · ')}
           expanded={contextExpanded}
@@ -460,15 +462,15 @@ const StrongDetailMainPage = ({
               )}
             </VStack>
           )}
-        </StrongEditorialSection>
+        </StudySection>
       )}
 
-      <StrongEditorialSection
+      <StudySection
         title={t('strongDetail.definition.title')}
         surface="rows"
         onLayout={event => setAnchor('definition', event.nativeEvent.layout.y)}
       >
-        <StrongCardBody>
+        <StudyCardBody>
           {definition.essentialHtml ? (
             <StrongEditorialHtml
               selectable
@@ -481,7 +483,7 @@ const StrongDetailMainPage = ({
               {t('strongLexicon.definitionUnavailable', { language: entry.language })}
             </Text>
           )}
-        </StrongCardBody>
+        </StudyCardBody>
         {isDeep && definition.deep && (
           <DefinitionBlock title={deepDefinitionTitle}>
             <StrongEditorialHtml
@@ -515,14 +517,14 @@ const StrongDetailMainPage = ({
           </DefinitionBlock>
         )}
         {isDeep && (extrasLoading || extrasError) && (
-          <StrongCardBody>
+          <StudyCardBody>
             {extrasLoading && <Loading message={t('Chargement...')} />}
             {extrasError && (
               <TouchableBox onPress={onRetryExtras} accessibilityRole="button" className="py-[4px]">
                 <Text className="text-primary">{t('Réessayer')}</Text>
               </TouchableBox>
             )}
-          </StrongCardBody>
+          </StudyCardBody>
         )}
         {isDeep && dictionaryResource && (
           <DefinitionBlock title={t('strongDetail.definition.classicalGreek')}>
@@ -543,12 +545,12 @@ const StrongDetailMainPage = ({
           </DefinitionBlock>
         )}
         {isDeep && dictionaryOverflows && (
-          <StrongPreviewLink
+          <StudyMoreRow
             label={t('strongDetail.dictionary.open')}
             onPress={() => onOpenPage('dictionary')}
           />
         )}
-      </StrongEditorialSection>
+      </StudySection>
 
       {passageMedia.length > 0 && (
         <StrongPassageMediaSection
@@ -559,13 +561,13 @@ const StrongDetailMainPage = ({
       )}
 
       {!!entry.entity && (
-        <StrongEditorialSection
+        <StudySection
           title={entityLabel}
           surface="none"
           onLayout={event => setAnchor('entity', event.nativeEvent.layout.y)}
         >
-          <StrongRowsCard>
-            <StrongCardBody>
+          <StudyRowsCard>
+            <StudyCardBody>
               <StrongEntitySummaryCard
                 entity={entry.entity}
                 plain
@@ -575,12 +577,12 @@ const StrongDetailMainPage = ({
                 onOpenBibleReference={onOpenBibleReference}
                 onOpenStrong={onOpenStrong}
               />
-            </StrongCardBody>
-            <StrongPreviewLink
+            </StudyCardBody>
+            <StudyMoreRow
               label={t('strongDetail.entity.open')}
               onPress={() => onOpenPage('entity')}
             />
-          </StrongRowsCard>
+          </StudyRowsCard>
           {!!entityRelations?.graph.length && (
             <StrongEntityRelationGraph
               entity={entry.entity}
@@ -594,11 +596,11 @@ const StrongDetailMainPage = ({
               onOpenEntity={onOpenEntityRelation}
             />
           )}
-        </StrongEditorialSection>
+        </StudySection>
       )}
 
       {lexicalRelations.relatedWords.length > 0 && (
-        <StrongEditorialSection
+        <StudySection
           title={t('strongDetail.related.title')}
           surface="rows"
           onLayout={event => setAnchor('related', event.nativeEvent.layout.y)}
@@ -615,15 +617,15 @@ const StrongDetailMainPage = ({
             lexicalRelations.relatedWords.length,
             displayedRelationCount
           ) && (
-            <StrongPreviewLink
+            <StudyMoreRow
               label={t('strongDetail.related.open')}
               onPress={() => onOpenPage('related')}
             />
           )}
-        </StrongEditorialSection>
+        </StudySection>
       )}
 
-      <StrongEditorialSection
+      <StudySection
         title={t('Concordance')}
         surface="none"
         onLayout={event => setAnchor('concordance', event.nativeEvent.layout.y)}
@@ -656,14 +658,14 @@ const StrongDetailMainPage = ({
             ))}
           </HorizontalControlScrollView>
         )}
-        <StrongRowsCard>
+        <StudyRowsCard>
           {concordanceLoading && (
-            <StrongCardBody>
+            <StudyCardBody>
               <Loading />
-            </StrongCardBody>
+            </StudyCardBody>
           )}
           {concordanceError && (
-            <StrongCardBody className="gap-[8px]">
+            <StudyCardBody className="gap-[8px]">
               <Text accessibilityRole="alert" className="text-grey">
                 {t('strongDetail.concordance.loadError')}
               </Text>
@@ -676,17 +678,18 @@ const StrongDetailMainPage = ({
                   {t(concordanceRetrying ? 'Chargement...' : 'bible.error.retry')}
                 </Text>
               </TouchableBox>
-            </StrongCardBody>
+            </StudyCardBody>
           )}
           {!concordanceLoading && !concordanceError && concordanceCount === 0 && (
-            <StrongCardBody>
+            <StudyCardBody>
               <Text className="text-grey">{t('strongDetail.concordance.empty')}</Text>
-            </StrongCardBody>
+            </StudyCardBody>
           )}
           {concordanceVerses.slice(0, displayedConcordanceCount).map(verse => (
             <ConcordanceVerse
               key={`${verse.Livre}-${verse.Chapitre}-${verse.Verset}`}
-              className="border-b-0 px-[16px] py-[12px]"
+              className="px-[16px] py-[12px]"
+              separated={false}
               onOpenVerse={onOpenConcordanceVerse}
               t={t}
               concordanceFor={String(entry.baseCode)}
@@ -696,13 +699,13 @@ const StrongDetailMainPage = ({
           {(concordanceTotalCount == null ||
             concordanceError ||
             hasHiddenStrongPreviewItems(concordanceTotalCount, displayedConcordanceCount)) && (
-            <StrongPreviewLink
+            <StudyMoreRow
               label={t('strongDetail.concordance.open')}
               onPress={() => onOpenPage('concordance')}
             />
           )}
-        </StrongRowsCard>
-      </StrongEditorialSection>
+        </StudyRowsCard>
+      </StudySection>
     </ScrollView>
   )
 }

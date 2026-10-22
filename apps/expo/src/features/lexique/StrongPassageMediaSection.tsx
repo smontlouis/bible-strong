@@ -3,7 +3,7 @@ import YoutubePlayer from '~helpers/react-native-youtube-iframe'
 import Box from '~common/ui/Box'
 import { radii } from '~common/ui/surfaces'
 import { type ResolvedPassageMedia } from '~features/bible/passageMedia'
-import { STRONG_COLUMN_MAX_WIDTH, StrongEditorialSection } from './StrongDetailUI'
+import { STUDY_COLUMN_MAX_WIDTH, StudySection } from '~common/ui/StudySection'
 type Props = {
   media: ResolvedPassageMedia[]
   title: string
@@ -13,11 +13,11 @@ type Props = {
 /** The player is the object of the section: it takes a card's corners, with no frame around it. */
 const StrongPassageMediaSection = ({ media, title, onLayout }: Props) => {
   const { width: windowWidth } = useWindowDimensions()
-  const playerWidth = Math.min(windowWidth - 40, STRONG_COLUMN_MAX_WIDTH)
+  const playerWidth = Math.min(windowWidth - 40, STUDY_COLUMN_MAX_WIDTH)
   const playerHeight = (playerWidth * 9) / 16
 
   return (
-    <StrongEditorialSection title={title} surface="none" onLayout={onLayout}>
+    <StudySection title={title} surface="none" onLayout={onLayout}>
       {media.map(item => (
         <Box
           className="overflow-hidden border-continuous rounded-[16px] bg-surface"
@@ -32,7 +32,7 @@ const StrongPassageMediaSection = ({ media, title, onLayout }: Props) => {
           />
         </Box>
       ))}
-    </StrongEditorialSection>
+    </StudySection>
   )
 }
 

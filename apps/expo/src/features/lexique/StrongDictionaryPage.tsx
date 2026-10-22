@@ -5,11 +5,8 @@ import { useTranslation } from 'react-i18next'
 import Empty from '~common/Empty'
 import { usePageBottomInset } from '~common/ui/Box'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
-import {
-  STRONG_COLUMN_MAX_WIDTH,
-  StrongEditorialHtml,
-  StrongEditorialSection,
-} from './StrongDetailUI'
+import { StrongEditorialHtml } from './StrongDetailUI'
+import { STUDY_COLUMN_MAX_WIDTH, StudySection } from '~common/ui/StudySection'
 type Props = {
   entry: StrongLexiconEntry
   onOpenBibleReference: (osis: string) => void
@@ -30,21 +27,21 @@ const StrongDictionaryPage = ({ entry, onOpenBibleReference, onOpenStrong }: Pro
       contentContainerStyle={[
         pageContentStyle,
         {
-          maxWidth: STRONG_COLUMN_MAX_WIDTH + 40,
+          maxWidth: STUDY_COLUMN_MAX_WIDTH + 40,
           paddingHorizontal: 20,
           paddingTop: 22,
           paddingBottom: 90 + bottomInset,
         },
       ]}
     >
-      <StrongEditorialSection title={resource.source} className="mt-[0px]">
+      <StudySection title={resource.source} className="mt-[0px]">
         <StrongEditorialHtml
           selectable
           value={resource.contentHtml}
           onOpenBibleReference={onOpenBibleReference}
           onOpenStrong={onOpenStrong}
         />
-      </StrongEditorialSection>
+      </StudySection>
     </ScrollView>
   )
 }

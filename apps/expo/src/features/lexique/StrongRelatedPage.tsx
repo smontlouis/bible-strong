@@ -6,11 +6,8 @@ import { VStack, usePageBottomInset } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { formatStrongDisplayCode } from '~helpers/strongIdentities'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
-import {
-  STRONG_COLUMN_MAX_WIDTH,
-  StrongEditorialSection,
-  StrongLexicalRelationRow,
-} from './StrongDetailUI'
+import { StrongLexicalRelationRow } from './StrongDetailUI'
+import { STUDY_COLUMN_MAX_WIDTH, StudySection } from '~common/ui/StudySection'
 import { splitStrongLexicalRelations } from './strongLexiconRelations'
 import { getScaledStrongTextStyle, type StrongReadingTypography } from './strongEditorialHtmlStyles'
 import { isStrongOriginalUnnamed } from './strongOriginalPresentation'
@@ -35,7 +32,7 @@ const StrongRelatedPage = ({ entry, readingTypography, onOpenStrong }: Props) =>
       contentContainerStyle={[
         pageContentStyle,
         {
-          maxWidth: STRONG_COLUMN_MAX_WIDTH + 40,
+          maxWidth: STUDY_COLUMN_MAX_WIDTH + 40,
           paddingHorizontal: 20,
           paddingTop: 22,
           paddingBottom: 90 + bottomInset,
@@ -54,7 +51,7 @@ const StrongRelatedPage = ({ entry, readingTypography, onOpenStrong }: Props) =>
         const relations = relatedWords.filter(relation => relation.group === group.id)
         if (!relations.length) return null
         return (
-          <StrongEditorialSection key={group.id} title={group.title} surface="rows">
+          <StudySection key={group.id} title={group.title} surface="rows">
             {relations.map(relation => (
               <StrongLexicalRelationRow
                 key={`${relation.stepCode}:${relation.label}`}
@@ -63,7 +60,7 @@ const StrongRelatedPage = ({ entry, readingTypography, onOpenStrong }: Props) =>
                 onPress={() => onOpenStrong(relation.stepCode)}
               />
             ))}
-          </StrongEditorialSection>
+          </StudySection>
         )
       })}
     </ScrollView>

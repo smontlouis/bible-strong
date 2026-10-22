@@ -12,13 +12,8 @@ import type {
   StrongLexiconEntityRelation,
 } from '~features/resources/strongLexiconAccess'
 import Card from '~common/ui/Card'
-import {
-  STRONG_COLUMN_MAX_WIDTH,
-  StrongCardBody,
-  StrongEditorialSection,
-  StrongEntityRelationList,
-  StrongEntitySummaryCard,
-} from './StrongDetailUI'
+import { StrongEntityRelationList, StrongEntitySummaryCard } from './StrongDetailUI'
+import { STUDY_COLUMN_MAX_WIDTH, StudyCardBody, StudySection } from '~common/ui/StudySection'
 import { StrongEntityRelationGraph } from './StrongEntityRelationGraph'
 import { splitStrongEntityRelations } from './strongEntityPresentation'
 import type { StrongReadingTypography } from './strongEditorialHtmlStyles'
@@ -61,7 +56,7 @@ const StrongEntityPage = ({
       contentContainerStyle={[
         pageContentStyle,
         {
-          maxWidth: STRONG_COLUMN_MAX_WIDTH + 40,
+          maxWidth: STUDY_COLUMN_MAX_WIDTH + 40,
           paddingHorizontal: 20,
           paddingTop: 22,
           paddingBottom: 90 + bottomInset,
@@ -69,7 +64,7 @@ const StrongEntityPage = ({
       ]}
     >
       <Card>
-        <StrongCardBody>
+        <StudyCardBody>
           <StrongEntitySummaryCard
             entity={entity}
             expanded
@@ -77,11 +72,11 @@ const StrongEntityPage = ({
             onOpenBibleReference={onOpenBibleReference}
             onOpenStrong={onOpenStrong}
           />
-        </StrongCardBody>
+        </StudyCardBody>
       </Card>
 
       {ENTITY_LOCATION_VISIBLE && !!place && (
-        <StrongEditorialSection title={t('strongDetail.entity.location')}>
+        <StudySection title={t('strongDetail.entity.location')}>
           <VStack className="overflow-hidden border-continuous gap-[8px]">
             <HStack className="overflow-hidden border-continuous items-center gap-[10px]">
               <Box
@@ -121,11 +116,11 @@ const StrongEntityPage = ({
               )}
             </HStack>
           </VStack>
-        </StrongEditorialSection>
+        </StudySection>
       )}
 
       {graph.length > 0 && (
-        <StrongEditorialSection title={t('strongDetail.entity.relationships')} surface="none">
+        <StudySection title={t('strongDetail.entity.relationships')} surface="none">
           <StrongEntityRelationGraph
             languageOverride={language}
             entity={entity}
@@ -133,11 +128,11 @@ const StrongEntityPage = ({
             onOpenProfile={onOpenEntityProfile}
             onOpenEntity={onOpenEntityRelation}
           />
-        </StrongEditorialSection>
+        </StudySection>
       )}
 
       {remaining.length > 0 && (
-        <StrongEditorialSection
+        <StudySection
           title={
             graph.length > 0
               ? t('strongDetail.entity.allRelationships')
@@ -146,7 +141,7 @@ const StrongEntityPage = ({
           surface="none"
         >
           <StrongEntityRelationList relations={remaining} onOpenEntity={onOpenEntityRelation} />
-        </StrongEditorialSection>
+        </StudySection>
       )}
     </ScrollView>
   )

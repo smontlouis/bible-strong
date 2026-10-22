@@ -19,10 +19,10 @@ export default function SelectionMenuTabs({
           accessibilityRole="tab"
           accessibilityState={{ selected: index === activeIndex }}
           onPress={() => onChange(index)}
-          className={`flex-1 items-center py-[5px] rounded-full ${index === activeIndex ? 'bg-reverse' : ''}`}
+          className={`flex-1 items-center py-[5px] rounded-full ${index === activeIndex ? 'bg-surface-raised' : ''}`}
         >
           <Text
-            className={`text-[12px] ${index === activeIndex ? 'font-bold text-default' : 'text-tertiary'}`}
+            className={`text-[12px] ${index === activeIndex ? 'font-semibold text-default' : 'text-grey'}`}
           >
             {label}
           </Text>

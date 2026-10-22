@@ -48,7 +48,8 @@ const VersesModalFooter = ({
             top: TAB_CONTAINER_PADDING,
             bottom: TAB_CONTAINER_PADDING,
             width: tabWidth,
-            backgroundColor: theme.colors.reverse,
+            // Raised above the light grey track in every theme, dark ones included.
+            backgroundColor: theme.colors.surfaceRaised,
             // A segmented control: its track and its thumb are pills, as buttons are.
             borderRadius: radii.pill,
           },

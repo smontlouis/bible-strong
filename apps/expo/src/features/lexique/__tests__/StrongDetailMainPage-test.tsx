@@ -45,21 +45,28 @@ jest.mock('../StrongEntityRelationGraph', () => ({
 }))
 jest.mock('../StrongPassageMediaSection', () => 'StrongPassageMediaSection')
 jest.mock('../StrongDetailUI', () => ({
-  STRONG_COLUMN_MAX_WIDTH: 600,
-  StrongCardBody: 'StrongCardBody',
-  StrongRowsCard: 'StrongRowsCard',
   StrongEditorialHtml: 'StrongEditorialHtml',
   StrongEditorialPreview: 'StrongEditorialPreview',
-  StrongEditorialSection: ({
+  StrongEntityRelationList: 'StrongEntityRelationList',
+  StrongEntitySummaryCard: 'StrongEntitySummaryCard',
+  StrongLexicalRelationRow: 'StrongLexicalRelationRow',
+}))
+jest.mock('~common/ui/SegmentedControl', () => 'SegmentedControl')
+jest.mock('~common/ui/StudySection', () => ({
+  STUDY_COLUMN_MAX_WIDTH: 600,
+  StudyCardBody: 'StudyCardBody',
+  StudyRowsCard: 'StudyRowsCard',
+  StudyMoreRow: 'StudyMoreRow',
+  StudySection: ({
     title,
     children,
     expanded,
     onToggle,
     ...rest
-  }: React.ComponentProps<typeof import('../StrongDetailUI').StrongEditorialSection>) => {
+  }: React.ComponentProps<typeof import('~common/ui/StudySection').StudySection>) => {
     const React = jest.requireActual<typeof import('react')>('react')
     return React.createElement(
-      'StrongEditorialSection',
+      'StudySection',
       { title, ...rest },
       onToggle &&
         React.createElement('TouchableBox', {
@@ -70,11 +77,6 @@ jest.mock('../StrongDetailUI', () => ({
       (!onToggle || expanded) && children
     )
   },
-  StrongLevelSwitch: 'StrongLevelSwitch',
-  StrongEntityRelationList: 'StrongEntityRelationList',
-  StrongEntitySummaryCard: 'StrongEntitySummaryCard',
-  StrongLexicalRelationRow: 'StrongLexicalRelationRow',
-  StrongPreviewLink: 'StrongPreviewLink',
 }))
 
 type Props = React.ComponentProps<typeof StrongDetailMainPage>
@@ -138,7 +140,7 @@ const render = (overrides: Partial<Props> = {}) => {
 const definitions = (root: ReactTestRenderer['root']) =>
   root.findAll(node => String(node.type) === 'StrongEditorialHtml').map(node => node.props.value)
 const levelSwitch = (root: ReactTestRenderer['root']) =>
-  root.findAll(node => String(node.type) === 'StrongLevelSwitch')
+  root.findAll(node => String(node.type) === 'SegmentedControl')
 const blockTitles = (root: ReactTestRenderer['root']) =>
   root
     .findAll(node => String(node.type) === 'Text' && node.props.accessibilityRole === 'header')
@@ -333,8 +335,7 @@ it('places the level switch before context and lets the level control grammar an
   const section = () =>
     root.find(
       node =>
-        String(node.type) === 'StrongEditorialSection' &&
-        node.props.title === 'strongDetail.context.title'
+        String(node.type) === 'StudySection' && node.props.title === 'strongDetail.context.title'
     )
   const toggle = () =>
     root.find(
@@ -345,7 +346,7 @@ it('places the level switch before context and lets the level control grammar an
   const grammar = () =>
     root.findAll(node => String(node.type) === 'Text' && node.props.children === 'nom · N')
   const controls = root.findAll(node =>
-    ['StrongLevelSwitch', 'StrongEditorialSection'].includes(String(node.type))
+    ['SegmentedControl', 'StudySection'].includes(String(node.type))
   )
   expect(controls.indexOf(levelSwitch(root)[0])).toBeLessThan(controls.indexOf(section()))
   expect(section().props.subtitle).toBe('Genèse 3:2')
@@ -401,9 +402,7 @@ it('shows a specific sense first and keeps the general definition at the deep le
 it('shows the concordance section and jump link while loading, without a false zero', () => {
   const root = render()
   expect(
-    root.findAll(
-      node => String(node.type) === 'StrongEditorialSection' && node.props.title === 'Concordance'
-    )
+    root.findAll(node => String(node.type) === 'StudySection' && node.props.title === 'Concordance')
   ).toHaveLength(1)
   expect(
     root.findAll(node => String(node.type) === 'Text' && node.props.children === 'Concordance')
