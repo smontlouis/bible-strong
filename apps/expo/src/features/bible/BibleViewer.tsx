@@ -1757,7 +1757,7 @@ const BibleViewer = ({
               />
               {!isActiveBibleTab && (
                 <Box className="overflow-hidden border-continuous absolute top-[0px] left-[0px] right-[0px] bottom-[0px]">
-                  <SnapshotPlaceholder base64={bible.base64Preview} />
+                  <SnapshotPlaceholder uri={bible.previewUri} />
                 </Box>
               )}
             </Box>

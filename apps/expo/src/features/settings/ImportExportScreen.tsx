@@ -22,17 +22,18 @@ import { selectUserAndPlan } from '~redux/selectors/plan'
 import type { RootState } from '~redux/modules/reducer'
 import type { AppDispatch } from '~redux/store'
 import { tabGroupsAtom, TabGroup } from '~state/tabs'
+import { withoutTabPreview } from '~state/tabPreview'
 import { localQueryOptions } from '~helpers/queryOptions'
 type ExistingFileInfo = Extract<FileSystem.FileInfo, { exists: true }>
 type BackupBibleData = Omit<RootState['user']['bible'], 'changelog' | 'studies'>
 
 /**
- * Nettoie les tab groups pour l'export en supprimant les base64Preview
+ * Nettoie les tab groups pour l'export en supprimant les aperçus (fichiers de cet appareil)
  */
 const sanitizeTabGroupsForBackup = (groups: TabGroup[]): TabGroup[] => {
   return groups.map(group => ({
     ...group,
-    tabs: group.tabs.map(tab => ({ ...tab, base64Preview: undefined })),
+    tabs: group.tabs.map(withoutTabPreview),
   }))
 }
 

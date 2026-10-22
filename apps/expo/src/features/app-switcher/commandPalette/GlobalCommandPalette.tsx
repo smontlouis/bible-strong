@@ -35,7 +35,7 @@ export default function GlobalCommandPalette() {
           ...tab,
           id: previous.id,
           isRemovable: previous.isRemovable,
-          base64Preview: '',
+          previewUri: '',
         })
       }
       close()

@@ -1,4 +1,5 @@
 import { BibleTab, TabGroup, TabItem } from '~state/tabs'
+import { withoutTabPreview } from '~state/tabPreview'
 import { clampTabIndex, compareTabGroupOrder } from '~state/tabWorkspace'
 import {
   writeToSubcollection,
@@ -28,9 +29,9 @@ export interface FirestoreTabGroup extends Omit<TabGroup, 'tabs' | 'activeTabInd
 }
 
 /**
- * TabItem structure for Firestore (without base64Preview)
+ * TabItem structure for Firestore (without previewUri)
  */
-type FirestoreTabItem = Omit<TabItem, 'base64Preview'>
+type FirestoreTabItem = Omit<TabItem, 'previewUri'>
 
 // ============================================================================
 // TRANSFORM FUNCTIONS
@@ -64,7 +65,7 @@ function removeUndefined<T>(obj: T): T {
 
 /**
  * Strip local-only fields from tab groups for Firestore storage
- * base64Preview is large (50-200KB) and can be regenerated locally
+ * previewUri points to a file on this device (the legacy inline base64Preview goes too)
  * activeTabIndex is per-device UI state
  * Also removes all undefined values (Firestore doesn't support them)
  */
@@ -78,7 +79,7 @@ export function prepareTabGroupForSync(
     isCollapsed: group.isDefault ? false : (group.isCollapsed ?? false),
     updatedAt: options?.updatedAt ?? group.updatedAt,
     tabs: group.tabs.map(tab => {
-      const { base64Preview, ...tabWithoutPreview } = tab
+      const tabWithoutPreview = withoutTabPreview(tab)
 
       if (tabWithoutPreview.type === 'bible') {
         const { selectedVersesVersion: _selectionVersion, ...data } = tabWithoutPreview.data
@@ -159,24 +160,26 @@ export function hydrateTabGroup(
     // Preserve state that is intentionally local-only and therefore absent
     // from (or cleared in) the Firestore representation.
     const localTab = localGroup?.tabs.find(t => t.id === firestoreTab.id)
+    // A preview is a file of this device: never one from Firestore, nor an older inline one.
+    const syncedTab = withoutTabPreview(firestoreTab)
 
-    if (firestoreTab.type === 'bible' && localTab?.type === 'bible') {
+    if (syncedTab.type === 'bible' && localTab?.type === 'bible') {
       return {
-        ...firestoreTab,
+        ...syncedTab,
         data: {
-          ...firestoreTab.data,
+          ...syncedTab.data,
           selectedVerses: localTab.data.selectedVerses,
           ...(localTab.data.selectedVersesVersion && {
             selectedVersesVersion: localTab.data.selectedVersesVersion,
           }),
         },
-        base64Preview: localTab.base64Preview,
+        previewUri: localTab.previewUri,
       } as TabItem
     }
 
     return {
-      ...firestoreTab,
-      base64Preview: localTab?.base64Preview,
+      ...syncedTab,
+      previewUri: localTab?.previewUri,
     } as TabItem
   })
 
@@ -252,7 +255,7 @@ export function subscribeToTabGroupsFirestore(
 /**
  * Merge remote groups with local groups
  * Strategy: last-write-wins based on updatedAt
- * Preserves local base64Preview values
+ * Preserves local previewUri values
  */
 export function mergeTabGroups(localGroups: TabGroup[], remoteGroups: TabGroup[]): TabGroup[] {
   const merged: TabGroup[] = []
@@ -280,7 +283,7 @@ export function mergeTabGroups(localGroups: TabGroup[], remoteGroups: TabGroup[]
       const localUpdatedAt = local.updatedAt || local.createdAt || 0
 
       if (remoteUpdatedAt > localUpdatedAt) {
-        // Remote wins, but preserve local base64Previews
+        // Remote wins, but preserve local previews
         merged.push(hydrateTabGroup(remote as FirestoreTabGroup, local))
       } else {
         // Local wins

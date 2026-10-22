@@ -20,6 +20,8 @@ function clearAll(): void {
 
 interface AtomWithAsyncStorageOptions<T> {
   migrate?: (value: T) => T
+  /** JSON replacer applied on write, to keep session-only values out of storage. */
+  replacer?: (key: string, value: unknown) => unknown
 }
 
 const atomWithAsyncStorage = <T>(
@@ -30,28 +32,31 @@ const atomWithAsyncStorage = <T>(
   atomWithStorage<T>(
     key,
     initialValue,
-    createJSONStorage<T>(() => ({
-      getItem: (k: string) => {
-        const value = getItem(k)
-        if (value && options?.migrate) {
-          try {
-            const parsed = JSON.parse(value) as T
-            const migrated = options.migrate(parsed)
-            // If migration changed the value, save it
-            if (JSON.stringify(migrated) !== value) {
-              setItem(k, JSON.stringify(migrated))
+    createJSONStorage<T>(
+      () => ({
+        getItem: (k: string) => {
+          const value = getItem(k)
+          if (value && options?.migrate) {
+            try {
+              const parsed = JSON.parse(value) as T
+              const migrated = options.migrate(parsed)
+              // If migration changed the value, save it
+              if (JSON.stringify(migrated) !== value) {
+                setItem(k, JSON.stringify(migrated))
+              }
+              return JSON.stringify(migrated)
+            } catch {
+              return value
             }
-            return JSON.stringify(migrated)
-          } catch {
-            return value
           }
-        }
-        return value
-      },
-      setItem,
-      removeItem,
-      clearAll,
-    })),
+          return value
+        },
+        setItem,
+        removeItem,
+        clearAll,
+      }),
+      { replacer: options?.replacer }
+    ),
     {
       getOnInit: true,
     }

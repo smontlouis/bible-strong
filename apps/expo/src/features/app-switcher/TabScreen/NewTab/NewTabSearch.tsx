@@ -51,7 +51,7 @@ export default function NewTabSearch({
       ...previous,
       type: 'search',
       title: value,
-      base64Preview: '',
+      previewUri: '',
       data: { searchValue: value },
     }))
   }

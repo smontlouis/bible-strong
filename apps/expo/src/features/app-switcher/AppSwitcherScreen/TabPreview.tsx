@@ -50,7 +50,7 @@ const TabPreview = ({ index, tabAtom, groupId, ...props }: TabPreviewProps & Box
   const theme = useTheme()
   const tab = useAtomValue(tabAtom)
 
-  const { base64Preview, type, isRemovable } = tab
+  const { previewUri, type, isRemovable } = tab
 
   const { GAP, TAB_PREVIEW_WIDTH, TAB_PREVIEW_HEIGHT } = useTabConstants()
 
@@ -89,11 +89,8 @@ const TabPreview = ({ index, tabAtom, groupId, ...props }: TabPreviewProps & Box
           style={[previewImageStyles, floatingShadow]}
         >
           <>
-            {Boolean(base64Preview) && (
-              <Image
-                style={styles.previewImage}
-                source={{ uri: `data:image/jpeg;base64,${base64Preview}` }}
-              />
+            {Boolean(previewUri) && (
+              <Image style={styles.previewImage} source={{ uri: previewUri }} />
             )}
             <Box className="overflow-hidden border-continuous items-center justify-center w-[80px] h-[80px] rounded-full bg-surface">
               <Box className="overflow-hidden border-continuous">

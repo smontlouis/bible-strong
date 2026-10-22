@@ -75,7 +75,7 @@ function mount(activeId = 'new-test') {
     type: 'new',
     title: 'New tab',
     isRemovable: true,
-    base64Preview: 'stale-preview',
+    previewUri: 'file:///documents/tab-previews/new-test-1.jpg',
     data: {},
   }
   const tabAtom = atom<TabItem>(initial)
@@ -101,7 +101,7 @@ it('submits a trimmed query into the same tab, preserving its identity and clear
     type: 'search',
     title: 'amour',
     isRemovable: true,
-    base64Preview: '',
+    previewUri: '',
     data: { searchValue: 'amour' },
   })
   expect(Keyboard.dismiss).toHaveBeenCalledTimes(1)

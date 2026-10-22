@@ -48,7 +48,7 @@ const blank: TabItem = {
   type: 'new',
   title: 'New',
   isRemovable: false,
-  base64Preview: 'old',
+  previewUri: 'old',
   data: {},
 }
 beforeEach(() => {
@@ -83,7 +83,7 @@ it('replaces the originating blank tab and preserves its identity', async () => 
     ...selected,
     id: 'blank',
     isRemovable: false,
-    base64Preview: '',
+    previewUri: '',
   })
   expect(mockOpenTab).not.toHaveBeenCalled()
   expect(store.get(commandPaletteOpenAtom)).toBe(false)

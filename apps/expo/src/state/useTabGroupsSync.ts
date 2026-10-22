@@ -246,7 +246,7 @@ export const useTabGroupsSync = ({
             console.log('[TabGroupsSync] Migration complete')
           }
         } else {
-          // Merge remote with local, preserving local base64Previews
+          // Merge remote with local, preserving local previews
           const merged = mergeTabGroups(localGroups, remoteGroups)
 
           const applied = applyRemoteGroups(merged)

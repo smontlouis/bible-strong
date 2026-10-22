@@ -192,6 +192,7 @@ const tabGroups: TabGroup[] = [
           pendingModeAcquisition: { kind: 'strong', versionId: 'LSG', mode: 'visible' },
         },
         base64Preview: 'device-preview',
+        previewUri: 'file:///documents/tab-previews/tab-1.jpg',
       },
       {
         id: 'compare-tab',
@@ -319,6 +320,7 @@ describe('guest data snapshot', () => {
     expect(snapshot.subcollections.links['1-1-1']).not.toHaveProperty('ogData')
     expect(snapshot.tabGroups[0]).not.toHaveProperty('activeTabIndex')
     expect(snapshot.tabGroups[0].tabs[0]).not.toHaveProperty('base64Preview')
+    expect(snapshot.tabGroups[0].tabs[0]).not.toHaveProperty('previewUri')
     expect(
       (
         snapshot.tabGroups[0].tabs[0] as Extract<
@@ -352,6 +354,7 @@ describe('guest data snapshot', () => {
     expect(restored.bible.settings?.defaultBibleVersion).toBe('LSG')
     expect(restored.bible.settings?.redWordsDisplay).toBe(true)
     expect(restored.tabGroups?.[0]).toMatchObject({ id: 'group', activeTabIndex: 0 })
+    expect(restored.tabGroups?.[0].tabs[0]).not.toHaveProperty('previewUri')
   })
 })
 

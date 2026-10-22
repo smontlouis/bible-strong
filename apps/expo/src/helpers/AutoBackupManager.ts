@@ -2,6 +2,7 @@ import * as FileSystem from 'expo-file-system/legacy'
 import { getDefaultStore } from 'jotai/vanilla'
 import { RootState } from '~redux/modules/reducer'
 import { tabGroupsAtom, TabGroup } from '~state/tabs'
+import { withoutTabPreview } from '~state/tabPreview'
 import { appLogger } from './agentObservability'
 
 type BackupBibleData = Omit<RootState['user']['bible'], 'changelog' | 'studies'>
@@ -14,13 +15,13 @@ interface BackupPayload {
 }
 
 /**
- * Nettoie les tab groups pour le backup en supprimant les base64Preview
+ * Nettoie les tab groups pour le backup en supprimant les aperçus
  * (comme pour la sync Firestore)
  */
 const sanitizeTabGroupsForBackup = (groups: TabGroup[]): TabGroup[] => {
   return groups.map(group => ({
     ...group,
-    tabs: group.tabs.map(tab => ({ ...tab, base64Preview: undefined })),
+    tabs: group.tabs.map(withoutTabPreview),
   }))
 }
 

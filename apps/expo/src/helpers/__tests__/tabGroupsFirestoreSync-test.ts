@@ -24,14 +24,20 @@ jest.mock('../storage', () => ({
   },
 }))
 
-const makeTab = (id: string, base64Preview?: string): TabItem => ({
+const makeTab = (id: string, previewUri?: string): TabItem => ({
   id,
   title: id,
   isRemovable: true,
   type: 'new',
   data: {},
-  base64Preview,
+  previewUri,
 })
+
+const previewOf = (id: string) => `file:///documents/tab-previews/${id}-1.jpg`
+
+// A tab saved by a version that kept its preview inline.
+const makeLegacyTab = (id: string) =>
+  ({ ...makeTab(id), base64Preview: 'inline-jpeg' }) as unknown as TabItem
 
 const makeBibleTab = (): BibleTab => ({
   id: 'bible-1',
@@ -92,13 +98,61 @@ describe('tabGroupsFirestoreSync', () => {
     expect(prepareTabGroupForSync({ ...local, isDefault: true }).isCollapsed).toBe(false)
   })
   it('omits local-only active tab and preview data from Firestore payloads', () => {
-    const group = makeGroup([makeTab('a', 'preview-a'), makeTab('b')], 1)
+    const group = makeGroup([makeTab('a', previewOf('a')), makeLegacyTab('b'), makeBibleTab()], 1)
+    group.tabs[2].previewUri = previewOf('bible-1')
 
     const synced = prepareTabGroupForSync(group, { updatedAt: 123 })
+    const intent = createTabGroupsSyncIntent([group], [])
 
     expect(synced.updatedAt).toBe(123)
     expect('activeTabIndex' in synced).toBe(false)
-    expect('base64Preview' in synced.tabs[0]).toBe(false)
+    for (const tab of synced.tabs) {
+      expect('previewUri' in tab).toBe(false)
+      expect('base64Preview' in tab).toBe(false)
+    }
+    expect(JSON.stringify(intent)).not.toMatch(/previewUri|base64Preview|tab-previews/)
+  })
+
+  it('does not write to Firestore when only a preview changed', () => {
+    const before = makeGroup([makeTab('a', previewOf('a'))])
+    const after = { ...before, tabs: [makeTab('a', previewOf('a-2'))] }
+
+    expect(createTabGroupsSyncIntent([after], [before])).toEqual(
+      expect.objectContaining({ set: {}, delete: [] })
+    )
+  })
+
+  it('never takes a preview from Firestore, even one written by an older client', () => {
+    const local = makeGroup([makeTab('a', previewOf('a')), makeTab('b')])
+    const remote: FirestoreTabGroup = {
+      id: 'group-1',
+      name: 'Group',
+      isDefault: false,
+      tabs: [{ ...makeTab('a'), previewUri: 'file:///other-device/a.jpg' }, makeLegacyTab('b')],
+      createdAt: 1,
+      updatedAt: 10,
+    }
+
+    const hydrated = hydrateTabGroup(remote, local)
+
+    expect(hydrated.tabs[0].previewUri).toBe(previewOf('a'))
+    expect(hydrated.tabs[1].previewUri).toBeUndefined()
+    expect('base64Preview' in hydrated.tabs[1]).toBe(false)
+  })
+
+  it('keeps the local previews when a newer remote group wins the merge', () => {
+    const local = makeGroup([makeTab('a', previewOf('a')), makeBibleTab()])
+    local.tabs[1].previewUri = previewOf('bible-1')
+    const remote = hydrateTabGroup({
+      ...prepareTabGroupForSync(local),
+      name: 'Renamed',
+      updatedAt: 10,
+    })
+
+    const [merged] = mergeTabGroups([local], [remote])
+
+    expect(merged.name).toBe('Renamed')
+    expect(merged.tabs.map(tab => tab.previewUri)).toEqual([previewOf('a'), previewOf('bible-1')])
   })
 
   it('omits selected verses from Bible tabs while preserving focus verses', () => {
@@ -130,7 +184,7 @@ describe('tabGroupsFirestoreSync', () => {
   })
 
   it('keeps the local active tab by tab id when hydrating reordered remote tabs', () => {
-    const local = makeGroup([makeTab('a'), makeTab('b', 'preview-b'), makeTab('c')], 1)
+    const local = makeGroup([makeTab('a'), makeTab('b', previewOf('b')), makeTab('c')], 1)
     const remote: FirestoreTabGroup = {
       id: 'group-1',
       name: 'Group',
@@ -144,7 +198,7 @@ describe('tabGroupsFirestoreSync', () => {
 
     expect(hydrated.activeTabIndex).toBe(2)
     expect(hydrated.tabs[2].id).toBe('b')
-    expect(hydrated.tabs[2].base64Preview).toBe('preview-b')
+    expect(hydrated.tabs[2].previewUri).toBe(previewOf('b'))
   })
 
   it('preserves local selected verses when hydrating a synced Bible tab', () => {

@@ -8,6 +8,7 @@ import {
 import type { RootState } from '~redux/modules/reducer'
 import type { ImportDataPayload } from '~redux/modules/user'
 import type { TabGroup, TabItem } from '~state/tabs'
+import { withoutTabPreview, type WithoutTabPreview } from '~state/tabPreview'
 
 export const GUEST_DATA_SNAPSHOT_SCHEMA_VERSION = 1 as const
 
@@ -63,9 +64,7 @@ export type AccountSyncedBibleSettings = Pick<
 >
 
 type EligibleGuestAdoptionTab = Exclude<TabItem, { type: 'study' }>
-type WithoutPreview<T> = T extends unknown ? Omit<T, 'base64Preview'> : never
-
-export type GuestAdoptionTab = WithoutPreview<EligibleGuestAdoptionTab>
+export type GuestAdoptionTab = WithoutTabPreview<EligibleGuestAdoptionTab>
 export type GuestAdoptionTabGroup = Omit<TabGroup, 'tabs' | 'activeTabIndex'> & {
   tabs: GuestAdoptionTab[]
 }
@@ -220,7 +219,7 @@ const sanitizeLinks = (links: Links): Links =>
   }, {})
 
 const sanitizeTab = (tab: EligibleGuestAdoptionTab): GuestAdoptionTab => {
-  const { base64Preview: _base64Preview, ...accountOwnedTab } = tab
+  const accountOwnedTab = withoutTabPreview(tab)
 
   if (accountOwnedTab.type === 'bible') {
     // A tab saved by an earlier version may still hold a pending mode download
@@ -339,7 +338,7 @@ export const createGuestSnapshotImportData = (
   tabGroups: snapshot.tabGroups.map(group => ({
     ...cloneJson(group),
     activeTabIndex: 0,
-    tabs: group.tabs.map(tab => ({ ...cloneJson(tab), base64Preview: undefined })) as TabItem[],
+    tabs: group.tabs.map(tab => withoutTabPreview(cloneJson(tab) as TabItem)),
   })),
 })
 
@@ -413,6 +412,7 @@ const isGuestDataSnapshot = (value: unknown): value is GuestDataSnapshot => {
       tab =>
         isRecord(tab) &&
         tab.type !== 'study' &&
+        !('previewUri' in tab) &&
         !('base64Preview' in tab) &&
         isRecord(tab.data) &&
         !('pendingModeAcquisition' in tab.data) &&

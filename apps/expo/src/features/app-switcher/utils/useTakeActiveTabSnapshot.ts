@@ -1,12 +1,41 @@
-import { type View } from 'react-native'
+import { PixelRatio, Platform, type View } from 'react-native'
 import { runAfterInteractions } from '~helpers/runAfterInteractions'
 import produceDraft from 'immer'
-import { useSetAtom } from 'jotai/react'
+import { useSetAtom, useStore } from 'jotai/react'
 import { captureRef } from 'react-native-view-shot'
 import useDynamicRefs from '~helpers/useDynamicRefs'
-import { tabsAtom } from '../../../state/tabs'
+import { tabGroupsAtom, tabsAtom } from '../../../state/tabs'
+import {
+  deleteTabPreviewFile,
+  isTabPreviewReferenced,
+  saveTabPreviewFile,
+  settleTabPreviewFile,
+} from './tabPreviewFiles'
+
+/**
+ * Previews are faded thumbnails and placeholders: half the pixels of the screen are plenty.
+ * iOS sizes a capture in points and renders it at the screen scale; Android and the web size
+ * it in pixels.
+ */
+const measurePreviewSize = (view: View) =>
+  new Promise<{ width: number; height: number } | undefined>(resolve => {
+    // A view that no longer answers is captured at its full size rather than waited for.
+    const timeout = setTimeout(() => resolve(undefined), 250)
+    try {
+      view.measure((_x, _y, width, height) => {
+        clearTimeout(timeout)
+        if (!width || !height) return resolve(undefined)
+        const scale = Platform.OS === 'ios' ? 0.5 : PixelRatio.get() / 2
+        resolve({ width: Math.round(width * scale), height: Math.round(height * scale) })
+      })
+    } catch {
+      clearTimeout(timeout)
+      resolve(undefined)
+    }
+  })
 
 const useTakeActiveTabSnapshot = () => {
+  const store = useStore()
   const setTabs = useSetAtom(tabsAtom)
   const [getRef] = useDynamicRefs<View>()
 
@@ -28,26 +57,47 @@ const useTakeActiveTabSnapshot = () => {
       return
     }
 
-    const data = await captureRef(cachedTabScreen, {
-      result: 'base64',
+    // The web keeps a data URI for the session; native writes a file kept across launches.
+    const isWeb = Platform.OS === 'web'
+    const size = await measurePreviewSize(cachedTabScreen)
+    const uri = await captureRef(cachedTabScreen, {
+      result: isWeb ? 'data-uri' : 'tmpfile',
       format: 'jpg',
       quality: 0.8,
-    }).catch(error => console.error('Oops, snapshot failed', error))
+      ...size,
+    })
+      .then(captured => (isWeb ? captured : saveTabPreviewFile(activeAtomId, captured)))
+      .catch(error => console.error('Oops, snapshot failed', error))
 
-    if (!data) {
+    if (!uri) {
       return
     }
 
-    const resolution = /^(\d+):(\d+)\|/g.exec(data)
-    const base64 = data.substring((resolution || [''])[0].length || 0)
+    const tab = store.get(tabsAtom)[activeTabIndex]
+    if (!tab) {
+      settleTabPreviewFile(uri)
+      deleteTabPreviewFile(uri)
+      return
+    }
 
+    const previousUri = tab.previewUri
     setTabs(
       produceDraft(draft => {
         if (draft[activeTabIndex]) {
-          draft[activeTabIndex].base64Preview = base64
+          draft[activeTabIndex].previewUri = uri
         }
       })
     )
+    settleTabPreviewFile(uri)
+
+    // The replaced picture goes at once, unless another tab still shows the same file.
+    if (
+      previousUri &&
+      previousUri !== uri &&
+      !isTabPreviewReferenced(store.get(tabGroupsAtom), previousUri)
+    ) {
+      deleteTabPreviewFile(previousUri)
+    }
   }
 
   /**

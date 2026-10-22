@@ -48,7 +48,7 @@ const StaticTabPreview = ({ tab, index, ...props }: StaticTabPreviewProps & BoxP
           floatingShadow,
         ]}
       >
-        {Boolean(tab.base64Preview) && (
+        {Boolean(tab.previewUri) && (
           <Image
             style={{
               width: '100%',
@@ -57,7 +57,7 @@ const StaticTabPreview = ({ tab, index, ...props }: StaticTabPreviewProps & BoxP
               opacity: 0.15,
               ...StyleSheet.absoluteFill,
             }}
-            source={{ uri: `data:image/jpeg;base64,${tab.base64Preview}` }}
+            source={{ uri: tab.previewUri }}
           />
         )}
         <Box className="overflow-hidden border-continuous items-center justify-center w-[80px] h-[80px] rounded-full bg-surface">

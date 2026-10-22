@@ -34,6 +34,7 @@ import {
   type BibleTextModeColumn,
 } from '~helpers/bibleColumnTextModes'
 import { migrateLegacyBibleTabData } from '../migrations/legacyBibleVersionMigration'
+import { omitSessionTabPreview, withoutLegacyTabPreview } from './tabPreview'
 import { appLogger } from '~helpers/agentObservability'
 import { useBibleRouteNavigation } from './bibleRouteNavigation'
 import { getSelectedVersesVersion, setSelectedVersesVersion } from './bibleSelectionVersion'
@@ -53,7 +54,11 @@ export type TabBase = {
   title: string
   isRemovable: boolean
   hasBackButton?: boolean
-  base64Preview?: string
+  /**
+   * Screenshot shown in the switcher: a JPEG file on native, a data URI held for the session
+   * on the web. It never leaves the device (see `withoutTabPreview`).
+   */
+  previewUri?: string
 }
 
 export type VersionCode = keyof typeof versions
@@ -455,8 +460,9 @@ const migrateTabTypes = (tab: TabItem): TabItem => {
 // Migration function to make all existing tabs removable
 const migrateTabsToRemovable = (tabs: TabItem[]): TabItem[] => {
   return tabs.map(tab => {
-    // First migrate old tab types
-    tab = migrateTabTypes(tab)
+    // First migrate old tab types. The inline preview of earlier versions is dropped rather than
+    // turned into a file: the switcher takes a new one the next time the tab is shown.
+    tab = withoutLegacyTabPreview(migrateTabTypes(tab))
     if (tab.type === 'bible') {
       tab = {
         ...tab,
@@ -552,7 +558,7 @@ const maxCachedTabs = 5
 export const tabGroupsAtom = atomWithAsyncStorage<TabGroup[]>(
   'tabGroupsAtom',
   [createDefaultGroup()],
-  { migrate: migrateTabGroups }
+  { migrate: migrateTabGroups, replacer: omitSessionTabPreview }
 )
 
 // Active group ID (persisted)

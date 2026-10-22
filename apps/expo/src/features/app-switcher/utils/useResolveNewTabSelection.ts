@@ -20,7 +20,7 @@ export const useResolveNewTabSelection = (tabId?: string) => {
     store.set(tabAtom, {
       ...selectedTab,
       id: tabId,
-      base64Preview: '',
+      previewUri: '',
     })
 
     router.dismissTo('/')

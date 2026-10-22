@@ -29,17 +29,17 @@ interface TabPreviewProps {
   tabAtom: PrimitiveAtom<TabItem>
 }
 
-const selectorb64 = (tab: TabItem) => tab.base64Preview
+const selectorPreview = (tab: TabItem) => tab.previewUri
 const selectorTitle = (tab: TabItem) => tab.title
 const selectorType = (tab: TabItem) => tab.type
 
 const TabPreview = ({ tabAtom }: TabPreviewProps & BoxProps) => {
-  const base64Preview = useAtomValue(selectAtom(tabAtom, selectorb64))
+  const previewUri = useAtomValue(selectAtom(tabAtom, selectorPreview))
   const title = useAtomValue(selectAtom(tabAtom, selectorTitle))
   const type = useAtomValue(selectAtom(tabAtom, selectorType))
 
   // Différer le rendu de l'image car ce composant n'est pas prioritaire
-  const deferredBase64 = useDeferredValue(base64Preview)
+  const deferredPreviewUri = useDeferredValue(previewUri)
 
   const { WIDTH, HEIGHT, GAP } = useTabConstants()
 
@@ -48,11 +48,8 @@ const TabPreview = ({ tabAtom }: TabPreviewProps & BoxProps) => {
       className="border-continuous overflow-visible bg-reverse items-center justify-center"
       style={{ marginRight: GAP, width: WIDTH, height: HEIGHT }}
     >
-      {Boolean(deferredBase64) && (
-        <Image
-          style={styles.previewImage}
-          source={{ uri: `data:image/jpeg;base64,${deferredBase64}` }}
-        />
+      {Boolean(deferredPreviewUri) && (
+        <Image style={styles.previewImage} source={{ uri: deferredPreviewUri }} />
       )}
       <Box className="overflow-hidden border-continuous items-center justify-center">
         <Box className="overflow-hidden border-continuous items-center justify-center w-[80px] h-[80px] rounded-full bg-light-grey">

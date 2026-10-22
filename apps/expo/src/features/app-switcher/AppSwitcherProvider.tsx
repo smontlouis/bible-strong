@@ -8,6 +8,7 @@ import { TabItem, activeGroupIdAtom, tabGroupsAtom, tabsCountAtom } from '~state
 import { AppSwitcherContext, type AppSwitcherContextValue } from './AppSwitcherContext'
 import { useOnceAtoms } from './utils/useOnceAtoms'
 import { useProviderEffects } from './utils/useProviderEffects'
+import { useTabPreviewFilesSweep } from './utils/useTabPreviewFilesSweep'
 import useTabConstants from './utils/useTabConstants'
 
 interface AppSwitcherProviderProps {
@@ -117,6 +118,9 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
     tabPreviewCarousel,
     createGroupPageIsFullyVisible,
   })
+
+  // Deletes the preview files of tabs that are gone, whatever closed them.
+  useTabPreviewFilesSweep()
 
   const navigateToPage = (pageIndex: number, groupsLength: number) => {
     const store = getDefaultStore()
