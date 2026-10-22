@@ -630,7 +630,7 @@ describe('Resource Worker binding', () => {
     assert.notEqual(passage, directory)
   })
 
-  it('keeps revisioned reads for thirty days, lists for an hour and searches for a day', () => {
+  it('keeps revisioned reads and lists for thirty days and searches for a day', () => {
     const ttl = (path: string) =>
       resourceApiCacheTtlSeconds(new Request(`https://api.bible-strong.app${path}`))
     const hour = 60 * 60
@@ -647,15 +647,13 @@ describe('Resource Worker binding', () => {
       '/v1/cross-references/fr/verses/1-1-1',
       '/v1/commentaries/MHY/fr/chapters/1/1',
       '/v1/commentaries/MHY/fr/coverage',
-    ]) {
-      assert.equal(ttl(path), thirtyDays, path)
-    }
-    for (const path of [
+      // Lists name the content they read like reads, page by page.
       '/v1/naves/fr/topics?limit=500',
       '/v1/strong-lexicon/entries?language=fr&level=simple',
+      '/v1/strong-bibles/LSG/books/19/identities/H3068/occurrences?limit=500',
       '/v1/timelines/fr/events',
     ]) {
-      assert.equal(ttl(path), hour, path)
+      assert.equal(ttl(path), thirtyDays, path)
     }
     assert.equal(ttl('/v1/bibles/LSG/search?q=grace'), 24 * hour)
     assert.equal(ttl('/v1/naves/fr/random'), undefined)
@@ -676,14 +674,10 @@ describe('Resource Worker binding', () => {
       '/v1/dictionaries/bost/fr/verses/2-6-20/words',
       '/v1/dictionaries/bost/fr/verses/2-6-20/entries',
       '/v1/dictionaries/verses/2-6-20/entries?language=fr',
-    ]) {
-      assert.equal(ttl(path), thirtyDays, path)
-    }
-    for (const path of [
       '/v1/dictionaries/bost/fr/entries?limit=500',
       '/v1/dictionaries/directory?language=fr&limit=500',
     ]) {
-      assert.equal(ttl(path), hour, path)
+      assert.equal(ttl(path), thirtyDays, path)
     }
     // A search of the directory is a search like any other.
     assert.equal(ttl('/v1/dictionaries/directory?language=fr&search=aaron'), 24 * hour)
@@ -728,29 +722,68 @@ describe('Resource Worker binding', () => {
     assert.deepEqual(failures, ['match'])
   })
 
-  it('does not cache unsuccessful origin responses', async () => {
+  it('keeps an absent content for a day and never an error', async () => {
     const cache = new MemoryEdgeCache()
     let originReads = 0
-    const route = () =>
+    const route = (status: number) =>
       routeResourceApiRequest({
-        request: new Request('https://api.bible-strong.app/v1/bibles/UNKNOWN/books/1/chapters/1'),
+        request: new Request(
+          `https://api.bible-strong.app/v1/cross-references/fr/verses/1-1-${status}`
+        ),
         authorize: async () => true,
         cache,
         cacheEpoch: 'catalog-release-1',
         waitUntil: () => undefined,
         load: async () => {
           originReads += 1
-          return Response.json({ code: 'BIBLE_UNSUPPORTED' }, { status: 404 })
+          return Response.json({ code: 'NOT_FOUND' }, { status })
         },
       })
 
-    const first = await route()
-    const second = await route()
-
-    assert.equal(originReads, 2)
-    assert.equal(cache.entries.size, 0)
-    assert.equal(first.headers.get('cache-control'), 'private, no-store')
+    const first = await route(404)
+    const second = await route(404)
+    assert.equal(originReads, 1)
+    assert.equal(first.status, 404)
+    assert.equal(second.status, 404)
+    assert.equal(second.headers.get('x-resource-cache'), 'HIT')
     assert.equal(second.headers.get('cache-control'), 'private, no-store')
+    const [kept] = [...cache.entries.values()]
+    assert.equal(kept?.headers.get('cache-control'), 'public, max-age=86400')
+    cache.now = 24 * 60 * 60
+    await route(404)
+    assert.equal(originReads, 2)
+
+    for (const status of [500, 503]) {
+      originReads = 0
+      await route(status)
+      await route(status)
+      assert.equal(originReads, 2, String(status))
+    }
+    assert.equal(cache.entries.size, 1)
+  })
+
+  it('keeps a read under the parameters the routes read alone', async () => {
+    const cache = new MemoryEdgeCache()
+    let originReads = 0
+    const route = (query: string) =>
+      routeResourceApiRequest({
+        request: new Request(`https://api.bible-strong.app/v1/bibles/LSG/verses?${query}`),
+        authorize: async () => true,
+        cache,
+        cacheEpoch: 'catalog-release-1',
+        waitUntil: () => undefined,
+        load: async () => {
+          originReads += 1
+          return Response.json({ verses: [] })
+        },
+      })
+
+    await route('references=1-1-1')
+    const junk = await route('references=1-1-1&utm_source=x&cachebust=1')
+    assert.equal(originReads, 1)
+    assert.equal(junk.headers.get('x-resource-cache'), 'HIT')
+    await route('references=1-1-2')
+    assert.equal(originReads, 2)
   })
 
   it('constructs the HTTP application with the shared Hyperdrive database without connecting', async () => {

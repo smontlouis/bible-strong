@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
-import { OpenApi } from '@effect/platform'
+import { HttpApi, OpenApi } from '@effect/platform'
+import { Option, SchemaAST } from 'effect'
 
+import { RESOURCE_API_QUERY_PARAMETERS } from '../../runtime/resourceApiCache'
 import { ResourceApi } from '../api'
 import { makeResourceWebHandler } from '../app'
 
@@ -33,6 +35,24 @@ describe('Resource service foundation', () => {
       ]
     )
     assert.equal(specification.paths['/health']?.get?.responses['429'], undefined)
+  })
+
+  it('keeps cached reads under every query parameter a route declares', () => {
+    const declared = new Set<string>()
+    HttpApi.reflect(ResourceApi, {
+      onGroup: () => undefined,
+      onEndpoint: ({ endpoint }) => {
+        if (Option.isNone(endpoint.urlParamsSchema)) return
+        for (const property of SchemaAST.getPropertySignatures(
+          endpoint.urlParamsSchema.value.ast
+        )) {
+          declared.add(String(property.name))
+        }
+      },
+    })
+
+    assert.ok(declared.has('references'))
+    assert.deepEqual([...declared].sort(), [...RESOURCE_API_QUERY_PARAMETERS].sort())
   })
 
   it('allows configured browser origins and answers preflight requests', async () => {

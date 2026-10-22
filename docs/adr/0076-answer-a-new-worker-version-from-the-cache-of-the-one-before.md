@@ -3,6 +3,7 @@
 ## Status
 
 Accepted. Amended on 2026-10-15: the Worker version leaves the key, and the fallback goes (see below).
+Amended again on 2026-10-22: lists, absent content and unknown parameters (see the end).
 
 ## Context
 
@@ -186,3 +187,18 @@ The risk this decision removed comes back, by choice: a deployment that changes 
 answers for the same content and forgets to bump `RESOURCE_API_ANSWER_REVISION`, or the route's
 own revision, serves the earlier answer until it expires, thirty days for a read. The README of
 the Resource service and the `cache-invalidation` skill list when to bump it.
+
+## Amendment of 2026-10-22: lists, absent content and unknown parameters
+
+Crawlers walking the public site reached the database through answers the Worker did not keep.
+
+- **Lists.** The lists and their pages (Nave topics, dictionary entries and directory, Strong
+  lexicon entries, concordance occurrences, timeline events) were kept one hour, a rule older
+  than revisioned keys. Their keys name the content they read like those of reads: they are
+  kept thirty days.
+- **Absent content.** A 404 under a cached route (a verse without cross-references, an entry a
+  dictionary does not have) is kept a day under the same key; an error is never kept.
+- **Unknown parameters.** A cached answer is kept under the query parameters some route reads
+  (`RESOURCE_API_QUERY_PARAMETERS`, which a test keeps equal to those the API declares). Any
+  other parameter, a crawler's or a cache buster's, gets the answer already kept.
+

@@ -226,9 +226,7 @@ const LONG_LIVED_PATHS = [
   /^\/v1\/commentaries\/verses\/[^/]+\/sections$/,
   /^\/v1\/cross-references\/[^/]+\/verses\/[^/]+$/,
   /^\/v1\/timelines\/[^/]+\/events\/[^/]+$/,
-] as const
-
-const SHORT_LIVED_PATHS = [
+  // Lists and their pages: their keys name the content they read like those of reads.
   /^\/v1\/naves\/[^/]+\/topics$/,
   /^\/v1\/dictionaries\/directory$/,
   /^\/v1\/dictionaries\/[^/]+\/[^/]+\/entries$/,
@@ -236,6 +234,40 @@ const SHORT_LIVED_PATHS = [
   /^\/v1\/strong-lexicon\/entries$/,
   /^\/v1\/timelines\/[^/]+\/events$/,
 ] as const
+
+/**
+ * The query parameters the routes read, every route together; a test keeps the list equal to
+ * those the API declares. A cached read is kept under these alone: a parameter no route reads,
+ * a crawler's or a cache buster's, gets the answer already kept instead of a database read.
+ */
+export const RESOURCE_API_QUERY_PARAMETERS: ReadonlySet<string> = new Set([
+  'allBooks',
+  'book',
+  'canon',
+  'chapter',
+  'codes',
+  'commentaries',
+  'content',
+  'cursor',
+  'identities',
+  'initial',
+  'kind',
+  'language',
+  'level',
+  'lexemeId',
+  'lexicalLanguage',
+  'limit',
+  'offset',
+  'prefix',
+  'q',
+  'references',
+  'search',
+  'section',
+  'sortOrder',
+  'strongCodes',
+  'versions',
+  'words',
+])
 
 const HOUR_SECONDS = 60 * 60
 const DAY_SECONDS = 24 * HOUR_SECONDS
@@ -249,12 +281,14 @@ export const resourceApiCacheTtlSeconds = (request: Request): number | undefined
   if (url.pathname.endsWith('/random')) return undefined
   if (isDynamicResourceRequest(request)) return DAY_SECONDS
   if (LONG_LIVED_PATHS.some(pattern => pattern.test(url.pathname))) return REVISIONED_TTL_SECONDS
-  if (SHORT_LIVED_PATHS.some(pattern => pattern.test(url.pathname))) return HOUR_SECONDS
   return undefined
 }
 
 const cacheRequest = (request: Request, cacheEpoch: string): Request => {
   const source = new URL(request.url)
+  for (const name of [...source.searchParams.keys()]) {
+    if (!RESOURCE_API_QUERY_PARAMETERS.has(name)) source.searchParams.delete(name)
+  }
   source.searchParams.sort()
   source.pathname = `/__resource-api-cache/${encodeURIComponent(cacheEpoch)}${source.pathname}`
   return new Request(source, { method: 'GET' })
@@ -351,13 +385,23 @@ export const routeResourceApiRequest = async ({
   if (hit) return responseForClient(hit, 'HIT', request, corsAllowedOrigins)
 
   const response = await load()
-  if (response.status !== 200) {
+  // Content that is not there stays absent for the content the key names: a verse without
+  // cross-references is asked for again and again. It is kept a day at most, an error never.
+  if (response.status !== 200 && response.status !== 404) {
     return responseForClient(response, undefined, request, corsAllowedOrigins)
   }
   waitUntil(
-    cache.put(key, cacheableResponse(response.clone(), ttlSeconds)).catch(cause => {
-      reportCacheFailure('put', cause)
-    })
+    cache
+      .put(
+        key,
+        cacheableResponse(
+          response.clone(),
+          response.status === 404 ? Math.min(ttlSeconds, DAY_SECONDS) : ttlSeconds
+        )
+      )
+      .catch(cause => {
+        reportCacheFailure('put', cause)
+      })
   )
   return responseForClient(response, 'MISS', request, corsAllowedOrigins)
 }
