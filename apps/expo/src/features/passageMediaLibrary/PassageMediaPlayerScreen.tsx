@@ -5,7 +5,6 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useWindowDimensions } from 'react-native'
 import YoutubePlayer from '~helpers/react-native-youtube-iframe'
-import type { ShouldStartLoadRequest } from 'react-native-webview/lib/WebViewTypes'
 import Header from '~common/Header'
 import Box, { VStack } from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
@@ -15,8 +14,6 @@ import Text from '~common/ui/Text'
 import { formatPassageMediaDuration, getPassageMediaById } from '~features/bible/passageMedia'
 import { IS_FORM_SHEET } from '~helpers/constants'
 import useLanguage from '~helpers/useLanguage'
-const YOUTUBE_PLAYER_BASE_URL =
-  'https://lonelycpp.github.io/react-native-youtube-iframe/iframe_v2.html'
 
 const PassageMediaPlayerScreen = () => {
   const stylingTheme = useStylingTheme()
@@ -61,12 +58,6 @@ const PassageMediaPlayerScreen = () => {
                   onError={error => setPlayerError(error || 'unknown')}
                   onReady={() => setPlayerError(undefined)}
                   initialPlayerParams={{ rel: false }}
-                  webViewProps={{
-                    onShouldStartLoadWithRequest: (request: ShouldStartLoadRequest) => {
-                      const url = request.mainDocumentURL || request.url
-                      return url === 'about:blank' || url.startsWith(YOUTUBE_PLAYER_BASE_URL)
-                    },
-                  }}
                   viewContainerStyle={{ borderRadius: radii.card, overflow: 'hidden' }}
                   webViewStyle={{ borderRadius: radii.card, overflow: 'hidden' }}
                 />

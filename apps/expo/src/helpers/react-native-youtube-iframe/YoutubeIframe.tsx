@@ -8,7 +8,7 @@ import React, {
 } from 'react'
 import { DimensionValue, Platform, StyleProp, StyleSheet, ViewStyle } from 'react-native'
 import WebView, { WebViewMessageEvent, WebViewProps } from 'react-native-webview'
-import { PLAYER_STATES, PLAYER_ERROR, CUSTOM_USER_AGENT } from './constants'
+import { PLAYER_STATES, PLAYER_ERROR, CUSTOM_USER_AGENT, PLAYER_BASE_URL } from './constants'
 import { EventEmitter } from 'events'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -215,12 +215,15 @@ const YoutubeIframe = (
         style={[styles.webView, webViewStyle]}
         mediaPlaybackRequiresUserAction={false}
         allowsFullscreenVideo={!initialPlayerParams?.preventFullScreen}
-        source={{ html: MAIN_SCRIPT(videoId, playList, initialPlayerParams) }}
+        source={{
+          html: MAIN_SCRIPT(videoId, playList, initialPlayerParams),
+          baseUrl: PLAYER_BASE_URL,
+        }}
         userAgent={
           forceAndroidAutoplay ? Platform.select({ android: CUSTOM_USER_AGENT, ios: '' }) : ''
         }
         onShouldStartLoadWithRequest={request => {
-          return request.mainDocumentURL === 'about:blank'
+          return request.mainDocumentURL === PLAYER_BASE_URL
         }}
         {...webViewProps}
       />
