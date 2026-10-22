@@ -200,7 +200,7 @@ const DownloadableItem = ({
               <Text
                 numberOfLines={1}
                 style={[{ fontSize: isDependency ? 14 : 16 }, { flexShrink: 1 }]}
-                className={twMerge(isDownloaded ? 'text-primary' : 'text-default')}
+                className={twMerge(isDownloaded ? 'text-link' : 'text-default')}
               >
                 {name}
               </Text>
@@ -388,7 +388,7 @@ const DownloadableItem = ({
               >
                 <Text
                   className={twMerge(
-                    downloadsDisabled ? 'text-tertiary' : 'text-primary',
+                    downloadsDisabled ? 'text-tertiary' : 'text-link',
                     'text-[12px] font-bold'
                   )}
                 >

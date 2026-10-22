@@ -52,7 +52,7 @@ const FilterRow = ({ icon, label, value, active, onPress }: FilterRowProps) => {
         <FeatherIcon name={icon} size={20} color={active ? 'primary' : 'tertiary'} />
         <Text
           className={twMerge(
-            active ? 'text-primary' : 'text-default',
+            active ? 'text-link' : 'text-default',
             'flex-[1] ml-[12px] text-[16px]'
           )}
         >
@@ -120,7 +120,7 @@ const PassageSearchFiltersSheet = forwardRef<SheetRef, PassageSearchFiltersProps
                       className="overflow-hidden border-continuous px-[8px] py-[8px]"
                       onPress={onReset}
                     >
-                      <Text className="text-primary text-[14px]">{t('Réinitialiser')}</Text>
+                      <Text className="text-link text-[14px]">{t('Réinitialiser')}</Text>
                     </TouchableBox>
                   </Box>
                 ) : undefined

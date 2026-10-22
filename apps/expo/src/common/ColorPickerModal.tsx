@@ -477,7 +477,7 @@ const ColorPickerModal = ({ inline = false }: { inline?: boolean }) => {
                     <IconTile tint="primary" className="mr-[10px]">
                       <FeatherIcon name="plus" size={20} color="primary" />
                     </IconTile>
-                    <Text className="font-bold text-primary text-[14px]">
+                    <Text className="font-bold text-link text-[14px]">
                       {t('Ajouter une couleur')}
                     </Text>
                   </Box>

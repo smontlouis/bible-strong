@@ -83,7 +83,7 @@ export const PlansExploreLink = () => {
       className="flex-row items-center gap-[6px] py-[12px]"
       accessibilityLabel={t('readingPlans.explorePlans')}
     >
-      <Text className="text-primary text-[13px] font-bold">{t('readingPlans.explore')}</Text>
+      <Text className="text-link text-[13px] font-bold">{t('readingPlans.explore')}</Text>
     </Link>
   )
 }

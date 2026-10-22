@@ -110,7 +110,7 @@ const HighlightedVerse = ({
       <Text style={getScaledStrongTextStyle(20, 30, readingTypography)}>
         {text.slice(0, untranslatedOffset)}
         <Text
-          className="text-primary font-bold"
+          className="text-link font-bold"
           style={getScaledStrongTextStyle(26, 30, readingTypography)}
         >
           {' ●'}
@@ -125,7 +125,7 @@ const HighlightedVerse = ({
     <Text style={getScaledStrongTextStyle(20, 30, readingTypography)}>
       {text.slice(0, highlight.start)}
       <Text
-        className="bg-light-primary text-primary font-bold rounded-[4px] px-[3px]"
+        className="bg-light-primary text-link font-bold rounded-[4px] px-[3px]"
         style={getScaledStrongTextStyle(20, 30, readingTypography)}
       >
         {text.slice(highlight.start, highlight.end)}
@@ -445,7 +445,7 @@ const StrongDetailMainPage = ({
             <Loading message={t('Chargement...')} />
           ) : contextError ? (
             <TouchableBox onPress={onRetryContext} accessibilityRole="button" className="py-[4px]">
-              <Text className="text-primary">{t('Réessayer')}</Text>
+              <Text className="text-link">{t('Réessayer')}</Text>
             </TouchableBox>
           ) : null}
           {isDeep && (contextMorphologies.length > 0 || !!entry.morphology) && (
@@ -521,7 +521,7 @@ const StrongDetailMainPage = ({
             {extrasLoading && <Loading message={t('Chargement...')} />}
             {extrasError && (
               <TouchableBox onPress={onRetryExtras} accessibilityRole="button" className="py-[4px]">
-                <Text className="text-primary">{t('Réessayer')}</Text>
+                <Text className="text-link">{t('Réessayer')}</Text>
               </TouchableBox>
             )}
           </StudyCardBody>
@@ -674,7 +674,7 @@ const StrongDetailMainPage = ({
                 disabled={concordanceRetrying}
                 onPress={onRetryConcordance}
               >
-                <Text className="text-primary font-semibold">
+                <Text className="text-link font-semibold">
                   {t(concordanceRetrying ? 'Chargement...' : 'bible.error.retry')}
                 </Text>
               </TouchableBox>

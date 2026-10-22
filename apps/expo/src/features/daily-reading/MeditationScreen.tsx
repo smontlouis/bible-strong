@@ -182,7 +182,7 @@ export const MeditationReader = ({
                   />
                 )}
                 <Box className="min-h-[44px] flex-row items-center gap-[8px] flex-1">
-                  <Text className="text-primary text-[14px] flex-1">
+                  <Text className="text-link text-[14px] flex-1">
                     {collection?.title ?? t('dailyReading.collection')}
                   </Text>
                   <FeatherIcon name="chevron-right" size={18} color="primary" />

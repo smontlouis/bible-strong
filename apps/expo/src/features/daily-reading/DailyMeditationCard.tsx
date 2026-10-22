@@ -84,9 +84,7 @@ const DailyMeditationCard = ({
           accessibilityLabel={t('dailyReading.change')}
           className="min-h-[44px] justify-center"
         >
-          <Text className="text-primary font-bold text-[13px]">
-            {t('dailyReading.changeShort')}
-          </Text>
+          <Text className="text-link font-bold text-[13px]">{t('dailyReading.changeShort')}</Text>
         </Link>
       </Box>
       {opening ? (
@@ -128,14 +126,14 @@ const DailyMeditationCard = ({
           <Text className="text-grey">
             {isOffline ? t('dailyReading.offlineContent') : t('dailyReading.downloadError')}
           </Text>
-          <Text className="text-primary mt-[8px]">{t('dailyReading.retry')}</Text>
+          <Text className="text-link mt-[8px]">{t('dailyReading.retry')}</Text>
         </Link>
       ) : lookup ? (
         <Box className="gap-[8px] mt-[12px]">
           <Text className="text-grey">{t('dailyReading.noEntry')}</Text>
           {onFallback && (
             <Link onPress={onFallback} className="py-[12px]">
-              <Text className="text-primary font-bold">{t('dailyReading.fallback')}</Text>
+              <Text className="text-link font-bold">{t('dailyReading.fallback')}</Text>
             </Link>
           )}
         </Box>

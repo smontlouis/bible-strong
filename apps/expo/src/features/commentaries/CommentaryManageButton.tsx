@@ -5,7 +5,7 @@ export default function CommentaryManageButton({ onPress }: { onPress: () => voi
   const { t } = useTranslation()
   return (
     <LinkBox className="px-[6px] min-h-[44px] items-center justify-center" onPress={onPress}>
-      <Text className="text-primary text-[14px] font-bold">
+      <Text className="text-link text-[14px] font-bold">
         {t('commentaries.availability.manage')}
       </Text>
     </LinkBox>

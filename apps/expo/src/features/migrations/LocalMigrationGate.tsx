@@ -376,9 +376,7 @@ const LocalMigrationGate = ({
       >
         <VStack className="overflow-hidden border-continuous flex-[1] w-[100%] max-w-[560px] self-center justify-center">
           <Box className="overflow-hidden border-continuous self-center px-[12px] py-[6px] rounded-[16px] bg-light-primary mb-[22px]">
-            <Text className="text-primary font-bold text-[12px]">
-              {t('migration.requiredBadge')}
-            </Text>
+            <Text className="text-link font-bold text-[12px]">{t('migration.requiredBadge')}</Text>
           </Box>
 
           <Box
@@ -465,7 +463,7 @@ const LocalMigrationGate = ({
             <VStack className="overflow-hidden border-continuous mt-[28px] gap-[10px]">
               <HStack className="overflow-hidden border-continuous items-center justify-between">
                 <Text className="text-[13px] text-grey">{t('migration.progress')}</Text>
-                <Text className="text-primary font-bold">{Math.round(progress * 100)}%</Text>
+                <Text className="text-link font-bold">{Math.round(progress * 100)}%</Text>
               </HStack>
               <View
                 accessible

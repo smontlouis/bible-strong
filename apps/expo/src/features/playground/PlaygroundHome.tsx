@@ -51,7 +51,7 @@ const PlaygroundLink = ({ description, eyebrow, icon, onPress, title }: Playgrou
             <Feather name={icon} size={21} color={theme.colors.reverse} />
           </Box>
           <VStack className="overflow-hidden border-continuous flex-[1] gap-[3px]">
-            <Text className="text-primary text-[10px] font-bold uppercase">{eyebrow}</Text>
+            <Text className="text-link text-[10px] font-bold uppercase">{eyebrow}</Text>
             <Text
               className="text-[19px] leading-[24px]"
               style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}

@@ -1725,7 +1725,7 @@ const BibleViewer = ({
                 accessibilityRole="button"
                 onPress={() => void inlineCommentaryQuery.refetch()}
               >
-                <Text className="text-[12px] font-semibold text-primary">
+                <Text className="text-[12px] font-semibold text-link">
                   {t('bible.error.retry')}
                 </Text>
               </TouchableBox>
@@ -1734,7 +1734,7 @@ const BibleViewer = ({
                 accessibilityRole="button"
                 onPress={bibleParamsModal.open}
               >
-                <Text className="text-[12px] font-semibold text-primary">
+                <Text className="text-[12px] font-semibold text-link">
                   {t('inlineCommentary.options')}
                 </Text>
               </TouchableBox>

@@ -29,7 +29,7 @@ function SourceCard({ source }: { source: StudySource }) {
           onPress={() => showSource(source)}
           className="flex-1"
         >
-          <Text className="text-primary text-[14px] font-semibold" numberOfLines={2}>
+          <Text className="text-link text-[14px] font-semibold" numberOfLines={2}>
             {title}
           </Text>
         </TouchableBox>

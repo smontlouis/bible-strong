@@ -92,9 +92,7 @@ export default function InlineCommentarySettings({ onManage }: { onManage?: () =
             <Text className="text-grey">{t('inlineCommentary.noSelection')}</Text>
             {onManage && (
               <TouchableBox accessibilityRole="button" onPress={onManage}>
-                <Text className="text-primary font-semibold">
-                  {t('commentaries.selector.title')}
-                </Text>
+                <Text className="text-link font-semibold">{t('commentaries.selector.title')}</Text>
               </TouchableBox>
             )}
           </Box>
@@ -112,7 +110,7 @@ export function InlineCommentaryManageAction({ onPress }: { onPress: () => void 
       onPress={onPress}
       className="px-[8px] min-h-[44px] justify-center"
     >
-      <Text className="text-primary font-semibold text-[14px]">
+      <Text className="text-link font-semibold text-[14px]">
         {t('commentaries.availability.manage')}
       </Text>
     </TouchableBox>

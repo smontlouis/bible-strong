@@ -14,7 +14,7 @@ const InlineLink = ({ href, children, ...props }: InlineLinkProps) => {
       onPress={() => Linking.openURL(href)}
       fontFamily="text"
       {...props}
-      className="text-primary font-bold"
+      className="text-link font-bold"
     >
       {children}
     </Paragraph>

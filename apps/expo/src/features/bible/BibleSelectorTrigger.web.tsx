@@ -135,7 +135,7 @@ function BookRow({
       <Text
         className={twMerge(
           'flex-1 text-[16px]',
-          selected ? 'text-primary font-semibold' : 'text-default'
+          selected ? 'text-link font-semibold' : 'text-default'
         )}
       >
         {label}
@@ -317,9 +317,7 @@ export function useBookPanelScreens({
                     nav.close()
                   }}
                 >
-                  <Text className={isCurrent ? 'text-primary font-semibold' : undefined}>
-                    {value}
-                  </Text>
+                  <Text className={isCurrent ? 'text-link font-semibold' : undefined}>{value}</Text>
                 </TouchableBox>
               )
             })}

@@ -96,7 +96,7 @@ export default function PassageContextButton({
         accessibilityState={{ expanded: !focused }}
         onPress={focused ? onExpand : onCollapse}
       >
-        <Text className="text-primary font-bold text-[14px] text-center">
+        <Text className="text-link font-bold text-[14px] text-center">
           {t(focused ? 'tab.readWholeChapter' : 'tab.closeContext')}
         </Text>
       </TouchableBox>
@@ -139,7 +139,7 @@ export function PlanPassageBanner({
         className="flex-1 items-center justify-center"
         style={{ marginHorizontal: hasContextToggle ? 88 : 56 }}
       >
-        <Text className="text-primary font-bold text-[14px] text-center" numberOfLines={1}>
+        <Text className="text-link font-bold text-[14px] text-center" numberOfLines={1}>
           {`${t('tab.plan')} — ${reference}`}
         </Text>
       </Box>

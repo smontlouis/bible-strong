@@ -128,7 +128,7 @@ export default function BookWidget({ widget }: { widget: Descriptor }) {
             onPress={() => setLimit(n => n + 12)}
             className="self-start py-2"
           >
-            <Text className="text-primary text-[14px] font-semibold">
+            <Text className="text-link text-[14px] font-semibold">
               {t('assistant.widgets.more')}
             </Text>
           </TouchableBox>

@@ -73,7 +73,7 @@ const BibleNoteItem = ({ item, onPress, relationCount, onRelationPress }: Props)
             <Box className="overflow-hidden border-continuous flex-row items-center">
               {item.isAnnotation && (
                 <Box className="overflow-hidden border-continuous rounded-full bg-light-primary px-[7px] py-[1px] mr-[6px]">
-                  <Text className="text-[11px] font-semibold text-primary">{t('Annotation')}</Text>
+                  <Text className="text-[11px] font-semibold text-link">{t('Annotation')}</Text>
                 </Box>
               )}
               <Text className="flex-[1] text-[12px] text-dark-grey" numberOfLines={1}>

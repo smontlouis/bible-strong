@@ -47,7 +47,7 @@ export const StudyMoreRow = ({ label, onPress }: { label: string; onPress: () =>
     accessibilityRole="button"
     accessibilityLabel={label}
   >
-    <Text className="flex-[1] text-primary text-[15px]">{label}</Text>
+    <Text className="flex-[1] text-link text-[15px]">{label}</Text>
     <FeatherIcon name="chevron-right" color="grey" size={18} />
   </TouchableBox>
 )

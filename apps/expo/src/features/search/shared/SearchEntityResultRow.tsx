@@ -164,7 +164,7 @@ const PassageDescription = ({ highlighted }: { highlighted?: string }) => {
       {parts.map((part, i) => {
         if (part.startsWith('{{') && part.endsWith('}}')) {
           return (
-            <Paragraph className="font-bold text-primary" small key={i}>
+            <Paragraph className="font-bold text-link" small key={i}>
               {part.slice(2, -2)}
             </Paragraph>
           )

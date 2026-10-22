@@ -133,7 +133,7 @@ const AccountMigrationModal = ({
             <VStack className="overflow-hidden border-continuous w-[100%] gap-[10px]">
               <HStack className="overflow-hidden border-continuous justify-between items-center">
                 <Text className="text-[13px] text-grey">{t('migration.progress')}</Text>
-                <Text className="text-primary font-bold">{Math.round(progress * 100)}%</Text>
+                <Text className="text-link font-bold">{Math.round(progress * 100)}%</Text>
               </HStack>
               <View
                 accessible

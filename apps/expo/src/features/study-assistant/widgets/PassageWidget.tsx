@@ -76,7 +76,7 @@ function PassageCard({
     >
       <HStack className="items-center gap-2">
         <TouchableBox accessibilityRole="button" onPress={open} className="shrink">
-          <Text className="text-primary text-[14px] font-semibold" numberOfLines={1}>
+          <Text className="text-link text-[14px] font-semibold" numberOfLines={1}>
             {label}
           </Text>
         </TouchableBox>

@@ -59,7 +59,7 @@ const CommentaryEntryNavigation = ({
           [{ opacity: referenceDisabled ? 0.6 : 1 }],
         ]}
       >
-        <Text className="text-primary font-bold" numberOfLines={1}>
+        <Text className="text-link font-bold" numberOfLines={1}>
           {reference}
         </Text>
       </TouchableBox>

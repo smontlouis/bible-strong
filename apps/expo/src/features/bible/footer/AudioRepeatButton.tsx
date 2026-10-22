@@ -42,7 +42,7 @@ const AudioRepeatButton = (props: AudioRepeatButtonProps) => {
         <FeatherIcon name="repeat" size={14} color={isActive ? 'primary' : 'grey'} />
         <Text
           className={twMerge(
-            isActive ? 'text-primary' : 'text-grey',
+            isActive ? 'text-link' : 'text-grey',
             'ml-[5px] font-bold text-[10px]'
           )}
         >

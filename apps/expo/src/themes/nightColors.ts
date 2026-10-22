@@ -12,6 +12,7 @@ const colors = {
   darkGrey: 'rgba(255, 255, 255, 0.5)',
   primary: 'rgb(14,211,185)',
   lightPrimary: 'rgba(14, 211, 185, 0.5)',
+  link: '#23dabf',
   secondary: 'rgb(255,240,187)',
   lightSecondary: 'rgba(255,240,187, 0.3)',
   tertiary: 'rgb(160,220,255)',

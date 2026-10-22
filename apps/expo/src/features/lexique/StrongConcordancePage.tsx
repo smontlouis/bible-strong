@@ -181,7 +181,7 @@ const StrongConcordancePage = ({
             void lemmaQuery.refetch()
         }}
       >
-        <Text className="text-primary">{t(retrying ? 'Chargement...' : 'Réessayer')}</Text>
+        <Text className="text-link">{t(retrying ? 'Chargement...' : 'Réessayer')}</Text>
       </TouchableBox>
     </VStack>
   ) : null

@@ -104,7 +104,7 @@ const ResourceUnavailableView = ({
         )}
         {presentation.actions.includes('retry') && onRetry && (
           <Text
-            className="font-bold text-primary"
+            className="font-bold text-link"
             onPress={onRetry}
             style={{ marginTop: padding, fontSize: size === 'small' ? 12 : 16 }}
           >
@@ -113,7 +113,7 @@ const ResourceUnavailableView = ({
         )}
         {presentation.actions.includes('manage') && (
           <Text
-            className="font-bold text-primary"
+            className="font-bold text-link"
             onPress={onManage ?? (() => router.push('/downloads'))}
             style={{ marginTop: padding }}
           >

@@ -104,7 +104,7 @@ const BookItem = memo(
           >
             <Text
               className={twMerge(
-                isSelected ? 'text-primary font-semibold' : 'text-default',
+                isSelected ? 'text-link font-semibold' : 'text-default',
                 'text-[16px] flex-[1]'
               )}
             >
@@ -173,7 +173,7 @@ const BookItem = memo(
                       >
                         <Text
                           className={twMerge(
-                            isSelectedChapter ? 'text-primary font-semibold' : 'text-default',
+                            isSelectedChapter ? 'text-link font-semibold' : 'text-default',
                             'text-center'
                           )}
                           style={{ width: ITEM_WIDTH }}

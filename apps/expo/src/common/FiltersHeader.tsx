@@ -57,7 +57,7 @@ export default function FiltersHeader({
   const reset =
     activeCount > 0 && onReset ? (
       <TouchableBox onPress={onReset} accessibilityRole="button" className="p-2">
-        <Text className="text-primary text-[12px]">{t('Réinitialiser')}</Text>
+        <Text className="text-link text-[12px]">{t('Réinitialiser')}</Text>
       </TouchableBox>
     ) : undefined
   const screens: Record<string, PanelScreen> = {
@@ -89,7 +89,7 @@ export default function FiltersHeader({
                 color={filter.active ? 'primary' : 'tertiary'}
               />
               <Text
-                className={`flex-1 ${isWeb ? 'text-[14px]' : 'text-[16px]'} ${filter.active ? 'text-primary' : 'text-default'}`}
+                className={`flex-1 ${isWeb ? 'text-[14px]' : 'text-[16px]'} ${filter.active ? 'text-link' : 'text-default'}`}
               >
                 {filter.label}
               </Text>

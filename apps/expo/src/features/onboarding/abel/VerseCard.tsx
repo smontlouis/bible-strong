@@ -155,7 +155,7 @@ const VerseCard = ({
             className="overflow-hidden border-continuous"
           >
             <AnimatedText
-              className="text-primary"
+              className="text-link"
               style={[
                 {
                   fontSize: s(31) || 16,

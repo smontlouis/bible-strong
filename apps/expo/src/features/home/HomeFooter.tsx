@@ -13,7 +13,7 @@ import type { MainStackProps } from '~navigation/type'
 
 const FooterLink = ({ children, ...props }: PropsWithChildren<LinkProps<keyof MainStackProps>>) => (
   <LinkBox {...props} className="self-start flex-row items-center gap-[7px] py-[7px]">
-    <Text className="text-primary text-[13px] font-bold shrink">{children}</Text>
+    <Text className="text-link text-[13px] font-bold shrink">{children}</Text>
     <FeatherIcon name="arrow-up-right" size={14} color="primary" />
   </LinkBox>
 )

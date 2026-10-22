@@ -74,7 +74,7 @@ const BibleDisplayModeCard = ({
           <Text
             className={twMerge(
               'font-bold text-[15px] leading-[20px]',
-              selected ? 'text-primary' : unavailable ? 'text-grey' : 'text-default'
+              selected ? 'text-link' : unavailable ? 'text-grey' : 'text-default'
             )}
             numberOfLines={1}
           >

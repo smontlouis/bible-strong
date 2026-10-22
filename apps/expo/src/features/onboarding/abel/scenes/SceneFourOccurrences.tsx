@@ -157,7 +157,7 @@ const StrongLemmaCard = ({ metrics, t }: StrongLemmaCardProps) => {
       ]}
     >
       <Text
-        className="text-primary font-bold"
+        className="text-link font-bold"
         style={[{ fontSize: s(9) || 16 }, { letterSpacing: s(1.1) }]}
       >
         {t('onboarding.abel.sceneFour.hebrew')}
@@ -169,7 +169,7 @@ const StrongLemmaCard = ({ metrics, t }: StrongLemmaCardProps) => {
         הֶבֶל
       </Text>
       <Text
-        className="text-primary"
+        className="text-link"
         style={[
           {
             fontSize: s(21) || 16,
@@ -232,7 +232,7 @@ const OccurrenceFilter = ({
         ]}
       >
         <Text
-          className={twMerge(active ? 'text-primary' : 'text-tertiary', 'font-bold')}
+          className={twMerge(active ? 'text-link' : 'text-tertiary', 'font-bold')}
           style={{ fontSize: metrics.s(8.5) || 16 }}
         >
           {label}
@@ -383,7 +383,7 @@ const OccurrenceVerseCard = ({
   const renderContent = (content: OccurrenceContent) => (
     <>
       <Text
-        className="text-primary font-bold"
+        className="text-link font-bold"
         style={[{ fontSize: s(9) || 16 }, { letterSpacing: s(1.2) }]}
       >
         {content.reference}
@@ -480,7 +480,7 @@ export const createSceneFourOccurrences = ({
   const renderVerse = (verse: OccurrenceVerse, fontSize: number) => (
     <>
       {verse.before}
-      <Text className="text-primary font-bold" style={{ fontSize: metrics.s(fontSize) || 16 }}>
+      <Text className="text-link font-bold" style={{ fontSize: metrics.s(fontSize) || 16 }}>
         {verse.highlight}
       </Text>
       {verse.after}
@@ -648,11 +648,11 @@ export const createSceneFourOccurrences = ({
         >
           {activeFilter === 'vanity' ? (
             <>
-              <Text className="text-primary font-bold" style={{ fontSize: metrics.s(12.3) || 16 }}>
+              <Text className="text-link font-bold" style={{ fontSize: metrics.s(12.3) || 16 }}>
                 {t('onboarding.abel.sceneFour.ecclesiastesHighlightOne')}
               </Text>
               {t('onboarding.abel.sceneFour.ecclesiastesMiddle')}
-              <Text className="text-primary font-bold" style={{ fontSize: metrics.s(12.3) || 16 }}>
+              <Text className="text-link font-bold" style={{ fontSize: metrics.s(12.3) || 16 }}>
                 {verses[2].highlight}
               </Text>
               {verses[2].after}

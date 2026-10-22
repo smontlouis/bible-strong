@@ -21,7 +21,7 @@ const SeeAll = () => {
   const { t } = useTranslation()
   return (
     <Link route="History" accessibilityLabel={`${t('history.seeAll')} · ${t('history.title')}`}>
-      <Text className="text-[12px] font-bold text-primary">{t('history.seeAll')}</Text>
+      <Text className="text-[12px] font-bold text-link">{t('history.seeAll')}</Text>
     </Link>
   )
 }

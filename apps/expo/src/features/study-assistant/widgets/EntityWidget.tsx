@@ -119,7 +119,7 @@ function EntityBody({ widget }: { widget: Descriptor }) {
                 }
                 className="self-start py-1"
               >
-                <Text className="text-primary text-[13px]">
+                <Text className="text-link text-[13px]">
                   {t('assistant.widgets.map')} · {Number(place.latitude).toFixed(4)},{' '}
                   {Number(place.longitude).toFixed(4)}
                 </Text>

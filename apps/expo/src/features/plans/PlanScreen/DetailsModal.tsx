@@ -69,9 +69,7 @@ const DetailsModal = ({
             <Box className="mt-[20px] gap-[8px]">
               <Text className="text-grey text-[13px] leading-[20px]">{attribution.text}</Text>
               <Link href={attribution.url} className="min-h-[44px] justify-center">
-                <Text className="text-primary text-[13px]">
-                  {new URL(attribution.url).hostname}
-                </Text>
+                <Text className="text-link text-[13px]">{new URL(attribution.url).hostname}</Text>
               </Link>
             </Box>
           )}

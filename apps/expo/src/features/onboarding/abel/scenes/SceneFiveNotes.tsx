@@ -140,7 +140,7 @@ const RelationChip = ({ label, metrics, onPress }: RelationChipProps) => {
           backgroundColor: colorWithOpacity(resolveThemeColor(stylingTheme, 'lightPrimary'), 0.5),
         }}
       >
-        <Text className="text-primary font-bold" style={{ fontSize: metrics.s(8.5) || 16 }}>
+        <Text className="text-link font-bold" style={{ fontSize: metrics.s(8.5) || 16 }}>
           {label}
         </Text>
       </Box>

@@ -44,9 +44,7 @@ const AudioSpeedButton = (props: AudioSpeedButtonProps) => {
       choices={choices}
       customRender={
         <AudioChip isActive={isActive} {...props}>
-          <Text
-            className={twMerge(isActive ? 'text-primary' : 'text-grey', 'font-bold text-[10px]')}
-          >
+          <Text className={twMerge(isActive ? 'text-link' : 'text-grey', 'font-bold text-[10px]')}>
             {rate}x
           </Text>
         </AudioChip>

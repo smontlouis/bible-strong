@@ -131,7 +131,7 @@ export default function ConcordanceWidget({ widget }: { widget: LexicalWidget })
             onPress={() => void query.fetchNextPage()}
             className="self-start py-2"
           >
-            <Text className="text-primary text-[14px] font-semibold">
+            <Text className="text-link text-[14px] font-semibold">
               {t(query.isFetchingNextPage ? 'Chargement...' : 'assistant.widgets.more')}
             </Text>
           </TouchableBox>

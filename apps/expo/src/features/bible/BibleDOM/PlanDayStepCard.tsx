@@ -45,7 +45,7 @@ const PlanDayStepCard = ({ step, settings, onPress }: Props) => {
       }}
     >
       <span style={{ flex: 1, minWidth: 0 }}>
-        <strong style={{ ...textStyle, color: colors.primary, fontSize: 16, lineHeight: 1.3 }}>
+        <strong style={{ ...textStyle, color: colors.link, fontSize: 16, lineHeight: 1.3 }}>
           {step.label}
         </strong>
         {step.title && (

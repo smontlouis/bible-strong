@@ -59,7 +59,7 @@ const AnnotationSheetContent = (props: AnnotationToolbarProps) => {
                 className="rounded-full px-[7px] py-[2px] bg-light-grey"
                 testID="annotation-toolbar-version"
               >
-                <Text className="text-[13px] font-bold text-primary">{annotatedVersion}</Text>
+                <Text className="text-[13px] font-bold text-link">{annotatedVersion}</Text>
               </Box>
             )}
           </HStack>

@@ -34,7 +34,7 @@ export default function BibleFontList({ onSelect }: { onSelect?: () => void }) {
           }}
         >
           <Text
-            className={font === selectedFont ? 'flex-1 text-primary' : 'flex-1 text-default'}
+            className={font === selectedFont ? 'flex-1 text-link' : 'flex-1 text-default'}
             style={{ fontFamily: font, fontSize: isWeb ? 14 : 18 }}
           >
             {font}

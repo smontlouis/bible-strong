@@ -216,9 +216,7 @@ describe('FiltersHeader', () => {
           node.props.size === 20
       ).props.color
     ).toBe('primary')
-    expect(renderer.root.findByProps({ children: 'order' }).props.className).toContain(
-      'text-primary'
-    )
+    expect(renderer.root.findByProps({ children: 'order' }).props.className).toContain('text-link')
 
     expect(
       renderer.root.find(

@@ -23,6 +23,7 @@ type OverlayColors = {
   default: string
   lightGrey: string
   primary: string
+  link: string
   reverse: string
   surfaceRaised: string
 }
@@ -428,7 +429,7 @@ const PassageMediaOverlay = ({
                     transition={{ duration: 0.22, delay: 0.08 + sectionIndex * 0.06 }}
                     style={{
                       margin: '0 0 14px 2px',
-                      color: colors.primary,
+                      color: colors.link,
                       fontFamily: INTERFACE_FONT,
                       fontSize: 12,
                       lineHeight: 1.2,

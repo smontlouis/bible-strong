@@ -77,7 +77,7 @@ const renderNoteNodes = (
         const osis = node.attributes.id
         return (
           <Text
-            className="text-primary underline decoration-solid decoration-default"
+            className="text-link underline decoration-solid decoration-default"
             key={key}
             accessibilityRole={osis ? 'link' : undefined}
             onPress={osis ? () => onReferencePress(osis) : undefined}

@@ -143,7 +143,7 @@ const StandaloneVerseOfTheDay = ({
         accessibilityLabel={t('dailyReading.change')}
         className="min-h-[44px] justify-center"
       >
-        <Text className="text-primary font-bold text-[13px]">{t('dailyReading.changeShort')}</Text>
+        <Text className="text-link font-bold text-[13px]">{t('dailyReading.changeShort')}</Text>
       </Link>
     </Box>
   )

@@ -65,7 +65,7 @@ const CompareStrongVerseText = ({
                   <Text
                     className={twMerge(
                       isSelected ? 'bg-primary' : '',
-                      isSelected ? 'text-reverse' : 'text-primary',
+                      isSelected ? 'text-reverse' : 'text-link',
                       'rounded-[8px] px-[4px] text-[12px]'
                     )}
                     onPress={() => openStrong(identity)}

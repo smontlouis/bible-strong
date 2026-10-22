@@ -183,7 +183,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
               icon={<FeatherIcon name="log-in" size={18} color="primary" />}
               iconTint="primary"
               label={t('Se connecter')}
-              labelClassName="text-primary"
+              labelClassName="text-link"
             />
           )}
         </ListSection>

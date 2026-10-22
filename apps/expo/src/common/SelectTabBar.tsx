@@ -65,7 +65,7 @@ const BibleSelectTabBar = ({ index, onChange }: Props) => {
               onChange(routeIndex)
             }}
           >
-            <Text className={twMerge(isRouteActive ? 'text-primary' : 'text-grey', 'font-bold')}>
+            <Text className={twMerge(isRouteActive ? 'text-link' : 'text-grey', 'font-bold')}>
               {route}
             </Text>
           </TabItem>

@@ -84,9 +84,9 @@ const EntityChipList = ({
               <FeatherIcon
                 name={item.type === 'tag' ? 'tag' : 'git-merge'}
                 size={10}
-                color="primary"
+                color="link"
               />
-              <Text className="text-[12px] text-primary max-w-[100px] ml-[4px]" numberOfLines={1}>
+              <Text className="text-[12px] text-link max-w-[100px] ml-[4px]" numberOfLines={1}>
                 {item.label}
               </Text>
             </Box>
@@ -102,7 +102,7 @@ const EntityChipList = ({
           }}
         >
           <Text
-            className="text-[10px] text-primary"
+            className="text-[10px] text-link"
             style={{
               paddingTop: 3,
               paddingBottom: 3,

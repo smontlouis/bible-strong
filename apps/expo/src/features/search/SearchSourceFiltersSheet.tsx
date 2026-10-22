@@ -52,7 +52,7 @@ const SearchSourceFiltersSheet = forwardRef<SheetRef, SearchSourceFiltersProps>(
                     className="overflow-hidden border-continuous px-[8px] py-[8px]"
                     onPress={onReset}
                   >
-                    <Text className="text-primary text-[14px]">{t('Réinitialiser')}</Text>
+                    <Text className="text-link text-[14px]">{t('Réinitialiser')}</Text>
                   </TouchableBox>
                 </Box>
               ) : undefined

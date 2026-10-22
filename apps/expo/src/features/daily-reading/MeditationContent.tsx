@@ -55,7 +55,7 @@ export default function MeditationContent({
               planLanguage={language}
               scale={-1}
               style={{ fontFamily }}
-              className="text-primary"
+              className="text-link"
             >
               {opening.reference}
             </ReferenceParagraph>

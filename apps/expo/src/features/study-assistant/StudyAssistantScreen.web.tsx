@@ -138,7 +138,7 @@ export default function StudyAssistantScreen() {
               setError('')
             }}
           >
-            <Text className="text-primary">{t('assistant.new')}</Text>
+            <Text className="text-link">{t('assistant.new')}</Text>
           </Pressable>
         }
       />

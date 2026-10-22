@@ -49,7 +49,7 @@ export default function PanelAction({
     >
       {icon && <FeatherIcon name={icon} size={17} color={destructive ? 'quart' : 'default'} />}
       <Text
-        className={`flex-1 ${Platform.OS === 'web' ? 'text-[14px]' : 'text-[16px]'} ${destructive ? 'text-quart' : selected ? 'text-primary font-bold' : 'text-default'}`}
+        className={`flex-1 ${Platform.OS === 'web' ? 'text-[14px]' : 'text-[16px]'} ${destructive ? 'text-quart' : selected ? 'text-link font-bold' : 'text-default'}`}
       >
         {label}
       </Text>

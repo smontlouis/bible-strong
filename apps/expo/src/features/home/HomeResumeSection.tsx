@@ -34,7 +34,7 @@ const HomeResumeSection = () => {
             accessibilityLabel={`${t('history.seeAll')} · ${t('history.title')}`}
             className="py-[12px]"
           >
-            <Text className="text-primary text-[13px] font-bold">{t('history.seeAll')}</Text>
+            <Text className="text-link text-[13px] font-bold">{t('history.seeAll')}</Text>
           </Link>
         }
       />

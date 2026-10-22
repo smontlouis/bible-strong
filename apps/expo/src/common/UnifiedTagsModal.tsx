@@ -259,7 +259,7 @@ export const UnifiedTagsModalInstance = ({ item, setItem }: UnifiedTagsModalInst
             onPress={saveTag}
           >
             <FeatherIcon size={20} color="primary" name="tag" />
-            <Text className="ml-[10px] font-bold text-primary">{`${t('Creer')} "${keyword}"`}</Text>
+            <Text className="ml-[10px] font-bold text-link">{`${t('Creer')} "${keyword}"`}</Text>
           </TouchableBox>
         )}
       </SheetScrollView>

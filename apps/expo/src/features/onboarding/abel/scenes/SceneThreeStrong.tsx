@@ -95,7 +95,7 @@ const StrongDefinitionCard = ({
           style={{ paddingHorizontal: s(10), paddingVertical: s(8), borderRadius: s(11) }}
         >
           <Text
-            className="text-primary font-bold"
+            className="text-link font-bold"
             style={[{ fontSize: s(10) || 16 }, { letterSpacing: s(1.8) }]}
           >
             {t('onboarding.abel.sceneThree.strongLabel')}
@@ -195,7 +195,7 @@ const StrongDefinitionCard = ({
             }}
           >
             <Text
-              className={twMerge(isAction ? 'text-reverse' : 'text-primary', 'font-bold')}
+              className={twMerge(isAction ? 'text-reverse' : 'text-link', 'font-bold')}
               style={{ fontSize: s(14) || 16 }}
             >
               H{definition.code}

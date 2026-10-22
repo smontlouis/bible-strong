@@ -77,7 +77,7 @@ export function WidgetOpenButton({ label, onPress }: { label: string; onPress: (
       onPress={onPress}
       className="flex-row items-center gap-1 self-start py-1"
     >
-      <Text className="text-primary text-[14px] font-semibold">{label}</Text>
+      <Text className="text-link text-[14px] font-semibold">{label}</Text>
       <FeatherIcon name="arrow-up-right" size={15} color="primary" />
     </TouchableBox>
   )
@@ -112,9 +112,7 @@ export function WidgetUnavailable({
       </Text>
       {onRetry && (
         <TouchableBox accessibilityRole="button" onPress={onRetry} className="self-start py-1">
-          <Text className="text-primary text-[14px] font-semibold">
-            {t('assistant.errors.retry')}
-          </Text>
+          <Text className="text-link text-[14px] font-semibold">{t('assistant.errors.retry')}</Text>
         </TouchableBox>
       )}
     </Box>

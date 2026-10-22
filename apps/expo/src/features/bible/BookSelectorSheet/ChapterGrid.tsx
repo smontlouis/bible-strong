@@ -114,7 +114,7 @@ const ChapterGrid = ({ book, chapters: availableChapters, selectedChapter }: Cha
             <Box className="overflow-hidden border-continuous absolute left-[0px] top-[0px] right-[0px] bottom-[0px] items-center justify-center">
               <Text
                 className={twMerge(
-                  isSelected ? 'text-primary font-semibold' : 'text-default',
+                  isSelected ? 'text-link font-semibold' : 'text-default',
                   'text-center'
                 )}
               >

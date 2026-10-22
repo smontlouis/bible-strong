@@ -162,7 +162,7 @@ export const AnnotationTypeButton = ({
       <Text
         className={twMerge(
           compact ? 'text-[12px]' : 'text-[13px]',
-          !disabled && activeType === type ? 'text-primary font-bold' : 'text-default'
+          !disabled && activeType === type ? 'text-link font-bold' : 'text-default'
         )}
         numberOfLines={1}
       >

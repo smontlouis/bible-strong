@@ -362,7 +362,7 @@ const StudyRelationList = ({
                 borderTopRightRadius: hasDirectionalType ? 0 : 16,
               }}
             >
-              <Text className="font-bold text-[12px] text-primary">
+              <Text className="font-bold text-[12px] text-link">
                 {getDraftRelationText(editingModel)}
               </Text>
             </TouchableBox>

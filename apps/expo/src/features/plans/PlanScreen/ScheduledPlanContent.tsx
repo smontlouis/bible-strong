@@ -304,7 +304,7 @@ const ScheduledPlanContent = ({ plan, initialReadingSliceId }: Props) => {
             <Link
               onPress={() => setChosenDay(readings.findIndex(item => item.id === missed[0].id) + 1)}
             >
-              <Text className="text-primary text-[13px]">
+              <Text className="text-link text-[13px]">
                 {t('readingPlans.missed', { count: missed.length })}
               </Text>
             </Link>

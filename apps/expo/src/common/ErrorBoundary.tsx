@@ -150,7 +150,7 @@ Date: ${new Date().toISOString()}
           {(isLoading || updateReady) && (
             <Box className="border-continuous overflow-hidden mt-[20px] p-[16px] bg-[rgba(59,130,246,0.1)] rounded-[8px] border-[1px] border-[rgba(59,130,246,0.2)] w-[100%] flex-row items-center">
               <ActivityIndicator size="small" color="#3B82F6" />
-              <Text className="text-[14px] text-primary ml-[12px]">
+              <Text className="text-[14px] text-link ml-[12px]">
                 {isLoading && t('app.updateChecking')}
                 {updateReady && t('app.updateReady')}
               </Text>

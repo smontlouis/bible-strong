@@ -127,7 +127,7 @@ export default function InlineCommentaryReader({
             <Box className="gap-[12px]">
               <Text className="text-tertiary">{t('inlineCommentary.editionUnavailable')}</Text>
               <Text
-                className="text-primary font-semibold"
+                className="text-link font-semibold"
                 onPress={() => {
                   if (!request) return
                   void queryClient.invalidateQueries({

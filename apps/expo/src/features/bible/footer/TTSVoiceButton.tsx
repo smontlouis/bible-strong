@@ -86,7 +86,7 @@ const TTSVoiceButton = ({ currentVersion, ...props }: TTSVoiceButtonProps) => {
           <FeatherIcon name="mic" size={14} color={isActive ? 'primary' : 'default'} />
           <Text
             className={twMerge(
-              isActive ? 'text-primary' : 'text-default',
+              isActive ? 'text-link' : 'text-default',
               'ml-[5px] font-bold text-[10px]'
             )}
             numberOfLines={1}

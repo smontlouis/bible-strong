@@ -152,7 +152,7 @@ const FAQScreen = () => {
                       hasChevron={false}
                       accessibilityState={{ selected }}
                       onPress={() => selectCategory(item)}
-                      labelClassName={selected ? 'text-primary font-bold' : 'font-bold'}
+                      labelClassName={selected ? 'text-link font-bold' : 'font-bold'}
                     />
                   )
                 })}
@@ -179,7 +179,7 @@ const FAQScreen = () => {
                       }
                     >
                       <Text
-                        className={selected ? 'text-primary font-bold text-[14px]' : 'text-[14px]'}
+                        className={selected ? 'text-link font-bold text-[14px]' : 'text-[14px]'}
                       >
                         {item.label}
                       </Text>
@@ -228,9 +228,7 @@ const FAQScreen = () => {
                               href={entry.link.href}
                               className="mt-[10px] py-[6px] self-start flex-row items-center gap-[6px]"
                             >
-                              <Text className="text-primary font-bold shrink">
-                                {entry.link.label}
-                              </Text>
+                              <Text className="text-link font-bold shrink">{entry.link.label}</Text>
                               <FeatherIcon name="arrow-up-right" size={16} color="primary" />
                             </LinkBox>
                           )}

@@ -125,7 +125,7 @@ export default function VerseAnalysisWidget({ widget }: { widget: PassageWidget 
         {!occurrence && (
           <HStack className="items-center gap-2 pb-1">
             <TouchableBox accessibilityRole="button" onPress={openPassage} className="shrink">
-              <Text className="text-primary text-[14px] font-semibold" numberOfLines={1}>
+              <Text className="text-link text-[14px] font-semibold" numberOfLines={1}>
                 {label}
               </Text>
             </TouchableBox>

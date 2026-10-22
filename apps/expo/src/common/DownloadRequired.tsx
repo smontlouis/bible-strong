@@ -57,7 +57,7 @@ const DownloadRequired = ({
             {title}
           </Text>
           <Text
-            className={twMerge(disabled ? 'text-tertiary' : 'text-primary', 'font-bold')}
+            className={twMerge(disabled ? 'text-tertiary' : 'text-link', 'font-bold')}
             onPress={disabled ? undefined : onDownload}
             style={{ opacity: disabled ? 0.75 : 1 }}
           >
@@ -65,7 +65,7 @@ const DownloadRequired = ({
           </Text>
           {secondaryActions.map(action => (
             <Text
-              className="font-bold text-primary mt-[12px]"
+              className="font-bold text-link mt-[12px]"
               key={action.label}
               onPress={action.onPress}
             >

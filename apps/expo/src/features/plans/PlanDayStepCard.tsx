@@ -20,7 +20,7 @@ const PlanDayStepCard = ({ step }: { step: PlanDayStepAction }) => {
     >
       <HStack className="items-center gap-[14px]">
         <Box className="flex-1 gap-[2px]">
-          <Text className="text-primary font-bold text-[16px]">{label}</Text>
+          <Text className="text-link font-bold text-[16px]">{label}</Text>
           {step.kind === 'next' && (
             <Text className="text-default text-[14px]" numberOfLines={1}>
               {step.title}

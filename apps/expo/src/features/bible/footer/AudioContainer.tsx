@@ -44,7 +44,7 @@ const Chip = ({ children, isActive, ...props }: ChipProps & BoxProps & Touchable
         props.className
       )}
     >
-      <Text className={twMerge(isActive ? 'text-primary' : 'text-default', 'text-[10px]')}>
+      <Text className={twMerge(isActive ? 'text-link' : 'text-default', 'text-[10px]')}>
         {children}
       </Text>
     </TouchableBox>

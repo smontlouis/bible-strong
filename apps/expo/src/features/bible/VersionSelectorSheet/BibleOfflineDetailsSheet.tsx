@@ -330,7 +330,7 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
                 downloadManager.retry(failedQueue.item.id)
               }}
             >
-              <Text className="text-primary font-semibold">{t('Réessayer')}</Text>
+              <Text className="text-link font-semibold">{t('Réessayer')}</Text>
             </TouchableBox>
           </SheetWell>
         )}

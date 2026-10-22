@@ -24,10 +24,7 @@ const DownloadItem = ({ name, subTitle, fileSize, isSelected, isDisabled, onPres
       <VStack className="flex-[1]" spacing={1 / 2}>
         <HStack>
           <Text
-            className={twMerge(
-              isSelected ? 'text-primary' : 'text-default',
-              'flex-[1] text-[18px]'
-            )}
+            className={twMerge(isSelected ? 'text-link' : 'text-default', 'flex-[1] text-[18px]')}
             style={{ fontWeight: isSelected ? 'bold' : undefined }}
           >
             {name}

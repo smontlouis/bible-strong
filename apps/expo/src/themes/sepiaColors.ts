@@ -14,6 +14,7 @@ const colors: typeof defaultColors = {
   darkGrey: 'rgba(72,54,35,0.5)',
   primary: 'rgb(125,123,168)',
   lightPrimary: 'rgb(228, 228, 245)',
+  link: '#5f5d88',
   secondary: 'rgb(255,188,0)',
   lightSecondary: 'rgb(255, 238, 198)',
   tertiary: 'rgb(98,113,122)',

@@ -15,7 +15,7 @@ describe('getStrongEditorialHtmlStyles', () => {
       {
         colors: {
           default: '#f5f5f5',
-          primary: '#4f80ff',
+          link: '#3f63cf',
           quart: '#ef4444',
         },
       } as Parameters<typeof getStrongEditorialHtmlStyles>[0],
@@ -49,7 +49,7 @@ describe('getStrongEditorialHtmlStyles', () => {
       })
     }
     expect(styles.a).toMatchObject({
-      color: '#4f80ff',
+      color: '#3f63cf',
       fontFamily: 'Literata',
       fontSize: 21.6,
       lineHeight: 47,

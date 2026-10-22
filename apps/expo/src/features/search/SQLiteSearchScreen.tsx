@@ -716,7 +716,7 @@ const SQLiteSearchScreen = ({
           onPress={() => void semanticPassageQuery.refetch()}
         >
           <Text className="text-grey">{semanticSearchError}</Text>
-          <Text className="text-primary">{t('Réessayer')}</Text>
+          <Text className="text-link">{t('Réessayer')}</Text>
         </TouchableBox>
       )
     return null
@@ -1279,7 +1279,7 @@ const SQLiteSearchScreen = ({
                     accessibilityRole="button"
                     className="px-[20px] py-[12px]"
                   >
-                    <Text className="text-primary">{t('Réessayer')}</Text>
+                    <Text className="text-link">{t('Réessayer')}</Text>
                   </TouchableBox>
                 ) : section.id === 'passages' ? (
                   <>

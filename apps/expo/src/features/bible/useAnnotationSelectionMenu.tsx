@@ -153,7 +153,7 @@ export default function useAnnotationSelectionMenu(
           className="rounded-full px-[6px] py-[1px] bg-light-grey shrink-0"
           testID="annotation-toolbar-version"
         >
-          <Text className="text-[11px] font-bold text-primary">{annotatedVersion}</Text>
+          <Text className="text-[11px] font-bold text-link">{annotatedVersion}</Text>
         </Box>
       ) : undefined,
       width: BIBLE_SELECTION_MENU_WIDTH,

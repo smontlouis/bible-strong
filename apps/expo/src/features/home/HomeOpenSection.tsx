@@ -42,7 +42,7 @@ export const NewTabLink = () => {
 
   return (
     <Link onPress={() => openInNewTab(undefined, { autoRedirect: true })} className="py-[12px]">
-      <Text className="text-primary text-[13px] font-bold">{t('tabs.new')}</Text>
+      <Text className="text-link text-[13px] font-bold">{t('tabs.new')}</Text>
     </Link>
   )
 }

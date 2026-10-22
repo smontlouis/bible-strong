@@ -58,7 +58,7 @@ const AudioSleepButton = (props: AudioSleepButtonProps) => {
           <IonIcon name="timer-outline" size={18} color={isActive ? 'primary' : 'grey'} />
           <Text
             className={twMerge(
-              isActive ? 'text-primary' : 'text-grey',
+              isActive ? 'text-link' : 'text-grey',
               'ml-[5px] font-bold text-[10px]'
             )}
           >

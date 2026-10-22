@@ -101,7 +101,7 @@ const StrongEntityPage = ({
                   className="overflow-hidden border-continuous"
                   onPress={() => Linking.openURL(place.palopenmapsUrl!)}
                 >
-                  <Text className="text-primary font-bold text-[13px]">
+                  <Text className="text-link font-bold text-[13px]">
                     {t('strongDetail.entity.bibleMap')}
                   </Text>
                 </TouchableBox>
@@ -111,7 +111,7 @@ const StrongEntityPage = ({
                   className="overflow-hidden border-continuous"
                   onPress={() => Linking.openURL(place.googleMapUrl!)}
                 >
-                  <Text className="text-primary font-bold text-[13px]">Google Maps</Text>
+                  <Text className="text-link font-bold text-[13px]">Google Maps</Text>
                 </TouchableBox>
               )}
             </HStack>

@@ -38,7 +38,7 @@
   margin: 0.35em 0;
 }
 .study-assistant-markdown a {
-  color: var(--color-primary, #5983f0);
+  color: var(--color-link, #3f63cf);
   text-decoration: underline;
 }
 .study-assistant-markdown blockquote {
@@ -65,7 +65,7 @@
 }
 .bs-assistant-passage-link {
   display: inline;
-  color: var(--color-primary);
+  color: var(--color-link);
   background: none;
   border: 0;
   padding: 0;

@@ -61,7 +61,7 @@ const ReferenceItem = ({ reference, version }: { reference: string; version: Ver
               disabled={verseQuery.isFetching}
               onPress={() => void verseQuery.refetch()}
             >
-              <Text className="text-primary">
+              <Text className="text-link">
                 {t(verseQuery.isFetching ? 'Chargement...' : 'Réessayer')}
               </Text>
             </TouchableBox>

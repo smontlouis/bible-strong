@@ -98,7 +98,7 @@ export default function ResourcePreviewContent({
       <Box className="gap-[12px]">
         <Text className="text-grey text-[14px]">{t('resourcePreview.unavailable')}</Text>
         <TouchableBox accessibilityRole="button" onPress={() => void query.refetch()}>
-          <Text className="text-primary">{t('Réessayer')}</Text>
+          <Text className="text-link">{t('Réessayer')}</Text>
         </TouchableBox>
       </Box>
     )

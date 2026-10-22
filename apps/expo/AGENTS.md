@@ -285,7 +285,7 @@ utilities without confusing them with border colors.
 ```tsx
 <Box className="flex-1 bg-reverse p-4">
   <HStack className="items-center gap-3">
-    <Text className="text-primary font-bold">Example</Text>
+    <Text className="text-link font-bold">Example</Text>
   </HStack>
 </Box>
 ```

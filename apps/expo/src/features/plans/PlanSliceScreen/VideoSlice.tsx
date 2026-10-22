@@ -41,7 +41,7 @@ const VideoSlice = ({ title, description, url, webUrl, poster, planLanguage }: P
             className="p-[20px] items-center gap-[12px]"
           >
             <Text className="text-grey">{t('readingPlans.videoUnavailable')}</Text>
-            <Text className="text-primary font-bold">{t('readingPlans.openVideo')}</Text>
+            <Text className="text-link font-bold">{t('readingPlans.openVideo')}</Text>
           </Link>
         ) : (
           <>

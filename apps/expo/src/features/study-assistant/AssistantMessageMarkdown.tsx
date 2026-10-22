@@ -62,7 +62,7 @@ export default function AssistantMessageMarkdown({
         h2: { color: colors.default, fontSize: 19 },
         h3: { color: colors.default, fontSize: 17 },
         strong: { color: colors.default },
-        link: { color: colors.primary },
+        link: { color: colors.link },
         code: { color: colors.default, backgroundColor: colors.lightGrey },
         codeBlock: { color: colors.default, backgroundColor: colors.lightGrey },
       }}

@@ -60,7 +60,7 @@ const VerseAccordion = ({ noteVerses, version }: VerseAccordionProps) => {
       >
         <HStack className="items-center gap-[8px] flex-[1]">
           <FeatherIcon name="book-open" size={16} color={getUniverseColor('bible')} />
-          <Text className="text-[14px] text-primary font-bold">{reference}</Text>
+          <Text className="text-[14px] text-link font-bold">{reference}</Text>
         </HStack>
         <EaseView
           animate={{ rotate: isExpanded ? 180 : 0 }}

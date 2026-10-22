@@ -90,9 +90,7 @@ const SearchSectionBlock = <SectionId extends string = string>({
           onPress={onLoadMore}
         >
           <Box className="overflow-hidden border-continuous px-[12px] py-[6px] bg-light-grey rounded-full">
-            <Text className="text-primary text-[13px] font-bold">
-              {String(i18n.t('Voir plus'))}
-            </Text>
+            <Text className="text-link text-[13px] font-bold">{String(i18n.t('Voir plus'))}</Text>
           </Box>
         </TouchableBox>
       ) : null}

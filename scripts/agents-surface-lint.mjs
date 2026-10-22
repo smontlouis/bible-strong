@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 // Keeps the Expo app on its surface rules (design-system/project/README.md, "The app"):
-// corner radii from one scale, one shared shadow for what floats, and a page that uses the canvas
-// gives it to its root container. Existing departures are frozen per file in
-// agents-surface-baseline.json and may only go down. A page header also leaves the tablet sidebar
-// button its room, with no baseline: none departs from it.
+// corner radii from one scale, one shared shadow for what floats, a page that uses the canvas
+// gives it to its root container, and text in the accent hue takes `link`. Existing departures
+// are frozen per file in agents-surface-baseline.json and may only go down. A page header also
+// leaves the tablet sidebar button its room, with no baseline: none departs from it.
 
 import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
@@ -22,7 +22,9 @@ const styleRadiusPattern =
 const shadowPattern = /\bshadowColor\s*:|\belevation\s*:\s*\d|\bshadow-\[|\bboxShadow\s*:/g
 const canvasPattern = /\bbg-canvas\b|backgroundColor="canvas"|\bbg="canvas"|\bcolors\.canvas\b/
 const rootWrapperPattern = /<(FormSheetScreen|Container|SafeAreaBox)\b([^>]*)>/g
-const kinds = ['radius', 'shadow', 'ground']
+// primary reads at about 3.3:1 on the light canvas: fills, icons and graphics only.
+const primaryTextPattern = /\btext-primary\b(?![-/])/g
+const kinds = ['radius', 'shadow', 'ground', 'text']
 // On a tablet the sidebar button sits at the top left of every page. A file that draws the back
 // button reads the room to leave it, or is a sheet that clears that room.
 const backImportPattern = /from ['"]~common\/Back['"]/
@@ -64,7 +66,7 @@ const countFile = file => {
   const source = readFileSync(file, 'utf8')
   const lines = source.split('\n')
   if (lines.some(line => exceptionPattern.test(line))) return null
-  const found = { radius: [], shadow: [], ground: [] }
+  const found = { radius: [], shadow: [], ground: [], text: [] }
   // A root wrapper left on the white default while the page inside is on the canvas shows a white
   // status bar and a white band above the tab bar.
   if (canvasPattern.test(source)) {
@@ -81,6 +83,7 @@ const countFile = file => {
       }
     }
     for (const _ of text.matchAll(shadowPattern)) found.shadow.push({ line: index + 1, text })
+    for (const _ of text.matchAll(primaryTextPattern)) found.text.push({ line: index + 1, text })
   })
   return found
 }
@@ -156,6 +159,10 @@ if (increases.length > 0) {
   console.error(
     'A page that uses the canvas gives it to its root Container, SafeAreaBox or FormSheetScreen ' +
       '(className="bg-canvas"), so the status bar and the space above the tab bar follow it.'
+  )
+  console.error(
+    'Text in the accent hue is text-link, which reads at 4.5:1 on every ground of every theme; ' +
+      'primary is for fills, icons and graphics.'
   )
   console.error(
     'A file with a genuine exception (the Bible DOM halo, a drawn illustration) states it with ' +

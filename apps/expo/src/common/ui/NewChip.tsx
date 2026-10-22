@@ -19,7 +19,7 @@ export const Chip = ({
       )}
     >
       <Text
-        className="text-primary text-[10px]"
+        className="text-link text-[10px]"
         style={{ fontWeight: variant === 'bold' ? 'bold' : 'normal' }}
       >
         {children}

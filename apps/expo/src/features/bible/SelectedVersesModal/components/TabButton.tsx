@@ -15,7 +15,7 @@ const TabButton = ({ label, isActive, onPress }: TabButtonProps) => {
     >
       <Box className="overflow-hidden border-continuous py-[10px]">
         <AnimatedText
-          className={twMerge(isActive ? 'text-primary' : 'text-default', 'text-[14px] text-center')}
+          className={twMerge(isActive ? 'text-link' : 'text-default', 'text-[14px] text-center')}
           style={[
             { fontWeight: isActive ? '600' : '400' },
             {

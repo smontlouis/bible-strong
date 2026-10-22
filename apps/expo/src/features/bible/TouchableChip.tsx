@@ -103,7 +103,7 @@ export default ({ onPress, color, isSelected, size = 17, label, disabled, name }
           disabled={disabled}
         />
       )}
-      {label && <Text className="text-[13px] text-primary">{label}</Text>}
+      {label && <Text className="text-[13px] text-link">{label}</Text>}
     </Touchable>
   )
 }

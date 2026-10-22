@@ -14,10 +14,10 @@ const StrongMark = ({
       className={twMerge(
         passive
           ? highlighted
-            ? 'text-primary'
+            ? 'text-link'
             : 'text-default'
           : highlighted
-            ? 'text-primary'
+            ? 'text-link'
             : 'text-tertiary',
         'text-[17px] font-bold'
       )}

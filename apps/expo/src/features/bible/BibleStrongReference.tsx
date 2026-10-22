@@ -157,10 +157,10 @@ const ConcordanceText = (
           {
             ...(isConcordance
               ? {
-                  color: theme.colors.primary,
+                  color: theme.colors.link,
                   textDecorationLine: 'underline',
                   textDecorationStyle: 'solid',
-                  textDecorationColor: theme.colors.primary,
+                  textDecorationColor: theme.colors.link,
                 }
               : {}),
           },

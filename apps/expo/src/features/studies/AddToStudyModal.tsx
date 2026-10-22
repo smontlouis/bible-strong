@@ -58,7 +58,7 @@ const AddToStudyModal = ({ sheetRef, onSelectStudy, reference, onClose }: AddToS
       >
         <FeatherIcon name="plus-circle" size={24} color="primary" />
         <Box className="overflow-hidden border-continuous flex-[1] ml-[16px]">
-          <Text className="text-[15px] font-semibold text-primary">{t('study.newStudy')}</Text>
+          <Text className="text-[15px] font-semibold text-link">{t('study.newStudy')}</Text>
         </Box>
         <FeatherIcon name="arrow-right" size={20} color="primary" />
       </HStack>

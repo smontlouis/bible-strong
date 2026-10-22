@@ -81,7 +81,7 @@ const ReminderSettings = ({
                   className="min-h-[44px] justify-center"
                   accessibilityLabel={t("Choisir l'heure")}
                 >
-                  <Text className="text-primary text-[18px] font-bold">{validTime ?? '07:00'}</Text>
+                  <Text className="text-link text-[18px] font-bold">{validTime ?? '07:00'}</Text>
                 </Link>
               )}
               {(Platform.OS === 'ios' || open) && (
@@ -116,7 +116,7 @@ const ReminderSettings = ({
                 }}
                 className="min-h-[44px] justify-center"
               >
-                <Text className="text-primary font-bold">
+                <Text className="text-link font-bold">
                   {t('dailyReading.notificationSettings')}
                 </Text>
               </Link>
@@ -128,7 +128,7 @@ const ReminderSettings = ({
                 {t('dailyReading.reminderError')}
               </Text>
               <Link onPress={delivery.retry} className="min-h-[44px] justify-center">
-                <Text className="text-primary font-bold">{t('dailyReading.retry')}</Text>
+                <Text className="text-link font-bold">{t('dailyReading.retry')}</Text>
               </Link>
             </Box>
           )}

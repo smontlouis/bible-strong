@@ -27,10 +27,7 @@ export const BookShortItem = ({ book, bookName, isSelected, onChange }: BookShor
       style={{ width: wp(99) / 5 }}
     >
       <Text
-        className={twMerge(
-          isSelected ? 'text-primary font-semibold' : 'text-default',
-          'text-[16px]'
-        )}
+        className={twMerge(isSelected ? 'text-link font-semibold' : 'text-default', 'text-[16px]')}
       >
         {shortName}
       </Text>

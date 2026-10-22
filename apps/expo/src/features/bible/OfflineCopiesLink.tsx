@@ -26,7 +26,7 @@ const OfflineCopiesLink = ({ onPress }: { onPress?: () => void }) => {
         opacity: pressed ? 0.6 : 1,
       })}
     >
-      <Text className="text-primary font-bold text-[14px]">{t('bible.error.goToDownloads')}</Text>
+      <Text className="text-link font-bold text-[14px]">{t('bible.error.goToDownloads')}</Text>
     </Pressable>
   )
 }

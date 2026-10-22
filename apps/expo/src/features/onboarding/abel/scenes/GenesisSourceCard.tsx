@@ -44,7 +44,7 @@ export const SourceCard = ({
       >
         <HStack className="overflow-hidden border-continuous justify-between items-center">
           <Text
-            className="text-primary font-bold"
+            className="text-link font-bold"
             style={[{ fontSize: s(8) || 16 }, { letterSpacing: s(0.6) }]}
           >
             {label}

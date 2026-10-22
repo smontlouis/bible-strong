@@ -31,8 +31,8 @@ const InterlinearShortcut = ({ onPress }: { onPress: () => void }) => {
         className="overflow-hidden border-continuous flex-row items-center gap-[7px] h-[32px] pl-[12px] pr-[14px] rounded-full"
         style={{ backgroundColor: colorWithOpacity(theme.colors.primary, 0.12) }}
       >
-        <InterlinearMark className="text-primary" />
-        <Text className="text-[14px] font-bold text-primary">
+        <InterlinearMark className="text-link" />
+        <Text className="text-[14px] font-bold text-link">
           {t('versionSelector.openInterlinear')}
         </Text>
       </Box>

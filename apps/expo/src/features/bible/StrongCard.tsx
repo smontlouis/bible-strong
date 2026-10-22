@@ -72,7 +72,7 @@ const smallTextStyle = (theme: Theme) => ({
 
 const smallLinkStyle = (theme: Theme) => ({
   ...smallTextStyle(theme),
-  color: theme.colors.primary,
+  color: theme.colors.link,
 })
 
 type Props = {
@@ -185,9 +185,7 @@ const StrongCard = (props: Props) => {
               accessibilityLabel={`${stepStrongCode} · ${Mot}`}
             >
               <VStack className="overflow-hidden border-continuous gap-[4px]">
-                <Text className="text-primary font-bold text-[12px] uppercase">
-                  {stepStrongCode}
-                </Text>
+                <Text className="text-link font-bold text-[12px] uppercase">{stepStrongCode}</Text>
 
                 <Text className="font-medium text-[16px]">{Mot}</Text>
 

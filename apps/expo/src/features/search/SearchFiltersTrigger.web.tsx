@@ -61,7 +61,7 @@ export default function SearchFiltersTrigger({
   ]
   const reset = (onPress: () => void) => (
     <TouchableBox className="p-2" onPress={onPress} accessibilityRole="button">
-      <Text className="text-primary text-[12px]">{t('Réinitialiser')}</Text>
+      <Text className="text-link text-[12px]">{t('Réinitialiser')}</Text>
     </TouchableBox>
   )
   const screens: Record<string, PanelScreen> = {

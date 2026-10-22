@@ -11,7 +11,7 @@ export default function CommentaryManageButton(_props: { onPress: () => void }) 
       actions={[{ id: 'choose-commentaries', title: t('commentaries.selector.title') }]}
     >
       <Box className="px-[6px] min-h-[44px] items-center justify-center">
-        <Text className="text-primary text-[14px] font-bold">
+        <Text className="text-link text-[14px] font-bold">
           {t('commentaries.availability.manage')}
         </Text>
       </Box>

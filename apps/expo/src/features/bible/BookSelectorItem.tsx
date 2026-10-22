@@ -35,10 +35,7 @@ const BookSelectorItem = ({ book, isSelected, onBookSelect }: BookSelectorItemPr
           style={{ height: itemHeight }}
         >
           <Text
-            className={twMerge(
-              isSelected ? 'text-primary' : 'text-default',
-              'text-[16px] flex-[1]'
-            )}
+            className={twMerge(isSelected ? 'text-link' : 'text-default', 'text-[16px] flex-[1]')}
             style={{ fontWeight: isSelected ? 'bold' : undefined }}
           >
             {t(book.Nom)}

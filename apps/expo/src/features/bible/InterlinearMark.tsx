@@ -14,7 +14,7 @@ const InterlinearMark = ({
   return (
     <Text
       className={twMerge(
-        passive ? 'text-default' : highlighted ? 'text-primary' : 'text-tertiary',
+        passive ? 'text-default' : highlighted ? 'text-link' : 'text-tertiary',
         'text-[17px] font-bold',
         className
       )}

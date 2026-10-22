@@ -71,7 +71,7 @@ function ThreadStatus() {
               disabled={busy || !ready}
               className="bg-light-grey flex-row items-center gap-2 rounded-[12px] px-4 py-3"
             >
-              <Text className="text-primary">›</Text>
+              <Text className="text-link">›</Text>
               <Text className="flex-1 text-[15px]">{t(`assistant.modal.action.${key}`)}</Text>
             </ThreadPrimitive.Suggestion>
           ))}

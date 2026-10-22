@@ -56,7 +56,7 @@ export default function SwitchableHTMLView({
   const colors = {
     background: theme.colors.reverse,
     text: theme.colors.default,
-    link: theme.colors.primary,
+    link: theme.colors.link,
     emphasis: theme.colors.quart,
   }
   const onLink = (payload: HTMLViewLinkPayload) => {

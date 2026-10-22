@@ -22,7 +22,7 @@ const CommentaryTag = ({ label, emphasized = false }: { label: string; emphasize
         )
       )}
     >
-      <Text className={twMerge(emphasized ? 'text-primary' : 'text-default', 'text-[12px]')}>
+      <Text className={twMerge(emphasized ? 'text-link' : 'text-default', 'text-[12px]')}>
         {label}
       </Text>
     </Box>

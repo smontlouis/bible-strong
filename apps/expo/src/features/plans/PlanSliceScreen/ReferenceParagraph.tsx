@@ -33,7 +33,7 @@ const ReferenceText = (
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
 
-  const resolvedClassName = twMerge('text-primary', className)
+  const resolvedClassName = twMerge('text-link', className)
   return (
     <Text
       {...props}

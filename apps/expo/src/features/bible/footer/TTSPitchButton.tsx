@@ -32,9 +32,7 @@ const TTSPitchButton = (props: TTSPitchButtonProps) => {
       choices={choices}
       customRender={
         <AudioChip isActive={isActive} {...props}>
-          <Text
-            className={twMerge(isActive ? 'text-primary' : 'text-grey', 'font-bold text-[10px]')}
-          >
+          <Text className={twMerge(isActive ? 'text-link' : 'text-grey', 'font-bold text-[10px]')}>
             {t('audio.pitch')} {pitch}x
           </Text>
         </AudioChip>

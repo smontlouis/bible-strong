@@ -41,7 +41,7 @@ export function useBibleBookmarkScreens(
   const passageHeader = (
     <Box className="flex-row items-center gap-2 px-3 pt-1 pb-3">
       <IonIcon name="bookmark-outline" size={16} color="primary" />
-      <Text className="text-[13px] font-bold text-primary">{destination}</Text>
+      <Text className="text-[13px] font-bold text-link">{destination}</Text>
       <Text className="text-[12px] text-tertiary">{version}</Text>
     </Box>
   )
@@ -91,7 +91,7 @@ export function useBibleBookmarkScreens(
                   <Box className="w-8 h-8 rounded-lg bg-reverse items-center justify-center">
                     <FeatherIcon name="plus" size={18} color="primary" />
                   </Box>
-                  <Text className="flex-1 font-bold text-[14px] text-primary">
+                  <Text className="flex-1 font-bold text-[14px] text-link">
                     {t('Créer un nouveau marque-page')}
                   </Text>
                   <FeatherIcon name="chevron-right" size={16} color="primary" />

@@ -73,7 +73,7 @@ const VersionSelectorItem = ({
           <Box className="overflow-hidden border-continuous flex-[1]">
             <Text
               className={twMerge(
-                isSelected ? 'text-primary' : 'text-default',
+                isSelected ? 'text-link' : 'text-default',
                 'text-[12px] opacity-[0.5] font-bold'
               )}
             >
@@ -81,10 +81,7 @@ const VersionSelectorItem = ({
             </Text>
             <Box className="flex-row items-center gap-[5px] flex-wrap">
               <Text
-                className={twMerge(
-                  isSelected ? 'text-primary' : 'text-default',
-                  'text-[16px] shrink'
-                )}
+                className={twMerge(isSelected ? 'text-link' : 'text-default', 'text-[16px] shrink')}
               >
                 {version.displayName || version.name}
               </Text>

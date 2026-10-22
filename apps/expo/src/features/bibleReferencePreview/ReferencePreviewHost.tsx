@@ -177,7 +177,7 @@ function PreviewContent({ request }: { request: ReferencePreviewRequest }) {
         <Box className="gap-[12px]">
           <Text className="text-grey text-[14px]">{t('referencePreview.unavailable')}</Text>
           <TouchableBox accessibilityRole="button" onPress={() => void query.refetch()}>
-            <Text className="text-primary">{t('Réessayer')}</Text>
+            <Text className="text-link">{t('Réessayer')}</Text>
           </TouchableBox>
         </Box>
       ) : (

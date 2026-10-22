@@ -102,7 +102,7 @@ export default function ContactDeveloperSheet({
               }}
             >
               <SheetWell className="gap-1 p-4">
-                <Text className="text-primary font-semibold">{t('contact.copyEmail')}</Text>
+                <Text className="text-link font-semibold">{t('contact.copyEmail')}</Text>
                 <Text className="text-grey text-sm">{SUPPORT_EMAIL}</Text>
               </SheetWell>
             </TouchableBox>

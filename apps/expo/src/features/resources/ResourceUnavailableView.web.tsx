@@ -32,7 +32,7 @@ const ResourceUnavailableView = ({ title, onRetry, size = 'large' }: Props) => {
           {t('resource.web.connectionRequired')}
         </Text>
         {onRetry && (
-          <Text className="font-bold text-primary" onPress={onRetry} style={{ marginTop: padding }}>
+          <Text className="font-bold text-link" onPress={onRetry} style={{ marginTop: padding }}>
             {t('bible.error.retry')}
           </Text>
         )}

@@ -36,7 +36,7 @@ export default function ErrorState({
         {!retrying && <Text className="text-grey text-[13px]">{detail}</Text>}
         {!retrying && onRetry && (
           <TouchableBox accessibilityRole="button" onPress={onRetry} className="mt-1 self-start">
-            <Text className="text-primary text-[14px] font-semibold">
+            <Text className="text-link text-[14px] font-semibold">
               {t('assistant.errors.retry')}
             </Text>
           </TouchableBox>

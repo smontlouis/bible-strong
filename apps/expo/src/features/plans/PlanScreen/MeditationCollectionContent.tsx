@@ -209,9 +209,7 @@ const MeditationCollectionContent = ({ plan, onReadingSlicePress }: Props) => {
                 }}
               >
                 <Box className="min-h-[44px] justify-center">
-                  <Text className="text-primary font-bold text-[14px]">
-                    {t('dailyReading.today')}
-                  </Text>
+                  <Text className="text-link font-bold text-[14px]">{t('dailyReading.today')}</Text>
                 </Box>
               </Link>
             </Box>
@@ -241,13 +239,11 @@ const MeditationCollectionContent = ({ plan, onReadingSlicePress }: Props) => {
                       {key && (
                         <Box className="w-[38px] gap-[2px]">
                           <Text
-                            className={`${selected ? 'text-primary' : 'text-default'} font-bold text-[19px]`}
+                            className={`${selected ? 'text-link' : 'text-default'} font-bold text-[19px]`}
                           >
                             {Number(key.slice(3))}
                           </Text>
-                          <Text
-                            className={`${selected ? 'text-primary' : 'text-grey'} text-[12px]`}
-                          >
+                          <Text className={`${selected ? 'text-link' : 'text-grey'} text-[12px]`}>
                             {shortMonth}
                           </Text>
                         </Box>
@@ -255,7 +251,7 @@ const MeditationCollectionContent = ({ plan, onReadingSlicePress }: Props) => {
                       <Box className="flex-1 gap-[6px]">
                         {isToday && (
                           <Box className="self-start bg-light-primary rounded-[8px] px-[8px] py-[3px]">
-                            <Text className="text-primary text-[10px] font-bold uppercase">
+                            <Text className="text-link text-[10px] font-bold uppercase">
                               {t('dailyReading.today')}
                             </Text>
                           </Box>

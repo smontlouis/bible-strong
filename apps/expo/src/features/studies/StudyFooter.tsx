@@ -143,7 +143,7 @@ const SelectHeading = ({
     >
       <TouchableBox className="overflow-hidden border-continuous" onPress={onToggle}>
         <Box className="overflow-hidden border-continuous flex-row items-center justify-center rounded-full bg-light-primary py-[4px] px-[7px]">
-          <Text className="text-[15px] font-bold text-primary">{t(getHeaderTitle())}</Text>
+          <Text className="text-[15px] font-bold text-link">{t(getHeaderTitle())}</Text>
           <Box className="overflow-hidden border-continuous ml-[5px] rounded-full bg-primary w-[18px] h-[18px] items-center justify-center">
             <FeatherIcon name="chevron-up" color="reverse" size={18} />
           </Box>

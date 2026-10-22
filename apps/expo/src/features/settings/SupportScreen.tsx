@@ -36,14 +36,14 @@ const SupportScreen = () => {
           <Paragraph className="mb-[20px]" scaleLineHeight={-1}>
             Si vous souhaitez me soutenir, vous pouvez le faire de deux façons. Soit par{' '}
             <Paragraph
-              className="text-primary font-bold"
+              className="text-link font-bold"
               onPress={() => Linking.openURL('https://fr.tipeee.com/smontlouis')}
             >
               Tipeee,
             </Paragraph>{' '}
             ou par{' '}
             <Paragraph
-              className="text-primary font-bold"
+              className="text-link font-bold"
               onPress={() => Linking.openURL('https://www.paypal.me/smontlouis')}
             >
               PayPal

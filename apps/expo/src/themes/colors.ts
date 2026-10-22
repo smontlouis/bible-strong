@@ -12,6 +12,8 @@ const colors = {
   darkGrey: 'rgba(0,0,0,0.5)',
   primary: 'rgb(89,131,240)',
   lightPrimary: 'rgb(233, 243, 252)',
+  // The accent hue for text under 24px, at 4.5:1 or more on every ground of the theme.
+  link: '#3f63cf',
   secondary: 'rgb(255,188,0)',
   lightSecondary: 'rgb(255, 238, 198)',
   tertiary: 'rgb(98,113,122)',
