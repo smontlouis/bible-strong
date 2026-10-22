@@ -8,8 +8,7 @@ import Link from '~common/Link'
 import type { OnlinePlan } from '~common/types'
 import Box, { usePageBottomInset } from '~common/ui/Box'
 import Button from '~common/ui/Button'
-import Card from '~common/ui/Card'
-import { ListSectionTitle } from '~common/ui/ListSection'
+import ListSection from '~common/ui/ListSection'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { pageContentStyle } from '~common/ui/PageContent'
@@ -21,7 +20,13 @@ import { getEditorialKind } from './readingCalendar'
 import { hasPlanParticipation, getPlanResumeDay } from './planProgress'
 import { filterReadingPlans, type ReadingPlanFilters } from './readingPlanFilters'
 
-const ReadingPlanCard = ({ plan, active }: { plan: OnlinePlan; active: boolean }) => {
+// The padding and gap of a settings row, so the plans read as the same list
+const ROW_PADDING = 14
+const ROW_GAP = 12
+const THUMBNAIL_WIDTH = 72
+const TEXT_INSET = ROW_PADDING + THUMBNAIL_WIDTH + ROW_GAP
+
+const ReadingPlanRow = ({ plan, active }: { plan: OnlinePlan; active: boolean }) => {
   const { t } = useTranslation()
   const router = useRouter()
   const image = useFireStorage(plan.image)
@@ -42,66 +47,61 @@ const ReadingPlanCard = ({ plan, active }: { plan: OnlinePlan; active: boolean }
       .filter(reading => progress?.readingSlices[reading.id] === 'Completed').length ?? 0
   const open = () => router.push({ pathname: '/plan', params: { planId: plan.id } })
   return (
-    <Card className="mb-[12px]">
-      <Link
-        onPress={open}
-        accessibilityLabel={plan.title}
-        className="flex-row gap-[14px] items-center p-[14px]"
+    <Link
+      onPress={open}
+      accessibilityLabel={plan.title}
+      className="flex-row items-center"
+      style={{ gap: ROW_GAP, paddingHorizontal: ROW_PADDING, paddingVertical: 10 }}
+    >
+      <Box
+        className="rounded-[8px] bg-canvas overflow-hidden h-[48px]"
+        style={{ width: THUMBNAIL_WIDTH }}
       >
-        <Box className="rounded-[8px] bg-canvas overflow-hidden w-[96px] h-[64px]">
-          {image ? (
-            <Image
-              source={{ uri: image }}
-              contentFit="cover"
-              style={{ width: '100%', height: '100%' }}
-            />
-          ) : (
-            <Box className="flex-1 items-center justify-center">
-              <FeatherIcon name="book-open" size={28} color="primary" />
+        {image ? (
+          <Image
+            source={{ uri: image }}
+            contentFit="cover"
+            style={{ width: '100%', height: '100%' }}
+          />
+        ) : (
+          <Box className="flex-1 items-center justify-center">
+            <FeatherIcon name="book-open" size={22} color="primary" />
+          </Box>
+        )}
+      </Box>
+      <Box className="flex-1 gap-[4px]">
+        <Text className="text-default font-bold text-[15px]" numberOfLines={2}>
+          {plan.title}
+        </Text>
+        <Box className="flex-row flex-wrap items-center gap-[8px]">
+          {active && !!total && (
+            <Box className="w-[50px] h-[6px] bg-canvas rounded-full overflow-hidden">
+              <Box
+                className="h-full bg-primary rounded-full"
+                style={{ width: `${(completed / total) * 100}%` }}
+              />
             </Box>
           )}
-        </Box>
-        <Box className="flex-1 gap-[8px]">
-          <Text className="text-default font-bold text-[16px]">{plan.title}</Text>
-          <Box className="flex-row flex-wrap items-center gap-[8px]">
-            {active && !!total && (
-              <Box className="w-[50px] h-[6px] bg-canvas rounded-full overflow-hidden">
-                <Box
-                  className="h-full bg-primary rounded-full"
-                  style={{ width: `${(completed / total) * 100}%` }}
-                />
-              </Box>
-            )}
-            <Text className="text-grey text-[13px]">
-              {total
-                ? t(
-                    active
-                      ? completed === total
-                        ? 'readingPlans.finished'
-                        : 'readingPlans.dayOfTotal'
-                      : 'readingPlans.duration',
-                    {
-                      day: resumeDay,
-                      count: active ? completed : total,
-                      total,
-                    }
-                  )
-                : t('readingPlans.journey')}
-            </Text>
-          </Box>
-          <Text className="text-primary font-bold text-[13px]">
-            {t(
-              active
-                ? total && completed === total
-                  ? 'readingPlans.reread'
-                  : 'readingPlans.continue'
-                : 'readingPlans.discover'
-            )}
+          <Text className="text-grey text-[13px]">
+            {total
+              ? t(
+                  active
+                    ? completed === total
+                      ? 'readingPlans.finished'
+                      : 'readingPlans.dayOfTotal'
+                    : 'readingPlans.duration',
+                  {
+                    day: resumeDay,
+                    count: active ? completed : total,
+                    total,
+                  }
+                )
+              : t('readingPlans.journey')}
           </Text>
         </Box>
-        <FeatherIcon name="chevron-right" color="grey" size={18} />
-      </Link>
-    </Card>
+      </Box>
+      <FeatherIcon name="chevron-right" color="grey" size={18} />
+    </Link>
   )
 }
 
@@ -135,10 +135,14 @@ const ReadingPlansScreen = ({ filters }: { filters: ReadingPlanFilters }) => {
           {t('readingPlans.yours')}
         </Text>
       )}
-      {active.map(plan => (
-        <ReadingPlanCard key={plan.id} plan={plan} active />
-      ))}
-      <Text className="text-default font-bold text-[18px] mt-[12px] mb-[16px]">
+      {!!active.length && (
+        <ListSection className="mx-0" separatorInset={TEXT_INSET}>
+          {active.map(plan => (
+            <ReadingPlanRow key={plan.id} plan={plan} active />
+          ))}
+        </ListSection>
+      )}
+      <Text className="text-default font-bold text-[18px] mb-[16px]">
         {t('readingPlans.explore')}
       </Text>
       {status === 'Pending' && !plans.length && (
@@ -161,12 +165,16 @@ const ReadingPlansScreen = ({ filters }: { filters: ReadingPlanFilters }) => {
         const entries = discoverable.filter(plan => plan.lang === language)
         if (!entries.length) return null
         return (
-          <Box key={language} className="mb-[20px]">
-            <ListSectionTitle>{t(language === 'fr' ? 'Français' : 'Anglais')}</ListSectionTitle>
+          <ListSection
+            key={language}
+            title={t(language === 'fr' ? 'Français' : 'Anglais')}
+            className="mx-0"
+            separatorInset={TEXT_INSET}
+          >
             {entries.map(plan => (
-              <ReadingPlanCard key={plan.id} plan={plan} active={isActive(plan.id)} />
+              <ReadingPlanRow key={plan.id} plan={plan} active={isActive(plan.id)} />
             ))}
-          </Box>
+          </ListSection>
         )
       })}
     </ScrollView>

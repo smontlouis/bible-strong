@@ -41,13 +41,21 @@ type ListSectionProps = {
   footer?: string
   children: ReactNode
   className?: string
+  /** Where the hairline under a row that is not a `ListRow` starts: where its text starts. */
+  separatorInset?: number
 }
 
 /**
  * A group of rows on the canvas: its title on the page, its rows in one card, split by hairlines.
  * Rows may be `ListRow`s or any content; separators follow the text of the row above.
  */
-const ListSection = ({ title, footer, children, className }: ListSectionProps) => {
+const ListSection = ({
+  title,
+  footer,
+  children,
+  className,
+  separatorInset: contentInset = ROW_PADDING,
+}: ListSectionProps) => {
   const rows = Children.toArray(children)
   return (
     <Box className={twMerge('mx-[20px] mb-[22px]', className)}>
@@ -55,7 +63,7 @@ const ListSection = ({ title, footer, children, className }: ListSectionProps) =
       <Card>
         {rows.map((row, index) => (
           <Fragment key={isValidElement(row) && row.key != null ? row.key : index}>
-            {index > 0 && <ListSeparator inset={separatorInset(rows[index - 1])} />}
+            {index > 0 && <ListSeparator inset={separatorInset(rows[index - 1], contentInset)} />}
             {row}
           </Fragment>
         ))}
@@ -65,10 +73,12 @@ const ListSection = ({ title, footer, children, className }: ListSectionProps) =
   )
 }
 
-const separatorInset = (row: ReturnType<typeof Children.toArray>[number]) =>
-  isValidElement<ListRowProps>(row) && row.type === ListRow && row.props.icon
-    ? ICON_INSET
-    : ROW_PADDING
+const separatorInset = (row: ReturnType<typeof Children.toArray>[number], contentInset: number) =>
+  isValidElement<ListRowProps>(row) && row.type === ListRow
+    ? row.props.icon
+      ? ICON_INSET
+      : ROW_PADDING
+    : contentInset
 
 type ListRowProps = Pick<
   LinkProps<keyof MainStackProps>,
