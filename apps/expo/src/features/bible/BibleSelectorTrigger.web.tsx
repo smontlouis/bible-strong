@@ -1,6 +1,6 @@
 import { BookSelectorParams } from './BookSelectorSheet/BookSelectorParams'
 import FiltersHeader from '~common/FiltersHeader'
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAtomValue } from 'jotai'
 import { useQuery } from '@tanstack/react-query'
@@ -24,6 +24,8 @@ import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { bookSelectorVersesAtom, bookSelectorSortAtom } from './BookSelectorSheet/atom'
+import { getTestamentGroups } from './BookSelectorSheet/bookListRows'
+import TestamentTitle from './BookSelectorSheet/TestamentTitle'
 import { useVersionCatalog, VersionCatalogList } from './VersionCatalogView'
 import VersionSelectorItem from './VersionSelectorItem'
 import BibleOfflineDetailsSheet from './VersionSelectorSheet/BibleOfflineDetailsSheet'
@@ -242,16 +244,21 @@ export function useBookPanelScreens({
           <BookSelectorParams includeLayout={false} includeVerses={forceVerses === undefined} />
         ),
         headerContent: <PanelSearch value={query} onChange={setQuery} />,
-        content: nav => (
-          <>
-            {[...books]
-              .sort((a, b) => (sort === 'alphabetical' ? nameOf(a).localeCompare(nameOf(b)) : 0))
-              .filter(item =>
-                [nameOf(item), item.Nom].some(name =>
-                  name.toLocaleLowerCase().includes(query.toLocaleLowerCase())
-                )
+        content: nav => {
+          const listed = [...books]
+            .sort((a, b) => (sort === 'alphabetical' ? nameOf(a).localeCompare(nameOf(b)) : 0))
+            .filter(item =>
+              [nameOf(item), item.Nom].some(name =>
+                name.toLocaleLowerCase().includes(query.toLocaleLowerCase())
               )
-              .map(item => {
+            )
+          return getTestamentGroups(listed, sort === 'alphabetical').map(group => (
+            <Fragment key={group.testament ?? 'all'}>
+              {/* Sticks over its books, as the version list keeps its groups' titles */}
+              {group.testament && (
+                <TestamentTitle testament={group.testament} className="sticky top-[0px] z-[1]" />
+              )}
+              {group.books.map(item => {
                 const action = (
                   <BookRow
                     key={item.Numero}
@@ -270,8 +277,9 @@ export function useBookPanelScreens({
                   action
                 )
               })}
-          </>
-        ),
+            </Fragment>
+          ))
+        },
       },
       chapters: {
         title: nameOf(book),

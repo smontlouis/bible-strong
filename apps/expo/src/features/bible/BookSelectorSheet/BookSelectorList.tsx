@@ -1,11 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { FlatList, ScrollView } from 'react-native'
-import { bookSelectorSelectionModeAtom, bookSelectorSortAtom } from './atom'
+import { bookSelectorSelectionModeAtom } from './atom'
 import { useAtomValue } from 'jotai/react'
 import { Book } from '~assets/bible_versions/books-desc'
 import Box from '~common/ui/Box'
-import { ListSectionTitle } from '~common/ui/ListSection'
 import { getReadingBookName } from '~helpers/readingLanguage'
 import BookItem from './BookItem'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -13,7 +11,8 @@ import { SharedValue } from 'react-native-reanimated'
 import { BibleTab } from 'src/state/tabs'
 import { BookShortItem } from './BookShortItem'
 import ChapterGrid from './ChapterGrid'
-import { isBookInTestament } from '~helpers/bibleBookCatalog'
+import { getBookListRows, type BookListRow, type TestamentGroup } from './bookListRows'
+import TestamentTitle from './TestamentTitle'
 
 export interface BookListMetrics {
   scrollOffset: number
@@ -23,7 +22,8 @@ export interface BookListMetrics {
 interface BookSelectorListProps {
   initialScrollOffset: number
   expandedBook: SharedValue<number | null>
-  data: Book[]
+  /** The books by testament, as `getTestamentGroups` sorts them. */
+  groups: TestamentGroup[]
   bookSelectorData?: BibleTab['data']
   flatListRef: React.RefObject<FlatList | null>
   listMetrics: React.RefObject<BookListMetrics>
@@ -35,7 +35,7 @@ interface BookSelectorListProps {
   onGridBookSelect: (book: Book) => void
 }
 export const BookSelectorList = ({
-  data,
+  groups,
   initialScrollOffset,
   expandedBook,
   bookSelectorData,
@@ -48,12 +48,14 @@ export const BookSelectorList = ({
   gridBook,
   onGridBookSelect,
 }: BookSelectorListProps) => {
-  const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const selectionMode = useAtomValue(bookSelectorSelectionModeAtom)
-  const isAlphabetical = useAtomValue(bookSelectorSortAtom) === 'alphabetical'
+  const rows = getBookListRows(groups)
 
-  const renderItem = ({ item: book }: { item: Book }) => {
+  const renderItem = ({ item: row }: { item: BookListRow }) => {
+    if (row.type === 'testament') return <TestamentTitle testament={row.testament} />
+
+    const { book } = row
     const isSelected = book.Numero === bookSelectorData?.selectedBook.Numero
 
     return (
@@ -81,7 +83,7 @@ export const BookSelectorList = ({
       listMetrics.current.scrollOffset = mountScrollOffset
       return
     }
-    if (data.length === 0) return
+    if (rows.length === 0) return
     const scrollTimer = setTimeout(() => {
       flatListRef.current?.scrollToOffset({
         offset: initialScrollOffset,
@@ -90,7 +92,7 @@ export const BookSelectorList = ({
     }, 100)
 
     return () => clearTimeout(scrollTimer)
-  }, [data.length, flatListRef, initialScrollOffset, listMetrics, mountScrollOffset])
+  }, [rows.length, flatListRef, initialScrollOffset, listMetrics, mountScrollOffset])
 
   if (selectionMode === 'grid') {
     if (gridBook) {
@@ -107,46 +109,30 @@ export const BookSelectorList = ({
       )
     }
 
-    // In the canon's order, each testament has its title; sorted by name, the books mix
-    const groups = isAlphabetical
-      ? [{ key: 'all', title: undefined, books: data }]
-      : [
-          {
-            key: 'old',
-            title: t('Ancien Testament'),
-            books: data.filter(book => !isBookInTestament(book.Numero, 'new')),
-          },
-          {
-            key: 'new',
-            title: t('Nouveau Testament'),
-            books: data.filter(book => isBookInTestament(book.Numero, 'new')),
-          },
-        ]
-
     return (
-      <ScrollView contentContainerStyle={{ paddingTop: 10, paddingBottom: insets.bottom }}>
-        {groups.map(group =>
-          group.books.length ? (
-            <Box key={group.key}>
-              {group.title ? (
-                <ListSectionTitle className="ml-[20px] mt-[12px] mb-[4px]">
-                  {group.title}
-                </ListSectionTitle>
-              ) : null}
-              <Box className="flex-row flex-wrap items-start">
-                {group.books.map(book => (
-                  <BookShortItem
-                    key={book.Numero}
-                    onChange={onGridBookSelect}
-                    book={book}
-                    bookName={getReadingBookName(book, bookSelectorData?.selectedVersion)}
-                    isSelected={book.Numero === bookSelectorData?.selectedBook.Numero}
-                  />
-                ))}
-              </Box>
+      <ScrollView
+        contentContainerStyle={{
+          // A title brings its own top margin
+          paddingTop: groups[0]?.testament ? 0 : 10,
+          paddingBottom: insets.bottom,
+        }}
+      >
+        {groups.map(group => (
+          <Box key={group.testament ?? 'all'}>
+            {group.testament ? <TestamentTitle testament={group.testament} /> : null}
+            <Box className="flex-row flex-wrap items-start">
+              {group.books.map(book => (
+                <BookShortItem
+                  key={book.Numero}
+                  onChange={onGridBookSelect}
+                  book={book}
+                  bookName={getReadingBookName(book, bookSelectorData?.selectedVersion)}
+                  isSelected={book.Numero === bookSelectorData?.selectedBook.Numero}
+                />
+              ))}
             </Box>
-          ) : null
-        )}
+          </Box>
+        ))}
       </ScrollView>
     )
   }
@@ -154,12 +140,14 @@ export const BookSelectorList = ({
   return (
     <FlatList
       ref={flatListRef}
-      data={data}
+      data={rows}
       renderItem={renderItem}
-      keyExtractor={item => item.Numero.toString()}
+      keyExtractor={row => (row.type === 'book' ? row.book.Numero.toString() : row.testament)}
+      // Each testament's title stays over its books, as the version list keeps its groups' titles
+      stickyHeaderIndices={rows.flatMap((row, index) => (row.type === 'testament' ? [index] : []))}
       contentOffset={{ x: 0, y: mountScrollOffset }}
-      // Every book is rendered at once, so the offset lands on laid out rows
-      initialNumToRender={data.length}
+      // Every row is rendered at once, so the offset lands on laid out rows
+      initialNumToRender={rows.length}
       onLayout={event => {
         listMetrics.current.viewportHeight = event.nativeEvent.layout.height
       }}

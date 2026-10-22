@@ -13,10 +13,13 @@ import { HelpTip } from '~features/tips/HelpTip'
 import { bookSelectorSelectionModeAtom, bookSelectorSortAtom, bookSelectorVersesAtom } from './atom'
 import {
   getBookListScrollOffset,
+  getBookRowTop,
   getListChapterGridHeight,
   getRevealChaptersOffset,
   isExpandedBookAboveViewport,
+  TESTAMENT_TITLE_HEIGHT,
 } from './bookSelectorScroll'
+import { getBookListRows, getTestamentGroups } from './bookListRows'
 import { BookSelectorList, type BookListMetrics } from './BookSelectorList'
 import { BookSelectorParams } from './BookSelectorParams'
 import { BOOK_SELECTION_EVENT, SelectionEvent } from './constants'
@@ -169,17 +172,22 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
     return booksArray
   }, [canonId, coverageData?.books, isAlphabetical, selectedVersion])
 
+  const groups = getTestamentGroups(data, isAlphabetical)
+  const rows = getBookListRows(groups)
+  // In the canon's order, a testament's title sticks over the top of the list
+  const topInset = isAlphabetical ? 0 : TESTAMENT_TITLE_HEIGHT
+
   const selectedBookNumber = bookSelectorData?.selectedBook.Numero || 1
-  const initialScrollIndex = data.findIndex(book => book.Numero === selectedBookNumber)
   const selectedBookChapters = coverageData?.chaptersByBook?.[selectedBookNumber]
   const selectedChapter = bookSelectorData?.selectedChapter ?? 1
   const initialScrollOffset = getBookListScrollOffset({
-    bookIndex: initialScrollIndex,
+    bookTop: getBookRowTop(rows, selectedBookNumber) ?? 0,
     chapterIndex: selectedBookChapters
       ? selectedBookChapters.indexOf(selectedChapter)
       : selectedChapter - 1,
     windowWidth,
     viewportHeight: windowHeight - insets.top - SHEET_HEADER_ALLOWANCE,
+    topInset,
   })
   const isGridChapterPicker = selectionMode === 'grid' && gridBook !== null
 
@@ -238,11 +246,12 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
     revealTimeout.current = setTimeout(() => {
       const { scrollOffset, viewportHeight } = listMetrics.current
       const offset = getRevealChaptersOffset({
-        bookIndex: data.findIndex(item => item.Numero === book.Numero),
+        bookTop: getBookRowTop(rows, book.Numero),
         chapterCount: getChapterCount(book),
         windowWidth,
         scrollOffset,
         viewportHeight,
+        topInset,
       })
       if (offset !== scrollOffset) flatListRef.current?.scrollToOffset({ offset, animated: true })
     }, delay)
@@ -260,14 +269,14 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
       return
     }
 
-    const expandedIndex = data.findIndex(item => item.Numero === currentExpandedBookNumber)
-    const expandedChapterCount = expandedIndex >= 0 ? getChapterCount(data[expandedIndex]) : 0
+    const expandedItem = data.find(item => item.Numero === currentExpandedBookNumber)
+    const expandedChapterCount = expandedItem ? getChapterCount(expandedItem) : 0
     const { scrollOffset } = listMetrics.current
     // A book expanded above the screen gives its place to the tapped one in a single render,
     // and the list scrolls back by the chapters that left: the books on screen stay put. Animated
     // apart, the list would shrink below the scroll position at its end and jump
     const swapsAtOnce = isExpandedBookAboveViewport({
-      bookIndex: expandedIndex,
+      bookTop: expandedItem ? getBookRowTop(rows, expandedItem.Numero) : undefined,
       chapterCount: expandedChapterCount,
       windowWidth,
       scrollOffset,
@@ -349,7 +358,7 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
       >
         <BookSelectorList
           key={selectedVersion}
-          data={data}
+          groups={groups}
           initialScrollOffset={initialScrollOffset}
           expandedBook={expandedBook}
           bookSelectorData={bookSelectorData}

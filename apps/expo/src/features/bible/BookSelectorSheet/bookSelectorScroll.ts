@@ -1,4 +1,8 @@
+import type { BookListRow } from './bookListRows'
+
 export const BOOK_ITEM_HEIGHT = 46
+/** A testament's title over its books. */
+export const TESTAMENT_TITLE_HEIGHT = 40
 export const LIST_CHAPTER_SIZE = 60
 export const LIST_CHAPTER_GAP = 10
 export const LIST_CHAPTER_VERTICAL_PADDING = 10
@@ -28,8 +32,19 @@ export const getListChapterGridHeight = (chapterCount: number, windowWidth: numb
   )
 }
 
+// Top of a book's row, the testament titles above it included; undefined when it is not listed
+export const getBookRowTop = (rows: BookListRow[], bookNumber: number) => {
+  let top = 0
+  for (const row of rows) {
+    if (row.type === 'book' && row.book.Numero === bookNumber) return top
+    top += row.type === 'book' ? BOOK_ITEM_HEIGHT : TESTAMENT_TITLE_HEIGHT
+  }
+  return undefined
+}
+
 interface ListBookInput {
-  bookIndex: number
+  /** From `getBookRowTop`. */
+  bookTop: number | undefined
   chapterCount: number
   windowWidth: number
   scrollOffset: number
@@ -37,30 +52,34 @@ interface ListBookInput {
 
 // Whether an expanded book, the only one, ends above the part of the list on screen
 export const isExpandedBookAboveViewport = ({
-  bookIndex,
+  bookTop,
   chapterCount,
   windowWidth,
   scrollOffset,
 }: ListBookInput) =>
-  bookIndex >= 0 &&
-  (bookIndex + 1) * BOOK_ITEM_HEIGHT + getListChapterGridHeight(chapterCount, windowWidth) <=
-    scrollOffset
+  bookTop !== undefined &&
+  bookTop + BOOK_ITEM_HEIGHT + getListChapterGridHeight(chapterCount, windowWidth) <= scrollOffset
 
 // Keeps `scrollOffset` while the only expanded book's grid is on screen, otherwise scrolls just
-// enough to show it whole without pushing the book's title off the top
+// enough to show it whole without pushing the book's title under the top of the list
 export const getRevealChaptersOffset = ({
-  bookIndex,
+  bookTop,
   chapterCount,
   windowWidth,
   scrollOffset,
   viewportHeight,
-}: ListBookInput & { viewportHeight: number }) => {
-  const bookTop = BOOK_ITEM_HEIGHT * Math.max(bookIndex, 0)
+  topInset = 0,
+}: ListBookInput & {
+  viewportHeight: number
+  /** What a sticky testament title covers at the top of the list. */
+  topInset?: number
+}) => {
+  if (bookTop === undefined) return scrollOffset
   const gridBottom =
     bookTop + BOOK_ITEM_HEIGHT + getListChapterGridHeight(chapterCount, windowWidth)
   if (viewportHeight <= 0 || gridBottom <= scrollOffset + viewportHeight) return scrollOffset
 
-  return Math.max(scrollOffset, Math.min(bookTop, gridBottom - viewportHeight))
+  return Math.max(scrollOffset, Math.min(bookTop - topInset, gridBottom - viewportHeight))
 }
 
 interface ChapterRowScrollInput {
@@ -93,28 +112,29 @@ export const getChapterRowScrollOffset = ({
 }
 
 interface BookListScrollInput {
-  bookIndex: number
+  /** From `getBookRowTop`. */
+  bookTop: number
   chapterIndex: number
   windowWidth: number
   viewportHeight: number
+  /** What a sticky testament title covers at the top of the list. */
+  topInset?: number
 }
 
 // The selected book is the only expanded one when the selector opens
 export const getBookListScrollOffset = ({
-  bookIndex,
+  bookTop,
   chapterIndex,
   windowWidth,
   viewportHeight,
-}: BookListScrollInput) => {
-  const bookTop = BOOK_ITEM_HEIGHT * Math.max(bookIndex, 0)
-
-  return getChapterRowScrollOffset({
+  topInset = 0,
+}: BookListScrollInput) =>
+  getChapterRowScrollOffset({
     chapterIndex,
     itemsPerRow: getListChapterLayout(windowWidth).itemsPerRow,
     itemSize: LIST_CHAPTER_SIZE,
     gap: LIST_CHAPTER_GAP,
     gridTop: bookTop + BOOK_ITEM_HEIGHT + LIST_CHAPTER_VERTICAL_PADDING,
     viewportHeight,
-    baseOffset: Math.max(0, bookTop - BOOKS_SHOWN_ABOVE_SELECTED * BOOK_ITEM_HEIGHT),
+    baseOffset: Math.max(0, bookTop - BOOKS_SHOWN_ABOVE_SELECTED * BOOK_ITEM_HEIGHT - topInset),
   })
-}
