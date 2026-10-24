@@ -1,3 +1,4 @@
+import Card from '~common/ui/Card'
 import SheetWell from '~common/ui/SheetWell'
 import { DateTimePicker } from '@expo/ui/community/datetime-picker'
 import { useEffect, useRef, useState } from 'react'
@@ -15,8 +16,11 @@ const ReminderSettings = ({
   onChange,
   scope = 'daily',
   showIcon = false,
+  surface = 'well',
 }: {
   showIcon?: boolean
+  /** A well inside a sheet; a card when the setting sits on a page. */
+  surface?: 'well' | 'card'
   time?: string
   scope?: string
   onChange: (time: string | null) => void
@@ -48,8 +52,9 @@ const ReminderSettings = ({
     setPending(false)
     if (allowed) onChange('07:00')
   }
+  const Container = surface === 'card' ? Card : SheetWell
   return (
-    <SheetWell className="p-[20px] gap-[12px]">
+    <Container className={surface === 'card' ? 'p-[16px] gap-[12px]' : 'p-[20px] gap-[12px]'}>
       <Box className="flex-row items-center justify-between gap-[16px]">
         <Box className="flex-1 flex-row items-center gap-[8px]">
           {showIcon && Platform.OS !== 'web' && (
@@ -140,7 +145,7 @@ const ReminderSettings = ({
             )}
         </>
       )}
-    </SheetWell>
+    </Container>
   )
 }
 export default ReminderSettings

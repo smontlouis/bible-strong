@@ -1,5 +1,5 @@
 import type { TFunction } from 'i18next'
-import type { EntitySlice } from '~common/types'
+import type { EntitySlice, ReadingSlice } from '~common/types'
 import { chapterToReference } from '~helpers/chapterToReference'
 import verseToReference from '~helpers/verseToReference'
 
@@ -20,4 +20,35 @@ export const getEntitySliceTitle = (slice: EntitySlice, t: TFunction): string =>
     default:
       return ''
   }
+}
+
+/** "Jour 12" or "Day 12" names a day by its number, which the screens already show. */
+const isNumberedDayTitle = (title: string) => /^(jour|day)\s*\d+$/i.test(title.trim())
+
+/** A day by its own title, or else by its passages: "Ésaïe 30:18-19, Jean 1:11-14". */
+export const getReadingSliceLabel = (reading: ReadingSlice, t: TFunction): string => {
+  if (reading.title && !isNumberedDayTitle(reading.title)) return reading.title
+  const passages = reading.slices.filter(
+    slice => slice.type === 'Chapter' || slice.type === 'Verse'
+  )
+  const named = passages.length ? passages : reading.slices.filter(slice => slice.type !== 'Title')
+  return named
+    .map(slice => getEntitySliceTitle(slice, t))
+    .filter(Boolean)
+    .join(', ')
+}
+
+/** The first verse of the day's first passage, "book-chapter-verse": where its reflection goes. */
+export const getReadingSliceFirstVerse = (reading: ReadingSlice): string | undefined => {
+  for (const slice of reading.slices) {
+    if (slice.type === 'Chapter') {
+      const match = /^(\d+)\|(\d+)/.exec(slice.chapters)
+      if (match) return `${match[1]}-${match[2]}-1`
+    }
+    if (slice.type === 'Verse') {
+      const match = /^(\d+)\|(\d+):(\d+)/.exec(slice.verses)
+      if (match) return `${match[1]}-${match[2]}-${match[3]}`
+    }
+  }
+  return undefined
 }

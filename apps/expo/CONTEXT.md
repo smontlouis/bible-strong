@@ -32,6 +32,8 @@
 
 **Plan participation** — A reader's progress through a Reading plan, with a chosen start date and a fixed calendar when scheduled.
 
+**Plan streak** — The days of a Plan participation's calendar read in a row up to today, or up to yesterday while today's reading is still ahead.
+
 **Meditation collection** — An editorial book of daily readings assigned to calendar dates rather than to a reader's start date.
 
 **Daily-reading source** — The reader's choice between the standalone verse of the day and the opening passage from one Meditation collection.
