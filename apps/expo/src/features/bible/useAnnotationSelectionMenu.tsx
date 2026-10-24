@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import ColorCircleGrid from '~common/ColorCircleGrid'
 import type { PanelNavigation, PanelScreen } from '~common/ContextualPanel/types'
 import { useEntityTagsScreen } from '~common/ContextualPanel/useEntityTagsScreen'
-import Box, { HStack, TouchableBox } from '~common/ui/Box'
+import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useColorItems } from '~helpers/useHighlightColors'
@@ -211,7 +211,8 @@ export default function useAnnotationSelectionMenu(
       ),
       headerContent: (
         <>
-          <HStack className="items-center gap-[8px] px-[10px] pt-[4px] pb-[6px]">
+          {/* The type above, the colors under it, as wide as the menu */}
+          <Box className="gap-[8px] px-[10px] pt-[4px] pb-[6px]">
             <AnnotationTypeSwitch
               compact
               disabled={tools.disabled}
@@ -219,7 +220,7 @@ export default function useAnnotationSelectionMenu(
               onChange={tools.setActiveAnnotationType}
               getColor={tools.getColor}
             />
-            <Box className="flex-1 min-w-0" style={{ opacity: tools.disabled ? 0.5 : 1 }}>
+            <Box style={{ opacity: tools.disabled ? 0.5 : 1 }}>
               <ColorCircleGrid
                 colors={colorItems}
                 selectedColor={tools.selectedColor}
@@ -234,10 +235,10 @@ export default function useAnnotationSelectionMenu(
                   })
                 }
                 layout="grid"
-                circleSize={20}
+                circleSize={22}
               />
             </Box>
-          </HStack>
+          </Box>
           <SelectionMenuTabs
             labels={[t('tabs.annotate'), t('tabs.study'), t('tabs.share')]}
             activeIndex={activeTabIndex}

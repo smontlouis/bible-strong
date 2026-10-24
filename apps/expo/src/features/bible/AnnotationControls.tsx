@@ -212,7 +212,7 @@ export const AnnotationTypeSwitch = ({
     <HStack
       className={twMerge(
         'bg-light-grey rounded-full p-[3px] gap-[2px]',
-        compact ? 'w-[120px]' : 'w-[138px]'
+        compact ? 'w-full' : 'w-[138px]'
       )}
       style={{ opacity: disabled ? 0.5 : 1 }}
     >
