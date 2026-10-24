@@ -1416,7 +1416,8 @@ const LoadedBibleContent = ({
     if (scrollTargetVerse === 1) {
       scrollDOMTo(getDOMScrollTarget(containerRef.current), { top: 0 })
     }
-  }, [chapter, scrollTargetVerse, hasVerses, verseNavigationRequest])
+    // A focus opened from lower in the chapter comes back to the top too.
+  }, [chapter, scrollTargetVerse, hasVerses, verseNavigationRequest, contextDisplayMode, focusKey])
 
   useEffect(() => {
     if (!scrollTargetVerse || !hasVerses) return

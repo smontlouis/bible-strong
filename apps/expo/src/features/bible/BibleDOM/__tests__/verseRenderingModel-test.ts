@@ -86,14 +86,14 @@ describe('verseRenderingModel', () => {
     ).toBe(false)
   })
 
-  it('uses the focused verse as scroll target in focused context', () => {
+  it('starts a focus at the top, whatever its verses', () => {
     expect(
       getScrollTargetVerse({
-        verseToScroll: 1,
+        verseToScroll: 12,
         contextDisplayMode: 'focused',
         focusVerses: ['28'],
       })
-    ).toBe(28)
+    ).toBe(1)
     expect(
       getScrollTargetVerse({
         verseToScroll: 12,

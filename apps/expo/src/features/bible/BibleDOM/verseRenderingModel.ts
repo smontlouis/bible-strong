@@ -22,12 +22,8 @@ export const getScrollTargetVerse = ({
   contextDisplayMode: WebViewProps['contextDisplayMode']
   focusVerses: WebViewProps['focusVerses']
 }) => {
-  if (contextDisplayMode === 'focused' && focusVerses?.length) {
-    const focusVerseNumbers = focusVerses.map(Number).filter(Number.isFinite)
-    if (focusVerseNumbers.length) {
-      return Math.min(...focusVerseNumbers)
-    }
-  }
+  // A focus shows its verses first: the reader starts at the top, whatever the verses.
+  if (contextDisplayMode === 'focused' && focusVerses?.length) return 1
 
   return verseToScroll
 }
