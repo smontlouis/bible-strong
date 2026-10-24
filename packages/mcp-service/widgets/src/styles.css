@@ -1,0 +1,783 @@
+/*
+ * A card lives inside a host's conversation. The host owns the ground, the text colours and
+ * the type: the card takes them from the variables the host gives (MCP Apps), and falls back
+ * on neutral values where it gives none. Bible Strong only brings its blues, its highlight
+ * and the colour of the words of Jesus, from `design-system/project/tokens.json`.
+ */
+:root {
+  color-scheme: light dark;
+
+  --text: var(--color-text-primary, #0d0d0d);
+  --text-muted: var(--color-text-secondary, #5d5d5d);
+  --text-faint: var(--color-text-tertiary, #8f8f8f);
+  --ground: var(--color-background-primary, #ffffff);
+  --ground-soft: var(--color-background-secondary, #f4f4f4);
+  --line: var(--color-border-primary, rgba(13, 13, 13, 0.1));
+  --line-soft: var(--color-border-secondary, rgba(13, 13, 13, 0.06));
+  --ring: var(--color-ring-primary, #5983f0);
+
+  --sans: var(--font-sans, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif);
+  --size-xs: var(--font-text-xs-size, 12px);
+  --size-sm: var(--font-text-sm-size, 14px);
+  --size-md: var(--font-text-md-size, 16px);
+  --size-lg: var(--font-text-lg-size, 18px);
+  --size-title: var(--font-heading-sm-size, 20px);
+  --weight-medium: var(--font-weight-medium, 500);
+  --weight-semibold: var(--font-weight-semibold, 600);
+
+  --radius-mark: 4px;
+  --radius-sm: var(--border-radius-sm, 8px);
+  --radius-md: var(--border-radius-md, 10px);
+  --radius-lg: var(--border-radius-lg, 14px);
+  --radius-pill: 999px;
+
+  /* Bible Strong: light values. */
+  --cta: #3f63cf;
+  --cta-ink: #f9fbff;
+  --accent-ink: #173a8a;
+  --accent-soft: #e6edff;
+  --mark: #fff1b8;
+  --mark-ink: #101b35;
+  --words-of-jesus: #a83339;
+
+  --universe-strong: #5983f0;
+  --universe-dictionary: #ffbc00;
+  --universe-nave: #30336b;
+  --universe-commentary: #26a69a;
+  --universe-references: #c22839;
+  --universe-bible: #62717a;
+}
+
+:root[data-theme='dark'] {
+  --text: var(--color-text-primary, #f3f3f3);
+  --text-muted: var(--color-text-secondary, #b4b4b4);
+  --text-faint: var(--color-text-tertiary, #8f8f8f);
+  --ground: var(--color-background-primary, #212121);
+  --ground-soft: var(--color-background-secondary, #2a2a2a);
+  --line: var(--color-border-primary, rgba(255, 255, 255, 0.14));
+  --line-soft: var(--color-border-secondary, rgba(255, 255, 255, 0.08));
+
+  --cta: #7e9cf2;
+  --cta-ink: #0e1521;
+  --accent-ink: #b9c9fa;
+  --accent-soft: #17294c;
+  --mark: #5b4a12;
+  --mark-ink: #edf2ff;
+  --words-of-jesus: #d96265;
+  /* Deep violet does not read on a dark ground. */
+  --universe-nave: #8f93d8;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+body {
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: var(--size-md);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+  overflow-wrap: anywhere;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* --- The card ------------------------------------------------------------ */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+/* Fullscreen: a reading column, with room for the host's composer below. */
+:root[data-mode='fullscreen'] body {
+  background: var(--ground);
+}
+
+:root[data-mode='fullscreen'] .card {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 20px 20px 160px;
+  gap: 20px;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.head-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 2px;
+  color: var(--text-muted);
+  font-size: var(--size-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--universe, var(--universe-bible));
+}
+
+.title {
+  margin: 0;
+  font-size: var(--size-title);
+  font-weight: var(--weight-semibold);
+  line-height: 1.3;
+}
+
+.subtitle {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: var(--size-sm);
+}
+
+.icon-button {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  background: var(--ground-soft);
+  color: var(--text);
+}
+
+.section-title {
+  margin: 0 0 8px;
+  color: var(--text-muted);
+  font-size: var(--size-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.divider {
+  height: 1px;
+  margin: 0;
+  border: 0;
+  background: var(--line-soft);
+}
+
+.note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--size-sm);
+}
+
+/* --- Actions ------------------------------------------------------------- */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  font-size: var(--size-sm);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 180ms ease-out,
+    border-color 180ms ease-out,
+    opacity 180ms ease-out;
+}
+
+.button[disabled] {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.button-primary {
+  background: var(--cta);
+  color: var(--cta-ink);
+}
+
+.button-primary:hover:not([disabled]) {
+  opacity: 0.9;
+}
+
+.button-secondary {
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.button-secondary:hover:not([disabled]) {
+  background: var(--ground-soft);
+}
+
+.button-quiet {
+  min-height: 32px;
+  padding: 0 10px;
+  color: var(--accent-ink);
+}
+
+.button-quiet:hover:not([disabled]) {
+  background: var(--accent-soft);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-size: var(--size-sm);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+button.chip {
+  cursor: pointer;
+}
+
+button.chip:hover {
+  filter: brightness(0.97);
+}
+
+.chip-neutral {
+  background: var(--ground-soft);
+  color: var(--text-muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.code {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-size: 0.72em;
+  font-weight: var(--weight-semibold);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* --- Reading text -------------------------------------------------------- */
+
+.reading {
+  margin: 0;
+  font-size: var(--size-lg);
+  line-height: 1.7;
+}
+
+.reading-compact {
+  font-size: var(--size-md);
+  line-height: 1.65;
+}
+
+.verse-number {
+  margin-right: 0.35em;
+  color: var(--text-muted);
+  font-size: 0.72em;
+  font-weight: var(--weight-semibold);
+  vertical-align: 0.25em;
+  font-variant-numeric: tabular-nums;
+}
+
+.heading-in-text {
+  display: block;
+  margin: 14px 0 4px;
+  color: var(--text-muted);
+  font-size: var(--size-sm);
+  font-weight: var(--weight-semibold);
+  line-height: 1.4;
+}
+
+.heading-in-text:first-child {
+  margin-top: 0;
+}
+
+.words-of-jesus {
+  color: var(--words-of-jesus);
+}
+
+.verse {
+  border-radius: var(--radius-mark);
+}
+
+button.verse {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: inherit;
+  cursor: pointer;
+}
+
+button.verse:hover {
+  background: var(--ground-soft);
+}
+
+.verse[aria-pressed='true'],
+mark {
+  background: var(--mark);
+  color: var(--mark-ink);
+  border-radius: var(--radius-mark);
+  padding: 0 1px;
+}
+
+.paragraph-break {
+  display: block;
+  height: 0.7em;
+}
+
+.original {
+  font-size: 1.35em;
+  line-height: 1.5;
+}
+
+.original[dir='rtl'] {
+  text-align: right;
+}
+
+.transliteration {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* --- Rich text of an article -------------------------------------------- */
+
+.prose {
+  font-size: var(--size-md);
+  line-height: 1.65;
+}
+
+.prose > :first-child {
+  margin-top: 0;
+}
+
+.prose > :last-child {
+  margin-bottom: 0;
+}
+
+.prose p {
+  margin: 0 0 0.8em;
+}
+
+.prose h4 {
+  margin: 1.1em 0 0.4em;
+  font-size: var(--size-md);
+  font-weight: var(--weight-semibold);
+}
+
+.prose ul,
+.prose ol {
+  margin: 0 0 0.8em;
+  padding-left: 1.3em;
+}
+
+.prose li {
+  margin: 0.15em 0;
+}
+
+.prose blockquote {
+  margin: 0 0 0.8em;
+  padding-left: 12px;
+  border-left: 2px solid var(--line);
+  color: var(--text-muted);
+}
+
+.link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent-ink);
+  font: inherit;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent-ink) 35%, transparent);
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.link:hover {
+  text-decoration-color: currentColor;
+}
+
+/* A long text is cut in a card and opens in full on request. */
+.clamped {
+  position: relative;
+  max-height: var(--clamp, 220px);
+  overflow: hidden;
+}
+
+.clamped::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 56px;
+  background: linear-gradient(to bottom, transparent, var(--fade, var(--ground)));
+  pointer-events: none;
+}
+
+/* --- Lists --------------------------------------------------------------- */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 10px 0;
+  border: 0;
+  border-top: 1px solid var(--line-soft);
+  background: transparent;
+  text-align: left;
+}
+
+.list > :first-child > .row,
+.list > .row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+button.row {
+  cursor: pointer;
+}
+
+button.row:hover .row-title {
+  color: var(--accent-ink);
+}
+
+.row-title {
+  font-size: var(--size-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.row-meta {
+  color: var(--text-muted);
+  font-size: var(--size-xs);
+}
+
+.row-text {
+  margin: 0;
+  font-size: var(--size-md);
+  line-height: 1.55;
+}
+
+.row-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* --- The words of a verse ------------------------------------------------ */
+
+.words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.word {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 72px;
+  max-width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-md);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 180ms ease-out;
+}
+
+.word:hover,
+.word[aria-pressed='true'] {
+  border-color: var(--cta);
+}
+
+.word[aria-pressed='true'] {
+  background: var(--accent-soft);
+}
+
+.word-original {
+  font-size: var(--size-lg);
+  line-height: 1.4;
+}
+
+.word-transliteration {
+  color: var(--text-muted);
+  font-size: var(--size-xs);
+  font-style: italic;
+}
+
+.word-gloss {
+  font-size: var(--size-sm);
+}
+
+/* --- Columns of a comparison --------------------------------------------- */
+
+.columns {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 560px) {
+  .columns[data-count='2'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+:root[data-mode='fullscreen'] .columns {
+  gap: 24px;
+}
+
+.column-title {
+  margin: 0 0 6px;
+  color: var(--text-muted);
+  font-size: var(--size-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* --- A picture ----------------------------------------------------------- */
+
+.figure {
+  margin: 0;
+}
+
+.figure img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  background: var(--ground-soft);
+}
+
+.figure figcaption {
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: var(--size-xs);
+}
+
+/* --- Facts --------------------------------------------------------------- */
+
+.facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 16px;
+  margin: 0;
+  font-size: var(--size-sm);
+}
+
+.facts dt {
+  color: var(--text-muted);
+}
+
+.facts dd {
+  margin: 0;
+}
+
+/* --- States -------------------------------------------------------------- */
+
+.state {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 20px 16px;
+  white-space: pre-line;
+  color: var(--text-muted);
+  font-size: var(--size-sm);
+}
+
+.skeleton {
+  height: 14px;
+  border-radius: var(--radius-pill);
+  background: var(--ground-soft);
+}
+
+.skeleton:nth-child(2) {
+  width: 82%;
+}
+
+.skeleton:nth-child(3) {
+  width: 64%;
+}
+
+.busy {
+  opacity: 0.6;
+  transition: opacity 180ms ease-out;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
+
+/* --- A row of events, swept through ------------------------------------- */
+
+.carousel {
+  display: flex;
+  gap: 12px;
+  margin: 0 -16px;
+  padding: 0 16px 4px;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel > li {
+  flex: none;
+  width: 220px;
+  scroll-snap-align: start;
+}
+
+:root[data-mode='fullscreen'] .carousel {
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+.slide {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.slide img,
+.slide-blank {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  margin-bottom: 4px;
+  border-radius: var(--radius-lg);
+  background: var(--ground-soft);
+  object-fit: cover;
+}
+
+.slide:hover .row-title {
+  color: var(--accent-ink);
+}
+
+.slide-text {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: var(--size-sm);
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.chip small {
+  color: var(--text-faint);
+  font-size: var(--size-xs);
+}
+
+button.chip[disabled],
+.link[disabled],
+button.row[disabled] {
+  cursor: default;
+}
+
+.row-title {
+  margin: 0;
+}
+
+/* Hebrew is read at a larger size than the Latin letters beside it. */
+[dir='rtl'] > .reading {
+  font-size: 1.3em;
+  line-height: 1.9;
+}

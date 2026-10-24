@@ -1,0 +1,65 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  // The MCP server of the Bible Strong plugin (ADR-0085). Deployed by hand:
+  // `yarn mcp:worker:deploy`. Its address is part of the published plugin and cannot change.
+  "name": "bible-strong-mcp",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-08-19",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "routes": [
+    {
+      "pattern": "mcp.bible-strong.app",
+      "custom_domain": true,
+    },
+  ],
+  "services": [
+    // Every tool reads the Resource API, asked without leaving Cloudflare.
+    // On a development machine the binding reaches the deployed API, as the site does.
+    { "binding": "RESOURCE_API", "service": "bible-strong-resources-api", "remote": true },
+  ],
+  // The built card is one HTML document, imported as text and served as a UI resource.
+  "rules": [{ "type": "Text", "globs": ["**/*.html"], "fallthrough": true }],
+  "vars": {
+    // The public pages each result links to.
+    "SITE_ORIGIN": "https://bible-strong.app",
+    // The token OpenAI asks the MCP host to publish to prove who owns it. Set it when the
+    // submission portal gives one; it is public by nature.
+    "OPENAI_APPS_CHALLENGE": "",
+    // The origin a host frames the cards under: ours, and of no other plugin.
+    "CARD_DOMAIN": "https://mcp.bible-strong.app",
+    // The page that shows each card outside a host: on a development machine only.
+    "CARD_WORKBENCH": "",
+    // Names in the terminal what a host asks for: on a development machine only.
+    "CALL_TRACE": "",
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 0.1,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+      "head_sampling_rate": 0.1,
+    },
+  },
+  "limits": { "cpu_ms": 5000 },
+  "env": {
+    // `yarn workspace @bible-strong/mcp-service dev`: the same server on a development
+    // machine, with the page that shows each card outside ChatGPT.
+    "dev": {
+      "name": "bible-strong-mcp-dev",
+      "workers_dev": true,
+      "routes": [],
+      "services": [
+        { "binding": "RESOURCE_API", "service": "bible-strong-resources-api", "remote": true },
+      ],
+      "vars": {
+        "SITE_ORIGIN": "https://bible-strong.app",
+        "OPENAI_APPS_CHALLENGE": "",
+        "CARD_DOMAIN": "",
+        "CARD_WORKBENCH": "true",
+        "CALL_TRACE": "true",
+      },
+    },
+  },
+}

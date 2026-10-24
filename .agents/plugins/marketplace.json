@@ -1,0 +1,20 @@
+{
+  "name": "bible-strong",
+  "interface": {
+    "displayName": "Bible Strong (this repository)"
+  },
+  "plugins": [
+    {
+      "name": "bible-strong",
+      "source": {
+        "source": "local",
+        "path": "./packages/mcp-service/plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    }
+  ]
+}

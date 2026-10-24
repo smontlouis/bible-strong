@@ -24,6 +24,7 @@ Before designing or restyling a public page, a video or a share image, read `des
 - `packages/resource-catalog` — generated catalog of published artifacts.
 - `packages/bible-reference-parser` — Bible passage reference parser.
 - `packages/ai-contract` — public API contract of the separately hosted study assistant.
+- `packages/mcp-service` — plugin for AI assistants such as ChatGPT: MCP server, cards and submission package (`@bible-strong/mcp-service`).
 
 App-specific instructions live in nested `AGENTS.md` files. In particular, read `apps/expo/AGENTS.md` before changing the Expo app and `apps/world/AGENTS.md` before changing World.
 
@@ -37,7 +38,7 @@ yarn test
 yarn build
 ```
 
-Start one product from the root with `yarn dev:expo`, `yarn dev:site`, `yarn dev:world`, `yarn dev:api`, `yarn dev:studio`, or `yarn dev:resources`. Resource-authoring commands use the `resources:<domain>:<action>` prefix; production import, upload, and activation remain owned by the Resource service. Run a workspace-specific command with `yarn workspace <package-name> <script>`.
+Start one product from the root with `yarn dev:expo`, `yarn dev:site`, `yarn dev:world`, `yarn dev:api`, `yarn dev:studio`, `yarn dev:resources`, or `yarn dev:mcp`. Resource-authoring commands use the `resources:<domain>:<action>` prefix; production import, upload, and activation remain owned by the Resource service. Run a workspace-specific command with `yarn workspace <package-name> <script>`.
 
 ## Dependency rules
 
