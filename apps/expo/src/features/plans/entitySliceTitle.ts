@@ -37,18 +37,3 @@ export const getReadingSliceLabel = (reading: ReadingSlice, t: TFunction): strin
     .filter(Boolean)
     .join(', ')
 }
-
-/** The first verse of the day's first passage, "book-chapter-verse": where its reflection goes. */
-export const getReadingSliceFirstVerse = (reading: ReadingSlice): string | undefined => {
-  for (const slice of reading.slices) {
-    if (slice.type === 'Chapter') {
-      const match = /^(\d+)\|(\d+)/.exec(slice.chapters)
-      if (match) return `${match[1]}-${match[2]}-1`
-    }
-    if (slice.type === 'Verse') {
-      const match = /^(\d+)\|(\d+):(\d+)/.exec(slice.verses)
-      if (match) return `${match[1]}-${match[2]}-${match[3]}`
-    }
-  }
-  return undefined
-}

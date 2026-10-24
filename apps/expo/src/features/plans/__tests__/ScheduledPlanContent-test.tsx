@@ -46,7 +46,6 @@ jest.mock('../PlanScreen/PlanDayStrip', () => ({
 }))
 jest.mock('../PlanScreen/PlanCalendar', () => 'PlanCalendar')
 jest.mock('../PlanScreen/PlanProgressCard', () => 'PlanProgressCard')
-jest.mock('../PlanScreen/PlanReflection', () => 'PlanReflection')
 jest.mock('../PlanScreen/PlanUpNext', () => 'PlanUpNext')
 jest.mock('~common/ModalSheet', () => 'Sheet')
 jest.mock('~common/sheet', () => ({ SheetView: 'SheetView' }))

@@ -1,7 +1,7 @@
 import type { TFunction } from 'i18next'
 import { getJourneyDetail } from '../planJourneyLabel'
 import { getPlanJourney } from '../planSchedule'
-import { getReadingSliceFirstVerse, getReadingSliceLabel } from '../entitySliceTitle'
+import { getReadingSliceLabel } from '../entitySliceTitle'
 
 jest.mock('~helpers/chapterToReference', () => ({
   chapterToReference: (chapters: string) => `chapitres ${chapters}`,
@@ -44,7 +44,4 @@ it('names a day by its own title, or by its passages when the title is only its 
   )
   expect(getReadingSliceLabel({ id: 'd', title: 'Marc 9', slices }, t)).toBe('Marc 9')
   expect(getReadingSliceLabel({ id: 'd', slices: [slices[0]] }, t)).toBe('BibleProject')
-  expect(getReadingSliceFirstVerse({ id: 'd', slices })).toBe('23-30-18')
-  expect(getReadingSliceFirstVerse({ id: 'd', slices: [slices[2]] })).toBe('43-1-1')
-  expect(getReadingSliceFirstVerse({ id: 'd', slices: [slices[0]] })).toBeUndefined()
 })

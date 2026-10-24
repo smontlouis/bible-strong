@@ -63,11 +63,9 @@ La durée d'un élément (`planReadingTime.ts`) se compte en mots, à 200 mots p
 ceux du passage dans la version par défaut, ou ceux du texte. Une vidéo ou une image n'en a
 pas. La ligne d'un élément montre aussi son début, dans la police de lecture.
 
-Sous le jour viennent la **réflexion** (les notes du lecteur sur le premier verset du jour, et
-de quoi en écrire une : une note ordinaire, retrouvée sur ce verset dans la Bible), les trois
-jours **à venir** et, sur mobile, le **rappel quotidien**. À partir de 800 points de large, la
-progression, le calendrier du mois, les jours à venir et le rappel passent dans une colonne à
-droite du jour.
+Sous le jour viennent les trois jours **à venir** et, sur mobile, le **rappel quotidien**. À
+partir de 800 points de large, la progression, le calendrier du mois, les jours à venir et le
+rappel passent dans une colonne à droite du jour.
 
 La liste des plans range les plans suivis en « Vos parcours » et « Terminés » (avec
 « Recommencer »), et ne montre dans « À découvrir » que les plans pas encore suivis.

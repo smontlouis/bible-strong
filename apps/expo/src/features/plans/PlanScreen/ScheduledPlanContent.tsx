@@ -18,7 +18,6 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { pageContentStyle } from '~common/ui/PageContent'
 import ReminderSettings from '~features/daily-reading/ReminderSettings'
 import { useLocalReadingDate } from '~features/daily-reading/useDailyMeditation'
-import verseToReference from '~helpers/verseToReference'
 import {
   startPlan,
   markAsRead,
@@ -39,17 +38,12 @@ import {
 import { getDoneDays, getPlanJourney } from '../planSchedule'
 import { getDayMinutes, useElementSizes } from '../planReadingTime'
 import { getPlanEntityRoute } from '../planEntityRoute'
-import {
-  getEntitySliceTitle,
-  getReadingSliceFirstVerse,
-  getReadingSliceLabel,
-} from '../entitySliceTitle'
+import { getEntitySliceTitle, getReadingSliceLabel } from '../entitySliceTitle'
 import PlanStreak from '../PlanStreak'
 import PlanCalendar from './PlanCalendar'
 import PlanDayStrip, { formatPlanDate } from './PlanDayStrip'
 import PlanElementRow from './PlanElementRow'
 import PlanProgressCard from './PlanProgressCard'
-import PlanReflection from './PlanReflection'
 import PlanUpNext from './PlanUpNext'
 
 interface Props {
@@ -200,7 +194,6 @@ const ScheduledPlanContent = ({ plan, initialReadingSliceId }: Props) => {
   ]
     .filter(Boolean)
     .join(' · ')
-  const firstVerse = reading ? getReadingSliceFirstVerse(reading) : undefined
   const nextElement = getNextElement()
   const isCurrentDay = selectedDay === journey.currentDay
   const primary = !started
@@ -404,9 +397,6 @@ const ScheduledPlanContent = ({ plan, initialReadingSliceId }: Props) => {
     </Card>
   )
 
-  const reflection = started && firstVerse && (
-    <PlanReflection verseKey={firstVerse} reference={verseToReference(firstVerse)} />
-  )
   const upNext = (
     <PlanUpNext
       readings={readings}
@@ -445,10 +435,7 @@ const ScheduledPlanContent = ({ plan, initialReadingSliceId }: Props) => {
           )}
           {wide ? (
             <Box className="flex-row items-start gap-[24px]">
-              <Box className="flex-1 gap-[28px]">
-                {dayCard}
-                {reflection}
-              </Box>
+              <Box className="flex-1 gap-[28px]">{dayCard}</Box>
               <Box className="gap-[20px]" style={{ width: SIDE_WIDTH }}>
                 {started && (
                   <PlanProgressCard
@@ -476,7 +463,6 @@ const ScheduledPlanContent = ({ plan, initialReadingSliceId }: Props) => {
           ) : (
             <>
               {dayCard}
-              {reflection}
               {upNext}
               {reminder}
             </>

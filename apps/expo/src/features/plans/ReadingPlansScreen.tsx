@@ -118,11 +118,6 @@ const ReadingPlanRow = ({ plan, kind }: { plan: OnlinePlan; kind: RowKind }) => 
             <Text className="text-grey text-[13px]">{detail}</Text>
             {kind === 'active' && <PlanStreak count={journey.streak} />}
           </Box>
-          {kind === 'discover' && !!plan.description && (
-            <Text className="text-grey text-[13px] leading-[18px]" numberOfLines={2}>
-              {plan.description}
-            </Text>
-          )}
         </Box>
         {!pill && <FeatherIcon name="chevron-right" color="grey" size={18} />}
       </Link>
