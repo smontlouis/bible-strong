@@ -35,14 +35,12 @@ const StudyTab = ({
 
   return (
     <ActionsLayout width={screenWidth}>
-      {/* The door to the whole study comes first; once the focus is on, the tile shows it as
-          selected instead of filled, since a filled tile would hide the selected border. */}
+      {/* The door to the whole study comes first, as one tile among the others. */}
       <ActionItem
         name="zoom-in"
         label={t('Approfondir')}
         onPress={onPinVerses}
         isActive={hasFocus}
-        variant={hasFocus ? 'default' : 'emphasized'}
         shortcut={formatShortcut('focus')}
       />
       <ActionItem
