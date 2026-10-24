@@ -38,7 +38,7 @@ const StudyTab = ({
       {/* The door to the whole study comes first; once the focus is on, the tile shows it as
           selected instead of filled, since a filled tile would hide the selected border. */}
       <ActionItem
-        name="crosshair"
+        name="zoom-in"
         label={t('Approfondir')}
         onPress={onPinVerses}
         isActive={hasFocus}
