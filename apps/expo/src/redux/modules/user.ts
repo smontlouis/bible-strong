@@ -632,7 +632,7 @@ const getInitialState = (): UserState => ({
     data: [],
   },
   needsUpdate: {},
-  fontFamily: 'Avenir',
+  fontFamily: 'Literata Book',
   bible: {
     changelog: {},
     bookmarks: {},
@@ -678,7 +678,7 @@ const getInitialState = (): UserState => ({
         hasQuotes: true,
         hasAppName: true,
       },
-      fontFamily: 'Avenir',
+      fontFamily: 'Literata Book',
       theme: 'default',
       colors: {
         default: defaultColors,
