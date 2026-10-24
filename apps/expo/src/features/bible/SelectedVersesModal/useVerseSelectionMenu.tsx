@@ -187,13 +187,14 @@ export default function useVerseSelectionMenu(
       onAddToStudy={onAddToStudy}
       onSelectStudy={onSelectStudy}
       reference={reference}
-      onPinVerses={onPinVerses}
       moreThanOneVerseSelected={moreThanOneVerseSelected}
       activeStates={activeStates}
     />,
     <StudyTab
       key="study"
       screenWidth={SELECTION_GROUP_WIDTH}
+      onPinVerses={onPinVerses}
+      hasFocus={activeStates.hasFocus}
       showStrongDetail={showStrongDetail}
       showDictionaryDetail={showDictionaryDetail}
       onOpenNave={onOpenNave}

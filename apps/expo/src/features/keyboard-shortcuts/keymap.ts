@@ -214,7 +214,7 @@ export const SHORTCUT_SECTIONS: ShortcutSection[] = [
       { label: 'Relation', shortcuts: ['relation'] },
       { label: 'Marque-page', shortcuts: ['bookmark'] },
       { label: 'shortcutGuide.addToStudy', shortcuts: ['addToStudy'] },
-      { label: 'Focus', shortcuts: ['focus'] },
+      { label: 'Approfondir', shortcuts: ['focus'] },
       { label: 'Lexique', shortcuts: ['lexicon'] },
       { label: 'Dictionnaire', shortcuts: ['dictionary'] },
       { label: 'Thèmes', shortcuts: ['topics'] },

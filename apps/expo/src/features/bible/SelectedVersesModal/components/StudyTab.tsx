@@ -6,6 +6,9 @@ import ActionItem from './ActionItem'
 import { formatShortcut } from '~features/keyboard-shortcuts/keymap'
 interface StudyTabProps {
   screenWidth: number
+  /** Holds the selected verses in the reader's focus, where their study gathers (ADR-0088). */
+  onPinVerses: () => void
+  hasFocus: boolean
   showStrongDetail: () => void
   showDictionaryDetail: () => void
   onOpenNave: () => void
@@ -17,6 +20,8 @@ interface StudyTabProps {
 
 const StudyTab = ({
   screenWidth,
+  onPinVerses,
+  hasFocus,
   showStrongDetail,
   showDictionaryDetail,
   onOpenNave,
@@ -30,6 +35,16 @@ const StudyTab = ({
 
   return (
     <ActionsLayout width={screenWidth}>
+      {/* The door to the whole study comes first; once the focus is on, the tile shows it as
+          selected instead of filled, since a filled tile would hide the selected border. */}
+      <ActionItem
+        name="crosshair"
+        label={t('Approfondir')}
+        onPress={onPinVerses}
+        isActive={hasFocus}
+        variant={hasFocus ? 'default' : 'emphasized'}
+        shortcut={formatShortcut('focus')}
+      />
       <ActionItem
         svgSource={require('~assets/images/tab-icons/lexique.svg')}
         tintColor={resolveUniverseColors(theme.colors, 'strong').foreground}

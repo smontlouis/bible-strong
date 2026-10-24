@@ -161,7 +161,6 @@ const SelectedVersesModal = ({
                     onAddToStudy={onAddToStudy}
                     onSelectStudy={onSelectStudy}
                     reference={selectedVersesTitle}
-                    onPinVerses={onPinVerses}
                     moreThanOneVerseSelected={moreThanOneVerseSelected}
                     activeStates={activeStates}
                   />
@@ -174,6 +173,8 @@ const SelectedVersesModal = ({
                   )}
                   <StudyTab
                     screenWidth={groupWidth}
+                    onPinVerses={onPinVerses}
+                    hasFocus={activeStates.hasFocus}
                     showStrongDetail={showStrongDetail}
                     showDictionaryDetail={showDictionaryDetail}
                     onOpenNave={onOpenNave}

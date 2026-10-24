@@ -23,7 +23,6 @@ interface AnnotateTabProps {
   onAddToStudy: () => void
   onSelectStudy?: (studyId: string, format: 'inline' | 'block') => Promise<void>
   reference?: string
-  onPinVerses: () => void
   moreThanOneVerseSelected: boolean
   activeStates: VerseActiveStates
 }
@@ -40,13 +39,12 @@ const AnnotateTab = ({
   onAddToStudy,
   onSelectStudy,
   reference,
-  onPinVerses,
   moreThanOneVerseSelected,
   activeStates,
 }: AnnotateTabProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
-  const { hasBookmark, hasFocus } = activeStates
+  const { hasBookmark } = activeStates
 
   return (
     <ActionsLayout width={screenWidth}>
@@ -79,13 +77,6 @@ const AnnotateTab = ({
         isActive={hasBookmark}
       />
       <AddToStudyAction onPress={onAddToStudy} onSelect={onSelectStudy} reference={reference} />
-      <ActionItem
-        name="crosshair"
-        label={t('Focus')}
-        onPress={onPinVerses}
-        isActive={hasFocus}
-        shortcut={formatShortcut('focus')}
-      />
     </ActionsLayout>
   )
 }
