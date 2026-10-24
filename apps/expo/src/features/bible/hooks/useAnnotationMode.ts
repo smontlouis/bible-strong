@@ -43,6 +43,8 @@ export interface SelectedAnnotation {
   type: AnnotationType
   noteId?: string
   tags?: { [id: string]: { id: string; name: string } }
+  /** The words it marks, verse by verse. */
+  ranges: { verseKey: string; startWordIndex: number; endWordIndex: number }[]
 }
 
 export interface AnnotationModeState {
@@ -121,6 +123,7 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
       type: selectedAnnotationFromRedux.type,
       noteId: selectedAnnotationFromRedux.noteId,
       tags: selectedAnnotationFromRedux.tags,
+      ranges: selectedAnnotationFromRedux.ranges,
     }
   })()
 

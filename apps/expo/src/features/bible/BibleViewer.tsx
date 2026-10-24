@@ -10,7 +10,7 @@ import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import * as Sentry from '@sentry/react-native'
 import { useCallback, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react'
 import { Platform, type LayoutChangeEvent } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector, useStore } from 'react-redux'
 import Box, { RightInsetCleared, TouchableBox, useRightInsetToClear } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import BibleViewport from './BibleViewport'
@@ -117,6 +117,7 @@ import {
   VersionCode,
 } from '../../state/tabs'
 import BibleSelectionSheet from './BibleSelectionSheet'
+import { getLastAnnotationMark } from './annotationWords'
 import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
 import {
   BibleDOMWrapper,
@@ -1108,6 +1109,31 @@ const BibleViewer = ({
     confirmSelectionAnnotationDeletion(() => annotationMode.applyAnnotation(color, type))
   }
 
+  // A note, tags or relations asked for words not annotated yet annotate them with the last mark
+  const reduxStore = useStore<RootState>()
+  const handleAnnotateWords = () => {
+    const { color, type } = getLastAnnotationMark(
+      reduxStore.getState().user.bible.wordAnnotations ?? {}
+    )
+    handleApplyAnnotation(color, type)
+  }
+
+  // Studying the words: their verses come in focus, where their study gathers, and the annotation
+  // session ends so that it shows.
+  const handleFocusAnnotatedVerses = (verseKeys: string[]) => {
+    const verseNumbers = verseKeys.map(verseKey => Number(verseKey.split('-')[2]))
+    if (verseNumbers.some(verse => (focusVerses ?? []).map(Number).includes(verse))) {
+      actions.clearFocusVerses()
+      return
+    }
+    handleExitAnnotationMode()
+    actions.pinVerses(verseNumbers)
+  }
+  const annotatedVerses =
+    annotationMode.version === version
+      ? verses
+      : (parallelVerses.find(parallel => parallel.id === annotationMode.version)?.verses ?? verses)
+
   const selectedVerseHighlightColor = useSelector((state: RootState) =>
     selectSelectedVerseHighlightColor(state, selectedVerses)
   )
@@ -2000,6 +2026,10 @@ const BibleViewer = ({
             annotatedVersion: annotationMode.version,
             entryVerseKey: annotationEntryVerseKey,
             isEnabled: isAnnotating,
+            verses: annotatedVerses,
+            focusVerses,
+            onFocusVerses: handleFocusAnnotatedVerses,
+            onAnnotateWords: handleAnnotateWords,
           }}
         />
         <CrossVersionAnnotationsModal

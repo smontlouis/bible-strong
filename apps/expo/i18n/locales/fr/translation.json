@@ -2744,5 +2744,11 @@
   "readingPlans.upNext": "À venir",
   "readingPlans.completedPlans": "Terminés",
   "readingPlans.restart": "Recommencer",
-  "readingPlans.restartMessage": "Le plan repart du premier jour, aujourd’hui. Vos lectures cochées seront effacées."
+  "readingPlans.restartMessage": "Le plan repart du premier jour, aujourd’hui. Vos lectures cochées seront effacées.",
+  "annotation.quote": "« {{text}} »",
+  "Effacer": "Effacer",
+  "Sélectionnez des mots": "Sélectionnez des mots",
+  "Sélectionnez des mots pour voir leur hébreu ou leur grec.": "Sélectionnez des mots pour voir leur hébreu ou leur grec.",
+  "Les mots de la {{version}} ne sont pas reliés aux numéros Strong.": "Les mots de la {{version}} ne sont pas reliés aux numéros Strong.",
+  "Aucun mot hébreu ou grec dans la sélection.": "Aucun mot hébreu ou grec dans la sélection."
 }

@@ -2716,5 +2716,11 @@
   "readingPlans.upNext": "Up next",
   "readingPlans.completedPlans": "Completed",
   "readingPlans.restart": "Start over",
-  "readingPlans.restartMessage": "The plan starts again from day one, today. Your checked readings will be cleared."
+  "readingPlans.restartMessage": "The plan starts again from day one, today. Your checked readings will be cleared.",
+  "annotation.quote": "“{{text}}”",
+  "Effacer": "Erase",
+  "Sélectionnez des mots": "Select words",
+  "Sélectionnez des mots pour voir leur hébreu ou leur grec.": "Select words to see their Hebrew or Greek.",
+  "Les mots de la {{version}} ne sont pas reliés aux numéros Strong.": "The words of the {{version}} are not linked to Strong's numbers.",
+  "Aucun mot hébreu ou grec dans la sélection.": "No Hebrew or Greek word in the selection."
 }

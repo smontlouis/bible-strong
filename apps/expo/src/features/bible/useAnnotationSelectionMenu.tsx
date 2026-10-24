@@ -1,7 +1,6 @@
 import { useSetAtom } from 'jotai/react'
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { StyleSheet } from 'react-native'
 import ColorCircleGrid from '~common/ColorCircleGrid'
 import type { PanelNavigation, PanelScreen } from '~common/ContextualPanel/types'
 import { useEntityTagsScreen } from '~common/ContextualPanel/useEntityTagsScreen'
@@ -11,27 +10,29 @@ import Text from '~common/ui/Text'
 import { useColorItems } from '~helpers/useHighlightColors'
 import { colorPickerModalAtom } from 'src/state/app'
 import {
-  AnnotationTypeButton,
+  AnnotationTypeSwitch,
   useAnnotationTools,
-  useAnnotationTypeLabels,
   type AnnotationToolbarProps,
 } from './AnnotationControls'
-import AnnotationPreview from './AnnotationPreview'
+import { AnnotationAnnotateTab, AnnotationShareTab, AnnotationStudyTab } from './AnnotationGroups'
 import {
   BIBLE_SELECTION_MENU_WIDTH,
   type BibleSelectionMenuContent,
 } from './bibleSelectionMenuContent'
-import ActionItem from './SelectedVersesModal/components/ActionItem'
+import SelectionMenuTabs from './SelectedVersesModal/components/SelectionMenuTabs'
+import { SELECTION_GROUP_WIDTH } from './SelectedVersesModal/selectionSheetLayout'
 import {
   SelectionMenuContext,
   type SelectionMenu as SelectionMenuValue,
 } from './SelectedVersesModal/selectionMenuContext'
+import useAnnotationWordActions from './useAnnotationWordActions'
+import useSelectionStrongWords from './useSelectionStrongWords'
 import type { VerseMenuTarget } from './VerseMenu.web'
 import { isEditingTarget } from '~features/keyboard-shortcuts/keyboardTargets'
-import { findShortcut, formatShortcut, matchShortcut } from '~features/keyboard-shortcuts/keymap'
+import { findShortcut, matchShortcut } from '~features/keyboard-shortcuts/keymap'
 
 /** Keys of the desktop annotation menu, shown beside each action. */
-const ANNOTATION_SHORTCUTS = ['note', 'tags', 'relation', 'erase'] as const
+const ANNOTATION_SHORTCUTS = ['note', 'tags', 'relation', 'erase', 'focus', 'copy'] as const
 
 // Its screens are named apart from those of the selected verses, which the menu showed before
 const TAGS_SCREEN = 'annotation-tags'
@@ -39,10 +40,11 @@ const TAGS_SCREEN = 'annotation-tags'
 type AnchorVerse = Omit<VerseMenuTarget, 'version'>
 
 /**
- * The annotation tools in the desktop selection menu, beside the verse being annotated. They open
- * at the verse annotation mode started from, then follow the words the reader selects or the
- * annotation they open. The menu's own button ends the mode; Escape lets go of the selected words,
- * then of the selected annotation, then ends the mode.
+ * The annotation tools in the desktop selection menu, beside the verse being annotated: the ways
+ * to mark words, then the groups of the selected verses' menu, for words. They open at the verse
+ * annotation mode started from, then follow the words the reader selects or the annotation they
+ * open. The menu's own button ends the mode; Escape lets go of the selected words, then of the
+ * selected annotation, then ends the mode.
  */
 export default function useAnnotationSelectionMenu(
   props: Omit<AnnotationToolbarProps, 'ref'>,
@@ -51,28 +53,35 @@ export default function useAnnotationSelectionMenu(
   const {
     hasSelection,
     selection,
-    onEraseAnnotations,
     onClearSelection,
     onClose,
     selectedAnnotation,
-    onDeleteAnnotation,
     onClearAnnotationSelection,
-    onNotePress,
-    onRelationsPress,
+    onFocusVerses,
     tagsCount = 0,
     relationsCount = 0,
     annotatedVersion,
     entryVerseKey,
     isEnabled,
+    verses = [],
   } = props
   const { t } = useTranslation()
-  const typeLabels = useAnnotationTypeLabels()
   const colorItems = useColorItems()
   const setColorPickerModal = useSetAtom(colorPickerModalAtom)
-  const tools = useAnnotationTools(props)
   const navigation = useRef<PanelNavigation | null>(null)
   const isOpen = useRef(false)
+  const menu: SelectionMenuValue = {
+    openScreen: name => navigation.current?.open(name === 'tags' ? TAGS_SCREEN : name),
+  }
+  const tools = useAnnotationTools(props, { openTags: () => menu.openScreen('tags') })
+  const strongWords = useSelectionStrongWords(annotatedVersion, tools.wordRanges, verses)
+  const wordActions = useAnnotationWordActions(annotatedVersion, tools.wordRanges)
   const tags = useEntityTagsScreen('wordAnnotations', selectedAnnotation?.id ?? '')
+  const hasWords = !tools.disabled && tools.wordRanges.length > 0
+
+  // Each session opens on its annotation's tools
+  const [activeTabIndex, setActiveTabIndex] = useState(0)
+  if (!isEnabled && activeTabIndex !== 0) setActiveTabIndex(0)
 
   // The menu stays by the last words or annotation chosen once they are let go of, until the mode
   // ends.
@@ -90,24 +99,19 @@ export default function useAnnotationSelectionMenu(
     version: selection?.version ?? annotatedVersion ?? '',
   }
 
-  const menu: SelectionMenuValue = {
-    openScreen: name => navigation.current?.open(name === 'tags' ? TAGS_SCREEN : name),
-  }
-
-  // The tags screen belongs to one annotation: choosing another one comes back to the tools.
+  // The tags screen belongs to one annotation: letting it go or choosing another one comes back to
+  // the tools. Words just annotated open their new annotation's tags, if they were asked for.
+  const previousAnnotationId = useRef(selectedAnnotation?.id)
   const backToTools = useEffectEvent(() => {
     navigation.current?.back()
     tags.reset()
   })
   useEffect(() => {
-    backToTools()
+    if (previousAnnotationId.current) backToTools()
+    previousAnnotationId.current = selectedAnnotation?.id
   }, [selectedAnnotation?.id])
 
-  const erase = selectedAnnotation
-    ? onDeleteAnnotation
-    : hasSelection
-      ? onEraseAnnotations
-      : undefined
+  const focusWords = () => onFocusVerses?.(tools.verseKeys)
 
   useEffect(() => {
     if (!isShown) return
@@ -124,14 +128,19 @@ export default function useAnnotationSelectionMenu(
       const action = findShortcut(event, ANNOTATION_SHORTCUTS)
       const handler =
         action === 'erase'
-          ? isEnabled && erase
+          ? tools.erase
           : action === 'note' && !tools.noteDisabled
-            ? onNotePress
+            ? tools.openNote
             : action === 'tags' && !tools.tagsDisabled
-              ? () => menu.openScreen('tags')
+              ? tools.openTags
               : action === 'relation' && !tools.relationsDisabled
-                ? onRelationsPress
-                : undefined
+                ? tools.openRelations
+                : action === 'focus' && hasWords && onFocusVerses
+                  ? focusWords
+                  : // Copying text the reader selected by hand keeps the browser's behaviour.
+                    action === 'copy' && hasWords && window.getSelection()?.isCollapsed !== false
+                    ? wordActions.copy
+                    : undefined
       if (!handler) return
       event.preventDefault()
       handler()
@@ -140,12 +149,47 @@ export default function useAnnotationSelectionMenu(
     return () => window.removeEventListener('keydown', onKeyDown)
   })
 
-  const reference = tools.reference ?? t('Sélectionnez du texte dans la Bible')
-  const withCount = (label: string, count: number) => (count > 0 ? `${label} · ${count}` : label)
+  const reference: string = tools.reference ?? t('Sélectionnez des mots')
+
+  const tabs = [
+    <AnnotationAnnotateTab
+      key="annotate"
+      screenWidth={SELECTION_GROUP_WIDTH}
+      hasNote={!!selectedAnnotation?.noteId}
+      tagsCount={tagsCount}
+      relationsCount={relationsCount}
+      noteDisabled={tools.noteDisabled}
+      tagsDisabled={tools.tagsDisabled}
+      relationsDisabled={tools.relationsDisabled}
+      onNotePress={tools.openNote}
+      onTagsPress={tools.openTags}
+      onRelationsPress={tools.openRelations}
+      erase={tools.erase}
+      isAnnotation={!!selectedAnnotation}
+      tagsNested
+    />,
+    <AnnotationStudyTab
+      key="study"
+      screenWidth={SELECTION_GROUP_WIDTH}
+      hasFocus={tools.hasFocus}
+      focusDisabled={!hasWords || !onFocusVerses}
+      onFocus={focusWords}
+      version={annotatedVersion}
+      strongWords={tools.disabled ? { status: 'none' } : strongWords}
+      onOpenWord={wordActions.openWord}
+    />,
+    <AnnotationShareTab
+      key="share"
+      screenWidth={SELECTION_GROUP_WIDTH}
+      disabled={!hasWords}
+      onCopy={wordActions.copy}
+      onShare={wordActions.share}
+    />,
+  ]
 
   const screens: Record<string, PanelScreen> = {
     actions: {
-      title: t('Annotation'),
+      title: reference,
       titleAccessory: annotatedVersion ? (
         <Box
           className="rounded-full px-[6px] py-[1px] bg-light-grey shrink-0"
@@ -156,97 +200,57 @@ export default function useAnnotationSelectionMenu(
       ) : undefined,
       width: BIBLE_SELECTION_MENU_WIDTH,
       headerRight: (
-        <>
-          {erase && (
-            <TouchableBox
-              accessibilityRole="button"
-              accessibilityLabel={t('Supprimer')}
-              disabled={!isEnabled}
-              onPress={erase}
-              className="w-[28px] h-[28px] items-center justify-center rounded-full"
-            >
-              <FeatherIcon name="trash-2" size={16} color="quart" />
-            </TouchableBox>
-          )}
-          <TouchableBox
-            accessibilityRole="button"
-            accessibilityLabel={t('Fermer')}
-            onPress={onClose}
-            className="w-[28px] h-[28px] items-center justify-center rounded-full"
-          >
-            <FeatherIcon name="x" size={17} color="tertiary" />
-          </TouchableBox>
-        </>
+        <TouchableBox
+          accessibilityRole="button"
+          accessibilityLabel={t('Fermer')}
+          onPress={onClose}
+          className="w-[28px] h-[28px] items-center justify-center rounded-full"
+        >
+          <FeatherIcon name="x" size={17} color="tertiary" />
+        </TouchableBox>
       ),
       headerContent: (
-        <Text className="px-3 pb-[6px] text-[12px] text-tertiary" numberOfLines={2}>
-          {reference}
-        </Text>
+        <>
+          <HStack className="items-center gap-[8px] px-[10px] pt-[4px] pb-[6px]">
+            <AnnotationTypeSwitch
+              compact
+              disabled={tools.disabled}
+              activeType={tools.activeAnnotationType}
+              onChange={tools.setActiveAnnotationType}
+              getColor={tools.getColor}
+            />
+            <Box className="flex-1 min-w-0" style={{ opacity: tools.disabled ? 0.5 : 1 }}>
+              <ColorCircleGrid
+                colors={colorItems}
+                selectedColor={tools.selectedColor}
+                onSelect={colorKey =>
+                  !tools.disabled && tools.apply(colorKey, tools.activeAnnotationType)
+                }
+                showAddButton
+                onAddPress={() =>
+                  setColorPickerModal({
+                    selectedColor: tools.selectedColor,
+                    onSelectColor: colorKey => tools.apply(colorKey, tools.activeAnnotationType),
+                  })
+                }
+                layout="grid"
+                circleSize={20}
+              />
+            </Box>
+          </HStack>
+          <SelectionMenuTabs
+            labels={[t('tabs.annotate'), t('tabs.study'), t('tabs.share')]}
+            activeIndex={activeTabIndex}
+            onChange={setActiveTabIndex}
+          />
+        </>
       ),
       content: nav => {
         navigation.current = nav
         return (
           <SelectionMenuContext.Provider value={menu}>
-            <Box className="w-full gap-[10px]" testID="annotation-toolbar">
-              <HStack className="gap-[6px]">
-                {typeLabels.map(({ type, label }) => (
-                  <AnnotationTypeButton
-                    key={type}
-                    compact
-                    disabled={tools.disabled}
-                    type={type}
-                    activeType={tools.activeAnnotationType}
-                    onPress={tools.setActiveAnnotationType}
-                    label={label}
-                  >
-                    <AnnotationPreview type={type} color={tools.getColor(type)} />
-                  </AnnotationTypeButton>
-                ))}
-              </HStack>
-              <Box className="px-[4px]">
-                <ColorCircleGrid
-                  colors={colorItems}
-                  selectedColor={tools.selectedColor}
-                  onSelect={colorKey => tools.apply(colorKey, tools.activeAnnotationType)}
-                  showAddButton
-                  onAddPress={() =>
-                    setColorPickerModal({
-                      selectedColor: tools.selectedColor,
-                      onSelectColor: colorKey => tools.apply(colorKey, tools.activeAnnotationType),
-                    })
-                  }
-                  layout="grid"
-                  circleSize={22}
-                />
-              </Box>
-              <Box className="bg-separator" style={{ height: StyleSheet.hairlineWidth }} />
-              <Box className="w-full gap-[2px]">
-                <ActionItem
-                  name={selectedAnnotation?.noteId ? 'file-text' : 'file-plus'}
-                  label={t('Note')}
-                  onPress={() => onNotePress?.()}
-                  disabled={tools.noteDisabled}
-                  isActive={!!selectedAnnotation?.noteId}
-                  shortcut={formatShortcut('note')}
-                />
-                <ActionItem
-                  name="tag"
-                  label={withCount(t('Étiquettes'), tagsCount)}
-                  onPress={() => menu.openScreen('tags')}
-                  disabled={tools.tagsDisabled}
-                  isActive={tagsCount > 0}
-                  shortcut={formatShortcut('tags')}
-                  nested
-                />
-                <ActionItem
-                  name="git-merge"
-                  label={withCount(t('Relations'), relationsCount)}
-                  onPress={() => onRelationsPress?.()}
-                  disabled={tools.relationsDisabled}
-                  isActive={relationsCount > 0}
-                  shortcut={formatShortcut('relation')}
-                />
-              </Box>
+            <Box className="w-full" testID="annotation-toolbar">
+              {tabs[activeTabIndex] ?? tabs[0]}
             </Box>
           </SelectionMenuContext.Provider>
         )

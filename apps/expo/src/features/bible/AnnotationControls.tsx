@@ -1,16 +1,18 @@
-import { useSetAtom } from 'jotai/react'
-import { useState, type ReactNode, type RefObject } from 'react'
+import { useEffect, useEffectEvent, useRef, useState, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { SheetRef } from '~common/sheet'
+import type { Verse } from '~common/types'
 import { twMerge } from '~common/ui/classNames'
-import Box, { HStack, TouchableBox } from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
-import Text from '~common/ui/Text'
+import { HStack, TouchableBox } from '~common/ui/Box'
 import verseToReference from '~helpers/verseToReference'
-import { useColorItems, useResolvedColor } from '~helpers/useHighlightColors'
-import { colorPickerModalAtom } from 'src/state/app'
-import { colorWithOpacity } from '~themes/colorValues'
+import { useResolvedColor } from '~helpers/useHighlightColors'
 import { useTheme } from '~themes/ThemeProvider'
+import AnnotationPreview from './AnnotationPreview'
+import {
+  getAnnotationWordRanges,
+  getSelectionWordRanges,
+  getWordRangesVerseKeys,
+} from './annotationWords'
 import type { AnnotationType, SelectedAnnotation, SelectionRange } from './hooks/useAnnotationMode'
 
 export type AnnotationToolbarProps = {
@@ -36,7 +38,16 @@ export type AnnotationToolbarProps = {
   /** Desktop menu: the verse the session started from, where the menu opens until words are chosen. */
   entryVerseKey?: string
   isEnabled: boolean
+  /** The verses of the annotated version on screen, where the words' text is read. */
+  verses?: Verse[]
+  focusVerses?: (string | number)[]
+  /** Holds the verses of the words in the reader's focus, where their study gathers. */
+  onFocusVerses?: (verseKeys: string[]) => void
+  /** Annotates the selected words with the last mark used, which then becomes the open annotation. */
+  onAnnotateWords?: () => void
 }
+
+type AnnotationAction = 'note' | 'tags' | 'relations'
 
 const formatSelectionRange = (selection: SelectionRange): string => {
   const [startBook, startChapter, startVerseNumber] = selection.start.verseKey
@@ -60,19 +71,32 @@ const formatSelectionRange = (selection: SelectionRange): string => {
   return verseToReference(verses)
 }
 
-/** The state the sheet and the desktop menu share: what is enabled, the type being chosen. */
-export function useAnnotationTools({
-  hasSelection,
-  selection,
-  isEnabled,
-  selectedAnnotation,
-  onApplyAnnotation,
-  onChangeAnnotationColor,
-  onChangeAnnotationType,
-  onNotePress,
-  onTagsPress,
-  onRelationsPress,
-}: AnnotationToolbarProps) {
+/**
+ * The state the sheet and the desktop menu share: what is enabled, the type being chosen, the
+ * words. A note, tags or relations asked for words not annotated yet annotate them first, then
+ * open on the new annotation. The desktop menu opens the tags in a screen of its own (`openTags`).
+ */
+export function useAnnotationTools(
+  props: AnnotationToolbarProps,
+  { openTags }: { openTags?: () => void } = {}
+) {
+  const {
+    hasSelection,
+    selection,
+    isEnabled,
+    selectedAnnotation,
+    onApplyAnnotation,
+    onChangeAnnotationColor,
+    onChangeAnnotationType,
+    onNotePress,
+    onTagsPress,
+    onRelationsPress,
+    onDeleteAnnotation,
+    onEraseAnnotations,
+    verses = [],
+    focusVerses,
+    onAnnotateWords,
+  } = props
   const theme = useTheme()
   const [annotationTypeSelection, setAnnotationTypeSelection] = useState<{
     annotationId?: string
@@ -87,17 +111,67 @@ export function useAnnotationTools({
   }
 
   const resolvedColor = useResolvedColor(selectedAnnotation?.color ?? 'color1')
+  const hasWords = !!selectedAnnotation || hasSelection
+  const wordRanges = selectedAnnotation
+    ? getAnnotationWordRanges(selectedAnnotation.ranges, verses)
+    : selection
+      ? getSelectionWordRanges(selection, verses)
+      : []
+  const verseKeys = getWordRangesVerseKeys(wordRanges)
+  const focusedVerses = (focusVerses ?? []).map(String)
+
+  const act = (action: AnnotationAction) => {
+    if (action === 'note') onNotePress?.()
+    else if (action === 'tags') (openTags ?? onTagsPress)?.()
+    else onRelationsPress?.()
+  }
+  // The action asked for words not annotated yet waits for their annotation to open.
+  const pendingAction = useRef<AnnotationAction | null>(null)
+  const runPendingAction = useEffectEvent((action: AnnotationAction) => act(action))
+  const selectedAnnotationId = selectedAnnotation?.id
+  useEffect(() => {
+    const action = pendingAction.current
+    if (!action || !selectedAnnotationId) return
+    pendingAction.current = null
+    runPendingAction(action)
+  }, [selectedAnnotationId])
+  const runOnAnnotation = (action: AnnotationAction) => {
+    if (selectedAnnotation) return act(action)
+    if (!hasSelection || !onAnnotateWords) return
+    pendingAction.current = action
+    onAnnotateWords()
+  }
+
+  const canAnnotate = !!selectedAnnotation || (hasSelection && !!onAnnotateWords)
 
   return {
-    disabled: !isEnabled || (!selectedAnnotation && !hasSelection),
-    noteDisabled: !isEnabled || !selectedAnnotation || !onNotePress,
-    tagsDisabled: !isEnabled || !selectedAnnotation || !onTagsPress,
-    relationsDisabled: !isEnabled || !selectedAnnotation || !onRelationsPress,
-    reference: selectedAnnotation
-      ? verseToReference([selectedAnnotation.verseKey])
-      : selection
-        ? formatSelectionRange(selection)
-        : null,
+    disabled: !isEnabled || !hasWords,
+    noteDisabled: !isEnabled || !canAnnotate || !onNotePress,
+    tagsDisabled: !isEnabled || !canAnnotate || !(openTags ?? onTagsPress),
+    relationsDisabled: !isEnabled || !canAnnotate || !onRelationsPress,
+    openNote: () => runOnAnnotation('note'),
+    openTags: () => runOnAnnotation('tags'),
+    openRelations: () => runOnAnnotation('relations'),
+    /** Deletes the open annotation, or erases those under the selected words. */
+    erase: !isEnabled
+      ? undefined
+      : selectedAnnotation
+        ? onDeleteAnnotation
+        : hasSelection
+          ? onEraseAnnotations
+          : undefined,
+    wordRanges,
+    verseKeys,
+    hasFocus:
+      focusedVerses.length > 0 &&
+      verseKeys.some(verseKey => focusedVerses.includes(verseKey.split('-')[2])),
+    reference: verseKeys.length
+      ? verseToReference(verseKeys)
+      : selectedAnnotation
+        ? verseToReference([selectedAnnotation.verseKey])
+        : selection
+          ? formatSelectionRange(selection)
+          : null,
     activeAnnotationType,
     setActiveAnnotationType,
     getColor: (type: AnnotationType) =>
@@ -115,110 +189,53 @@ export function useAnnotationTools({
   }
 }
 
-type AnnotationTypeButtonProps = {
-  disabled: boolean
-  type: AnnotationType
-  activeType: AnnotationType
-  onPress: (type: AnnotationType) => void
-  children: ReactNode
-  label: string
-  /** The desktop menu's smaller tile. */
-  compact?: boolean
-}
-
-export const AnnotationTypeButton = ({
+/**
+ * The three ways to mark words, side by side as a segmented control: each shows its mark in the
+ * open annotation's color, the chosen one stands out on its track.
+ */
+export const AnnotationTypeSwitch = ({
   disabled,
-  type,
   activeType,
-  onPress,
-  children,
-  label,
+  onChange,
+  getColor,
   compact,
-}: AnnotationTypeButtonProps) => {
-  const theme = useTheme()
+}: {
+  disabled: boolean
+  activeType: AnnotationType
+  onChange: (type: AnnotationType) => void
+  getColor: (type: AnnotationType) => string
+  /** The desktop menu's smaller control. */
+  compact?: boolean
+}) => {
+  const typeLabels = useAnnotationTypeLabels()
   return (
-    <TouchableBox
+    <HStack
       className={twMerge(
-        'flex-1 min-w-0 items-center justify-center',
-        compact
-          ? 'gap-[2px] min-h-[58px] px-[2px] py-[6px] rounded-[8px]'
-          : 'gap-[6px] min-h-[75px] px-[4px] py-[10px] rounded-[12px]'
+        'bg-light-grey rounded-full p-[3px] gap-[2px]',
+        compact ? 'w-[120px]' : 'w-[138px]'
       )}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityState={{ disabled, selected: !disabled && activeType === type }}
-      disabled={disabled}
-      onPress={() => onPress(type)}
-      style={{
-        opacity: disabled ? 0.5 : 1,
-        // The chosen type takes a tint, not an outline.
-        backgroundColor:
-          !disabled && activeType === type
-            ? colorWithOpacity(theme.colors.primary, 0.12)
-            : undefined,
-      }}
+      style={{ opacity: disabled ? 0.5 : 1 }}
     >
-      {children}
-      <Text
-        className={twMerge(
-          compact ? 'text-[12px]' : 'text-[13px]',
-          !disabled && activeType === type ? 'text-link font-bold' : 'text-default'
-        )}
-        numberOfLines={1}
-      >
-        {label}
-      </Text>
-    </TouchableBox>
-  )
-}
-
-type AnnotationColorPaletteProps = {
-  type: AnnotationType
-  selectedColor?: string
-  onSelectColor: (colorKey: string, type: AnnotationType) => void
-}
-
-export const AnnotationColorPalette = ({
-  type,
-  selectedColor,
-  onSelectColor,
-}: AnnotationColorPaletteProps) => {
-  const colorItems = useColorItems()
-  const setColorPickerModal = useSetAtom(colorPickerModalAtom)
-
-  return (
-    <HStack className="overflow-hidden border-continuous items-center justify-center gap-[8px] flex-wrap py-[14px] px-[16px]">
-      {colorItems.map(color => (
-        <TouchableBox
-          className="border-continuous overflow-hidden rounded-full items-center justify-center border-primary"
-          key={color.key}
-          onPress={() => onSelectColor(color.key, type)}
-          style={{ borderWidth: selectedColor === color.key ? 2 : 0, width: 36, height: 36 }}
-        >
-          <Box
-            className="overflow-hidden border-continuous rounded-full"
-            style={[
-              {
-                width: selectedColor === color.key ? 26 : 28,
-                height: selectedColor === color.key ? 26 : 28,
-              },
-              { backgroundColor: color.hex },
-            ]}
-          />
-        </TouchableBox>
-      ))}
-      <TouchableBox
-        className="overflow-hidden border-continuous rounded-full items-center justify-center bg-opacity5"
-        onPress={() => {
-          setColorPickerModal({
-            selectedColor,
-            onSelectColor: colorKey => onSelectColor(colorKey, type),
-          })
-        }}
-        style={{ width: 36, height: 36 }}
-      >
-        <FeatherIcon name="plus" size={16} color="primary" />
-      </TouchableBox>
+      {typeLabels.map(({ type, label }) => {
+        const isActive = !disabled && activeType === type
+        return (
+          <TouchableBox
+            key={type}
+            className={twMerge(
+              'flex-1 min-w-0 items-center justify-center rounded-full',
+              compact ? 'h-[28px]' : 'h-[38px]',
+              isActive && 'bg-surface-raised'
+            )}
+            accessibilityRole="button"
+            accessibilityLabel={label}
+            accessibilityState={{ disabled, selected: isActive }}
+            disabled={disabled}
+            onPress={() => onChange(type)}
+          >
+            <AnnotationPreview small type={type} color={getColor(type)} />
+          </TouchableBox>
+        )
+      })}
     </HStack>
   )
 }

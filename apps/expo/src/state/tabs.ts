@@ -1120,6 +1120,19 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     )
   }
 
+  // Words studied from annotation mode: their verses, which no verse selection holds
+  const pinVerses = (verseNumbers: number[]) => {
+    if (verseNumbers.length === 0) return
+    setBibleTab(
+      produce(draft => {
+        draft.data.focusVerses = verseNumbers
+        draft.data.contextDisplayMode = 'focused'
+        draft.data.selectedVerses = {}
+        delete draft.data.selectedVersesVersion
+      })
+    )
+  }
+
   const clearFocusVerses = () => {
     if (routeNavigation) {
       const current = getDefaultStore().get(tabAtom).data
@@ -1289,6 +1302,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     expandContext,
     collapseContext,
     pinSelectedVerses,
+    pinVerses,
     clearFocusVerses,
     exitPlanMode,
 

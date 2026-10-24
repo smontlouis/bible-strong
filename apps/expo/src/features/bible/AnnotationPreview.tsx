@@ -33,12 +33,38 @@ export const AnnotationMark = ({ type, color }: { type: AnnotationType; color: s
   </Svg>
 )
 
-const AnnotationPreview = ({ type, color }: { type: AnnotationType; color: string }) => (
-  <Box className="w-[68px] max-w-full h-[30px] items-center justify-center">
-    <Box className="absolute top-0 left-2 right-2 bottom-0" pointerEvents="none">
+const AnnotationPreview = ({
+  type,
+  color,
+  small,
+}: {
+  type: AnnotationType
+  color: string
+  /** The size of a segment of the type switch. */
+  small?: boolean
+}) => (
+  <Box
+    className={
+      small
+        ? 'w-[36px] h-[22px] items-center justify-center'
+        : 'w-[68px] max-w-full h-[30px] items-center justify-center'
+    }
+  >
+    <Box
+      className={
+        small ? 'absolute top-0 left-0 right-0 bottom-0' : 'absolute top-0 left-2 right-2 bottom-0'
+      }
+      pointerEvents="none"
+    >
       <AnnotationMark type={type} color={color} />
     </Box>
-    <Text className="text-[22px] leading-[30px] font-bold">Aa</Text>
+    <Text
+      className={
+        small ? 'text-[15px] leading-[22px] font-bold' : 'text-[22px] leading-[30px] font-bold'
+      }
+    >
+      Aa
+    </Text>
   </Box>
 )
 

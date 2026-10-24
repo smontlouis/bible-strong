@@ -1,172 +1,148 @@
-import { SheetView } from '~common/sheet'
+import { useSetAtom } from 'jotai/react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import AnnotationPreview from './AnnotationPreview'
+import { Platform, StyleSheet } from 'react-native'
+import ColorCircleGrid from '~common/ColorCircleGrid'
+import { SheetView } from '~common/sheet'
+import Box, { HStack } from '~common/ui/Box'
+import Text from '~common/ui/Text'
+import { useColorItems } from '~helpers/useHighlightColors'
+import { colorPickerModalAtom } from 'src/state/app'
 import {
-  AnnotationColorPalette,
-  AnnotationTypeButton,
+  AnnotationTypeSwitch,
   useAnnotationTools,
-  useAnnotationTypeLabels,
   type AnnotationToolbarProps,
 } from './AnnotationControls'
-import Box, { AnimatedBox, HStack, TouchableBox } from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
-import Text from '~common/ui/Text'
-import { StyleSheet } from 'react-native'
-import { LinearTransition } from 'react-native-reanimated'
+import { AnnotationAnnotateTab, AnnotationShareTab, AnnotationStudyTab } from './AnnotationGroups'
+import SelectionGroupsPager from './SelectedVersesModal/components/SelectionGroupsPager'
+import useAnnotationWordActions from './useAnnotationWordActions'
+import useSelectionStrongWords from './useSelectionStrongWords'
+
+// Circles beside the type switch: narrower than the verses' row, which spans the sheet
+const COLOR_ITEM_WIDTH = 44
 
 /**
- * The annotation tools, shown in the selection sheet once words are selected (see
- * BibleSelectionSheet). On desktop, AnnotationMenu shows them beside the verse.
+ * The selected words and what can be done with them, in the selection sheet (see
+ * BibleSelectionSheet): the same skeleton as selected verses, with the ways to mark words in
+ * place of the verses' colors. On desktop, useAnnotationSelectionMenu shows them beside the verse.
  */
 const AnnotationSheetContent = (props: AnnotationToolbarProps) => {
   const {
-    hasSelection,
-    onEraseAnnotations,
     selectedAnnotation,
-    onDeleteAnnotation,
-    onNotePress,
-    onTagsPress,
-    onRelationsPress,
+    onFocusVerses,
     tagsCount = 0,
     relationsCount = 0,
     annotatedVersion,
+    verses = [],
   } = props
   const { t } = useTranslation()
-  const typeLabels = useAnnotationTypeLabels()
-  const {
-    disabled,
-    noteDisabled,
-    tagsDisabled,
-    relationsDisabled,
-    reference,
-    activeAnnotationType,
-    setActiveAnnotationType,
-    getColor,
-    selectedColor,
-    apply,
-  } = useAnnotationTools(props)
+  const colorItems = useColorItems()
+  const setColorPickerModal = useSetAtom(colorPickerModalAtom)
+  const tools = useAnnotationTools(props)
+  const strongWords = useSelectionStrongWords(annotatedVersion, tools.wordRanges, verses)
+  const wordActions = useAnnotationWordActions(annotatedVersion, tools.wordRanges)
+  // Each session opens on its annotation's tools
+  const [activeTabIndex, setActiveTabIndex] = useState(0)
+  const hasWords = !tools.disabled && tools.wordRanges.length > 0
+
+  const header = (
+    <HStack
+      className="items-center gap-[10px] pl-[16px]"
+      style={{ opacity: tools.disabled ? 0.5 : 1 }}
+    >
+      <AnnotationTypeSwitch
+        disabled={tools.disabled}
+        activeType={tools.activeAnnotationType}
+        onChange={tools.setActiveAnnotationType}
+        getColor={tools.getColor}
+      />
+      <Box className="h-[24px] bg-separator" style={{ width: StyleSheet.hairlineWidth }} />
+      <Box className="flex-1 min-w-0" pointerEvents={tools.disabled ? 'none' : 'auto'}>
+        <ColorCircleGrid
+          colors={colorItems}
+          selectedColor={tools.selectedColor}
+          onSelect={colorKey => tools.apply(colorKey, tools.activeAnnotationType)}
+          showAddButton
+          onAddPress={() =>
+            setColorPickerModal({
+              selectedColor: tools.selectedColor,
+              onSelectColor: colorKey => tools.apply(colorKey, tools.activeAnnotationType),
+            })
+          }
+          itemWidth={COLOR_ITEM_WIDTH}
+          itemHeight={56}
+        />
+      </Box>
+    </HStack>
+  )
 
   return (
-    <SheetView className="pt-[14px]" testID="annotation-toolbar">
-      <HStack className="px-[16px] pb-[14px] items-center gap-[8px]">
-        <Box className="flex-1 min-w-0 gap-[4px]">
-          <HStack className="items-center gap-[8px]">
-            <Text className="font-bold text-[18px] flex-shrink" numberOfLines={1}>
-              {t('Annotation')}
-            </Text>
-            {annotatedVersion && (
-              <Box
-                className="rounded-full px-[7px] py-[2px] bg-light-grey"
-                testID="annotation-toolbar-version"
-              >
-                <Text className="text-[13px] font-bold text-link">{annotatedVersion}</Text>
-              </Box>
-            )}
-          </HStack>
-          <Text className="text-[14px] text-grey" numberOfLines={2}>
-            {reference ?? t('Sélectionnez du texte dans la Bible')}
-          </Text>
-        </Box>
-        {(selectedAnnotation || hasSelection) && (
-          <Box className="pl-[6px]">
-            <TouchableBox
-              className="w-[48px] h-[44px] gap-[3px] items-center justify-center rounded-[8px]"
-              accessibilityRole="button"
-              accessibilityLabel={t('Supprimer')}
-              onPress={selectedAnnotation ? onDeleteAnnotation : onEraseAnnotations}
-            >
-              <FeatherIcon name="trash-2" size={20} color="quart" />
-            </TouchableBox>
+    <SheetView
+      style={{ flex: 0, paddingTop: 10, paddingBottom: Platform.OS === 'web' ? 12 : 0 }}
+      testID="annotation-toolbar"
+    >
+      <HStack className="px-[16px] pb-[4px] items-center gap-[8px]">
+        <Text
+          className={
+            tools.reference
+              ? 'font-bold text-[16px] flex-shrink'
+              : 'text-[15px] text-grey flex-shrink'
+          }
+          numberOfLines={1}
+        >
+          {tools.reference ?? t('Sélectionnez des mots')}
+        </Text>
+        {annotatedVersion && (
+          <Box
+            className="rounded-full px-[7px] py-[2px] bg-light-grey"
+            testID="annotation-toolbar-version"
+          >
+            <Text className="text-[12px] font-bold text-link">{annotatedVersion}</Text>
           </Box>
         )}
       </HStack>
-
-      <AnimatedBox layout={LinearTransition} className="overflow-hidden border-continuous">
-        <HStack className="overflow-hidden border-continuous mx-[16px] gap-[8px] items-center">
-          {typeLabels.map(({ type, label }) => (
-            <AnnotationTypeButton
-              key={type}
-              disabled={disabled}
-              type={type}
-              activeType={activeAnnotationType}
-              onPress={setActiveAnnotationType}
-              label={label}
-            >
-              <AnnotationPreview type={type} color={getColor(type)} />
-            </AnnotationTypeButton>
-          ))}
-        </HStack>
-        <Box className="border-continuous overflow-hidden">
-          <AnnotationColorPalette
-            type={activeAnnotationType}
-            selectedColor={selectedColor}
-            onSelectColor={apply}
-          />
-        </Box>
-      </AnimatedBox>
-      <HStack
-        className="mx-[16px] border-separator py-[12px] items-center"
-        style={{ borderTopWidth: StyleSheet.hairlineWidth }}
-      >
-        <TouchableBox
-          className="flex-1 min-w-0 h-[44px] flex-row gap-[6px] items-center justify-center"
-          accessibilityRole="button"
-          accessibilityLabel={t('Note')}
-          onPress={onNotePress}
-          disabled={noteDisabled}
-          accessibilityState={{ disabled: noteDisabled }}
-          style={{ opacity: noteDisabled ? 0.35 : 1 }}
-        >
-          <FeatherIcon
-            name={selectedAnnotation?.noteId ? 'file-text' : 'file-plus'}
-            size={20}
-            color={selectedAnnotation?.noteId ? 'primary' : 'grey'}
-          />
-          <Text className="text-[13px] text-default" numberOfLines={1}>
-            {t('Note')}
-          </Text>
-        </TouchableBox>
-        <Box className="h-[24px] bg-separator" style={{ width: StyleSheet.hairlineWidth }} />
-        <TouchableBox
-          className="flex-1 min-w-0 h-[44px] flex-row gap-[6px] items-center justify-center"
-          accessibilityRole="button"
-          accessibilityLabel={`${t('Étiquettes')}, ${tagsCount}`}
-          onPress={onTagsPress}
-          disabled={tagsDisabled}
-          accessibilityState={{ disabled: tagsDisabled }}
-          style={{ opacity: tagsDisabled ? 0.35 : 1 }}
-        >
-          <FeatherIcon name="tag" size={20} color={tagsCount > 0 ? 'primary' : 'grey'} />
-          <Text className="text-[13px] text-default" numberOfLines={1}>
-            {t('Étiquettes')}
-          </Text>
-          {tagsCount > 0 && (
-            <Box className="absolute right-0 top-0 bg-primary rounded-full min-w-[14px] h-[14px] px-[2px] items-center justify-center">
-              <Text className="text-[8px] text-reverse font-bold">{tagsCount}</Text>
-            </Box>
-          )}
-        </TouchableBox>
-        <Box className="h-[24px] bg-separator" style={{ width: StyleSheet.hairlineWidth }} />
-        <TouchableBox
-          className="flex-1 min-w-0 h-[44px] flex-row gap-[6px] items-center justify-center"
-          accessibilityRole="button"
-          accessibilityLabel={`${t('Relations')}, ${relationsCount}`}
-          onPress={onRelationsPress}
-          disabled={relationsDisabled}
-          accessibilityState={{ disabled: relationsDisabled }}
-          style={{ opacity: relationsDisabled ? 0.35 : 1 }}
-        >
-          <FeatherIcon name="git-merge" size={20} color={relationsCount > 0 ? 'primary' : 'grey'} />
-          <Text className="text-[13px] text-default" numberOfLines={1}>
-            {t('Relations')}
-          </Text>
-          {relationsCount > 0 && (
-            <Box className="absolute right-0 top-0 bg-primary rounded-full min-w-[14px] h-[14px] px-[2px] items-center justify-center">
-              <Text className="text-[8px] text-reverse font-bold">{relationsCount}</Text>
-            </Box>
-          )}
-        </TouchableBox>
-      </HStack>
+      <SelectionGroupsPager
+        activeTabIndex={activeTabIndex}
+        setActiveTabIndex={setActiveTabIndex}
+        header={header}
+        groups={[
+          width => (
+            <AnnotationAnnotateTab
+              screenWidth={width}
+              hasNote={!!selectedAnnotation?.noteId}
+              tagsCount={tagsCount}
+              relationsCount={relationsCount}
+              noteDisabled={tools.noteDisabled}
+              tagsDisabled={tools.tagsDisabled}
+              relationsDisabled={tools.relationsDisabled}
+              onNotePress={tools.openNote}
+              onTagsPress={tools.openTags}
+              onRelationsPress={tools.openRelations}
+              erase={tools.erase}
+              isAnnotation={!!selectedAnnotation}
+            />
+          ),
+          width => (
+            <AnnotationStudyTab
+              screenWidth={width}
+              hasFocus={tools.hasFocus}
+              focusDisabled={!hasWords || !onFocusVerses}
+              onFocus={() => onFocusVerses?.(tools.verseKeys)}
+              version={annotatedVersion}
+              strongWords={tools.disabled ? { status: 'none' } : strongWords}
+              onOpenWord={wordActions.openWord}
+            />
+          ),
+          width => (
+            <AnnotationShareTab
+              screenWidth={width}
+              disabled={!hasWords}
+              onCopy={wordActions.copy}
+              onShare={wordActions.share}
+            />
+          ),
+        ]}
+      />
     </SheetView>
   )
 }

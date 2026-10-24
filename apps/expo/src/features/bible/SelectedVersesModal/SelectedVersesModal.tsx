@@ -2,21 +2,16 @@ import { SheetView } from '~common/sheet'
 import { useAtom } from 'jotai/react'
 import { Platform } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import Animated from 'react-native-reanimated'
-import Box, { HStack } from '~common/ui/Box'
+import { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { BOTTOM_INSET } from '~helpers/constants'
 import verseToReference from '../../../helpers/verseToReference'
 import ColorCirclesBar from '../ColorCirclesBar'
 import TouchableIcon from '../TouchableIcon'
 import AnnotateTab from './components/AnnotateTab'
+import SelectionGroupsPager from './components/SelectionGroupsPager'
 import ShareTab from './components/ShareTab'
-import SelectionGroups from './components/SelectionGroups'
 import StudyTab from './components/StudyTab'
-import VersesModalFooter from './components/VersesModalFooter'
-import { TABS } from './constants'
-import { SELECTION_GROUP_WIDTH } from './selectionSheetLayout'
-import useTabSwipeGesture from './hooks/useTabSwipeGesture'
 import useVerseActions from './hooks/useVerseActions'
 import useVerseActiveStates from './hooks/useVerseActiveStates'
 import type { SelectedVersesModalProps } from './types'
@@ -61,20 +56,6 @@ const SelectedVersesModal = ({
   })
 
   const {
-    panGesture,
-    animatedStyle,
-    indicatorAnimatedStyle,
-    goToTab,
-    tabWidth,
-    screenWidth,
-    setContentWidth,
-    setTabContainerWidth,
-  } = useTabSwipeGesture({
-    activeTabIndex,
-    setActiveTabIndex,
-  })
-
-  const {
     shareVerse,
     copyToClipboard,
     showStrongDetail,
@@ -91,9 +72,6 @@ const SelectedVersesModal = ({
     onClose: close,
     onChangeResourceType,
   })
-
-  const expanded = Platform.OS === 'web'
-  const groupWidth = expanded ? SELECTION_GROUP_WIDTH : screenWidth
 
   const moreThanOneVerseSelected = Object.keys(selectedVerses).length > 1
 
@@ -118,99 +96,60 @@ const SelectedVersesModal = ({
         ) : typeof isSelectionMode === 'string' && isSelectionMode.includes('strong') ? (
           <></>
         ) : (
-          <Box
-            onLayout={event => setContentWidth(event.nativeEvent.layout.width)}
-            className="overflow-hidden border-continuous"
-            style={{
-              overflow: 'hidden',
-            }}
-          >
-            <ColorCirclesBar
-              selectedVerseHighlightColor={selectedVerseHighlightColor}
-              addHighlight={addHighlight}
-              removeHighlight={removeHighlight}
-              onClose={close}
-            />
-            <SelectionGroups>
-              <Animated.View
-                key={expanded ? 'expanded' : 'tabs'}
-                style={[
-                  {
-                    flexDirection: 'row',
-                    width: groupWidth * TABS.length,
-                    alignItems: 'flex-start',
-                  },
-                  !expanded && animatedStyle,
-                ]}
-              >
-                <Box style={{ width: groupWidth, flexShrink: 0 }}>
-                  {expanded && (
-                    <Text className="text-center text-[13px] text-grey py-[10px]">
-                      {t('tabs.annotate')}
-                    </Text>
-                  )}
-                  <AnnotateTab
-                    version={version}
-                    selectedVerses={selectedVerses}
-                    screenWidth={groupWidth}
-                    onCreateNoteClick={onCreateNoteClick}
-                    addTag={addTag}
-                    onCreateLinkClick={onCreateLinkClick}
-                    onCreateStudyRelationClick={onCreateStudyRelationClick}
-                    onAddBookmark={onAddBookmark}
-                    onAddToStudy={onAddToStudy}
-                    onSelectStudy={onSelectStudy}
-                    reference={selectedVersesTitle}
-                    moreThanOneVerseSelected={moreThanOneVerseSelected}
-                    activeStates={activeStates}
-                  />
-                </Box>
-                <Box style={{ width: groupWidth, flexShrink: 0 }}>
-                  {expanded && (
-                    <Text className="text-center text-[13px] text-grey py-[10px]">
-                      {t('tabs.study')}
-                    </Text>
-                  )}
-                  <StudyTab
-                    screenWidth={groupWidth}
-                    onPinVerses={onPinVerses}
-                    hasFocus={activeStates.hasFocus}
-                    showStrongDetail={showStrongDetail}
-                    showDictionaryDetail={showDictionaryDetail}
-                    onOpenNave={onOpenNave}
-                    onOpenReferences={onOpenReferences}
-                    openCommentariesScreen={openCommentariesScreen}
-                    compareVerses={compareVerses}
-                    moreThanOneVerseSelected={moreThanOneVerseSelected}
-                  />
-                </Box>
-                <Box style={{ width: groupWidth, flexShrink: 0 }}>
-                  {expanded && (
-                    <Text className="text-center text-[13px] text-grey py-[10px]">
-                      {t('tabs.share')}
-                    </Text>
-                  )}
-                  <ShareTab
-                    screenWidth={groupWidth}
-                    copyToClipboard={copyToClipboard}
-                    shareVerse={shareVerse}
-                    exportPassage={onExportPassage}
-                    selectAllVerses={selectAllVerses}
-                  />
-                </Box>
-              </Animated.View>
-            </SelectionGroups>
-            {Platform.OS !== 'web' && (
-              <VersesModalFooter
-                onContainerWidthChange={setTabContainerWidth}
-                panGesture={panGesture}
-                indicatorAnimatedStyle={indicatorAnimatedStyle}
-                tabWidth={tabWidth}
-                activeTabIndex={activeTabIndex}
-                goToTab={goToTab}
+          <SelectionGroupsPager
+            activeTabIndex={activeTabIndex}
+            setActiveTabIndex={setActiveTabIndex}
+            header={
+              <ColorCirclesBar
+                selectedVerseHighlightColor={selectedVerseHighlightColor}
+                addHighlight={addHighlight}
+                removeHighlight={removeHighlight}
+                onClose={close}
               />
-            )}
-          </Box>
+            }
+            groups={[
+              width => (
+                <AnnotateTab
+                  version={version}
+                  selectedVerses={selectedVerses}
+                  screenWidth={width}
+                  onCreateNoteClick={onCreateNoteClick}
+                  addTag={addTag}
+                  onCreateLinkClick={onCreateLinkClick}
+                  onCreateStudyRelationClick={onCreateStudyRelationClick}
+                  onAddBookmark={onAddBookmark}
+                  onAddToStudy={onAddToStudy}
+                  onSelectStudy={onSelectStudy}
+                  reference={selectedVersesTitle}
+                  moreThanOneVerseSelected={moreThanOneVerseSelected}
+                  activeStates={activeStates}
+                />
+              ),
+              width => (
+                <StudyTab
+                  screenWidth={width}
+                  onPinVerses={onPinVerses}
+                  hasFocus={activeStates.hasFocus}
+                  showStrongDetail={showStrongDetail}
+                  showDictionaryDetail={showDictionaryDetail}
+                  onOpenNave={onOpenNave}
+                  onOpenReferences={onOpenReferences}
+                  openCommentariesScreen={openCommentariesScreen}
+                  compareVerses={compareVerses}
+                  moreThanOneVerseSelected={moreThanOneVerseSelected}
+                />
+              ),
+              width => (
+                <ShareTab
+                  screenWidth={width}
+                  copyToClipboard={copyToClipboard}
+                  shareVerse={shareVerse}
+                  exportPassage={onExportPassage}
+                  selectAllVerses={selectAllVerses}
+                />
+              ),
+            ]}
+          />
         )}
       </SheetView>
     </>
