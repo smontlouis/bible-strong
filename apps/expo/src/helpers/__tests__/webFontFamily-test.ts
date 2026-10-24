@@ -12,7 +12,6 @@ describe('browser font families', () => {
     expect(webFontFamily('Literata Book')).toBe('"Literata Book", Georgia, serif')
     expect(webFontFamily('Baskerville')).toBe('"Baskerville", Georgia, serif')
     expect(webFontFamily('Avenir')).toMatch(/^"Avenir", system-ui/)
-    expect(webFontFamily('eina-03-bold')).toMatch(/^"eina-03-bold", system-ui/)
     expect(webFontFamily('FiraCode')).toBe('"FiraCode", ui-monospace, monospace')
   })
 

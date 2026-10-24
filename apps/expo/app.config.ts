@@ -71,7 +71,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   ios: {
     bundleIdentifier: process.env.BUNDLE_IDENTIFIER ?? 'com.smontlouis.biblestrong.dev',
-    buildNumber: '299',
+    buildNumber: '300',
     googleServicesFile:
       process.env.IOS_GOOGLE_SERVICES_FILE ?? './firebase/dev/GoogleService-Info.plist',
     userInterfaceStyle: 'automatic',
@@ -142,10 +142,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-font',
       {
-        fonts: [
-          './src/assets/fonts/LiterataBook-Regular.otf',
-          './src/assets/fonts/eina-03-bold.otf',
-        ],
+        fonts: ['./src/assets/fonts/LiterataBook-Regular.otf'],
         android: {
           fonts: [
             vectorIconFont('feather', 'Feather.ttf'),

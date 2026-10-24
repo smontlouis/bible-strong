@@ -1,5 +1,5 @@
 import { twMerge } from '~common/ui/classNames'
-import { resolveThemeColor, resolveFontFamily } from '~themes/styleValues'
+import { resolveThemeColor, titleFontStyle } from '~themes/styleValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { Feather } from '@expo/vector-icons'
 import { useTranslation } from 'react-i18next'
@@ -57,10 +57,7 @@ const PlaygroundPreferences = ({ selectedTheme, onSelectTheme }: PlaygroundPrefe
           <Feather name="sliders" size={16} color={theme.colors.primary} />
         </Box>
         <VStack className="overflow-hidden border-continuous">
-          <Text
-            className="text-[17px] leading-[21px]"
-            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-          >
+          <Text className="text-[17px] leading-[21px]" style={titleFontStyle(stylingTheme)}>
             {t('playground.previewSettings')}
           </Text>
           <Text className="text-grey text-[12px] leading-[17px]">

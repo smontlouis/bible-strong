@@ -1,4 +1,4 @@
-import { resolveFontFamily } from '~themes/styleValues'
+import { resolveFontFamily, titleFontStyle } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { useLocalSearchParams } from 'expo-router'
 import { useState } from 'react'
@@ -63,10 +63,7 @@ const PassageMediaPlayerScreen = () => {
                 />
               </Box>
               <VStack className="overflow-hidden border-continuous gap-[7px] px-[2px]">
-                <Text
-                  className="text-[22px] leading-[28px]"
-                  style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-                >
+                <Text className="text-[22px] leading-[28px]" style={titleFontStyle(stylingTheme)}>
                   {item.title}
                 </Text>
                 <Text

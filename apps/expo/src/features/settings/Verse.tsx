@@ -1,5 +1,5 @@
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { titleFontStyle } from '~themes/styleValues'
 import distanceInWords from 'date-fns/formatDistance'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { TouchableOpacity, Text as NativeText } from 'react-native'
@@ -143,10 +143,7 @@ const VerseComponent = ({
           >
             <Box className="overflow-hidden border-continuous flex-[1] flex-row items-center">
               <HighlightTypeIndicator color={resolvedColor} type={highlightType} size={15} />
-              <Text
-                className="text-[14px] ml-[10px]"
-                style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-              >
+              <Text className="text-[14px] ml-[10px]" style={titleFontStyle(stylingTheme)}>
                 {title}
               </Text>
             </Box>

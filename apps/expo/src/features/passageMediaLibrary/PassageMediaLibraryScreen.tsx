@@ -1,4 +1,4 @@
-import { resolveFontFamily } from '~themes/styleValues'
+import { resolveFontFamily, titleFontStyle } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { pageContentStyle } from '~common/ui/PageContent'
 import { useRouter } from 'expo-router'
@@ -104,10 +104,7 @@ const PassageMediaLibraryScreen = () => {
         ]}
         ListHeaderComponent={
           <VStack className="overflow-hidden border-continuous mb-[22px] gap-[5px]">
-            <Text
-              className="text-[25px] leading-[31px]"
-              style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-            >
+            <Text className="text-[25px] leading-[31px]" style={titleFontStyle(stylingTheme)}>
               {t('passageMediaLibrary.heading')}
             </Text>
             <Text

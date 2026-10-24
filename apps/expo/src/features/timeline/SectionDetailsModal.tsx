@@ -1,4 +1,4 @@
-import { resolveThemeColor, resolveFontFamily } from '~themes/styleValues'
+import { resolveThemeColor, titleFontStyle } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React from 'react'
 import { type SheetRef, SheetScrollView } from '~common/sheet'
@@ -63,27 +63,18 @@ const SectionDetailsModal = ({
               : 'overflow-hidden border-continuous flex-[1] items-center justify-center px-[50px] py-[60px]'
           }
         >
-          <Text
-            className="text-[20px]"
-            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-          >
+          <Text className="text-[20px]" style={titleFontStyle(stylingTheme)}>
             {getLegacyLocalizedField(lang, { fr: sectionTitle, en: sectionTitleEn })}
           </Text>
 
-          <Text
-            className="py-[30px] text-[35px] text-center"
-            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-          >
+          <Text className="py-[30px] text-[35px] text-center" style={titleFontStyle(stylingTheme)}>
             {getLegacyLocalizedField(lang, { fr: title, en: titleEn }).toUpperCase()}
           </Text>
 
           <Box className="overflow-hidden border-continuous">
             <Box className="overflow-hidden border-continuous h-[2px] bg-default" />
 
-            <Text
-              className="py-[3px] text-center"
-              style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-            >
+            <Text className="py-[3px] text-center" style={titleFontStyle(stylingTheme)}>
               {getLegacyLocalizedField(lang, { fr: subTitle, en: subTitleEn })}
             </Text>
             <Box className="overflow-hidden border-continuous h-[2px] bg-default" />

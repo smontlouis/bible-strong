@@ -28,5 +28,4 @@ it('keeps transparent, absent, and platform-specific colors intact', () => {
 it('preserves web font fallbacks without setting a font when none is requested', () => {
   expect(resolveFontFamily(undefined)).toBeUndefined()
   expect(resolveFontFamily('System')).toContain('system-ui')
-  expect(resolveFontFamily('eina-03-bold')).toContain('eina-03-bold')
 })

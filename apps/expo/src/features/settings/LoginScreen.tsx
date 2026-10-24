@@ -1,5 +1,5 @@
 import { goBackOrHome } from '~navigation/goBackOrHome'
-import { resolveFontFamily } from '~themes/styleValues'
+import { titleFontStyle } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React, { useEffect } from 'react'
 import Text from '~common/ui/Text'
@@ -32,10 +32,7 @@ const LoginScreen = () => {
       <Header hasBackButton title={t('Se connecter')} />
       <ScrollView backgroundColor="canvas">
         <Box className="overflow-hidden border-continuous p-[20px] web:w-full web:max-w-[500px] web:self-center">
-          <Text
-            className="text-[30px] mb-[30px]"
-            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-          >
+          <Text className="text-[30px] mb-[30px]" style={titleFontStyle(stylingTheme)}>
             {t('Bienvenue !')}
           </Text>
           <Paragraph className="mb-[10px]" scaleLineHeight={-2}>

@@ -1,5 +1,5 @@
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { titleFontStyle } from '~themes/styleValues'
 import distanceInWords from 'date-fns/formatDistance'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -112,10 +112,7 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
                   type={item.type as 'background' | 'underline'}
                   size={15}
                 />
-                <Text
-                  className="text-[14px] ml-[10px]"
-                  style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-                >
+                <Text className="text-[14px] ml-[10px]" style={titleFontStyle(stylingTheme)}>
                   {title}
                 </Text>
               </HStack>

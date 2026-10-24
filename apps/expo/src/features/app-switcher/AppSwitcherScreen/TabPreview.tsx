@@ -1,5 +1,5 @@
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
+import { titleFontStyle } from '~themes/styleValues'
 import { twMerge } from '~common/ui/classNames'
 import Color from 'color'
 import { useAtomValue } from 'jotai/react'
@@ -142,7 +142,7 @@ const Title = ({ tabAtom }: { tabAtom: PrimitiveAtom<TabItem> }) => {
       className="ml-[8px] text-[12px]"
       numberOfLines={1}
       ellipsizeMode="middle"
-      style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+      style={titleFontStyle(stylingTheme)}
     >
       {tab.title}
     </Text>

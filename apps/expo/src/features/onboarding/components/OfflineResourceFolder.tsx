@@ -1,5 +1,5 @@
 import { twMerge } from '~common/ui/classNames'
-import { resolveFontFamily } from '~themes/styleValues'
+import { titleFontStyle } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { Feather } from '@expo/vector-icons'
 import { Pressable } from 'react-native'
@@ -147,7 +147,7 @@ const OfflineResourceFolder = ({
               style={{
                 fontSize: scaled(15) || 16,
                 lineHeight: scaled(18),
-                fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+                ...titleFontStyle(stylingTheme),
               }}
             >
               {title}

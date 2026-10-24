@@ -1,5 +1,5 @@
 import { twMerge } from '~common/ui/classNames'
-import { resolveFontFamily } from '~themes/styleValues'
+import { titleFontStyle } from '~themes/styleValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { Feather } from '@expo/vector-icons'
 import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio'
@@ -148,7 +148,7 @@ const StrongDefinitionCard = ({
             {
               fontSize: s(28) || 16,
               lineHeight: s(34),
-              fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+              ...titleFontStyle(stylingTheme),
             },
             { fontFamily: 'Literata Book', fontStyle: 'italic' },
           ]}
@@ -206,7 +206,7 @@ const StrongDefinitionCard = ({
           style={{
             fontSize: s(28) || 16,
             lineHeight: s(32),
-            fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+            ...titleFontStyle(stylingTheme),
           }}
         >
           {t(definition.titleKey)}

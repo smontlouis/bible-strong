@@ -1,4 +1,4 @@
-import { webFontFamily } from '~helpers/webFontFamily'
+import { webFontFamily, webTitleFontStyle } from '~helpers/webFontFamily'
 import { resolveUniverseColors } from '~themes/universeColors'
 import TabIcon from './utils/getIconByTabType'
 import * as Dialog from '@radix-ui/react-dialog'
@@ -236,9 +236,7 @@ export default function WorkspaceKeyboardShortcuts({
               if (returnFocus.current?.isConnected) returnFocus.current.focus()
             }}
           >
-            <Dialog.Title style={{ fontFamily: webFontFamily(theme.fontFamily.title) }}>
-              {t('hotkeys.recentTabs')}
-            </Dialog.Title>
+            <Dialog.Title style={webTitleFontStyle(theme)}>{t('hotkeys.recentTabs')}</Dialog.Title>
             <Dialog.Description>{t('hotkeys.switcherHint')}</Dialog.Description>
             <div
               ref={listRef}

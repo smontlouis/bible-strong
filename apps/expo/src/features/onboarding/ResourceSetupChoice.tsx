@@ -1,5 +1,5 @@
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { titleFontStyle } from '~themes/styleValues'
 import { useTranslation } from 'react-i18next'
 import { Image, Pressable, useWindowDimensions } from 'react-native'
 import type { ImageSourcePropType } from 'react-native'
@@ -72,10 +72,7 @@ const ResourceSetupChoice = ({ onContinueOnline, onPrepareOffline }: Props) => {
         className="overflow-hidden border-continuous flex-[1] self-center"
         style={{ paddingTop: insets.top + OFFLINE_SETUP_HEADER_TOP_OFFSET, width: contentWidth }}
       >
-        <Text
-          className="text-[40px] leading-[42px]"
-          style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-        >
+        <Text className="text-[40px] leading-[42px]" style={titleFontStyle(stylingTheme)}>
           {t('offlineSetup.choice.title')}
         </Text>
 

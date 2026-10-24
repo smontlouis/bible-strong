@@ -7,9 +7,7 @@ export const loadWebFonts = async () => {
   // Load reading/title faces explicitly before measuring and painting the UI.
   if (typeof document !== 'undefined' && document.fonts) {
     await Promise.all(
-      ['Literata Book', 'eina-03-bold', 'FiraCode'].map(family =>
-        document.fonts.load(`16px "${family}"`)
-      )
+      ['Literata Book', 'FiraCode'].map(family => document.fonts.load(`16px "${family}"`))
     )
   }
 }

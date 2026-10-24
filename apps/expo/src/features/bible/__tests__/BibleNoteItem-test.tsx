@@ -51,7 +51,10 @@ jest.mock('~themes/ThemeProvider', () => ({
     fontFamily: { title: 'title' },
   }),
 }))
-jest.mock('~themes/styleValues', () => ({ resolveFontFamily: (font: string) => font }))
+jest.mock('~themes/styleValues', () => ({
+  resolveFontFamily: (font: string) => font,
+  titleFontStyle: () => ({ fontFamily: 'System', fontWeight: '700' }),
+}))
 
 const createItem = (
   title: string,

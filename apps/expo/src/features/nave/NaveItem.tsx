@@ -1,5 +1,5 @@
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { titleFontStyle } from '~themes/styleValues'
 import { memo, useCallback } from 'react'
 import { Pressable } from 'react-native'
 
@@ -41,7 +41,7 @@ const NaveItem = memo(({ name_lower, name, onSelect, hasSeparator = true }: Nave
       <Box className="flex-row">
         <Text
           className="text-[18px] text-default flex-[1] pr-[20px]"
-          style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+          style={titleFontStyle(stylingTheme)}
         >
           {name}
         </Text>

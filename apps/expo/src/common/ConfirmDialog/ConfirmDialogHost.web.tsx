@@ -2,7 +2,7 @@ import { useAtom } from 'jotai'
 import { AlertDialog } from '@heroui/react/alert-dialog'
 import { Button } from '@heroui/react/button'
 import { useTheme } from '~themes/ThemeProvider'
-import { webFontFamily } from '~helpers/webFontFamily'
+import { webFontFamily, webTitleFontStyle } from '~helpers/webFontFamily'
 import { confirmRequestsAtom } from './state'
 import './confirm-dialog.css'
 
@@ -36,7 +36,7 @@ export default function ConfirmDialogHost() {
           }}
         >
           <AlertDialog.Header>
-            <AlertDialog.Heading style={{ fontFamily: webFontFamily(theme.fontFamily.title) }}>
+            <AlertDialog.Heading style={webTitleFontStyle(theme)}>
               {request?.options.title}
             </AlertDialog.Heading>
           </AlertDialog.Header>

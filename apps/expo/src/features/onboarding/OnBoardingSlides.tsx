@@ -1,5 +1,5 @@
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { titleFontStyle } from '~themes/styleValues'
 import React from 'react'
 import { Image } from 'react-native'
 import { Carousel, type CarouselRef } from 'react-native-reanimated-carousel'
@@ -34,10 +34,7 @@ const Item = ({ item }: { item: Slide; index: number }) => {
           }}
         />
       )}
-      <Text
-        className="text-[38px]"
-        style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-      >
+      <Text className="text-[38px]" style={titleFontStyle(stylingTheme)}>
         {item.title}
       </Text>
       <Paragraph fontFamily="text" scale={2}>

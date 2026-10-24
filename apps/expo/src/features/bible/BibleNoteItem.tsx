@@ -1,5 +1,5 @@
 import NoteOptionsPanel from '~features/notes/NoteOptionsPanel'
-import { resolveFontFamily } from '~themes/styleValues'
+import { titleFontStyle } from '~themes/styleValues'
 import { useTheme as useStylingTheme, Theme } from '~themes/ThemeProvider'
 import distanceInWords from 'date-fns/formatDistance'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
@@ -88,7 +88,7 @@ const BibleNoteItem = ({ item, onPress, relationCount, onRelationPress }: Props)
                 className="mt-[6px] text-[16px] leading-[22px]"
                 numberOfLines={2}
                 ellipsizeMode="tail"
-                style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+                style={titleFontStyle(stylingTheme)}
               >
                 {noteTitle}
               </Text>

@@ -1,7 +1,7 @@
 import ExternalLinkCard from './ExternalLinkCard'
+import { titleFontStyle } from '~themes/styleValues'
 import { goBackOrHome } from '~navigation/goBackOrHome'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
@@ -428,10 +428,7 @@ const BibleLinkScreen = () => {
                     </Text>
                   </HStack>
 
-                  <Text
-                    className="text-[20px] mb-[10px]"
-                    style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-                  >
+                  <Text className="text-[20px] mb-[10px]" style={titleFontStyle(stylingTheme)}>
                     {displayTitle}
                   </Text>
 

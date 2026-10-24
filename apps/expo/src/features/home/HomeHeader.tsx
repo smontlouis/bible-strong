@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { titleFontStyle } from '~themes/styleValues'
 import { Platform } from 'react-native'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
@@ -11,7 +12,6 @@ import {
 } from '~features/app-switcher/workspaceHeaderInset'
 import useLogin from '~helpers/useLogin'
 import { useTheme } from '~themes/ThemeProvider'
-import { resolveFontFamily } from '~themes/styleValues'
 import HomeSearch from './HomeSearch'
 
 const AVATAR_SIZE = 44
@@ -49,7 +49,7 @@ const HomeHeader = () => {
           accessibilityRole="header"
           numberOfLines={1}
           className="mt-[4px] text-[30px] leading-[38px]"
-          style={{ fontFamily: resolveFontFamily(theme.fontFamily.title) }}
+          style={titleFontStyle(theme)}
         >
           {firstName ? t('home.greeting', { name: firstName }) : t('home.greetingAnonymous')}
         </Text>

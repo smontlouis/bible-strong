@@ -3,7 +3,7 @@ import { loadWebFonts } from '../loadWebFonts'
 
 jest.mock('expo-font', () => ({ loadAsync: jest.fn(async () => undefined) }))
 jest.mock('../appFonts', () => ({
-  appFonts: { 'Literata Book': 1, 'eina-03-bold': 2, FiraCode: 3 },
+  appFonts: { 'Literata Book': 1, FiraCode: 3 },
 }))
 
 it('requests the bundled reading and title faces before completing web font preparation', async () => {
@@ -15,7 +15,6 @@ it('requests the bundled reading and title faces before completing web font prep
     expect(loadAsync).toHaveBeenCalled()
     expect(load.mock.calls.map(call => call[0])).toEqual([
       '16px "Literata Book"',
-      '16px "eina-03-bold"',
       '16px "FiraCode"',
     ])
   } finally {

@@ -1,4 +1,5 @@
 import { timelineContext } from '~features/study-assistant/referenceContext'
+import { titleFontStyle } from '~themes/styleValues'
 import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -13,7 +14,6 @@ import { StudySection } from '~common/ui/StudySection'
 import { useTranslation } from 'react-i18next'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { resolveUniverseColors } from '~themes/universeColors'
-import { resolveFontFamily } from '~themes/styleValues'
 import Paragraph from '~common/ui/Paragraph'
 import { radii } from '~common/ui/surfaces'
 import { calculateLabel } from './constants'
@@ -121,10 +121,7 @@ export const EventDetailsContent = ({
           </IconTile>
           <Text className="flex-[1] text-[15px] text-grey">{date}</Text>
         </HStack>
-        <Text
-          className="text-[30px] leading-[38px]"
-          style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-        >
+        <Text className="text-[30px] leading-[38px]" style={titleFontStyle(stylingTheme)}>
           {getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
         </Text>
       </VStack>

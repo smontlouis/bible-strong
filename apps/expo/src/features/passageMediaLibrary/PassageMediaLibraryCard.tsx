@@ -1,4 +1,4 @@
-import { resolveFontFamily } from '~themes/styleValues'
+import { resolveFontFamily, titleFontStyle } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
@@ -54,7 +54,7 @@ const PassageMediaLibraryCard = ({ item, episodeNumber, thumbnailWidth, onPress 
         <Text
           className="text-[16px] leading-[20px]"
           numberOfLines={2}
-          style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+          style={titleFontStyle(stylingTheme)}
         >
           {item.title}
         </Text>

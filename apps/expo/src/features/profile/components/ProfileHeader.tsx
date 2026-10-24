@@ -1,5 +1,5 @@
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { titleFontStyle } from '~themes/styleValues'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -74,10 +74,7 @@ const ProfileHeader = () => {
 
       <VStack className="overflow-hidden border-continuous gap-[10px] items-center justify-center">
         <HStack className="overflow-hidden border-continuous items-center gap-[10px]">
-          <Text
-            className="text-[24px]"
-            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-          >
+          <Text className="text-[24px]" style={titleFontStyle(stylingTheme)}>
             {user.displayName || t('profile.noName')}
           </Text>
           <EditButton onPress={() => renameModalRef.current?.present()}>

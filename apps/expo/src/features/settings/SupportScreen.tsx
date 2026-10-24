@@ -1,5 +1,5 @@
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { titleFontStyle } from '~themes/styleValues'
 import { Linking } from 'react-native'
 
 import Header from '~common/Header'
@@ -19,10 +19,7 @@ const SupportScreen = () => {
       <Header hasBackButton title="Soutenir le développeur" />
       <ScrollView backgroundColor="canvas">
         <Box className="px-[24px]">
-          <Text
-            className="text-[28px] mb-[16px]"
-            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-          >
+          <Text className="text-[28px] mb-[16px]" style={titleFontStyle(stylingTheme)}>
             Hello !
           </Text>
           <Paragraph className="mb-[20px]" scaleLineHeight={-1}>

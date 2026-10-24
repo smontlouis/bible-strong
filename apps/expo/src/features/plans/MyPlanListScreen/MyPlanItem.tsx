@@ -1,5 +1,5 @@
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { titleFontStyle } from '~themes/styleValues'
 import Lottie from 'lottie-react-native'
 import React from 'react'
 import { ComputedPlanItem } from 'src/common/types'
@@ -51,10 +51,7 @@ const PlanItem = ({
     <Link {...linkProps}>
       <Box className="overflow-hidden border-continuous min-h-[52px] px-[14px] py-[10px] gap-[12px] items-center flex-row">
         <Box className="overflow-hidden border-continuous flex-[1]">
-          <Text
-            className="text-[15px]"
-            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-          >
+          <Text className="text-[15px]" style={titleFontStyle(stylingTheme)}>
             {title}
           </Text>
         </Box>

@@ -1,5 +1,5 @@
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { titleFontStyle } from '~themes/styleValues'
 import type { TFunction } from 'i18next'
 import { type SharedValue, useAnimatedStyle } from 'react-native-reanimated'
 import Box, { AnimatedBox, HStack, VStack } from '~common/ui/Box'
@@ -62,8 +62,8 @@ export const SourceCard = ({
             {
               fontSize: (variant === 'small' ? s(12) : s(16)) || 16,
               lineHeight: variant === 'small' ? s(18) : s(21),
+              ...titleFontStyle(stylingTheme),
               fontWeight: !titleItalic ? 'bold' : undefined,
-              fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
             },
             {
               fontFamily: 'Literata Book',

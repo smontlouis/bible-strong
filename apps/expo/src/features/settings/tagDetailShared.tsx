@@ -1,5 +1,5 @@
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { titleFontStyle } from '~themes/styleValues'
 import { getUniverseColor, type UniverseItem } from '~themes/universeColors'
 import distanceInWords from 'date-fns/formatDistance'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
@@ -149,7 +149,7 @@ export const NoteItem = ({
           className="text-[17px]"
           numberOfLines={2}
           ellipsizeMode="tail"
-          style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+          style={titleFontStyle(stylingTheme)}
         >
           {noteTitle}
         </Text>
@@ -226,10 +226,7 @@ export const LinkItem = ({
         </LinkTypeIcon>
         <Box className="overflow-hidden border-continuous flex-[1]">
           <Text className="text-dark-grey font-bold text-[11px]">{metadataLabel}</Text>
-          <Text
-            className="text-[16px]"
-            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-          >
+          <Text className="text-[16px]" style={titleFontStyle(stylingTheme)}>
             {truncate(displayTitle, 50)}
           </Text>
           <Paragraph className="text-tertiary" scale={-3} scaleLineHeight={-1} numberOfLines={1}>

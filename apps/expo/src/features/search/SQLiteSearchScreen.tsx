@@ -1,4 +1,5 @@
 import { getSimpleStrongModuleId } from '@bible-strong/resource-domain/strong-lexicon'
+import { titleFontStyle } from '~themes/styleValues'
 import { getPrimaryStrongLexiconAvailability } from '~features/resources/layeredStrongLexiconAccess'
 import { usePassageFilterChoices } from './usePassageFilterChoices'
 import { getSearchRateLimitNotice, searchRateLimitQueryOptions } from './searchRateLimit'
@@ -10,7 +11,6 @@ import { normalizeSearchItemFilters } from '~state/searchFilters'
 import generateUUID from '~helpers/generateUUID'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { usePassageSearch } from './usePassageSearch'
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import PageContent, { pageContentStyle } from '~common/ui/PageContent'
 import type { ReactNode } from 'react'
@@ -1387,10 +1387,7 @@ const SearchNoResultsState = ({ query }: { query: string }) => {
           contentFit="contain"
         />
       </Box>
-      <Text
-        className="text-[18px] text-center mb-[8px]"
-        style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-      >
+      <Text className="text-[18px] text-center mb-[8px]" style={titleFontStyle(stylingTheme)}>
         {t('Aucun résultat')}
       </Text>
       <Text className="text-tertiary text-center">

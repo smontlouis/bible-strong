@@ -26,6 +26,7 @@ jest.mock('~themes/ThemeProvider', () => ({
 jest.mock('~themes/styleValues', () => ({
   resolveThemeColor: (_theme: unknown, color: string) => color,
   resolveFontFamily: () => 'System',
+  titleFontStyle: () => ({ fontFamily: 'System', fontWeight: '700' }),
 }))
 jest.mock('~common/ui/Box', () => {
   const React = jest.requireActual('react')

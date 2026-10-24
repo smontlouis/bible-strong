@@ -1,4 +1,5 @@
 import { Platform } from 'react-native'
+import { titleFontStyle } from '~themes/styleValues'
 import { Image, type ImageSource } from 'expo-image'
 import type { PrimitiveAtom } from 'jotai/vanilla'
 import { useState } from 'react'
@@ -8,7 +9,6 @@ import Text from '~common/ui/Text'
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 import type { TabItem } from '~state/tabs'
 import { useTheme } from '~themes/ThemeProvider'
-import { resolveFontFamily } from '~themes/styleValues'
 import NewTabItem from './NewTabItem'
 import NewTabSearch from './NewTabSearch'
 
@@ -36,7 +36,7 @@ function SectionHeading({
       <Text
         accessibilityRole="header"
         className="shrink text-[23px] leading-[30px]"
-        style={{ fontFamily: resolveFontFamily(theme.fontFamily.title) }}
+        style={titleFontStyle(theme)}
       >
         {title}
       </Text>
@@ -99,7 +99,7 @@ export default function NewTabContent({
         <Text
           accessibilityRole="header"
           className="mb-[22px] text-[27px] leading-[33px]"
-          style={{ fontFamily: resolveFontFamily(theme.fontFamily.title) }}
+          style={titleFontStyle(theme)}
         >
           {t('newTab.heading')}
         </Text>
@@ -171,7 +171,7 @@ export default function NewTabContent({
         accessibilityRole="header"
         className="text-center mb-[28px]"
         style={{
-          fontFamily: resolveFontFamily(theme.fontFamily.title),
+          ...titleFontStyle(theme),
           fontSize: compact ? 28 : 36,
           lineHeight: compact ? 36 : 46,
         }}

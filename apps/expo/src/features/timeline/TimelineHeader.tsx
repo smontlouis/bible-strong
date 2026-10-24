@@ -1,5 +1,5 @@
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { titleFontStyle } from '~themes/styleValues'
 import * as Icon from '~common/ui/classNameIcons'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -111,7 +111,7 @@ const TimelineHeader = ({
           <Text
             style={{
               fontSize: fontSize || 14,
-              fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+              ...titleFontStyle(stylingTheme),
             }}
           >
             {getLegacyLocalizedField(lang, { fr: title, en: titleEn })}

@@ -1,5 +1,5 @@
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { titleFontStyle } from '~themes/styleValues'
 import { colorWithOpacity } from '~themes/colorValues'
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -24,7 +24,7 @@ const FAQScreen = () => {
   const [expandedId, setExpandedId] = useState<string | null>('availability')
   const [contentWidth, setContentWidth] = useState(0)
   const wide = contentWidth >= 900
-  const titleStyle = { fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }
+  const titleStyle = titleFontStyle(stylingTheme)
   const entries = [
     {
       id: 'availability',

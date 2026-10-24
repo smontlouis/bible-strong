@@ -1,4 +1,4 @@
-import { resolveThemeColor, resolveFontFamily } from '~themes/styleValues'
+import { resolveThemeColor, titleFontStyle } from '~themes/styleValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { Feather } from '@expo/vector-icons'
 import { useEffect, useState } from 'react'
@@ -220,7 +220,7 @@ const DownloadProgressContent = ({
           style={[
             {
               color: resolveThemeColor(stylingTheme, palette.title) || stylingTheme.colors.default,
-              fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+              ...titleFontStyle(stylingTheme),
             },
             { fontFamily: 'FiraCode' },
           ]}
@@ -237,7 +237,7 @@ const DownloadProgressContent = ({
           className="text-[25px] leading-[30px] text-center mt-[30px]"
           style={{
             color: resolveThemeColor(stylingTheme, palette.title) || stylingTheme.colors.default,
-            fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+            ...titleFontStyle(stylingTheme),
           }}
         >
           {t('offlineSetup.didYouKnow')}
@@ -393,7 +393,7 @@ const DownloadErrorContent = ({
         className="text-[24px] text-center mt-[24px]"
         style={{
           color: resolveThemeColor(stylingTheme, palette.title) || stylingTheme.colors.default,
-          fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+          ...titleFontStyle(stylingTheme),
         }}
       >
         {t('offlineSetup.downloadError')}

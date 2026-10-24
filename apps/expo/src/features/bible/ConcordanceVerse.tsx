@@ -1,5 +1,5 @@
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { titleFontStyle } from '~themes/styleValues'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { StyleSheet, TouchableOpacity, View } from 'react-native'
 import type { TextStyle } from 'react-native'
@@ -93,7 +93,9 @@ const ConcordanceVerse = ({
       <Text
         className="text-[16px] mb-[5px]"
         style={{
-          fontFamily: textStyle?.fontFamily || resolveFontFamily(stylingTheme.fontFamily.title),
+          ...(textStyle?.fontFamily
+            ? { fontFamily: textStyle.fontFamily }
+            : titleFontStyle(stylingTheme)),
           ...referenceTextStyle,
         }}
       >

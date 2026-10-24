@@ -1,4 +1,4 @@
-import { resolveThemeColor, resolveFontFamily } from '~themes/styleValues'
+import { resolveThemeColor, titleFontStyle } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { twMerge } from '~common/ui/classNames'
 import React from 'react'
@@ -54,26 +54,17 @@ const TimelineItem = ({
         className="relative z-[2] w-[45%] max-w-[180px] h-[180px] p-[20px] justify-between"
         style={{ transform: [{ translateX: 20 }] }}
       >
-        <Text
-          className="text-[12px]"
-          style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-        >
+        <Text className="text-[12px]" style={titleFontStyle(stylingTheme)}>
           {getLegacyLocalizedField(lang, { fr: sectionTitle, en: sectionTitleEn })}
         </Text>
-        <Text
-          className="text-[18px]"
-          style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-        >
+        <Text className="text-[18px]" style={titleFontStyle(stylingTheme)}>
           {getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
         </Text>
 
         <Box className="overflow-hidden border-continuous">
           <Box className="overflow-hidden border-continuous h-[2px] bg-default" />
 
-          <Text
-            className="py-[3px] text-center text-[10px]"
-            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-          >
+          <Text className="py-[3px] text-center text-[10px]" style={titleFontStyle(stylingTheme)}>
             {getLegacyLocalizedField(lang, { fr: subTitle, en: subTitleEn })}
           </Text>
           <Box className="overflow-hidden border-continuous h-[2px] bg-default" />

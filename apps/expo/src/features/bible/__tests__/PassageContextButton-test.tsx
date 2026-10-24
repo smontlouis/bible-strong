@@ -61,11 +61,11 @@ it('slides away with fullscreen and restores without changing the sheet header',
     mockFullScreen = true
     act(() => tree.update(render()))
     expect(header().pointerEvents).toBe('none')
-    expect(header().style.transform).toEqual([{ translateY: -78 }])
+    expect(header().style.transform).toEqual([{ translateY: -86 }])
     expect(header().style.opacity).toBe(0)
     act(() => tree.update(render(true)))
     expect(header().style.opacity).toBe(1)
-    expect(header().pointerEvents).toBe('auto')
+    expect(header().pointerEvents).toBe('box-none')
     mockFullScreen = false
     act(() => tree.update(render()))
     expect(header().style.transform).toEqual([{ translateY: 0 }])

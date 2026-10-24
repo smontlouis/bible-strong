@@ -1,4 +1,5 @@
 import * as Icon from '~common/ui/classNameIcons'
+import { titleFontStyle } from '~themes/styleValues'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -8,7 +9,6 @@ import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'
 import { useTheme } from '~themes/ThemeProvider'
-import { resolveFontFamily } from '~themes/styleValues'
 import { resolveUniverseColors } from '~themes/universeColors'
 import { type PersonalContent, personalContentIcons } from '~common/personalContent'
 
@@ -176,10 +176,7 @@ const StatValue = ({
       {isLoading && count === 0 ? (
         <ActivityIndicator size="small" color={theme.colors.primary} />
       ) : (
-        <Text
-          className="text-[22px] leading-[26px]"
-          style={{ fontFamily: resolveFontFamily(theme.fontFamily.title) }}
-        >
+        <Text className="text-[22px] leading-[26px]" style={titleFontStyle(theme)}>
           {count}
         </Text>
       )}

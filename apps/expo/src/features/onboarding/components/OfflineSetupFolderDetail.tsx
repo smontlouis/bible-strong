@@ -1,4 +1,4 @@
-import { resolveThemeColor, resolveFontFamily } from '~themes/styleValues'
+import { resolveThemeColor, titleFontStyle } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { Feather } from '@expo/vector-icons'
 import { useState } from 'react'
@@ -146,7 +146,7 @@ const OfflineSetupFolderDetail = ({
             className="text-[34px] leading-[38px] max-w-[280px]"
             style={{
               color: resolveThemeColor(stylingTheme, palette.title) || stylingTheme.colors.default,
-              fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+              ...titleFontStyle(stylingTheme),
             }}
           >
             {t('offlineSetup.chooseResources')}

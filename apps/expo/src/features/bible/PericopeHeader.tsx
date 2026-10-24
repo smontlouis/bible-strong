@@ -1,5 +1,5 @@
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { titleFontStyle } from '~themes/styleValues'
 import * as Icon from '~common/ui/classNameIcons'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { twMerge } from '~common/ui/classNames'
@@ -68,10 +68,7 @@ function PericopeHeader({ hasBackButton, title }: PericopeHeaderProps) {
           )}
         </Box>
         <Box className="overflow-hidden border-continuous items-center justify-center flex-[1]">
-          <Text
-            className="text-[16px] ml-[10px] mr-[10px]"
-            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-          >
+          <Text className="text-[16px] ml-[10px] mr-[10px]" style={titleFontStyle(stylingTheme)}>
             {title}
           </Text>
         </Box>

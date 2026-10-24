@@ -18,3 +18,9 @@ export const webFontFamily = (fontFamily?: string): string => {
   if (fontFamily === 'FiraCode') return '"FiraCode", ui-monospace, monospace'
   return `${JSON.stringify(fontFamily)}, ${SYSTEM_SANS}`
 }
+
+/** The title face on the web: the system sans stack at bold weight, as on the native app. */
+export const webTitleFontStyle = (theme: { fontFamily: { title: string } }) => ({
+  fontFamily: webFontFamily(theme.fontFamily.title),
+  fontWeight: 700 as const,
+})

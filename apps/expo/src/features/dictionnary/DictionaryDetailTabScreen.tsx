@@ -1,4 +1,5 @@
 import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
+import { titleFontStyle } from '~themes/styleValues'
 import { dictionaryContext } from '~features/study-assistant/resourceContext'
 import HorizontalControlScrollView from '~common/HorizontalControlScrollView'
 import { goBackOrHome } from '~navigation/goBackOrHome'
@@ -16,7 +17,6 @@ import IconTile from '~common/ui/IconTile'
 import { STUDY_COLUMN_MAX_WIDTH, StudySection } from '~common/ui/StudySection'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import { resolveUniverseColors } from '~themes/universeColors'
-import { resolveFontFamily } from '~themes/styleValues'
 import Text from '~common/ui/Text'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -509,10 +509,7 @@ const DictionnaryDetailScreen = ({
               {capitalizeFirst(resolvedDictionaryTitle)}
             </Text>
           </HStack>
-          <Text
-            className="text-[34px] leading-[42px]"
-            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-          >
+          <Text className="text-[34px] leading-[42px]" style={titleFontStyle(stylingTheme)}>
             {capitalizeFirst(word)}
           </Text>
         </VStack>

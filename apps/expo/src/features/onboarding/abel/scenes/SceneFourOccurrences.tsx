@@ -1,5 +1,5 @@
 import { twMerge } from '~common/ui/classNames'
-import { resolveFontFamily } from '~themes/styleValues'
+import { titleFontStyle } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import type { TFunction } from 'i18next'
 import { useEffect, useState } from 'react'
@@ -131,7 +131,7 @@ const OccurrenceCounter = ({ metrics, t }: StrongLemmaCardProps) => {
         style={{
           fontSize: s(9) || 16,
           lineHeight: s(16),
-          fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+          ...titleFontStyle(stylingTheme),
         }}
       >
         {t('onboarding.abel.sceneFour.occurrenceCount')}
@@ -174,7 +174,7 @@ const StrongLemmaCard = ({ metrics, t }: StrongLemmaCardProps) => {
           {
             fontSize: s(21) || 16,
             lineHeight: s(24),
-            fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+            ...titleFontStyle(stylingTheme),
           },
           { fontFamily: 'Literata Book', fontStyle: 'italic' },
         ]}

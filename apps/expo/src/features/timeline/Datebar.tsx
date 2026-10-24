@@ -1,4 +1,4 @@
-import { resolveThemeColor, resolveFontFamily } from '~themes/styleValues'
+import { resolveThemeColor, titleFontStyle } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React from 'react'
 import { Platform } from 'react-native'
@@ -60,7 +60,7 @@ const Datebar = ({
               className="font-bold text-[10px]"
               style={{
                 color: resolveThemeColor(stylingTheme, color) || stylingTheme.colors.default,
-                fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+                ...titleFontStyle(stylingTheme),
               }}
             >
               {value < 2020 ? Math.abs(value) : t('Futur')}

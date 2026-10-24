@@ -1,5 +1,5 @@
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { titleFontStyle } from '~themes/styleValues'
 import { useTranslation } from 'react-i18next'
 import { HStack, VStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -149,10 +149,7 @@ export const Events = () => {
             <Text className="font-bold text-[12px]">{t('event')}</Text>
           </HStack>
         </HStack>
-        <Text
-          className="text-[22px] text-[white]"
-          style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-        >
+        <Text className="text-[22px] text-[white]" style={titleFontStyle(stylingTheme)}>
           {event?.title}
         </Text>
         <Text className="font-bold text-[white]">{event?.description}</Text>

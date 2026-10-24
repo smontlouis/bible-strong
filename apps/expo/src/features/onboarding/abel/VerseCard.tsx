@@ -1,5 +1,5 @@
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
+import { titleFontStyle } from '~themes/styleValues'
 import { Image } from 'expo-image'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -160,7 +160,7 @@ const VerseCard = ({
                 {
                   fontSize: s(31) || 16,
                   lineHeight: s(38),
-                  fontFamily: resolveFontFamily(stylingTheme.fontFamily.title),
+                  ...titleFontStyle(stylingTheme),
                 },
                 [{ fontFamily: 'Literata Book' }, dimmedTextStyle],
               ]}

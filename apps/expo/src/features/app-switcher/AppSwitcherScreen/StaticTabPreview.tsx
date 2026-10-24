@@ -1,5 +1,5 @@
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
+import { titleFontStyle } from '~themes/styleValues'
 import { twMerge } from '~common/ui/classNames'
 import Color from 'color'
 import React from 'react'
@@ -90,7 +90,7 @@ const StaticTabPreview = ({ tab, index, ...props }: StaticTabPreviewProps & BoxP
             className="ml-[8px] text-[12px]"
             numberOfLines={1}
             ellipsizeMode="middle"
-            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+            style={titleFontStyle(stylingTheme)}
           >
             {tab.title}
           </Text>

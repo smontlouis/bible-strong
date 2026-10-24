@@ -4,7 +4,7 @@ import { useImperativeHandle, useState, type ReactNode } from 'react'
 import { HeaderActionContext, HeaderContentContext } from './HeaderActionContext'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '~themes/ThemeProvider'
-import { webFontFamily } from '~helpers/webFontFamily'
+import { webFontFamily, webTitleFontStyle } from '~helpers/webFontFamily'
 import { webThemeVariables } from '~themes/webThemeVariables'
 import { FeatherIcon } from '~common/ui/Icon'
 import type { ContextualPanelProps, PanelScreen, PanelNavigation } from './types'
@@ -136,7 +136,7 @@ function PanelFrameLayout({
                 )}
                 <div className="bs-panel-title">
                   {active ? (
-                    <Popover.Heading style={{ fontFamily: webFontFamily(theme.fontFamily.title) }}>
+                    <Popover.Heading style={webTitleFontStyle(theme)}>
                       {screen.title}
                     </Popover.Heading>
                   ) : (

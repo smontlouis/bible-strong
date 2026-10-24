@@ -1,4 +1,4 @@
-import { resolveThemeColor, resolveFontFamily } from '~themes/styleValues'
+import { resolveThemeColor, titleFontStyle } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import React from 'react'
 import { Image } from 'expo-image'
@@ -34,27 +34,18 @@ const SectionImage = ({
         {direction === 'previous' && <FeatherIcon name="chevron-left" size={60} />}
       </Box>
       <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center">
-        <Text
-          className="text-[20px]"
-          style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-        >
+        <Text className="text-[20px]" style={titleFontStyle(stylingTheme)}>
           {getLegacyLocalizedField(lang, { fr: sectionTitle, en: sectionTitleEn })}
         </Text>
 
-        <Text
-          className="py-[10px] text-[30px] text-center"
-          style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-        >
+        <Text className="py-[10px] text-[30px] text-center" style={titleFontStyle(stylingTheme)}>
           {getLegacyLocalizedField(lang, { fr: title, en: titleEn }).toUpperCase()}
         </Text>
 
         <Box className="overflow-hidden border-continuous">
           <Box className="overflow-hidden border-continuous h-[2px] bg-default" />
 
-          <Text
-            className="py-[3px] text-center"
-            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
-          >
+          <Text className="py-[3px] text-center" style={titleFontStyle(stylingTheme)}>
             {getLegacyLocalizedField(lang, { fr: subTitle, en: subTitleEn })}
           </Text>
           <Box className="overflow-hidden border-continuous h-[2px] bg-default" />

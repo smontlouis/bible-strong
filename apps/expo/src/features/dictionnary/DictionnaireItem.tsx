@@ -1,5 +1,5 @@
-import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
+import { titleFontStyle } from '~themes/styleValues'
 import { Pressable } from 'react-native'
 
 import Border from '~common/ui/Border'
@@ -33,7 +33,7 @@ const DictionnaireItem = ({ word, onSelect, hasSeparator = true }: DictionnaireI
         <Box className="flex-row">
           <Text
             className="text-[18px] text-default flex-[1] pr-[20px]"
-            style={{ fontFamily: resolveFontFamily(stylingTheme.fontFamily.title) }}
+            style={titleFontStyle(stylingTheme)}
           >
             {word}
           </Text>
