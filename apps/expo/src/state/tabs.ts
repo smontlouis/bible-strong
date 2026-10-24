@@ -1089,6 +1089,9 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     setBibleTab(
       produce(draft => {
         draft.data.contextDisplayMode = 'fullChapter'
+        // The chapter opens on the passage the reader was studying.
+        const firstFocusVerse = Math.min(...(draft.data.focusVerses ?? []).map(Number))
+        if (Number.isFinite(firstFocusVerse)) draft.data.selectedVerse = firstFocusVerse
       })
     )
   }

@@ -1429,9 +1429,10 @@ const LoadedBibleContent = ({
       if (element) {
         const scrollTarget = getDOMScrollTarget(containerRef.current)
         window.disableSwipeDownEvent = true
+        // The verse lands under the header and the passage's pill, with a little air.
         const elementPosition = element.getBoundingClientRect().top
         scrollDOMTo(scrollTarget, {
-          top: getDOMScrollTop(scrollTarget) + elementPosition - 100,
+          top: getDOMScrollTop(scrollTarget) + elementPosition - headerHeight - 12,
         })
         setTimeout(() => {
           window.disableSwipeDownEvent = false
