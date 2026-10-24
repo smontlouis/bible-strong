@@ -4,15 +4,15 @@ import {
 } from '../passagePreviewPresentation'
 
 it('reserves the subheader height for a targeted passage and releases it when focus ends', () => {
-  expect(getPassageContextHeaderHeight([35])).toBe(44)
+  expect(getPassageContextHeaderHeight([35])).toBe(52)
   expect(getPassageContextHeaderHeight(['35'], true)).toBe(0)
   expect(getPassageContextHeaderHeight([])).toBe(0)
   expect(getPassageContextHeaderHeight(undefined)).toBe(0)
 })
 
 it('reserves one subheader in plan mode, with or without focused verses', () => {
-  expect(getPassageContextHeaderHeight(undefined, false, true)).toBe(44)
-  expect(getPassageContextHeaderHeight([1, 2], false, true)).toBe(44)
+  expect(getPassageContextHeaderHeight(undefined, false, true)).toBe(52)
+  expect(getPassageContextHeaderHeight([1, 2], false, true)).toBe(52)
   expect(getPassageContextHeaderHeight(undefined, true, true)).toBe(0)
 })
 

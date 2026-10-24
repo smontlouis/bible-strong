@@ -1,4 +1,3 @@
-import { StyleSheet } from 'react-native'
 import type { ComponentProps, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -7,14 +6,18 @@ import { useAtomValue } from 'jotai/react'
 import { isFullScreenBibleAtom } from '~state/app'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
+import { floatingShadow, radii } from '~common/ui/surfaces'
 import {
   BIBLE_FORM_SHEET_HEADER_HEIGHT,
   HEADER_HEIGHT,
   HEADER_HEIGHT_MIN,
 } from '~features/app-switcher/utils/constants'
-import { PASSAGE_CONTEXT_HEADER_HEIGHT } from './passagePreviewPresentation'
+import { PASSAGE_CONTEXT_HEADER_HEIGHT, PASSAGE_PILL_HEIGHT } from './passagePreviewPresentation'
 
-/** The bar under the Bible header; it slides away with the header in full screen. */
+/**
+ * The band under the Bible header where the passage's pill floats: it keeps no ground of its
+ * own, so the text scrolls under the pill, and it slides away with the header in full screen.
+ */
 const PassageSubheader = ({
   isFormSheet,
   children,
@@ -27,13 +30,12 @@ const PassageSubheader = ({
   const collapsed = !isFormSheet && isFullScreen
   return (
     <AnimatedBox
-      className="absolute left-0 right-0 border-separator bg-reverse"
-      pointerEvents={collapsed ? 'none' : 'auto'}
+      className="absolute left-0 right-0 items-center justify-center"
+      pointerEvents={collapsed ? 'none' : 'box-none'}
       accessibilityElementsHidden={collapsed}
       importantForAccessibility={collapsed ? 'no-hide-descendants' : 'auto'}
       style={{
         top: isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT + insets.top,
-        borderBottomWidth: StyleSheet.hairlineWidth,
         height: PASSAGE_CONTEXT_HEADER_HEIGHT,
         zIndex: 1,
         opacity: collapsed ? 0 : 1,
@@ -48,10 +50,18 @@ const PassageSubheader = ({
         transitionDuration: 300,
       }}
     >
-      {children}
+      <Box
+        className="flex-row items-center bg-surface-raised pl-[16px] pr-[4px] max-w-[100%] mx-[16px]"
+        style={{ height: PASSAGE_PILL_HEIGHT, borderRadius: radii.pill, ...floatingShadow }}
+      >
+        {children}
+      </Box>
     </AnimatedBox>
   )
 }
+
+/** The hairline between the pill's words and its icons. */
+const PillDivider = () => <Box className="w-[1px] h-[18px] bg-separator mx-[6px]" />
 
 const SubheaderIconButton = ({
   name,
@@ -63,7 +73,8 @@ const SubheaderIconButton = ({
   onPress: () => void
 }) => (
   <TouchableBox
-    className="w-[36px] h-[44px] items-center justify-center"
+    className="w-[36px] items-center justify-center"
+    style={{ height: PASSAGE_PILL_HEIGHT }}
     accessibilityRole="button"
     accessibilityLabel={accessibilityLabel}
     onPress={onPress}
@@ -91,29 +102,29 @@ export default function PassageContextButton({
   return (
     <PassageSubheader isFormSheet={isFormSheet}>
       <TouchableBox
-        className="flex-1 mx-[56px] items-center justify-center"
+        className="justify-center"
+        style={{ height: PASSAGE_PILL_HEIGHT }}
         accessibilityRole="button"
         accessibilityState={{ expanded: !focused }}
         onPress={focused ? onExpand : onCollapse}
       >
-        <Text className="text-link font-bold text-[14px] text-center">
+        <Text className="text-link font-semibold text-[13px]" numberOfLines={1}>
           {t(focused ? 'tab.readWholeChapter' : 'tab.closeContext')}
         </Text>
       </TouchableBox>
-      <Box className="absolute right-[12px] top-0 bottom-0 justify-center">
-        <SubheaderIconButton
-          name="x"
-          accessibilityLabel={t('accessibility.clearFocus')}
-          onPress={onExit}
-        />
-      </Box>
+      <PillDivider />
+      <SubheaderIconButton
+        name="x"
+        accessibilityLabel={t('accessibility.clearFocus')}
+        onPress={onExit}
+      />
     </PassageSubheader>
   )
 }
 
 /**
- * Plan mode names its passage here and carries the way out. A passage of verses also gets
- * the switch between those verses and the whole chapter, as an icon to keep the line short.
+ * Plan mode names its passage in the pill and carries the way out. A passage of verses also
+ * gets the switch between those verses and the whole chapter, as an icon to keep the pill short.
  */
 export function PlanPassageBanner({
   reference,
@@ -135,28 +146,24 @@ export function PlanPassageBanner({
   const hasContextToggle = focused !== undefined
   return (
     <PassageSubheader isFormSheet={isFormSheet}>
-      <Box
-        className="flex-1 items-center justify-center"
-        style={{ marginHorizontal: hasContextToggle ? 88 : 56 }}
-      >
-        <Text className="text-link font-bold text-[14px] text-center" numberOfLines={1}>
+      <Box className="shrink justify-center" style={{ height: PASSAGE_PILL_HEIGHT }}>
+        <Text className="text-link font-semibold text-[13px]" numberOfLines={1}>
           {`${t('tab.plan')} — ${reference}`}
         </Text>
       </Box>
-      <Box className="absolute right-[12px] top-0 bottom-0 flex-row items-center">
-        {hasContextToggle && (
-          <SubheaderIconButton
-            name={focused ? 'maximize-2' : 'minimize-2'}
-            accessibilityLabel={t(focused ? 'tab.readWholeChapter' : 'tab.closeContext')}
-            onPress={focused ? onExpand : onCollapse}
-          />
-        )}
+      <PillDivider />
+      {hasContextToggle && (
         <SubheaderIconButton
-          name="x"
-          accessibilityLabel={t('accessibility.exitPlanMode')}
-          onPress={onExit}
+          name={focused ? 'maximize-2' : 'minimize-2'}
+          accessibilityLabel={t(focused ? 'tab.readWholeChapter' : 'tab.closeContext')}
+          onPress={focused ? onExpand : onCollapse}
         />
-      </Box>
+      )}
+      <SubheaderIconButton
+        name="x"
+        accessibilityLabel={t('accessibility.exitPlanMode')}
+        onPress={onExit}
+      />
     </PassageSubheader>
   )
 }

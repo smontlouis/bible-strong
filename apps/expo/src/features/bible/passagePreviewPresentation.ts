@@ -1,4 +1,7 @@
-export const PASSAGE_CONTEXT_HEADER_HEIGHT = 44
+/** The pill that floats under the header in focus and plan modes. */
+export const PASSAGE_PILL_HEIGHT = 40
+/** The room the text keeps under the header so that its first line starts below the pill. */
+export const PASSAGE_CONTEXT_HEADER_HEIGHT = PASSAGE_PILL_HEIGHT + 12
 
 /** One subheader at most: the plan banner carries the passage controls in plan mode. */
 export const getPassageContextHeaderHeight = (
