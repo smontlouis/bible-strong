@@ -571,6 +571,7 @@ const StrongDetailMainPage = ({
               <StrongEntitySummaryCard
                 entity={entry.entity}
                 plain
+                featured
                 showsKind={false}
                 previewLines={4}
                 readingTypography={readingTypography}

@@ -1,4 +1,6 @@
 import {
+  formatEntityChapterRanges,
+  getEntitySeriesPlace,
   getEntityPlaceholderIndex,
   getEntityChapterPortraitHash,
   getEntityPortraitPictures,
@@ -160,5 +162,42 @@ describe('entity portraits', () => {
       obsolete: ['z9'],
     })
     expect(planEntityPortraitPack([], [])).toEqual({ missing: [], obsolete: [] })
+  })
+
+  it('finds the place of an entity in its series', () => {
+    const catalog = parseEntityPortraitCatalog({
+      version: 3,
+      entities: {},
+      series: [
+        {
+          id: 'rois-unis',
+          title: { fr: 'Les rois d’Israël uni', en: 'The kings of united Israel' },
+          members: ['Saul@1Sa.9.2-Act', 'David@Rut.4.17-Rev', 'Solomon@2Sa.5.14-Act'],
+        },
+      ],
+    })!
+    expect(getEntitySeriesPlace(catalog, 'David@Rut.4.17-Rev')).toEqual({
+      title: { fr: 'Les rois d’Israël uni', en: 'The kings of united Israel' },
+      rank: 2,
+      total: 3,
+    })
+    expect(getEntitySeriesPlace(catalog, 'Akisch@1Sa.21.10-Psa')).toBeUndefined()
+  })
+
+  it('writes the chapters of a stage as the reader reads them', () => {
+    const names: Record<number, string> = { 9: '1 Samuel', 12: '2 Rois', 13: '1 Chroniques' }
+    const name = (book: number) => names[book]
+    expect(
+      formatEntityChapterRanges(
+        [
+          { book: 9, from: 18, to: 31 },
+          { book: 13, from: 11, to: 11 },
+        ],
+        name
+      )
+    ).toBe('1 Samuel 18–31 ; 1 Chroniques 11')
+    expect(
+      formatEntityChapterRanges([{ book: 12, from: 5, to: 5, fromVerse: 14, toVerse: 19 }], name)
+    ).toBe('2 Rois 5:14–19')
   })
 })

@@ -36,6 +36,8 @@ import {
   isStrongEditorialPreviewOverflowing,
 } from './strongDetailPreview'
 import StrongEntityAvatar from './StrongEntityAvatar'
+import { useEntityPortraitCatalog } from './entityPortraitManifest'
+import { getEntityPortraitText } from './entityPortraits'
 import { isStrongOriginalUnnamed } from './strongOriginalPresentation'
 export const StrongLexicalRelationRow = ({
   relation,
@@ -253,7 +255,11 @@ export const StrongEditorialPreview = ({
   )
 }
 
-const getEntityLabel = (category: string, type: string, t: TFunction<'translation', undefined>) => {
+export const getEntityLabel = (
+  category: string,
+  type: string,
+  t: TFunction<'translation', undefined>
+) => {
   if (category === 'person') return t('strongDetail.entity.person')
   if (category === 'place') return t('strongDetail.entity.place')
   if (category === 'group') return t('strongDetail.entity.group')
@@ -279,7 +285,9 @@ const resolveEntityEditorialTypography = (
 
 /**
  * An entity's avatar, name and description. `plain` leaves out its Strong numbers, `showsKind`
- * the kind of entity when the title above already says it; the page sets it in a card.
+ * the kind of entity when the title above already says it; the page sets it in a card. `featured`
+ * gives a painted entity a larger portrait, its title and its roles; `hidesHeader` leaves only the
+ * description, under a profile's own head.
  */
 export const StrongEntitySummaryCard = ({
   entity,
@@ -287,6 +295,9 @@ export const StrongEntitySummaryCard = ({
   plain = false,
   compact = false,
   showsKind = true,
+  featured = false,
+  hidesHeader = false,
+  language,
   previewLines,
   editorialTypography,
   readingTypography,
@@ -298,6 +309,10 @@ export const StrongEntitySummaryCard = ({
   plain?: boolean
   compact?: boolean
   showsKind?: boolean
+  featured?: boolean
+  hidesHeader?: boolean
+  /** The language of the portrait's title and roles; the app's by default. */
+  language?: string
   /** Truncates the short description; the full text stays on the entity page. */
   previewLines?: number
   editorialTypography?: ReadingTypography
@@ -305,9 +320,17 @@ export const StrongEntitySummaryCard = ({
   onOpenBibleReference: (osis: string) => void
   onOpenStrong: (stepCode: string) => void
 }) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const catalog = useEntityPortraitCatalog()
   const detailedDescription = entity.articleHtml || entity.summaryHtml
-  const presentation = entityCardPresentation(compact)
+  const portrait = featured ? catalog?.entities[entity.uniqueName] : undefined
+  const textLanguage = language ?? i18n.language
+  const presentation = portrait
+    ? { avatarSize: 72, nameClassName: 'font-semibold text-[20px]' }
+    : entityCardPresentation(compact)
+  const roles = (portrait?.roles ?? []).flatMap(role =>
+    catalog?.roles[role] ? [getEntityPortraitText(catalog.roles[role], textLanguage)] : []
+  )
   const resolvedEditorialTypography = resolveEntityEditorialTypography(
     readingTypography,
     editorialTypography
@@ -315,42 +338,55 @@ export const StrongEntitySummaryCard = ({
 
   return (
     <VStack className="overflow-hidden border-continuous gap-[13px]">
-      <HStack className="overflow-hidden border-continuous gap-[12px] items-center">
-        <StrongEntityAvatar
-          uniqueName={entity.uniqueName}
-          category={entity.category}
-          type={entity.type}
-          size={presentation.avatarSize}
-        />
-        <VStack className="overflow-hidden border-continuous flex-[1] gap-[2px]">
-          <Text className={presentation.nameClassName}>{entity.name}</Text>
-          {showsKind && (
-            <Text className="text-[13px] text-grey">
-              {getEntityLabel(entity.category, entity.type, t)}
-            </Text>
-          )}
-          {!plain && (
-            <HStack className="overflow-hidden border-continuous gap-[6px] flex-wrap mt-[4px]">
-              {entity.strongCodes.map(code => (
-                // The chip is set on a card: the canvas is the recessed level in every theme.
-                <TouchableBox
-                  className="overflow-hidden border-continuous bg-canvas rounded-full px-[9px] py-[3px] flex-row items-center gap-[2px]"
-                  key={code}
-                  onPress={() => onOpenStrong(code)}
-                  activeOpacity={0.7}
-                  accessibilityRole="link"
-                  accessibilityLabel={formatStrongDisplayCode(code)}
-                >
-                  <Text className="text-grey text-[12px] font-semibold">
-                    {formatStrongDisplayCode(code)}
-                  </Text>
-                  <FeatherIcon name="chevron-right" color="grey" size={11} />
-                </TouchableBox>
-              ))}
-            </HStack>
-          )}
-        </VStack>
-      </HStack>
+      {!hidesHeader && (
+        <HStack className="overflow-hidden border-continuous gap-[12px] items-center">
+          <StrongEntityAvatar
+            uniqueName={entity.uniqueName}
+            category={entity.category}
+            type={entity.type}
+            size={presentation.avatarSize}
+          />
+          <VStack className="overflow-hidden border-continuous flex-[1] gap-[2px]">
+            <Text className={presentation.nameClassName}>{entity.name}</Text>
+            {!!portrait?.title && (
+              <Text className="text-[15px] text-grey" style={{ fontFamily: 'Literata Book' }}>
+                {getEntityPortraitText(portrait.title, textLanguage)}
+              </Text>
+            )}
+            {portrait ? (
+              <Text className="text-[13px] text-grey">
+                {[getEntityLabel(entity.category, entity.type, t), ...roles].join(' · ')}
+              </Text>
+            ) : (
+              showsKind && (
+                <Text className="text-[13px] text-grey">
+                  {getEntityLabel(entity.category, entity.type, t)}
+                </Text>
+              )
+            )}
+            {!plain && (
+              <HStack className="overflow-hidden border-continuous gap-[6px] flex-wrap mt-[4px]">
+                {entity.strongCodes.map(code => (
+                  // The chip is set on a card: the canvas is the recessed level in every theme.
+                  <TouchableBox
+                    className="overflow-hidden border-continuous bg-canvas rounded-full px-[9px] py-[3px] flex-row items-center gap-[2px]"
+                    key={code}
+                    onPress={() => onOpenStrong(code)}
+                    activeOpacity={0.7}
+                    accessibilityRole="link"
+                    accessibilityLabel={formatStrongDisplayCode(code)}
+                  >
+                    <Text className="text-grey text-[12px] font-semibold">
+                      {formatStrongDisplayCode(code)}
+                    </Text>
+                    <FeatherIcon name="chevron-right" color="grey" size={11} />
+                  </TouchableBox>
+                ))}
+              </HStack>
+            )}
+          </VStack>
+        </HStack>
+      )}
       {!!entity.shortDescription && previewLines ? (
         <StrongEditorialPreview
           value={entity.shortDescription}

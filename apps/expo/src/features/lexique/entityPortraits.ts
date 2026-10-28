@@ -189,6 +189,32 @@ export const getEntityChapterPortraitHash = (
     )
   )?.hash ?? entry.hash
 
+/** The series an entity belongs to, and its place in it, from 1. */
+export const getEntitySeriesPlace = (catalog: EntityPortraitCatalog, uniqueName: string) => {
+  const series = catalog.series.find(item => item.members.includes(uniqueName))
+  return series
+    ? {
+        title: series.title,
+        rank: series.members.indexOf(uniqueName) + 1,
+        total: series.members.length,
+      }
+    : undefined
+}
+
+/** A stage's chapters as the reader reads them: « 1 Samuel 18–31 ; 1 Chroniques 11–29 ». */
+export const formatEntityChapterRanges = (
+  ranges: EntityChapterRange[],
+  getBookName: (book: number) => string
+) =>
+  ranges
+    .map(range => {
+      const book = getBookName(range.book)
+      if (range.fromVerse !== undefined && range.toVerse !== undefined)
+        return `${book} ${range.from}:${range.fromVerse}–${range.toVerse}`
+      return range.from === range.to ? `${book} ${range.from}` : `${book} ${range.from}–${range.to}`
+    })
+    .join(' ; ')
+
 // FNV-1a: the same unique name picks the same placeholder on every platform and every launch.
 const stableHash = (text: string) => {
   let hash = 0x811c9dc5

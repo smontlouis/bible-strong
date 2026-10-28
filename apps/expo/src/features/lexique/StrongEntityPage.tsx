@@ -15,6 +15,8 @@ import Card from '~common/ui/Card'
 import { StrongEntityRelationList, StrongEntitySummaryCard } from './StrongDetailUI'
 import { STUDY_COLUMN_MAX_WIDTH, StudyCardBody, StudySection } from '~common/ui/StudySection'
 import { StrongEntityRelationGraph } from './StrongEntityRelationGraph'
+import StrongEntityPortraitHeader from './StrongEntityPortraitHeader'
+import { useEntityPortraitCatalog } from './entityPortraitManifest'
 import { splitStrongEntityRelations } from './strongEntityPresentation'
 import type { StrongReadingTypography } from './strongEditorialHtmlStyles'
 type Props = {
@@ -40,8 +42,9 @@ const StrongEntityPage = ({
   onOpenEntityProfile,
   onOpenEntityRelation,
 }: Props) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const bottomInset = usePageBottomInset()
+  const catalog = useEntityPortraitCatalog()
   if (loading) return <Loading message={t('Chargement...')} />
   if (!entity) {
     return <Empty message={t('strongDetail.entity.unavailable')} />
@@ -49,6 +52,8 @@ const StrongEntityPage = ({
 
   const { graph, remaining } = splitStrongEntityRelations(entity)
   const place = entity.place
+  // A painted entity opens on its portrait (ADR-0089); the others keep the compact card.
+  const portrait = catalog?.entities[entity.uniqueName]
 
   return (
     <ScrollView
@@ -63,17 +68,39 @@ const StrongEntityPage = ({
         },
       ]}
     >
-      <Card>
-        <StudyCardBody>
+      {catalog && portrait && (
+        <StrongEntityPortraitHeader
+          entity={entity}
+          entry={portrait}
+          catalog={catalog}
+          language={language ?? i18n.language}
+          onOpenStrong={onOpenStrong}
+        />
+      )}
+      {portrait ? (
+        <StudySection title={t('strongDetail.entity.presentation')}>
           <StrongEntitySummaryCard
             entity={entity}
             expanded
+            hidesHeader
             readingTypography={readingTypography}
             onOpenBibleReference={onOpenBibleReference}
             onOpenStrong={onOpenStrong}
           />
-        </StudyCardBody>
-      </Card>
+        </StudySection>
+      ) : (
+        <Card>
+          <StudyCardBody>
+            <StrongEntitySummaryCard
+              entity={entity}
+              expanded
+              readingTypography={readingTypography}
+              onOpenBibleReference={onOpenBibleReference}
+              onOpenStrong={onOpenStrong}
+            />
+          </StudyCardBody>
+        </Card>
+      )}
 
       {ENTITY_LOCATION_VISIBLE && !!place && (
         <StudySection title={t('strongDetail.entity.location')}>

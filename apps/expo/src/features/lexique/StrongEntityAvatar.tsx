@@ -1,15 +1,14 @@
 import { Image } from 'expo-image'
-import { useState } from 'react'
 
-import { getEntityAvatarRadius, getEntityPortraitUri } from './entityPortraits'
+import { getEntityAvatarRadius } from './entityPortraits'
 import { useEntityPortraitHash } from './entityPortraitManifest'
-import { getEntityPortraitLocalUri, useEntityPortraitLocalHashes } from './entityPortraitPack'
 import { getStrongEntityPlaceholderSource } from './strongEntityAvatars'
+import { useEntityPortraitImage } from './useEntityPortraitImage'
 
 /**
  * An entity's portrait, from the offline pack when the device holds it, otherwise from the media
- * host, or its placeholder when it has none or the portrait cannot be loaded (ADR-0089). While a portrait loads, the square stays empty, so a grey face
- * never turns into a painted one.
+ * host, or its placeholder when it has none or the portrait cannot be loaded (ADR-0089). While a
+ * portrait loads, the square stays empty, so a grey face never turns into a painted one.
  */
 const StrongEntityAvatar = ({
   uniqueName,
@@ -26,16 +25,7 @@ const StrongEntityAvatar = ({
   size: number
 }) => {
   const hash = useEntityPortraitHash(uniqueName)
-  const localHashes = useEntityPortraitLocalHashes()
-  const [failedUris, setFailedUris] = useState<string[]>([])
-  const candidates =
-    uniqueName && hash
-      ? [
-          localHashes.has(hash) ? getEntityPortraitLocalUri(hash, 'w256') : undefined,
-          getEntityPortraitUri(uniqueName, hash),
-        ]
-      : []
-  const portraitUri = candidates.find(uri => uri && !failedUris.includes(uri))
+  const portrait = useEntityPortraitImage(uniqueName, hash, 'w256')
   const style = {
     width: size,
     height: size,
@@ -43,16 +33,16 @@ const StrongEntityAvatar = ({
     borderCurve: 'continuous' as const,
   }
 
-  if (portraitUri) {
+  if (portrait.uri) {
     return (
       <Image
-        source={{ uri: portraitUri }}
+        source={{ uri: portrait.uri }}
         style={style}
         contentFit="cover"
         cachePolicy="memory-disk"
         transition={150}
-        recyclingKey={portraitUri}
-        onError={() => setFailedUris(failed => [...failed, portraitUri])}
+        recyclingKey={portrait.uri}
+        onError={portrait.onError}
       />
     )
   }
