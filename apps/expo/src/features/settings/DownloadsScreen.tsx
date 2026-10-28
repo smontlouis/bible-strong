@@ -19,6 +19,7 @@ import type { StatusFilter, LangFilter } from './components/FilterChipRow'
 import DownloadSectionHeader from './components/DownloadSectionHeader'
 import DownloadSubsectionHeader from './components/DownloadSubsectionHeader'
 import DownloadManagementFooter from './components/DownloadManagementFooter'
+import EntityPortraitPackCard from './components/EntityPortraitPackCard'
 import { DOWNLOAD_LIST_LAYOUT } from './components/downloadListLayout'
 import { AvailableUpdatesSheet, AvailableUpdatesWidget } from './components/AvailableUpdatesWidget'
 import { versions, type Version } from '~helpers/bibleVersions'
@@ -827,6 +828,7 @@ const DownloadsScreen = () => {
           ListHeaderComponent={
             <>
               <StorageSummaryCard />
+              <EntityPortraitPackCard downloadsDisabled={!isConnected} />
               <AvailableUpdatesWidget
                 count={itemsToUpdate.length}
                 onPress={() => updatesRef.current?.present()}

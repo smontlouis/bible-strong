@@ -31,7 +31,14 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
 import { useEntityPortraitCatalog } from '~features/lexique/entityPortraitManifest'
-import { getEntityChapterPortraitHash } from '~features/lexique/entityPortraits'
+import {
+  getEntityChapterPortraitHash,
+  getEntityPortraitUri,
+} from '~features/lexique/entityPortraits'
+import {
+  getEntityPortraitLocalUri,
+  useEntityPortraitLocalHashes,
+} from '~features/lexique/entityPortraitPack'
 import type { StrongIdentity } from '~helpers/strongIdentities'
 import type { FocusStudyAction } from './focusStudy/focusVerseStudyTypes'
 import { useFocusVerseStudy } from './focusStudy/useFocusVerseStudy'
@@ -725,15 +732,24 @@ const BibleViewer = ({
   })
   const chapterEntities = chapterEntitiesQuery.data ?? []
   const chapterEntitiesLoaded = chapterEntitiesQuery.isSuccess
-  // The web view cannot read the device's catalog: it gets the chapter's pictures, the stage of an
-  // entity when one covers this chapter (ADR-0089).
+  // The web view cannot read the device's catalog: it gets the address of the chapter's pictures,
+  // the stage of an entity when one covers this chapter, from the offline pack when the device holds
+  // it (ADR-0089). The development web view, served by Metro over HTTP, cannot read local files.
   const portraitCatalog = useEntityPortraitCatalog()
+  const localPortraitHashes = useEntityPortraitLocalHashes()
   const chapterEntityPortraits = Object.fromEntries(
     chapterEntities.flatMap(entity => {
       const entry = portraitCatalog?.entities[entity.uniqueName]
-      return entry
-        ? [[entity.uniqueName, getEntityChapterPortraitHash(entry, book.Numero, chapter)]]
-        : []
+      if (!entry) return []
+      const hash = getEntityChapterPortraitHash(entry, book.Numero, chapter)
+      return [
+        [
+          entity.uniqueName,
+          !__DEV__ && localPortraitHashes.has(hash)
+            ? getEntityPortraitLocalUri(hash, 'w256')
+            : getEntityPortraitUri(entity.uniqueName, hash),
+        ],
+      ]
     })
   )
 

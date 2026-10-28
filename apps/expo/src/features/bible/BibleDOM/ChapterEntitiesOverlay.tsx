@@ -7,7 +7,10 @@ import type {
   StrongLexiconEntityCategory,
 } from '~features/resources/strongLexiconAccess'
 import { getChapterEntityAvatar } from './chapterEntityAvatar'
-import { getEntityAvatarRadius, type EntityPortraitHashes } from '~features/lexique/entityPortraits'
+import {
+  getEntityAvatarRadius,
+  type EntityPortraitSources,
+} from '~features/lexique/entityPortraits'
 import OverlayCloseButton from './OverlayCloseButton'
 import { useModalOverlayLifecycle } from './overlayLifecycle'
 import { useTranslations } from './TranslationsContext'
@@ -21,7 +24,7 @@ import { withColorAlpha } from './themeOverlayColor'
 
 type Props = {
   entities: StrongLexiconChapterEntity[]
-  portraits: EntityPortraitHashes
+  portraits: EntityPortraitSources
   groupLabels: Record<StrongLexiconEntityCategory, string>
   openEntityLabel: string
   colors: {

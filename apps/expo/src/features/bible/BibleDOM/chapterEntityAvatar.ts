@@ -1,4 +1,4 @@
-import { getEntityPortraitUri, type EntityPortraitHashes } from '~features/lexique/entityPortraits'
+import type { EntityPortraitSources } from '~features/lexique/entityPortraits'
 import { getStrongEntityPlaceholderSource } from '~features/lexique/strongEntityAvatars'
 import type { StrongEntityPresentationKind } from '~features/lexique/strongEntityPresentation'
 import type { StrongLexiconChapterEntity } from '~features/resources/strongLexiconAccess'
@@ -23,12 +23,11 @@ const getChapterEntityPlaceholderUri = (entity: StrongLexiconChapterEntity) => {
  */
 export const getChapterEntityAvatar = (
   entity: StrongLexiconChapterEntity,
-  portraits: EntityPortraitHashes
+  portraits: EntityPortraitSources
 ) => {
   const placeholder = getChapterEntityPlaceholderUri(entity)
-  const hash = portraits[entity.uniqueName]
   return {
-    src: hash ? getEntityPortraitUri(entity.uniqueName, hash) : placeholder,
+    src: portraits[entity.uniqueName] ?? placeholder,
     onError: (event: SyntheticEvent<HTMLImageElement>) => {
       if (event.currentTarget.src !== placeholder) event.currentTarget.src = placeholder
     },

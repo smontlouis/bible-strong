@@ -23,6 +23,9 @@ export const getEntityAvatarRadius = (size: number) => Math.round(size * 0.27)
 /** Unique name → hash of the picture to show. An entity absent from it has none. */
 export type EntityPortraitHashes = Record<string, string>
 
+/** Unique name → address of the picture to show, a local file or the media host's copy. */
+export type EntityPortraitSources = Record<string, string>
+
 /** A text of the catalog in each active language of the application. */
 export type EntityPortraitText = { fr: string; en: string }
 
@@ -145,6 +148,27 @@ export const parseEntityPortraitCatalog = (value: unknown): EntityPortraitCatalo
 /** The portrait of each entity, whatever the chapter. */
 export const getEntityPortraitHashes = (catalog: EntityPortraitCatalog): EntityPortraitHashes =>
   Object.fromEntries(Object.entries(catalog.entities).map(([name, entry]) => [name, entry.hash]))
+
+/** Every picture the catalog names, portraits and stages, once each, with the entity it is stored under. */
+export const getEntityPortraitPictures = (catalog: EntityPortraitCatalog) => {
+  const pictures = new Map<string, string>()
+  for (const [uniqueName, entry] of Object.entries(catalog.entities)) {
+    for (const hash of [entry.hash, ...(entry.stages ?? []).map(stage => stage.hash)]) {
+      if (!pictures.has(hash)) pictures.set(hash, uniqueName)
+    }
+  }
+  return [...pictures].map(([hash, uniqueName]) => ({ hash, uniqueName }))
+}
+
+/** What a device holding `local` must download and delete to hold exactly the `wanted` pictures. */
+export const planEntityPortraitPack = (wanted: string[], local: string[]) => {
+  const wantedSet = new Set(wanted)
+  const localSet = new Set(local)
+  return {
+    missing: wanted.filter(hash => !localSet.has(hash)),
+    obsolete: local.filter(hash => !wantedSet.has(hash)),
+  }
+}
 
 /**
  * The picture of an entity for a whole chapter: the stage that covers it, or the portrait. A stage

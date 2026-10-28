@@ -1,7 +1,8 @@
 import { getDefaultStore, useAtomValue } from 'jotai'
 import { useEffect, useMemo } from 'react'
 
-import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
+import { entityPortraitCatalogAtom } from './entityPortraitCatalogAtom'
+import { syncEntityPortraitPack } from './entityPortraitPack'
 import {
   ENTITY_PORTRAIT_CATALOG_URL,
   getEntityPortraitHashes,
@@ -10,19 +11,8 @@ import {
   type EntityPortraitHashes,
 } from './entityPortraits'
 
-type EntityPortraitCatalogState = {
-  fetchedAt: number
-  catalog: EntityPortraitCatalog
-}
-
 const REFRESH_INTERVAL = 24 * 60 * 60 * 1000
 const FETCH_TIMEOUT = 10_000
-
-/** The last catalog read from the media host, kept for offline use (ADR-0089). */
-const entityPortraitCatalogAtom = atomWithAsyncStorage<EntityPortraitCatalogState | null>(
-  'entityPortraitCatalog',
-  null
-)
 
 // One attempt per launch: a failure keeps the last copy until the next launch.
 let refreshAttempted = false
@@ -30,6 +20,12 @@ let refreshAttempted = false
 const refreshEntityPortraitCatalog = async () => {
   if (refreshAttempted) return
   refreshAttempted = true
+  await fetchEntityPortraitCatalog()
+  // The offline pack follows the catalog and resumes a download cut short.
+  void syncEntityPortraitPack()
+}
+
+const fetchEntityPortraitCatalog = async () => {
   const store = getDefaultStore()
   const current = store.get(entityPortraitCatalogAtom)
   if (current && Date.now() - current.fetchedAt < REFRESH_INTERVAL) return

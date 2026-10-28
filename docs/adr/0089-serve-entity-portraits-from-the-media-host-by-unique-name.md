@@ -88,9 +88,24 @@ painted one.
 ### Offline
 
 A portrait is cached on the device once displayed: expo-image's disk cache on native screens and on
-the web, the web view's HTTP cache in the Bible DOM. Nothing is downloaded ahead. Offline, a portrait
-already seen still shows; any other shows its placeholder. The 768-pixel copy is fetched only when an
-enlarged portrait is opened.
+the web, the web view's HTTP cache in the Bible DOM. Offline, a portrait already seen still shows;
+any other shows its placeholder.
+
+On iOS and Android, the reader may also download every portrait ahead, from a card of the Downloads
+screen (amended 2026-10-28). The pack holds the 256- and 768-pixel copies of every picture the
+catalog names, portraits and stages, about 30 MB for 482 pictures; the 1254-pixel copy stays online.
+The copies are stored in the application's documents, one folder per `hash`, and the device keeps
+the list of the pictures whose two copies are complete. Once the reader has asked for the pack, it
+follows the catalog: each new catalog downloads the pictures it adds and deletes the folders it no
+longer names, and a download cut short resumes at the next launch. Removing the pack deletes the
+folder.
+
+A picture of the pack is shown from its local file: by expo-image on native screens, and in the
+Bible DOM, whose production web view may read the application's files (`allowingReadAccessToURL:
+'file://'`, checked on the iOS simulator on 2026-10-28). The development web view, served by Metro
+over HTTP, cannot read local files and keeps the media host's addresses. The pack does not exist on
+the web, where the browser's cache stands in for it. The pack is not an Offline copy: it has no
+Resource identity or revision, and the Resource service knows nothing of it.
 
 ### Publication
 

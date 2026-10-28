@@ -10,7 +10,10 @@ import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModu
 import type { BibleDOMDownloadState, RootStyles } from './BibleDOMWrapper'
 import ChapterEntitiesOverlay from './ChapterEntitiesOverlay'
 import { getChapterEntityAvatar } from './chapterEntityAvatar'
-import { getEntityAvatarRadius, type EntityPortraitHashes } from '~features/lexique/entityPortraits'
+import {
+  getEntityAvatarRadius,
+  type EntityPortraitSources,
+} from '~features/lexique/entityPortraits'
 import { getChapterEntitiesViewMode, splitChapterEntities } from './chapterEntitiesPresentation'
 import { useBibleOverlayOpen } from './overlayLifecycle'
 import { getOverlayLayoutTransition } from './overlayStagger'
@@ -32,7 +35,7 @@ type ChapterEntityTranslations = {
 
 type Props = RootStyles & {
   entities: StrongLexiconChapterEntity[]
-  portraits: EntityPortraitHashes
+  portraits: EntityPortraitSources
   loaded: boolean
   availabilityStatus: StrongLexiconModuleAvailability['status'] | null
   downloadState: BibleDOMDownloadState

@@ -1,7 +1,9 @@
 import {
   getEntityPlaceholderIndex,
   getEntityChapterPortraitHash,
+  getEntityPortraitPictures,
   getEntityPortraitText,
+  planEntityPortraitPack,
   getEntityPortraitUri,
   parseEntityPortraitCatalog,
 } from '../entityPortraits'
@@ -124,5 +126,39 @@ describe('entity portraits', () => {
     )
     expect([...picked].sort()).toEqual([0, 1, 2, 3, 4])
     expect(getEntityPlaceholderIndex('Moses@Exo.2.10-Rev', 1)).toBe(0)
+  })
+
+  it('lists every picture of the catalog once, stages included', () => {
+    const catalog = parseEntityPortraitCatalog({
+      version: 3,
+      entities: {
+        'David@Rut.4.17-Rev': {
+          hash: 'aaaaaa',
+          stages: [
+            {
+              key: 'roi',
+              label: { fr: 'Le roi', en: 'The king' },
+              hash: 'bbbbbb',
+              ranges: [{ book: 10, from: 1, to: 24 }],
+            },
+          ],
+        },
+        'Bethlehem@Gen.35.16-Jhn': { hash: 'cccccc' },
+        'Ephrath@Gen.35.16-Mic': { hash: 'cccccc' },
+      },
+    })
+    expect(getEntityPortraitPictures(catalog!)).toEqual([
+      { hash: 'aaaaaa', uniqueName: 'David@Rut.4.17-Rev' },
+      { hash: 'bbbbbb', uniqueName: 'David@Rut.4.17-Rev' },
+      { hash: 'cccccc', uniqueName: 'Bethlehem@Gen.35.16-Jhn' },
+    ])
+  })
+
+  it('downloads what the catalog adds and deletes what it no longer names', () => {
+    expect(planEntityPortraitPack(['a1', 'b2', 'c3'], ['b2', 'z9'])).toEqual({
+      missing: ['a1', 'c3'],
+      obsolete: ['z9'],
+    })
+    expect(planEntityPortraitPack([], [])).toEqual({ missing: [], obsolete: [] })
   })
 })
