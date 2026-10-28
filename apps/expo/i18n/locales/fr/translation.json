@@ -843,8 +843,6 @@
   "strongDetail.entity.bibleMap": "Carte biblique",
   "strongDetail.entity.relationships": "Relations",
   "strongDetail.entity.presentation": "Présentation",
-  "strongDetail.entity.lifeStages": "Étapes de vie",
-  "strongDetail.entity.elsewhere": "Ailleurs dans la Bible",
   "strongDetail.entity.seriesRank": "{{rank}}ᵉ sur {{total}}",
   "strongDetail.entity.allRelationships": "Toutes les relations",
   "strongDetail.entity.graphPage_one": "",

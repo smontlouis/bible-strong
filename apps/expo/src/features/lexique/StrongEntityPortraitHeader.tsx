@@ -9,7 +9,6 @@ import Card from '~common/ui/Card'
 import { FeatherIcon } from '~common/ui/Icon'
 import IconTile from '~common/ui/IconTile'
 import Text from '~common/ui/Text'
-import { StudySection } from '~common/ui/StudySection'
 import type { StrongLexiconEntity } from '~features/resources/strongLexiconAccess'
 import { formatStrongDisplayCode } from '~helpers/strongIdentities'
 import {
@@ -37,7 +36,7 @@ const StageTile = ({
   uniqueName: string
   hash: string
   label: string
-  chapters: string
+  chapters?: string
   selected: boolean
   onPress: () => void
 }) => {
@@ -51,7 +50,7 @@ const StageTile = ({
       activeOpacity={0.7}
       accessibilityRole="button"
       accessibilityState={{ selected }}
-      accessibilityLabel={`${label}, ${chapters}`}
+      accessibilityLabel={chapters ? `${label}, ${chapters}` : label}
     >
       {/* The ring of the chosen stage surrounds the picture, which keeps its own corners. */}
       <Box
@@ -86,9 +85,11 @@ const StageTile = ({
       <Text className="text-[12px] font-semibold text-default mt-[7px]" numberOfLines={2}>
         {label}
       </Text>
-      <Text className="text-[11px] text-grey mt-[2px]" numberOfLines={2}>
-        {chapters}
-      </Text>
+      {!!chapters && (
+        <Text className="text-[11px] text-grey mt-[2px]" numberOfLines={2}>
+          {chapters}
+        </Text>
+      )}
     </TouchableBox>
   )
 }
@@ -144,13 +145,6 @@ const StrongEntityPortraitHeader = ({
               accessibilityLabel={entity.name}
             />
           )}
-          {!!series && (
-            <Box className="overflow-hidden border-continuous absolute top-[10px] right-[10px] rounded-full bg-surface px-[10px] py-[4px]">
-              <Text className="text-[12px] font-semibold text-default">
-                {series.rank} / {series.total}
-              </Text>
-            </Box>
-          )}
         </Box>
         <VStack className="overflow-hidden border-continuous px-[8px] pt-[14px] pb-[6px] gap-[3px]">
           <Text
@@ -175,6 +169,31 @@ const StrongEntityPortraitHeader = ({
           )}
         </VStack>
       </Box>
+
+      {!!entry.stages?.length && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <HStack className="overflow-hidden border-continuous gap-[12px]">
+            <StageTile
+              uniqueName={entity.uniqueName}
+              hash={entry.hash}
+              label={entry.title ? getEntityPortraitText(entry.title, language) : entity.name}
+              selected={!stage}
+              onPress={() => setStageKey(undefined)}
+            />
+            {entry.stages.map(item => (
+              <StageTile
+                key={item.key}
+                uniqueName={entity.uniqueName}
+                hash={item.hash}
+                label={getEntityPortraitText(item.label, language)}
+                chapters={formatEntityChapterRanges(item.ranges, getBookName)}
+                selected={item.key === stage?.key}
+                onPress={() => setStageKey(item.key)}
+              />
+            ))}
+          </HStack>
+        </ScrollView>
+      )}
 
       {(roles.length > 0 || entity.strongCodes.length > 0) && (
         <HStack className="overflow-hidden border-continuous gap-[6px] flex-wrap">
@@ -223,41 +242,6 @@ const StrongEntityPortraitHeader = ({
             </VStack>
           </HStack>
         </Card>
-      )}
-
-      {!!entry.stages?.length && (
-        <StudySection
-          title={
-            entry.stagesLabel
-              ? getEntityPortraitText(entry.stagesLabel, language)
-              : t('strongDetail.entity.lifeStages')
-          }
-          surface="none"
-        >
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <HStack className="overflow-hidden border-continuous gap-[12px]">
-              <StageTile
-                uniqueName={entity.uniqueName}
-                hash={entry.hash}
-                label={entry.title ? getEntityPortraitText(entry.title, language) : entity.name}
-                chapters={t('strongDetail.entity.elsewhere')}
-                selected={!stage}
-                onPress={() => setStageKey(undefined)}
-              />
-              {entry.stages.map(item => (
-                <StageTile
-                  key={item.key}
-                  uniqueName={entity.uniqueName}
-                  hash={item.hash}
-                  label={getEntityPortraitText(item.label, language)}
-                  chapters={formatEntityChapterRanges(item.ranges, getBookName)}
-                  selected={item.key === stage?.key}
-                  onPress={() => setStageKey(item.key)}
-                />
-              ))}
-            </HStack>
-          </ScrollView>
-        </StudySection>
       )}
     </VStack>
   )
