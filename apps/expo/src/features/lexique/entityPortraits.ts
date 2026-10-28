@@ -14,6 +14,12 @@ export const getEntityPortraitUri = (
   size: EntityPortraitSize = 'w256'
 ) => `${ENTITY_PORTRAIT_BASE_URL}/${encodeURIComponent(uniqueName)}/${hash}/${size}.webp`
 
+/**
+ * Avatars are rounded squares whose corner grows with them, in the proportion of the app's icon
+ * tiles (radius 8 on 30).
+ */
+export const getEntityAvatarRadius = (size: number) => Math.round(size * 0.27)
+
 /** Unique name → hash of the picture to show. An entity absent from it has none. */
 export type EntityPortraitHashes = Record<string, string>
 

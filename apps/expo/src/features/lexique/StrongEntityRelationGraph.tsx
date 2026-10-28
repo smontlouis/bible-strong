@@ -36,14 +36,17 @@ import {
   getStrongEntityRelationPage,
   splitStrongEntityRelations,
 } from './strongEntityPresentation'
+import { getEntityAvatarRadius } from './entityPortraits'
 import StrongEntityAvatar from './StrongEntityAvatar'
 import { getGraphScenePositionIndexes, GRAPH_POSITION_INDEXES } from './strongEntityGraphLayout'
 import { useStrongLexiconLanguage } from './useStrongLexiconLanguage'
 const GRAPH_HEIGHT = 410
 const CENTER_Y = 188
 const CENTER_NODE_SIZE = 82
+const CENTER_AVATAR_SIZE = 76
 const CENTER_LABEL_WIDTH = 120
 const SATELLITE_NODE_SIZE = 58
+const SATELLITE_AVATAR_SIZE = 54
 const SATELLITE_WIDTH = 92
 const CAMERA_RELATION_MIN_SCALE = 0.3
 const PAGINATION_ENTRY_DELAY = 200
@@ -560,7 +563,12 @@ const EntityGraphNode = ({
       )}
       style={[
         {
-          borderRadius: center ? CENTER_NODE_SIZE / 2 : SATELLITE_NODE_SIZE / 2,
+          // Concentric with the avatar inside it
+          borderRadius:
+            getEntityAvatarRadius(center ? CENTER_AVATAR_SIZE : SATELLITE_AVATAR_SIZE) +
+            (center
+              ? (CENTER_NODE_SIZE - CENTER_AVATAR_SIZE) / 2
+              : (SATELLITE_NODE_SIZE - SATELLITE_AVATAR_SIZE) / 2),
           borderWidth: center ? 2 : 1,
           ...((center ? CENTER_NODE_SIZE : SATELLITE_NODE_SIZE)
             ? {
@@ -577,7 +585,7 @@ const EntityGraphNode = ({
         seed={seed}
         category={category ?? 'other'}
         type={type ?? 'Other'}
-        size={center ? 76 : 54}
+        size={center ? CENTER_AVATAR_SIZE : SATELLITE_AVATAR_SIZE}
       />
     </AnimatedBox>
   )

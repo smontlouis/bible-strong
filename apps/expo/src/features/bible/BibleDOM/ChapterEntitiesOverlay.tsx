@@ -7,7 +7,7 @@ import type {
   StrongLexiconEntityCategory,
 } from '~features/resources/strongLexiconAccess'
 import { getChapterEntityAvatar } from './chapterEntityAvatar'
-import type { EntityPortraitHashes } from '~features/lexique/entityPortraits'
+import { getEntityAvatarRadius, type EntityPortraitHashes } from '~features/lexique/entityPortraits'
 import OverlayCloseButton from './OverlayCloseButton'
 import { useModalOverlayLifecycle } from './overlayLifecycle'
 import { useTranslations } from './TranslationsContext'
@@ -182,7 +182,7 @@ const ChapterEntitiesOverlay = ({
                       height: 68,
                       margin: '0 auto 8px',
                       border: `2px solid ${colors.reverse}`,
-                      borderRadius: '50%',
+                      borderRadius: getEntityAvatarRadius(68),
                       objectFit: 'cover',
                     }}
                   />

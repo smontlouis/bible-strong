@@ -10,7 +10,7 @@ import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModu
 import type { BibleDOMDownloadState, RootStyles } from './BibleDOMWrapper'
 import ChapterEntitiesOverlay from './ChapterEntitiesOverlay'
 import { getChapterEntityAvatar } from './chapterEntityAvatar'
-import type { EntityPortraitHashes } from '~features/lexique/entityPortraits'
+import { getEntityAvatarRadius, type EntityPortraitHashes } from '~features/lexique/entityPortraits'
 import { getChapterEntitiesViewMode } from './chapterEntitiesPresentation'
 import { useBibleOverlayOpen } from './overlayLifecycle'
 import { getOverlayLayoutTransition } from './overlayStagger'
@@ -160,7 +160,7 @@ const ChapterEntities = ({
                     height: 62,
                     placeItems: 'center',
                     border: `2px dashed ${colors.border}`,
-                    borderRadius: '50%',
+                    borderRadius: getEntityAvatarRadius(62),
                     background: colors.reverse,
                     color: colors.tertiary,
                   }}
@@ -277,7 +277,7 @@ const ChapterEntities = ({
                         height: 62,
                         placeSelf: 'center',
                         border: `2px solid ${colors.reverse}`,
-                        borderRadius: '50%',
+                        borderRadius: getEntityAvatarRadius(62),
                         objectFit: 'cover',
                         x: position * 6,
                         y: Math.abs(position) * 2,
