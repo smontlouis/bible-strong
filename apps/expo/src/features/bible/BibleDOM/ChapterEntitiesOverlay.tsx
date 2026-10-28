@@ -6,7 +6,7 @@ import type {
   StrongLexiconChapterEntity,
   StrongLexiconEntityCategory,
 } from '~features/resources/strongLexiconAccess'
-import { getChapterEntityAvatar } from './chapterEntityAvatar'
+import { CHAPTER_ENTITY_AVATAR_SHADOW, getChapterEntityAvatar } from './chapterEntityAvatar'
 import {
   getEntityAvatarRadius,
   type EntityPortraitSources,
@@ -33,6 +33,8 @@ type Props = {
     reverse: string
     surfaceRaised: string
   }
+  /** The ground drawn behind the cut-out portraits (`getEntityPortraitGround`). */
+  portraitGround: string
   fontFamily: string
   visibleStackItemCount: number
   isOpen: boolean
@@ -46,6 +48,7 @@ const ChapterEntitiesOverlay = ({
   groupLabels,
   openEntityLabel,
   colors,
+  portraitGround,
   fontFamily,
   visibleStackItemCount,
   isOpen,
@@ -186,6 +189,8 @@ const ChapterEntitiesOverlay = ({
                       margin: '0 auto 8px',
                       border: `2px solid ${colors.reverse}`,
                       borderRadius: getEntityAvatarRadius(68),
+                      background: portraitGround,
+                      boxShadow: CHAPTER_ENTITY_AVATAR_SHADOW,
                       objectFit: 'cover',
                     }}
                   />

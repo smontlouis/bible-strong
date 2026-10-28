@@ -3,6 +3,7 @@ import {
   getEntitySeriesPlace,
   getEntityPlaceholderIndex,
   getEntityChapterPortraitHash,
+  getEntityPortraitGround,
   getEntityPortraitPictures,
   getEntityPortraitText,
   planEntityPortraitPack,
@@ -18,6 +19,19 @@ describe('entity portraits', () => {
     expect(getEntityPortraitUri('Paul@Act.7.58-2Pe', 'abcdef', 'w768')).toMatch(
       /\/abcdef\/w768\.webp$/
     )
+  })
+
+  it('draws the dusk blue behind a portrait in a dark theme, the light primary in a light one', () => {
+    const dark = { primary: 'rgb(14, 211, 185)', lightPrimary: 'rgba(14, 211, 185, 0.5)' }
+    expect(getEntityPortraitGround(true, dark)).toMatch(/^radial-gradient\(.*#2e466a/)
+    expect(getEntityPortraitGround(true, dark)).not.toContain('14, 211')
+    // The centre leans towards the primary blue, the edge keeps the light primary.
+    expect(
+      getEntityPortraitGround(false, {
+        primary: 'rgb(89,131,240)',
+        lightPrimary: 'rgb(233, 243, 252)',
+      })
+    ).toBe('radial-gradient(circle at 50% 35%, rgb(201, 218, 249) 0%, rgb(233, 243, 252) 75%)')
   })
 
   it('keeps the well-formed entries of a catalog', () => {

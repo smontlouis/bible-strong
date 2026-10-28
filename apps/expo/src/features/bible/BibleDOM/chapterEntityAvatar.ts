@@ -33,3 +33,7 @@ export const getChapterEntityAvatar = (
     },
   }
 }
+
+/** A light shadow that lifts a thumbnail and shows its white contour on the page. */
+export const CHAPTER_ENTITY_AVATAR_SHADOW =
+  '0 1px 2px rgba(16, 27, 53, 0.12), 0 3px 10px rgba(16, 27, 53, 0.10)'

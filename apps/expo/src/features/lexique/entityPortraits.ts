@@ -1,4 +1,5 @@
 // Shared by the native screens and the Bible DOM: no React Native import here.
+import Color from 'color'
 
 /** The portraits of biblical entities on the public media host (ADR-0089). */
 export const ENTITY_PORTRAIT_BASE_URL = 'https://media.bible-strong.app/entity-images'
@@ -19,6 +20,21 @@ export const getEntityPortraitUri = (
  * tiles (radius 8 on 30).
  */
 export const getEntityAvatarRadius = (size: number) => Math.round(size * 0.27)
+
+/**
+ * The ground behind a portrait, as a CSS background: characters are published cut out, so the app
+ * draws the dusk blue they were painted on in a dark theme and, in a light one, the theme's light
+ * primary deepened towards its primary at the centre (ADR-0089). Places keep their painting, which
+ * covers it.
+ */
+export const getEntityPortraitGround = (
+  dark: boolean,
+  colors: { primary: string; lightPrimary: string }
+) => {
+  if (dark) return 'radial-gradient(circle at 50% 35%, #4d6a99 0%, #2e466a 55%, #1b2a43 100%)'
+  const centre = Color(colors.lightPrimary).mix(Color(colors.primary), 0.22).rgb().string()
+  return `radial-gradient(circle at 50% 35%, ${centre} 0%, ${colors.lightPrimary} 75%)`
+}
 
 /** Unique name → hash of the picture to show. An entity absent from it has none. */
 export type EntityPortraitHashes = Record<string, string>

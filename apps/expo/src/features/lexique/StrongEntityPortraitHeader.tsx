@@ -20,6 +20,7 @@ import {
   type EntityPortraitEntry,
 } from './entityPortraits'
 import { getEntityLabel } from './StrongDetailUI'
+import { useEntityPortraitGround } from './useEntityPortraitGround'
 import { useEntityPortraitImage } from './useEntityPortraitImage'
 
 const STAGE_TILE_SIZE = 92
@@ -41,6 +42,7 @@ const StageTile = ({
   onPress: () => void
 }) => {
   const image = useEntityPortraitImage(uniqueName, hash, 'w256')
+  const ground = useEntityPortraitGround()
   const radius = getEntityAvatarRadius(STAGE_TILE_SIZE)
   return (
     <TouchableBox
@@ -63,11 +65,12 @@ const StageTile = ({
         }}
       >
         <Box
-          className="overflow-hidden border-continuous bg-canvas"
+          className="overflow-hidden border-continuous"
           style={{
             width: STAGE_TILE_SIZE - 10,
             height: STAGE_TILE_SIZE - 10,
             borderRadius: radius - 5,
+            experimental_backgroundImage: ground,
           }}
         >
           {!!image.uri && (
@@ -116,6 +119,7 @@ const StrongEntityPortraitHeader = ({
   const [stageKey, setStageKey] = useState<string>()
   const stage = entry.stages?.find(item => item.key === stageKey)
   const image = useEntityPortraitImage(entity.uniqueName, stage?.hash ?? entry.hash, 'w768')
+  const ground = useEntityPortraitGround()
   const title = stage?.label ?? entry.title
   const series = getEntitySeriesPlace(catalog, entity.uniqueName)
   const roles = (entry.roles ?? []).flatMap(role =>
@@ -130,8 +134,8 @@ const StrongEntityPortraitHeader = ({
     <VStack className="overflow-hidden border-continuous gap-[14px]">
       <Box className="overflow-hidden border-continuous bg-surface rounded-[24px] p-[10px]">
         <Box
-          className="overflow-hidden border-continuous bg-canvas rounded-[16px]"
-          style={{ aspectRatio: 1 }}
+          className="overflow-hidden border-continuous rounded-[16px]"
+          style={{ aspectRatio: 1, experimental_backgroundImage: ground }}
         >
           {!!image.uri && (
             <Image

@@ -9,14 +9,16 @@ import type {
 import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
 import type { BibleDOMDownloadState, RootStyles } from './BibleDOMWrapper'
 import ChapterEntitiesOverlay from './ChapterEntitiesOverlay'
-import { getChapterEntityAvatar } from './chapterEntityAvatar'
+import { CHAPTER_ENTITY_AVATAR_SHADOW, getChapterEntityAvatar } from './chapterEntityAvatar'
 import {
   getEntityAvatarRadius,
+  getEntityPortraitGround,
   type EntityPortraitSources,
 } from '~features/lexique/entityPortraits'
 import { getChapterEntitiesViewMode, splitChapterEntities } from './chapterEntitiesPresentation'
 import { useBibleOverlayOpen } from './overlayLifecycle'
 import { getOverlayLayoutTransition } from './overlayStagger'
+import { isDarkTheme } from './utils'
 
 const MAX_STACKED_ENTITIES = 3
 const AVATAR_SIZE = 62
@@ -68,6 +70,7 @@ const ChapterEntities = ({
   if (viewMode === 'hidden' && !chapterResources) return null
 
   const colors = settings.colors[settings.theme]
+  const portraitGround = getEntityPortraitGround(isDarkTheme(settings.theme), colors)
   const isDownloading = ['queued', 'downloading', 'inserting'].includes(downloadState.status ?? '')
   const progress = Math.max(0, Math.min(1, downloadState.progress))
   const { painted, stacked } = splitChapterEntities(entities, portraits)
@@ -154,7 +157,10 @@ const ChapterEntities = ({
                   width: AVATAR_SIZE,
                   height: AVATAR_SIZE,
                   margin: '0 auto 6px',
+                  border: `2px solid ${colors.reverse}`,
                   borderRadius: getEntityAvatarRadius(AVATAR_SIZE),
+                  background: portraitGround,
+                  boxShadow: CHAPTER_ENTITY_AVATAR_SHADOW,
                   objectFit: 'cover',
                 }}
               />
@@ -345,6 +351,8 @@ const ChapterEntities = ({
                         placeSelf: 'center',
                         border: `2px solid ${colors.reverse}`,
                         borderRadius: getEntityAvatarRadius(AVATAR_SIZE),
+                        background: portraitGround,
+                        boxShadow: CHAPTER_ENTITY_AVATAR_SHADOW,
                         objectFit: 'cover',
                         x: position * 6,
                         y: Math.abs(position) * 2,
@@ -362,6 +370,7 @@ const ChapterEntities = ({
                 groupLabels={translations.groups}
                 openEntityLabel={translations.openEntity}
                 colors={colors}
+                portraitGround={portraitGround}
                 fontFamily={settings.fontFamily}
                 visibleStackItemCount={stackedEntities.length}
                 isOpen={isOverlayOpen}

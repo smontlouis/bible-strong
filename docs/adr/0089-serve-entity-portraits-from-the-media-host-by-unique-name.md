@@ -82,8 +82,24 @@ hash of its `uniqueName`, modulo the number of placeholders of that key, by one 
 DOM, so an entity keeps the same face everywhere.
 
 A placeholder is shown for an entity without a portrait, and for an entity whose portrait cannot be
-loaded. While a portrait loads, the avatar shows its empty disc, so a grey face never flashes into a
-painted one.
+loaded. While a portrait loads, the avatar shows only its ground, so a grey face never flashes into
+a painted one.
+
+### Cut-out characters and their ground
+
+Amended 2026-10-28. The dusk-blue ground every character was painted on reads well in a dark theme
+but makes dark blocks in a light one. Characters, their stages and the placeholders are therefore
+published cut out, as WebP with transparency, and the application draws the ground behind every
+avatar and portrait card, native screens and Bible DOM alike, as a radial gradient: the dusk blue in
+a dark theme; in a light one, the theme's light primary, deepened towards its primary at the centre.
+The painted background is not published: a gradient stands in for it. In the Bible DOM, thumbnails
+also carry a white contour and a light shadow.
+
+Places keep their painting, which covers the ground, and so does every picture of God, his portrait
+and all his stages, and Lucifer, a being of light that leaves nothing to cut out. The catalog does
+not say which picture is cut out; a ground behind a painting is simply hidden. A cut-out is 768
+pixels wide: its `w1254` copy holds those 768 pixels. The card album (ADR-0090) uses the same
+copies.
 
 ### Offline
 
@@ -93,7 +109,7 @@ any other shows its placeholder.
 
 On iOS and Android, the reader may also download every portrait ahead, from a card of the Downloads
 screen (amended 2026-10-28). The pack holds the 256- and 768-pixel copies of every picture the
-catalog names, portraits and stages, about 30 MB for 482 pictures; the 1254-pixel copy stays online.
+catalog names, portraits and stages, about 38 MB for 482 pictures; the 1254-pixel copy stays online.
 The copies are stored in the application's documents, one folder per `hash`, and the device keeps
 the list of the pictures whose two copies are complete. Once the reader has asked for the pack, it
 follows the catalog: each new catalog downloads the pictures it adds and deletes the folders it no
