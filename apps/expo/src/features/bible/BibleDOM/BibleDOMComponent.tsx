@@ -206,6 +206,7 @@ type Props = Pick<
   | 'inlineCommentaries'
   | 'chapterEntities'
   | 'chapterEntitiesLoaded'
+  | 'chapterEntityPortraits'
   | 'focusStudy'
   | 'focusStudyTranslations'
   | 'chapterEntityModuleStatus'
@@ -700,6 +701,7 @@ const LoadedBibleContent = ({
   inlineCommentaries,
   chapterEntities,
   chapterEntitiesLoaded,
+  chapterEntityPortraits,
   focusStudy,
   focusStudyTranslations,
   chapterEntityModuleStatus,
@@ -1756,6 +1758,7 @@ const LoadedBibleContent = ({
             )}
             <ChapterEntities
               entities={chapterEntities}
+              portraits={chapterEntityPortraits}
               loaded={chapterEntitiesLoaded}
               availabilityStatus={chapterEntityModuleStatus}
               downloadState={chapterEntityDownloadState}

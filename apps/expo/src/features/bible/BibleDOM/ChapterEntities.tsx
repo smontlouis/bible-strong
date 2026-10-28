@@ -9,7 +9,8 @@ import type {
 import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
 import type { BibleDOMDownloadState, RootStyles } from './BibleDOMWrapper'
 import ChapterEntitiesOverlay from './ChapterEntitiesOverlay'
-import { getChapterEntityAvatarUri } from './chapterEntityAvatar'
+import { getChapterEntityAvatar } from './chapterEntityAvatar'
+import type { EntityPortraitHashes } from '~features/lexique/entityPortraits'
 import { getChapterEntitiesViewMode } from './chapterEntitiesPresentation'
 import { useBibleOverlayOpen } from './overlayLifecycle'
 import { getOverlayLayoutTransition } from './overlayStagger'
@@ -30,6 +31,7 @@ type ChapterEntityTranslations = {
 
 type Props = RootStyles & {
   entities: StrongLexiconChapterEntity[]
+  portraits: EntityPortraitHashes
   loaded: boolean
   availabilityStatus: StrongLexiconModuleAvailability['status'] | null
   downloadState: BibleDOMDownloadState
@@ -42,6 +44,7 @@ type Props = RootStyles & {
 
 const ChapterEntities = ({
   entities,
+  portraits,
   loaded,
   availabilityStatus,
   downloadState,
@@ -264,7 +267,7 @@ const ChapterEntities = ({
                       key={entity.uniqueName}
                       layoutId={`chapter-entity-${entity.uniqueName}`}
                       layoutDependency={isOverlayOpen}
-                      src={getChapterEntityAvatarUri(entity)}
+                      {...getChapterEntityAvatar(entity, portraits)}
                       alt=""
                       transition={{ layout: layoutTransition }}
                       style={{
@@ -275,7 +278,7 @@ const ChapterEntities = ({
                         placeSelf: 'center',
                         border: `2px solid ${colors.reverse}`,
                         borderRadius: '50%',
-                        objectFit: 'contain',
+                        objectFit: 'cover',
                         x: position * 6,
                         y: Math.abs(position) * 2,
                         rotate: position * 5,
@@ -288,6 +291,7 @@ const ChapterEntities = ({
               </m.button>
               <ChapterEntitiesOverlay
                 entities={entities}
+                portraits={portraits}
                 groupLabels={translations.groups}
                 openEntityLabel={translations.openEntity}
                 colors={colors}

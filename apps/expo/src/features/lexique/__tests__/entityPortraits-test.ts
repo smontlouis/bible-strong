@@ -1,0 +1,128 @@
+import {
+  getEntityPlaceholderIndex,
+  getEntityChapterPortraitHash,
+  getEntityPortraitText,
+  getEntityPortraitUri,
+  parseEntityPortraitCatalog,
+} from '../entityPortraits'
+
+describe('entity portraits', () => {
+  it('addresses a portrait by its unique name and hash', () => {
+    expect(getEntityPortraitUri("King's_Highway@Num.20.17-", '0123456789ab')).toBe(
+      "https://media.bible-strong.app/entity-images/King's_Highway%40Num.20.17-/0123456789ab/w256.webp"
+    )
+    expect(getEntityPortraitUri('Paul@Act.7.58-2Pe', 'abcdef', 'w768')).toMatch(
+      /\/abcdef\/w768\.webp$/
+    )
+  })
+
+  it('keeps the well-formed entries of a catalog', () => {
+    const catalog = parseEntityPortraitCatalog({
+      version: 3,
+      entities: {
+        'Paul@Act.7.58-2Pe': {
+          hash: '0123456789ab',
+          title: { fr: "L'apôtre des nations", en: 'The apostle to the Gentiles' },
+          stagesLabel: 'Étapes',
+          roles: ['apotre', 3],
+          stages: [
+            {
+              key: 'saul',
+              label: { fr: 'Saul le persécuteur', en: 'Saul the persecutor' },
+              hash: 'abcdef12',
+              ranges: [{ book: 44, from: 7, to: 9 }],
+            },
+            {
+              key: 'bad',
+              label: { fr: 'Sans plage', en: 'No range' },
+              hash: 'abcdef34',
+              ranges: [],
+            },
+            {
+              key: 'french',
+              label: { fr: 'Sans anglais' },
+              hash: 'abcdef56',
+              ranges: [{ book: 44, from: 10, to: 10 }],
+            },
+          ],
+        },
+        'Bad@Gen.1.1': { hash: '../x' },
+        'Num@Gen.1.1': 3,
+      },
+      series: [
+        {
+          id: 'apotres',
+          title: { fr: 'Les douze apôtres', en: 'The twelve apostles' },
+          members: ['Peter@Mat.4.18-2Pe'],
+        },
+        { id: 'texte', title: 'Texte seul', members: [] },
+        { id: 1 },
+      ],
+      roles: { apotre: { fr: 'Apôtre', en: 'Apostle' }, roi: 'Roi' },
+    })
+    expect(Object.keys(catalog?.entities ?? {})).toEqual(['Paul@Act.7.58-2Pe'])
+    expect(catalog?.entities['Paul@Act.7.58-2Pe']).toEqual({
+      hash: '0123456789ab',
+      title: { fr: "L'apôtre des nations", en: 'The apostle to the Gentiles' },
+      roles: ['apotre'],
+      stages: [
+        {
+          key: 'saul',
+          label: { fr: 'Saul le persécuteur', en: 'Saul the persecutor' },
+          hash: 'abcdef12',
+          ranges: [{ book: 44, from: 7, to: 9 }],
+        },
+      ],
+    })
+    expect(catalog?.series).toHaveLength(1)
+    expect(Object.keys(catalog?.roles ?? {})).toEqual(['apotre'])
+  })
+
+  it('refuses what is not a catalog', () => {
+    expect(parseEntityPortraitCatalog(null)).toBeUndefined()
+    expect(parseEntityPortraitCatalog({ version: 1, portraits: {} })).toBeUndefined()
+    expect(parseEntityPortraitCatalog({ version: 2, entities: {} })).toBeUndefined()
+    expect(parseEntityPortraitCatalog('<html>')).toBeUndefined()
+  })
+
+  it('shows a text in French, and in English for every other language', () => {
+    const text = { fr: 'Le crucifié', en: 'The crucified one' }
+    expect(getEntityPortraitText(text, 'fr')).toBe('Le crucifié')
+    expect(getEntityPortraitText(text, 'en')).toBe('The crucified one')
+    expect(getEntityPortraitText(text, 'es')).toBe('The crucified one')
+  })
+
+  it('shows the stage that covers a chapter, the portrait elsewhere', () => {
+    const naaman = {
+      hash: 'aaaaaa',
+      stages: [
+        {
+          key: 'gueri',
+          label: { fr: 'Guéri', en: 'Healed' },
+          hash: 'bbbbbb',
+          ranges: [
+            { book: 12, from: 5, to: 5, fromVerse: 14, toVerse: 19 },
+            { book: 42, from: 4, to: 4 },
+          ],
+        },
+      ],
+    }
+    expect(getEntityChapterPortraitHash(naaman, 12, 5)).toBe('aaaaaa')
+    expect(getEntityChapterPortraitHash(naaman, 42, 4)).toBe('bbbbbb')
+    expect(getEntityChapterPortraitHash(naaman, 42, 5)).toBe('aaaaaa')
+    expect(getEntityChapterPortraitHash({ hash: 'cccccc' }, 1, 1)).toBe('cccccc')
+  })
+
+  it('picks the same placeholder for the same entity, and spreads entities over the five', () => {
+    expect(getEntityPlaceholderIndex('Moses@Exo.2.10-Rev', 5)).toBe(
+      getEntityPlaceholderIndex('Moses@Exo.2.10-Rev', 5)
+    )
+    const picked = new Set(
+      Array.from({ length: 200 }, (_, index) =>
+        getEntityPlaceholderIndex(`Entity${index}@Gen.1.1`, 5)
+      )
+    )
+    expect([...picked].sort()).toEqual([0, 1, 2, 3, 4])
+    expect(getEntityPlaceholderIndex('Moses@Exo.2.10-Rev', 1)).toBe(0)
+  })
+})

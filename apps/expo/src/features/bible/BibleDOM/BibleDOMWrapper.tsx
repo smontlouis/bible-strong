@@ -80,6 +80,7 @@ import type { CrossVersionAnnotation } from '~redux/selectors/bible'
 import type { RelationEndpoint, RelationKind, RelationType } from '~features/studyRelations/domain'
 import { useOpenRelationEndpoint } from '~features/studyRelations/useOpenRelationEndpoint'
 import type { StrongLexiconChapterEntity } from '~features/resources/strongLexiconAccess'
+import type { EntityPortraitHashes } from '~features/lexique/entityPortraits'
 import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
 import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
 import { createStrongIdentity } from '~helpers/strongIdentities'
@@ -350,6 +351,8 @@ export type WebViewProps = {
   onOpenInlineCommentary?: (chip: LabeledCommentaryChip) => void
   chapterEntities: StrongLexiconChapterEntity[]
   chapterEntitiesLoaded: boolean
+  /** The portraits of the chapter's entities, by unique name (ADR-0089). */
+  chapterEntityPortraits: EntityPortraitHashes
   /** What the reader gathers under the studied verse of a focus (ADR-0088). */
   focusStudy?: FocusVerseStudy
   focusStudyTranslations?: FocusStudyTranslations
@@ -485,6 +488,7 @@ export const BibleDOMWrapper = ({
   onOpenInlineCommentary,
   chapterEntities,
   chapterEntitiesLoaded,
+  chapterEntityPortraits,
   focusStudy,
   focusStudyTranslations,
   onFocusStudyAction,
@@ -1336,6 +1340,7 @@ export const BibleDOMWrapper = ({
         inlineCommentaries={inlineCommentaries}
         chapterEntities={chapterEntities}
         chapterEntitiesLoaded={chapterEntitiesLoaded}
+        chapterEntityPortraits={chapterEntityPortraits}
         focusStudy={focusStudy}
         focusStudyTranslations={focusStudyTranslations}
         chapterEntityModuleStatus={chapterEntityModuleStatus}

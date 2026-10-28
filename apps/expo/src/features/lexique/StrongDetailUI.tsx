@@ -4,7 +4,6 @@ import { useReferencePreview } from '~features/bibleReferencePreview/state'
 import { ListSeparator } from '~common/ui/ListSection'
 import { StudyRowsCard } from '~common/ui/StudySection'
 import { formatStrongDisplayCode } from '~helpers/strongIdentities'
-import { Image } from 'expo-image'
 import { useTheme } from '~themes/ThemeProvider'
 import React from 'react'
 import {
@@ -36,7 +35,7 @@ import {
   getStrongEditorialPreviewHtml,
   isStrongEditorialPreviewOverflowing,
 } from './strongDetailPreview'
-import { getStrongEntityAvatarSource } from './strongEntityAvatars'
+import StrongEntityAvatar from './StrongEntityAvatar'
 import { isStrongOriginalUnnamed } from './strongOriginalPresentation'
 export const StrongLexicalRelationRow = ({
   relation,
@@ -317,10 +316,11 @@ export const StrongEntitySummaryCard = ({
   return (
     <VStack className="overflow-hidden border-continuous gap-[13px]">
       <HStack className="overflow-hidden border-continuous gap-[12px] items-center">
-        <Image
-          source={getStrongEntityAvatarSource(entity.category, entity.type)}
-          style={{ width: presentation.avatarSize, height: presentation.avatarSize }}
-          contentFit="contain"
+        <StrongEntityAvatar
+          uniqueName={entity.uniqueName}
+          category={entity.category}
+          type={entity.type}
+          size={presentation.avatarSize}
         />
         <VStack className="overflow-hidden border-continuous flex-[1] gap-[2px]">
           <Text className={presentation.nameClassName}>{entity.name}</Text>

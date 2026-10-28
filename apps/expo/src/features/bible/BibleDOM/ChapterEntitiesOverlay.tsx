@@ -6,7 +6,8 @@ import type {
   StrongLexiconChapterEntity,
   StrongLexiconEntityCategory,
 } from '~features/resources/strongLexiconAccess'
-import { getChapterEntityAvatarUri } from './chapterEntityAvatar'
+import { getChapterEntityAvatar } from './chapterEntityAvatar'
+import type { EntityPortraitHashes } from '~features/lexique/entityPortraits'
 import OverlayCloseButton from './OverlayCloseButton'
 import { useModalOverlayLifecycle } from './overlayLifecycle'
 import { useTranslations } from './TranslationsContext'
@@ -20,6 +21,7 @@ import { withColorAlpha } from './themeOverlayColor'
 
 type Props = {
   entities: StrongLexiconChapterEntity[]
+  portraits: EntityPortraitHashes
   groupLabels: Record<StrongLexiconEntityCategory, string>
   openEntityLabel: string
   colors: {
@@ -37,6 +39,7 @@ type Props = {
 
 const ChapterEntitiesOverlay = ({
   entities,
+  portraits,
   groupLabels,
   openEntityLabel,
   colors,
@@ -170,7 +173,7 @@ const ChapterEntitiesOverlay = ({
                 >
                   <m.img
                     layoutId={`chapter-entity-${entity.uniqueName}`}
-                    src={getChapterEntityAvatarUri(entity)}
+                    {...getChapterEntityAvatar(entity, portraits)}
                     alt=""
                     transition={{ layout: { ...spring, delay: sourceDelay } }}
                     style={{
@@ -180,7 +183,7 @@ const ChapterEntitiesOverlay = ({
                       margin: '0 auto 8px',
                       border: `2px solid ${colors.reverse}`,
                       borderRadius: '50%',
-                      objectFit: 'contain',
+                      objectFit: 'cover',
                     }}
                   />
                   <m.div

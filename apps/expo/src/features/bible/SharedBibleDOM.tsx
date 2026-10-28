@@ -104,6 +104,7 @@ const SharedBibleDOM = () => {
     selectedCode: null,
     chapterEntities: [],
     chapterEntitiesLoaded: false,
+    chapterEntityPortraits: {},
     chapterEntityModuleStatus: null,
     chapterEntityDownloadState: { progress: 0 },
   }

@@ -4,7 +4,7 @@ import { useTheme } from '~themes/ThemeProvider'
 import { AnimatePresence } from '@alloc/moti'
 import React, { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, Image, Pressable, StyleSheet } from 'react-native'
+import { ActivityIndicator, Pressable, StyleSheet } from 'react-native'
 import Svg, { Line } from 'react-native-svg'
 import { useQueryClient } from '@tanstack/react-query'
 import { scheduleOnRN } from 'react-native-worklets'
@@ -36,7 +36,7 @@ import {
   getStrongEntityRelationPage,
   splitStrongEntityRelations,
 } from './strongEntityPresentation'
-import { getStrongEntityAvatarSource } from './strongEntityAvatars'
+import StrongEntityAvatar from './StrongEntityAvatar'
 import { getGraphScenePositionIndexes, GRAPH_POSITION_INDEXES } from './strongEntityGraphLayout'
 import { useStrongLexiconLanguage } from './useStrongLexiconLanguage'
 const GRAPH_HEIGHT = 410
@@ -524,12 +524,16 @@ const getAvatarBorderStyle = (
 }
 
 const EntityGraphNode = ({
+  uniqueName,
+  seed,
   category,
   type,
   center = false,
   avatarProgress,
   avatarRole,
 }: {
+  uniqueName?: string
+  seed: string
   category?: string
   type?: string
   center?: boolean
@@ -568,15 +572,19 @@ const EntityGraphNode = ({
         avatarStyle,
       ]}
     >
-      <Image
-        source={getStrongEntityAvatarSource(category ?? 'other', type ?? 'Other')}
-        style={{ width: center ? 76 : 54, height: center ? 76 : 54 }}
+      <StrongEntityAvatar
+        uniqueName={uniqueName}
+        seed={seed}
+        category={category ?? 'other'}
+        type={type ?? 'Other'}
+        size={center ? 76 : 54}
       />
     </AnimatedBox>
   )
 }
 
 const GraphSatelliteContent = ({
+  uniqueName,
   name,
   category,
   type,
@@ -589,6 +597,7 @@ const GraphSatelliteContent = ({
   disabled,
   onPress,
 }: {
+  uniqueName?: string
   name: string
   category?: string
   type?: string
@@ -626,6 +635,8 @@ const GraphSatelliteContent = ({
         }}
       >
         <EntityGraphNode
+          uniqueName={uniqueName}
+          seed={name}
           category={category}
           type={type}
           avatarProgress={avatarProgress}
@@ -1071,6 +1082,8 @@ const GraphCenterNode = ({
             })}
           >
             <EntityGraphNode
+              uniqueName={entity.uniqueName}
+              seed={entity.name}
               category={entity.category}
               type={entity.type}
               center
@@ -1153,6 +1166,7 @@ const GraphRelationNodeView = ({
         exitRole={getRelationExitRole(uniqueName, exit)}
       >
         <GraphSatelliteContent
+          uniqueName={uniqueName}
           name={relation.targetName}
           category={relation.targetCategory}
           type={relation.targetType}
@@ -1213,6 +1227,7 @@ const GraphPreviousNode = ({
         exitRole={getPreviousExitRole(entity.uniqueName, exit)}
       >
         <GraphSatelliteContent
+          uniqueName={entity.uniqueName}
           name={entity.name}
           category={entity.category}
           type={entity.type}
