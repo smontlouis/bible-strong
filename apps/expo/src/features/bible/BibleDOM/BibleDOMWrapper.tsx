@@ -654,7 +654,8 @@ export const BibleDOMWrapper = ({
       supernatural: t('bible.chapterEntities.supernatural'),
       other: t('bible.chapterEntities.others'),
     },
-    openEntity: t('bible.chapterEntities.open'),
+    // Keeps {{name}} for the web view, which puts each entity's name in it.
+    openEntity: t('bible.chapterEntities.open', { interpolation: { skipOnVariables: true } }),
     empty: t('bible.chapterEntities.empty'),
     downloadTitle: t('strongLexicon.biblicalEntities'),
     downloadDescription: t('strongLexicon.biblicalEntitiesDescription'),
