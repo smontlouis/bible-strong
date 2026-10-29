@@ -79,6 +79,7 @@ export type FocusStudyTranslations = {
   commentariesAll: string
   topics: string
   dictionary: string
+  entities: string
   studyVerse: string
 }
 

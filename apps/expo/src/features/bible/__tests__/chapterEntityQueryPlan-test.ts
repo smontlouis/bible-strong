@@ -123,7 +123,6 @@ describe('getChapterEntityQueryPlan', () => {
   it.each([
     { chapterReady: false, contextualInformationDisplay: true, isContextFocused: false },
     { chapterReady: true, contextualInformationDisplay: false, isContextFocused: false },
-    { chapterReady: true, contextualInformationDisplay: true, isContextFocused: true },
   ])('does not budget contextual requests for an inactive context', context => {
     expect(
       getChapterEntityQueryPlan({
@@ -137,6 +136,25 @@ describe('getChapterEntityQueryPlan', () => {
       codesReady: false,
       shouldCheckAvailability: false,
       shouldLoadEntities: false,
+      shouldLoadStrongCodes: false,
+    })
+  })
+
+  it('loads the entities of a focused chapter for the study of its verse', () => {
+    expect(
+      getChapterEntityQueryPlan({
+        chapterReady: true,
+        chapterKind: 'strong',
+        contextualInformationDisplay: false,
+        displayedStrongCodes: ['H1732'],
+        isContextFocused: true,
+        strongCodesQueryFetched: false,
+      })
+    ).toEqual({
+      codes: ['H1732'],
+      codesReady: true,
+      shouldCheckAvailability: true,
+      shouldLoadEntities: true,
       shouldLoadStrongCodes: false,
     })
   })

@@ -1,3 +1,4 @@
+// surface-allow: a light shadow under the chapter's thumbnails shows their white contour on the page
 import Feather from '@expo/vector-icons/Feather'
 import { LayoutGroup, m, useReducedMotion } from 'motion/react'
 import { useId, useState, type CSSProperties, type ReactNode } from 'react'

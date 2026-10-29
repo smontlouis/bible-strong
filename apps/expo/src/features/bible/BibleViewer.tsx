@@ -708,9 +708,9 @@ const BibleViewer = ({
     contextualInformationDisplay && !isContextFocused
       ? (chapterEntityAvailabilityQuery.data?.status ?? null)
       : null
+  // Loaded for the end of the chapter, or for the study of a verse in focus, which names its own.
   const chapterEntitiesAvailable =
-    contextualInformationDisplay &&
-    !isContextFocused &&
+    (contextualInformationDisplay || isContextFocused) &&
     chapterEntityAvailabilityQuery.data?.status === 'available'
   const chapterEntitiesQuery = useQuery({
     queryKey: resourceQueryKeys.strongLexiconChapterEntities({
@@ -779,6 +779,7 @@ const BibleViewer = ({
     compareAll: t('bible.focusStudy.compareAll'),
     chooseVersions: t('bible.focusStudy.chooseVersions'),
     words: t('bible.focusStudy.words'),
+    entities: t('bible.focusStudy.entities'),
     wordsAll: t(
       focusStudy.wordCount === 1
         ? 'bible.focusStudy.wordsAll_one'

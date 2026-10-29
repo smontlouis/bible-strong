@@ -1,3 +1,4 @@
+// surface-allow: a light shadow under the chapter's thumbnails shows their white contour on the page
 import { m, useReducedMotion } from 'motion/react'
 import { createPortal } from 'react-dom'
 import { IS_DOM } from 'expo/dom'

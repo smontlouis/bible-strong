@@ -38,7 +38,9 @@ export const getChapterEntityQueryPlan = ({
   loadedStrongCodes,
   strongCodesQueryFetched,
 }: ChapterEntityQueryPlanInput): ChapterEntityQueryPlan => {
-  const shouldCheckAvailability = chapterReady && contextualInformationDisplay && !isContextFocused
+  // The end of a chapter names its entities when contextual information is shown; a verse in
+  // focus names its own in its study (ADR-0088), whatever that setting.
+  const shouldCheckAvailability = chapterReady && (isContextFocused || contextualInformationDisplay)
   const chapterAlreadyContainsStrongCodes =
     chapterKind === 'strong' || chapterKind === 'reverse-interlinear'
 

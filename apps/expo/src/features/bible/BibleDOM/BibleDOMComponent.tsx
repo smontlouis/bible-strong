@@ -1750,9 +1750,14 @@ const LoadedBibleContent = ({
               <FocusVerseStudy
                 study={focusStudy}
                 translations={focusStudyTranslations}
+                entities={chapterEntities}
+                portraits={chapterEntityPortraits}
                 settings={settings}
                 onAction={focusAction => {
                   void dispatch({ type: FOCUS_STUDY_ACTION, payload: focusAction })
+                }}
+                onOpenEntity={uniqueName => {
+                  void dispatch({ type: NAVIGATE_TO_BIBLICAL_ENTITY, payload: uniqueName })
                 }}
               />
             )}

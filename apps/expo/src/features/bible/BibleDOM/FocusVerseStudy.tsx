@@ -2,6 +2,12 @@ import { styled } from 'goober'
 import type { CSSProperties, ReactNode } from 'react'
 
 import { radii } from '~common/ui/surfaces'
+import {
+  getEntityAvatarRadius,
+  getEntityPortraitGround,
+  type EntityPortraitSources,
+} from '~features/lexique/entityPortraits'
+import type { StrongLexiconChapterEntity } from '~features/resources/strongLexiconAccess'
 import { resolveUniverseColors } from '~themes/universeColors'
 import type {
   FocusStudyAction,
@@ -10,13 +16,21 @@ import type {
   FocusVerseStudy as FocusVerseStudyData,
 } from '../focusStudy/focusVerseStudyTypes'
 import type { RootStyles } from './BibleDOMWrapper'
+import { getChapterEntityAvatar } from './chapterEntityAvatar'
 import { INTERFACE_FONT } from './interfaceFont'
 import { withColorAlpha } from './themeOverlayColor'
+import { isDarkTheme } from './utils'
+
+const ENTITY_AVATAR_SIZE = 40
 
 type Props = RootStyles & {
   study: FocusVerseStudyData
   translations: FocusStudyTranslations
+  /** The entities of the chapter, as its end shows them; the study keeps those of its verse. */
+  entities: StrongLexiconChapterEntity[]
+  portraits: EntityPortraitSources
   onAction: (action: FocusStudyAction) => void
+  onOpenEntity: (uniqueName: string) => void
 }
 
 // Every tap target of the study answers the finger the same way.
@@ -50,10 +64,19 @@ const ChevronRight = ({ color }: { color: string }) => (
 
 /**
  * What the reader gathers under the verse it holds in focus: the verse in other Bibles, its
- * original words, the passages read with it, how commentaries begin on it, its topics and the
- * dictionary articles that name it, each a door to its study card (ADR-0088).
+ * original words, the people and places it names, the passages read with it, how commentaries
+ * begin on it, its topics and the dictionary articles that name it, each a door to its study
+ * card or page (ADR-0088).
  */
-const FocusVerseStudy = ({ study, translations, settings, onAction }: Props) => {
+const FocusVerseStudy = ({
+  study,
+  translations,
+  entities,
+  portraits,
+  settings,
+  onAction,
+  onOpenEntity,
+}: Props) => {
   const colors = settings.colors[settings.theme]
   const bibleFont = settings.fontFamily
   const hairline = `0.5px solid ${colors.separator}`
@@ -163,6 +186,8 @@ const FocusVerseStudy = ({ study, translations, settings, onAction }: Props) => 
 
   const strongColors = resolveUniverseColors(colors, 'strong')
   const studyVerse = Number(study.verseKey.split('-')[2])
+  const verseEntities = entities.filter(entity => entity.verses.includes(studyVerse))
+  const portraitGround = getEntityPortraitGround(isDarkTheme(settings.theme), colors)
 
   return (
     <div
@@ -331,6 +356,52 @@ const FocusVerseStudy = ({ study, translations, settings, onAction }: Props) => 
               {footer(translations.wordsAll, 'strong')}
             </div>
           )}
+
+      {verseEntities.length > 0 &&
+        section(
+          translations.entities,
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {verseEntities.map(entity => {
+              const avatar = getChapterEntityAvatar(entity, portraits)
+              return (
+                <Pressable
+                  key={entity.uniqueName}
+                  type="button"
+                  onClick={() => onOpenEntity(entity.uniqueName)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '4px 14px 4px 4px',
+                    borderRadius: radii.card,
+                    background: colors.surface,
+                    color: colors.default,
+                    fontFamily: INTERFACE_FONT,
+                    fontSize: 15,
+                    fontWeight: 600,
+                  }}
+                >
+                  <img
+                    src={avatar.src}
+                    onError={avatar.onError}
+                    alt=""
+                    width={ENTITY_AVATAR_SIZE}
+                    height={ENTITY_AVATAR_SIZE}
+                    style={{
+                      display: 'block',
+                      width: ENTITY_AVATAR_SIZE,
+                      height: ENTITY_AVATAR_SIZE,
+                      objectFit: 'cover',
+                      borderRadius: getEntityAvatarRadius(ENTITY_AVATAR_SIZE),
+                      background: portraitGround,
+                    }}
+                  />
+                  {entity.name}
+                </Pressable>
+              )
+            })}
+          </div>
+        )}
 
       {study.references === undefined
         ? placeholder(3)
