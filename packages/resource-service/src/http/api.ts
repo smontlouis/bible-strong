@@ -80,6 +80,8 @@ import {
   StrongLexiconChapterEntitiesPath,
   StrongLexiconChapterEntitiesQuery,
   StrongLexiconChapterEntitiesResponseDto,
+  StrongLexiconEntitiesResponseDto,
+  StrongLexiconEntityPassagesResponseDto,
   StrongLexiconEntryQuery,
   StrongLexiconEntryDto,
   StrongLexiconEntryCardsDto,
@@ -529,6 +531,25 @@ const StrongLexiconApi = HttpApiGroup.make('strongLexicon')
     HttpApiEndpoint.get('getStrongLexiconMorphologies', '/v1/strong-lexicon/morphologies')
       .setUrlParams(StrongLexiconMorphologyQuery)
       .addSuccess(StrongLexiconMorphologyResponseDto)
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('listStrongLexiconEntities', '/v1/strong-lexicon/entities')
+      .setUrlParams(StrongLexiconLanguageQuery)
+      .addSuccess(StrongLexiconEntitiesResponseDto)
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get(
+      'getStrongLexiconEntityPassages',
+      '/v1/strong-lexicon/entities/:uniqueName/passages'
+    )
+      .setPath(StrongLexiconEntityPath)
+      .addSuccess(StrongLexiconEntityPassagesResponseDto)
       .addError(ResourceNotFoundProblem, { status: 404 })
       .addError(ResourceUnavailableProblem, { status: 503 })
       .addError(ResourceInternalProblem, { status: 500 })

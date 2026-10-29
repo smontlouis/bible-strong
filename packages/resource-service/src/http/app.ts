@@ -88,6 +88,8 @@ import {
   browseStrongLexicon,
   readRandomStrongLexiconEntry,
   readStrongLexiconChapterEntities,
+  readStrongLexiconEntities,
+  readStrongLexiconEntityPassages,
   readStrongLexiconEntry,
   readStrongLexiconEntryCards,
   readStrongLexiconEntity,
@@ -1033,6 +1035,28 @@ const StrongLexiconApiLive = HttpApiBuilder.group(ResourceApi, 'strongLexicon', 
         ['strong-lexicon', 'entity', path.uniqueName, urlParams.language]
       )
     })
+    .handle('listStrongLexiconEntities', ({ urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readStrongLexiconEntities({ language: urlParams.language }).pipe(
+          Effect.mapError(cause => toHttpProblem(cause, requestId))
+        ),
+        requestId,
+        request.headers['if-none-match'],
+        ['strong-lexicon', 'entities', urlParams.language]
+      )
+    })
+    .handle('getStrongLexiconEntityPassages', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readStrongLexiconEntityPassages({ uniqueName: path.uniqueName }).pipe(
+          Effect.mapError(cause => toHttpProblem(cause, requestId))
+        ),
+        requestId,
+        request.headers['if-none-match'],
+        ['strong-lexicon', 'entity-passages', path.uniqueName]
+      )
+    })
     .handle('getStrongLexiconChapterEntities', ({ path, urlParams, request }) => {
       const requestId = requestIdFrom(request.headers['x-request-id'])
       return serveRevisionedResponse(
@@ -1284,6 +1308,10 @@ const unavailableStrongLexiconRepository: StrongLexiconRepositoryService = {
   findEntity: () =>
     Effect.fail(new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'entities' })),
   findChapterEntities: () =>
+    Effect.fail(new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'entities' })),
+  findEntities: () =>
+    Effect.fail(new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'entities' })),
+  findEntityPassages: () =>
     Effect.fail(new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'entities' })),
 }
 

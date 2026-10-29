@@ -115,6 +115,40 @@ const repository: StrongLexiconRepositoryService = {
         },
       ],
     }),
+  findEntities: input =>
+    Effect.succeed({
+      revision: 'entities-r1',
+      value: [
+        {
+          uniqueName: entity.uniqueName,
+          name: input.language === 'fr' ? entity.name : 'Adam',
+          category: 'person',
+          type: entity.type,
+          brief: 'premier homme',
+          chapterCount: 30,
+        },
+        {
+          uniqueName: 'Eden@Gen.2.8-Eze',
+          name: 'Éden',
+          category: 'place',
+          type: 'Place',
+          brief: 'jardin',
+          chapterCount: 12,
+          latitude: 31.1,
+          longitude: 47.5,
+        },
+      ],
+    }),
+  findEntityPassages: input =>
+    input.uniqueName === 'absent'
+      ? Effect.fail(new StrongLexiconEntityNotFound(input))
+      : Effect.succeed({
+          revision: 'entities-r1',
+          value: [
+            { book: 'Gen', chapter: 2, verses: [19, 20] },
+            { book: 'Jud', chapter: 1, verses: [14] },
+          ],
+        }),
 }
 
 const request = (path: string) =>
@@ -270,6 +304,8 @@ describe('v1 Strong lexicon API', () => {
         '/v1/strong-lexicon/morphologies?language=fr&codes=G%3AN-M',
         '/v1/strong-lexicon/entities/Adam%40Gen.2.19-Jud?language=fr',
         '/v1/strong-lexicon/entities/chapters/Gen/1?language=fr',
+        '/v1/strong-lexicon/entities?language=fr',
+        '/v1/strong-lexicon/entities/Adam%40Gen.2.19-Jud/passages',
       ]
       for (const path of paths) {
         const response = await web.handler(request(path))
@@ -284,6 +320,42 @@ describe('v1 Strong lexicon API', () => {
         request('/v1/strong-lexicon/entries?language=fr&prefix=p&limit=10')
       )
       assert.equal(((await page.json()) as { nextCursor?: string }).nextCursor, 'next-page')
+    } finally {
+      await web.dispose()
+    }
+  })
+
+  it('lists the entities and the passages of one for the atlas', async () => {
+    const web = makeResourceWebHandler(undefined, undefined, { strongLexicon: repository })
+    try {
+      const list = await web.handler(request('/v1/strong-lexicon/entities?language=fr'))
+      assert.equal(list.status, 200)
+      assert.ok(list.headers.get('etag'))
+      const listed = (await list.json()) as {
+        entities: { uniqueName: string; latitude?: number }[]
+      }
+      assert.deepEqual(
+        listed.entities.map(item => [item.uniqueName, item.latitude]),
+        [
+          ['Adam@Gen.2.19-Jud', undefined],
+          ['Eden@Gen.2.8-Eze', 31.1],
+        ]
+      )
+
+      const passages = await web.handler(
+        request('/v1/strong-lexicon/entities/Adam%40Gen.2.19-Jud/passages')
+      )
+      assert.equal(passages.status, 200)
+      assert.deepEqual(((await passages.json()) as { passages: unknown[] }).passages, [
+        { book: 'Gen', chapter: 2, verses: [19, 20] },
+        { book: 'Jud', chapter: 1, verses: [14] },
+      ])
+
+      const missing = await web.handler(request('/v1/strong-lexicon/entities/absent/passages'))
+      assert.equal(missing.status, 404)
+
+      const unlocalized = await web.handler(request('/v1/strong-lexicon/entities'))
+      assert.equal(unlocalized.status, 400)
     } finally {
       await web.dispose()
     }

@@ -315,3 +315,40 @@ export class StrongLexiconChapterEntitiesResponseDto extends Schema.Class<Strong
   resource: Schema.Struct({ revision: Schema.String }),
   entities: Schema.Array(StrongLexiconChapterEntityDto),
 }) {}
+
+export class StrongLexiconListedEntityDto extends Schema.Class<StrongLexiconListedEntityDto>(
+  'StrongLexiconListedEntityDto'
+)({
+  uniqueName: Schema.String,
+  name: Schema.String,
+  category: Schema.Literal('person', 'place', 'group', 'supernatural', 'other'),
+  type: Schema.String,
+  brief: Schema.String,
+  chapterCount: Schema.Int,
+  latitude: Schema.optional(Schema.Number),
+  longitude: Schema.optional(Schema.Number),
+}) {}
+
+/** Every entity of the publication, as the atlas of the public site lists them (ADR-0091). */
+export class StrongLexiconEntitiesResponseDto extends Schema.Class<StrongLexiconEntitiesResponseDto>(
+  'StrongLexiconEntitiesResponseDto'
+)({
+  resource: Schema.Struct({ revision: Schema.String }),
+  entities: Schema.Array(StrongLexiconListedEntityDto),
+}) {}
+
+export class StrongLexiconEntityPassageDto extends Schema.Class<StrongLexiconEntityPassageDto>(
+  'StrongLexiconEntityPassageDto'
+)({
+  book: Schema.String,
+  chapter: Schema.Int,
+  verses: Schema.Array(Schema.Int),
+}) {}
+
+/** The chapters and verses that name an entity, in the order of the Bible (ADR-0091). */
+export class StrongLexiconEntityPassagesResponseDto extends Schema.Class<StrongLexiconEntityPassagesResponseDto>(
+  'StrongLexiconEntityPassagesResponseDto'
+)({
+  resource: Schema.Struct({ revision: Schema.String }),
+  passages: Schema.Array(StrongLexiconEntityPassageDto),
+}) {}

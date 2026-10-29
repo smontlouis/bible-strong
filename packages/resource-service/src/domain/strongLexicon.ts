@@ -3,6 +3,10 @@ import { Context, Data, Effect } from 'effect'
 import {
   StrongLexiconChapterEntitiesResponseDto,
   StrongLexiconChapterEntityDto,
+  StrongLexiconEntitiesResponseDto,
+  StrongLexiconEntityPassageDto,
+  StrongLexiconEntityPassagesResponseDto,
+  StrongLexiconListedEntityDto,
   StrongLexiconEntryDto,
   StrongLexiconEntryCardDto,
   StrongLexiconEntryCardsDto,
@@ -24,6 +28,8 @@ import type {
   StrongLexiconEntry,
   StrongLexiconEntryCard,
   StrongLexiconEntity,
+  StrongLexiconEntityPassage,
+  StrongLexiconListedEntity,
   StrongLexiconMorphology,
   StrongLexiconNumberSense,
   StrongLexiconSearchResult,
@@ -134,6 +140,18 @@ export type StrongLexiconRepositoryService = {
     strongCodes: string[]
   }) => Effect.Effect<
     ActiveStrongLexiconValue<StrongLexiconChapterEntity[]>,
+    StrongLexiconRepositoryError
+  >
+  findEntities: (input: {
+    language: StrongLexiconLanguage
+  }) => Effect.Effect<
+    ActiveStrongLexiconValue<StrongLexiconListedEntity[]>,
+    StrongLexiconRepositoryError
+  >
+  findEntityPassages: (input: {
+    uniqueName: string
+  }) => Effect.Effect<
+    ActiveStrongLexiconValue<StrongLexiconEntityPassage[]>,
     StrongLexiconRepositoryError
   >
 }
@@ -321,5 +339,23 @@ export const readStrongLexiconChapterEntities = (input: {
       entities: active.value.map(
         entity => new StrongLexiconChapterEntityDto({ ...entity, verses: entity.verses })
       ),
+    })
+  })
+
+export const readStrongLexiconEntities = (input: { language: StrongLexiconLanguage }) =>
+  Effect.gen(function* () {
+    const active = yield* (yield* StrongLexiconRepository).findEntities(input)
+    return new StrongLexiconEntitiesResponseDto({
+      resource: { revision: active.revision },
+      entities: active.value.map(entity => new StrongLexiconListedEntityDto(entity)),
+    })
+  })
+
+export const readStrongLexiconEntityPassages = (input: { uniqueName: string }) =>
+  Effect.gen(function* () {
+    const active = yield* (yield* StrongLexiconRepository).findEntityPassages(input)
+    return new StrongLexiconEntityPassagesResponseDto({
+      resource: { revision: active.revision },
+      passages: active.value.map(passage => new StrongLexiconEntityPassageDto(passage)),
     })
   })

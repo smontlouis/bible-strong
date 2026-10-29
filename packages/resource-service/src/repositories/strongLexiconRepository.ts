@@ -22,15 +22,18 @@ import {
   type StrongLexiconModuleState,
   type StrongLexiconRepositoryService,
 } from '../domain/strongLexicon'
-import type {
-  StrongLexiconChapterEntity,
-  StrongLexiconEntity,
-  StrongLexiconEntityRelation,
-  StrongLexiconEntry,
-  StrongLexiconEntryCard,
-  StrongLexiconMorphology,
-  StrongLexiconNumberSense,
-  StrongLexiconSearchResult,
+import {
+  TIPNR_BOOK_CODES,
+  type StrongLexiconChapterEntity,
+  type StrongLexiconEntity,
+  type StrongLexiconEntityPassage,
+  type StrongLexiconEntityRelation,
+  type StrongLexiconListedEntity,
+  type StrongLexiconEntry,
+  type StrongLexiconEntryCard,
+  type StrongLexiconMorphology,
+  type StrongLexiconNumberSense,
+  type StrongLexiconSearchResult,
 } from '@bible-strong/resource-domain/strong-lexicon'
 import {
   decodeStrongLexiconPageCursor,
@@ -67,6 +70,16 @@ const text = (row: Payload, key: string): string =>
 const number = (row: Payload, key: string): number => Number(row[key] ?? 0)
 const localized = (language: StrongLexiconLanguage, translated: string, fallback: string) =>
   language === 'fr' && translated.trim() ? translated : fallback
+/** The family a list gives an entity: supernatural beings apart from the other entities. */
+const listedEntityCategory = (
+  category: string,
+  type: string
+): StrongLexiconChapterEntity['category'] =>
+  type.toLowerCase() === 'supernatural'
+    ? 'supernatural'
+    : category === 'person' || category === 'place' || category === 'group'
+      ? category
+      : 'other'
 const normalizeCode = (value: string) =>
   createStrongIdentity(value, value.trim().toUpperCase().startsWith('H') ? 'hebrew' : 'greek').code
 const normalizeText = (value: string): string =>
@@ -2891,15 +2904,8 @@ export const makeKyselyStrongLexiconRepository = (
           .map((entity): StrongLexiconChapterEntity => {
             const id = number(entity, 'id')
             const translation = translations.find(row => number(row, 'entityId') === id)
-            const category = text(entity, 'category')
             const type = text(entity, 'type')
-            const chapterCategory = (
-              type.toLowerCase() === 'supernatural'
-                ? 'supernatural'
-                : category === 'person' || category === 'place' || category === 'group'
-                  ? category
-                  : 'other'
-            ) as StrongLexiconChapterEntity['category']
+            const chapterCategory = listedEntityCategory(text(entity, 'category'), type)
             return {
               uniqueName: text(entity, 'uniqueName'),
               name: localized(
@@ -2934,6 +2940,116 @@ export const makeKyselyStrongLexiconRepository = (
               left.uniqueName.localeCompare(right.uniqueName)
             )
           })
+        return { revision: entityRepresentationRevision(core, state), value }
+      }).pipe(Effect.mapError(mapRepositoryCause)),
+
+    findEntities: input =>
+      tryDatabasePromise('strong-lexicon.entities', async () => {
+        const core = await requiredCore(input.language)
+        const entityPublication = await activePublication('entities')
+        const state = moduleStateFrom('entities', entityPublication, core.revision)
+        if (!entityPublication || state.status !== 'available') {
+          throw new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'entities' })
+        }
+        type ListedEntityRow = {
+          entity: Payload
+          translation: Payload | null
+          place: Payload | null
+          chapters: number | string
+        }
+        // One statement for the whole publication: each entity with its translation, its place
+        // and the number of chapters that name it.
+        const rows = (
+          await sql<ListedEntityRow>`
+            SELECT e.payload AS entity, t.payload AS translation, p.payload AS place,
+                   coalesce(r.chapters, 0) AS chapters
+              FROM strong_lexicon_entities e
+              LEFT JOIN strong_lexicon_entity_translations t
+                ON t.publication_id = e.publication_id
+               AND t.entity_id = e.entity_id
+               AND t.language = ${input.language}
+              LEFT JOIN strong_lexicon_entity_places p
+                ON p.publication_id = e.publication_id AND p.entity_id = e.entity_id
+              LEFT JOIN (
+                SELECT entity_id, count(DISTINCT (book, chapter)) AS chapters
+                  FROM strong_lexicon_entity_refs
+                 WHERE publication_id = ${entityPublication.id}
+                 GROUP BY entity_id
+              ) r ON r.entity_id = e.entity_id
+             WHERE e.publication_id = ${entityPublication.id}
+             ORDER BY e.entity_id
+          `.execute(database)
+        ).rows
+        const value = rows.map(
+          ({ entity, translation, place, chapters }): StrongLexiconListedEntity => {
+            const type = text(entity, 'type')
+            return {
+              uniqueName: text(entity, 'uniqueName'),
+              name: localized(
+                input.language,
+                text(translation ?? {}, 'displayName'),
+                text(entity, 'displayName')
+              ).replace(/_+/gu, ' '),
+              category: listedEntityCategory(text(entity, 'category'), type),
+              type,
+              brief: localized(
+                input.language,
+                text(translation ?? {}, 'brief'),
+                text(entity, 'brief')
+              ),
+              chapterCount: Number(chapters),
+              // A latitude of 0 is how the publication says it does not know where a place lies.
+              ...(place?.latitude != null && place.longitude != null && Number(place.latitude) !== 0
+                ? { latitude: number(place, 'latitude'), longitude: number(place, 'longitude') }
+                : {}),
+            }
+          }
+        )
+        return { revision: entityRepresentationRevision(core, state), value }
+      }).pipe(Effect.mapError(mapRepositoryCause)),
+
+    findEntityPassages: input =>
+      tryDatabasePromise('strong-lexicon.entity-passages', async () => {
+        const core = await requiredCore('en')
+        const entityPublication = await activePublication('entities')
+        const state = moduleStateFrom('entities', entityPublication, core.revision)
+        if (!entityPublication || state.status !== 'available') {
+          throw new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'entities' })
+        }
+        const entity = (
+          await sql<{ entity_id: number }>`
+            SELECT entity_id FROM strong_lexicon_entities
+             WHERE publication_id = ${entityPublication.id} AND unique_name = ${input.uniqueName}
+          `.execute(database)
+        ).rows[0]
+        if (!entity) throw new StrongLexiconEntityNotFound({ uniqueName: input.uniqueName })
+        type PassageRow = { book: string; chapter: number; verses: number[] | null }
+        const rows = (
+          await sql<PassageRow>`
+            SELECT book, chapter,
+                   array_agg(DISTINCT verse ORDER BY verse) FILTER (WHERE verse > 0) AS verses
+              FROM strong_lexicon_entity_refs
+             WHERE publication_id = ${entityPublication.id} AND entity_id = ${entity.entity_id}
+             GROUP BY book, chapter
+          `.execute(database)
+        ).rows
+        // A book the publication codes otherwise goes after the Bible's own.
+        const bookOrder = (book: string) => {
+          const index = (TIPNR_BOOK_CODES as readonly string[]).indexOf(book)
+          return index < 0 ? TIPNR_BOOK_CODES.length : index
+        }
+        const value: StrongLexiconEntityPassage[] = rows
+          .map(row => ({
+            book: row.book,
+            chapter: Number(row.chapter),
+            verses: (row.verses ?? []).map(Number),
+          }))
+          .sort(
+            (left, right) =>
+              bookOrder(left.book) - bookOrder(right.book) ||
+              left.book.localeCompare(right.book) ||
+              left.chapter - right.chapter
+          )
         return { revision: entityRepresentationRevision(core, state), value }
       }).pipe(Effect.mapError(mapRepositoryCause)),
   }
