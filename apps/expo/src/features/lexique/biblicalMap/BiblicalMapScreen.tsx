@@ -1,0 +1,79 @@
+import { biblicalMapBounds } from '@bible-strong/resource-domain/biblical-map'
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import Header from '~common/Header'
+import Loading from '~common/Loading'
+import Box from '~common/ui/Box'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
+import Text from '~common/ui/Text'
+import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { useStrongRouteNavigation } from '../useStrongRouteNavigation'
+import BiblicalMap from './BiblicalMap'
+import { useBiblicalPlaces } from './useBiblicalPlaces'
+
+/**
+ * The map of every place of the Bible, travelled with the fingers. It opens on a place and its
+ * surroundings, on the places of a chapter brought forward, or on the Promised Land. A place
+ * touched opens its page.
+ */
+const BiblicalMapScreen = ({
+  focus,
+  placeNames,
+  title,
+  isFormSheet,
+}: {
+  focus?: string
+  /** The places brought forward, the others dimmed: the places of a chapter. */
+  placeNames?: string[]
+  title?: string
+  isFormSheet?: boolean
+}) => {
+  const { t } = useTranslation()
+  const canGoBack = useCanGoBackInStack()
+  const navigation = useStrongRouteNavigation({})
+  const { places, loading } = useBiblicalPlaces()
+  const highlighted = useMemo(() => new Set(placeNames ?? []), [placeNames])
+  const region = useMemo(() => {
+    if (focus) {
+      const self = places.find(place => place.uniqueName === focus)
+      return self ? biblicalMapBounds([self], 200) : undefined
+    }
+    return biblicalMapBounds(places.filter(place => highlighted.has(place.uniqueName)))
+  }, [places, focus, highlighted])
+  const missing = Boolean(placeNames?.length) && !loading && !region
+
+  return (
+    <FormSheetScreen isFormSheet={isFormSheet}>
+      <Header
+        hasBackButton={isFormSheet ? canGoBack : true}
+        title={title || t('strongDetail.entity.mapTitle')}
+      />
+      <Box className="overflow-hidden border-continuous flex-[1]">
+        {loading ? (
+          <Loading message={t('Chargement...')} />
+        ) : (
+          <BiblicalMap
+            places={places}
+            focus={focus}
+            highlighted={highlighted}
+            region={region}
+            interactive
+            onOpenPlace={navigation.openEntity}
+            style={{ flex: 1 }}
+          />
+        )}
+        {missing && (
+          <Box
+            className="overflow-hidden border-continuous bg-surface-raised rounded-[12px] px-[14px] py-[10px]"
+            style={{ position: 'absolute', left: 12, right: 12, top: 12 }}
+          >
+            <Text className="text-[14px]">{t('strongDetail.entity.mapNoPlace')}</Text>
+          </Box>
+        )}
+      </Box>
+    </FormSheetScreen>
+  )
+}
+
+export default BiblicalMapScreen

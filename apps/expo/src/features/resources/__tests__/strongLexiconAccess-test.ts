@@ -1175,6 +1175,46 @@ describe('strongLexiconAccess', () => {
     await expect(localStrongLexiconAccess.loadChapterEntities(1, 23, 'fr')).resolves.toEqual([])
   })
 
+  it('lists the located places of the entity module in the reader language', async () => {
+    const entitiesDatabase = {
+      getAllAsync: jest.fn().mockResolvedValueOnce([
+        {
+          uniqueName: 'Jerusalem@Gen.14.18-Rev',
+          displayName: 'Jerusalem',
+          localizedDisplayName: 'Jérusalem',
+          type: 'Place',
+          brief: 'Capital of Israel',
+          localizedBrief: 'Capitale d’Israël',
+          latitude: 31.78,
+          longitude: 35.23,
+          chapterCount: 351,
+        },
+      ]),
+    }
+    mockGetStrongLexiconModuleAvailability.mockResolvedValue({
+      status: 'available',
+      moduleId: 'entities',
+      schemaVersion: 1,
+    })
+    mockWithOptionalStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(entitiesDatabase as unknown as SQLiteDatabase)
+    )
+
+    await expect(localStrongLexiconAccess.loadPlaces('fr')).resolves.toEqual([
+      {
+        uniqueName: 'Jerusalem@Gen.14.18-Rev',
+        name: 'Jérusalem',
+        category: 'place',
+        type: 'Place',
+        brief: 'Capitale d’Israël',
+        chapterCount: 351,
+        latitude: 31.78,
+        longitude: 35.23,
+      },
+    ])
+    expect(entitiesDatabase.getAllAsync.mock.calls[0][1]).toEqual(['fr'])
+  })
+
   it('does not query chapter entities when the module or book is unavailable', async () => {
     await expect(localStrongLexiconAccess.loadChapterEntities(1, 1, 'fr')).resolves.toEqual([])
     await expect(localStrongLexiconAccess.loadChapterEntities(67, 1, 'fr')).resolves.toEqual([])
@@ -1222,6 +1262,7 @@ const createHybridStub = (
   loadMorphologies: jest.fn(async () => []),
   loadEntity: jest.fn(async () => undefined),
   loadChapterEntities: jest.fn(async () => []),
+  loadPlaces: jest.fn(async () => []),
   listEntries: jest.fn(async () => ({ entries: [{ gloss: label }] as never })),
   search: jest.fn(async () => [{ gloss: label }] as never),
   browseByGlossPrefix: jest.fn(async () => [{ gloss: label }] as never),

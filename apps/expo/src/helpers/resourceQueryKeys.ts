@@ -99,6 +99,7 @@ export const resourceQueryKeys = {
     chapter: number
     strongCodes: readonly string[]
   }) => [...strongLexicon, 'chapter-entities', request] as const,
+  strongLexiconPlaces: (language: string) => [...strongLexicon, 'places', language] as const,
   offlineDatabaseAvailability: (databaseId: string, language: string) =>
     [...offlineDatabase, 'availability', databaseId, language] as const,
   timeline: (language: string) => [...timeline, language] as const,

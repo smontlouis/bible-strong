@@ -45,6 +45,7 @@ import {
   SWIPE_UP,
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_BIBLICAL_ENTITY,
+  NAVIGATE_TO_BIBLICAL_MAP,
   TOGGLE_SELECTED_VERSE,
   OPEN_DOWNLOADS,
   RESET_BIBLE_DATABASE,
@@ -221,6 +222,7 @@ type Props = Pick<
     title: string
     groups: { person: string; place: string; group: string; supernatural: string; other: string }
     openEntity: string
+    openMap: string
     empty: string
     downloadTitle: string
     downloadDescription: string
@@ -1783,6 +1785,9 @@ const LoadedBibleContent = ({
               }
               onOpenEntity={uniqueName => {
                 void dispatch({ type: NAVIGATE_TO_BIBLICAL_ENTITY, payload: uniqueName })
+              }}
+              onOpenMap={places => {
+                void dispatch({ type: NAVIGATE_TO_BIBLICAL_MAP, payload: places.join(',') })
               }}
               onDownload={() => {
                 void dispatch({ type: DOWNLOAD_CHAPTER_ENTITIES })

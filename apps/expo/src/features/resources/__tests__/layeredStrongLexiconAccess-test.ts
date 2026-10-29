@@ -47,6 +47,7 @@ const source = (value?: StrongLexiconEntry): StrongLexiconAccess => ({
   loadMorphologies: async () => [],
   loadEntity: async () => undefined,
   loadChapterEntities: async () => [],
+  loadPlaces: async () => [],
   listEntries: async () => ({ entries: [] }),
   search: async () => [],
   browseByGlossPrefix: async () => [],

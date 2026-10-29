@@ -73,6 +73,23 @@ the lexicon, and the chapters that name it as links to the Bible. A place also s
 The pages are designed as the timeline's: a showcase of the product, not a column of text with a
 list under it. They take their values from the design system and its two themes.
 
+### The map, in the application too
+
+The map of the places is one drawing for the site and the application. The projection, the windows
+a map opens on and the rule that places names (from the place in focus and the most named down,
+none covering another or a painting) live in `@bible-strong/resource-domain/biblical-map`. The
+ground is drawn once from Natural Earth by `apps/site/scripts/build-atlas-map.py`, as an SVG for the
+site and as path strings for the application, which draws them with react-native-svg.
+
+In the application:
+
+- the page of a place shows where it lies, with its neighbours, and opens the map of every place;
+- that map moves under the fingers and zooms with them; a place touched opens its page;
+- the end of a chapter that names places opens the same map with those places brought forward.
+
+The places come from the entity module on the device once it is downloaded, from the list of the
+Resource API otherwise: the map works offline, with no tiles and no map service.
+
 ## Consequences
 
 - About 8,500 new indexable pages. Their first visit by crawlers reads Neon; later ones are

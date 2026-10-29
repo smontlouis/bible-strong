@@ -105,6 +105,7 @@ import {
   NAVIGATE_TO_BIBLE_NOTE,
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_BIBLICAL_ENTITY,
+  NAVIGATE_TO_BIBLICAL_MAP,
   NAVIGATE_TO_STRONG,
   DOWNLOAD_CHAPTER_ENTITIES,
   DISMISS_CONTEXTUAL_INFORMATION,
@@ -656,6 +657,7 @@ export const BibleDOMWrapper = ({
     },
     // Keeps {{name}} for the web view, which puts each entity's name in it.
     openEntity: t('bible.chapterEntities.open', { interpolation: { skipOnVariables: true } }),
+    openMap: t('bible.chapterEntities.openMap'),
     empty: t('bible.chapterEntities.empty'),
     downloadTitle: t('strongLexicon.biblicalEntities'),
     downloadDescription: t('strongLexicon.biblicalEntitiesDescription'),
@@ -735,6 +737,15 @@ export const BibleDOMWrapper = ({
             { entityKey }
           )
         )
+        break
+      }
+      case NAVIGATE_TO_BIBLICAL_MAP: {
+        const places = getStringPayload(action.payload)
+        if (!places) break
+        pushRouteOnce({
+          pathname: '/strong/map',
+          params: { places, title: `${t(book.Nom)} ${chapter}` },
+        })
         break
       }
       case NAVIGATE_TO_STRONG: {

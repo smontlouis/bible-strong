@@ -28,6 +28,7 @@ type ChapterEntityTranslations = {
   title: string
   groups: Record<StrongLexiconEntityCategory, string>
   openEntity: string
+  openMap: string
   empty: string
   downloadTitle: string
   downloadDescription: string
@@ -45,6 +46,8 @@ type Props = RootStyles & {
   translations: ChapterEntityTranslations
   chapterResources?: ReactNode
   onOpenEntity: (uniqueName: string) => void
+  /** The map of the places of the Bible, the places of this chapter brought forward. */
+  onOpenMap: (uniqueNames: string[]) => void
   onDownload: () => void
   onDismiss: () => void
 }
@@ -59,6 +62,7 @@ const ChapterEntities = ({
   translations,
   chapterResources,
   onOpenEntity,
+  onOpenMap,
   onDownload,
   onDismiss,
 }: Props) => {
@@ -78,6 +82,8 @@ const ChapterEntities = ({
   const showsPainted = viewMode === 'entities' && painted.length > 0
   const showsStack = viewMode === 'entities' && stacked.length > 0
   const stackedEntities = stacked.slice(0, MAX_STACKED_ENTITIES)
+  const places =
+    viewMode === 'entities' ? entities.filter(entity => entity.category === 'place') : []
   const layoutTransition = getOverlayLayoutTransition(shouldReduceMotion)
   const sectionStyle: CSSProperties = {
     direction: 'ltr',
@@ -383,6 +389,33 @@ const ChapterEntities = ({
             </LayoutGroup>
           )}
           {chapterResources}
+        </div>
+      )}
+      {places.length > 0 && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 18 }}>
+          <m.button
+            type="button"
+            data-ignore-verse-touch
+            whileTap={{ opacity: 0.55 }}
+            onClick={() => onOpenMap(places.map(place => place.uniqueName))}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '8px 14px',
+              border: 0,
+              borderRadius: 999,
+              background: colors.lightPrimary,
+              color: colors.link,
+              fontFamily: settings.fontFamily,
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            <Feather name="map" size={15} color={colors.link} />
+            {translations.openMap}
+          </m.button>
         </div>
       )}
     </section>

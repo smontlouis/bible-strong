@@ -1,12 +1,10 @@
 import { pageContentStyle } from '~common/ui/PageContent'
 import React from 'react'
-import { Linking, ScrollView } from 'react-native'
+import { ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import Empty from '~common/Empty'
 import Loading from '~common/Loading'
-import Box, { HStack, TouchableBox, VStack, usePageBottomInset } from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
-import Text from '~common/ui/Text'
+import { usePageBottomInset } from '~common/ui/Box'
 import type {
   StrongLexiconEntity,
   StrongLexiconEntityRelation,
@@ -16,6 +14,7 @@ import { StrongEntityRelationList, StrongEntitySummaryCard } from './StrongDetai
 import { STUDY_COLUMN_MAX_WIDTH, StudyCardBody, StudySection } from '~common/ui/StudySection'
 import { StrongEntityRelationGraph } from './StrongEntityRelationGraph'
 import StrongEntityPortraitHeader from './StrongEntityPortraitHeader'
+import StrongEntityPlaceMap from './biblicalMap/StrongEntityPlaceMap'
 import { useEntityPortraitCatalog } from './entityPortraitManifest'
 import { splitStrongEntityRelations } from './strongEntityPresentation'
 import type { StrongReadingTypography } from './strongEditorialHtmlStyles'
@@ -28,9 +27,9 @@ type Props = {
   onOpenStrong: (stepCode: string) => void
   onOpenEntityProfile: (entityKey: string) => void
   onOpenEntityRelation: (relation: StrongLexiconEntityRelation) => void
+  /** The map of the places of the Bible, opened on this place. */
+  onOpenMap?: (focus: string) => void
 }
-
-const ENTITY_LOCATION_VISIBLE = false
 
 const StrongEntityPage = ({
   language,
@@ -41,6 +40,7 @@ const StrongEntityPage = ({
   onOpenStrong,
   onOpenEntityProfile,
   onOpenEntityRelation,
+  onOpenMap,
 }: Props) => {
   const { t, i18n } = useTranslation()
   const bottomInset = usePageBottomInset()
@@ -102,47 +102,9 @@ const StrongEntityPage = ({
         </Card>
       )}
 
-      {ENTITY_LOCATION_VISIBLE && !!place && (
+      {entity.category === 'place' && !!place && onOpenMap && (
         <StudySection title={t('strongDetail.entity.location')}>
-          <VStack className="overflow-hidden border-continuous gap-[8px]">
-            <HStack className="overflow-hidden border-continuous items-center gap-[10px]">
-              <Box
-                className="overflow-hidden border-continuous rounded-full bg-light-primary items-center justify-center"
-                style={{ width: 42, height: 42 }}
-              >
-                <FeatherIcon name="map-pin" color="primary" size={20} />
-              </Box>
-              <VStack className="overflow-hidden border-continuous flex-[1] gap-[2px]">
-                <Text className="font-bold text-[17px]">{place.name || entity.name}</Text>
-                {!!place.area && <Text className="text-tertiary">{place.area}</Text>}
-              </VStack>
-            </HStack>
-            {place.latitude != null && place.longitude != null && (
-              <Text className="text-tertiary text-[12px]">
-                {place.latitude}, {place.longitude}
-              </Text>
-            )}
-            <HStack className="overflow-hidden border-continuous gap-[10px] flex-wrap">
-              {!!place.palopenmapsUrl && (
-                <TouchableBox
-                  className="overflow-hidden border-continuous"
-                  onPress={() => Linking.openURL(place.palopenmapsUrl!)}
-                >
-                  <Text className="text-link font-bold text-[13px]">
-                    {t('strongDetail.entity.bibleMap')}
-                  </Text>
-                </TouchableBox>
-              )}
-              {!!place.googleMapUrl && (
-                <TouchableBox
-                  className="overflow-hidden border-continuous"
-                  onPress={() => Linking.openURL(place.googleMapUrl!)}
-                >
-                  <Text className="text-link font-bold text-[13px]">Google Maps</Text>
-                </TouchableBox>
-              )}
-            </HStack>
-          </VStack>
+          <StrongEntityPlaceMap entity={entity} onOpenMap={onOpenMap} />
         </StudySection>
       )}
 

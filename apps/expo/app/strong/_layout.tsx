@@ -21,6 +21,7 @@ const StrongLayout = () => {
         <Stack.Screen name="[code]/concordance" />
         <Stack.Screen name="entity/[uniqueName]" />
         <Stack.Screen name="entity" />
+        <Stack.Screen name="map" />
         <Stack.Screen name="dictionary" />
         <Stack.Screen name="related" />
         <Stack.Screen name="concordance" />

@@ -7,6 +7,7 @@ import type {
   StrongLexiconEntryCard,
   StrongLexiconEntity,
   StrongLexiconEntityCategory,
+  StrongLexiconListedEntity,
   StrongLexiconListRequest,
   StrongLexiconMorphology,
   StrongLexiconPage,
@@ -33,6 +34,7 @@ import {
   decodeStrongLexiconPageCursor,
   encodeStrongLexiconPageCursor,
   StrongLexiconChapterEntitiesResponseDto,
+  StrongLexiconEntitiesResponseDto,
   StrongLexiconEntryDto,
   StrongLexiconEntryCardsDto,
   StrongLexiconEntityResponseDto,
@@ -553,6 +555,18 @@ const TIPNR_BOOK_CODES = [
 
 export const getTipnrBookCode = (book: number): string | undefined => TIPNR_BOOK_CODES[book - 1]
 
+type PlaceRow = {
+  uniqueName: string
+  displayName: string
+  localizedDisplayName: string | null
+  type: string
+  brief: string
+  localizedBrief: string | null
+  latitude: number
+  longitude: number
+  chapterCount: number
+}
+
 type ChapterEntityRow = {
   uniqueName: string
   displayName: string
@@ -883,6 +897,8 @@ export type StrongLexiconAccess = {
     language: ResourceLanguage,
     strongCodes?: string[]
   ) => Promise<StrongLexiconChapterEntity[]>
+  /** Every place the entity publication locates, for the map of the places of the Bible. */
+  loadPlaces: (language: ResourceLanguage) => Promise<StrongLexiconListedEntity[]>
   listEntries: (request: StrongLexiconListRequest) => Promise<StrongLexiconPage>
   search: (
     query: string,
@@ -1030,6 +1046,40 @@ export const createLocalStrongLexiconAccess = (
         )
         return rows.map(row => toChapterEntity(row, language))
       }).then(entities => entities ?? [])
+    },
+
+    async loadPlaces(language) {
+      const availability = await getRegisteredStrongLexiconAvailability('entities')
+      if (availability.status !== 'available') return []
+      return withOptionalStrongLexiconDatabase('entities', async database => {
+        const rows = await database.getAllAsync<PlaceRow>(
+          `SELECT e.uniqueName, e.displayName, e.type, e.brief,
+                tr.displayName AS localizedDisplayName, tr.brief AS localizedBrief,
+                p.latitude, p.longitude,
+                (SELECT COUNT(DISTINCT refs.book || '.' || refs.chapter)
+                   FROM EntityRefs refs WHERE refs.entityId=e.id) AS chapterCount
+           FROM Entities e
+           JOIN EntityPlaces p ON p.entityId=e.id
+           LEFT JOIN EntityTranslations tr ON tr.entityId=e.id AND tr.language=?
+          WHERE e.category='place' AND p.latitude IS NOT NULL AND p.latitude<>0
+            AND p.longitude IS NOT NULL`,
+          [language]
+        )
+        return rows.map(
+          (row): StrongLexiconListedEntity => ({
+            uniqueName: row.uniqueName,
+            name: formatStrongEntityDisplayName(
+              chooseLocalized(language, row.localizedDisplayName, row.displayName)
+            ),
+            category: 'place',
+            type: row.type,
+            brief: chooseLocalized(language, row.localizedBrief, row.brief),
+            chapterCount: row.chapterCount,
+            latitude: row.latitude,
+            longitude: row.longitude,
+          })
+        )
+      }).then(places => places ?? [])
     },
 
     async loadEntry(identity, language, options) {
@@ -1440,6 +1490,19 @@ export const createHttpStrongLexiconAccess = ({
       )
       return response.entities.map(entity => ({ ...entity, verses: [...entity.verses] }))
     },
+    async loadPlaces(language) {
+      // The list of the whole publication, kept by the answer cache; the map keeps its places.
+      const response = await get(
+        `/v1/strong-lexicon/entities?${languageQuery(language)}`,
+        StrongLexiconEntitiesResponseDto
+      )
+      return response.entities.filter(
+        entity =>
+          entity.category === 'place' &&
+          entity.latitude !== undefined &&
+          entity.longitude !== undefined
+      )
+    },
     listEntries({ signal, language, lexicalLanguage, search, prefix, limit = 100, cursor }) {
       const query = new URLSearchParams({ language, limit: String(limit) })
       if (lexicalLanguage) query.set('lexicalLanguage', lexicalLanguage)
@@ -1626,6 +1689,12 @@ export const createHybridStrongLexiconAccess = ({
         'entities',
         () => offline.loadChapterEntities(book, chapter, language, strongCodes),
         () => online.loadChapterEntities(book, chapter, language, strongCodes)
+      ),
+    loadPlaces: language =>
+      select(
+        'entities',
+        () => offline.loadPlaces(language),
+        () => online.loadPlaces(language)
       ),
     listEntries: request =>
       searchFirstOnline(

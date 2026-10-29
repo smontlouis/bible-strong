@@ -35,6 +35,18 @@ export const useStrongRouteNavigation = (context: StrongDetailRouteContext) => {
     )
   }
 
+  /** The map of the places of the Bible, opened on a place or on the places of a chapter. */
+  const openMap = (options: { focus?: string; places?: string[]; title?: string }) => {
+    pushRouteOnce({
+      pathname: '/strong/map',
+      params: {
+        ...(options.focus ? { focus: options.focus } : {}),
+        ...(options.places?.length ? { places: options.places.join(',') } : {}),
+        ...(options.title ? { title: options.title } : {}),
+      },
+    })
+  }
+
   const openEntityRelation = (relation: StrongLexiconEntityRelation) => {
     if (relation.targetUniqueName) openEntity(relation.targetUniqueName)
   }
@@ -62,5 +74,6 @@ export const useStrongRouteNavigation = (context: StrongDetailRouteContext) => {
     openEntity,
     openEntityRelation,
     openConcordanceVerse,
+    openMap,
   }
 }

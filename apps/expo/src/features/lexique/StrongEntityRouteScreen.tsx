@@ -70,6 +70,7 @@ const StrongEntityRouteScreen = ({ context, entityKey, isFormSheet = false }: Pr
         onOpenStrong={navigation.openStrong}
         onOpenEntityProfile={navigation.openEntity}
         onOpenEntityRelation={navigation.openEntityRelation}
+        onOpenMap={focus => navigation.openMap({ focus })}
       />
     </StrongEntryRouteScaffold>
   )
