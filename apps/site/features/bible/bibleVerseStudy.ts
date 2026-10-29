@@ -3,8 +3,15 @@ import type {
   BibleVerseTextsDto,
 } from '@bible-strong/resource-domain/contracts/bibleChapterContract'
 import type { StrongBibleChapterDto } from '@bible-strong/resource-domain/contracts/strongBibleContract'
-import type { StrongLexiconEntryCardsDto } from '@bible-strong/resource-domain/contracts/strongLexiconContract'
+import type {
+  StrongLexiconChapterEntitiesResponseDto,
+  StrongLexiconEntryCardsDto,
+} from '@bible-strong/resource-domain/contracts/strongLexiconContract'
+import { TIPNR_BOOK_CODES } from '@bible-strong/resource-domain/strong-lexicon'
 import type { CommentaryVerseSectionsResponseDto } from '@bible-strong/resource-domain/contracts/supplementaryContract'
+import { readAtlasPortraitCatalog } from '../atlas/atlas.functions'
+import { entityClayUrl, entityPortraitUrl } from '../atlas/atlasPortraits'
+import { buildAtlasEntityPath } from '../atlas/atlasRoutes'
 import { listCommentaries } from '../commentary/commentaryCatalog'
 import { commentaryExcerpt, renderCommentaryHtml } from '../commentary/commentaryHtml'
 import type { CommentaryLink } from '../commentary/commentaryLinks'
@@ -88,6 +95,8 @@ export type VerseStudyData = {
   comments: VerseComment[]
   topics: { name: string; path: string }[]
   dictionary: { word: string; path: string }[]
+  /** The people, places and nations the verse names, each leading to its page in the atlas. */
+  entities: { name: string; path: string; picture: string }[]
 }
 
 // Every part of the study is read through `reads.optional`: a part that cannot be read is
@@ -386,10 +395,41 @@ const loadDictionary = async (
   })
 }
 
+const loadEntities = async (
+  reads: PageReads,
+  language: ResourceLanguage,
+  verse: VerseKey
+): Promise<VerseStudyData['entities']> => {
+  const bookCode = TIPNR_BOOK_CODES[verse.book - 1]
+  if (!bookCode) return []
+  // The entities of the chapter, as its end lists them in the app, then those of this verse.
+  const [found, portraits] = await Promise.all([
+    reads.optional(() =>
+      readResource<StrongLexiconChapterEntitiesResponseDto>(
+        `/v1/strong-lexicon/entities/chapters/${bookCode}/${verse.chapter}`,
+        { language }
+      )
+    ),
+    reads.optional(readAtlasPortraitCatalog),
+  ])
+  return (found?.entities ?? [])
+    .filter(entity => entity.verses.includes(verse.verse))
+    .map(entity => {
+      const portrait = portraits?.entities[entity.uniqueName]
+      return {
+        name: entity.name,
+        path: buildAtlasEntityPath(language, entity.uniqueName),
+        picture: portrait
+          ? entityPortraitUrl(entity.uniqueName, portrait.hash, 'w256')
+          : entityClayUrl(entity.category, entity.type, entity.uniqueName),
+      }
+    })
+}
+
 /**
  * Everything a verse page shows around its verse: the verse in a few other Bibles and in its
- * original language, its words, the passages it is read with, how commentaries begin on it,
- * and the topics and dictionary articles that name it.
+ * original language, its words, the people and places it names, the passages it is read with,
+ * how commentaries begin on it, and the topics and dictionary articles that name it.
  *
  * Nothing here waits for the chapter of the page: what the study needs from it comes as
  * promises, so its reads leave with the read of the chapter instead of after it.
@@ -422,14 +462,16 @@ export const loadVerseStudy = async ({
     )
   )
   // The reads another read waits for are asked first: the words, then the cross-references.
-  const [words, crossReferences, quoted, comments, topics, dictionary] = await Promise.all([
-    loadWords(reads, language, versionId, verse, verseText, texts),
-    loadCrossReferences(reads, language, versionId, verse),
-    texts,
-    commenting.then(links => loadComments(reads, language, verse, links)),
-    loadTopics(reads, language, verse),
-    loadDictionary(reads, language, verse),
-  ])
+  const [words, crossReferences, quoted, comments, topics, dictionary, entities] =
+    await Promise.all([
+      loadWords(reads, language, versionId, verse, verseText, texts),
+      loadCrossReferences(reads, language, versionId, verse),
+      texts,
+      commenting.then(links => loadComments(reads, language, verse, links)),
+      loadTopics(reads, language, verse),
+      loadDictionary(reads, language, verse),
+      loadEntities(reads, language, verse),
+    ])
   return {
     versions: presentOtherVersions(language, versionId, verse, quoted),
     original:
@@ -439,5 +481,6 @@ export const loadVerseStudy = async ({
     comments,
     topics,
     dictionary,
+    entities,
   }
 }

@@ -29,9 +29,9 @@ const Quotes = ({ quotes, lang }: { quotes: readonly VerseQuote[]; lang?: string
 
 /**
  * What a verse is studied with, under the verse itself: other Bibles, the verses around it,
- * its words in the original language, the passages it is read with, how commentaries begin
- * on it, and the topics and dictionary articles that name it. A part with nothing to show
- * is left out.
+ * its words in the original language, the people and places it names, the passages it is
+ * read with, how commentaries begin on it, and the topics and dictionary articles that name
+ * it. A part with nothing to show is left out.
  */
 export default function BibleVerseDetails({
   study,
@@ -126,6 +126,23 @@ export default function BibleVerseDetails({
               ))}
             </ul>
           )}
+        </Section>
+      )}
+
+      {study.entities.length > 0 && (
+        <Section title={title('bible.verse.entities')}>
+          <ul className="atlas-relations__list">
+            {study.entities.map(entity => (
+              <li key={entity.path}>
+                <a className="atlas-relation" href={entity.path}>
+                  <span className="atlas-picture">
+                    <img src={entity.picture} alt="" width={44} height={44} loading="lazy" />
+                  </span>
+                  <span>{entity.name}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
         </Section>
       )}
 

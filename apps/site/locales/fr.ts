@@ -244,6 +244,7 @@ export default {
   'bible.verse.comments': 'Commentaires sur {verse}',
   'bible.verse.readComment': 'Lire le commentaire',
   'bible.verse.topics': 'Thèmes liés à {verse}',
+  'bible.verse.entities': 'Personnages et lieux de {verse}',
   'bible.verse.dictionary': 'Dans les dictionnaires',
   'bible.nav.commentaries': 'Commentaires',
   'bible.nav.commentaries.title': 'Afficher dans le texte',

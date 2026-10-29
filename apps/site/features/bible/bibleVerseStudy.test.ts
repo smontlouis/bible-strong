@@ -4,6 +4,10 @@ import { createPageReads, PAGE_READ_CONCURRENCY } from '../resources/pageReads'
 import { loadVerseStudy } from './bibleVerseStudy'
 
 vi.mock('../resources/resourceApi', () => ({ readResource: vi.fn() }))
+// The portraits come from the media host, which a test does not reach.
+vi.mock('../atlas/atlas.functions', () => ({
+  readAtlasPortraitCatalog: vi.fn(async () => undefined),
+}))
 
 type Query = Record<string, string | number | undefined>
 type Answer = (path: string, query: Query) => unknown
@@ -215,6 +219,7 @@ describe('loadVerseStudy', () => {
       comments: [],
       topics: [],
       dictionary: [],
+      entities: [],
     })
     expect(reads.incomplete).toBe(false)
   })

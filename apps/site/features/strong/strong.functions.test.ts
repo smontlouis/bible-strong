@@ -4,6 +4,10 @@ import { readResource } from '../resources/resourceApi'
 import { loadStrongConcordancePage, loadStrongPage } from './strong.functions'
 
 vi.mock('../resources/resourceApi', () => ({ readResource: vi.fn() }))
+// The portraits come from the media host, which a test does not reach.
+vi.mock('../atlas/atlas.functions', () => ({
+  readAtlasPortraitCatalog: vi.fn(async () => undefined),
+}))
 // A server function is its handler here: the tests call it as the route does.
 vi.mock('@tanstack/react-start', () => ({
   createServerFn: () => {
