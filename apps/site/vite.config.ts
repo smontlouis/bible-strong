@@ -24,7 +24,11 @@ const animationsStayInTheBrowser = (): Plugin => ({
 })
 
 export default defineConfig({
-  resolve: { alias: { '@': fileURLToPath(new URL('.', import.meta.url)) } },
+  resolve: {
+    alias: { '@': fileURLToPath(new URL('.', import.meta.url)) },
+    // A shared package that renders with React (@bible-strong/biblical-map) has none of its own.
+    dedupe: ['react', 'react-dom'],
+  },
   plugins: [
     satoriForWorkers(),
     animationsStayInTheBrowser(),

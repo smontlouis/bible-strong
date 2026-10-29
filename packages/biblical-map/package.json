@@ -1,0 +1,17 @@
+{
+  "name": "@bible-strong/biblical-map",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./ground": "./src/BiblicalMapGround.tsx",
+    "./ground-paths": "./src/groundPaths.ts"
+  },
+  "dependencies": {
+    "@bible-strong/resource-domain": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  }
+}

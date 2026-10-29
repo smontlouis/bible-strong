@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@bible-strong/bible-reference-parser": "workspace:*",
+    "@bible-strong/biblical-map": "workspace:*",
     "@bible-strong/resource-catalog": "workspace:*",
     "@bible-strong/resource-domain": "workspace:*",
     "@bible-strong/share-card-service": "workspace:*",

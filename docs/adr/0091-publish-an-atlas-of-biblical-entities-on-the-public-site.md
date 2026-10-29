@@ -79,7 +79,19 @@ The map of the places is one drawing for the site and the application. The proje
 a map opens on and the rule that places names (from the place in focus and the most named down,
 none covering another or a painting) live in `@bible-strong/resource-domain/biblical-map`. The
 ground is drawn once from Natural Earth by `apps/site/scripts/build-atlas-map.py`, as an SVG for the
-site and as path strings for the application, which draws them with react-native-svg.
+site and as path strings in `packages/biblical-map`.
+
+The map travelled with the fingers is one React component for the web, `@bible-strong/biblical-map`:
+the site renders it, and the application shows it in a DOM component (`'use dom'`), so it is
+delivered by an over-the-air update. It redraws its view on every move, which a browser does within
+a frame, and keeps its names and marks at their size; a lifted finger lets it glide and slow down,
+as a scroll view does. A first version drew it with react-native-svg, moving the drawing as a
+picture during a gesture and drawing it again when the fingers lifted: drawing a thousand places
+took up to two seconds, the edges stayed blank while zooming out, names grew with the picture, and
+the map had no glide. The still map on a place's page stays drawn with react-native-svg.
+
+The package holds no copy of React: Vite dedupes it on the site, Metro finds the application's, and
+the type paths of both consumers point `react` at their own.
 
 In the application:
 

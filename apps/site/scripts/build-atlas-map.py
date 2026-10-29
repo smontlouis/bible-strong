@@ -14,8 +14,8 @@ then run from `apps/site`, with shapely installed:
   python3 scripts/build-atlas-map.py <folder of the GeoJSON files>
 
 The projection is `@bible-strong/resource-domain/biblical-map`; change both together. The same
-shapes are written for the application, which draws them with react-native-svg, to
-`apps/expo/src/features/lexique/biblicalMap/biblicalMapGround.ts`.
+shapes are written as path strings for the application, which draws them inline, to
+`packages/biblical-map/src/groundPaths.ts`.
 """
 import json
 import math
@@ -33,7 +33,7 @@ PARALLEL = 32.0
 UNIT = 100  # SVG units per degree of latitude
 
 OUT = Path(__file__).resolve().parents[1] / 'public/atlas/map.svg'
-APP_OUT = Path(__file__).resolve().parents[3] / 'apps/expo/src/features/lexique/biblicalMap/biblicalMapGround.ts'
+APP_OUT = Path(__file__).resolve().parents[3] / 'packages/biblical-map/src/groundPaths.ts'
 
 
 def project(lon: float, lat: float) -> tuple[float, float]:

@@ -8,14 +8,15 @@ import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Text from '~common/ui/Text'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
+import { useTheme } from '~themes/ThemeProvider'
 import { useStrongRouteNavigation } from '../useStrongRouteNavigation'
-import BiblicalMap from './BiblicalMap'
+import BiblicalMapDOM from './BiblicalMapDOM'
 import { useBiblicalPlaces } from './useBiblicalPlaces'
 
 /**
- * The map of every place of the Bible, travelled with the fingers. It opens on a place and its
- * surroundings, on the places of a chapter brought forward, or on the Promised Land. A place
- * touched opens its page.
+ * The map of every place of the Bible, travelled with the fingers in a web view, as the public
+ * atlas is. It opens on a place and its surroundings, on the places of a chapter brought forward,
+ * or on the Promised Land. A place touched opens its page.
  */
 const BiblicalMapScreen = ({
   focus,
@@ -30,6 +31,7 @@ const BiblicalMapScreen = ({
   isFormSheet?: boolean
 }) => {
   const { t } = useTranslation()
+  const { colors } = useTheme()
   const canGoBack = useCanGoBackInStack()
   const navigation = useStrongRouteNavigation({})
   const { places, loading } = useBiblicalPlaces()
@@ -53,14 +55,42 @@ const BiblicalMapScreen = ({
         {loading ? (
           <Loading message={t('Chargement...')} />
         ) : (
-          <BiblicalMap
-            places={places}
+          <BiblicalMapDOM
+            places={[...places]}
             focus={focus}
-            highlighted={highlighted}
+            highlighted={placeNames}
             region={region}
-            interactive
+            colors={{
+              sea: colors.lightPrimary,
+              land: colors.surface,
+              coast: colors.separator,
+              water: colors.primary,
+              lakeOpacity: 0.35,
+              riverOpacity: 0.45,
+              place: colors.tertiary,
+              accent: colors.primary,
+              halo: colors.surface,
+              ink: colors.default,
+              nameHalo: colors.surface,
+              control: colors.surfaceRaised,
+              controlInk: colors.default,
+              controlLine: colors.separator,
+            }}
+            labels={{
+              map: t('strongDetail.entity.mapLabel'),
+              zoomIn: t('strongDetail.entity.mapZoomIn'),
+              zoomOut: t('strongDetail.entity.mapZoomOut'),
+              whole: t('strongDetail.entity.mapWhole'),
+            }}
             onOpenPlace={navigation.openEntity}
-            style={{ flex: 1 }}
+            dom={{
+              useExpoDOMWebView: false,
+              webviewDebuggingEnabled: __DEV__,
+              scrollEnabled: false,
+              bounces: false,
+              style: { flex: 1, backgroundColor: colors.lightPrimary },
+              containerStyle: { flex: 1, backgroundColor: colors.lightPrimary },
+            }}
           />
         )}
         {missing && (

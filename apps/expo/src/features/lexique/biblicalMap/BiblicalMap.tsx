@@ -1,7 +1,6 @@
 import {
   BIBLICAL_MAP_HEIGHT,
   BIBLICAL_MAP_HOLY_LAND,
-  BIBLICAL_MAP_WHOLE,
   BIBLICAL_MAP_WIDTH,
   clampBiblicalMapView,
   fitBiblicalMapView,
@@ -9,11 +8,14 @@ import {
   type BiblicalMapPlace,
   type BiblicalMapView,
 } from '@bible-strong/resource-domain/biblical-map'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  BIBLICAL_MAP_LAKES,
+  BIBLICAL_MAP_LAND,
+  BIBLICAL_MAP_RIVERS,
+} from '@bible-strong/biblical-map/ground-paths'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { StyleSheet, type LayoutChangeEvent, type StyleProp, type ViewStyle } from 'react-native'
-import { Gesture, GestureDetector } from 'react-native-gesture-handler'
-import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated'
+import { type LayoutChangeEvent, type StyleProp, type ViewStyle } from 'react-native'
 import Svg, {
   Circle,
   ClipPath,
@@ -24,20 +26,14 @@ import Svg, {
   Rect,
   Text,
 } from 'react-native-svg'
-import { scheduleOnRN } from 'react-native-worklets'
 
-import Box, { HStack, TouchableBox } from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
-import TextUI from '~common/ui/Text'
+import Box from '~common/ui/Box'
 import { useTheme } from '~themes/ThemeProvider'
-import { BIBLICAL_MAP_LAKES, BIBLICAL_MAP_LAND, BIBLICAL_MAP_RIVERS } from './biblicalMapGround'
 
-// The places of the Bible on one map, in the projection and on the ground of the public atlas
-// (ADR-0091). The window is a view in map units; a gesture moves the drawing as a picture, and the
-// view is set again when the fingers lift, so that marks and names keep their size.
+// A place and its neighbours on a still map, in the projection and on the ground of the public
+// atlas (ADR-0091). The map travelled with the fingers is the atlas's own, in a web view
+// (BiblicalMapDOM): react-native-svg cannot redraw it on every move.
 
-/** A tap within this many points of a place opens it. */
-const TAP_RADIUS = 24
 /** Paintings show once a degree spans about 220 points. */
 const PICTURES_FROM = 2.2
 
@@ -47,164 +43,35 @@ type Props = {
   focus?: string
   /** Places brought forward, the others dimmed: the places of a chapter. */
   highlighted?: ReadonlySet<string>
-  /** The region the map opens on; the Promised Land by default. */
+  /** The region the map shows; the Promised Land by default. */
   region?: BiblicalMapView
-  /** Moves under the fingers and zooms with the buttons; otherwise a still picture. */
-  interactive?: boolean
-  onOpenPlace?: (uniqueName: string) => void
   style?: StyleProp<ViewStyle>
 }
 
-const BiblicalMap = ({
-  places,
-  focus,
-  highlighted,
-  region,
-  interactive = false,
-  onOpenPlace,
-  style,
-}: Props) => {
+const BiblicalMap = ({ places, focus, highlighted, region, style }: Props) => {
   const { t } = useTranslation()
   const { colors } = useTheme()
   const [frame, setFrame] = useState<{ width: number; height: number }>()
-  const [view, setView] = useState<BiblicalMapView>()
   const opening = region ?? BIBLICAL_MAP_HOLY_LAND
-  const openingKey = `${opening.x}:${opening.y}:${opening.width}:${opening.height}`
 
-  const aspect = frame ? frame.height / frame.width : 0.6
-  // A new frame or a new region opens the map again on its region.
-  useEffect(() => {
-    if (frame) setView(clampBiblicalMapView(fitBiblicalMapView(opening, aspect), aspect))
+  const openingKey = `${opening.x}:${opening.y}:${opening.width}:${opening.height}`
+  const view = useMemo(
+    () =>
+      frame
+        ? clampBiblicalMapView(
+            fitBiblicalMapView(opening, frame.height / frame.width),
+            frame.height / frame.width
+          )
+        : undefined,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [frame?.width, frame?.height, openingKey])
+    [frame?.width, frame?.height, openingKey]
+  )
 
   const onLayout = (event: LayoutChangeEvent) => {
     const { width, height } = event.nativeEvent.layout
     if (width && height && (width !== frame?.width || height !== frame?.height)) {
       setFrame({ width, height })
     }
-  }
-
-  // The gesture in progress, in screen points: the drawing moves and grows as a picture.
-  const translateX = useSharedValue(0)
-  const translateY = useSharedValue(0)
-  const scale = useSharedValue(1)
-  const startX = useSharedValue(0)
-  const startY = useSharedValue(0)
-  const startScale = useSharedValue(1)
-  const focalX = useSharedValue(0)
-  const focalY = useSharedValue(0)
-
-  const viewRef = useRef(view)
-  viewRef.current = view
-
-  /** Turns the picture's move into a new view, then shows the drawing at rest again. */
-  const commit = (moveX: number, moveY: number, grow: number) => {
-    const current = viewRef.current
-    if (!current || !frame) return
-    const unit = current.width / frame.width
-    const width = current.width / grow
-    setView(
-      clampBiblicalMapView(
-        {
-          x: current.x - (moveX * unit) / grow,
-          y: current.y - (moveY * unit) / grow,
-          width,
-          height: width * aspect,
-        },
-        aspect
-      )
-    )
-    translateX.value = 0
-    translateY.value = 0
-    scale.value = 1
-  }
-
-  const openAt = (pointX: number, pointY: number) => {
-    const current = viewRef.current
-    if (!current || !frame || !onOpenPlace) return
-    const unit = current.width / frame.width
-    const x = current.x + pointX * unit
-    const y = current.y + pointY * unit
-    // Among the places under the finger, the one drawn on top: the place in focus, a place
-    // brought forward, a painting, then the most named. Mount Moriah lies under Jerusalem.
-    const rank = (place: BiblicalMapPlace) => [
-      Number(place.uniqueName === focus),
-      Number(highlighted?.has(place.uniqueName) ?? false),
-      Number(thumbRadius(place) !== undefined),
-      place.chapterCount,
-    ]
-    const touched = places.filter(
-      place =>
-        Math.hypot(place.x - x, place.y - y) < Math.max(thumbRadius(place) ?? 0, TAP_RADIUS) * unit
-    )
-    const chosen = touched.sort((left, right) => {
-      const [a, b] = [rank(left), rank(right)]
-      return b[0] - a[0] || b[1] - a[1] || b[2] - a[2] || b[3] - a[3]
-    })[0]
-    if (chosen) onOpenPlace(chosen.uniqueName)
-  }
-
-  const pan = Gesture.Pan()
-    .maxPointers(1)
-    .onStart(() => {
-      startX.value = translateX.value
-      startY.value = translateY.value
-    })
-    .onUpdate(event => {
-      translateX.value = startX.value + event.translationX
-      translateY.value = startY.value + event.translationY
-    })
-    .onEnd(() => {
-      scheduleOnRN(commit, translateX.value, translateY.value, scale.value)
-    })
-  // The point between the fingers stays under them while they part or close.
-  const pinch = Gesture.Pinch()
-    .onStart(event => {
-      startScale.value = scale.value
-      startX.value = translateX.value
-      startY.value = translateY.value
-      focalX.value = event.focalX
-      focalY.value = event.focalY
-    })
-    .onUpdate(event => {
-      const next = startScale.value * event.scale
-      const ratio = next / startScale.value
-      scale.value = next
-      translateX.value = event.focalX - (focalX.value - startX.value) * ratio
-      translateY.value = event.focalY - (focalY.value - startY.value) * ratio
-    })
-    .onEnd(() => {
-      scheduleOnRN(commit, translateX.value, translateY.value, scale.value)
-    })
-  const tap = Gesture.Tap().onEnd(event => {
-    scheduleOnRN(openAt, event.x, event.y)
-  })
-  const gesture = Gesture.Race(pinch, pan, tap)
-
-  const pictureStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: translateX.value },
-      { translateY: translateY.value },
-      { scale: scale.value },
-    ],
-  }))
-
-  const zoom = (factor: number) => {
-    const current = viewRef.current
-    if (!current) return
-    const width = current.width * factor
-    setView(
-      clampBiblicalMapView(
-        {
-          x: current.x + (current.width - width) / 2,
-          y: current.y + (current.height - width * aspect) / 2,
-          width,
-          height: width * aspect,
-        },
-        aspect
-      )
-    )
   }
 
   const unit = view && frame ? view.width / frame.width : 1
@@ -370,62 +237,10 @@ const BiblicalMap = ({
       className="overflow-hidden border-continuous"
       style={[{ backgroundColor: colors.lightPrimary }, style]}
       onLayout={onLayout}
-      accessibilityRole={interactive ? 'adjustable' : 'image'}
+      accessibilityRole="image"
       accessibilityLabel={t('strongDetail.entity.mapLabel')}
     >
-      {interactive ? (
-        <GestureDetector gesture={gesture}>
-          <Animated.View
-            style={[StyleSheet.absoluteFill, pictureStyle, { transformOrigin: '0% 0%' }]}
-          >
-            {drawing}
-          </Animated.View>
-        </GestureDetector>
-      ) : (
-        drawing
-      )}
-      {interactive && (
-        <HStack
-          className="overflow-hidden border-continuous gap-[8px]"
-          style={{ position: 'absolute', right: 12, bottom: 12 }}
-        >
-          {[
-            {
-              icon: 'plus' as const,
-              label: t('strongDetail.entity.mapZoomIn'),
-              press: () => zoom(0.6),
-            },
-            {
-              icon: 'minus' as const,
-              label: t('strongDetail.entity.mapZoomOut'),
-              press: () => zoom(1 / 0.6),
-            },
-          ].map(control => (
-            <TouchableBox
-              key={control.icon}
-              className="overflow-hidden border-continuous bg-surface-raised rounded-full items-center justify-center"
-              style={{ width: 40, height: 40 }}
-              onPress={control.press}
-              accessibilityRole="button"
-              accessibilityLabel={control.label}
-            >
-              <FeatherIcon name={control.icon} size={18} />
-            </TouchableBox>
-          ))}
-          <TouchableBox
-            className="overflow-hidden border-continuous bg-surface-raised rounded-full items-center justify-center px-[14px]"
-            style={{ height: 40 }}
-            onPress={() =>
-              setView(clampBiblicalMapView(fitBiblicalMapView(BIBLICAL_MAP_WHOLE, aspect), aspect))
-            }
-            accessibilityRole="button"
-          >
-            <TextUI className="text-[13px] font-semibold">
-              {t('strongDetail.entity.mapWhole')}
-            </TextUI>
-          </TouchableBox>
-        </HStack>
-      )}
+      {drawing}
     </Box>
   )
 }

@@ -22,7 +22,10 @@
     "types": ["vite/client", "vite-plugin-svgr/client"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      // A shared package that renders with React (@bible-strong/biblical-map) takes the site's.
+      "react": ["./node_modules/@types/react"],
+      "react/*": ["./node_modules/@types/react/*"]
     }
   },
   "exclude": [

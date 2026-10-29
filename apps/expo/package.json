@@ -73,6 +73,7 @@
     "@bible-strong/ai-contract": "workspace:*",
     "@bible-strong/avatar-react": "0.1.0",
     "@bible-strong/bible-reference-parser": "workspace:*",
+    "@bible-strong/biblical-map": "workspace:*",
     "@bible-strong/resource-catalog": "workspace:*",
     "@bible-strong/resource-domain": "workspace:*",
     "@blobatar/react": "2.7.0",

@@ -2500,6 +2500,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@bible-strong/biblical-map@workspace:*, @bible-strong/biblical-map@workspace:packages/biblical-map":
+  version: 0.0.0-use.local
+  resolution: "@bible-strong/biblical-map@workspace:packages/biblical-map"
+  dependencies:
+    "@bible-strong/resource-domain": "workspace:*"
+  peerDependencies:
+    react: ">=18"
+  languageName: unknown
+  linkType: soft
+
 "@bible-strong/expo@workspace:apps/expo":
   version: 0.0.0-use.local
   resolution: "@bible-strong/expo@workspace:apps/expo"
@@ -2517,6 +2527,7 @@ __metadata:
     "@bible-strong/ai-contract": "workspace:*"
     "@bible-strong/avatar-react": "npm:0.1.0"
     "@bible-strong/bible-reference-parser": "workspace:*"
+    "@bible-strong/biblical-map": "workspace:*"
     "@bible-strong/resource-catalog": "workspace:*"
     "@bible-strong/resource-domain": "workspace:*"
     "@blobatar/react": "npm:2.7.0"
@@ -2827,6 +2838,7 @@ __metadata:
   resolution: "@bible-strong/site@workspace:apps/site"
   dependencies:
     "@bible-strong/bible-reference-parser": "workspace:*"
+    "@bible-strong/biblical-map": "workspace:*"
     "@bible-strong/resource-catalog": "workspace:*"
     "@bible-strong/resource-domain": "workspace:*"
     "@bible-strong/share-card-service": "workspace:*"

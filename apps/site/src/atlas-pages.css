@@ -511,118 +511,15 @@ a.atlas-chip:hover {
 
 /* ---------- Map ---------- */
 
+/* The map draws itself (@bible-strong/biblical-map); the page sets its size. */
 .atlas-map {
-  position: relative;
-}
-
-.atlas-map__frame {
   height: min(70vh, 640px);
-  overflow: hidden;
   border-radius: 28px;
-  background: var(--atlas-sea);
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
 }
 
-.atlas-map__frame:active {
-  cursor: grabbing;
-}
-
-.atlas-map--compact .atlas-map__frame {
+.atlas-map--compact {
   height: min(52vh, 380px);
   border-radius: 24px;
-}
-
-.atlas-map__svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.atlas-map__sea {
-  fill: var(--atlas-sea);
-}
-
-.atlas-map__land {
-  fill: var(--atlas-land);
-  stroke: var(--atlas-coast);
-  stroke-width: 1px;
-  vector-effect: non-scaling-stroke;
-}
-
-.atlas-map__lakes {
-  fill: var(--atlas-water);
-}
-
-.atlas-map__rivers {
-  fill: none;
-  stroke: var(--atlas-water);
-}
-
-.atlas-map__dot {
-  fill: var(--atlas-place);
-  stroke: var(--atlas-halo);
-}
-
-.atlas-map__ring {
-  fill: var(--atlas-halo);
-}
-
-.atlas-map__place.is-focus .atlas-map__ring {
-  fill: var(--resource-cta);
-}
-
-.atlas-map__name {
-  fill: var(--resource-ink);
-  stroke: var(--atlas-land);
-  paint-order: stroke;
-  font-weight: 600;
-  text-anchor: middle;
-  pointer-events: none;
-}
-
-.atlas-map__place:hover .atlas-map__dot,
-.atlas-map__place:focus-visible .atlas-map__dot,
-.atlas-map__place.is-focus .atlas-map__dot {
-  fill: var(--resource-cta);
-}
-
-.atlas-map__place:focus-visible {
-  outline: none;
-}
-
-.atlas-map__controls {
-  position: absolute;
-  right: 14px;
-  bottom: 14px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.atlas-map__controls button {
-  display: inline-flex;
-  min-width: 40px;
-  min-height: 40px;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--resource-line);
-  border-radius: 999px;
-  background: var(--resource-surface-raised);
-  color: var(--resource-ink);
-}
-
-.atlas-map__controls svg {
-  width: 16px;
-  height: 16px;
-}
-
-.atlas-map__controls .atlas-map__text-button {
-  padding: 0 14px;
-  font-size: 0.85rem;
-  font-weight: 600;
 }
 
 /* ---------- Entity ---------- */
