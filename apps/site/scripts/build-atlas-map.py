@@ -13,7 +13,9 @@ Natural Earth is in the public domain. Download its GeoJSON files (v5.1.2) next 
 then run from `apps/site`, with shapely installed:
   python3 scripts/build-atlas-map.py <folder of the GeoJSON files>
 
-The projection is repeated in `features/atlas/atlasProjection.ts`; change both together.
+The projection is `@bible-strong/resource-domain/biblical-map`; change both together. The same
+shapes are written for the application, which draws them with react-native-svg, to
+`apps/expo/src/features/lexique/biblicalMap/biblicalMapGround.ts`.
 """
 import json
 import math
@@ -31,6 +33,7 @@ PARALLEL = 32.0
 UNIT = 100  # SVG units per degree of latitude
 
 OUT = Path(__file__).resolve().parents[1] / 'public/atlas/map.svg'
+APP_OUT = Path(__file__).resolve().parents[3] / 'apps/expo/src/features/lexique/biblicalMap/biblicalMapGround.ts'
 
 
 def project(lon: float, lat: float) -> tuple[float, float]:
@@ -93,6 +96,14 @@ def main() -> None:
         f'{symbols}</svg>\n'
     )
     print(f'{OUT}: {OUT.stat().st_size // 1024} KB, {width:.0f} x {height:.0f}')
+    APP_OUT.parent.mkdir(parents=True, exist_ok=True)
+    APP_OUT.write_text(
+        '// The ground of the map of the places of the Bible: Natural Earth (public domain), drawn by\n'
+        '// apps/site/scripts/build-atlas-map.py in the projection of @bible-strong/resource-domain/biblical-map.\n'
+        '// Do not edit: run the script again.\n'
+        + ''.join(f"export const BIBLICAL_MAP_{key.upper()} =\n  '{path_of(geometry)}'\n" for key, geometry in shapes.items())
+    )
+    print(f'{APP_OUT}: {APP_OUT.stat().st_size // 1024} KB')
 
 
 if __name__ == '__main__':
