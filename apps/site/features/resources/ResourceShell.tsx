@@ -36,6 +36,7 @@ export default function ResourceShell({
   breadcrumbs,
   subHeader,
   immersive = false,
+  wide = false,
   children,
 }: {
   /** The same resource in the other language, when it exists. */
@@ -53,6 +54,11 @@ export default function ResourceShell({
    * without the reading column, the invitation or the footer.
    */
   immersive?: boolean
+  /**
+   * The page lays out its own full-width sections, then the invitation and the footer as
+   * every page has them.
+   */
+  wide?: boolean
   children: ReactNode
 }) {
   const t = useI18n()
@@ -174,7 +180,11 @@ export default function ResourceShell({
         <main className="resource-stage">{children}</main>
       ) : (
         <>
-          <main className="mx-auto max-w-[760px] px-5 pb-20 pt-8 md:pt-10">
+          <main
+            className={
+              wide ? 'resource-wide pb-20' : 'mx-auto max-w-[760px] px-5 pb-20 pt-8 md:pt-10'
+            }
+          >
             {breadcrumbs && breadcrumbs.length > 1 && (
               <nav className="resource-breadcrumbs" aria-label={t('resource.breadcrumbs')}>
                 <ol>
@@ -192,12 +202,14 @@ export default function ResourceShell({
             )}
             {children}
             {section && (
-              <AppInvitation
-                section={section}
-                language={locale}
-                appUrl={appUrl}
-                downloadPath={`${homePath}#telecharger`}
-              />
+              <div className={wide ? 'mx-auto max-w-[760px] px-5' : undefined}>
+                <AppInvitation
+                  section={section}
+                  language={locale}
+                  appUrl={appUrl}
+                  downloadPath={`${homePath}#telecharger`}
+                />
+              </div>
             )}
           </main>
           <footer className="resource-footer mx-auto max-w-[760px] px-5 py-10 text-sm">

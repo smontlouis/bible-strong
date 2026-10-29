@@ -7,6 +7,8 @@
 @import './nave-pages.css';
 @import './commentary-pages.css';
 @import './timeline-pages.css';
+@import './atlas-pages.css';
+@import './atlas-cards.css';
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

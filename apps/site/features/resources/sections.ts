@@ -7,6 +7,7 @@ export type ResourceSectionKey =
   | 'nave'
   | 'commentary'
   | 'timeline'
+  | 'atlas'
 
 export type ResourceSection = {
   key: ResourceSectionKey
@@ -73,6 +74,15 @@ export const RESOURCE_SECTIONS: readonly ResourceSection[] = [
       en: 'The events of biblical history',
     },
     path: language => `/timeline/${language}`,
+  },
+  {
+    key: 'atlas',
+    label: { fr: 'Atlas', en: 'Atlas' },
+    summary: {
+      fr: 'Les personnages, les lieux et les peuples de la Bible',
+      en: 'The people, places and nations of the Bible',
+    },
+    path: language => `/atlas/${language}`,
   },
 ]
 

@@ -9,3 +9,6 @@
   Content-Security-Policy: default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; frame-src https://www.youtube.com; base-uri 'none'; form-action 'none'
   Referrer-Policy: strict-origin-when-cross-origin
   X-Content-Type-Options: nosniff
+
+/atlas/*
+  Cache-Control: public, max-age=86400

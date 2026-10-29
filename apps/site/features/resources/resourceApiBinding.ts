@@ -3,6 +3,7 @@ import { env } from 'cloudflare:workers'
 import { getRequestHeader } from '@tanstack/react-start/server'
 
 const READER_ADDRESS_HEADER = 'cf-connecting-ip'
+const DEPLOYED_API_HOST = 'api.bible-strong.app'
 
 const readerAddress = (): string | undefined => {
   try {
@@ -22,7 +23,8 @@ const readerAddress = (): string | undefined => {
  */
 export const resourceApiFetch = (url: URL | string, init: RequestInit): Promise<Response> => {
   const api = env.RESOURCE_API
-  if (!api) return fetch(url, init)
+  // The binding stands for the deployed API: another address (a local API) is asked directly.
+  if (!api || new URL(url).hostname !== DEPLOYED_API_HOST) return fetch(url, init)
   const headers = new Headers(init.headers)
   const address = readerAddress()
   if (address) headers.set(READER_ADDRESS_HEADER, address)

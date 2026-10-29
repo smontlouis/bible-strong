@@ -20,6 +20,7 @@ import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as DotwellKnownAppleAppSiteAssociationRouteImport } from './routes/[.]well-known.apple-app-site-association'
 import { Route as DotwellKnownAssetlinksDotjsonRouteImport } from './routes/[.]well-known.assetlinks[.]json'
+import { Route as AtlasLanguageRouteImport } from './routes/atlas.$language'
 import { Route as BibleIndexRouteImport } from './routes/bible.index'
 import { Route as BibleSplatRouteImport } from './routes/bible.$'
 import { Route as BibleVersionRouteImport } from './routes/bible.$version'
@@ -40,6 +41,7 @@ import { Route as SitemapsNameRouteImport } from './routes/sitemaps.$name'
 import { Route as StrongCodeRouteImport } from './routes/strong.$code'
 import { Route as StudiesIdRouteImport } from './routes/studies.$id'
 import { Route as TimelineLanguageRouteImport } from './routes/timeline.$language'
+import { Route as AtlasLanguageNameRouteImport } from './routes/atlas.$language_.$name'
 import { Route as CommentaryLanguageResourceRouteImport } from './routes/commentary.$language_.$resource'
 import { Route as DictionaryLanguageWorkRouteImport } from './routes/dictionary.$language_.$work'
 import { Route as FrStudiesIdRouteImport } from './routes/fr.studies.$id'
@@ -115,6 +117,11 @@ const DotwellKnownAssetlinksDotjsonRoute =
     path: '/.well-known/assetlinks.json',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AtlasLanguageRoute = AtlasLanguageRouteImport.update({
+  id: '/atlas/$language',
+  path: '/atlas/$language',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BibleIndexRoute = BibleIndexRouteImport.update({
   id: '/bible/',
   path: '/bible/',
@@ -214,6 +221,11 @@ const StudiesIdRoute = StudiesIdRouteImport.update({
 const TimelineLanguageRoute = TimelineLanguageRouteImport.update({
   id: '/timeline/$language',
   path: '/timeline/$language',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtlasLanguageNameRoute = AtlasLanguageNameRouteImport.update({
+  id: '/atlas/$language_/$name',
+  path: '/atlas/$language/$name',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommentaryLanguageResourceRoute =
@@ -319,6 +331,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
+  '/atlas/$language': typeof AtlasLanguageRoute
   '/bible/$': typeof BibleSplatRoute
   '/bible/$version': typeof BibleVersionRoute
   '/commentary/$language': typeof CommentaryLanguageRoute
@@ -339,6 +352,7 @@ export interface FileRoutesByFullPath {
   '/timeline/$language': typeof TimelineLanguageRoute
   '/bible/': typeof BibleIndexRoute
   '/fr/': typeof FrIndexRoute
+  '/atlas/$language/$name': typeof AtlasLanguageNameRoute
   '/commentary/$language/$resource': typeof CommentaryLanguageResourceRoute
   '/dictionary/$language/$work': typeof DictionaryLanguageWorkRoute
   '/fr/studies/$id': typeof FrStudiesIdRoute
@@ -368,6 +382,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
+  '/atlas/$language': typeof AtlasLanguageRoute
   '/bible/$': typeof BibleSplatRoute
   '/bible/$version': typeof BibleVersionRoute
   '/commentary/$language': typeof CommentaryLanguageRoute
@@ -388,6 +403,7 @@ export interface FileRoutesByTo {
   '/timeline/$language': typeof TimelineLanguageRoute
   '/bible': typeof BibleIndexRoute
   '/fr': typeof FrIndexRoute
+  '/atlas/$language/$name': typeof AtlasLanguageNameRoute
   '/commentary/$language/$resource': typeof CommentaryLanguageResourceRoute
   '/dictionary/$language/$work': typeof DictionaryLanguageWorkRoute
   '/fr/studies/$id': typeof FrStudiesIdRoute
@@ -418,6 +434,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
   '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
+  '/atlas/$language': typeof AtlasLanguageRoute
   '/bible/$': typeof BibleSplatRoute
   '/bible/$version': typeof BibleVersionRoute
   '/commentary/$language': typeof CommentaryLanguageRoute
@@ -438,6 +455,7 @@ export interface FileRoutesById {
   '/timeline/$language': typeof TimelineLanguageRoute
   '/bible/': typeof BibleIndexRoute
   '/fr/': typeof FrIndexRoute
+  '/atlas/$language_/$name': typeof AtlasLanguageNameRoute
   '/commentary/$language_/$resource': typeof CommentaryLanguageResourceRoute
   '/dictionary/$language_/$work': typeof DictionaryLanguageWorkRoute
   '/fr/studies/$id': typeof FrStudiesIdRoute
@@ -469,6 +487,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/.well-known/apple-app-site-association'
     | '/.well-known/assetlinks.json'
+    | '/atlas/$language'
     | '/bible/$'
     | '/bible/$version'
     | '/commentary/$language'
@@ -489,6 +508,7 @@ export interface FileRouteTypes {
     | '/timeline/$language'
     | '/bible/'
     | '/fr/'
+    | '/atlas/$language/$name'
     | '/commentary/$language/$resource'
     | '/dictionary/$language/$work'
     | '/fr/studies/$id'
@@ -518,6 +538,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/.well-known/apple-app-site-association'
     | '/.well-known/assetlinks.json'
+    | '/atlas/$language'
     | '/bible/$'
     | '/bible/$version'
     | '/commentary/$language'
@@ -538,6 +559,7 @@ export interface FileRouteTypes {
     | '/timeline/$language'
     | '/bible'
     | '/fr'
+    | '/atlas/$language/$name'
     | '/commentary/$language/$resource'
     | '/dictionary/$language/$work'
     | '/fr/studies/$id'
@@ -567,6 +589,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/.well-known/apple-app-site-association'
     | '/.well-known/assetlinks.json'
+    | '/atlas/$language'
     | '/bible/$'
     | '/bible/$version'
     | '/commentary/$language'
@@ -587,6 +610,7 @@ export interface FileRouteTypes {
     | '/timeline/$language'
     | '/bible/'
     | '/fr/'
+    | '/atlas/$language_/$name'
     | '/commentary/$language_/$resource'
     | '/dictionary/$language_/$work'
     | '/fr/studies/$id'
@@ -617,6 +641,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   DotwellKnownAppleAppSiteAssociationRoute: typeof DotwellKnownAppleAppSiteAssociationRoute
   DotwellKnownAssetlinksDotjsonRoute: typeof DotwellKnownAssetlinksDotjsonRoute
+  AtlasLanguageRoute: typeof AtlasLanguageRoute
   BibleSplatRoute: typeof BibleSplatRoute
   BibleVersionRoute: typeof BibleVersionRoute
   CommentaryLanguageRoute: typeof CommentaryLanguageRoute
@@ -637,6 +662,7 @@ export interface RootRouteChildren {
   TimelineLanguageRoute: typeof TimelineLanguageRoute
   BibleIndexRoute: typeof BibleIndexRoute
   FrIndexRoute: typeof FrIndexRoute
+  AtlasLanguageNameRoute: typeof AtlasLanguageNameRoute
   CommentaryLanguageResourceRoute: typeof CommentaryLanguageResourceRoute
   DictionaryLanguageWorkRoute: typeof DictionaryLanguageWorkRoute
   FrStudiesIdRoute: typeof FrStudiesIdRoute
@@ -732,6 +758,13 @@ declare module '@tanstack/react-router' {
       path: '/.well-known/assetlinks.json'
       fullPath: '/.well-known/assetlinks.json'
       preLoaderRoute: typeof DotwellKnownAssetlinksDotjsonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atlas/$language': {
+      id: '/atlas/$language'
+      path: '/atlas/$language'
+      fullPath: '/atlas/$language'
+      preLoaderRoute: typeof AtlasLanguageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bible/': {
@@ -874,6 +907,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TimelineLanguageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/atlas/$language_/$name': {
+      id: '/atlas/$language_/$name'
+      path: '/atlas/$language/$name'
+      fullPath: '/atlas/$language/$name'
+      preLoaderRoute: typeof AtlasLanguageNameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/commentary/$language_/$resource': {
       id: '/commentary/$language_/$resource'
       path: '/commentary/$language/$resource'
@@ -1002,6 +1042,7 @@ const rootRouteChildren: RootRouteChildren = {
   DotwellKnownAppleAppSiteAssociationRoute:
     DotwellKnownAppleAppSiteAssociationRoute,
   DotwellKnownAssetlinksDotjsonRoute: DotwellKnownAssetlinksDotjsonRoute,
+  AtlasLanguageRoute: AtlasLanguageRoute,
   BibleSplatRoute: BibleSplatRoute,
   BibleVersionRoute: BibleVersionRoute,
   CommentaryLanguageRoute: CommentaryLanguageRoute,
@@ -1022,6 +1063,7 @@ const rootRouteChildren: RootRouteChildren = {
   TimelineLanguageRoute: TimelineLanguageRoute,
   BibleIndexRoute: BibleIndexRoute,
   FrIndexRoute: FrIndexRoute,
+  AtlasLanguageNameRoute: AtlasLanguageNameRoute,
   CommentaryLanguageResourceRoute: CommentaryLanguageResourceRoute,
   DictionaryLanguageWorkRoute: DictionaryLanguageWorkRoute,
   FrStudiesIdRoute: FrStudiesIdRoute,

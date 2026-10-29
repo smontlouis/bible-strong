@@ -1,3 +1,4 @@
+import { ATLAS_SITEMAPS } from '../atlas/atlasSitemap'
 import { listBibleSitemapUrls } from '../bible/bibleSitemap'
 import { BIBLE_VERSE_SITEMAPS } from '../bible/bibleVerseSitemap'
 import { COMMENTARY_SITEMAPS } from '../commentary/commentarySitemap'
@@ -53,6 +54,7 @@ export const SITEMAPS: Record<string, () => Promise<SitemapUrl[]> | SitemapUrl[]
   ...NAVE_SITEMAPS,
   ...COMMENTARY_SITEMAPS,
   ...TIMELINE_SITEMAPS,
+  ...ATLAS_SITEMAPS,
   // One sitemap of verse pages per well-known Bible: `bible-lsg-verses.xml`, …
   ...BIBLE_VERSE_SITEMAPS,
 }

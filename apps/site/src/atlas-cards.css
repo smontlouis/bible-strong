@@ -1,0 +1,969 @@
+/*
+ * The collectible cards of ADR-0090 on the atlas pages: one layout (the image from edge to edge
+ * at the top, the sentence on a parchment panel below), a palette per family and a foil per
+ * finish. Every class is prefixed `ac-`. The card mechanics and the « V » bands follow
+ * pokemon-cards-css by Simon Goellner.
+ */
+
+.ac-deck {
+  --ac-w: min(236px, calc(100vw - 48px));
+  --ac-display: 'Literata Reading', ui-serif, Georgia, serif;
+  --ac-text: 'Literata Reading', ui-serif, Georgia, serif;
+  --ac-hebrew: 'SBL Hebrew', 'Times New Roman', serif;
+  --ac-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+  --ac-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  --ac-paper: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='.035' numOctaves='4' seed='7'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .33  0 0 0 0 .12  0 0 0 .16 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>");
+  --red: #f80e35;
+  --yellow: #eedf10;
+  --green: #21e985;
+  --blue: #0dbde9;
+  --violet: #c929f1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.ac-slot {
+  width: var(--ac-w);
+}
+
+/* ---------- Mechanics ---------- */
+
+.ac-card *,
+.ac-card *::before,
+.ac-card *::after {
+  box-sizing: content-box;
+}
+
+.ac-card {
+  position: relative;
+  z-index: 1;
+  width: var(--ac-w);
+  max-width: 100%;
+  aspect-ratio: 63 / 88;
+  color: #ece6d6;
+  font: 400 16px / normal var(--ac-text);
+  text-align: left;
+  -webkit-touch-callout: none;
+  user-select: none;
+  --foil: linear-gradient(
+    100deg,
+    var(--f1) 0%,
+    var(--f2) calc(var(--pointer-x, 50%) - 26%),
+    var(--f3) var(--pointer-x, 50%),
+    var(--f2) calc(var(--pointer-x, 50%) + 26%),
+    var(--f1) 100%
+  );
+}
+
+.ac-card.is-interacting {
+  z-index: 20;
+}
+
+.ac-card.is-active,
+.ac-card.is-active.is-interacting {
+  z-index: 100;
+}
+
+.ac-translater {
+  width: 100%;
+  height: 100%;
+  perspective: 900px;
+  transform: translate3d(var(--translate-x, 0px), var(--translate-y, 0px), 0)
+    scale(var(--card-scale, 1));
+  transform-origin: center;
+  will-change: transform;
+}
+
+.ac-rotator {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4.6% / 3.3%;
+  appearance: none;
+  background: transparent;
+  box-shadow:
+    0 10px 20px -5px #000,
+    0 2px 15px -5px #000;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  touch-action: pan-y;
+  transform: rotateY(calc(var(--rotate-x, 0deg) + var(--spin, 0deg) + var(--flip, 0deg)))
+    rotateX(var(--rotate-y, 0deg));
+  transform-style: preserve-3d;
+  transition: box-shadow 0.4s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ac-rotator:focus-visible {
+  outline: 2px solid #e3c27a;
+  outline-offset: 4px;
+}
+
+.ac-card.is-active .ac-rotator {
+  box-shadow:
+    0 0 3px -1px #fff,
+    0 0 3px 1px var(--edge),
+    0 0 14px 2px var(--glow),
+    0 10px 20px -5px #000,
+    0 0 40px -30px var(--glow),
+    0 0 50px -20px var(--glow);
+  touch-action: none;
+}
+
+.ac-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  backface-visibility: hidden;
+  clip-path: inset(0 round 4.6% / 3.3%);
+  container-type: inline-size;
+  text-align: left;
+  transform: translateZ(0.01px);
+}
+
+.ac-back {
+  transform: rotateY(180deg) translateZ(0.01px);
+}
+
+.ac-face > * {
+  position: absolute;
+}
+
+/* ---------- Families ---------- */
+
+.ac-fam-human {
+  --f1: #6d4e1d;
+  --f2: #c9a457;
+  --f3: #fff0c2;
+  --edge: hsl(210 40% 82%);
+  --glow: hsl(212 40% 62%);
+  --frame:
+    var(--ac-grain), radial-gradient(130% 70% at 50% 0%, #26345a, transparent 70%),
+    linear-gradient(165deg, #1a2440, #0c1222);
+  --sub-ink: #ddd3b8;
+  --type-ink: #c4b991;
+  --panel: var(--ac-paper), linear-gradient(180deg, #f3ead3, #e4d6b4);
+  --panel-ink: #2a2214;
+  --panel-dim: #6f6040;
+  --art-bg: #233a62;
+}
+
+/* A human with life stages: emerald instead of night blue, gold lettering kept. */
+.ac-fam-human.ac-stages {
+  --f2: #d4b062;
+  --f3: #fff3cc;
+  --edge: hsl(150 45% 76%);
+  --glow: hsl(160 45% 48%);
+  --frame:
+    var(--ac-grain), radial-gradient(130% 70% at 50% 0%, #1f4f43, transparent 70%),
+    linear-gradient(165deg, #133a31, #06140f);
+  --sub-ink: #d7e5d8;
+  --type-ink: #a9c8b3;
+  --art-bg: #1b4a3e;
+  --panel: var(--ac-paper), linear-gradient(180deg, #eef0dc, #dcdcbc);
+}
+
+.ac-fam-divine {
+  --f1: #8a6a2b;
+  --f2: #c7a55c;
+  --f3: #fff4d6;
+  --edge: hsl(48 100% 90%);
+  --glow: hsl(45 100% 82%);
+  --frame:
+    var(--ac-grain), radial-gradient(120% 80% at 50% 0%, #fffdf6, transparent 75%),
+    linear-gradient(165deg, #f6f0e2, #e3d9c2);
+  --sub-ink: #5c5034;
+  --type-ink: #7a6a45;
+  --panel: var(--ac-paper), linear-gradient(180deg, #fffdf7, #f4ecd8);
+  --panel-ink: #1b2236;
+  --panel-dim: #6c5e40;
+  --art-bg: #f3ecd9;
+}
+
+.ac-fam-spirit {
+  --f1: #5b2f8f;
+  --f2: #36b6c9;
+  --f3: #f6dcff;
+  --edge: hsl(250 55% 82%);
+  --glow: hsl(255 50% 64%);
+  --frame:
+    var(--ac-grain), radial-gradient(120% 70% at 50% 0%, #2e1d4c, transparent 70%),
+    linear-gradient(165deg, #1a1030, #07050f);
+  --sub-ink: #d3c6f2;
+  --type-ink: #b6a7d9;
+  --panel: var(--ac-grain), linear-gradient(180deg, #1e1636, #140e26);
+  --panel-ink: #efe7ff;
+  --panel-dim: #a898d0;
+  --art-bg: #1f2340;
+}
+
+.ac-fam-idol {
+  --f1: #4a3a24;
+  --f2: #9c8358;
+  --f3: #e6d6ad;
+  --edge: hsl(36 28% 58%);
+  --glow: hsl(32 30% 38%);
+  --frame:
+    var(--ac-grain), radial-gradient(130% 70% at 50% 0%, #3d3022, transparent 70%),
+    linear-gradient(165deg, #2b2218, #120d08);
+  --sub-ink: #dccdb0;
+  --type-ink: #b9a782;
+  --panel: var(--ac-paper), linear-gradient(180deg, #ece0c6, #d8c7a2);
+  --panel-ink: #2a2214;
+  --panel-dim: #6f6040;
+  --art-bg: #2e3346;
+}
+
+/* ---------- Front ---------- */
+
+.ac-fr-bg {
+  inset: 0;
+  z-index: 0;
+  background: var(--frame);
+}
+
+.ac-fr-shine {
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* The image covers the top of the card and fades into its frame. */
+.ac-art {
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 2;
+  height: 104cqw;
+  overflow: hidden;
+  background: var(--art-bg);
+  isolation: isolate;
+  mask: linear-gradient(180deg, #000 72%, transparent 100%);
+}
+
+.ac-art .ac-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.ac-art img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 28%;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Three depths: the backdrop far behind, the original name halfway, the person in front. */
+.ac-plates img {
+  transform: translate3d(calc(var(--tx, 0) * -3.2cqw), calc(var(--ty, 0) * -2.6cqw), 0) scale(1.12);
+}
+
+.ac-plates img.ac-scene {
+  transform: translate3d(calc(var(--tx, 0) * -1.6cqw), calc(var(--ty, 0) * -1.4cqw), 0) scale(1.08);
+}
+
+.ac-plates img.ac-decor {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.ac-plates img.ac-decor.is-loaded {
+  opacity: 1;
+}
+
+/* The person stands lower, so that the head clears the name and the title. */
+.ac-art .ac-subjects {
+  top: 16cqw;
+  bottom: -16cqw;
+  z-index: 3;
+}
+
+.ac-subjects img {
+  transform: translate3d(calc(var(--tx, 0) * 2.2cqw), calc(var(--ty, 0) * 1.8cqw), 0) scale(1.05);
+}
+
+/* A portrait the painting cut off at its top fades upward into the shade behind the name. */
+.ac-cut-top .ac-subjects img {
+  mask: linear-gradient(180deg, transparent 0%, rgb(0 0 0 / 40%) 4%, #000 11%);
+}
+
+/* The original name, painted large in the image: in front of the backdrop, behind the person. */
+.ac-depth-name {
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ac-depth-name span {
+  position: absolute;
+  top: 13cqw;
+  right: 8cqw;
+  background: var(--foil);
+  background-clip: text;
+  color: transparent;
+  direction: rtl;
+  font-family: var(--ac-hebrew);
+  font-size: 17cqw;
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0.55;
+  transform: translate3d(calc(var(--tx, 0) * -1.5cqw), calc(var(--ty, 0) * -1.2cqw), 0);
+  white-space: nowrap;
+}
+
+.ac-depth-name:lang(grc) span {
+  direction: ltr;
+  font-family: var(--ac-text);
+  font-size: 13cqw;
+  font-weight: 600;
+}
+
+.ac-ribbon {
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 3;
+  height: 40cqw;
+  background: linear-gradient(
+    180deg,
+    rgb(5 8 16 / 92%) 0%,
+    rgb(5 8 16 / 70%) 45%,
+    rgb(5 8 16 / 0%)
+  );
+}
+
+.ac-name,
+.ac-subtitle,
+.ac-typeline,
+.ac-textbox,
+.ac-foot {
+  z-index: 4;
+}
+
+.ac-name {
+  top: 7cqw;
+  left: 7cqw;
+  margin: 0;
+  background: var(--foil);
+  background-clip: text;
+  color: transparent;
+  font-family: var(--ac-display);
+  font-size: 8cqw;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ac-subtitle {
+  top: 17cqw;
+  left: 7cqw;
+  display: -webkit-box;
+  max-width: 50cqw;
+  overflow: hidden;
+  color: #f2ecdc;
+  font-size: 4.6cqw;
+  font-style: italic;
+  line-height: 1.15;
+  text-shadow: 0 0.3cqw 1cqw rgb(0 0 0 / 60%);
+  text-wrap: balance;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.ac-typeline {
+  top: 102.3cqw;
+  right: 6cqw;
+  left: 6cqw;
+  display: flex;
+  justify-content: center;
+  color: var(--type-ink);
+  font-family: var(--ac-mono);
+  font-size: 2.6cqw;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ac-textbox {
+  top: 106.5cqw;
+  right: 6.5cqw;
+  left: 6.5cqw;
+  display: flex;
+  height: 19cqw;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2cqw 3.6cqw;
+  border-radius: 2cqw;
+  background: var(--panel);
+  box-shadow: inset 0 0 0 0.3cqw rgb(0 0 0 / 12%);
+  color: var(--panel-ink);
+}
+
+.ac-flavor {
+  margin: 0;
+  font-size: 3.8cqw;
+  font-style: italic;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.ac-flavor q,
+.ac-flavor .ac-para {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.ac-flavor q {
+  font-style: normal;
+  quotes: '« ' ' »';
+}
+
+.ac-flavor q:lang(en) {
+  quotes: '“' '”';
+}
+
+.ac-flavor cite {
+  display: block;
+  margin-top: 0.8cqw;
+  color: var(--panel-dim);
+  font-family: var(--ac-mono);
+  font-size: 2.5cqw;
+  font-style: normal;
+  letter-spacing: 0.03em;
+}
+
+.ac-foot {
+  right: 7cqw;
+  bottom: 6.6cqw;
+  left: 7cqw;
+  display: flex;
+  justify-content: space-between;
+  gap: 2cqw;
+  color: var(--type-ink);
+  font-family: var(--ac-mono);
+  font-size: 2.4cqw;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.ac-ring {
+  inset: 2.2cqw;
+  z-index: 5;
+  padding: 0.45cqw;
+  border-radius: 3cqw;
+  background: var(--foil);
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+.ac-glare {
+  inset: 0;
+  z-index: 6;
+  background-image: radial-gradient(
+    farthest-corner circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+    hsl(0 0% 100% / 80%) 10%,
+    hsl(0 0% 100% / 65%) 20%,
+    hsl(0 0% 0% / 50%) 90%
+  );
+  mix-blend-mode: overlay;
+  opacity: calc(var(--glare-opacity, 0) * 0.8);
+  pointer-events: none;
+}
+
+/* ---------- Finishes ---------- */
+
+.ac-shine-art {
+  z-index: 2;
+  pointer-events: none;
+}
+
+.ac-shine-art::before,
+.ac-shine-art::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+}
+
+/* God and Jesus: holo behind the person, reverse holo on the frame. */
+.ac-fin-holo-reverse .ac-shine-art {
+  background-image:
+    repeating-linear-gradient(
+      110deg,
+      var(--violet),
+      var(--blue),
+      var(--green),
+      var(--yellow),
+      var(--red),
+      var(--violet),
+      var(--blue),
+      var(--green),
+      var(--yellow),
+      var(--red),
+      var(--violet),
+      var(--blue),
+      var(--green),
+      var(--yellow),
+      var(--red)
+    ),
+    repeating-linear-gradient(90deg, #000 0 1px, #666 1px 2px);
+  background-blend-mode: overlay;
+  background-position:
+    calc(((50% - var(--background-x, 50%)) * 2.6) + 50%)
+      calc(((50% - var(--background-y, 50%)) * 3.5) + 50%),
+    center;
+  background-size:
+    400% 400%,
+    cover;
+  filter: brightness(1.1) contrast(1.1) saturate(1.2);
+  mix-blend-mode: color-dodge;
+  opacity: calc(0.14 + var(--card-opacity, 0) * 0.66);
+}
+
+.ac-fin-holo-reverse .ac-shine-art::before {
+  --bars: 3%;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      #000 calc(var(--bars) * 2),
+      #b3b3b3 calc(var(--bars) * 3),
+      #000 calc(var(--bars) * 3.5),
+      #b3b3b3 calc(var(--bars) * 4),
+      #000 calc(var(--bars) * 5),
+      #000 calc(var(--bars) * 14)
+    ),
+    repeating-linear-gradient(
+      90deg,
+      #000 calc(var(--bars) * 2),
+      #b3b3b3 calc(var(--bars) * 3),
+      #000 calc(var(--bars) * 3.5),
+      #b3b3b3 calc(var(--bars) * 4),
+      #000 calc(var(--bars) * 5),
+      #000 calc(var(--bars) * 10)
+    );
+  background-blend-mode: screen;
+  background-position:
+    calc((((50% - var(--background-x, 50%)) * 1.65) + 50%) + (var(--background-y, 50%) * 0.5))
+      var(--background-x, 50%),
+    calc((((50% - var(--background-x, 50%)) * -0.9) + 50%) - (var(--background-y, 50%) * 0.75))
+      var(--background-y, 50%);
+  background-size:
+    200% 200%,
+    200% 200%;
+  filter: brightness(1.15) contrast(1.1);
+  mix-blend-mode: hard-light;
+}
+
+.ac-fin-holo-reverse .ac-shine-art::after {
+  background-image: radial-gradient(
+    farthest-corner circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+    hsl(0 0% 90% / 80%) 0%,
+    hsl(0 0% 78% / 10%) 25%,
+    #000 90%
+  );
+  filter: brightness(0.6) contrast(4);
+  mix-blend-mode: luminosity;
+}
+
+.ac-fin-reverse .ac-fr-shine,
+.ac-fin-holo-reverse .ac-fr-shine {
+  background-image:
+    radial-gradient(
+      circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+      #fff 5%,
+      #000 50%,
+      #fff 80%
+    ),
+    linear-gradient(-45deg, #000 15%, #fff, #000 85%), var(--ac-glitter);
+  background-blend-mode: soft-light, difference;
+  background-position:
+    center,
+    calc(100% * var(--pointer-from-left, 0.5)) calc(100% * var(--pointer-from-top, 0.5)),
+    center;
+  background-size:
+    120% 120%,
+    200% 200%,
+    22% auto;
+  filter: brightness(0.55) contrast(1.5);
+  mix-blend-mode: color-dodge;
+  opacity: clamp(0, calc((1.5 * var(--card-opacity, 0)) - var(--pointer-from-center, 0)), 1);
+}
+
+/* Spiritual beings: cosmos. */
+.ac-fin-cosmos .ac-shine-art {
+  --space: 4%;
+  background-image:
+    var(--ac-nebula),
+    repeating-linear-gradient(
+      82deg,
+      hsl(53 65% 60%) calc(var(--space) * 1),
+      hsl(93 56% 50%) calc(var(--space) * 2),
+      hsl(176 54% 49%) calc(var(--space) * 3),
+      hsl(228 59% 55%) calc(var(--space) * 4),
+      hsl(283 60% 55%) calc(var(--space) * 5),
+      hsl(326 59% 51%) calc(var(--space) * 6),
+      hsl(326 59% 51%) calc(var(--space) * 7),
+      hsl(283 60% 55%) calc(var(--space) * 8),
+      hsl(228 59% 55%) calc(var(--space) * 9),
+      hsl(176 54% 49%) calc(var(--space) * 10),
+      hsl(93 56% 50%) calc(var(--space) * 11),
+      hsl(53 65% 60%) calc(var(--space) * 12)
+    ),
+    radial-gradient(
+      farthest-corner circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+      hsl(180 100% 89% / 50%) 5%,
+      hsl(180 14% 57% / 30%) 40%,
+      #000 130%
+    );
+  background-blend-mode: color-burn, multiply;
+  background-position:
+    calc(50% + var(--tx, 0) * 6%) calc(50% + var(--ty, 0) * 6%),
+    calc(10% + (var(--pointer-from-left, 0.5) * 80%))
+      calc(10% + (var(--pointer-from-top, 0.5) * 80%)),
+    center;
+  background-size:
+    cover,
+    400% 900%,
+    cover;
+  filter: brightness(1) contrast(1) saturate(0.8);
+  mix-blend-mode: color-dodge;
+  opacity: calc(0.35 + var(--card-opacity, 0) * 0.6);
+}
+
+.ac-fin-cosmos .ac-shine-art::before {
+  background-image: var(--ac-glitter);
+  background-position: calc(50% + var(--tx, 0) * -8%) calc(50% + var(--ty, 0) * -8%);
+  background-size: 16% auto;
+  mix-blend-mode: color-dodge;
+  opacity: calc(0.2 + var(--card-opacity, 0) * 0.7);
+}
+
+.ac-fin-cosmos .ac-fr-shine,
+.ac-fin-glitter .ac-fr-shine {
+  background-image:
+    var(--ac-glitter),
+    linear-gradient(
+      115deg,
+      #ff4fd8,
+      #5ef0ff calc(var(--pointer-x, 50%) - 12%),
+      #fff36b var(--pointer-x, 50%),
+      #8a5bff calc(var(--pointer-x, 50%) + 18%),
+      #ff4fd8
+    );
+  background-blend-mode: multiply;
+  background-size:
+    18% auto,
+    cover;
+  mix-blend-mode: color-dodge;
+  opacity: calc(0.12 + var(--card-opacity, 0) * 0.4);
+}
+
+/* Other humans: sparkles that catch the light, on the image and the frame. */
+.ac-fin-glitter .ac-shine-art {
+  background-image:
+    var(--ac-glitter),
+    radial-gradient(
+      farthest-corner circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+      #fff 0%,
+      #777 30%,
+      #000 75%
+    );
+  background-blend-mode: multiply;
+  background-position:
+    calc(50% + var(--tx, 0) * -6%) calc(50% + var(--ty, 0) * -6%),
+    center;
+  background-size:
+    14% auto,
+    cover;
+  mix-blend-mode: color-dodge;
+  opacity: calc(0.25 + var(--card-opacity, 0) * 0.75);
+}
+
+/* Humans with life stages: wide pastel bands that climb as the card tilts. */
+.ac-fin-v :is(.ac-shine-art, .ac-fr-shine),
+.ac-fin-v .ac-shine-art::after {
+  --space: 5%;
+  --p1: hsl(2 100% 73%);
+  --p2: hsl(53 100% 69%);
+  --p3: hsl(93 100% 69%);
+  --p4: hsl(176 100% 76%);
+  --p5: hsl(228 100% 74%);
+  --p6: hsl(283 100% 73%);
+  background-image:
+    var(--ac-grain),
+    repeating-linear-gradient(
+      0deg,
+      var(--p1) calc(var(--space) * 1),
+      var(--p2) calc(var(--space) * 2),
+      var(--p3) calc(var(--space) * 3),
+      var(--p4) calc(var(--space) * 4),
+      var(--p5) calc(var(--space) * 5),
+      var(--p6) calc(var(--space) * 6),
+      var(--p1) calc(var(--space) * 7)
+    ),
+    repeating-linear-gradient(
+      133deg,
+      #0e152e 0%,
+      hsl(180 10% 60%) 3.8%,
+      hsl(180 29% 66%) 4.5%,
+      hsl(180 10% 60%) 5.2%,
+      #0e152e 10%,
+      #0e152e 12%
+    ),
+    radial-gradient(
+      farthest-corner circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+      hsl(0 0% 0% / 10%) 12%,
+      hsl(0 0% 0% / 15%) 20%,
+      hsl(0 0% 0% / 25%) 120%
+    );
+  background-blend-mode: screen, hue, hard-light;
+  background-position:
+    center,
+    0% var(--background-y, 50%),
+    var(--background-x, 50%) var(--background-y, 50%),
+    var(--background-x, 50%) var(--background-y, 50%);
+  background-size:
+    180px 180px,
+    200% 700%,
+    300% 100%,
+    200% 100%;
+  filter: brightness(1) contrast(1.7) saturate(0.9);
+  mix-blend-mode: color-dodge;
+  opacity: calc(0.25 + var(--card-opacity, 0) * 0.65);
+}
+
+/* The second layer runs the colours one step on and the lines the other way. */
+.ac-fin-v .ac-shine-art::after {
+  --p1: hsl(283 100% 73%);
+  --p2: hsl(2 100% 73%);
+  --p3: hsl(53 100% 69%);
+  --p4: hsl(93 100% 69%);
+  --p5: hsl(176 100% 76%);
+  --p6: hsl(228 100% 74%);
+  background-position:
+    center,
+    0% var(--background-y, 50%),
+    calc(var(--background-x, 50%) * -1) calc(var(--background-y, 50%) * -1),
+    var(--background-x, 50%) var(--background-y, 50%);
+  background-size:
+    180px 180px,
+    200% 400%,
+    195% 100%,
+    200% 100%;
+  filter: brightness(1.2) contrast(2) saturate(1.75);
+  mix-blend-mode: soft-light;
+  opacity: 1;
+}
+
+/* ---------- Back ---------- */
+
+.ac-pattern {
+  inset: 2.6cqw;
+  border-radius: 3cqw;
+  background: repeating-radial-gradient(
+    circle at 50% 36%,
+    var(--f2) 0 0.25cqw,
+    transparent 0.25cqw 3.2cqw
+  );
+  mask: radial-gradient(70% 55% at 50% 36%, #000, transparent);
+  opacity: 0.2;
+}
+
+.ac-back-body {
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.4cqw;
+  padding: 9cqw 9cqw 8.5cqw;
+  color: #efe7d4;
+  text-align: center;
+}
+
+.ac-fam-divine .ac-back-body {
+  color: var(--panel-ink);
+}
+
+.ac-fam-spirit .ac-back-body {
+  color: #efe7ff;
+}
+
+.ac-family {
+  color: var(--type-ink);
+  font-family: var(--ac-mono);
+  font-size: 2.8cqw;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.ac-big {
+  margin-top: 2cqw;
+  background: var(--foil);
+  background-clip: text;
+  color: transparent;
+  font-family: var(--ac-hebrew);
+  font-size: 17cqw;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.ac-big:lang(grc) {
+  font-family: var(--ac-text);
+  font-size: 14cqw;
+  font-weight: 600;
+}
+
+.ac-translit {
+  font-size: 5cqw;
+  font-style: italic;
+}
+
+.ac-strong {
+  padding: 0.8cqw 2.4cqw;
+  border: 0.25cqw solid currentcolor;
+  border-radius: 999px;
+  color: var(--type-ink);
+  font-family: var(--ac-mono);
+  font-size: 2.8cqw;
+}
+
+.ac-meaning {
+  font-family: var(--ac-display);
+  font-size: 5.4cqw;
+  font-weight: 500;
+}
+
+.ac-fam-idol .ac-meaning {
+  color: #e6d6ad;
+}
+
+.ac-sep {
+  width: 18cqw;
+  height: 0.4cqw;
+  margin: 0.6cqw 0;
+  border-radius: 1cqw;
+  background: var(--foil);
+}
+
+.ac-brief {
+  margin: 0;
+  font-size: 4.2cqw;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+.ac-facts {
+  display: grid;
+  width: 100%;
+  margin: auto 0 0;
+  gap: 1.3cqw 3cqw;
+  font-size: 3.5cqw;
+  grid-template-columns: auto 1fr;
+  text-align: left;
+}
+
+.ac-facts dt {
+  padding-top: 0.6cqw;
+  color: var(--type-ink);
+  font-family: var(--ac-mono);
+  font-size: 2.6cqw;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ac-facts dd {
+  margin: 0;
+}
+
+/* ---------- An opened card ---------- */
+
+.ac-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgb(4 6 12 / 82%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+  backdrop-filter: blur(6px);
+}
+
+.ac-backdrop.is-shown {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ac-toolbar {
+  position: fixed;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  z-index: 120;
+  display: flex;
+  max-width: calc(100vw - 32px);
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid rgb(236 230 214 / 16%);
+  border-radius: 22px;
+  background: rgb(21 27 43 / 92%);
+  transform: translate(-50%, 160%);
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.ac-toolbar.is-shown {
+  transform: translate(-50%, 0);
+}
+
+.ac-toolbar button {
+  padding: 10px 14px;
+  border: 1px solid rgb(236 230 214 / 16%);
+  border-radius: 999px;
+  background: transparent;
+  color: #ece6d6;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.ac-toolbar__name {
+  padding: 0 6px;
+  color: #ece6d6;
+  font-family: var(--ac-text, 'Literata Reading', serif);
+  font-size: 0.95rem;
+  font-style: italic;
+}
+
+/* On a phone the bar keeps its two buttons on one line; the card shows its own title. */
+@media (max-width: 480px) {
+  .ac-toolbar__name {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ac-backdrop,
+  .ac-toolbar,
+  .ac-rotator,
+  .ac-plates img.ac-decor {
+    transition: none;
+  }
+}

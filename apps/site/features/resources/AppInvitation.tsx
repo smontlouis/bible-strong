@@ -71,6 +71,16 @@ const INVITATIONS: Record<
       body: 'In the app, scroll the frieze of biblical events and open the passages that tell them.',
     },
   },
+  atlas: {
+    fr: {
+      title: 'Les personnages à côté du texte',
+      body: 'Dans l’app, touchez un nom dans la Bible pour ouvrir sa fiche, son portrait et ses liens, même hors ligne.',
+    },
+    en: {
+      title: 'The people next to the text',
+      body: 'In the app, tap a name in the Bible to open its page, its portrait and its relations, even offline.',
+    },
+  },
 }
 
 /**
