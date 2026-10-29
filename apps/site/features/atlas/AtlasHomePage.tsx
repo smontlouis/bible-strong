@@ -70,9 +70,14 @@ export default function AtlasHomePage({ page }: { page: AtlasHomePageData }) {
                 { '--atlas-index': index, '--atlas-count': lineUp.length } as React.CSSProperties
               }
             >
+              {/* A phone draws the figures about a hundred pixels wide: the small copy is enough. */}
               <img
                 src={member.picture.replace('/w256.webp', '/w768.webp')}
+                srcSet={`${member.picture} 256w, ${member.picture.replace('/w256.webp', '/w768.webp')} 768w`}
+                sizes="(max-width: 640px) 85px, clamp(120px, 15vw, 230px)"
                 alt=""
+                width={230}
+                height={230}
                 loading={index < 6 ? 'eager' : 'lazy'}
               />
             </a>
