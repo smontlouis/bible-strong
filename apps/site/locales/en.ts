@@ -172,6 +172,7 @@ export default {
   'strong.relations.identity': 'Same identity',
   'strong.relations.subentry': 'Other senses',
   'strong.entity': 'In the biblical story',
+  'strong.entity.atlas': 'See in the Atlas',
   'strong.concordance': 'In the Bible',
   'strong.concordance.summary': '{code} appears in {count} verses of the {version}.',
   'strong.concordance.summary.one': '{code} appears in {count} verse of the {version}.',

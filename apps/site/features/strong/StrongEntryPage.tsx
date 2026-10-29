@@ -150,13 +150,25 @@ export default function StrongEntryPage({ entry }: { entry: StrongPageData }) {
 
         {entry.entity && (
           <Section title={t('strong.entity')}>
-            <div className="resource-card px-5 py-4">
-              <p className="font-semibold">{entry.entity.name}</p>
-              {entry.entity.brief && <p className="resource-muted text-sm">{entry.entity.brief}</p>}
-              {entry.entity.description && (
-                <p className="resource-prose mt-3">{entry.entity.description}</p>
-              )}
-            </div>
+            <a className="resource-card strong-entity" href={entry.entity.path}>
+              <span className="atlas-picture strong-entity__picture">
+                <img src={entry.entity.picture} alt="" width={96} height={96} loading="lazy" />
+              </span>
+              <span className="min-w-0">
+                <span className="block font-semibold">{entry.entity.name}</span>
+                {entry.entity.brief && (
+                  <span className="resource-muted block text-sm">{entry.entity.brief}</span>
+                )}
+                {entry.entity.description && (
+                  <span className="resource-prose strong-entity__text">
+                    {entry.entity.description}
+                  </span>
+                )}
+                <span className="resource-link mt-2 inline-block text-sm font-semibold">
+                  {t('strong.entity.atlas')}
+                </span>
+              </span>
+            </a>
           </Section>
         )}
 

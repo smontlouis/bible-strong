@@ -29,7 +29,18 @@ const entry = (stepCode: string, classicStrong: string, gloss: string, brief?: s
   definitionHtml: `<p>${gloss} (${stepCode})</p>`,
   relations: [],
   resources: [],
-  entity: brief ? { name: gloss, brief, shortDescription: brief, description: brief } : undefined,
+  entity: brief
+    ? {
+        uniqueName: `${gloss}@Gen.1.1`,
+        name: gloss,
+        category: 'person',
+        type: 'Male',
+        brief,
+        shortDescription: brief,
+        description: brief,
+        articleHtml: '',
+      }
+    : undefined,
 })
 
 // A small lexicon: a number that is its own sense, a number told apart in two senses, a

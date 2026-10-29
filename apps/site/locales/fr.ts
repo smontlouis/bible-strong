@@ -172,6 +172,7 @@ export default {
   'strong.relations.identity': 'Même identité',
   'strong.relations.subentry': 'Autres sens',
   'strong.entity': 'Dans le récit biblique',
+  'strong.entity.atlas': 'Voir dans l’Atlas',
   'strong.concordance': 'Dans la Bible',
   'strong.concordance.summary': '{code} apparaît dans {count} versets de la {version}.',
   'strong.concordance.summary.one': '{code} apparaît dans {count} verset de la {version}.',

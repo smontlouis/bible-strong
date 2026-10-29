@@ -25,6 +25,13 @@ import {
 } from '../resources/editorialHtml'
 import { createPageReads, type PageReads } from '../resources/pageReads'
 import { isResourceLanguage, type ResourceLanguage } from '../resources/publicSite'
+import { readAtlasPortraitCatalog } from '../atlas/atlas.functions'
+import {
+  entityClayUrl,
+  entityPortraitUrl,
+  type AtlasPortraitCatalog,
+} from '../atlas/atlasPortraits'
+import { buildAtlasEntityPath } from '../atlas/atlasRoutes'
 import { findBibleBook } from '../bible/bibleBooks'
 import { readResource } from '../resources/resourceApi'
 import { notingStaleAnswers } from '../resources/staleAnswers'
@@ -107,7 +114,8 @@ export type StrongPageData = {
   nameMeaningHtml?: string
   relations: StrongPageRelation[]
   dictionaryArticles: { title: string; html: string }[]
-  entity?: { name: string; brief: string; description: string }
+  /** The biblical figure or place the sense names, with its page in the atlas (ADR-0091). */
+  entity?: { name: string; brief: string; description: string; path: string; picture: string }
   concordance?: StrongPageConcordance
   /**
    * A part of the page is missing because it could not be read, as opposed to not existing.
@@ -745,7 +753,12 @@ export const loadStrongPage = createServerFn({ method: 'GET' })
     // A number with a single sense, or a code in another letter case: the page is the one
     // of the sense that answered, at its own address, and reads nothing more here.
     if (code !== identity.code) return { kind: 'moved', code }
-    const [concordance, senses] = await Promise.all([earlyConcordance, sensesRequest])
+    const [concordance, senses, portraits] = await Promise.all([
+      earlyConcordance,
+      sensesRequest,
+      // The portrait of the entity the sense names, read where the atlas reads it.
+      detailed?.entity ? reads.optional(readAtlasPortraitCatalog) : undefined,
+    ])
     const numberPage = hasStrongNumberPage(classicCode, senses)
     const senseCodes = new Set(senses.map(sense => sense.code))
 
@@ -829,17 +842,33 @@ export const loadStrongPage = createServerFn({ method: 'GET' })
         title: resource.title,
         html: sanitizeEditorialHtml(resource.contentHtml),
       })),
-      entity: detailed?.entity
-        ? {
-            name: detailed.entity.name,
-            brief: detailed.entity.brief,
-            description: detailed.entity.shortDescription || detailed.entity.description,
-          }
-        : undefined,
+      entity: detailed?.entity ? strongPageEntity(detailed.entity, language, portraits) : undefined,
       concordance,
       incomplete: reads.incomplete || undefined,
     }
   })
+
+/**
+ * The entity of a sense as its page shows it: its portrait or clay figure and the opening of its
+ * article, leading to its page in the atlas.
+ */
+const strongPageEntity = (
+  entity: NonNullable<StrongLexiconEntryDto['entity']>,
+  language: ResourceLanguage,
+  portraits: AtlasPortraitCatalog | undefined
+) => {
+  const portrait = portraits?.entities[entity.uniqueName]
+  const opening = entity.articleHtml.split('¶')[0]?.replace(/\s+/gu, ' ').trim()
+  return {
+    name: entity.name,
+    brief: entity.brief,
+    description: opening || entity.description,
+    path: buildAtlasEntityPath(language, entity.uniqueName),
+    picture: portrait
+      ? entityPortraitUrl(entity.uniqueName, portrait.hash, 'w256')
+      : entityClayUrl(entity.category, entity.type, entity.uniqueName),
+  }
+}
 
 const CONCORDANCE_PAGE_SIZE = 50
 

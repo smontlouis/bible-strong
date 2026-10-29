@@ -637,6 +637,8 @@ a.atlas-chip:hover {
   display: grid;
   gap: 28px;
   align-items: start;
+  /* One column no wider than the page, whatever the row of stages beneath the portrait holds. */
+  grid-template-columns: minmax(0, 1fr);
 }
 
 @media (min-width: 900px) {
@@ -823,4 +825,34 @@ a.atlas-passage:hover {
   .atlas-lineup__figure {
     transition: none;
   }
+}
+
+/* ---------- The entity of a Strong page, leading to the atlas ---------- */
+
+.strong-entity {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 14px;
+  transition: border-color 180ms ease-out;
+}
+
+.strong-entity:hover {
+  border-color: var(--resource-accent);
+}
+
+.strong-entity__picture {
+  width: 96px;
+  flex: none;
+  border-radius: 18px;
+}
+
+.strong-entity__text {
+  display: -webkit-box;
+  margin-top: 8px;
+  overflow: hidden;
+  font-size: 0.98rem;
+  line-height: 1.6;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
 }
