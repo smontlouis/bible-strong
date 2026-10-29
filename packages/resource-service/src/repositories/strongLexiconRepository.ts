@@ -2859,11 +2859,16 @@ export const makeKyselyStrongLexiconRepository = (
         if (!entityPublication || state.status !== 'available') {
           throw new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'entities' })
         }
-        const refs = await records(entityPublication.id, 'EntityRefs', query =>
-          query.where(
-            sql<boolean>`payload->>'book' = ${input.bookCode} AND (payload->>'chapter')::integer = ${input.chapter}`
-          )
-        )
+        // Read by the book and chapter columns, which an index covers, not inside the payload.
+        const refs = (
+          await sql<{ payload: Payload }>`
+            SELECT payload FROM strong_lexicon_entity_refs
+             WHERE publication_id = ${entityPublication.id}
+               AND book = ${input.bookCode}
+               AND chapter = ${input.chapter}
+             ORDER BY entity_id
+          `.execute(database)
+        ).rows.map(row => row.payload)
         const normalizedStrongCodes = [
           ...new Set(input.strongCodes.map(code => normalizeCode(code)).filter(Boolean)),
         ]
@@ -2958,10 +2963,25 @@ export const makeKyselyStrongLexiconRepository = (
           chapters: number | string
         }
         // One statement for the whole publication: each entity with its translation, its place
-        // and the number of chapters that name it.
+        // and the number of chapters that name it. Only the fields of a list leave the database:
+        // the whole payloads, articles included, weigh about twelve megabytes.
         const rows = (
           await sql<ListedEntityRow>`
-            SELECT e.payload AS entity, t.payload AS translation, p.payload AS place,
+            SELECT jsonb_build_object(
+                     'uniqueName', e.payload->'uniqueName',
+                     'displayName', e.payload->'displayName',
+                     'category', e.payload->'category',
+                     'type', e.payload->'type',
+                     'brief', e.payload->'brief'
+                   ) AS entity,
+                   CASE WHEN t.payload IS NULL THEN NULL ELSE jsonb_build_object(
+                     'displayName', t.payload->'displayName',
+                     'brief', t.payload->'brief'
+                   ) END AS translation,
+                   CASE WHEN p.payload IS NULL THEN NULL ELSE jsonb_build_object(
+                     'latitude', p.payload->'latitude',
+                     'longitude', p.payload->'longitude'
+                   ) END AS place,
                    coalesce(r.chapters, 0) AS chapters
               FROM strong_lexicon_entities e
               LEFT JOIN strong_lexicon_entity_translations t

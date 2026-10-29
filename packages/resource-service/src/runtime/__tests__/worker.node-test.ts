@@ -641,6 +641,9 @@ describe('Resource Worker binding', () => {
       '/v1/bibles/LSG/verses?references=1-1-1',
       '/v1/strong-lexicon/entries/H430?language=fr',
       '/v1/strong-lexicon/numbers/H2148/senses?language=fr',
+      '/v1/strong-lexicon/entities/David%40Rut.4.17-Rev?language=fr',
+      '/v1/strong-lexicon/entities/David%40Rut.4.17-Rev/passages',
+      '/v1/strong-lexicon/entities/chapters/1Sa/17?language=fr',
       '/v1/strong-bibles/LSG/books/1/identities/H2148A/counts',
       '/v1/strong-bibles/LSG/books/1/identities/batch/counts?references=H2148A,H2148B',
       '/v1/naves/fr/topics/aaron',
@@ -650,6 +653,7 @@ describe('Resource Worker binding', () => {
       // Lists name the content they read like reads, page by page.
       '/v1/naves/fr/topics?limit=500',
       '/v1/strong-lexicon/entries?language=fr&level=simple',
+      '/v1/strong-lexicon/entities?language=fr',
       '/v1/strong-bibles/LSG/books/19/identities/H3068/occurrences?limit=500',
       '/v1/timelines/fr/events',
     ]) {

@@ -221,7 +221,7 @@ const LONG_LIVED_PATHS = [
   // The counts of several references, `identities/batch/counts`, are counts like those of one.
   /^\/v1\/strong-bibles\/[^/]+\/(?:coverage|books\/\d+\/(?:chapters\/\d+|identities\/[^/]+\/(?:counts|lemmas)))$/,
   /^\/v1\/interlinear-bibles\/[^/]+\/languages\/[^/]+\/(?:coverage|books\/\d+\/chapters\/\d+)$/,
-  /^\/v1\/strong-lexicon\/(?:modules\/[^/]+|entries\/[^/]+|numbers\/[^/]+\/senses|morphologies|entities\/(?:chapters\/[^/]+\/\d+|[^/]+))$/,
+  /^\/v1\/strong-lexicon\/(?:modules\/[^/]+|entries\/[^/]+|numbers\/[^/]+\/senses|morphologies|entities\/(?:chapters\/[^/]+\/\d+|[^/]+(?:\/passages)?))$/,
   /^\/v1\/commentaries\/[^/]+\/[^/]+\/(?:coverage|verses\/[^/]+|chapters\/\d+\/\d+)$/,
   /^\/v1\/commentaries\/verses\/[^/]+\/sections$/,
   /^\/v1\/cross-references\/[^/]+\/verses\/[^/]+$/,
@@ -232,6 +232,7 @@ const LONG_LIVED_PATHS = [
   /^\/v1\/dictionaries\/[^/]+\/[^/]+\/entries$/,
   /^\/v1\/strong-bibles\/[^/]+\/books\/\d+\/identities\/[^/]+\/occurrences$/,
   /^\/v1\/strong-lexicon\/entries$/,
+  /^\/v1\/strong-lexicon\/entities$/,
   /^\/v1\/timelines\/[^/]+\/events$/,
 ] as const
 
