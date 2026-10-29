@@ -90,8 +90,10 @@ picture during a gesture and drawing it again when the fingers lifted: drawing a
 took up to two seconds, the edges stayed blank while zooming out, names grew with the picture, and
 the map had no glide. The still map on a place's page stays drawn with react-native-svg.
 
-The package holds no copy of React: Vite dedupes it on the site, Metro finds the application's, and
-the type paths of both consumers point `react` at their own.
+The package holds no copy of React: Vite dedupes it on the site and Metro finds the application's.
+It carries React's types only, for the application's type check; the site's `tsconfig.json` points
+`react` at its own types. The application's must not: Expo resolves modules through those paths, and
+`react` would then lead Metro to a package of types.
 
 In the application:
 

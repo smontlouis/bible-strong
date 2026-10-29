@@ -7,9 +7,6 @@
     "customConditions": ["react-native", "react-native-legacy-deep-imports"],
     "baseUrl": ".",
     "paths": {
-      // A shared package that renders with React (@bible-strong/biblical-map) takes the app's.
-      "react": ["./node_modules/@types/react"],
-      "react/*": ["./node_modules/@types/react/*"],
       "~assets/*": ["src/assets/*"],
       "~common/*": ["src/common/*"],
       "~devtools/*": ["src/devtools/*"],

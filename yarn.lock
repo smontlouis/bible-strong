@@ -2505,6 +2505,7 @@ __metadata:
   resolution: "@bible-strong/biblical-map@workspace:packages/biblical-map"
   dependencies:
     "@bible-strong/resource-domain": "workspace:*"
+    "@types/react": "npm:~19.3.0"
   peerDependencies:
     react: ">=18"
   languageName: unknown
