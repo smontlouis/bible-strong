@@ -42,6 +42,7 @@ import {
 
 const CACHE_TTL_MS = 60 * 60 * 1000
 const CATALOG_TIMEOUT_MS = 5_000
+const ABSENT_CATALOG_TTL_MS = 5 * 60 * 1000
 /** The entities of a family a page names beside its painted ones, the most named first. */
 const MOST_NAMED_COUNT = 120
 const SEARCH_RESULTS = 24
@@ -186,7 +187,10 @@ let cardCache: { at: number; catalog: CardCatalog | undefined } | undefined
  * not a failure: the pages show no card.
  */
 export const readAtlasCardCatalog = async (): Promise<CardCatalog | undefined> => {
-  if (cardCache && Date.now() - cardCache.at < CACHE_TTL_MS) return cardCache.catalog
+  // A missing catalog is asked for again within minutes: once it is published, a page drawn
+  // without its cards would otherwise be kept by the page cache for a month.
+  const kept = cardCache?.catalog ? CACHE_TTL_MS : ABSENT_CATALOG_TTL_MS
+  if (cardCache && Date.now() - cardCache.at < kept) return cardCache.catalog
   const response = await fetch(`${cardBaseUrl()}/catalog.json`, {
     headers: { accept: 'application/json' },
     signal: AbortSignal.timeout(CATALOG_TIMEOUT_MS),

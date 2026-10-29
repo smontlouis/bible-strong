@@ -57,9 +57,9 @@ need a table of its own that the publication does not keep.
 - **The clay figures** are copies of the application's 23 placeholders, served by the site and
   chosen as the application chooses them, so an entity wears the same figure everywhere.
 
-The site reads the two catalogs and the list of entities once an hour per server instance. A page
-whose catalog could not be read is shown without it and kept a minute only, like any page missing
-a part.
+The site reads the two catalogs and the list of entities once an hour per server instance; a card
+catalog not yet published is asked for again after five minutes. A page whose catalog could not be
+read is shown without it and kept a minute only, like any page missing a part.
 
 ### How an entity is shown
 
@@ -79,8 +79,9 @@ list under it. They take their values from the design system and its two themes.
   answered by the page cache.
 - What the entity data says of minor persons, relations of low certainty included, becomes public
   and indexed as it is.
-- A portrait, a stage or a card published later appears on the site within the hour, with no
-  deployment.
+- A portrait, a stage or a card published later reaches the server within the hour, with no
+  deployment; the pages already kept by the page cache show it once the `/atlas` folder is
+  rendered again (`yarn cache:invalidate --site /atlas`).
 - The clay figures exist twice, in the application and on the site; a new figure is copied to both.
 - The prototype is no longer the public atlas: it stays a design reference.
 - The map is drawn from Natural Earth by `apps/site/scripts/build-atlas-map.py`, without tiles
