@@ -24,6 +24,14 @@ import {
   type EntityImageCatalog,
   type EntityImageSelection
 } from "./entityImages.js";
+import {
+  CATALOG_CACHE_CONTROL,
+  pendingUploads,
+  putImmutableCopies,
+  unreachableAddresses,
+  wranglerPut,
+  type MediaUpload
+} from "./mediaUpload.js";
 import { readImageSize, sha256Hex } from "./timelineImages.js";
 
 const execFileAsync = promisify(execFile);
@@ -32,20 +40,11 @@ const STUDIO_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   ".."
 );
-const RESOURCE_SERVICE_DIR = path.resolve(
-  STUDIO_ROOT,
-  "../../packages/resource-service"
-);
 const DEFAULT_OUTPUT = path.join(STUDIO_ROOT, "outputs", "entity-images");
 const DEFAULT_PLACEHOLDER_TARGET = path.resolve(
   STUDIO_ROOT,
   "../expo/src/assets/images/entity-avatars"
 );
-const UPLOADS_IN_FLIGHT = 6;
-// A portrait never changes under its address: a new one gets a new hash.
-const IMAGE_CACHE_CONTROL = "public, max-age=31536000, immutable";
-// The catalog is the only object that changes; the application reads it at most once a day.
-const CATALOG_CACHE_CONTROL = "public, max-age=3600";
 
 const USAGE = `Prepares the portraits of biblical entities for the media host (ADR-0089).
 
@@ -217,45 +216,14 @@ const report = async (args: string[]) => {
   console.log(`catalog ${(await stat(catalogPath(output))).size} bytes`);
 };
 
-const wranglerPut = (
-  bucket: string,
-  key: string,
-  file: string,
-  mediaType: string,
-  cacheControl: string
-) =>
-  execFileAsync(
-    "yarn",
-    [
-      "wrangler",
-      "r2",
-      "object",
-      "put",
-      `${bucket}/${key}`,
-      "--file",
-      file,
-      "--content-type",
-      mediaType,
-      "--cache-control",
-      cacheControl,
-      "--remote"
-    ],
-    { cwd: RESOURCE_SERVICE_DIR, maxBuffer: 16 * 1024 * 1024 }
-  );
-
-type Upload = { key: string; file: string; sha256: string; url: string };
-
 const uploadImages = async (args: string[]) => {
   const output = option(args, "--output") ?? DEFAULT_OUTPUT;
   const bucket = option(args, "--bucket") ?? ENTITY_IMAGE_BUCKET;
   const dryRun = args.includes("--dry-run");
   const { built } = await readBuilt(output);
   const ledgerPath = path.join(output, `uploaded.${bucket}.json`);
-  const ledger: Record<string, string> = existsSync(ledgerPath)
-    ? JSON.parse(await readFile(ledgerPath, "utf8"))
-    : {};
 
-  const copies: Upload[] = [];
+  const copies: MediaUpload[] = [];
   for (const portrait of built) {
     for (const width of ENTITY_IMAGE_WIDTHS) {
       const file = copyPath(output, portrait.hash, width);
@@ -271,7 +239,7 @@ const uploadImages = async (args: string[]) => {
       });
     }
   }
-  const uploads = copies.filter((copy) => ledger[copy.key] !== copy.sha256);
+  const uploads = await pendingUploads(copies, ledgerPath);
 
   if (dryRun) {
     for (const upload of uploads.slice(0, 10)) console.log(`put ${upload.key}`);
@@ -282,46 +250,17 @@ const uploadImages = async (args: string[]) => {
     return;
   }
 
-  const queue = [...uploads];
-  let done = 0;
-  const worker = async () => {
-    for (;;) {
-      const next = queue.shift();
-      if (!next) return;
-      await wranglerPut(
-        bucket,
-        next.key,
-        next.file,
-        "image/webp",
-        IMAGE_CACHE_CONTROL
-      );
-      ledger[next.key] = next.sha256;
-      done += 1;
-      if (done % 50 === 0) {
-        console.log(`${done} uploaded, ${queue.length} to go`);
-        await writeFile(ledgerPath, `${JSON.stringify(ledger, null, 2)}\n`);
-      }
-    }
-  };
-  try {
-    await Promise.all(Array.from({ length: UPLOADS_IN_FLIGHT }, worker));
-  } finally {
-    await writeFile(ledgerPath, `${JSON.stringify(ledger, null, 2)}\n`);
-  }
+  const done = await putImmutableCopies(
+    bucket,
+    uploads,
+    ledgerPath,
+    "image/webp"
+  );
   console.log(`Uploaded ${done} copies to ${bucket}.`);
 
   // The catalog must never name a picture its address does not serve.
-  const unreachable: string[] = [];
-  const checks = [...copies];
-  await Promise.all(
-    Array.from({ length: UPLOADS_IN_FLIGHT }, async () => {
-      for (;;) {
-        const next = checks.shift();
-        if (!next) return;
-        const answer = await fetch(next.url, { method: "HEAD" });
-        if (!answer.ok) unreachable.push(`${answer.status} ${next.url}`);
-      }
-    })
+  const unreachable = await unreachableAddresses(
+    copies.map((copy) => copy.url)
   );
   if (unreachable.length > 0) {
     throw new Error(
