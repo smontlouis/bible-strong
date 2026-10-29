@@ -1,6 +1,8 @@
 import { biblicalMapBounds } from '@bible-strong/resource-domain/biblical-map'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { View } from 'react-native'
+import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 
 import Header from '~common/Header'
 import Loading from '~common/Loading'
@@ -44,6 +46,10 @@ const BiblicalMapScreen = ({
     return biblicalMapBounds(places.filter(place => highlighted.has(place.uniqueName)))
   }, [places, focus, highlighted])
   const missing = Boolean(placeNames?.length) && !loading && !region
+  // The web view leaves its moves unclaimed, so iOS gives a drag down to the sheet, which leaves
+  // with the map. This pan does nothing but claim them; the page still gets every touch, and the
+  // sheet still moves by its header.
+  const holdSheet = useMemo(() => Gesture.Pan().cancelsTouchesInView(false), [])
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
@@ -55,43 +61,47 @@ const BiblicalMapScreen = ({
         {loading ? (
           <Loading message={t('Chargement...')} />
         ) : (
-          <BiblicalMapDOM
-            places={[...places]}
-            focus={focus}
-            highlighted={placeNames}
-            region={region}
-            colors={{
-              sea: colors.lightPrimary,
-              land: colors.surface,
-              coast: colors.separator,
-              water: colors.primary,
-              lakeOpacity: 0.35,
-              riverOpacity: 0.45,
-              place: colors.tertiary,
-              accent: colors.primary,
-              halo: colors.surface,
-              ink: colors.default,
-              nameHalo: colors.surface,
-              control: colors.surfaceRaised,
-              controlInk: colors.default,
-              controlLine: colors.separator,
-            }}
-            labels={{
-              map: t('strongDetail.entity.mapLabel'),
-              zoomIn: t('strongDetail.entity.mapZoomIn'),
-              zoomOut: t('strongDetail.entity.mapZoomOut'),
-              whole: t('strongDetail.entity.mapWhole'),
-            }}
-            onOpenPlace={navigation.openEntity}
-            dom={{
-              useExpoDOMWebView: false,
-              webviewDebuggingEnabled: __DEV__,
-              scrollEnabled: false,
-              bounces: false,
-              style: { flex: 1, backgroundColor: colors.lightPrimary },
-              containerStyle: { flex: 1, backgroundColor: colors.lightPrimary },
-            }}
-          />
+          <GestureDetector gesture={holdSheet}>
+            <View collapsable={false} style={{ flex: 1 }}>
+              <BiblicalMapDOM
+                places={[...places]}
+                focus={focus}
+                highlighted={placeNames}
+                region={region}
+                colors={{
+                  sea: colors.lightPrimary,
+                  land: colors.surface,
+                  coast: colors.separator,
+                  water: colors.primary,
+                  lakeOpacity: 0.35,
+                  riverOpacity: 0.45,
+                  place: colors.tertiary,
+                  accent: colors.primary,
+                  halo: colors.surface,
+                  ink: colors.default,
+                  nameHalo: colors.surface,
+                  control: colors.surfaceRaised,
+                  controlInk: colors.default,
+                  controlLine: colors.separator,
+                }}
+                labels={{
+                  map: t('strongDetail.entity.mapLabel'),
+                  zoomIn: t('strongDetail.entity.mapZoomIn'),
+                  zoomOut: t('strongDetail.entity.mapZoomOut'),
+                  whole: t('strongDetail.entity.mapWhole'),
+                }}
+                onOpenPlace={navigation.openEntity}
+                dom={{
+                  useExpoDOMWebView: false,
+                  webviewDebuggingEnabled: __DEV__,
+                  scrollEnabled: false,
+                  bounces: false,
+                  style: { flex: 1, backgroundColor: colors.lightPrimary },
+                  containerStyle: { flex: 1, backgroundColor: colors.lightPrimary },
+                }}
+              />
+            </View>
+          </GestureDetector>
         )}
         {missing && (
           <Box
