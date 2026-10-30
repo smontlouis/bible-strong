@@ -53,12 +53,21 @@ it, scrolling holds 60 frames a second with none. Loading took the same main-thr
 A card opens over the gallery at `/atlas/:language/cards/:id`. Its id is the entity's unique name,
 followed by `~stage` for a life stage. The open card:
 
-- rises from its place in the grid, tilts under the pointer and turns over when touched;
-- moves to the card before or after it, in the gallery as filtered, with a swipe or the arrow keys;
+- rises from its place in the page, tilts under the pointer and turns over when touched;
+- moves to the card before or after it, in the gallery as filtered, with the arrows of its bar or of
+  the keyboard, one card leaving as the next arrives. A swipe does not move it: on a phone a finger
+  on the card tilts it and scrolls to what lies under it;
 - leads to the character's page, the verse of its sentence, its first mention, its Strong number and
   its series.
 
-Closing it, or the browser's back button, returns to the gallery where it was.
+Closing it, or the browser's back button, sends the card back to its place and returns to the
+gallery where it was. The page moves only to bring the last card seen into view, when the reader
+opened a card of the grid and moved on with the arrows. Motion carries the card, its own springs
+tilt it and turn it over.
+
+A card names a Strong number the lexicon knows. Two characters (Lot, Zeruiah) carried in the entity
+data a sense the lexicon does not hold, which has no page (ADR-0068): their cards take the number
+it is written under.
 
 The address of a card exists to be shared. Its share image is drawn as an entity's, with the card's
 sentence, its title and its own picture: each life stage now has a PNG copy on the media host too

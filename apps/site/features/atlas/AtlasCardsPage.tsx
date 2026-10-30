@@ -1,4 +1,5 @@
 import { Outlet, useMatch, useNavigate } from '@tanstack/react-router'
+import { AnimatePresence } from 'motion/react'
 import {
   useCallback,
   useDeferredValue,
@@ -12,7 +13,7 @@ import { WEB_APP_ORIGIN } from '../resources/publicSite'
 import ResourceShell from '../resources/ResourceShell'
 import type { AtlasCardsPageData } from './atlas.functions'
 import AtlasBooster, { BOOSTER_WORDS } from './AtlasBooster'
-import AtlasCardViewer, { type CardOrigin } from './AtlasCardViewer'
+import AtlasCardViewer from './AtlasCardViewer'
 import { cardClasses, CardFront } from './AtlasCards'
 import { CARD_FAMILY_LABELS, type AtlasGalleryCard } from './atlasCardCatalog'
 import {
@@ -73,11 +74,6 @@ const WORDS = {
 /** How many cards stand in the fan of the opening. */
 const FAN = 5
 
-const originOf = (element: Element): CardOrigin => {
-  const rect = element.getBoundingClientRect()
-  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, width: rect.width }
-}
-
 /** A card as the grid draws it: still, its foil at rest, a link to its own address. */
 function GridCard({
   card,
@@ -86,7 +82,7 @@ function GridCard({
 }: {
   card: AtlasGalleryCard
   href: string
-  onOpen: (card: AtlasGalleryCard, origin: CardOrigin) => void
+  onOpen: (card: AtlasGalleryCard, place: Element) => void
 }) {
   return (
     <li className="acg__item">
@@ -99,7 +95,7 @@ function GridCard({
           if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button)
             return
           event.preventDefault()
-          onOpen(card, originOf(event.currentTarget))
+          onOpen(card, event.currentTarget)
         }}
       >
         <span className={`${cardClasses(card)} acg__card`}>
@@ -126,7 +122,8 @@ export default function AtlasCardsPage({ page }: { page: AtlasCardsPageData }) {
   const openId = parseAtlasCardId(opened?.params.card)
   const [filters, setFilters] = useState<CardFilters>(NO_FILTERS)
   const [booster, setBooster] = useState(false)
-  const origin = useRef<CardOrigin>(undefined)
+  // Where the card opened came from: the grid, the fan of the opening or a pack.
+  const opening = useRef<{ id: string; place: Element }>(undefined)
   const grid = useRef<HTMLDivElement>(null)
 
   useEffect(() => rememberCardsPage(page), [page])
@@ -186,9 +183,11 @@ export default function AtlasCardsPage({ page }: { page: AtlasCardsPageData }) {
   const travelled = openCard && shown.some(card => card.id === openCard.id) ? shown : page.cards
 
   const hash = () => (typeof window === 'undefined' ? '' : window.location.hash)
+  const gridCard = (id: string) =>
+    document.querySelector<HTMLElement>(`.acg__link[data-card-id="${CSS.escape(id)}"]`)
   const open = useCallback(
-    (card: AtlasGalleryCard, from?: CardOrigin) => {
-      origin.current = from
+    (card: AtlasGalleryCard, place: Element) => {
+      opening.current = { id: card.id, place }
       void navigate({
         href: `${buildAtlasCardPath(language, card.id)}${hash()}`,
         resetScroll: false,
@@ -196,18 +195,20 @@ export default function AtlasCardsPage({ page }: { page: AtlasCardsPageData }) {
     },
     [language, navigate]
   )
+  /** The card goes back where it came from; another one, reached with the arrows, to the grid. */
+  const placeOf = (id: string) =>
+    opening.current?.id === id
+      ? opening.current.place
+      : opening.current?.place.matches('.acg__link')
+        ? gridCard(id)
+        : undefined
   const close = () => {
-    const last = openId
-    origin.current = undefined
+    // Opened from the grid and moved on with the arrows, the page follows to the last card seen.
+    // Anywhere else it stays where the reader left it.
+    const place = openId ? placeOf(openId) : undefined
+    if (openId !== opening.current?.id) place?.scrollIntoView({ block: 'nearest' })
     void navigate({ href: `${buildAtlasCardsPath(language)}${hash()}`, resetScroll: false }).then(
-      () => {
-        // The reader comes back to the card they last looked at.
-        const element = last
-          ? document.querySelector<HTMLElement>(`[data-card-id="${CSS.escape(last)}"]`)
-          : null
-        element?.scrollIntoView({ block: 'nearest' })
-        element?.focus({ preventScroll: true })
-      }
+      () => (place as HTMLElement | undefined)?.focus({ preventScroll: true })
     )
   }
 
@@ -252,7 +253,7 @@ export default function AtlasCardsPage({ page }: { page: AtlasCardsPageData }) {
                 style={{ '--acg-index': index - (FAN - 1) / 2 } as React.CSSProperties}
                 onClick={event => {
                   event.preventDefault()
-                  open(card, originOf(event.currentTarget))
+                  open(card, event.currentTarget)
                 }}
               >
                 <span className={`${cardClasses(card)} acg__card`}>
@@ -438,29 +439,32 @@ export default function AtlasCardsPage({ page }: { page: AtlasCardsPageData }) {
         />
       )}
 
-      {openCard && (
-        <AtlasCardViewer
-          card={openCard}
-          cards={travelled}
-          siblings={byEntity.get(openCard.entity) ?? [openCard]}
-          language={language}
-          origin={origin.current}
-          onClose={close}
-          onMove={card =>
-            void navigate({
-              href: `${buildAtlasCardPath(language, card.id)}${hash()}`,
-              replace: true,
-              resetScroll: false,
-            })
-          }
-          onSeries={series => {
-            setBooster(false)
-            update({ ...NO_FILTERS, series })
-            close()
-            window.requestAnimationFrame(() => grid.current?.scrollIntoView({ block: 'start' }))
-          }}
-        />
-      )}
+      <AnimatePresence>
+        {openCard && (
+          <AtlasCardViewer
+            key="card"
+            card={openCard}
+            cards={travelled}
+            siblings={byEntity.get(openCard.entity) ?? [openCard]}
+            language={language}
+            placeOf={placeOf}
+            onClose={close}
+            onMove={card =>
+              void navigate({
+                href: `${buildAtlasCardPath(language, card.id)}${hash()}`,
+                replace: true,
+                resetScroll: false,
+              })
+            }
+            onSeries={series => {
+              setBooster(false)
+              update({ ...NO_FILTERS, series })
+              close()
+              window.requestAnimationFrame(() => grid.current?.scrollIntoView({ block: 'start' }))
+            }}
+          />
+        )}
+      </AnimatePresence>
       <Outlet />
     </ResourceShell>
   )

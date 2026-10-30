@@ -975,6 +975,9 @@
 /* ---------- The gallery of every card ---------- */
 
 .acg-hero {
+  /* The fan stays under the header when the page scrolls. */
+  position: relative;
+  z-index: 0;
   display: grid;
   max-width: 1120px;
   align-items: center;
@@ -1175,6 +1178,8 @@
 
 .acg__link {
   display: block;
+  /* Brought into view under the header and the filters. */
+  scroll-margin-top: 240px;
   border-radius: 4.6% / 3.3%;
   transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-tap-highlight-color: transparent;
@@ -1257,16 +1262,26 @@
   justify-content: center;
   padding: 28px 20px calc(96px + env(safe-area-inset-bottom, 0px));
   gap: clamp(28px, 6vw, 80px);
-  overflow-y: auto;
+  overflow: hidden auto;
   overscroll-behavior: contain;
 }
 
-.acv__slot {
+.acv__deck {
+  --ac-w: min(400px, 84vw, calc((100svh - 190px) * 63 / 88));
+  position: relative;
+  width: var(--ac-w);
   flex: none;
+  aspect-ratio: 63 / 88;
 }
 
-.acv__card {
-  --ac-w: min(400px, 84vw, calc((100svh - 190px) * 63 / 88));
+.acv__turn {
+  position: absolute;
+  inset: 0;
+}
+
+/* A finger on the card tilts it, and still scrolls to what lies under it. */
+.acv .acv__card.is-active .ac-rotator {
+  touch-action: pan-y;
 }
 
 .acv__panel {
@@ -1329,9 +1344,12 @@
 }
 
 .acv__links :is(a, button) {
-  display: block;
+  display: flex;
   width: 100%;
+  align-items: center;
+  justify-content: space-between;
   padding: 11px 0;
+  gap: 12px;
   border: 0;
   background: none;
   color: #f2ecdc;
@@ -1341,15 +1359,46 @@
   text-align: left;
 }
 
-.acv__links :is(a, button):hover {
-  color: #fff3cf;
+.acv__links svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  fill: none;
+  opacity: 0.6;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  transition:
+    opacity 180ms ease-out,
+    transform 180ms ease-out;
 }
 
-.acv__links span {
+.acv__links :is(a, button):hover svg,
+.acv__links :is(a, button):focus-visible svg {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+.acv__links :is(a, button):hover .acv__row-value,
+.acv__links :is(a, button):focus-visible .acv__row-value {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.acv__row-text {
+  min-width: 0;
+}
+
+.acv__row-label {
   display: block;
   color: #a9a294;
   font-size: 0.75rem;
   font-weight: 500;
+}
+
+.acv__row-value {
+  display: block;
 }
 
 .acv__share {
@@ -1434,7 +1483,7 @@
     gap: 24px;
   }
 
-  .acv__card {
+  .acv__deck {
     --ac-w: min(360px, 80vw, calc((100svh - 220px) * 63 / 88));
   }
 
@@ -1443,9 +1492,39 @@
   }
 }
 
+/* Closing: the card goes back to its place while everything else fades away. */
+.acv.is-leaving {
+  pointer-events: none;
+}
+
+.acv.is-leaving .acv__shade {
+  animation: acv-fade-out 280ms 60ms ease-out both;
+}
+
+.acv.is-leaving .acv__panel {
+  animation: acv-fade-out 160ms ease-out both;
+}
+
+.acv.is-leaving .acv__bar {
+  animation: acv-bar-out 200ms ease-in both;
+}
+
 @keyframes acv-fade {
   from {
     opacity: 0;
+  }
+}
+
+@keyframes acv-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes acv-bar-out {
+  to {
+    opacity: 0;
+    transform: translate(-50%, 16px);
   }
 }
 
@@ -1941,6 +2020,9 @@
   .acv__shade,
   .acv__panel,
   .acv__bar,
+  .acv.is-leaving .acv__shade,
+  .acv.is-leaving .acv__panel,
+  .acv.is-leaving .acv__bar,
   .acb__shade,
   .acb__pack,
   .acb__tear,

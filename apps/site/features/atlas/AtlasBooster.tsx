@@ -3,7 +3,6 @@ import type { ResourceLanguage } from '../resources/publicSite'
 import { cardClasses, CardFront } from './AtlasCards'
 import type { AtlasGalleryCard } from './atlasCardCatalog'
 import { cardPacks, drawPack, PACK_SIZE, type CardPack } from './atlasCardsGallery'
-import type { CardOrigin } from './AtlasCardViewer'
 
 // Packs of five cards drawn at random, opened for the pleasure of turning them over. Nothing is
 // kept and nothing is worth more than another (ADR-0090): a pack is a way of meeting characters
@@ -101,7 +100,7 @@ export default function AtlasBooster({
   cards: AtlasGalleryCard[]
   language: ResourceLanguage
   onClose: () => void
-  onOpenCard: (card: AtlasGalleryCard, origin: CardOrigin) => void
+  onOpenCard: (card: AtlasGalleryCard, place: Element) => void
 }) {
   const words = BOOSTER_WORDS[language]
   const packs = useRef(cardPacks(cards, words.everything)).current
@@ -223,12 +222,7 @@ export default function AtlasBooster({
                     turn(index)
                     return
                   }
-                  const rect = event.currentTarget.getBoundingClientRect()
-                  onOpenCard(card, {
-                    x: rect.left + rect.width / 2,
-                    y: rect.top + rect.height / 2,
-                    width: rect.width,
-                  })
+                  onOpenCard(card, event.currentTarget)
                 }}
               >
                 <span className="acb__flipper">

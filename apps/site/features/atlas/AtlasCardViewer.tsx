@@ -1,10 +1,19 @@
 import { TIPNR_BOOK_CODES } from '@bible-strong/resource-domain/strong-lexicon'
 import {
+  animate,
+  AnimatePresence,
+  motion,
+  useMotionValue,
+  usePresence,
+  type Transition,
+} from 'motion/react'
+import {
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
   type PointerEvent as ReactPointerEvent,
+  type ReactNode,
 } from 'react'
 import { buildBibleReferencePath } from '../resources/editorialLinks'
 import type { ResourceLanguage } from '../resources/publicSite'
@@ -25,9 +34,10 @@ import {
 import { CARD_FAMILY_LABELS, type AtlasGalleryCard } from './atlasCardCatalog'
 import { buildAtlasCardPath, buildAtlasEntityPath } from './atlasRoutes'
 
-// A card opened over the gallery, at its own address: it rises from its place in the grid, tilts
-// under the pointer, turns over when touched, and gives way to the card before or after it with a
-// swipe or the arrow keys. Beside it, where it leads: its character, its Strong number, its verses.
+// A card opened over the gallery, at its own address. Two levels move it: Motion carries the card
+// from its place in the page and back, and from one card to the next with the arrows; the springs
+// of the card itself tilt it under the pointer and turn it over. Beside it, where it leads: its
+// character, its Strong number, its verses.
 
 export const VIEWER_WORDS = {
   fr: {
@@ -78,34 +88,53 @@ const versePath = (language: ResourceLanguage, reference: string | undefined) =>
   })
 }
 
-/** Where a card rises from: the place of its copy in the grid, when it is on screen. */
-export type CardOrigin = { x: number; y: number; width: number }
-
-const SWIPE = 56
-
 // The card is placed where it rises from before the browser paints it.
 const useArrivalEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect
 
-export default function AtlasCardViewer({
+/** Where a card stands in the page, when it is on screen. */
+const placeOnScreen = (element: Element | null | undefined) => {
+  const rect = element?.getBoundingClientRect()
+  if (!rect || rect.bottom < 0 || rect.top > window.innerHeight) return undefined
+  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, width: rect.width }
+}
+
+const CARRY: Transition = { type: 'spring', visualDuration: 0.42, bounce: 0.14 }
+const RETURN: Transition = { type: 'spring', visualDuration: 0.34, bounce: 0 }
+const PASS: Transition = { type: 'spring', visualDuration: 0.4, bounce: 0.1 }
+
+/** A card arriving from the side it is going to, and the one it replaces leaving by the other. */
+const PASSING = {
+  enter: (direction: number) => ({
+    x: `${direction * 72}%`,
+    rotate: direction * 6,
+    scale: 0.9,
+    opacity: 0,
+  }),
+  rest: { x: 0, rotate: 0, scale: 1, opacity: 1 },
+  leave: (direction: number) => ({
+    x: `${direction * -72}%`,
+    rotate: direction * -6,
+    scale: 0.9,
+    opacity: 0,
+  }),
+}
+
+/** One card: it tilts under the pointer and turns over when touched. */
+function ViewerCard({
   card,
-  cards,
   siblings,
   language,
-  origin,
-  onClose,
-  onMove,
-  onSeries,
+  flipped,
+  spin,
+  onFlip,
 }: {
   card: AtlasGalleryCard
-  /** The cards the viewer moves through: the gallery as it is filtered and ordered. */
-  cards: AtlasGalleryCard[]
-  /** Every card of the same character, base card first. */
   siblings: AtlasGalleryCard[]
   language: ResourceLanguage
-  origin?: CardOrigin
-  onClose: () => void
-  onMove: (card: AtlasGalleryCard, direction: -1 | 1) => void
-  onSeries?: (series: string) => void
+  flipped: boolean
+  /** The full turn a card makes as it first comes out of the page. */
+  spin: boolean
+  onFlip: () => void
 }) {
   const words = VIEWER_WORDS[language]
   const element = useRef<HTMLDivElement>(null)
@@ -114,15 +143,7 @@ export default function AtlasCardViewer({
   const frame = useRef(0)
   const still = useRef(false)
   const endTimer = useRef(0)
-  const down = useRef<{ x: number; y: number; id: number }>(undefined)
-  const swiped = useRef(false)
-  const [flipped, setFlipped] = useState(false)
-  const [copied, setCopied] = useState(false)
-  const arrival = useRef<{ origin?: CardOrigin; direction: -1 | 0 | 1 }>({ origin, direction: 0 })
-
-  const position = cards.findIndex(item => item.id === card.id)
-  const previous = position > 0 ? cards[position - 1] : undefined
-  const next = position >= 0 && position < cards.length - 1 ? cards[position + 1] : undefined
+  const pressed = useRef(false)
 
   const tick = () => {
     let moving = false
@@ -176,51 +197,216 @@ export default function AtlasCardViewer({
     kick()
   }
 
-  const flip = () => {
-    const s = springs.current
-    s.flip.t = s.flip.t ? 0 : 180
-    setFlipped(Boolean(s.flip.t))
-    kick()
-  }
-
-  // A new card arrives: from its place in the grid the first time, from the side after a swipe.
-  useArrivalEffect(() => {
+  useEffect(() => {
     drawTextures()
     still.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const s = (springs.current = restingSprings())
-    setFlipped(false)
-    const target = element.current?.getBoundingClientRect()
-    const { origin: from, direction } = arrival.current
-    if (target && !still.current) {
-      if (from) {
-        s.tx.x = from.x - (target.left + target.width / 2)
-        s.ty.x = from.y - (target.top + target.height / 2)
-        s.sc.x = from.width / target.width
-        s.spin.t = 360
-      } else if (direction) {
-        s.tx.x = direction * Math.min(target.width * 0.6, 220)
-        s.sc.x = 0.92
-      } else {
-        s.sc.x = 0.9
-      }
-    }
-    arrival.current = { direction: 0 }
-    if (element.current) paint(element.current, s)
+    if (element.current) paint(element.current, springs.current)
+    if (spin && !still.current) springs.current.spin.t = 360
     kick()
-    rest(s.spin.t ? 900 : 120)
+    rest(spin ? 900 : 120)
     return () => {
       cancelAnimationFrame(frame.current)
       frame.current = 0
       window.clearTimeout(endTimer.current)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [card.id])
+  }, [])
 
-  const move = (direction: -1 | 1) => {
-    const target = direction < 0 ? previous : next
+  useEffect(() => {
+    springs.current.flip.t = flipped ? 180 : 0
+    kick()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flipped])
+
+  const onPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    pressed.current = true
+    tilt(event.clientX, event.clientY)
+  }
+  const onPointerMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType === 'mouse' || pressed.current) tilt(event.clientX, event.clientY)
+  }
+  const release = () => {
+    pressed.current = false
+    rest(250)
+  }
+
+  const rank = siblings.findIndex(item => item.id === card.id) + 1
+
+  return (
+    <div ref={element} className={`${cardClasses(card)} acv__card is-active`}>
+      <div className="ac-translater">
+        <button
+          ref={rotator}
+          type="button"
+          className="ac-rotator"
+          aria-label={`${card.name}, ${card.title}. ${flipped ? words.front : words.flip}`}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={release}
+          onPointerCancel={release}
+          onPointerLeave={event => {
+            if (event.pointerType === 'mouse') rest()
+          }}
+          onClick={onFlip}
+        >
+          <div className="ac-face ac-front">
+            <CardFront card={card} />
+          </div>
+          <div className="ac-face ac-back">
+            <CardBack
+              card={card}
+              language={language}
+              rank={rank || 1}
+              total={siblings.length || 1}
+            />
+          </div>
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/** A row of the panel: what it leads to, and an arrow that says it leads somewhere. */
+function PanelRow({
+  label,
+  value,
+  href,
+  onClick,
+}: {
+  label?: string
+  value: ReactNode
+  href?: string
+  onClick?: () => void
+}) {
+  const content = (
+    <>
+      <span className="acv__row-text">
+        {label && <span className="acv__row-label">{label}</span>}
+        <span className="acv__row-value">{value}</span>
+      </span>
+      <svg viewBox="0 0 20 20" aria-hidden="true">
+        <path d="m7.5 4.5 5.5 5.5-5.5 5.5" />
+      </svg>
+    </>
+  )
+  return (
+    <li>
+      {href ? (
+        <a href={href}>{content}</a>
+      ) : (
+        <button type="button" onClick={onClick}>
+          {content}
+        </button>
+      )}
+    </li>
+  )
+}
+
+export default function AtlasCardViewer({
+  card,
+  cards,
+  siblings,
+  language,
+  placeOf,
+  onClose,
+  onMove,
+  onSeries,
+}: {
+  card: AtlasGalleryCard
+  /** The cards the viewer moves through: the gallery as it is filtered and ordered. */
+  cards: AtlasGalleryCard[]
+  /** Every card of the same character, base card first. */
+  siblings: AtlasGalleryCard[]
+  language: ResourceLanguage
+  /** The element a card rises from and goes back to in the page. */
+  placeOf: (id: string) => Element | null | undefined
+  onClose: () => void
+  onMove: (card: AtlasGalleryCard) => void
+  onSeries?: (series: string) => void
+}) {
+  const words = VIEWER_WORDS[language]
+  const [present, safeToRemove] = usePresence()
+  const deck = useRef<HTMLDivElement>(null)
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+  const scale = useMotionValue(1)
+  const opacity = useMotionValue(1)
+  const [flipped, setFlipped] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [direction, setDirection] = useState<-1 | 1>(1)
+  const [still, setStill] = useState(false)
+  // The card that came out of the page makes a full turn on its way; the next ones slide in.
+  const [spinner] = useState(() =>
+    typeof document !== 'undefined' && placeOf(card.id) ? card.id : undefined
+  )
+
+  const position = cards.findIndex(item => item.id === card.id)
+  const previous = position > 0 ? cards[position - 1] : undefined
+  const next = position >= 0 && position < cards.length - 1 ? cards[position + 1] : undefined
+
+  /** How far the card, at rest in the window, stands from a place in the page. */
+  const distanceTo = (place: { x: number; y: number; width: number }) => {
+    const rect = deck.current?.getBoundingClientRect()
+    if (!rect) return undefined
+    return {
+      x: place.x - (rect.left + rect.width / 2 - x.get()),
+      y: place.y - (rect.top + rect.height / 2 - y.get()),
+      scale: (place.width / rect.width) * scale.get(),
+    }
+  }
+
+  // The card rises from its place, before the browser paints it at the middle of the window.
+  useArrivalEffect(() => {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    setStill(reduced)
+    const place = placeOnScreen(placeOf(card.id))
+    const from = place && !reduced ? distanceTo(place) : undefined
+    if (!from) return
+    x.set(from.x)
+    y.set(from.y)
+    scale.set(from.scale)
+    animate(x, 0, CARRY)
+    animate(y, 0, CARRY)
+    animate(scale, 1, CARRY)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Closed, it goes back to its place, or fades when its place is off screen. The timer is there
+  // for a page that is not painting: its animations never end.
+  useEffect(() => {
+    if (present) return
+    setFlipped(false)
+    let done = false
+    const remove = () => {
+      if (done) return
+      done = true
+      safeToRemove?.()
+    }
+    const timer = window.setTimeout(remove, 800)
+    const place = placeOnScreen(placeOf(card.id))
+    const to = place && !still ? distanceTo(place) : undefined
+    const landing = to
+      ? [
+          animate(x, to.x, RETURN),
+          animate(y, to.y, RETURN),
+          animate(scale, to.scale, RETURN),
+          animate(opacity, 0, { delay: 0.26, duration: 0.1 }),
+        ]
+      : [
+          animate(scale, 0.92, { duration: still ? 0 : 0.2 }),
+          animate(opacity, 0, { duration: still ? 0 : 0.2 }),
+        ]
+    void Promise.all(landing).then(remove)
+    return () => window.clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [present])
+
+  const move = (to: -1 | 1) => {
+    const target = to < 0 ? previous : next
     if (!target) return
-    arrival.current = { direction }
-    onMove(target, direction)
+    setDirection(to)
+    setFlipped(false)
+    onMove(target)
   }
 
   useEffect(() => {
@@ -230,46 +416,18 @@ export default function AtlasCardViewer({
       else if (event.key === 'ArrowRight') move(1)
     }
     document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [card.id, previous?.id, next?.id])
+
+  useEffect(() => {
     const root = document.documentElement
     const overflow = root.style.overflow
     root.style.overflow = 'hidden'
     return () => {
-      document.removeEventListener('keydown', onKey)
       root.style.overflow = overflow
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [card.id, previous?.id, next?.id])
-
-  const onPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    down.current = { x: event.clientX, y: event.clientY, id: event.pointerId }
-    swiped.current = false
-    event.currentTarget.setPointerCapture(event.pointerId)
-    tilt(event.clientX, event.clientY)
-  }
-  const onPointerMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    const start = down.current
-    if (start && event.pointerType !== 'mouse') {
-      const dx = event.clientX - start.x
-      if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(event.clientY - start.y)) {
-        // A sideways drag carries the card along, then lets the next one in.
-        springs.current.tx.t = dx * 0.6
-        kick()
-        if (Math.abs(dx) > SWIPE) swiped.current = true
-        return
-      }
-    }
-    if (event.pointerType === 'mouse' || start) tilt(event.clientX, event.clientY)
-  }
-  const onPointerUp = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    const start = down.current
-    down.current = undefined
-    springs.current.tx.t = 0
-    if (start && swiped.current) {
-      move(event.clientX - start.x < 0 ? 1 : -1)
-      return
-    }
-    rest(250)
-  }
+  }, [])
 
   const share = async () => {
     const url = `${window.location.origin}${buildAtlasCardPath(language, card.id)}`
@@ -295,50 +453,39 @@ export default function AtlasCardViewer({
   const seriesId = card.seriesIds[0]
 
   return (
-    <div className="acv" role="dialog" aria-modal="true" aria-label={`${card.name}, ${card.title}`}>
+    <div
+      className={`acv ${present ? '' : 'is-leaving'}`}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${card.name}, ${card.title}`}
+    >
       <div className="acv__shade" onClick={onClose} aria-hidden="true" />
       <div className="acv__stage">
-        <div className="acv__slot">
-          <div ref={element} className={`${cardClasses(card)} acv__card is-active`}>
-            <div className="ac-translater">
-              <button
-                ref={rotator}
-                type="button"
-                className="ac-rotator"
-                aria-label={`${card.name}, ${card.title}. ${flipped ? words.front : words.flip}`}
-                onPointerDown={onPointerDown}
-                onPointerMove={onPointerMove}
-                onPointerUp={onPointerUp}
-                onPointerCancel={() => {
-                  down.current = undefined
-                  springs.current.tx.t = 0
-                  rest(0)
-                }}
-                onPointerLeave={event => {
-                  if (event.pointerType === 'mouse') rest()
-                }}
-                onClick={() => {
-                  if (swiped.current) swiped.current = false
-                  else flip()
-                }}
-              >
-                <div className="ac-face ac-front">
-                  <CardFront card={card} />
-                </div>
-                <div className="ac-face ac-back">
-                  <CardBack
-                    card={card}
-                    language={language}
-                    rank={rank || 1}
-                    total={siblings.length || 1}
-                  />
-                </div>
-              </button>
-            </div>
-          </div>
-        </div>
+        <motion.div ref={deck} className="acv__deck" style={{ x, y, scale, opacity }}>
+          <AnimatePresence initial={false} custom={direction}>
+            <motion.div
+              key={card.id}
+              className="acv__turn"
+              custom={direction}
+              variants={PASSING}
+              initial="enter"
+              animate="rest"
+              exit="leave"
+              transition={still ? { duration: 0 } : PASS}
+            >
+              <ViewerCard
+                card={card}
+                siblings={siblings}
+                language={language}
+                flipped={flipped}
+                spin={card.id === spinner}
+                onFlip={() => setFlipped(value => !value)}
+              />
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
 
-        <aside className="acv__panel">
+        <aside key={card.id} className="acv__panel">
           <p className="acv__eyebrow">
             {CARD_FAMILY_LABELS[card.family][language]} · {card.era}
           </p>
@@ -356,42 +503,29 @@ export default function AtlasCardViewer({
             </p>
           )}
           <ul className="acv__links">
-            <li>
-              <a href={buildAtlasEntityPath(language, card.entity)}>
-                {words.page.replace('{name}', card.name)}
-              </a>
-            </li>
+            <PanelRow
+              href={buildAtlasEntityPath(language, card.entity)}
+              value={words.page.replace('{name}', card.name)}
+            />
             {sentencePath && (
-              <li>
-                <a href={sentencePath}>
-                  <span>{words.sentence}</span>
-                  {card.source}
-                </a>
-              </li>
+              <PanelRow href={sentencePath} label={words.sentence} value={card.source} />
             )}
             {firstPath && (
-              <li>
-                <a href={firstPath}>
-                  <span>{words.first}</span>
-                  {card.firstMention}
-                </a>
-              </li>
+              <PanelRow href={firstPath} label={words.first} value={card.firstMention} />
             )}
             {strongPath && (
-              <li>
-                <a href={strongPath}>
-                  <span>{words.strong}</span>
-                  {displayStrongCode(card.strong)}
-                </a>
-              </li>
+              <PanelRow
+                href={strongPath}
+                label={words.strong}
+                value={displayStrongCode(card.strong)}
+              />
             )}
             {seriesId && card.series && onSeries && (
-              <li>
-                <button type="button" onClick={() => onSeries(seriesId)}>
-                  <span>{words.series}</span>
-                  {card.series}
-                </button>
-              </li>
+              <PanelRow
+                label={words.series}
+                value={card.series}
+                onClick={() => onSeries(seriesId)}
+              />
             )}
           </ul>
           <button type="button" className="acv__share" onClick={share}>
@@ -411,7 +545,7 @@ export default function AtlasCardViewer({
             <path d="M12.5 4.5 7 10l5.5 5.5" />
           </svg>
         </button>
-        <button type="button" className="acv__flip" onClick={flip}>
+        <button type="button" className="acv__flip" onClick={() => setFlipped(value => !value)}>
           {flipped ? words.front : words.flip}
         </button>
         {position >= 0 && (
