@@ -65,9 +65,13 @@ gallery where it was. The page moves only to bring the last card seen into view,
 opened a card of the grid and moved on with the arrows. Motion carries the card, its own springs
 tilt it and turn it over.
 
-A card names a Strong number the lexicon knows. Two characters (Lot, Zeruiah) carried in the entity
-data a sense the lexicon does not hold, which has no page (ADR-0068): their cards take the number
-it is written under.
+Beside the card stand every Strong number of the character's names, each with the name it stands
+for: David is H1732 and G1138, God has 33. The card catalog carries them (`strongs`), its first being
+the number printed on the card, and the search reads them all. A card names only numbers the lexicon
+knows. A sense the lexicon does not hold has no page (ADR-0068): it gives way to the number it is
+written under, as for Lot and Zeruiah, or is left out when that number has no entry either.
+
+A touch beside the card, or Escape, closes it like the button of its bar.
 
 The address of a card exists to be shared. Its share image is drawn as an entity's, with the card's
 sentence, its title and its own picture: each life stage now has a PNG copy on the media host too

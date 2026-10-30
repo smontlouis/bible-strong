@@ -64,6 +64,7 @@ export type SourceEntityCard = {
   script: string;
   transliteration: string;
   strong: string;
+  strongs: EntityCardStrong[];
   chapterCount: number;
   stageIndex: number;
   stageCount: number;
@@ -99,6 +100,8 @@ export type EntityCard = {
   stageCount: number;
   chapterCount: number;
   strong: string;
+  /** Every Strong number of the character's names, `strong` first: David is H1732 and G1138. */
+  strongs: EntityCardStrong[];
   original: string;
   script: string;
   transliteration: string;
@@ -116,6 +119,13 @@ export type EntityCard = {
     /** What the card prints under the sentence: speaker, « d’après », reference. */
     source: Both;
   };
+};
+
+/** A Strong number of a character, with the name it stands for and the script of that name. */
+export type EntityCardStrong = {
+  code: string;
+  original: string;
+  script: string;
 };
 
 export type EntityCardCatalog = {
@@ -235,6 +245,7 @@ export const entityCardCatalog = (
       stageCount: card.stageCount,
       chapterCount: card.chapterCount,
       strong: card.strong,
+      strongs: card.strongs,
       original: card.original,
       script: card.script,
       transliteration: card.transliteration,

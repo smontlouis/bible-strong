@@ -43,6 +43,7 @@ const card = (
   era: 'Patriarches',
   eraRank: 1,
   roles: [],
+  strongs: [],
   seriesIds: [],
   order: 0,
   ...extra,
@@ -53,12 +54,14 @@ const gallery = [
     original: 'אַבְרָהָם',
     transliteration: 'avraham',
     strong: 'H85',
+    strongs: [{ code: 'H85', original: 'אַבְרָהָם', script: 'he' }],
     chapterCount: 120,
     roles: ['Patriarche'],
     order: 1,
   }),
   card('Moses@Exo.2.10-Rev', 'Moïse', {
     strong: 'H4872',
+    strongs: [{ code: 'H4872', original: 'מֹשֶׁה', script: 'he' }],
     chapterCount: 700,
     era: 'Exode',
     eraRank: 2,
@@ -69,6 +72,10 @@ const gallery = [
     stages: true,
     stage: 'roi',
     strong: 'H1732',
+    strongs: [
+      { code: 'H1732', original: 'דָּוִד', script: 'he' },
+      { code: 'G1138', original: 'Δαυείδ', script: 'grc' },
+    ],
     chapterCount: 900,
     era: 'Juges et royauté',
     eraRank: 3,
@@ -90,6 +97,9 @@ describe('the gallery of cards', () => {
     expect(ids('moise')).toEqual(['Moïse'])
     expect(ids('אברהם')).toEqual(['Abraham'])
     expect(ids('1732')).toEqual(['David'])
+    // Every number of a character finds it, its Greek name too.
+    expect(ids('G1138')).toEqual(['David'])
+    expect(ids('Δαυειδ')).toEqual(['David'])
     expect(ids('h85')).toEqual(['Abraham'])
     expect(ids('prophète')).toEqual(['Moïse'])
     // A word is found at the start of a word only.

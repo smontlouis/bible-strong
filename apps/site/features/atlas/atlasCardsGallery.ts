@@ -53,9 +53,12 @@ const textOf = (card: AtlasGalleryCard) => {
         card.title,
         card.original,
         card.transliteration,
-        card.strong,
-        // `H1732` is also found as `1732`.
-        card.strong.replace(/^[HG]/u, ''),
+        // Every number of the character; `H1732` is also found as `1732`.
+        ...card.strongs.flatMap(strong => [
+          strong.code,
+          strong.code.replace(/^[HG]/u, ''),
+          strong.original,
+        ]),
         card.era,
         ...card.roles,
         card.series ?? '',

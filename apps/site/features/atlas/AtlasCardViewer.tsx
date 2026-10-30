@@ -43,13 +43,14 @@ export const VIEWER_WORDS = {
   fr: {
     previous: 'Carte précédente',
     next: 'Carte suivante',
-    flip: 'Retourner',
+    flip: 'Verso',
     front: 'Recto',
     close: 'Fermer',
     page: 'La page de {name}',
     first: 'Première mention',
     sentence: 'La phrase de la carte',
     strong: 'Numéro Strong',
+    strongs: 'Numéros Strong',
     series: 'Toute la série',
     share: 'Partager',
     copied: 'Lien copié',
@@ -60,13 +61,14 @@ export const VIEWER_WORDS = {
   en: {
     previous: 'Previous card',
     next: 'Next card',
-    flip: 'Turn over',
+    flip: 'Back',
     front: 'Front',
     close: 'Close',
     page: 'The page of {name}',
     first: 'First mention',
     sentence: 'The sentence of the card',
     strong: 'Strong’s number',
+    strongs: 'Strong’s numbers',
     series: 'The whole series',
     share: 'Share',
     copied: 'Link copied',
@@ -447,9 +449,7 @@ export default function AtlasCardViewer({
   const rank = siblings.findIndex(item => item.id === card.id) + 1
   const firstPath = versePath(language, card.firstRef)
   const sentencePath = versePath(language, card.lineRef)
-  const strongPath = parseStrongCode(card.strong)
-    ? buildStrongPath(language, card.strong)
-    : undefined
+  const strongs = card.strongs.filter(strong => parseStrongCode(strong.code))
   const seriesId = card.seriesIds[0]
 
   return (
@@ -460,7 +460,13 @@ export default function AtlasCardViewer({
       aria-label={`${card.name}, ${card.title}`}
     >
       <div className="acv__shade" onClick={onClose} aria-hidden="true" />
-      <div className="acv__stage">
+      {/* The stage covers the shade: a touch beside the card lands on it. */}
+      <div
+        className="acv__stage"
+        onClick={event => {
+          if (event.target === event.currentTarget) onClose()
+        }}
+      >
         <motion.div ref={deck} className="acv__deck" style={{ x, y, scale, opacity }}>
           <AnimatePresence initial={false} custom={direction}>
             <motion.div
@@ -513,13 +519,6 @@ export default function AtlasCardViewer({
             {firstPath && (
               <PanelRow href={firstPath} label={words.first} value={card.firstMention} />
             )}
-            {strongPath && (
-              <PanelRow
-                href={strongPath}
-                label={words.strong}
-                value={displayStrongCode(card.strong)}
-              />
-            )}
             {seriesId && card.series && onSeries && (
               <PanelRow
                 label={words.series}
@@ -528,6 +527,25 @@ export default function AtlasCardViewer({
               />
             )}
           </ul>
+          {strongs.length > 0 && (
+            <div className="acv__strongs">
+              <p className="acv__row-label">{strongs.length > 1 ? words.strongs : words.strong}</p>
+              <ul>
+                {strongs.map(strong => (
+                  <li key={strong.code}>
+                    <a href={buildStrongPath(language, strong.code)}>
+                      <span className="acv__strong-code">{displayStrongCode(strong.code)}</span>
+                      {strong.original && (
+                        <span lang={strong.script} dir="auto">
+                          {strong.original}
+                        </span>
+                      )}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <button type="button" className="acv__share" onClick={share}>
             {copied ? words.copied : words.share}
           </button>

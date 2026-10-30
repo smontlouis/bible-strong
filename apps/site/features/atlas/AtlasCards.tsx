@@ -10,7 +10,7 @@ import { CARD_FAMILY_LABELS, type AtlasCardView } from './atlasCardCatalog'
 export const CARD_WORDS = {
   fr: {
     open: 'Ouvrir la carte',
-    flip: 'Retourner',
+    flip: 'Verso',
     front: 'Recto',
     close: 'Fermer',
     thisCard: 'Cette carte',
@@ -21,7 +21,7 @@ export const CARD_WORDS = {
   },
   en: {
     open: 'Open the card',
-    flip: 'Flip',
+    flip: 'Back',
     front: 'Front',
     close: 'Close',
     thisCard: 'This card',

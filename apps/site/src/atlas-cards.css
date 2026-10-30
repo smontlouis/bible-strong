@@ -1401,6 +1401,54 @@
   display: block;
 }
 
+.acv__strongs {
+  padding-top: 11px;
+  border-top: 1px solid rgb(236 230 214 / 12%);
+}
+
+.acv__strongs ul {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 8px 0 0;
+  padding: 0;
+  gap: 6px;
+  list-style: none;
+}
+
+.acv__strongs a {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  padding: 0 11px;
+  gap: 7px;
+  border: 1px solid rgb(236 230 214 / 18%);
+  border-radius: 999px;
+  color: #f2ecdc;
+  font-size: 0.85rem;
+  transition: background 180ms ease-out;
+}
+
+.acv__strongs a:hover,
+.acv__strongs a:focus-visible {
+  background: rgb(236 230 214 / 10%);
+}
+
+.acv__strong-code {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.acv__strongs a:hover .acv__strong-code,
+.acv__strongs a:focus-visible .acv__strong-code {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.acv__strongs [lang='he'] {
+  font-family: 'SBL Hebrew', 'Times New Roman', serif;
+  font-size: 1.05rem;
+}
+
 .acv__share {
   min-height: 40px;
   margin-top: 16px;
@@ -1474,6 +1522,15 @@
   font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+/* God has 33 numbers: beside the card the panel scrolls on its own. */
+@media (min-width: 861px) {
+  .acv__panel {
+    max-height: calc(100svh - 130px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
 }
 
 @media (max-width: 860px) {

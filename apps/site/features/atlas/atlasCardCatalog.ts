@@ -26,6 +26,9 @@ type CardText = {
 
 export type CardFamily = 'divine' | 'human' | 'spirit' | 'idol'
 
+/** A Strong number of a character, with the name it stands for in its own script. */
+export type CardStrong = { code: string; original: string; script: string }
+
 type PublishedCard = {
   id: string
   entity: string
@@ -41,6 +44,8 @@ type PublishedCard = {
   stageCount: number
   chapterCount: number
   strong: string
+  /** Every Strong number of the character's names, `strong` first. */
+  strongs?: CardStrong[]
   original: string
   script: string
   transliteration: string
@@ -161,6 +166,8 @@ export type AtlasGalleryCard = AtlasCardView & {
   /** The rank of the era in the story, gods and spiritual beings after it. */
   eraRank: number
   roles: string[]
+  /** Every Strong number of the character's names. */
+  strongs: CardStrong[]
   /** The ids of the series of the portraits' catalog the character belongs to. */
   seriesIds: string[]
   /** The order of the Bible: the character's first mention, then its stages. */
@@ -279,6 +286,11 @@ export const atlasGalleryCards = (
           era,
           eraRank: eraRank < 0 ? ERA_ORDER.length : eraRank,
           roles: text.roles ?? [],
+          strongs:
+            card.strongs ??
+            (card.strong
+              ? [{ code: card.strong, original: card.original, script: card.script }]
+              : []),
           seriesIds: portraits.series
             .filter(series => series.members.includes(card.entity))
             .map(series => series.id),
