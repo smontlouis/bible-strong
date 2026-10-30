@@ -5,4 +5,12 @@ Disallow: /_serverFn/
 # A Bible page with commentaries in its text adds them to a page that is indexed without them.
 Disallow: /*?*commentary=
 
+# ClaudeBot keeps to one request a second. A group of its own replaces the one above, so it
+# repeats the rules.
+User-agent: ClaudeBot
+Crawl-delay: 1
+Allow: /
+Disallow: /_serverFn/
+Disallow: /*?*commentary=
+
 Sitemap: https://bible-strong.app/sitemap.xml

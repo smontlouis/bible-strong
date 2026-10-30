@@ -1,0 +1,8 @@
+# The study workspace holds nothing to crawl: public reading lives on bible-strong.app (ADR-0069).
+# Search engines stay allowed, so that they still read the noindex of the pages the site links to.
+User-agent: Googlebot
+User-agent: Bingbot
+Allow: /
+
+User-agent: *
+Disallow: /
