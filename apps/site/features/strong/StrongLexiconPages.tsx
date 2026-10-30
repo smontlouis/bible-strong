@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { useI18n } from '@/locales'
 import { WEB_APP_ORIGIN, type ResourceLanguage } from '../resources/publicSite'
 import ResourceShell from '../resources/ResourceShell'
@@ -35,13 +36,13 @@ const LetterNav = ({
         {STRONG_LETTERS.map(letter => (
           <li key={letter}>
             {letters.includes(letter) ? (
-              <a
+              <SiteLink
                 className="strong-letters__letter"
                 aria-current={letter === current ? 'page' : undefined}
                 href={buildStrongLetterPath(language, lexicon, letter)}
               >
                 {letter.toUpperCase()}
-              </a>
+              </SiteLink>
             ) : (
               <span className="strong-letters__letter" aria-hidden="true">
                 {letter.toUpperCase()}
@@ -105,9 +106,9 @@ export function StrongLetterPage({ page }: { page: StrongLetterPageData }) {
           <p className="resource-muted mt-3 text-sm">
             {t('strong.list.count').replace('{count}', entries.length.toLocaleString(language))}
             {' · '}
-            <a className="resource-link" href={`${buildStrongIndexPath(language)}#${otherLexicon}`}>
+            <SiteLink className="resource-link" href={`${buildStrongIndexPath(language)}#${otherLexicon}`}>
               {t(`strong.lexicon.${otherLexicon}`)}
-            </a>
+            </SiteLink>
           </p>
         </header>
 
@@ -119,7 +120,7 @@ export function StrongLetterPage({ page }: { page: StrongLetterPageData }) {
           {entries.map(entry => (
             // The senses of a number may be gathered under several glosses of one letter.
             <li key={`${entry.code} ${entry.gloss}`}>
-              <a className="strong-list__entry" href={buildStrongPath(language, entry.code)}>
+              <SiteLink className="strong-list__entry" href={buildStrongPath(language, entry.code)}>
                 <span className="strong-list__gloss">{entry.gloss}</span>
                 <span
                   className="strong-list__original"
@@ -129,7 +130,7 @@ export function StrongLetterPage({ page }: { page: StrongLetterPageData }) {
                   {entry.original}
                 </span>
                 <span className="strong-list__code">{displayStrongCode(entry.code)}</span>
-              </a>
+              </SiteLink>
             </li>
           ))}
         </ul>

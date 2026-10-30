@@ -3,10 +3,12 @@ import { readResource } from '../resources/resourceApi'
 import { loadBiblePage } from './bible.functions'
 
 vi.mock('../resources/resourceApi', () => ({ readResource: vi.fn() }))
+vi.mock('../resources/keptLikeAPage', () => ({ keptLikeAPage: {} }))
 // A server function is its handler here: the tests call it as the route does.
 vi.mock('@tanstack/react-start', () => ({
   createServerFn: () => {
     const builder = {
+      middleware: () => builder,
       validator: () => builder,
       handler: (handle: (context: { data: unknown }) => unknown) => handle,
     }

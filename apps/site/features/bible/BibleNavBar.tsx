@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { useEffect, useRef, useState } from 'react'
 import { useI18n } from '@/locales'
 import type { BiblePageData } from './bible.functions'
@@ -97,13 +98,13 @@ export default function BibleNavBar({
                 <ul className="bible-nav__grid">
                   {Array.from({ length: openBookChapters }, (_, index) => index + 1).map(number => (
                     <li key={number}>
-                      <a
+                      <SiteLink
                         className="bible-nav__cell"
                         aria-current={openBook === book && number === chapter ? 'page' : undefined}
                         href={keep(buildBiblePath({ ...location, book: openBook, chapter: number }))}
                       >
                         {number}
-                      </a>
+                      </SiteLink>
                     </li>
                   ))}
                 </ul>
@@ -117,7 +118,7 @@ export default function BibleNavBar({
                 <ul className="bible-nav__list">
                   {testament.books.map(entry => (
                     <li key={entry.book}>
-                      <a
+                      <SiteLink
                         className="bible-nav__item"
                         aria-current={entry.book === book ? 'true' : undefined}
                         href={keep(buildBiblePath({ ...location, book: entry.book, chapter: 1 }))}
@@ -128,7 +129,7 @@ export default function BibleNavBar({
                         }}
                       >
                         {bibleBookName(entry.book, language)}
-                      </a>
+                      </SiteLink>
                     </li>
                   ))}
                 </ul>
@@ -156,7 +157,7 @@ export default function BibleNavBar({
                 <ul className="bible-nav__list bible-nav__list--wide">
                   {groupVersions.map(version => (
                     <li key={version.id}>
-                      <a
+                      <SiteLink
                         className="bible-nav__item bible-nav__item--version"
                         aria-current={version.id === versionId ? 'true' : undefined}
                         href={keep(
@@ -182,7 +183,7 @@ export default function BibleNavBar({
                             {t(`bible.aid.${aid}`)}
                           </span>
                         ))}
-                      </a>
+                      </SiteLink>
                     </li>
                   ))}
                 </ul>
@@ -211,7 +212,7 @@ export default function BibleNavBar({
             <ul className="bible-nav__list bible-nav__list--wide">
               {modes.map(mode => (
                 <li key={mode}>
-                  <a
+                  <SiteLink
                     className="bible-nav__item bible-nav__item--mode"
                     aria-current={mode === presentation ? 'true' : undefined}
                     href={keep(
@@ -220,7 +221,7 @@ export default function BibleNavBar({
                   >
                     <span className="font-semibold">{t(`bible.mode.${mode}`)}</span>
                     <span className="resource-muted block text-sm">{t(`bible.mode.${mode}.hint`)}</span>
-                  </a>
+                  </SiteLink>
                 </li>
               ))}
             </ul>

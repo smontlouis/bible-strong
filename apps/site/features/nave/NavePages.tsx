@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import LetterNav from '../resources/LetterNav'
 import Pagination from '../resources/Pagination'
 import ResourceShell from '../resources/ResourceShell'
@@ -99,7 +100,7 @@ export function NaveLetterPage({ page }: { page: NaveLetterPageData }) {
         <ul className="strong-list mt-8">
           {topics.map(topic => (
             <li key={topic.normalizedName}>
-              <a
+              <SiteLink
                 className="strong-list__entry"
                 href={buildNavePath(language, topic.normalizedName)}
               >
@@ -109,7 +110,7 @@ export function NaveLetterPage({ page }: { page: NaveLetterPageData }) {
                     {topic.original}
                   </span>
                 )}
-              </a>
+              </SiteLink>
             </li>
           ))}
         </ul>

@@ -66,6 +66,12 @@ export const pageCacheTags = (pathname: string): string[] => {
   return tags
 }
 
+/**
+ * The reads the pages are filled with when the reader moves inside the site. Their addresses
+ * say nothing of the page they fill, so they are all read again with any page.
+ */
+const PAGE_READS_TAG = 'path:_serverFn'
+
 /** The tag of every page under a folder; nothing for a folder a tag cannot name. */
 export const pageTag = (folder: string): string | undefined => {
   const path = folder.replace(/^\/+|\/+$/gu, '')
@@ -79,7 +85,8 @@ export const pageTag = (folder: string): string | undefined => {
 export const MISSING_PAGE_CACHE_CONTROL = 'public, max-age=0, s-maxage=3600'
 
 // Answers made of what a reader or an author keeps, which change at any time: a server
-// function reads for the page a reader is on, a study is published or withdrawn by its author.
+// function reads for the page a reader is on unless it says otherwise, a study is published or
+// withdrawn by its author.
 const UNPUBLISHED_PATHS = /^\/(?:_serverFn|(?:fr\/)?studies)(?:\/|$)/u
 
 /**
@@ -153,5 +160,7 @@ export const readPageRefresh = (body: unknown): PageRefresh | undefined => {
   if (everything === true) return { everything: true }
   if (!Array.isArray(paths) || paths.length === 0) return undefined
   const tags = paths.map(path => (typeof path === 'string' ? pageTag(path) : undefined))
-  return tags.every(tag => tag !== undefined) ? { tags: tags as string[] } : undefined
+  return tags.every(tag => tag !== undefined)
+    ? { tags: [...(tags as string[]), PAGE_READS_TAG] }
+    : undefined
 }

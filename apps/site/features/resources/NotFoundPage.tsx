@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { useCurrentLocale } from '@/locales'
 import { WEB_APP_ORIGIN } from './publicSite'
 import ResourceShell from './ResourceShell'
@@ -29,10 +30,10 @@ export default function NotFoundPage() {
         <ul className="grid gap-3 sm:grid-cols-2">
           {RESOURCE_SECTIONS.map(section => (
             <li key={section.key}>
-              <a className="resource-card resource-card--link block h-full p-4" href={section.path(locale)}>
+              <SiteLink className="resource-card resource-card--link block h-full p-4" href={section.path(locale)}>
                 <span className="font-semibold">{section.label[locale]}</span>
                 <span className="resource-muted mt-1 block text-sm">{section.summary[locale]}</span>
-              </a>
+              </SiteLink>
             </li>
           ))}
         </ul>

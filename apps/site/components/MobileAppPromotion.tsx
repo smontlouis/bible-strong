@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { useEffect, useRef, useState, type MouseEvent } from 'react'
 import { appStoreUrl, playStoreUrl } from '../lib/app-links'
 import { useI18n } from '../locales'
@@ -55,8 +56,8 @@ export function MobileDownloadLink() {
   }
 
   return (
-    <a className="button button--compact button--mobile-app" href={href} onClick={download}>
+    <SiteLink className="button button--compact button--mobile-app" href={href} onClick={download}>
       {t('home.cta.getApp')}
-    </a>
+    </SiteLink>
   )
 }

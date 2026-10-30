@@ -3866,8 +3866,8 @@ input {
 }
 
 /* Landing preferences: explicit theme overrides and compact navigation controls. */
-::view-transition-old(root),
-::view-transition-new(root) {
+html[data-theme-transition='active']::view-transition-old(root),
+html[data-theme-transition='active']::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
 }
@@ -3907,6 +3907,14 @@ html[data-theme-transition='active']::view-transition-new(root) {
 }
 .theme-toggle:hover {
   transform: rotate(8deg);
+}
+.theme-toggle svg {
+  display: none;
+}
+:is([data-theme='auto'], [data-landing-theme='auto']) .theme-toggle svg[data-icon='auto'],
+:is([data-theme='light'], [data-landing-theme='light']) .theme-toggle svg[data-icon='light'],
+:is([data-theme='dark'], [data-landing-theme='dark']) .theme-toggle svg[data-icon='dark'] {
+  display: block;
 }
 .theme-toggle svg {
   width: 19px;
@@ -4324,5 +4332,49 @@ html[data-theme-transition='active']::view-transition-new(root) {
 
   .landing-nav .button--compact {
     padding: 0 10px;
+  }
+}
+
+/* Moving between pages (ADR-0093): the page fades into the next, the header of the resources stays. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+}
+.resource-header {
+  view-transition-name: site-header;
+}
+/* The browser copies the blur of the header to its transition, which would blur what lies under it. */
+::view-transition-group(site-header) {
+  backdrop-filter: none;
+}
+html[data-theme-transition='active'] .resource-header {
+  view-transition-name: none;
+}
+.site-progress {
+  position: fixed;
+  z-index: 100;
+  inset: 0 0 auto;
+  height: 2px;
+  transform-origin: left;
+  background: #5983f0;
+  pointer-events: none;
+  animation: site-progress 8s cubic-bezier(0.08, 0.8, 0.2, 1) 200ms both;
+}
+@keyframes site-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(0.94);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none;
+  }
+  .site-progress {
+    animation: none;
   }
 }

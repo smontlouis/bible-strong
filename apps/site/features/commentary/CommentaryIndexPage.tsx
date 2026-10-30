@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import ResourceShell from '../resources/ResourceShell'
 import { resourceSection } from '../resources/sections'
 import type { CommentaryIndexPageData } from './commentary.functions'
@@ -38,9 +39,9 @@ export default function CommentaryIndexPage({ page }: { page: CommentaryIndexPag
           {commentaries.map(commentary => (
             <li key={commentary.id} className="resource-card px-5 py-4">
               <h2 className="text-xl font-semibold">
-                <a className="resource-link" href={buildCommentaryPath(language, commentary.id)}>
+                <SiteLink className="resource-link" href={buildCommentaryPath(language, commentary.id)}>
                   {commentary.title}
-                </a>
+                </SiteLink>
               </h2>
               <p className="resource-muted mt-1 text-sm">{commentary.author}</p>
               {commentary.description && <p className="mt-3">{commentary.description}</p>}

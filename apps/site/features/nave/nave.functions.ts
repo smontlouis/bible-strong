@@ -6,6 +6,7 @@ import { bibleBookName } from '../bible/bibleBooks'
 import { buildBiblePath } from '../bible/bibleRoutes'
 import { quoteVerseText } from '../bible/bibleVerseRules'
 import { defaultBibleVersionId } from '../bible/bibleVersions'
+import { keptLikeAPage } from '../resources/keptLikeAPage'
 import { editorialHtmlToText } from '../resources/editorialHtml'
 import { isResourceLanguage, type ResourceLanguage } from '../resources/publicSite'
 import { readResource } from '../resources/resourceApi'
@@ -62,6 +63,7 @@ export type NaveIndexPageData = {
 }
 
 export const loadNaveIndexPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string }) => data)
   .handler(async ({ data }): Promise<NaveIndexPageData> => {
     if (!isResourceLanguage(data.language)) throw notFound()
@@ -92,6 +94,7 @@ export type NaveLetterPageData = {
 
 /** The topics filed under a letter, a numbered page at a time. */
 export const loadNaveLetterPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string; letter: string; page?: number }) => data)
   .handler(async ({ data }): Promise<NaveLetterPageData> => {
     const { language, letter, page = 1 } = data
@@ -136,6 +139,7 @@ export type NaveTopicPageData = NaveListTopic & {
 }
 
 export const loadNaveTopicPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string; topic: string }) => data)
   .handler(async ({ data }): Promise<NaveTopicPageData> => {
     const requested = parseNaveTopic(data.topic)

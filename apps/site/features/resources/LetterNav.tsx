@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 /** An alphabet to browse a list by; a letter without entries is shown but not linked. */
 export default function LetterNav({
   letters,
@@ -18,13 +19,13 @@ export default function LetterNav({
         {letters.map(letter => (
           <li key={letter}>
             {available.includes(letter) ? (
-              <a
+              <SiteLink
                 className="strong-letters__letter"
                 aria-current={letter === current ? 'page' : undefined}
                 href={hrefFor(letter)}
               >
                 {letter.toUpperCase()}
-              </a>
+              </SiteLink>
             ) : (
               <span className="strong-letters__letter" aria-hidden="true">
                 {letter.toUpperCase()}

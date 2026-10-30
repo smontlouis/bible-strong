@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { bibleBookName } from '../bible/bibleBooks'
 import Pagination from '../resources/Pagination'
 import ResourceShell from '../resources/ResourceShell'
@@ -80,9 +81,9 @@ export default function CommentaryChapterPage({ page }: { page: CommentaryChapte
               ` · ${t('commentary.chapter.page', { page: page.page, count: page.pageCount })}`}
           </p>
           {page.biblePath && (
-            <a className="resource-link mt-3 inline-block py-1 text-sm font-semibold" href={page.biblePath}>
+            <SiteLink className="resource-link mt-3 inline-block py-1 text-sm font-semibold" href={page.biblePath}>
               {t('commentary.chapter.readBible', { reference })}
-            </a>
+            </SiteLink>
           )}
         </header>
 
@@ -122,16 +123,16 @@ export default function CommentaryChapterPage({ page }: { page: CommentaryChapte
 
         <nav className="mt-10 flex justify-between gap-4" aria-label={t('commentary.chapter.nav')}>
           {page.previous ? (
-            <a className="resource-link" href={chapterPath(page.previous)} rel={chapterRel('prev')}>
+            <SiteLink className="resource-link" href={chapterPath(page.previous)} rel={chapterRel('prev')}>
               ← {bibleBookName(page.previous.book, language)} {page.previous.chapter}
-            </a>
+            </SiteLink>
           ) : (
             <span />
           )}
           {page.next && (
-            <a className="resource-link" href={chapterPath(page.next)} rel={chapterRel('next')}>
+            <SiteLink className="resource-link" href={chapterPath(page.next)} rel={chapterRel('next')}>
               {bibleBookName(page.next.book, language)} {page.next.chapter} →
-            </a>
+            </SiteLink>
           )}
         </nav>
 

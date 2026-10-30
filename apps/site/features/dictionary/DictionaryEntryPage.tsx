@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import ResourceShell from '../resources/ResourceShell'
 import type { DictionaryEntryPageData, DictionaryListEntry } from './dictionary.functions'
 import { dictionaryEntryBreadcrumbs } from './dictionaryBreadcrumbs'
@@ -41,9 +42,9 @@ export default function DictionaryEntryPage({ page }: { page: DictionaryEntryPag
         <header>
           <h1 className="font-serif text-4xl leading-tight md:text-5xl">{word}</h1>
           <p className="resource-muted mt-3 text-sm">
-            <a className="resource-link" href={buildDictionaryWorkPath(language, work.id)}>
+            <SiteLink className="resource-link" href={buildDictionaryWorkPath(language, work.id)}>
               {work.title}
-            </a>
+            </SiteLink>
             {' · '}
             {work.authors.join(', ')}
           </p>
@@ -60,36 +61,36 @@ export default function DictionaryEntryPage({ page }: { page: DictionaryEntryPag
               <ul className="dictionary-neighbours mb-5">
                 {page.previous && (
                   <li>
-                    <a
+                    <SiteLink
                       className="resource-card resource-card--link block h-full px-4 py-3"
                       rel="prev"
                       href={entryPath(page.previous)}
                     >
                       <span className="resource-muted block text-xs">← {t('entry.previous')}</span>
                       <span className="mt-1 block font-medium">{page.previous.word}</span>
-                    </a>
+                    </SiteLink>
                   </li>
                 )}
                 {page.next && (
                   <li className="dictionary-neighbours__next">
-                    <a
+                    <SiteLink
                       className="resource-card resource-card--link block h-full px-4 py-3"
                       rel="next"
                       href={entryPath(page.next)}
                     >
                       <span className="resource-muted block text-xs">{t('entry.next')} →</span>
                       <span className="mt-1 block font-medium">{page.next.word}</span>
-                    </a>
+                    </SiteLink>
                   </li>
                 )}
               </ul>
             )}
-            <a
+            <SiteLink
               className="resource-link inline-block py-1 text-sm font-semibold"
               href={buildDictionaryLetterPath(language, work.id, letter)}
             >
               {t('entry.letter').replace('{letter}', letter.toUpperCase())}
-            </a>
+            </SiteLink>
           </nav>
         )}
 
@@ -97,19 +98,19 @@ export default function DictionaryEntryPage({ page }: { page: DictionaryEntryPag
           <section className="mt-12">
             <h2 className="mb-4 text-xl font-semibold">{t('entry.related')}</h2>
             {page.term && (
-              <a
+              <SiteLink
                 className="resource-link mb-4 inline-block py-1 font-semibold"
                 href={buildDictionaryTermPath(language, page.term.word)}
               >
                 {t('entry.term')
                   .replace('{word}', page.term.word)
                   .replace('{count}', String(page.term.count))}
-              </a>
+              </SiteLink>
             )}
             <ul className="grid gap-2 sm:grid-cols-2">
               {related.map(article => (
                 <li key={`${article.language}-${article.work}-${article.id}`}>
-                  <a
+                  <SiteLink
                     className="resource-card resource-card--link block h-full px-4 py-3"
                     href={relatedPath(article)}
                     hrefLang={article.language === language ? undefined : article.language}
@@ -120,7 +121,7 @@ export default function DictionaryEntryPage({ page }: { page: DictionaryEntryPag
                     <span className="resource-muted mt-1 block text-sm" lang={article.language}>
                       {article.workTitle}
                     </span>
-                  </a>
+                  </SiteLink>
                 </li>
               ))}
             </ul>

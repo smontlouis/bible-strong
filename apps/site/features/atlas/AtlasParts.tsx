@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { useEffect, useRef, useState } from 'react'
 import type { ResourceLanguage } from '../resources/publicSite'
 import { searchAtlas, type AtlasTile } from './atlas.functions'
@@ -50,7 +51,7 @@ export function AtlasTileLink({
 }) {
   const messages = ATLAS_MESSAGES[language]
   return (
-    <a
+    <SiteLink
       className={`atlas-tile atlas-tile--${size}`}
       href={buildAtlasEntityPath(language, tile.uniqueName)}
     >
@@ -65,7 +66,7 @@ export function AtlasTileLink({
           {countLabel(messages.chaptersShort, tile.chapterCount, language)}
         </span>
       )}
-    </a>
+    </SiteLink>
   )
 }
 
@@ -138,7 +139,7 @@ export function AtlasSearch({ language }: { language: ResourceLanguage }) {
         <div className="atlas-search__results" role="list">
           {results.length ? (
             results.map(tile => (
-              <a
+              <SiteLink
                 key={tile.uniqueName}
                 role="listitem"
                 className="atlas-search__result"
@@ -149,7 +150,7 @@ export function AtlasSearch({ language }: { language: ResourceLanguage }) {
                   <span className="atlas-search__name">{tile.name}</span>
                   {tile.brief && <span className="atlas-search__brief">{tile.brief}</span>}
                 </span>
-              </a>
+              </SiteLink>
             ))
           ) : (
             <p className="atlas-search__empty">{messages.searchEmpty}</p>

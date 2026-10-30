@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { useI18n } from '@/locales'
 import { paginationItems } from './paginationItems'
 
@@ -18,9 +19,9 @@ export default function Pagination({
   return (
     <nav className="resource-pagination" aria-label={t('pagination.label')}>
       {current > 1 && (
-        <a className="resource-pagination__step" href={hrefFor(current - 1)} rel="prev">
+        <SiteLink className="resource-pagination__step" href={hrefFor(current - 1)} rel="prev">
           ← {t('pagination.previous')}
-        </a>
+        </SiteLink>
       )}
       <ol className="resource-pagination__pages">
         {paginationItems(current, pageCount).map((item, index) =>
@@ -30,22 +31,22 @@ export default function Pagination({
             </li>
           ) : (
             <li key={item}>
-              <a
+              <SiteLink
                 className="resource-pagination__page"
                 aria-current={item === current ? 'page' : undefined}
                 aria-label={pageLabel(item)}
                 href={hrefFor(item)}
               >
                 {item}
-              </a>
+              </SiteLink>
             </li>
           )
         )}
       </ol>
       {current < pageCount && (
-        <a className="resource-pagination__step" href={hrefFor(current + 1)} rel="next">
+        <SiteLink className="resource-pagination__step" href={hrefFor(current + 1)} rel="next">
           {t('pagination.next')} →
-        </a>
+        </SiteLink>
       )}
     </nav>
   )

@@ -204,7 +204,7 @@ describe('Pages the operator asks to be rendered again', () => {
   it('reads everything, or the pages under some folders', () => {
     expect(readPageRefresh({ everything: true })).toEqual({ everything: true })
     expect(readPageRefresh({ paths: ['/bible/lsg/', 'strong'] })).toEqual({
-      tags: ['path:bible/lsg', 'path:strong'],
+      tags: ['path:bible/lsg', 'path:strong', 'path:_serverFn'],
     })
   })
 

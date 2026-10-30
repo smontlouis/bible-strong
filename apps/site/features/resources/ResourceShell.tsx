@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { useEffect, useLayoutEffect, useState, type ReactNode } from 'react'
 import {
   isThemePreference,
@@ -80,7 +81,7 @@ export default function ResourceShell({
       <header className="resource-header sticky top-0 z-10">
         <div className="relative mx-auto flex h-16 max-w-[760px] items-center justify-between gap-3 px-5">
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-            <a
+            <SiteLink
               className="flex min-w-0 shrink-0 items-center gap-2.5 font-semibold"
               href={homePath}
               aria-label={t('resource.nav.home')}
@@ -93,7 +94,7 @@ export default function ResourceShell({
                 className="size-7 shrink-0 rounded-full"
               />
               <span className="truncate max-[640px]:sr-only">Bible Strong</span>
-            </a>
+            </SiteLink>
             <ExploreMenu section={section} />
           </div>
           <div className="landing-nav__actions resource-header__actions shrink-0">
@@ -111,7 +112,7 @@ export default function ResourceShell({
               }}
             />
             {alternatePath && (
-              <a
+              <SiteLink
                 className="language-link"
                 href={alternatePath}
                 lang={locale === 'fr' ? 'en' : 'fr'}
@@ -119,7 +120,7 @@ export default function ResourceShell({
                 title={t('home.language.switch')}
               >
                 <LanguageMark locale={locale} />
-              </a>
+              </SiteLink>
             )}
           </div>
         </div>
@@ -142,7 +143,7 @@ export default function ResourceShell({
                   {breadcrumbs.map((breadcrumb, index) => (
                     <li key={`${index}-${breadcrumb.label}`}>
                       {breadcrumb.path && index < breadcrumbs.length - 1 ? (
-                        <a href={breadcrumb.path}>{breadcrumb.label}</a>
+                        <SiteLink href={breadcrumb.path}>{breadcrumb.label}</SiteLink>
                       ) : (
                         <span aria-current="page">{breadcrumb.label}</span>
                       )}
@@ -167,14 +168,14 @@ export default function ResourceShell({
             <ul className="resource-footer__sections">
               {RESOURCE_SECTIONS.map(entry => (
                 <li key={entry.key}>
-                  <a href={entry.path(locale)}>{entry.label[locale]}</a>
+                  <SiteLink href={entry.path(locale)}>{entry.label[locale]}</SiteLink>
                 </li>
               ))}
             </ul>
             <p className="resource-muted mt-6">{t('resource.footer.tagline')}</p>
-            <a className="resource-link mt-2 inline-block" href={homePath}>
+            <SiteLink className="resource-link mt-2 inline-block" href={homePath}>
               {t('resource.footer.getApp')}
-            </a>
+            </SiteLink>
           </footer>
         </>
       )}

@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { TIPNR_BOOK_CODES } from '@bible-strong/resource-domain/strong-lexicon'
 import {
   animate,
@@ -188,7 +189,7 @@ function PanelRow({
   return (
     <li>
       {href ? (
-        <a href={href}>{content}</a>
+        <SiteLink href={href}>{content}</SiteLink>
       ) : (
         <button type="button" onClick={onClick}>
           {content}
@@ -427,14 +428,14 @@ export default function AtlasCardViewer({
               <ul>
                 {strongs.map(strong => (
                   <li key={strong.code}>
-                    <a href={buildStrongPath(language, strong.code)}>
+                    <SiteLink href={buildStrongPath(language, strong.code)}>
                       <span className="acv__strong-code">{displayStrongCode(strong.code)}</span>
                       {strong.original && (
                         <span lang={strong.script} dir="auto">
                           {strong.original}
                         </span>
                       )}
-                    </a>
+                    </SiteLink>
                   </li>
                 ))}
               </ul>

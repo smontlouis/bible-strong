@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import ResourceShell from '../resources/ResourceShell'
 import { NAVE_MESSAGES, naveCount } from './messages'
 import type { NaveTopicPageData } from './nave.functions'
@@ -61,10 +62,10 @@ export default function NaveTopicPage({ topic }: { topic: NaveTopicPageData }) {
             <ul className="verse-quotes">
               {topic.verses.map(verse => (
                 <li key={verse.path}>
-                  <a className="verse-quotes__quote" href={verse.path}>
+                  <SiteLink className="verse-quotes__quote" href={verse.path}>
                     <span className="verse-quotes__label">{verse.label}</span>
                     <span className="verse-quotes__text">{verse.text}</span>
-                  </a>
+                  </SiteLink>
                 </li>
               ))}
             </ul>
@@ -77,24 +78,24 @@ export default function NaveTopicPage({ topic }: { topic: NaveTopicPageData }) {
             aria-label={messages['topic.neighbours']}
           >
             {previous ? (
-              <a
+              <SiteLink
                 className="resource-link py-1"
                 href={buildNavePath(language, previous.normalizedName)}
                 rel="prev"
               >
                 ← {previous.name}
-              </a>
+              </SiteLink>
             ) : (
               <span />
             )}
             {next && (
-              <a
+              <SiteLink
                 className="resource-link py-1 text-end"
                 href={buildNavePath(language, next.normalizedName)}
                 rel="next"
               >
                 {next.name} →
-              </a>
+              </SiteLink>
             )}
           </nav>
         )}

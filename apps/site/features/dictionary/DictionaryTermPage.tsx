@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import ResourceShell from '../resources/ResourceShell'
 import type { DictionaryTermPageData } from './dictionary.functions'
 import { dictionaryTermBreadcrumbs } from './dictionaryBreadcrumbs'
@@ -67,12 +68,12 @@ export default function DictionaryTermPage({ page }: { page: DictionaryTermPageD
               dangerouslySetInnerHTML={{ __html: article.html }}
             />
             <p className="resource-muted mt-4 text-sm">{article.work.attribution}</p>
-            <a
+            <SiteLink
               className="resource-link mt-2 inline-block py-1 text-sm font-semibold"
               href={articlePath(article)}
             >
               {t('term.article').replace('{work}', article.work.abbreviation)}
-            </a>
+            </SiteLink>
           </section>
         ))}
       </article>

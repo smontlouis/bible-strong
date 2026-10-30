@@ -6,6 +6,7 @@ import type {
 } from '@bible-strong/resource-domain/contracts/dictionaryContract'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
+import { keptLikeAPage } from '../resources/keptLikeAPage'
 import { truncateText } from '../resources/editorialHtml'
 import {
   isResourceLanguage,
@@ -179,6 +180,7 @@ export type DictionaryIndexPageData = {
 }
 
 export const loadDictionaryIndexPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string }) => data)
   .handler(async ({ data }): Promise<DictionaryIndexPageData> => {
     const { language } = data
@@ -200,6 +202,7 @@ export type DictionaryWorkPageData = {
 }
 
 export const loadDictionaryWorkPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string; work: string }) => data)
   .handler(async ({ data }): Promise<DictionaryWorkPageData> => {
     const { language, work } = await requireDictionaryWork(data)
@@ -220,6 +223,7 @@ export type DictionaryLetterPageData = {
 }
 
 export const loadDictionaryLetterPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string; work: string; letter: string; page?: number }) => data)
   .handler(async ({ data }): Promise<DictionaryLetterPageData> => {
     const { letter, page = 1 } = data
@@ -324,6 +328,7 @@ export type DictionaryEntryPageData = {
 }
 
 export const loadDictionaryEntryPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string; work: string; entryId: string }) => data)
   .handler(async ({ data }): Promise<DictionaryEntryPageData> => {
     const entryId = parseDictionaryEntryId(data.entryId)
@@ -396,6 +401,7 @@ export type DictionaryTermArticle = { kind: 'article'; work: string; id: number;
  * Resource API gathers across dictionaries.
  */
 export const loadDictionaryTermPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string; slug: string }) => data)
   .handler(async ({ data }): Promise<DictionaryTermPageData | DictionaryTermArticle> => {
     const slug = parseDictionaryTermSlug(data.slug)

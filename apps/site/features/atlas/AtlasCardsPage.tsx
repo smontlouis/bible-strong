@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { Outlet, useMatch, useNavigate } from '@tanstack/react-router'
 import { AnimatePresence } from 'motion/react'
 import {
@@ -237,7 +238,7 @@ export default function AtlasCardsPage({ page }: { page: AtlasCardsPageData }) {
       <section className="acg-hero">
         <div className="acg-hero__text">
           <p className="atlas-eyebrow">
-            <a href={buildAtlasPath(language)}>{messages.name}</a>
+            <SiteLink href={buildAtlasPath(language)}>{messages.name}</SiteLink>
           </p>
           <h1 className="atlas-title">{messages.cardsTitle}</h1>
           <p className="atlas-lead">
@@ -256,7 +257,7 @@ export default function AtlasCardsPage({ page }: { page: AtlasCardsPageData }) {
         {fan.length === FAN && (
           <div className="acg-fan" aria-hidden="true">
             {fan.map((card, index) => (
-              <a
+              <SiteLink
                 key={card.id}
                 href={buildAtlasCardPath(language, card.id)}
                 tabIndex={-1}
@@ -272,7 +273,7 @@ export default function AtlasCardsPage({ page }: { page: AtlasCardsPageData }) {
                     <CardFront card={card} grid />
                   </span>
                 </span>
-              </a>
+              </SiteLink>
             ))}
           </div>
         )}

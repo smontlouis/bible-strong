@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { useState } from 'react'
 import ResourceShell from '../resources/ResourceShell'
 import type { AtlasEntityPageData } from './atlas.functions'
@@ -81,11 +82,11 @@ export default function AtlasEntityPage({ page }: { page: AtlasEntityPageData })
 
           <div className="atlas-entity__intro">
             <p className="atlas-eyebrow">
-              <a href={buildAtlasPath(language)}>{messages.breadcrumbHome}</a>
+              <SiteLink href={buildAtlasPath(language)}>{messages.breadcrumbHome}</SiteLink>
               <span aria-hidden="true"> · </span>
-              <a href={buildAtlasFamilyPath(language, page.family)}>
+              <SiteLink href={buildAtlasFamilyPath(language, page.family)}>
                 {messages.families[page.family]}
-              </a>
+              </SiteLink>
             </p>
             <h1 className="atlas-title atlas-title--entity">{page.name}</h1>
             {subtitle && <p className="atlas-entity__subtitle">{subtitle}</p>}
@@ -105,9 +106,9 @@ export default function AtlasEntityPage({ page }: { page: AtlasEntityPageData })
                 ))}
                 {page.strong.map(strong => (
                   <li key={strong.code}>
-                    <a className="atlas-chip atlas-chip--strong" href={strong.path}>
+                    <SiteLink className="atlas-chip atlas-chip--strong" href={strong.path}>
                       {strong.label}
-                    </a>
+                    </SiteLink>
                   </li>
                 ))}
               </ul>
@@ -127,13 +128,13 @@ export default function AtlasEntityPage({ page }: { page: AtlasEntityPageData })
           <section className="atlas-entity__section atlas-entity__section--wide">
             <div className="atlas-entity__cards-head">
               <h2 className="atlas-heading">{messages.cards}</h2>
-              <a
+              <SiteLink
                 className="resource-link"
                 href={buildAtlasCardPath(language, page.cards[0].id)}
                 hrefLang={language}
               >
                 {messages.allCards}
-              </a>
+              </SiteLink>
             </div>
             <AtlasCards cards={page.cards} language={language} />
           </section>
@@ -202,9 +203,9 @@ export default function AtlasEntityPage({ page }: { page: AtlasEntityPageData })
                     return (
                       <li key={`${item.path ?? item.name}-${index}`}>
                         {item.path ? (
-                          <a className="atlas-relation" href={item.path}>
+                          <SiteLink className="atlas-relation" href={item.path}>
                             {content}
-                          </a>
+                          </SiteLink>
                         ) : (
                           <span className="atlas-relation">{content}</span>
                         )}
@@ -247,9 +248,9 @@ export default function AtlasEntityPage({ page }: { page: AtlasEntityPageData })
                 const rest = book.chapters.slice(CHAPTERS_SHOWN)
                 const chapterLink = (chapter: (typeof book.chapters)[number]) =>
                   chapter.path ? (
-                    <a key={chapter.chapter} className="atlas-passage" href={chapter.path}>
+                    <SiteLink key={chapter.chapter} className="atlas-passage" href={chapter.path}>
                       {chapter.chapter}
-                    </a>
+                    </SiteLink>
                   ) : (
                     <span key={chapter.chapter} className="atlas-passage">
                       {chapter.chapter}

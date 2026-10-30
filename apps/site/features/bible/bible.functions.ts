@@ -11,6 +11,7 @@ import { readCommentarySections } from '../commentary/commentaryChapter'
 import { commentaryExcerpt, renderCommentaryHtml } from '../commentary/commentaryHtml'
 import { listCommentaryLinks, type CommentaryLink } from '../commentary/commentaryLinks'
 import { buildCommentarySectionPath } from '../commentary/commentaryRoutes'
+import { keptLikeAPage } from '../resources/keptLikeAPage'
 import { truncateText } from '../resources/editorialHtml'
 import { parseOsisReference } from '../resources/editorialLinks'
 import { createPageReads } from '../resources/pageReads'
@@ -246,6 +247,7 @@ export type BibleVersionPageData = {
 }
 
 export const loadBibleVersionPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { version: string }) => data)
   .handler(async ({ data }): Promise<BibleVersionPageData> => {
     const version = findBibleVersion(data.version)
@@ -267,6 +269,7 @@ const versesByNumber = <Verse extends { number: number }>(
 ): Map<number, Verse> => new Map((verses ?? []).map(verse => [verse.number, verse]))
 
 export const loadBiblePage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { path: string; commentary?: string }) => data)
   .handler(async ({ data }): Promise<BiblePageData> => {
     const route = parseBibleRoute(data.path)

@@ -10,6 +10,7 @@ import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseHeader } from '@tanstack/react-start/server'
 import { defaultBibleVersionId } from '../bible/bibleVersions'
+import { keptLikeAPage } from '../resources/keptLikeAPage'
 import { truncateText } from '../resources/editorialHtml'
 import { buildBibleReferencePath } from '../resources/editorialLinks'
 import { isResourceLanguage, type ResourceLanguage } from '../resources/publicSite'
@@ -114,6 +115,7 @@ export type TimelineIndexPageData = {
 }
 
 export const loadTimelineIndexPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string }) => data)
   .handler(async ({ data }): Promise<TimelineIndexPageData> => {
     if (!isResourceLanguage(data.language)) throw notFound()
@@ -314,6 +316,7 @@ export type TimelineEventPageData = {
 }
 
 export const loadTimelineEventPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string; slug: string }) => data)
   .handler(async ({ data }): Promise<TimelineEventPageData> => {
     const { slug } = data

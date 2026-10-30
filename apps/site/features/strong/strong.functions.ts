@@ -23,6 +23,7 @@ import {
   sanitizeEditorialHtml,
   truncateText,
 } from '../resources/editorialHtml'
+import { keptLikeAPage } from '../resources/keptLikeAPage'
 import { createPageReads, type PageReads } from '../resources/pageReads'
 import { isResourceLanguage, type ResourceLanguage } from '../resources/publicSite'
 import { readAtlasPortraitCatalog } from '../atlas/atlas.functions'
@@ -671,6 +672,7 @@ const loadNumberPage = async ({
  * is the code of that sense.
  */
 export const loadStrongPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string; code: string }) => data)
   .handler(async ({ data }): Promise<StrongPageAnswer> => {
     const identity = parseStrongCode(data.code)
@@ -891,6 +893,7 @@ export type StrongConcordancePageData = {
 }
 
 export const loadStrongConcordancePage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string; code: string; book?: string; page?: number }) => data)
   .handler(async ({ data }): Promise<StrongConcordancePageData | StrongNumberAddress> => {
     const identity = parseStrongCode(data.code)
@@ -1073,6 +1076,7 @@ export type StrongIndexPageData = {
 }
 
 export const loadStrongIndexPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string }) => data)
   .handler(async ({ data }): Promise<StrongIndexPageData> => {
     if (!isResourceLanguage(data.language)) throw notFound()
@@ -1095,6 +1099,7 @@ export type StrongLetterPageData = {
 
 /** The entries of a lexicon whose gloss starts with a letter, a line per number and gloss. */
 export const loadStrongLetterPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string; lexicon: string; letter: string }) => data)
   .handler(async ({ data }): Promise<StrongLetterPageData> => {
     const { language, lexicon, letter } = data

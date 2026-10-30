@@ -9,7 +9,9 @@ type MessageKey = keyof typeof en
 
 export function useCurrentLocale(): Locale {
   return useRouterState({ select: (state) => {
-    const pathname = state.location.pathname.replace(/\/$/, '')
+    // The page on screen: while the next one loads, the reader still reads this one.
+    const shown = state.matches[state.matches.length - 1]?.pathname ?? state.location.pathname
+    const pathname = shown.replace(/\/$/, '')
     // Preserve the language of existing legal URLs, including legacy aliases.
     if (pathname === '/politique-de-confidentialite' || pathname === '/eula') return 'fr'
     if (pathname === '/fr/privacy-policy' || pathname === '/fr/eula-en') return 'en'

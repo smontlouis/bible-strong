@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { NavigationProgress, PageFailure, usePublishedLinks } from '@/components/SiteNavigation'
 import { shareCardMeta } from '@/features/share/shareCardMeta'
 import { HeadContent, Scripts, createRootRouteWithContext } from '@tanstack/react-router'
 import NotFoundPage from '@/features/resources/NotFoundPage'
@@ -26,16 +27,18 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   }),
   shellComponent: RootDocument,
   notFoundComponent: NotFoundPage,
-  errorComponent: () => <main className="grid min-h-screen place-items-center p-6"><p>Une erreur est survenue.</p></main>,
+  errorComponent: PageFailure,
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   const { queryClient } = Route.useRouteContext()
   const locale = useCurrentLocale()
+  usePublishedLinks()
   return (
     <html lang={locale}>
       <head><HeadContent /></head>
       <body>
+        <NavigationProgress />
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
         <Scripts />
       </body>

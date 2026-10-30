@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { useI18n } from '@/locales'
@@ -97,11 +98,11 @@ export default function StrongEntryPage({ entry }: { entry: StrongPageData }) {
           <p className="mt-4 text-2xl font-medium">{entry.gloss}</p>
           {entry.number && (
             <p className="mt-3 text-sm">
-              <a className="resource-link" href={buildStrongPath(language, entry.number.code)}>
+              <SiteLink className="resource-link" href={buildStrongPath(language, entry.number.code)}>
                 {t('strong.sense.oneOf')
                   .replace('{count}', String(entry.number.senseCount))
                   .replace('{code}', `Strong ${number}`)}
-              </a>
+              </SiteLink>
             </p>
           )}
           <dl className="resource-muted mt-5 flex flex-wrap gap-x-8 gap-y-2 text-sm">
@@ -150,7 +151,7 @@ export default function StrongEntryPage({ entry }: { entry: StrongPageData }) {
 
         {entry.entity && (
           <Section title={t('strong.entity')}>
-            <a className="resource-card strong-entity" href={entry.entity.path}>
+            <SiteLink className="resource-card strong-entity" href={entry.entity.path}>
               <span className="atlas-picture strong-entity__picture">
                 <img src={entry.entity.picture} alt="" width={96} height={96} loading="lazy" />
               </span>
@@ -168,7 +169,7 @@ export default function StrongEntryPage({ entry }: { entry: StrongPageData }) {
                   {t('strong.entity.atlas')}
                 </span>
               </span>
-            </a>
+            </SiteLink>
           </Section>
         )}
 
@@ -201,12 +202,12 @@ export default function StrongEntryPage({ entry }: { entry: StrongPageData }) {
                   version={concordance.version}
                   language={language}
                 />
-                <a
+                <SiteLink
                   className="resource-link mt-5 inline-block text-sm font-semibold"
                   href={buildStrongConcordancePath(language, entry.code)}
                 >
                   {t('strong.concordance.all')}
-                </a>
+                </SiteLink>
               </>
             )}
 

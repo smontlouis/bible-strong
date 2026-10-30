@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useI18n } from '@/locales'
 import ResourceShell from '../resources/ResourceShell'
@@ -96,9 +97,9 @@ const InterlinearWord = ({
     {word.strong.length > 0 && (
       <span className="interlinear__strong">
         {word.strong.map(link => (
-          <a key={link.code} href={link.path} data-strong={link.code}>
+          <SiteLink key={link.code} href={link.path} data-strong={link.code}>
             {link.label}
-          </a>
+          </SiteLink>
         ))}
       </span>
     )}
@@ -210,7 +211,7 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
                   className="interlinear"
                   dir={presentation === 'interlinear' && book <= 39 ? 'rtl' : 'ltr'}
                 >
-                  <a
+                  <SiteLink
                     id={`v${verse.number}`}
                     className="bible-verse-number"
                     href={keep(
@@ -219,7 +220,7 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
                     aria-label={`${bookName} ${chapter}:${verse.number}`}
                   >
                     {verse.number}
-                  </a>
+                  </SiteLink>
                   {verse.words.map((word, index) => (
                     <InterlinearWord
                       key={index}
@@ -249,27 +250,27 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
           />
         ) : (
           passage && (
-            <a
+            <SiteLink
               className="resource-link mt-6 inline-block font-semibold"
               href={keep(`${buildBiblePath(location)}#v${passage.startVerse}`)}
             >
               {t('bible.readChapter').replace('{chapter}', `${bookName} ${chapter}`)}
-            </a>
+            </SiteLink>
           )
         )}
 
         <nav className="mt-10 flex justify-between gap-4" aria-label={t('bible.chapterNav')}>
           {page.previous ? (
-            <a className="resource-link" href={chapterPath(page.previous)} rel="prev">
+            <SiteLink className="resource-link" href={chapterPath(page.previous)} rel="prev">
               ← {bibleBookName(page.previous.book, language)} {page.previous.chapter}
-            </a>
+            </SiteLink>
           ) : (
             <span />
           )}
           {page.next && (
-            <a className="resource-link" href={chapterPath(page.next)} rel="next">
+            <SiteLink className="resource-link" href={chapterPath(page.next)} rel="next">
               {bibleBookName(page.next.book, language)} {page.next.chapter} →
-            </a>
+            </SiteLink>
           )}
         </nav>
 
@@ -311,9 +312,9 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
             <ul className="strong-list">
               {page.commentaries.map(commentary => (
                 <li key={commentary.path}>
-                  <a className="strong-list__entry" href={commentary.path}>
+                  <SiteLink className="strong-list__entry" href={commentary.path}>
                     <span className="strong-list__gloss">{commentary.title}</span>
-                  </a>
+                  </SiteLink>
                 </li>
               ))}
             </ul>

@@ -10,6 +10,7 @@ import {
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { bibleBookName } from '../bible/bibleBooks'
+import { keptLikeAPage } from '../resources/keptLikeAPage'
 import { buildBibleReferencePath } from '../resources/editorialLinks'
 import { createPageReads } from '../resources/pageReads'
 import { isResourceLanguage, type ResourceLanguage } from '../resources/publicSite'
@@ -306,6 +307,7 @@ const formatRanges = (ranges: AtlasChapterRange[], language: ResourceLanguage) =
 // ---------- Pages ----------
 
 export const loadAtlasHomePage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string }) => data)
   .handler(async ({ data }): Promise<AtlasHomePageData> => {
     if (!isResourceLanguage(data.language)) throw notFound()
@@ -345,6 +347,7 @@ export const loadAtlasHomePage = createServerFn({ method: 'GET' })
   })
 
 export const loadAtlasFamilyPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string; family: string }) => data)
   .handler(async ({ data }): Promise<AtlasFamilyPageData> => {
     if (!isResourceLanguage(data.language) || !isAtlasFamily(data.family)) throw notFound()
@@ -399,6 +402,7 @@ const readCardBasis = async () => {
 }
 
 export const loadAtlasCardsPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string }) => data)
   .handler(async ({ data }): Promise<AtlasCardsPageData> => {
     if (!isResourceLanguage(data.language)) throw notFound()
@@ -417,6 +421,7 @@ export const loadAtlasCardsPage = createServerFn({ method: 'GET' })
   })
 
 export const loadAtlasCardPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string; id: string }) => data)
   .handler(async ({ data }): Promise<AtlasCardPageData> => {
     if (!isResourceLanguage(data.language)) throw notFound()
@@ -473,6 +478,7 @@ const RELATION_ORDER = [
 ]
 
 export const loadAtlasEntityPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string; uniqueName: string }) => data)
   .handler(async ({ data }): Promise<AtlasEntityPageData> => {
     if (!isResourceLanguage(data.language)) throw notFound()

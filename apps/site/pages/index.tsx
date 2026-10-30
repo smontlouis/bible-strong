@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
@@ -81,10 +82,10 @@ export type HomeProps = {
 
 function StoreLink({ href, kicker, label }: { href: string; kicker: string; label: string }) {
   return (
-    <a className="store-link" href={href} target="_blank" rel="noreferrer">
+    <SiteLink className="store-link" href={href} target="_blank" rel="noreferrer">
       <span>{kicker}</span>
       <strong>{label}</strong>
-    </a>
+    </SiteLink>
   )
 }
 
@@ -112,20 +113,20 @@ function LandingHeader({
   return (
     <header className="landing-nav-wrap">
       <nav className="landing-nav" aria-label={t('home.nav.label')}>
-        <a className="brand" href={homePath} aria-label="Bible Strong">
+        <SiteLink className="brand" href={homePath} aria-label="Bible Strong">
           <img src="/images/icon-144.png" alt="" width="44" height="44" />
           <span>Bible Strong</span>
-        </a>
+        </SiteLink>
         <div className="landing-nav__links">
           <a href="#parcours">{t('home.nav.journey')}</a>
           <a href="#univers">{t('home.nav.tools')}</a>
           <ExploreMenu />
-          <a className="support-link" href={supportPath}>
+          <SiteLink className="support-link" href={supportPath}>
             {t('support')}
             <svg aria-hidden="true" viewBox="0 0 16 16">
               <path d="M5 11 11 5M6 5h5v5" />
             </svg>
-          </a>
+          </SiteLink>
         </div>
         <div className="landing-nav__actions">
           <a className="button button--compact button--web-app" href={webAppUrl}>
@@ -142,7 +143,7 @@ function LandingHeader({
               dark: t('home.theme.dark'),
             }}
           />
-          <a
+          <SiteLink
             className="language-link"
             href={alternatePath}
             lang={locale === 'fr' ? 'en' : 'fr'}
@@ -150,7 +151,7 @@ function LandingHeader({
             title={t('home.language.switch')}
           >
             <LanguageMark locale={locale} />
-          </a>
+          </SiteLink>
         </div>
       </nav>
     </header>
@@ -867,9 +868,9 @@ export default function Home({ initialTheme }: HomeProps) {
             <a className="button" href="#telecharger">
               {t('home.cta.download')}
             </a>
-            <a className="text-link text-link--web" href={readPath}>
+            <SiteLink className="text-link text-link--web" href={readPath}>
               {t('home.cta.readOnline')} <span aria-hidden="true">→</span>
-            </a>
+            </SiteLink>
           </div>
           <p className="hero-proof">{t('home.hero.proof')}</p>
         </div>
@@ -1037,9 +1038,9 @@ export default function Home({ initialTheme }: HomeProps) {
                   <h3>{world.title}</h3>
                   <p>{world.body}</p>
                   {world.path && (
-                    <a className="world-card__link" href={world.path}>
+                    <SiteLink className="world-card__link" href={world.path}>
                       {t('home.worlds.explore')} <span aria-hidden="true">→</span>
-                    </a>
+                    </SiteLink>
                   )}
                 </div>
               </li>
@@ -1130,31 +1131,31 @@ export default function Home({ initialTheme }: HomeProps) {
       <footer className="landing-footer">
         <nav className="landing-footer__sections" aria-label={t('home.footer.sections')}>
           {RESOURCE_SECTIONS.map(section => (
-            <a key={section.key} href={section.path(locale)}>
+            <SiteLink key={section.key} href={section.path(locale)}>
               {section.label[locale]}
-            </a>
+            </SiteLink>
           ))}
         </nav>
-        <a className="brand brand--footer" href={homePath} aria-label="Bible Strong">
+        <SiteLink className="brand brand--footer" href={homePath} aria-label="Bible Strong">
           <img src="/images/icon-144.png" alt="" width="38" height="38" />
           <span>Bible Strong</span>
-        </a>
+        </SiteLink>
         <p>{t('home.footer.line')}</p>
         <div>
           <a href={webAppUrl}>{t('home.cta.openApp')}</a>
-          <a href={supportPath}>{t('support')}</a>
+          <SiteLink href={supportPath}>{t('support')}</SiteLink>
           <a href="https://github.com/smontlouis/bible-strong" target="_blank" rel="noreferrer">
             GitHub
           </a>
-          <a href={locale === 'fr' ? '/fr/politique-de-confidentialite' : '/privacy-policy'}>
+          <SiteLink href={locale === 'fr' ? '/fr/politique-de-confidentialite' : '/privacy-policy'}>
             {t('home.footer.privacy')}
-          </a>
-          <a href={locale === 'fr' ? '/fr/eula' : '/eula-en'}>
+          </SiteLink>
+          <SiteLink href={locale === 'fr' ? '/fr/eula' : '/eula-en'}>
             {locale === 'fr' ? 'Conditions d’utilisation' : 'Terms of use'}
-          </a>
-          <a href={locale === 'fr' ? '/fr/data-deletion' : '/data-deletion'}>
+          </SiteLink>
+          <SiteLink href={locale === 'fr' ? '/fr/data-deletion' : '/data-deletion'}>
             {locale === 'fr' ? 'Supprimer mes données' : 'Delete my data'}
-          </a>
+          </SiteLink>
         </div>
       </footer>
     </main>

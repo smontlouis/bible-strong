@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import type { ResourceLanguage } from './publicSite'
 import type { ResourceSectionKey } from './sections'
 
@@ -110,9 +111,9 @@ export default function AppInvitation({
         <a className="resource-cta" href={appUrl}>
           {actions.open}
         </a>
-        <a className="resource-link font-semibold" href={downloadPath}>
+        <SiteLink className="resource-link font-semibold" href={downloadPath}>
           {actions.download}
-        </a>
+        </SiteLink>
       </div>
     </aside>
   )

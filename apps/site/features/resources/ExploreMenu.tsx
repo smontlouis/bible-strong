@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import {
   BookMarked,
   BookOpen,
@@ -69,7 +70,7 @@ export default function ExploreMenu({ section }: { section?: ResourceSectionKey 
             const Icon = SECTION_ICONS[entry.key]
             return (
               <li key={entry.key}>
-                <a
+                <SiteLink
                   className="resource-menu__item"
                   aria-current={entry.key === section ? 'true' : undefined}
                   href={entry.path(locale)}
@@ -81,7 +82,7 @@ export default function ExploreMenu({ section }: { section?: ResourceSectionKey 
                     <span className="resource-menu__label">{entry.label[locale]}</span>
                     <span className="resource-menu__short">{entry.short[locale]}</span>
                   </span>
-                </a>
+                </SiteLink>
               </li>
             )
           })}

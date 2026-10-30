@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { bibleBookName, bibleBookSlug } from '../bible/bibleBooks'
 import type { ResourceLanguage } from '../resources/publicSite'
 import type { StrongPageConcordance } from './strong.functions'
@@ -17,7 +18,7 @@ export default function StrongBookCounts({
     <ul className="flex flex-wrap gap-2">
       {books.map(count => (
         <li key={count.book}>
-          <a
+          <SiteLink
             className="resource-chip"
             aria-current={count.book === selectedBook ? 'true' : undefined}
             href={buildStrongConcordancePath(entry.language, entry.code, {
@@ -26,7 +27,7 @@ export default function StrongBookCounts({
           >
             {bibleBookName(count.book, entry.language)}
             <span className="font-semibold">{count.verseCount}</span>
-          </a>
+          </SiteLink>
         </li>
       ))}
     </ul>

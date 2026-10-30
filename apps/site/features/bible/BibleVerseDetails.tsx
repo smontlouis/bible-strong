@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import type { ReactNode } from 'react'
 import { useI18n } from '@/locales'
 import type { ResourceLanguage } from '../resources/publicSite'
@@ -16,12 +17,12 @@ const Quotes = ({ quotes, lang }: { quotes: readonly VerseQuote[]; lang?: string
   <ul className="verse-quotes">
     {quotes.map(quote => (
       <li key={quote.path}>
-        <a className="verse-quotes__quote" href={quote.path}>
+        <SiteLink className="verse-quotes__quote" href={quote.path}>
           <span className="verse-quotes__label">{quote.label}</span>
           <span className="verse-quotes__text" lang={lang}>
             {quote.text}
           </span>
-        </a>
+        </SiteLink>
       </li>
     ))}
   </ul>
@@ -69,22 +70,22 @@ export default function BibleVerseDetails({
         <Section title={title('bible.verse.context')}>
           <p className="verse-context" lang={textLang}>
             {context.before.map(verse => (
-              <a key={verse.verse} className="verse-context__verse" href={verse.path}>
+              <SiteLink key={verse.verse} className="verse-context__verse" href={verse.path}>
                 <span className="verse-context__number">{verse.verse}</span>
                 {verse.text}{' '}
-              </a>
+              </SiteLink>
             ))}
             <strong className="verse-context__current">{study.text}</strong>{' '}
             {context.after.map(verse => (
-              <a key={verse.verse} className="verse-context__verse" href={verse.path}>
+              <SiteLink key={verse.verse} className="verse-context__verse" href={verse.path}>
                 <span className="verse-context__number">{verse.verse}</span>
                 {verse.text}{' '}
-              </a>
+              </SiteLink>
             ))}
           </p>
-          <a className="resource-link mt-4 inline-block text-sm font-semibold" href={chapterPath}>
+          <SiteLink className="resource-link mt-4 inline-block text-sm font-semibold" href={chapterPath}>
             {t('bible.readChapter').replace('{chapter}', chapterLabel)}
-          </a>
+          </SiteLink>
         </Section>
       )}
 
@@ -95,12 +96,12 @@ export default function BibleVerseDetails({
               <span className="font-serif text-2xl" lang={originalLang} dir="auto">
                 {study.original.text}
               </span>
-              <a
+              <SiteLink
                 className="resource-link mt-2 block text-sm font-semibold"
                 href={study.original.path}
               >
                 {t('bible.verse.interlinear')}
-              </a>
+              </SiteLink>
             </p>
           )}
           {study.wordsVersion && (
@@ -112,7 +113,7 @@ export default function BibleVerseDetails({
             <ul className="verse-words">
               {study.words.map(word => (
                 <li key={word.code}>
-                  <a className="verse-words__word" href={word.path} data-strong={word.code}>
+                  <SiteLink className="verse-words__word" href={word.path} data-strong={word.code}>
                     <span className="verse-words__text">{word.word ?? '·'}</span>
                     <span className="verse-words__original" lang={originalLang} dir="auto">
                       {word.original}
@@ -121,7 +122,7 @@ export default function BibleVerseDetails({
                       <span className="italic">{word.transliteration}</span> · {word.gloss}
                     </span>
                     <span className="verse-words__code">{word.label}</span>
-                  </a>
+                  </SiteLink>
                 </li>
               ))}
             </ul>
@@ -134,12 +135,12 @@ export default function BibleVerseDetails({
           <ul className="atlas-relations__list">
             {study.entities.map(entity => (
               <li key={entity.path}>
-                <a className="atlas-relation" href={entity.path}>
+                <SiteLink className="atlas-relation" href={entity.path}>
                   <span className="atlas-picture">
                     <img src={entity.picture} alt="" width={44} height={44} loading="lazy" />
                   </span>
                   <span>{entity.name}</span>
-                </a>
+                </SiteLink>
               </li>
             ))}
           </ul>
@@ -158,7 +159,7 @@ export default function BibleVerseDetails({
             {study.comments.map(comment => (
               <li key={comment.commentary}>
                 {/* A plain link to the comment; with scripting, the dialog reads it whole. */}
-                <a
+                <SiteLink
                   className="verse-comments__comment"
                   href={comment.path}
                   data-commentary={comment.commentary}
@@ -169,7 +170,7 @@ export default function BibleVerseDetails({
                   </span>
                   <span className="verse-comments__excerpt">{comment.excerpt}</span>
                   <span className="verse-comments__more">{t('bible.verse.readComment')}</span>
-                </a>
+                </SiteLink>
               </li>
             ))}
           </ul>
@@ -181,9 +182,9 @@ export default function BibleVerseDetails({
           <ul className="flex flex-wrap gap-2">
             {study.topics.map(topic => (
               <li key={topic.path}>
-                <a className="resource-chip" href={topic.path}>
+                <SiteLink className="resource-chip" href={topic.path}>
                   {topic.name}
-                </a>
+                </SiteLink>
               </li>
             ))}
           </ul>
@@ -195,9 +196,9 @@ export default function BibleVerseDetails({
           <ul className="flex flex-wrap gap-2">
             {study.dictionary.map(entry => (
               <li key={entry.path}>
-                <a className="resource-chip" href={entry.path}>
+                <SiteLink className="resource-chip" href={entry.path}>
                   {entry.word}
-                </a>
+                </SiteLink>
               </li>
             ))}
           </ul>

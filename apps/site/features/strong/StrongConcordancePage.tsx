@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { useI18n } from '@/locales'
 import { bibleBookName, bibleBookSlug } from '../bible/bibleBooks'
 import Pagination from '../resources/Pagination'
@@ -52,22 +53,22 @@ export default function StrongConcordancePage({ page }: { page: StrongConcordanc
               .replace('{count}', page.verseCount.toLocaleString(language))
               .replace('{version}', page.version)}
           </p>
-          <a
+          <SiteLink
             className="resource-link mt-3 inline-block text-sm font-semibold"
             href={buildStrongPath(language, code)}
           >
             ← {t('strong.concordance.back')}
-          </a>
+          </SiteLink>
         </header>
 
         <nav className="mt-8" aria-label={t('strong.concordance.byBook')}>
-          <a
+          <SiteLink
             className="resource-chip mb-2"
             aria-current={book === undefined ? 'true' : undefined}
             href={buildStrongConcordancePath(language, code)}
           >
             {t('strong.concordance.allBooks')}
-          </a>
+          </SiteLink>
           <StrongBookCounts entry={page} books={page.books} selectedBook={book} />
         </nav>
 

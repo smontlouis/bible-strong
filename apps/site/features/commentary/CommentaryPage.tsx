@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { bibleBookName } from '../bible/bibleBooks'
 import ResourceShell from '../resources/ResourceShell'
 import type { CommentaryPageData } from './commentary.functions'
@@ -53,15 +54,15 @@ export default function CommentaryPage({ page }: { page: CommentaryPageData }) {
           </p>
           <ul className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
             <li>
-              <a className="resource-chip resource-chip--action" href={start}>
+              <SiteLink className="resource-chip resource-chip--action" href={start}>
                 {t('commentary.resource.start')}
-              </a>
+              </SiteLink>
             </li>
             {counterpartPath && (
               <li>
-                <a className="resource-link inline-block py-1 text-sm" href={counterpartPath}>
+                <SiteLink className="resource-link inline-block py-1 text-sm" href={counterpartPath}>
                   {t('commentary.resource.otherLanguage')}
-                </a>
+                </SiteLink>
               </li>
             )}
           </ul>
@@ -88,13 +89,13 @@ export default function CommentaryPage({ page }: { page: CommentaryPageData }) {
                     <ul className="bible-nav__grid pb-4">
                       {entry.chapters.map(chapter => (
                         <li key={chapter}>
-                          <a
+                          <SiteLink
                             className="bible-nav__cell"
                             href={chapterPath(entry.book, chapter)}
                             aria-label={`${bibleBookName(entry.book, language)} ${chapter}`}
                           >
                             {chapter}
-                          </a>
+                          </SiteLink>
                         </li>
                       ))}
                     </ul>

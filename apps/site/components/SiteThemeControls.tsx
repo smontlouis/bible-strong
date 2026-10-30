@@ -26,19 +26,19 @@ type ViewTransitionDocument = Document & {
 function ThemeIcon({ theme }: { theme: ThemePreference }) {
   if (theme === 'light')
     return (
-      <svg aria-hidden="true" viewBox="0 0 24 24">
+      <svg aria-hidden="true" viewBox="0 0 24 24" data-icon="light">
         <circle cx="12" cy="12" r="3.5" />
         <path d="M12 2v2.2M12 19.8V22M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2 12h2.2M19.8 12H22M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6" />
       </svg>
     )
   if (theme === 'dark')
     return (
-      <svg aria-hidden="true" viewBox="0 0 24 24">
+      <svg aria-hidden="true" viewBox="0 0 24 24" data-icon="dark">
         <path d="M20.2 15.2A8.7 8.7 0 0 1 8.8 3.8 8.7 8.7 0 1 0 20.2 15.2Z" />
       </svg>
     )
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24">
+    <svg aria-hidden="true" viewBox="0 0 24 24" data-icon="auto">
       <rect x="3" y="4" width="18" height="13" rx="2.5" />
       <path d="M8.5 21h7M12 17v4" />
     </svg>
@@ -132,7 +132,10 @@ export function ThemeToggle({
       data-theme-value={value}
       onClick={changeThemeWithReveal}
     >
-      <ThemeIcon theme={value} />
+      {/* The style shows the one of the theme: a page kept for everyone cannot know it. */}
+      {themePreferences.map(theme => (
+        <ThemeIcon key={theme} theme={theme} />
+      ))}
     </button>
   )
 }

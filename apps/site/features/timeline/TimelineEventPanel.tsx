@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import type { ResourceLanguage } from '../resources/publicSite'
 import { TIMELINE_MESSAGES } from './messages'
@@ -127,10 +128,10 @@ export default function TimelineEventPanel({
               </p>
             )}
 
-            <a className="resource-cta" href={buildTimelineEventPath(language, event.slug)}>
+            <SiteLink className="resource-cta" href={buildTimelineEventPath(language, event.slug)}>
               {messages.panelRead}
               <Arrow />
-            </a>
+            </SiteLink>
           </div>
         </div>
       </div>

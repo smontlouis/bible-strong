@@ -4,6 +4,7 @@ import { readResource } from '../resources/resourceApi'
 import { loadStrongConcordancePage, loadStrongPage } from './strong.functions'
 
 vi.mock('../resources/resourceApi', () => ({ readResource: vi.fn() }))
+vi.mock('../resources/keptLikeAPage', () => ({ keptLikeAPage: {} }))
 // The portraits come from the media host, which a test does not reach.
 vi.mock('../atlas/atlas.functions', () => ({
   readAtlasPortraitCatalog: vi.fn(async () => undefined),
@@ -12,6 +13,7 @@ vi.mock('../atlas/atlas.functions', () => ({
 vi.mock('@tanstack/react-start', () => ({
   createServerFn: () => {
     const builder = {
+      middleware: () => builder,
       validator: () => builder,
       handler: (handle: (context: { data: unknown }) => unknown) => handle,
     }

@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import { useI18n } from '@/locales'
 import { hideAnchoredPopoverOnScroll, placePopover } from '../resources/popoverPlacement'
@@ -116,15 +117,15 @@ export default function StrongPreviewPopover({
           )}
 
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-            <a className="resource-cta" href={buildStrongPath(language, preview?.code ?? state.code)}>
+            <SiteLink className="resource-cta" href={buildStrongPath(language, preview?.code ?? state.code)}>
               {t('strong.preview.open')}
-            </a>
-            <a
+            </SiteLink>
+            <SiteLink
               className="resource-link text-sm font-semibold"
               href={buildStrongConcordancePath(language, preview?.code ?? state.code)}
             >
               {t('strong.preview.concordance')}
-            </a>
+            </SiteLink>
           </div>
         </>
       )}

@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { useI18n } from '@/locales'
 import { WEB_APP_ORIGIN, type ResourceLanguage } from '../resources/publicSite'
 import ResourceShell from '../resources/ResourceShell'
@@ -70,12 +71,12 @@ export function BibleHubPage({ language }: { language: ResourceLanguage }) {
           <ul className="flex flex-wrap gap-2">
             {STARTING_POINTS.map(point => (
               <li key={point.book}>
-                <a
+                <SiteLink
                   className="resource-chip resource-chip--action"
                   href={buildBiblePath({ versionId, ...point })}
                 >
                   {bibleBookName(point.book, language)} {point.chapter}
-                </a>
+                </SiteLink>
               </li>
             ))}
           </ul>
@@ -86,7 +87,7 @@ export function BibleHubPage({ language }: { language: ResourceLanguage }) {
           <ul className="grid gap-3 sm:grid-cols-3">
             {studyReadings.map(reading => (
               <li key={reading.presentation}>
-                <a
+                <SiteLink
                   className="resource-card resource-card--link block h-full p-4"
                   href={buildBiblePath({ ...reading, ...STUDY_PASSAGE, gloss: language })}
                 >
@@ -94,7 +95,7 @@ export function BibleHubPage({ language }: { language: ResourceLanguage }) {
                   <span className="resource-muted mt-1 block text-sm">
                     {t(`bible.mode.${reading.presentation}.hint`)}
                   </span>
-                </a>
+                </SiteLink>
               </li>
             ))}
           </ul>
@@ -108,7 +109,7 @@ export function BibleHubPage({ language }: { language: ResourceLanguage }) {
               <ul className="bible-nav__list bible-nav__list--wide">
                 {BIBLE_VERSIONS.filter(version => versionGroup(version) === group).map(version => (
                   <li key={version.id}>
-                    <a
+                    <SiteLink
                       className="bible-nav__item bible-nav__item--version"
                       href={buildBibleVersionPath(version.id)}
                     >
@@ -123,7 +124,7 @@ export function BibleHubPage({ language }: { language: ResourceLanguage }) {
                           {t(`bible.aid.${aid}`)}
                         </span>
                       ))}
-                    </a>
+                    </SiteLink>
                   </li>
                 ))}
               </ul>
@@ -179,7 +180,7 @@ export function BibleVersionPage({ page }: { page: BibleVersionPageData }) {
             <ul className="grid gap-3 sm:grid-cols-3">
               {modes.map(presentation => (
                 <li key={presentation}>
-                  <a
+                  <SiteLink
                     className="resource-card resource-card--link block h-full p-4"
                     href={buildBiblePath({
                       versionId,
@@ -193,7 +194,7 @@ export function BibleVersionPage({ page }: { page: BibleVersionPageData }) {
                     <span className="resource-muted mt-1 block text-sm">
                       {t(`bible.mode.${presentation}.hint`)}
                     </span>
-                  </a>
+                  </SiteLink>
                 </li>
               ))}
             </ul>
@@ -221,13 +222,13 @@ export function BibleVersionPage({ page }: { page: BibleVersionPageData }) {
                     <ul className="bible-nav__grid pb-4">
                       {entry.chapters.map(chapter => (
                         <li key={chapter}>
-                          <a
+                          <SiteLink
                             className="bible-nav__cell"
                             href={buildBiblePath({ versionId, book: entry.book, chapter })}
                             aria-label={`${bibleBookName(entry.book, language)} ${chapter}`}
                           >
                             {chapter}
-                          </a>
+                          </SiteLink>
                         </li>
                       ))}
                     </ul>

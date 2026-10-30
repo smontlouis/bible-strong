@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { Fragment, type CSSProperties, type ReactNode } from 'react'
 import { bibleVersionName, findBibleVersion } from '../bible/bibleVersions'
 import ResourceShell from '../resources/ResourceShell'
@@ -59,12 +60,12 @@ const Figure = ({
 const Passage = ({ passage }: { passage: TimelinePagePassage }) => (
   <li>
     {passage.path ? (
-      <a
+      <SiteLink
         className="resource-link inline-flex min-h-6 items-center text-sm font-semibold"
         href={passage.path}
       >
         {passage.label}
-      </a>
+      </SiteLink>
     ) : (
       <span className="text-sm font-semibold">{passage.label}</span>
     )}
@@ -95,7 +96,7 @@ const Neighbour = ({
   rel: 'prev' | 'next'
   language: TimelineEventPageData['language']
 }) => (
-  <a
+  <SiteLink
     className={`resource-card timeline-neighbour timeline-neighbour--${rel}`}
     href={buildTimelineEventPath(language, event.slug)}
     rel={rel}
@@ -103,7 +104,7 @@ const Neighbour = ({
     <span className="resource-muted text-sm">{rel === 'prev' ? `← ${label}` : `${label} →`}</span>{' '}
     <span className="font-semibold">{event.title}</span>{' '}
     <span className="resource-muted text-sm">{formatTimelineDates(event.dates, language)}</span>
-  </a>
+  </SiteLink>
 )
 
 /** `/timeline/:language/:slug` — an event of the timeline. */
@@ -128,26 +129,26 @@ export default function TimelineEventPage({ event }: { event: TimelineEventPageD
       <article>
         <header>
           {period && (
-            <a
+            <SiteLink
               className="resource-chip"
               href={buildTimelinePeriodPath(language, period.id)}
               style={{ '--timeline-period': period.color } as CSSProperties}
             >
               <span className="timeline-marker self-center" aria-hidden="true" />
               {period.title[language]}
-            </a>
+            </SiteLink>
           )}
           <h1 className="mt-4 font-serif text-4xl leading-tight md:text-5xl">{event.title}</h1>
           <dl className="mt-3">
             <dt className="sr-only">{messages.dates}</dt>
             <dd className="text-xl font-medium">{formatTimelineDates(event.dates, language)}</dd>
           </dl>
-          <a
+          <SiteLink
             className="resource-link mt-3 inline-block text-sm font-semibold"
             href={buildTimelineEventPlacePath(language, slug)}
           >
             {messages.locate}
-          </a>
+          </SiteLink>
         </header>
 
         {event.summary && <p className="resource-prose timeline-lead mt-6">{event.summary}</p>}

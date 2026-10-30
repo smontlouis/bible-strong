@@ -7,6 +7,7 @@ import {
   bibleVersionCoversBook,
   defaultBibleVersionId,
 } from '../bible/bibleVersions'
+import { keptLikeAPage } from '../resources/keptLikeAPage'
 import { truncateText } from '../resources/editorialHtml'
 import { buildBibleReferencePath } from '../resources/editorialLinks'
 import { isResourceLanguage, type ResourceLanguage } from '../resources/publicSite'
@@ -45,6 +46,7 @@ export type CommentaryIndexPageData = {
 
 /** `/commentary/:language` — the commentaries published in a language. */
 export const loadCommentaryIndexPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string }) => data)
   .handler(async ({ data }): Promise<CommentaryIndexPageData> => {
     if (!isResourceLanguage(data.language)) throw notFound()
@@ -77,6 +79,7 @@ const readCounterpartCoverage = async (
 
 /** `/commentary/:language/:resource` — a commentary and the chapters it covers. */
 export const loadCommentaryPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: { language: string; resource: string }) => data)
   .handler(async ({ data }): Promise<CommentaryPageData> => {
     if (!isResourceLanguage(data.language)) throw notFound()
@@ -143,6 +146,7 @@ export type CommentaryChapterPageData = {
 
 /** `/commentary/:language/:resource/:book/:chapter` — the commentary of a chapter. */
 export const loadCommentaryChapterPage = createServerFn({ method: 'GET' })
+  .middleware([keptLikeAPage])
   .validator((data: CommentaryChapterRequest & { page?: number }) => data)
   .handler(async ({ data }): Promise<CommentaryChapterPageData> => {
     const { route, commentary, coverage, pages } = await loadChapter(data)

@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { bibleBookName } from '../bible/bibleBooks'
 import { buildBiblePath } from '../bible/bibleRoutes'
 import type { ResourceLanguage } from '../resources/publicSite'
@@ -17,7 +18,7 @@ export default function StrongVerseList({
     <ol className="space-y-4">
       {verses.map(verse => (
         <li key={`${verse.book}-${verse.chapter}-${verse.verse}`}>
-          <a
+          <SiteLink
             className="resource-link text-sm font-semibold"
             href={buildBiblePath({
               versionId: version,
@@ -27,7 +28,7 @@ export default function StrongVerseList({
             })}
           >
             {bibleBookName(verse.book, language)} {verse.chapter}:{verse.verse}
-          </a>
+          </SiteLink>
           <div className="resource-prose" dangerouslySetInnerHTML={{ __html: verse.html }} />
         </li>
       ))}

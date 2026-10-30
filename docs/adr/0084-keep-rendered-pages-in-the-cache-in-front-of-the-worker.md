@@ -97,3 +97,6 @@ Crawlers rendered pages the cache could not keep, each one a read of the Resourc
 
 `robots.txt` also turns crawlers away from the server functions and from the Bible pages with
 commentaries in their text, which are not indexed.
+
+The reads a page is filled with when the reader reaches it by a link are kept the same way
+(ADR-0093).

@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { useI18n } from '@/locales'
 import { bibleBookName } from '../bible/bibleBooks'
 import ResourceShell from '../resources/ResourceShell'
@@ -107,7 +108,7 @@ export default function StrongNumberPage({ page }: { page: StrongNumberPageData 
               const summary = name === sense.summary ? undefined : sense.summary
               return (
                 <li key={sense.code}>
-                  <a
+                  <SiteLink
                     className="strong-senses__sense resource-card"
                     href={buildStrongPath(language, sense.code)}
                   >
@@ -127,7 +128,7 @@ export default function StrongNumberPage({ page }: { page: StrongNumberPageData 
                     </span>
                     {summary && <span className="strong-senses__summary">{summary}</span>}
                     {verses && <span className="strong-senses__verses">{verses}</span>}
-                  </a>
+                  </SiteLink>
                 </li>
               )
             })}

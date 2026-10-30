@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import { useI18n } from '@/locales'
 import {
@@ -137,12 +138,12 @@ export default function BibleCommentaryDialog({
           )}
 
           <p className="mt-5">
-            <a
+            <SiteLink
               className="resource-link text-sm font-semibold"
               href={state.section?.path ?? state.path}
             >
               {t('bible.comment.open')}
-            </a>
+            </SiteLink>
           </p>
         </div>
       )}

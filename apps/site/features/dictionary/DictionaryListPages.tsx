@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import LetterNav from '../resources/LetterNav'
 import Pagination from '../resources/Pagination'
 import ResourceShell from '../resources/ResourceShell'
@@ -43,12 +44,12 @@ export function DictionaryIndexPage({ page }: { page: DictionaryIndexPageData })
           {works.map(work => (
             <li key={work.id} className="dictionary-work resource-card resource-card--link p-5">
               <h2 className="text-xl font-semibold">
-                <a
+                <SiteLink
                   className="dictionary-work__link"
                   href={buildDictionaryWorkPath(language, work.id)}
                 >
                   {work.title}
-                </a>
+                </SiteLink>
               </h2>
               <p className="resource-muted mt-1 text-sm">{work.authors.join(', ')}</p>
               <p className="mt-3">{work.description}</p>
@@ -153,7 +154,7 @@ export function DictionaryLetterPage({ page }: { page: DictionaryLetterPageData 
         <ul className="strong-list mt-8">
           {entries.map(entry => (
             <li key={entry.id}>
-              <a
+              <SiteLink
                 className="strong-list__entry"
                 href={buildDictionaryEntryPath({
                   language,
@@ -163,7 +164,7 @@ export function DictionaryLetterPage({ page }: { page: DictionaryLetterPageData 
                 })}
               >
                 <span className="min-w-0 font-medium">{entry.word}</span>
-              </a>
+              </SiteLink>
             </li>
           ))}
         </ul>

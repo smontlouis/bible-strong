@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import { useEffect, useState, type RefObject } from 'react'
 import { Button } from '@/components/ui/button'
 import {
@@ -73,9 +74,9 @@ export default function StudyEntityDialog({ contentRef }: Props) {
           {link && (
             <div className="mt-2 flex justify-end">
               <Button asChild>
-                <a href={link.href} {...(link.external && { target: '_blank', rel: 'noreferrer' })}>
+                <SiteLink href={link.href} {...(link.external && { target: '_blank', rel: 'noreferrer' })}>
                   {entity.endpoint.type === 'study' ? 'Ouvrir l’étude' : 'Ouvrir le lien'}
-                </a>
+                </SiteLink>
               </Button>
             </div>
           )}

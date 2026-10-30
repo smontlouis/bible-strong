@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import ResourceShell from '../resources/ResourceShell'
 import type { AtlasHomePageData } from './atlas.functions'
 import AtlasMap from './AtlasMap'
@@ -51,18 +52,18 @@ export default function AtlasHomePage({ page }: { page: AtlasHomePageData }) {
           <AtlasSearch language={language} />
           <nav className="atlas-families" aria-label={messages.name}>
             {ATLAS_FAMILIES.map(family => (
-              <a key={family} className="atlas-chip" href={buildAtlasFamilyPath(language, family)}>
+              <SiteLink key={family} className="atlas-chip" href={buildAtlasFamilyPath(language, family)}>
                 {messages.families[family]}
                 <span className="atlas-chip__count">
                   {page.counts[family].toLocaleString(language)}
                 </span>
-              </a>
+              </SiteLink>
             ))}
           </nav>
         </div>
         <div className="atlas-lineup" aria-hidden="true">
           {lineUp.map((member, index) => (
-            <a
+            <SiteLink
               key={member.uniqueName}
               className="atlas-lineup__figure"
               href={buildAtlasEntityPath(language, member.uniqueName)}
@@ -81,7 +82,7 @@ export default function AtlasHomePage({ page }: { page: AtlasHomePageData }) {
                 height={230}
                 loading={index < 6 ? 'eager' : 'lazy'}
               />
-            </a>
+            </SiteLink>
           ))}
         </div>
       </section>
@@ -91,9 +92,9 @@ export default function AtlasHomePage({ page }: { page: AtlasHomePageData }) {
           <h2 className="atlas-heading">{messages.cardsTitle}</h2>
           <p className="atlas-section__lead">{messages.cardsEntryLead}</p>
         </div>
-        <a className="resource-cta" href={buildAtlasCardsPath(language)}>
+        <SiteLink className="resource-cta" href={buildAtlasCardsPath(language)}>
           {messages.cardsEntry}
-        </a>
+        </SiteLink>
       </section>
 
       <section className="atlas-section">
@@ -138,20 +139,20 @@ export default function AtlasHomePage({ page }: { page: AtlasHomePageData }) {
           </header>
           <AtlasStrip label={messages.families.places}>
             {page.places.map(place => (
-              <a
+              <SiteLink
                 key={place.uniqueName}
                 className="atlas-painting"
                 href={buildAtlasEntityPath(language, place.uniqueName)}
               >
                 <AtlasPicture src={place.picture.replace('/w256.webp', '/w768.webp')} size={300} />
                 <span className="atlas-painting__name">{place.name}</span>
-              </a>
+              </SiteLink>
             ))}
           </AtlasStrip>
           <p className="atlas-section__more">
-            <a className="resource-link" href={buildAtlasFamilyPath(language, 'places')}>
+            <SiteLink className="resource-link" href={buildAtlasFamilyPath(language, 'places')}>
               {messages.seeAll} · {page.counts.places.toLocaleString(language)}
-            </a>
+            </SiteLink>
           </p>
         </section>
       )}
@@ -173,7 +174,7 @@ export default function AtlasHomePage({ page }: { page: AtlasHomePageData }) {
       <section className="atlas-section">
         <div className="atlas-family-grid">
           {ATLAS_FAMILIES.map(family => (
-            <a
+            <SiteLink
               key={family}
               className="atlas-family-card"
               href={buildAtlasFamilyPath(language, family)}
@@ -183,7 +184,7 @@ export default function AtlasHomePage({ page }: { page: AtlasHomePageData }) {
               </span>
               <span className="atlas-family-card__name">{messages.families[family]}</span>
               <span className="atlas-family-card__lead">{messages.familyLeads[family]}</span>
-            </a>
+            </SiteLink>
           ))}
         </div>
       </section>

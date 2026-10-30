@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import ResourceShell from '../resources/ResourceShell'
 import { WEB_APP_ORIGIN } from '../resources/publicSite'
 import type { AtlasFamilyPageData } from './atlas.functions'
@@ -23,7 +24,7 @@ export default function AtlasFamilyPage({ page }: { page: AtlasFamilyPageData })
       <section className="atlas-hero atlas-hero--family">
         <div className="atlas-hero__text">
           <p className="atlas-eyebrow">
-            <a href={buildAtlasPath(language)}>{messages.name}</a>
+            <SiteLink href={buildAtlasPath(language)}>{messages.name}</SiteLink>
           </p>
           <h1 className="atlas-title">{messages.families[family]}</h1>
           <p className="atlas-lead">{messages.familyLeads[family]}</p>
@@ -33,9 +34,9 @@ export default function AtlasFamilyPage({ page }: { page: AtlasFamilyPageData })
           <AtlasSearch language={language} />
           <nav className="atlas-families" aria-label={messages.name}>
             {ATLAS_FAMILIES.filter(other => other !== family).map(other => (
-              <a key={other} className="atlas-chip" href={buildAtlasFamilyPath(language, other)}>
+              <SiteLink key={other} className="atlas-chip" href={buildAtlasFamilyPath(language, other)}>
                 {messages.families[other]}
-              </a>
+              </SiteLink>
             ))}
           </nav>
         </div>

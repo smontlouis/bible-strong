@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import type { ResourceLanguage } from '../resources/publicSite'
 import type { TimelineEventLink } from './timeline.functions'
 import { formatTimelineDates } from './timelineDates'
@@ -15,12 +16,12 @@ export default function TimelineEventList({
     <ol className="timeline-events">
       {events.map(event => (
         <li key={event.slug}>
-          <a className="timeline-events__event" href={buildTimelineEventPath(language, event.slug)}>
+          <SiteLink className="timeline-events__event" href={buildTimelineEventPath(language, event.slug)}>
             <span className="timeline-events__title">{event.title}</span>{' '}
             <span className="timeline-events__dates">
               {formatTimelineDates(event.dates, language)}
             </span>
-          </a>
+          </SiteLink>
         </li>
       ))}
     </ol>

@@ -1,3 +1,4 @@
+import SiteLink from '@/components/SiteLink'
 import {
   useEffect,
   useRef,
@@ -380,7 +381,7 @@ export default function TimelineStage({ page }: { page: TimelineIndexPageData })
             <ul>
               {RESOURCE_SECTIONS.filter(section => section.key !== 'timeline').map(section => (
                 <li key={section.key}>
-                  <a href={section.path(language)}>{section.label[language]}</a>
+                  <SiteLink href={section.path(language)}>{section.label[language]}</SiteLink>
                 </li>
               ))}
             </ul>
