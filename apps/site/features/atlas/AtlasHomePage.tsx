@@ -4,6 +4,7 @@ import AtlasMap from './AtlasMap'
 import { AtlasPicture, AtlasSearch, AtlasStrip, AtlasTileLink } from './AtlasParts'
 import {
   ATLAS_FAMILIES,
+  buildAtlasCardsPath,
   buildAtlasEntityPath,
   buildAtlasFamilyPath,
   buildAtlasPath,
@@ -83,6 +84,16 @@ export default function AtlasHomePage({ page }: { page: AtlasHomePageData }) {
             </a>
           ))}
         </div>
+      </section>
+
+      <section className="atlas-section atlas-cards-entry">
+        <div>
+          <h2 className="atlas-heading">{messages.cardsTitle}</h2>
+          <p className="atlas-section__lead">{messages.cardsEntryLead}</p>
+        </div>
+        <a className="resource-cta" href={buildAtlasCardsPath(language)}>
+          {messages.cardsEntry}
+        </a>
       </section>
 
       <section className="atlas-section">

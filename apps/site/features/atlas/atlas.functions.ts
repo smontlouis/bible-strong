@@ -18,9 +18,11 @@ import { notingStaleAnswers } from '../resources/staleAnswers'
 import { buildStrongPath, displayStrongCode, parseStrongCode } from '../strong/strongRoutes'
 import {
   atlasCardsOf,
+  atlasGalleryCards,
   ENTITY_CARD_BASE_URL,
   parseCardCatalog,
   type AtlasCardView,
+  type AtlasGalleryCard,
   type CardCatalog,
 } from './atlasCardCatalog'
 import { projectAtlasPlace } from './atlasProjection'
@@ -83,6 +85,22 @@ export type AtlasFamilyPageData = {
   painted: AtlasTile[]
   mostNamed: AtlasTile[]
   points: AtlasMapPoint[]
+  incomplete: boolean
+}
+
+/** Every card, in the order of the Bible, with the series they can be filtered by. */
+export type AtlasCardsPageData = {
+  language: ResourceLanguage
+  cards: AtlasGalleryCard[]
+  /** The series that hold cards, in the order of the story. */
+  series: { id: string; title: string }[]
+  incomplete: boolean
+}
+
+/** One card, opened over the gallery at its own address. */
+export type AtlasCardPageData = {
+  language: ResourceLanguage
+  card: AtlasGalleryCard
   incomplete: boolean
 }
 
@@ -350,6 +368,70 @@ export const loadAtlasFamilyPage = createServerFn({ method: 'GET' })
       points: family === 'places' ? mapPoints(entities, catalog) : [],
       incomplete,
     }
+  })
+
+/** The cards of the gallery, drawn once per catalog and language. */
+const galleries = new Map<
+  ResourceLanguage,
+  { cards: CardCatalog; portraits: AtlasPortraitCatalog; gallery: AtlasGalleryCard[] }
+>()
+
+const galleryOf = (
+  cards: CardCatalog,
+  portraits: AtlasPortraitCatalog,
+  language: ResourceLanguage
+): AtlasGalleryCard[] => {
+  const kept = galleries.get(language)
+  if (kept && kept.cards === cards && kept.portraits === portraits) return kept.gallery
+  const gallery = atlasGalleryCards(cards, portraits, language, cardBaseUrl())
+  galleries.set(language, { cards, portraits, gallery })
+  return gallery
+}
+
+/** Reads the two catalogs of the cards; one that cannot be read leaves the page incomplete. */
+const readCardBasis = async () => {
+  const reads = createPageReads()
+  const [portraits, cards] = await Promise.all([
+    reads.optional(readAtlasPortraitCatalog),
+    reads.optional(readAtlasCardCatalog),
+  ])
+  return { portraits, cards, incomplete: reads.incomplete }
+}
+
+export const loadAtlasCardsPage = createServerFn({ method: 'GET' })
+  .validator((data: { language: string }) => data)
+  .handler(async ({ data }): Promise<AtlasCardsPageData> => {
+    if (!isResourceLanguage(data.language)) throw notFound()
+    const { language } = data
+    const { portraits, cards, incomplete } = await readCardBasis()
+    const gallery = cards && portraits ? galleryOf(cards, portraits, language) : []
+    const held = new Set(gallery.flatMap(card => card.seriesIds))
+    return {
+      language,
+      cards: gallery,
+      series: (portraits?.series ?? [])
+        .filter(series => held.has(series.id))
+        .map(series => ({ id: series.id, title: text(series.title, language) })),
+      incomplete: incomplete || !gallery.length,
+    }
+  })
+
+export const loadAtlasCardPage = createServerFn({ method: 'GET' })
+  .validator((data: { language: string; id: string }) => data)
+  .handler(async ({ data }): Promise<AtlasCardPageData> => {
+    if (!isResourceLanguage(data.language)) throw notFound()
+    const { language, id } = data
+    const { portraits, cards, incomplete } = await readCardBasis()
+    const card =
+      cards && portraits
+        ? galleryOf(cards, portraits, language).find(item => item.id === id)
+        : undefined
+    if (!card) {
+      // A card is missing for good only when both catalogs were read.
+      if (cards && portraits) throw notFound()
+      throw new Error('ATLAS_CARD_CATALOG_UNREADABLE')
+    }
+    return { language, card, incomplete }
   })
 
 // Search ignores case, accents and the underscores of the publication.

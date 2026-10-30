@@ -2,7 +2,10 @@ import { absoluteSiteUrl, RESOURCE_LANGUAGES } from '../resources/publicSite'
 import { buildResourceHead } from '../resources/resourceHead'
 import { SHARE_MAP_SIZE, shareMapPixel, shareMapWindow } from '../share/shareCardMap'
 import { shareCardExcerpt, shareCardLine } from '../share/shareCardText'
+import { CARD_FAMILY_LABELS, type AtlasGalleryCard } from './atlasCardCatalog'
 import type {
+  AtlasCardPageData,
+  AtlasCardsPageData,
   AtlasEntityPageData,
   AtlasFamilyPageData,
   AtlasHomePageData,
@@ -10,7 +13,13 @@ import type {
   AtlasTile,
 } from './atlas.functions'
 import { entitySharePicture } from './atlasPortraits'
-import { buildAtlasEntityPath, buildAtlasFamilyPath, buildAtlasPath } from './atlasRoutes'
+import {
+  buildAtlasCardPath,
+  buildAtlasCardsPath,
+  buildAtlasEntityPath,
+  buildAtlasFamilyPath,
+  buildAtlasPath,
+} from './atlasRoutes'
 import { ATLAS_MESSAGES, countLabel } from './messages'
 
 const DESCRIPTION_LENGTH = 155
@@ -243,5 +252,105 @@ export const buildAtlasEntityHead = (page: AtlasEntityPageData) => {
         ...(page.painted ? { image: page.picture } : {}),
       },
     ],
+  })
+}
+
+/** A card's sentence with its reference, or the sentence alone, cut, where both do not fit. */
+const cardShareLine = (card: AtlasGalleryCard, language: 'fr' | 'en') => {
+  const quote = (text: string) => (language === 'fr' ? `« ${text} »` : `“${text}”`)
+  const whole = `${quote(card.sentence)} ${card.source}`
+  return whole.length <= 92 ? whole : quote(shareCardExcerpt(card.sentence, true))
+}
+
+/** The cut-out PNG of a card's picture, which a share image can draw; a whole scene keeps its own. */
+const cardSharePicture = (card: AtlasGalleryCard) => entitySharePicture(card.picture)
+
+export const buildAtlasCardsHead = (page: AtlasCardsPageData) => {
+  const { language } = page
+  const messages = ATLAS_MESSAGES[language]
+  const path = buildAtlasCardsPath(language)
+  const count = page.cards.length.toLocaleString(language)
+  const description = messages.cardsHeadDescription.replace('{cards}', count)
+  // Six cards of different characters, the most named first, as the other pages show theirs.
+  const shown = [...new Map(page.cards.map(card => [card.entity, card])).values()]
+    .filter(card => !card.scene)
+    .sort((left, right) => right.chapterCount - left.chapterCount)
+    .slice(0, 6)
+  return buildResourceHead({
+    title: messages.cardsHeadTitle,
+    description,
+    path,
+    language,
+    alternates: bothLanguages(buildAtlasCardsPath),
+    ogType: 'website',
+    breadcrumbs: [
+      { label: messages.name, path: buildAtlasPath(language) },
+      { label: messages.cardsTitle },
+    ],
+    shareCard: {
+      kind: 'title',
+      kicker: messages.name,
+      title: messages.cardsTitle,
+      facts: countLabel(messages.cardsCount, page.cards.length, language),
+      ...(shown.length === 6
+        ? {
+            pictures: shown.map(card => ({ src: cardSharePicture(card), caption: card.name })),
+            cutOut: true,
+          }
+        : {}),
+      excerpt: shareCardExcerpt(messages.cardsLead.replace('{cards}', count), shown.length === 6),
+    },
+    structuredData: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        '@id': absoluteSiteUrl(path),
+        url: absoluteSiteUrl(path),
+        name: messages.cardsTitle,
+        description,
+        inLanguage: language,
+      },
+    ],
+  })
+}
+
+/**
+ * A card opened over the gallery: a page of its own to share, which only rearranges the gallery
+ * and the character's page, so it is not indexed.
+ */
+export const buildAtlasCardHead = (page: AtlasCardPageData) => {
+  const { language, card } = page
+  const messages = ATLAS_MESSAGES[language]
+  const path = buildAtlasCardPath(language, card.id)
+  const description = cut(
+    messages.cardHeadDescription
+      .replace('{name}', card.name)
+      .replace('{title}', card.title)
+      .replace('{sentence}', card.sentence)
+      .replace('{source}', card.source)
+      .replace('{brief}', card.brief.replace(/[.\s]+$/u, '')),
+    DESCRIPTION_LENGTH
+  )
+  return buildResourceHead({
+    title: messages.cardHeadTitle.replace('{name}', card.name).replace('{title}', card.title),
+    description,
+    path,
+    language,
+    alternates: bothLanguages(other => buildAtlasCardPath(other, card.id)),
+    indexable: false,
+    breadcrumbs: [
+      { label: messages.name, path: buildAtlasPath(language) },
+      { label: messages.cardsTitle, path: buildAtlasCardsPath(language) },
+      { label: card.name },
+    ],
+    shareCard: {
+      kind: 'entity',
+      kicker: messages.cardsName,
+      chip: CARD_FAMILY_LABELS[card.family][language],
+      title: card.name,
+      facts: card.title,
+      excerpt: cardShareLine(card, language),
+      picture: cardSharePicture(card),
+    },
   })
 }

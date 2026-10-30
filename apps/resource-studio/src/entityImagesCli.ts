@@ -63,7 +63,7 @@ gives the titles, the stages with their chapters, the series and the roles (Enti
 
   yarn resources:entities:images build --selection <file> --data <file> [--output <dir>]
       Writes the ${ENTITY_IMAGE_WIDTHS.map((width) => `${width}`).join(", ")}-pixel WebP copies of every portrait and stage, cropped to a
-      centred square, a ${ENTITY_SHARE_WIDTH}-pixel PNG of every portrait for share images, and the
+      centred square, a ${ENTITY_SHARE_WIDTH}-pixel PNG of every portrait and stage for share images, and the
       catalog to publish. Needs cwebp, dwebp (brew install webp) and pngquant.
   yarn resources:entities:images placeholders --selection <file> [--target <dir>] [--site-target <dir>]
       Writes the ${ENTITY_PLACEHOLDER_WIDTH}-pixel placeholders bundled in the application (default: apps/expo/src/assets/images/entity-avatars),
@@ -195,7 +195,7 @@ const buildImages = async (args: string[]) => {
       written += 1;
     }
     const share = sharePath(output, hash);
-    if (!stage && !(existsSync(share) && (await stat(share)).size > 0)) {
+    if (!(existsSync(share) && (await stat(share)).size > 0)) {
       await writeSquarePng(original, share, ENTITY_SHARE_WIDTH);
       written += 1;
     }
@@ -311,11 +311,10 @@ const uploadImages = async (args: string[]) => {
   }
   const shares: MediaUpload[] = [];
   for (const portrait of built) {
-    if (portrait.stage) continue;
     const file = sharePath(output, portrait.hash);
     if (!existsSync(file))
       throw new Error(
-        `ENTITY_IMAGE_SHARE_COPY_MISSING: ${portrait.uniqueName}`
+        `ENTITY_IMAGE_SHARE_COPY_MISSING: ${portrait.uniqueName}${portrait.stage ? `#${portrait.stage}` : ""}, run build again`
       );
     shares.push({
       key: entityShareKey(portrait.uniqueName, portrait.hash),

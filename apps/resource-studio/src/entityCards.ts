@@ -13,6 +13,12 @@ export const ENTITY_CARD_CATALOG_KEY = `${ENTITY_CARD_KEY_PREFIX}/catalog.json`;
 
 /** A backdrop is served at the width of an enlarged card, in the 2:3 of its painting. */
 export const ENTITY_BACKDROP_WIDTH = 768;
+/** And at the width of a card in a grid of cards, under the same hash. */
+export const ENTITY_BACKDROP_GRID_WIDTH = 384;
+export const ENTITY_BACKDROP_WIDTHS = [
+  ENTITY_BACKDROP_WIDTH,
+  ENTITY_BACKDROP_GRID_WIDTH
+] as const;
 export const ENTITY_BACKDROP_QUALITY = 80;
 /** Part of every backdrop's hash, as for the portraits: a new way of copying gives new addresses. */
 export const ENTITY_BACKDROP_BUILD_SETTINGS = `webp-q${ENTITY_BACKDROP_QUALITY}-w${ENTITY_BACKDROP_WIDTH}-v1`;
@@ -126,11 +132,18 @@ export const entityBackdropHash = (original: Uint8Array): string =>
     .digest("hex")
     .slice(0, 12);
 
-export const entityBackdropKey = (key: string, hash: string): string =>
-  `${ENTITY_CARD_KEY_PREFIX}/backdrops/${key}/${hash}/w${ENTITY_BACKDROP_WIDTH}.webp`;
+export const entityBackdropKey = (
+  key: string,
+  hash: string,
+  width: number = ENTITY_BACKDROP_WIDTH
+): string =>
+  `${ENTITY_CARD_KEY_PREFIX}/backdrops/${key}/${hash}/w${width}.webp`;
 
-export const entityBackdropUrl = (key: string, hash: string): string =>
-  `${ENTITY_IMAGE_HOST}/${entityBackdropKey(key, hash)}`;
+export const entityBackdropUrl = (
+  key: string,
+  hash: string,
+  width: number = ENTITY_BACKDROP_WIDTH
+): string => `${ENTITY_IMAGE_HOST}/${entityBackdropKey(key, hash, width)}`;
 
 /** The backdrop keys the cards name, each once. */
 export const backdropsNamed = (cards: SourceEntityCard[]): string[] =>

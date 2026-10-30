@@ -41,8 +41,8 @@ Store each portrait in the media bucket, under `entity-images/`, in three WebP c
 The third size is the original's own width, about 110 KB a copy, and is decided now: adding
 a width later would change every hash and make every device fetch every portrait again.
 
-Each portrait, not each stage, also has `entity-images/<uniqueName>/<hash>/w512.png`, for the share
-image of its atlas page (ADR-0081, ADR-0091) only: that image's renderer reads PNG and JPEG, not WebP.
+Each portrait and each stage also has `entity-images/<uniqueName>/<hash>/w512.png`, for the share
+images of the atlas (ADR-0081, ADR-0091) only, a stage's for the share image of its card: that image's renderer reads PNG and JPEG, not WebP.
 It is transparent like the WebP copies and reduced to a palette by pngquant (about 115 KB). It was
 added under the same hash, the build settings unchanged, so no device fetches anything again.
 

@@ -79,6 +79,20 @@ export const ATLAS_MESSAGES = {
     entityFallbackDescription:
       '{name} dans la Bible : qui est-ce, ses liens et les passages qui le nomment.',
     cards: 'Ses cartes',
+    allCards: 'Toutes les cartes',
+    cardsName: 'Cartes de la Bible',
+    cardsTitle: 'Les cartes de la Bible',
+    cardsLead:
+      '{cards} cartes peintes : une pour chaque grande figure de la Bible et pour chacune de ses étapes de vie. Touchez une carte pour l’ouvrir, encore une fois pour la retourner.',
+    cardsHeadTitle: 'Les cartes des personnages de la Bible – Atlas de la Bible',
+    cardsHeadDescription:
+      '{cards} cartes illustrées des personnages de la Bible : leur nom en hébreu ou en grec, une phrase de la Bible, leurs étapes de vie. Triez-les, filtrez-les, ouvrez un paquet.',
+    cardHeadTitle: '{name} – {title} | Cartes de la Bible',
+    cardHeadDescription: '{name}, {title} : « {sentence} » ({source}). {brief}.',
+    cardsCount: { one: '1 carte', other: '{count} cartes' },
+    cardsEntry: 'Parcourir les cartes',
+    cardsEntryLead:
+      'Chaque grande figure a sa carte, et chacune de ses étapes de vie la sienne. Triez-les, filtrez-les, ou ouvrez un paquet de cinq au hasard.',
     breadcrumbHome: 'Atlas',
     // The kinds of relation of the entity publication, in the order a page groups them.
     relationKinds: {
@@ -168,6 +182,20 @@ export const ATLAS_MESSAGES = {
     entityFallbackDescription:
       '{name} in the Bible: who this is, relations and the passages that name it.',
     cards: 'Cards',
+    allCards: 'All the cards',
+    cardsName: 'Bible cards',
+    cardsTitle: 'The cards of the Bible',
+    cardsLead:
+      '{cards} painted cards: one for each great figure of the Bible and one for each of their life stages. Tap a card to open it, and once more to turn it over.',
+    cardsHeadTitle: 'Cards of the people of the Bible – Bible Atlas',
+    cardsHeadDescription:
+      '{cards} illustrated cards of the people of the Bible: their name in Hebrew or Greek, a sentence from the Bible, their life stages. Sort them, filter them, open a pack.',
+    cardHeadTitle: '{name} – {title} | Bible cards',
+    cardHeadDescription: '{name}, {title}: “{sentence}” ({source}). {brief}.',
+    cardsCount: { one: '1 card', other: '{count} cards' },
+    cardsEntry: 'Browse the cards',
+    cardsEntryLead:
+      'Each great figure has a card, and each of their life stages has its own. Sort them, filter them, or open a pack of five at random.',
     breadcrumbHome: 'Atlas',
     relationKinds: {
       father: 'Father',

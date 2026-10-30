@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { AtlasMapPoint } from './atlas.functions'
-import { afterName, cut, shareMapNeighbours } from './atlasHead'
+import type { AtlasGalleryCard } from './atlasCardCatalog'
+import { afterName, buildAtlasCardHead, cut, shareMapNeighbours } from './atlasHead'
 import { entitySharePicture } from './atlasPortraits'
 
 describe('Head of an atlas page', () => {
@@ -61,5 +62,42 @@ describe('Places named on the map of a card', () => {
       index,
     ])
     expect(shareMapNeighbours(point, many, 'Béthel').length).toBeLessThanOrEqual(5)
+  })
+})
+
+describe('Head of a card', () => {
+  const card = {
+    id: 'Israel@Gen.25.26-Rev~vieux',
+    entity: 'Israel@Gen.25.26-Rev',
+    family: 'human',
+    name: 'Jacob',
+    title: 'La bénédiction des douze fils',
+    picture:
+      'https://media.bible-strong.app/entity-images/Israel%40Gen.25.26-Rev/0123456789ab/w768.webp',
+    sentence: 'Assemblez-vous, et je vous annoncerai ce qui vous arrivera.',
+    source: 'Gn 49.1',
+    brief: 'Patriarche, fils d’Isaac.',
+  } as AtlasGalleryCard
+  const head = buildAtlasCardHead({ language: 'fr', card, incomplete: false })
+  const meta = (key: string) =>
+    (head.meta as { name?: string; property?: string; content?: string }[]).find(
+      item => item.name === key || item.property === key
+    )?.content
+
+  it('is shared, not indexed: it only opens a card over the gallery', () => {
+    expect(meta('robots')).toBe('noindex, follow')
+    expect(head.meta[0]).toEqual({
+      title: 'Jacob – La bénédiction des douze fils | Cartes de la Bible',
+    })
+    expect(head.links).toContainEqual({
+      rel: 'canonical',
+      href: 'https://bible-strong.app/atlas/fr/cards/Israel@Gen.25.26-Rev~vieux',
+    })
+  })
+
+  it('says the sentence of the card, with its reference', () => {
+    expect(meta('description')).toBe(
+      'Jacob, La bénédiction des douze fils : « Assemblez-vous, et je vous annoncerai ce qui vous arrivera. » (Gn 49.1). Patriarche, fils d’Isaac.'
+    )
   })
 })

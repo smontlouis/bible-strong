@@ -5,6 +5,7 @@ import AtlasCards from './AtlasCards'
 import AtlasMap from './AtlasMap'
 import { AtlasPicture, AtlasStrip, AtlasTileLink } from './AtlasParts'
 import {
+  buildAtlasCardPath,
   buildAtlasEntityPath,
   buildAtlasFamilyPath,
   buildAtlasPath,
@@ -124,7 +125,16 @@ export default function AtlasEntityPage({ page }: { page: AtlasEntityPageData })
 
         {page.cards.length > 0 && (
           <section className="atlas-entity__section atlas-entity__section--wide">
-            <h2 className="atlas-heading">{messages.cards}</h2>
+            <div className="atlas-entity__cards-head">
+              <h2 className="atlas-heading">{messages.cards}</h2>
+              <a
+                className="resource-link"
+                href={buildAtlasCardPath(language, page.cards[0].id)}
+                hrefLang={language}
+              >
+                {messages.allCards}
+              </a>
+            </div>
             <AtlasCards cards={page.cards} language={language} />
           </section>
         )}

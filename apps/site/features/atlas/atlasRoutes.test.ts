@@ -3,8 +3,10 @@ import { entityClayUrl, parseAtlasPortraitCatalog } from './atlasPortraits'
 import { ATLAS_HOLY_LAND_VIEW, ATLAS_MAP_WIDTH, projectAtlasPlace } from './atlasProjection'
 import {
   atlasFamilyOf,
+  buildAtlasCardPath,
   buildAtlasEntityPath,
   buildAtlasRoutePath,
+  parseAtlasCardId,
   parseAtlasRoute,
 } from './atlasRoutes'
 
@@ -109,5 +111,17 @@ describe('atlas map', () => {
     expect(y).toBeLessThan(ATLAS_HOLY_LAND_VIEW.y + ATLAS_HOLY_LAND_VIEW.height)
     expect(projectAtlasPlace(22, 77)).toBeUndefined()
     expect(ATLAS_MAP_WIDTH).toBe(3901)
+  })
+
+  it('gives a card an address of its own, life stage included', () => {
+    expect(buildAtlasCardPath('fr', 'Israel@Gen.25.26-Rev~vieux')).toBe(
+      '/atlas/fr/cards/Israel@Gen.25.26-Rev~vieux'
+    )
+    expect(buildAtlasCardPath('en', "Ba'al@Num.22.41-Rom")).toBe(
+      "/atlas/en/cards/Ba'al@Num.22.41-Rom"
+    )
+    expect(parseAtlasCardId('Israel%40Gen.25.26-Rev~vieux')).toBe('Israel@Gen.25.26-Rev~vieux')
+    expect(parseAtlasCardId('booster')).toBeUndefined()
+    expect(parseAtlasCardId('%E0%A4%A')).toBeUndefined()
   })
 })

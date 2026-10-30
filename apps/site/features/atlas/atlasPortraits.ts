@@ -16,7 +16,7 @@ export const entityPortraitUrl = (
 
 /**
  * The PNG copy of an entity's own picture, a portrait or a clay figure, which a share image can
- * draw: its renderer reads no WebP. Stages have no such copy.
+ * draw: its renderer reads no WebP. A stage has one too, under its own hash.
  */
 export const entitySharePicture = (picture: string): string =>
   picture.startsWith(ENTITY_PORTRAIT_BASE_URL)

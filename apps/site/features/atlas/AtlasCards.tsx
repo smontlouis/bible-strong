@@ -7,7 +7,7 @@ import { CARD_FAMILY_LABELS, type AtlasCardView } from './atlasCardCatalog'
 // it turns over. The motion follows the springs of the cards prototype (after pokemon-cards-css
 // by Simon Goellner).
 
-const WORDS = {
+export const CARD_WORDS = {
   fr: {
     open: 'Ouvrir la carte',
     flip: 'Retourner',
@@ -34,11 +34,17 @@ const WORDS = {
 
 // ---------- Motion ----------
 
-type Spring = { x: number; v: number; t: number; k: number; d: number }
-const spring = (value: number, k: number, d: number): Spring => ({ x: value, v: 0, t: value, k, d })
+export type Spring = { x: number; v: number; t: number; k: number; d: number }
+export const spring = (value: number, k: number, d: number): Spring => ({
+  x: value,
+  v: 0,
+  t: value,
+  k,
+  d,
+})
 
 /** Moves a spring one frame; false once it has come to rest. */
-const step = (s: Spring, still: boolean) => {
+export const step = (s: Spring, still: boolean) => {
   if (still) {
     s.x = s.t
     s.v = 0
@@ -54,19 +60,24 @@ const step = (s: Spring, still: boolean) => {
   return true
 }
 
-const clamp = (value: number, min = 0, max = 100) => Math.min(Math.max(value, min), max)
-const adjust = (value: number, fromMin: number, fromMax: number, toMin: number, toMax: number) =>
-  toMin + ((toMax - toMin) * (value - fromMin)) / (fromMax - fromMin)
+export const clamp = (value: number, min = 0, max = 100) => Math.min(Math.max(value, min), max)
+export const adjust = (
+  value: number,
+  fromMin: number,
+  fromMax: number,
+  toMin: number,
+  toMax: number
+) => toMin + ((toMax - toMin) * (value - fromMin)) / (fromMax - fromMin)
 
 // At rest the foil stays lit, as from a little above; the pointer only moves the light and adds glare.
-const REST = { x: 50, y: 32, shine: 0.75 }
+export const REST = { x: 50, y: 32, shine: 0.75 }
 
-type Springs = Record<
+export type Springs = Record<
   'rx' | 'ry' | 'gx' | 'gy' | 'go' | 'gl' | 'bx' | 'by' | 'tx' | 'ty' | 'sc' | 'spin' | 'flip',
   Spring
 >
 
-const restingSprings = (): Springs => ({
+export const restingSprings = (): Springs => ({
   rx: spring(0, 0.08, 0.26),
   ry: spring(0, 0.08, 0.26),
   gx: spring(REST.x, 0.08, 0.26),
@@ -83,7 +94,7 @@ const restingSprings = (): Springs => ({
 })
 
 /** Writes the springs of a card into the CSS variables its layers read. */
-const paint = (element: HTMLElement, s: Springs) => {
+export const paint = (element: HTMLElement, s: Springs) => {
   const style = element.style
   const gx = s.gx.x
   const gy = s.gy.x
@@ -112,7 +123,7 @@ const paint = (element: HTMLElement, s: Springs) => {
 
 // The textures of the foils are drawn once in the browser: no image is borrowed.
 let texturesDrawn = false
-const drawTextures = () => {
+export const drawTextures = () => {
   if (texturesDrawn) return
   texturesDrawn = true
   const canvas = (size: number) => {
@@ -163,21 +174,51 @@ const drawTextures = () => {
 // « ch. » reads the same in both languages.
 const WORDS_CH = 'ch.'
 
-function CardFront({ card }: { card: AtlasCardView }) {
+/** The classes of a card: its family's palette, its frame and its foil. */
+export const cardClasses = (card: AtlasCardView) =>
+  [
+    'ac-card',
+    `ac-fam-${card.family}`,
+    card.stages ? 'ac-stages' : '',
+    `ac-fin-${card.finish}`,
+    card.fadeTop ? 'ac-cut-top' : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+// A card in a grid is drawn about 110 to 220 pixels wide: the browser picks the copy it needs.
+// On a phone it is told less than the card's width, so that it takes the small copies even at
+// three pixels per point: a quarter of the weight, a little softer, over hundreds of cards.
+const GRID_SIZES = '(max-width: 640px) 85px, 220px'
+const gridSource = (url: string, small: string) =>
+  `${url.replace('/w768.webp', `/${small}.webp`)} ${small.slice(1)}w, ${url} 768w`
+
+export function CardFront({ card, grid = false }: { card: AtlasCardView; grid?: boolean }) {
   return (
     <>
       <div className="ac-fr-bg" />
-      <div className="ac-fr-shine" />
+      {/* A card in a grid is still: its foil is not drawn. */}
+      {!grid && <div className="ac-fr-shine" />}
       <div className="ac-art">
         <div className="ac-layer ac-plates">
           {card.scene ? (
-            <img className="ac-scene" src={card.picture} alt="" loading="lazy" draggable={false} />
+            <img
+              className="ac-scene"
+              src={card.picture}
+              {...(grid ? { srcSet: gridSource(card.picture, 'w256'), sizes: GRID_SIZES } : {})}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              draggable={false}
+            />
           ) : card.backdrop ? (
             <img
               className="ac-decor"
               src={card.backdrop}
+              {...(grid ? { srcSet: gridSource(card.backdrop, 'w384'), sizes: GRID_SIZES } : {})}
               alt=""
               loading="lazy"
+              decoding="async"
               draggable={false}
               onLoad={event => event.currentTarget.classList.add('is-loaded')}
               // Loaded before the page came to life, it fired its load with no one listening.
@@ -187,16 +228,29 @@ function CardFront({ card }: { card: AtlasCardView }) {
             />
           ) : null}
         </div>
-        <div className="ac-layer ac-shine-art" />
+        {!grid && <div className="ac-layer ac-shine-art" />}
         <div className="ac-layer ac-depth-name" lang={card.script} aria-hidden="true">
           <span>{card.original}</span>
         </div>
         <div className="ac-layer ac-subjects">
-          {!card.scene && <img src={card.picture} alt="" loading="lazy" draggable={false} />}
+          {!card.scene && (
+            <img
+              src={card.picture}
+              {...(grid ? { srcSet: gridSource(card.picture, 'w256'), sizes: GRID_SIZES } : {})}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              draggable={false}
+            />
+          )}
         </div>
       </div>
       <div className="ac-ribbon" />
-      <h3 className="ac-name">{card.name}</h3>
+      {grid ? (
+        <span className="ac-name">{card.name}</span>
+      ) : (
+        <h3 className="ac-name">{card.name}</h3>
+      )}
       <span className="ac-subtitle">{card.title}</span>
       <div className="ac-typeline">
         <span>{card.typeLine}</span>
@@ -218,12 +272,12 @@ function CardFront({ card }: { card: AtlasCardView }) {
         </span>
       </div>
       <div className="ac-ring" />
-      <div className="ac-glare" />
+      {!grid && <div className="ac-glare" />}
     </>
   )
 }
 
-function CardBack({
+export function CardBack({
   card,
   language,
   rank,
@@ -234,7 +288,7 @@ function CardBack({
   rank: number
   total: number
 }) {
-  const words = WORDS[language]
+  const words = CARD_WORDS[language]
   return (
     <>
       <div className="ac-fr-bg" />
@@ -308,7 +362,7 @@ export default function AtlasCards({
   cards: AtlasCardView[]
   language: ResourceLanguage
 }) {
-  const words = WORDS[language]
+  const words = CARD_WORDS[language]
   const states = useRef(new Map<string, CardState>())
   const frame = useRef(0)
   const activeRef = useRef<CardState>(undefined)
@@ -542,18 +596,7 @@ export default function AtlasCards({
       <div className="ac-deck">
         {cards.map((card, index) => (
           <div key={card.id} className="ac-slot">
-            <div
-              ref={register(card)}
-              className={[
-                'ac-card',
-                `ac-fam-${card.family}`,
-                card.stages ? 'ac-stages' : '',
-                `ac-fin-${card.finish}`,
-                card.fadeTop ? 'ac-cut-top' : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
+            <div ref={register(card)} className={cardClasses(card)}>
               <div className="ac-translater">
                 <button
                   type="button"

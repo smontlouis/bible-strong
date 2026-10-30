@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { atlasCardsOf, parseCardCatalog } from './atlasCardCatalog'
+import {
+  atlasCardsOf,
+  atlasGalleryCards,
+  firstMentionOf,
+  parseCardCatalog,
+} from './atlasCardCatalog'
 import type { AtlasPortraitCatalog } from './atlasPortraits'
 
 const text = (name: string) => ({
@@ -99,5 +104,56 @@ describe('atlas cards', () => {
       foot: "Les rois d'Israël uni",
       sentence: 'Tu marches contre moi…',
     })
+  })
+
+  it('lays every card out in the order of the Bible, a stage behind its base card', () => {
+    const gallery = parseCardCatalog({
+      version: 1,
+      cards: [
+        card('David@Rut.4.17-Rev~roi', 'roi', { stageIndex: 1 }),
+        card('David@Rut.4.17-Rev', null),
+        card('Adam@Gen.2.19-Jud', null, {
+          entity: 'Adam@Gen.2.19-Jud',
+          era: 'Origines',
+          text: { fr: { ...text('Adam'), roles: ['Patriarche'] }, en: text('Adam') },
+        }),
+      ],
+      backdrops: { paturages: { hash: 'cccccccc' } },
+    })
+    const cards = atlasGalleryCards(
+      gallery!,
+      {
+        ...portraits,
+        entities: {
+          ...portraits.entities,
+          'Adam@Gen.2.19-Jud': { hash: 'dddddddd', roles: [], stages: [] },
+        },
+        series: [
+          { id: 'kings', title: { fr: 'Rois', en: 'Kings' }, members: ['David@Rut.4.17-Rev'] },
+        ],
+      },
+      'fr',
+      'https://example.test'
+    )
+    expect(cards.map(item => [item.id, item.order])).toEqual([
+      ['Adam@Gen.2.19-Jud', 0],
+      ['David@Rut.4.17-Rev', 1],
+      ['David@Rut.4.17-Rev~roi', 2],
+    ])
+    expect(cards[0]).toMatchObject({ era: 'Juges et royauté', eraRank: 0, roles: ['Patriarche'] })
+    expect(cards[2]).toMatchObject({
+      stage: 'roi',
+      seriesIds: ['kings'],
+      firstRef: 'Rut.4.17',
+      lineRef: '1Sa.17.45',
+      picture:
+        'https://media.bible-strong.app/entity-images/David%40Rut.4.17-Rev/bbbbbbbb/w768.webp',
+    })
+  })
+
+  it('reads the first mention a unique name opens on', () => {
+    expect(firstMentionOf('Israel@Gen.25.26-Rev')).toBe('Gen.25.26')
+    expect(firstMentionOf('Abdon@Jdg.12.13-')).toBe('Jdg.12.13')
+    expect(firstMentionOf('Nobody')).toBeUndefined()
   })
 })

@@ -36,6 +36,25 @@ export const buildAtlasFamilyPath = (language: ResourceLanguage, family: AtlasFa
 export const buildAtlasEntityPath = (language: ResourceLanguage, uniqueName: string): string =>
   `${buildAtlasPath(language)}/${atlasEntitySegment(uniqueName)}`
 
+/** The gallery of every card (ADR-0090), and one card opened over it. */
+export const buildAtlasCardsPath = (language: ResourceLanguage): string =>
+  `${buildAtlasPath(language)}/cards`
+
+/** A card's id is its entity's unique name, followed by `~stage` for a life stage. */
+export const buildAtlasCardPath = (language: ResourceLanguage, id: string): string =>
+  `${buildAtlasCardsPath(language)}/${atlasEntitySegment(id)}`
+
+/** The id of a card in its address; `undefined` when it cannot be one. */
+export const parseAtlasCardId = (segment: string | undefined): string | undefined => {
+  if (!segment) return undefined
+  try {
+    const id = decodeURIComponent(segment)
+    return id.includes('@') ? id : undefined
+  } catch {
+    return undefined
+  }
+}
+
 export type AtlasRoute =
   | { language: ResourceLanguage; kind: 'home' }
   | { language: ResourceLanguage; kind: 'family'; family: AtlasFamily }

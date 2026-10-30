@@ -13,6 +13,7 @@ import {
   entityCardCatalog,
   ENTITY_BACKDROP_QUALITY,
   ENTITY_BACKDROP_WIDTH,
+  ENTITY_BACKDROP_WIDTHS,
   ENTITY_CARD_CATALOG_KEY,
   type EntityCardCatalog,
   type SourceEntityCard
@@ -51,7 +52,8 @@ portrait by its identity: the portraits must be published first.
 
   yarn resources:entities:cards build --cards <file> --backdrops <folder> [--portraits <file>] [--output <dir>]
       Checks every card against the portraits' catalog (default: the one at ${ENTITY_IMAGE_HOST}),
-      writes the ${ENTITY_BACKDROP_WIDTH}-pixel WebP copy of every backdrop a card names, and the catalog
+      writes the WebP copies of every backdrop a card names (${ENTITY_BACKDROP_WIDTHS.join(" and ")} pixels
+      wide: an enlarged card, a card in a grid), and the catalog
       to publish. Writes nothing if a card lacks a reviewed sentence, a language, a portrait or a
       backdrop. Needs cwebp (brew install webp).
   yarn resources:entities:cards upload [--output <dir>] [--bucket <name>] [--dry-run]
@@ -72,8 +74,11 @@ type BuiltBackdrop = { key: string; hash: string; source: string };
 
 const builtPath = (output: string) => path.join(output, "built.json");
 const catalogPath = (output: string) => path.join(output, "catalog.json");
-const copyPath = (output: string, hash: string) =>
-  path.join(output, "backdrops", hash, `w${ENTITY_BACKDROP_WIDTH}.webp`);
+const copyPath = (
+  output: string,
+  hash: string,
+  width: number = ENTITY_BACKDROP_WIDTH
+) => path.join(output, "backdrops", hash, `w${width}.webp`);
 
 const readPortraits = async (file?: string): Promise<EntityImageCatalog> => {
   if (file) return JSON.parse(await readFile(file, "utf8"));
@@ -103,15 +108,16 @@ const buildCards = async (args: string[]) => {
     const source = path.resolve(folder, `${key}.png`);
     if (!existsSync(source)) continue;
     const hash = entityBackdropHash(await readFile(source));
-    const target = copyPath(output, hash);
-    if (!existsSync(target) || (await stat(target)).size === 0) {
+    for (const width of ENTITY_BACKDROP_WIDTHS) {
+      const target = copyPath(output, hash, width);
+      if (existsSync(target) && (await stat(target)).size > 0) continue;
       await mkdir(path.dirname(target), { recursive: true });
       await execFileAsync("cwebp", [
         "-quiet",
         "-q",
         String(ENTITY_BACKDROP_QUALITY),
         "-resize",
-        String(ENTITY_BACKDROP_WIDTH),
+        String(width),
         "0",
         source,
         "-o",
@@ -132,7 +138,7 @@ const buildCards = async (args: string[]) => {
   await writeFile(catalogPath(output), `${JSON.stringify(catalog)}\n`);
   const stages = catalog.cards.filter((card) => card.stage).length;
   console.log(
-    `Built ${written} backdrop copies; the catalog names ${catalog.cards.length} cards (${stages} life stages) and ${built.length} backdrops.`
+    `Built ${written} backdrop copies (${ENTITY_BACKDROP_WIDTHS.map((width) => `w${width}`).join(", ")}); the catalog names ${catalog.cards.length} cards (${stages} life stages) and ${built.length} backdrops.`
   );
 };
 
@@ -154,7 +160,8 @@ const report = async (args: string[]) => {
   const { built, catalog } = await readBuilt(output);
   let bytes = 0;
   for (const backdrop of built)
-    bytes += (await stat(copyPath(output, backdrop.hash))).size;
+    for (const width of ENTITY_BACKDROP_WIDTHS)
+      bytes += (await stat(copyPath(output, backdrop.hash, width))).size;
   const families = new Map<string, number>();
   for (const card of catalog.cards)
     families.set(card.family, (families.get(card.family) ?? 0) + 1);
@@ -201,15 +208,19 @@ const uploadCards = async (args: string[]) => {
 
   const copies: MediaUpload[] = [];
   for (const backdrop of built) {
-    const file = copyPath(output, backdrop.hash);
-    if (!existsSync(file))
-      throw new Error(`ENTITY_BACKDROP_COPY_MISSING: ${backdrop.key}`);
-    copies.push({
-      key: entityBackdropKey(backdrop.key, backdrop.hash),
-      file,
-      sha256: sha256Hex(await readFile(file)),
-      url: entityBackdropUrl(backdrop.key, backdrop.hash)
-    });
+    for (const width of ENTITY_BACKDROP_WIDTHS) {
+      const file = copyPath(output, backdrop.hash, width);
+      if (!existsSync(file))
+        throw new Error(
+          `ENTITY_BACKDROP_COPY_MISSING: ${backdrop.key} w${width}, run build again`
+        );
+      copies.push({
+        key: entityBackdropKey(backdrop.key, backdrop.hash, width),
+        file,
+        sha256: sha256Hex(await readFile(file)),
+        url: entityBackdropUrl(backdrop.key, backdrop.hash, width)
+      });
+    }
   }
   const uploads = await pendingUploads(copies, ledgerPath);
 

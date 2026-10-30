@@ -42,12 +42,15 @@ import { Route as StrongCodeRouteImport } from './routes/strong.$code'
 import { Route as StudiesIdRouteImport } from './routes/studies.$id'
 import { Route as TimelineLanguageRouteImport } from './routes/timeline.$language'
 import { Route as AtlasLanguageNameRouteImport } from './routes/atlas.$language_.$name'
+import { Route as AtlasLanguageCardsRouteImport } from './routes/atlas.$language_.cards'
 import { Route as CommentaryLanguageResourceRouteImport } from './routes/commentary.$language_.$resource'
 import { Route as DictionaryLanguageWorkRouteImport } from './routes/dictionary.$language_.$work'
 import { Route as FrStudiesIdRouteImport } from './routes/fr.studies.$id'
 import { Route as NaveLanguageTopicRouteImport } from './routes/nave.$language_.$topic'
 import { Route as StrongLanguageCodeRouteImport } from './routes/strong.$language.$code'
 import { Route as TimelineLanguageSlugRouteImport } from './routes/timeline.$language_.$slug'
+import { Route as AtlasLanguageCardsIndexRouteImport } from './routes/atlas.$language_.cards.index'
+import { Route as AtlasLanguageCardsCardRouteImport } from './routes/atlas.$language_.cards.$card'
 import { Route as DictionaryLanguageWorkLetterRouteImport } from './routes/dictionary.$language_.$work_.$letter'
 import { Route as DictionaryLanguageTermSlugRouteImport } from './routes/dictionary.$language_.term.$slug'
 import { Route as NaveLanguageIndexLetterRouteImport } from './routes/nave.$language_.index.$letter'
@@ -228,6 +231,11 @@ const AtlasLanguageNameRoute = AtlasLanguageNameRouteImport.update({
   path: '/atlas/$language/$name',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AtlasLanguageCardsRoute = AtlasLanguageCardsRouteImport.update({
+  id: '/atlas/$language_/cards',
+  path: '/atlas/$language/cards',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CommentaryLanguageResourceRoute =
   CommentaryLanguageResourceRouteImport.update({
     id: '/commentary/$language_/$resource',
@@ -258,6 +266,16 @@ const TimelineLanguageSlugRoute = TimelineLanguageSlugRouteImport.update({
   id: '/timeline/$language_/$slug',
   path: '/timeline/$language/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AtlasLanguageCardsIndexRoute = AtlasLanguageCardsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AtlasLanguageCardsRoute,
+} as any)
+const AtlasLanguageCardsCardRoute = AtlasLanguageCardsCardRouteImport.update({
+  id: '/$card',
+  path: '/$card',
+  getParentRoute: () => AtlasLanguageCardsRoute,
 } as any)
 const DictionaryLanguageWorkLetterRoute =
   DictionaryLanguageWorkLetterRouteImport.update({
@@ -353,16 +371,19 @@ export interface FileRoutesByFullPath {
   '/bible/': typeof BibleIndexRoute
   '/fr/': typeof FrIndexRoute
   '/atlas/$language/$name': typeof AtlasLanguageNameRoute
+  '/atlas/$language/cards': typeof AtlasLanguageCardsRouteWithChildren
   '/commentary/$language/$resource': typeof CommentaryLanguageResourceRoute
   '/dictionary/$language/$work': typeof DictionaryLanguageWorkRoute
   '/fr/studies/$id': typeof FrStudiesIdRoute
   '/nave/$language/$topic': typeof NaveLanguageTopicRoute
   '/strong/$language/$code': typeof StrongLanguageCodeRoute
   '/timeline/$language/$slug': typeof TimelineLanguageSlugRoute
+  '/atlas/$language/cards/$card': typeof AtlasLanguageCardsCardRoute
   '/dictionary/$language/$work/$letter': typeof DictionaryLanguageWorkLetterRoute
   '/dictionary/$language/term/$slug': typeof DictionaryLanguageTermSlugRoute
   '/strong/$language/$code/concordance': typeof StrongLanguageCodeConcordanceRoute
   '/strong/$language/$lexicon/$letter': typeof StrongLanguageLexiconLetterRoute
+  '/atlas/$language/cards/': typeof AtlasLanguageCardsIndexRoute
   '/nave/$language/index/$letter': typeof NaveLanguageIndexLetterRoute
   '/commentary/$language/$resource/$book/$chapter': typeof CommentaryLanguageResourceBookChapterRoute
   '/dictionary/$language/$work/$entryId/$slug': typeof DictionaryLanguageWorkEntryIdSlugRoute
@@ -410,10 +431,12 @@ export interface FileRoutesByTo {
   '/nave/$language/$topic': typeof NaveLanguageTopicRoute
   '/strong/$language/$code': typeof StrongLanguageCodeRoute
   '/timeline/$language/$slug': typeof TimelineLanguageSlugRoute
+  '/atlas/$language/cards/$card': typeof AtlasLanguageCardsCardRoute
   '/dictionary/$language/$work/$letter': typeof DictionaryLanguageWorkLetterRoute
   '/dictionary/$language/term/$slug': typeof DictionaryLanguageTermSlugRoute
   '/strong/$language/$code/concordance': typeof StrongLanguageCodeConcordanceRoute
   '/strong/$language/$lexicon/$letter': typeof StrongLanguageLexiconLetterRoute
+  '/atlas/$language/cards': typeof AtlasLanguageCardsIndexRoute
   '/nave/$language/index/$letter': typeof NaveLanguageIndexLetterRoute
   '/commentary/$language/$resource/$book/$chapter': typeof CommentaryLanguageResourceBookChapterRoute
   '/dictionary/$language/$work/$entryId/$slug': typeof DictionaryLanguageWorkEntryIdSlugRoute
@@ -456,16 +479,19 @@ export interface FileRoutesById {
   '/bible/': typeof BibleIndexRoute
   '/fr/': typeof FrIndexRoute
   '/atlas/$language_/$name': typeof AtlasLanguageNameRoute
+  '/atlas/$language_/cards': typeof AtlasLanguageCardsRouteWithChildren
   '/commentary/$language_/$resource': typeof CommentaryLanguageResourceRoute
   '/dictionary/$language_/$work': typeof DictionaryLanguageWorkRoute
   '/fr/studies/$id': typeof FrStudiesIdRoute
   '/nave/$language_/$topic': typeof NaveLanguageTopicRoute
   '/strong/$language/$code': typeof StrongLanguageCodeRoute
   '/timeline/$language_/$slug': typeof TimelineLanguageSlugRoute
+  '/atlas/$language_/cards/$card': typeof AtlasLanguageCardsCardRoute
   '/dictionary/$language_/$work_/$letter': typeof DictionaryLanguageWorkLetterRoute
   '/dictionary/$language_/term/$slug': typeof DictionaryLanguageTermSlugRoute
   '/strong/$language/$code_/concordance': typeof StrongLanguageCodeConcordanceRoute
   '/strong/$language/$lexicon/$letter': typeof StrongLanguageLexiconLetterRoute
+  '/atlas/$language_/cards/': typeof AtlasLanguageCardsIndexRoute
   '/nave/$language_/index/$letter': typeof NaveLanguageIndexLetterRoute
   '/commentary/$language_/$resource_/$book/$chapter': typeof CommentaryLanguageResourceBookChapterRoute
   '/dictionary/$language_/$work_/$entryId/$slug': typeof DictionaryLanguageWorkEntryIdSlugRoute
@@ -509,16 +535,19 @@ export interface FileRouteTypes {
     | '/bible/'
     | '/fr/'
     | '/atlas/$language/$name'
+    | '/atlas/$language/cards'
     | '/commentary/$language/$resource'
     | '/dictionary/$language/$work'
     | '/fr/studies/$id'
     | '/nave/$language/$topic'
     | '/strong/$language/$code'
     | '/timeline/$language/$slug'
+    | '/atlas/$language/cards/$card'
     | '/dictionary/$language/$work/$letter'
     | '/dictionary/$language/term/$slug'
     | '/strong/$language/$code/concordance'
     | '/strong/$language/$lexicon/$letter'
+    | '/atlas/$language/cards/'
     | '/nave/$language/index/$letter'
     | '/commentary/$language/$resource/$book/$chapter'
     | '/dictionary/$language/$work/$entryId/$slug'
@@ -566,10 +595,12 @@ export interface FileRouteTypes {
     | '/nave/$language/$topic'
     | '/strong/$language/$code'
     | '/timeline/$language/$slug'
+    | '/atlas/$language/cards/$card'
     | '/dictionary/$language/$work/$letter'
     | '/dictionary/$language/term/$slug'
     | '/strong/$language/$code/concordance'
     | '/strong/$language/$lexicon/$letter'
+    | '/atlas/$language/cards'
     | '/nave/$language/index/$letter'
     | '/commentary/$language/$resource/$book/$chapter'
     | '/dictionary/$language/$work/$entryId/$slug'
@@ -611,16 +642,19 @@ export interface FileRouteTypes {
     | '/bible/'
     | '/fr/'
     | '/atlas/$language_/$name'
+    | '/atlas/$language_/cards'
     | '/commentary/$language_/$resource'
     | '/dictionary/$language_/$work'
     | '/fr/studies/$id'
     | '/nave/$language_/$topic'
     | '/strong/$language/$code'
     | '/timeline/$language_/$slug'
+    | '/atlas/$language_/cards/$card'
     | '/dictionary/$language_/$work_/$letter'
     | '/dictionary/$language_/term/$slug'
     | '/strong/$language/$code_/concordance'
     | '/strong/$language/$lexicon/$letter'
+    | '/atlas/$language_/cards/'
     | '/nave/$language_/index/$letter'
     | '/commentary/$language_/$resource_/$book/$chapter'
     | '/dictionary/$language_/$work_/$entryId/$slug'
@@ -663,6 +697,7 @@ export interface RootRouteChildren {
   BibleIndexRoute: typeof BibleIndexRoute
   FrIndexRoute: typeof FrIndexRoute
   AtlasLanguageNameRoute: typeof AtlasLanguageNameRoute
+  AtlasLanguageCardsRoute: typeof AtlasLanguageCardsRouteWithChildren
   CommentaryLanguageResourceRoute: typeof CommentaryLanguageResourceRoute
   DictionaryLanguageWorkRoute: typeof DictionaryLanguageWorkRoute
   FrStudiesIdRoute: typeof FrStudiesIdRoute
@@ -914,6 +949,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtlasLanguageNameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/atlas/$language_/cards': {
+      id: '/atlas/$language_/cards'
+      path: '/atlas/$language/cards'
+      fullPath: '/atlas/$language/cards'
+      preLoaderRoute: typeof AtlasLanguageCardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/commentary/$language_/$resource': {
       id: '/commentary/$language_/$resource'
       path: '/commentary/$language/$resource'
@@ -955,6 +997,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/timeline/$language/$slug'
       preLoaderRoute: typeof TimelineLanguageSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/atlas/$language_/cards/': {
+      id: '/atlas/$language_/cards/'
+      path: '/'
+      fullPath: '/atlas/$language/cards/'
+      preLoaderRoute: typeof AtlasLanguageCardsIndexRouteImport
+      parentRoute: typeof AtlasLanguageCardsRoute
+    }
+    '/atlas/$language_/cards/$card': {
+      id: '/atlas/$language_/cards/$card'
+      path: '/$card'
+      fullPath: '/atlas/$language/cards/$card'
+      preLoaderRoute: typeof AtlasLanguageCardsCardRouteImport
+      parentRoute: typeof AtlasLanguageCardsRoute
     }
     '/dictionary/$language_/$work_/$letter': {
       id: '/dictionary/$language_/$work_/$letter'
@@ -1029,6 +1085,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AtlasLanguageCardsRouteChildren {
+  AtlasLanguageCardsCardRoute: typeof AtlasLanguageCardsCardRoute
+  AtlasLanguageCardsIndexRoute: typeof AtlasLanguageCardsIndexRoute
+}
+
+const AtlasLanguageCardsRouteChildren: AtlasLanguageCardsRouteChildren = {
+  AtlasLanguageCardsCardRoute: AtlasLanguageCardsCardRoute,
+  AtlasLanguageCardsIndexRoute: AtlasLanguageCardsIndexRoute,
+}
+
+const AtlasLanguageCardsRouteWithChildren =
+  AtlasLanguageCardsRoute._addFileChildren(AtlasLanguageCardsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DataDeletionRoute: DataDeletionRoute,
@@ -1064,6 +1133,7 @@ const rootRouteChildren: RootRouteChildren = {
   BibleIndexRoute: BibleIndexRoute,
   FrIndexRoute: FrIndexRoute,
   AtlasLanguageNameRoute: AtlasLanguageNameRoute,
+  AtlasLanguageCardsRoute: AtlasLanguageCardsRouteWithChildren,
   CommentaryLanguageResourceRoute: CommentaryLanguageResourceRoute,
   DictionaryLanguageWorkRoute: DictionaryLanguageWorkRoute,
   FrStudiesIdRoute: FrStudiesIdRoute,

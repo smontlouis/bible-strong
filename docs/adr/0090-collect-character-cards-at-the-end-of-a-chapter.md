@@ -97,7 +97,8 @@ publishes them. The published catalog is `{ version: 1, cards, backdrops }`:
   it from the family and the life stages;
 - `backdrops` maps each key a card names to the hash of its painting, served at
   `entity-cards/backdrops/<key>/<hash>/w768.webp`, 768 by 1152 pixels, never changed under its
-  address.
+  address; since ADR-0092 a 384-pixel copy for a grid of cards sits beside it, `w384.webp`, under
+  the same hash.
 
 The command writes nothing while one card lacks a reviewed sentence, a language, a sentence of at
 most 120 characters, a portrait on the media host or a painted backdrop. Before it puts the

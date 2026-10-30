@@ -753,3 +753,26 @@ a.atlas-passage:hover {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 4;
 }
+
+/* ---------- The way to the cards ---------- */
+
+.atlas-cards-entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 32px;
+}
+
+.atlas-entity__cards-head {
+  display: flex;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 20px;
+}
+
+.atlas-entity__cards-head .resource-link {
+  font-weight: 600;
+}

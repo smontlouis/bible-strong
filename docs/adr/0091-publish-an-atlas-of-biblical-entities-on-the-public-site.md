@@ -36,6 +36,7 @@ route for `/atlas/`, which it does not have yet.
 | `/atlas/:language` | the entry of the atlas: its families, the painted characters by series, the map of places |
 | `/atlas/:language/people`, `/places`, `/groups`, `/beings`, `/others` | every entity of a family, the painted ones first; `beings` are God, angels, Satan and the gods of the nations, `others` the times, titles, languages, stars and words |
 | `/atlas/:language/:uniqueName` | one entity |
+| `/atlas/:language/cards` | every card, and `/cards/:id` one card opened over them (ADR-0092) |
 
 An entity's address is its `uniqueName` (ADR-0016), percent-encoded where it must be: six names
 hold an apostrophe. Every unique name holds `@`, so it never meets the words of the other routes.
