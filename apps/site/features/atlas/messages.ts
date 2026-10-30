@@ -8,7 +8,7 @@ export const ATLAS_MESSAGES = {
     homeEyebrow: 'Personnages, lieux et peuples',
     homeTitle: 'L’Atlas de la Bible',
     homeLead:
-      '{entities} personnages, lieux, peuples et êtres de la Bible, chacun avec les chapitres qui le nomment. Les grandes figures sont peintes.',
+      '{entities} personnages, lieux, peuples et êtres de la Bible, chacun avec les chapitres qui le nomment. Les grandes figures sont illustrées.',
     homeHeadTitle: 'Atlas de la Bible – personnages, lieux et peuples bibliques',
     homeHeadDescription:
       'Découvrez {entities} personnages, lieux, peuples et êtres de la Bible : portraits, étapes de vie, relations, carte des lieux et passages bibliques.',
@@ -21,7 +21,7 @@ export const ATLAS_MESSAGES = {
     } satisfies Record<AtlasFamily, string>,
     familyLeads: {
       people:
-        'Les hommes et les femmes de la Bible, des patriarches aux apôtres. Les plus nommés sont peints.',
+        'Les hommes et les femmes de la Bible, des patriarches aux apôtres. Les plus nommés sont illustrés.',
       places: 'Les villes, les montagnes, les fleuves et les pays de l’histoire biblique.',
       groups: 'Les peuples, les tribus et les familles qui traversent le récit.',
       beings: 'Dieu, les anges, Satan et les dieux des nations, que la Bible nomme.',
@@ -32,7 +32,7 @@ export const ATLAS_MESSAGES = {
       people:
         '{count} personnages de la Bible, avec leurs portraits, leurs liens de famille et les passages qui les nomment.',
       places:
-        '{count} lieux de la Bible sur une carte, avec leurs peintures et les passages qui les nomment.',
+        '{count} lieux de la Bible sur une carte, avec leurs illustrations et les passages qui les nomment.',
       groups: '{count} peuples, tribus et familles de la Bible, avec les passages qui les nomment.',
       beings:
         'Dieu, les anges, Satan et les dieux des nations : {count} êtres que la Bible nomme, avec leurs passages.',
@@ -43,7 +43,7 @@ export const ATLAS_MESSAGES = {
     seeAll: 'Tout voir',
     series: 'Les séries',
     seriesLead: 'Les grandes figures, dans l’ordre de l’histoire.',
-    painted: 'Les figures peintes',
+    painted: 'Les figures illustrées',
     mostNamed: 'Les plus nommés',
     map: 'La carte des lieux',
     mapLead:
@@ -83,7 +83,7 @@ export const ATLAS_MESSAGES = {
     cardsName: 'Cartes de la Bible',
     cardsTitle: 'Les cartes de la Bible',
     cardsLead:
-      '{cards} cartes peintes : une pour chaque grande figure de la Bible et pour chacune de ses étapes de vie. Touchez une carte pour l’ouvrir, encore une fois pour la retourner.',
+      '{cards} cartes illustrées : une pour chaque grande figure de la Bible et pour chacune de ses étapes de vie. Touchez une carte pour l’ouvrir, encore une fois pour la retourner.',
     cardsHeadTitle: 'Les cartes des personnages de la Bible – Atlas de la Bible',
     cardsHeadDescription:
       '{cards} cartes illustrées des personnages de la Bible : leur nom en hébreu ou en grec, une phrase de la Bible, leurs étapes de vie. Triez-les, filtrez-les, ouvrez un paquet.',
@@ -110,7 +110,7 @@ export const ATLAS_MESSAGES = {
     homeEyebrow: 'People, places and nations',
     homeTitle: 'The Bible Atlas',
     homeLead:
-      '{entities} people, places, nations and beings of the Bible, each with the chapters that name it. The great figures are painted.',
+      '{entities} people, places, nations and beings of the Bible, each with the chapters that name it. The great figures are illustrated.',
     homeHeadTitle: 'Bible Atlas – people, places and nations of the Bible',
     homeHeadDescription:
       'Discover {entities} people, places, nations and beings of the Bible: portraits, life stages, relations, a map of places and Bible passages.',
@@ -123,7 +123,7 @@ export const ATLAS_MESSAGES = {
     } satisfies Record<AtlasFamily, string>,
     familyLeads: {
       people:
-        'The men and women of the Bible, from the patriarchs to the apostles. The most named are painted.',
+        'The men and women of the Bible, from the patriarchs to the apostles. The most named are illustrated.',
       places: 'The cities, mountains, rivers and lands of biblical history.',
       groups: 'The nations, tribes and families that run through the story.',
       beings: 'God, the angels, Satan and the gods of the nations, as the Bible names them.',
@@ -134,7 +134,7 @@ export const ATLAS_MESSAGES = {
       people:
         '{count} people of the Bible, with their portraits, their families and the passages that name them.',
       places:
-        '{count} places of the Bible on a map, with their paintings and the passages that name them.',
+        '{count} places of the Bible on a map, with their illustrations and the passages that name them.',
       groups:
         '{count} nations, tribes and families of the Bible, with the passages that name them.',
       beings:
@@ -146,7 +146,7 @@ export const ATLAS_MESSAGES = {
     seeAll: 'See all',
     series: 'The series',
     seriesLead: 'The great figures, in the order of the story.',
-    painted: 'The painted figures',
+    painted: 'The illustrated figures',
     mostNamed: 'The most named',
     map: 'The map of places',
     mapLead:
@@ -186,7 +186,7 @@ export const ATLAS_MESSAGES = {
     cardsName: 'Bible cards',
     cardsTitle: 'The cards of the Bible',
     cardsLead:
-      '{cards} painted cards: one for each great figure of the Bible and one for each of their life stages. Tap a card to open it, and once more to turn it over.',
+      '{cards} illustrated cards: one for each great figure of the Bible and one for each of their life stages. Tap a card to open it, and once more to turn it over.',
     cardsHeadTitle: 'Cards of the people of the Bible – Bible Atlas',
     cardsHeadDescription:
       '{cards} illustrated cards of the people of the Bible: their name in Hebrew or Greek, a sentence from the Bible, their life stages. Sort them, filter them, open a pack.',
