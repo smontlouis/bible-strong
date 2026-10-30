@@ -217,12 +217,16 @@ function HandCard({
           type="button"
           className="acb__tilt"
           aria-label={label}
+          data-card-id={card.id}
           {...handlers}
           onClick={event => onPress(event.currentTarget)}
         >
           <span className="acb__flipper">
             <span className="acb__face acb__face--back" aria-hidden="true">
-              <span className="acb__reverse" />
+              <span className="acb__reverse">
+                <img className="acb__mark" src="/images/bible-strong-mark.svg" alt="" />
+                <span className="acb__name">Bible Strong</span>
+              </span>
             </span>
             <span className="acb__face acb__face--front">
               <span className="ac-face ac-front">
@@ -252,7 +256,7 @@ function OpenPack({
   language: ResourceLanguage
   onAgain: () => void
   onOther: () => void
-  onOpenCard: (card: AtlasGalleryCard, place: Element) => void
+  onOpenCard: (card: AtlasGalleryCard, place: Element, among: AtlasGalleryCard[]) => void
 }) {
   const words = BOOSTER_WORDS[language]
   const [phase, setPhase] = useState<Phase>('sealed')
@@ -351,8 +355,14 @@ function OpenPack({
               }
               onPress={place => {
                 if (stacked) return
-                if (turned[index]) onOpenCard(card, place)
-                else {
+                // Opened, a card moves on through the cards of this pack already turned over.
+                if (turned[index]) {
+                  onOpenCard(
+                    card,
+                    place,
+                    drawn.filter((_, at) => turned[at])
+                  )
+                } else {
                   setTurned(current => current.map((value, at) => (at === index ? true : value)))
                   navigator.vibrate?.(8)
                 }
@@ -403,7 +413,7 @@ export default function AtlasBooster({
   cards: AtlasGalleryCard[]
   language: ResourceLanguage
   onClose: () => void
-  onOpenCard: (card: AtlasGalleryCard, place: Element) => void
+  onOpenCard: (card: AtlasGalleryCard, place: Element, among: AtlasGalleryCard[]) => void
 }) {
   const words = BOOSTER_WORDS[language]
   const packs = useRef(cardPacks(cards, words.everything)).current

@@ -124,6 +124,8 @@ export default function AtlasCardsPage({ page }: { page: AtlasCardsPageData }) {
   const [booster, setBooster] = useState(false)
   // Where the card opened came from: the grid, the fan of the opening or a pack.
   const opening = useRef<{ id: string; place: Element }>(undefined)
+  // The cards an opened card moves through when it did not come from the gallery: a pack's.
+  const [within, setWithin] = useState<AtlasGalleryCard[]>()
   const grid = useRef<HTMLDivElement>(null)
 
   useEffect(() => rememberCardsPage(page), [page])
@@ -180,14 +182,20 @@ export default function AtlasCardsPage({ page }: { page: AtlasCardsPageData }) {
   )
 
   const openCard = openId ? page.cards.find(card => card.id === openId) : undefined
-  const travelled = openCard && shown.some(card => card.id === openCard.id) ? shown : page.cards
+  const travelled =
+    openCard && within?.some(card => card.id === openCard.id)
+      ? within
+      : openCard && shown.some(card => card.id === openCard.id)
+        ? shown
+        : page.cards
 
   const hash = () => (typeof window === 'undefined' ? '' : window.location.hash)
   const gridCard = (id: string) =>
     document.querySelector<HTMLElement>(`.acg__link[data-card-id="${CSS.escape(id)}"]`)
   const open = useCallback(
-    (card: AtlasGalleryCard, place: Element) => {
+    (card: AtlasGalleryCard, place: Element, among?: AtlasGalleryCard[]) => {
       opening.current = { id: card.id, place }
+      setWithin(among)
       void navigate({
         href: `${buildAtlasCardPath(language, card.id)}${hash()}`,
         resetScroll: false,
@@ -195,18 +203,21 @@ export default function AtlasCardsPage({ page }: { page: AtlasCardsPageData }) {
     },
     [language, navigate]
   )
-  /** The card goes back where it came from; another one, reached with the arrows, to the grid. */
-  const placeOf = (id: string) =>
-    opening.current?.id === id
-      ? opening.current.place
-      : opening.current?.place.matches('.acg__link')
-        ? gridCard(id)
-        : undefined
+  /** The card goes back where it came from; another one, reached with the arrows, to its own. */
+  const placeOf = (id: string) => {
+    const from = opening.current
+    if (!from) return undefined
+    if (from.id === id) return from.place
+    if (from.place.matches('.acg__link')) return gridCard(id)
+    return document.querySelector(`.acb [data-card-id="${CSS.escape(id)}"]`)
+  }
   const close = () => {
     // Opened from the grid and moved on with the arrows, the page follows to the last card seen.
     // Anywhere else it stays where the reader left it.
     const place = openId ? placeOf(openId) : undefined
-    if (openId !== opening.current?.id) place?.scrollIntoView({ block: 'nearest' })
+    if (openId !== opening.current?.id && place?.matches('.acg__link')) {
+      place.scrollIntoView({ block: 'nearest' })
+    }
     void navigate({ href: `${buildAtlasCardsPath(language)}${hash()}`, resetScroll: false }).then(
       () => (place as HTMLElement | undefined)?.focus({ preventScroll: true })
     )
