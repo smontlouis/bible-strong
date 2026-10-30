@@ -29,7 +29,10 @@ export const getChapterEntityAvatar = (
   return {
     src: portraits[entity.uniqueName] ?? placeholder,
     onError: (event: SyntheticEvent<HTMLImageElement>) => {
-      if (event.currentTarget.src !== placeholder) event.currentTarget.src = placeholder
+      // The attribute, not `src`, which is absolute: a placeholder that fails must not load again.
+      if (event.currentTarget.getAttribute('src') !== placeholder) {
+        event.currentTarget.src = placeholder
+      }
     },
   }
 }
