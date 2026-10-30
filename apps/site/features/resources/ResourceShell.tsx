@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useState, type ReactNode } from 'react'
 import {
   isThemePreference,
   LanguageMark,
@@ -9,6 +9,7 @@ import {
 } from '@/components/SiteThemeControls'
 import { useCurrentLocale, useI18n } from '@/locales'
 import AppInvitation from './AppInvitation'
+import ExploreMenu from './ExploreMenu'
 import type { Breadcrumb } from './resourceHead'
 import { RESOURCE_SECTIONS, type ResourceSectionKey } from './sections'
 
@@ -22,8 +23,6 @@ const readThemePreference = (): ThemePreference => {
 // Pages are cached for everyone, so the stored theme is applied in the browser, before the
 // first paint, rather than rendered on the server like on the landing page.
 const applyStoredTheme = `(function(){try{var m=document.cookie.match(/(?:^|; )${themeCookieName}=(light|dark)/);if(m)document.currentScript.parentElement.dataset.theme=m[1]}catch(e){}})()`
-
-const MENU_LABEL = { fr: 'Explorer', en: 'Explore' } as const
 
 /**
  * Standalone chrome of a public resource page: brand, the sections of the site, the app
@@ -64,27 +63,10 @@ export default function ResourceShell({
   const t = useI18n()
   const locale = useCurrentLocale()
   const homePath = locale === 'fr' ? '/fr' : '/'
-  const menuRef = useRef<HTMLDetailsElement>(null)
   const [theme, setTheme] = useState<ThemePreference>('auto')
 
   useIsomorphicLayoutEffect(() => {
     setTheme(readThemePreference())
-  }, [])
-
-  useEffect(() => {
-    const close = (event: Event) => {
-      const menu = menuRef.current
-      if (!menu?.open) return
-      const escape = event instanceof KeyboardEvent && event.key === 'Escape'
-      const outside = event.type === 'pointerdown' && !menu.contains(event.target as Node)
-      if (escape || outside) menu.removeAttribute('open')
-    }
-    document.addEventListener('pointerdown', close)
-    document.addEventListener('keydown', close)
-    return () => {
-      document.removeEventListener('pointerdown', close)
-      document.removeEventListener('keydown', close)
-    }
   }, [])
 
   const changeTheme = (nextTheme: ThemePreference) => {
@@ -112,38 +94,7 @@ export default function ResourceShell({
               />
               <span className="truncate max-[640px]:sr-only">Bible Strong</span>
             </a>
-            <details ref={menuRef} className="resource-menu">
-              <summary className="resource-menu__trigger">
-                {MENU_LABEL[locale]}
-                <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3.5">
-                  <path
-                    d="m4 6 4 4 4-4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </summary>
-              <nav className="resource-menu__panel" aria-label={MENU_LABEL[locale]}>
-                <ul>
-                  {RESOURCE_SECTIONS.map(entry => (
-                    <li key={entry.key}>
-                      <a
-                        className="resource-menu__item"
-                        aria-current={entry.key === section ? 'true' : undefined}
-                        href={entry.path(locale)}
-                      >
-                        <span className="font-semibold">{entry.label[locale]}</span>
-                        <span className="resource-muted block text-sm">
-                          {entry.summary[locale]}
-                        </span>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            </details>
+            <ExploreMenu section={section} />
           </div>
           <div className="landing-nav__actions resource-header__actions shrink-0">
             <a className="resource-cta" href={appUrl}>

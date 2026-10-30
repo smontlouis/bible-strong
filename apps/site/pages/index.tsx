@@ -13,6 +13,7 @@ import {
   ThemeToggle,
   type ThemePreference,
 } from '../components/SiteThemeControls'
+import ExploreMenu from '../features/resources/ExploreMenu'
 import { RESOURCE_SECTIONS, resourceSection } from '../features/resources/sections'
 import { androidApkUrl, appStoreUrl, playStoreUrl, webAppUrl } from '../lib/app-links'
 
@@ -95,7 +96,6 @@ function LandingHeader({
   locale,
   homePath,
   supportPath,
-  readPath,
   alternatePath,
   theme,
   onThemeChange,
@@ -104,7 +104,6 @@ function LandingHeader({
   locale: string
   homePath: string
   supportPath: string
-  readPath: string
   alternatePath: string
   theme: ThemePreference
   onThemeChange: (theme: ThemePreference) => void
@@ -120,7 +119,7 @@ function LandingHeader({
         <div className="landing-nav__links">
           <a href="#parcours">{t('home.nav.journey')}</a>
           <a href="#univers">{t('home.nav.tools')}</a>
-          <a href={readPath}>{t('home.nav.read')}</a>
+          <ExploreMenu />
           <a className="support-link" href={supportPath}>
             {t('support')}
             <svg aria-hidden="true" viewBox="0 0 16 16">
@@ -852,7 +851,6 @@ export default function Home({ initialTheme }: HomeProps) {
         locale={locale}
         homePath={homePath}
         supportPath={supportPath}
-        readPath={readPath}
         alternatePath={alternatePath}
         theme={theme}
         onThemeChange={changeTheme}

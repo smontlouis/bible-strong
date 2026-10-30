@@ -1,19 +1,15 @@
 import type { ResourceLanguage } from './publicSite'
 
 export type ResourceSectionKey =
-  | 'bible'
-  | 'strong'
-  | 'dictionary'
-  | 'nave'
-  | 'commentary'
-  | 'timeline'
-  | 'atlas'
+  'bible' | 'strong' | 'dictionary' | 'nave' | 'commentary' | 'timeline' | 'atlas'
 
 export type ResourceSection = {
   key: ResourceSectionKey
   label: Record<ResourceLanguage, string>
-  /** What a reader finds there, for menus and hubs. */
+  /** What a reader finds there, for hubs. */
   summary: Record<ResourceLanguage, string>
+  /** The same in a few words, for a tile of the menu. */
+  short: Record<ResourceLanguage, string>
   /** The entry page of the section in a language. */
   path: (language: ResourceLanguage) => string
 }
@@ -27,6 +23,10 @@ export const RESOURCE_SECTIONS: readonly ResourceSection[] = [
       fr: 'Lire la Bible dans plus de 40 versions',
       en: 'Read the Bible in more than 40 versions',
     },
+    short: {
+      fr: 'Lire la Bible dans plus de 40 versions',
+      en: 'Read the Bible in more than 40 versions',
+    },
     // The Bible entry has no resource language of its own: it follows the site locale.
     path: language => (language === 'fr' ? '/fr/bible' : '/bible'),
   },
@@ -37,6 +37,7 @@ export const RESOURCE_SECTIONS: readonly ResourceSection[] = [
       fr: 'Les mots hébreux et grecs et leurs numéros Strong',
       en: 'Hebrew and Greek words and their Strong’s numbers',
     },
+    short: { fr: 'Les mots hébreux et grecs', en: 'Hebrew and Greek words' },
     path: language => `/strong/${language}`,
   },
   {
@@ -46,6 +47,7 @@ export const RESOURCE_SECTIONS: readonly ResourceSection[] = [
       fr: 'Personnes, lieux et notions bibliques',
       en: 'Biblical people, places and notions',
     },
+    short: { fr: 'Personnes, lieux et notions', en: 'People, places and notions' },
     path: language => `/dictionary/${language}`,
   },
   {
@@ -55,6 +57,7 @@ export const RESOURCE_SECTIONS: readonly ResourceSection[] = [
       fr: 'La Bible par thèmes, d’après Nave',
       en: 'The Bible by topic, after Nave',
     },
+    short: { fr: 'La Bible par thèmes', en: 'The Bible by topic' },
     path: language => `/nave/${language}`,
   },
   {
@@ -64,6 +67,7 @@ export const RESOURCE_SECTIONS: readonly ResourceSection[] = [
       fr: 'Les commentaires bibliques, chapitre par chapitre',
       en: 'Bible commentaries, chapter by chapter',
     },
+    short: { fr: 'Chapitre par chapitre', en: 'Chapter by chapter' },
     path: language => `/commentary/${language}`,
   },
   {
@@ -73,6 +77,7 @@ export const RESOURCE_SECTIONS: readonly ResourceSection[] = [
       fr: 'Les événements de l’histoire biblique',
       en: 'The events of biblical history',
     },
+    short: { fr: 'L’histoire biblique', en: 'Biblical history' },
     path: language => `/timeline/${language}`,
   },
   {
@@ -82,6 +87,7 @@ export const RESOURCE_SECTIONS: readonly ResourceSection[] = [
       fr: 'Les personnages, les lieux et les peuples de la Bible',
       en: 'The people, places and nations of the Bible',
     },
+    short: { fr: 'Personnages, lieux et peuples', en: 'People, places and nations' },
     path: language => `/atlas/${language}`,
   },
 ]

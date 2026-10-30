@@ -616,6 +616,17 @@ input {
     opacity 180ms ease;
 }
 
+/* The menu of the sections opens under its own button, in the middle of the header. */
+.landing-nav .resource-menu {
+  position: relative;
+}
+
+.landing-nav .resource-menu__panel {
+  top: calc(100% + 14px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
 .landing-nav__links a:hover,
 .language-link:hover,
 .landing-footer a:hover {
@@ -1321,11 +1332,29 @@ input {
 
 @media (max-width: 1023px) {
   .landing-nav {
-    grid-template-columns: 1fr auto;
+    position: relative;
+    grid-template-columns: auto 1fr auto;
+    gap: 8px;
   }
 
-  .landing-nav__links {
+  /* The other links lead within the page: the menu of the sections stays. */
+  .landing-nav .landing-nav__links > :not(.resource-menu) {
     display: none;
+  }
+
+  .landing-nav .brand {
+    flex: none;
+  }
+
+  .landing-nav .resource-menu {
+    position: static;
+  }
+
+  .landing-nav .resource-menu__panel {
+    top: calc(100% + 2px);
+    left: 0;
+    width: min(640px, 100%);
+    transform: none;
   }
 
   .hero-section {
@@ -3451,9 +3480,6 @@ input {
   .landing-nav {
     display: flex;
   }
-  .landing-nav__links {
-    display: none;
-  }
   .landing-nav__actions {
     margin-left: auto;
   }
@@ -3948,6 +3974,7 @@ html[data-theme-transition='active']::view-transition-new(root) {
   --landing-muted: #58657a;
   --landing-line: rgb(16 27 53 / 12%);
   --landing-accent: #5983f0;
+  --landing-accent-soft: #e6edff;
   --landing-accent-ink: #173778;
   --landing-shadow: rgb(40 67 128 / 16%);
 }
@@ -3996,6 +4023,7 @@ html[data-theme-transition='active']::view-transition-new(root) {
   --landing-muted: #a9b5c8;
   --landing-line: rgb(213 225 255 / 15%);
   --landing-accent: #7e9cf2;
+  --landing-accent-soft: #17294c;
   --landing-accent-ink: #a9c0ff;
   --landing-shadow: rgb(2 8 20 / 36%);
 }
@@ -4277,5 +4305,24 @@ html[data-theme-transition='active']::view-transition-new(root) {
 
   .landing-nav__actions .button--mobile-app {
     display: inline-flex;
+  }
+}
+
+/* The smallest phones keep the logo, the menu and the download: the theme stays the system's. */
+@media (max-width: 359px) {
+  .landing-nav {
+    gap: 2px;
+  }
+
+  .landing-nav .theme-toggle {
+    display: none;
+  }
+
+  .landing-nav .landing-nav__actions {
+    gap: 8px;
+  }
+
+  .landing-nav .button--compact {
+    padding: 0 10px;
   }
 }

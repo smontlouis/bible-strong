@@ -230,7 +230,6 @@ export default {
   'bible.version.chapters': '{count} chapters',
   'bible.version.chapter': '1 chapter',
   'bible.version.summary': '{books} books, {chapters} chapters.',
-  'home.nav.read': 'Read the Bible',
   'home.footer.sections': 'Read online',
   'home.worlds.explore': 'Explore online',
   'bible.note': 'Note',

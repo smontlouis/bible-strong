@@ -64,7 +64,9 @@
   --landing-muted: var(--resource-muted);
   --landing-line: var(--resource-line);
   --landing-accent: var(--resource-accent);
+  --landing-accent-soft: var(--resource-accent-soft);
   --landing-accent-ink: var(--resource-accent-ink);
+  --landing-ink: var(--resource-ink);
   min-height: 100vh;
   background: var(--resource-canvas);
   color: var(--resource-ink);
@@ -1147,12 +1149,15 @@ a.strong-letters__letter:hover,
   gap: 6px;
   padding: 0 12px;
   border-radius: 999px;
-  color: var(--resource-muted);
+  color: var(--landing-muted);
   font-size: 0.92rem;
   font-weight: 600;
   cursor: pointer;
   list-style: none;
   user-select: none;
+  transition:
+    background 180ms ease-out,
+    color 180ms ease-out;
 }
 
 .resource-menu__trigger::-webkit-details-marker {
@@ -1161,8 +1166,16 @@ a.strong-letters__letter:hover,
 
 .resource-menu__trigger:hover,
 .resource-menu[open] > .resource-menu__trigger {
-  background: var(--resource-accent-soft);
-  color: var(--resource-accent-ink);
+  background: var(--landing-accent-soft);
+  color: var(--landing-accent-ink);
+}
+
+.resource-menu__trigger svg {
+  transition: transform 180ms ease-out;
+}
+
+.resource-menu[open] > .resource-menu__trigger svg {
+  transform: rotate(180deg);
 }
 
 .resource-menu__panel {
@@ -1170,23 +1183,86 @@ a.strong-letters__letter:hover,
   top: calc(100% + 6px);
   left: 20px;
   z-index: 30;
-  width: min(360px, calc(100vw - 40px));
+  width: min(640px, calc(100vw - 40px));
   padding: 8px;
-  border: 1px solid var(--resource-line);
+  border: 1px solid var(--landing-line);
   border-radius: 20px;
-  background: var(--resource-surface-raised);
+  background: var(--landing-surface-raised);
   box-shadow: 0 24px 60px rgb(8 14 28 / 22%);
 }
 
-.resource-menu__item {
-  display: block;
-  padding: 10px 12px;
-  border-radius: 12px;
+/* Eight cells: the Bible takes two of them, and seven sections leave no hole. */
+.resource-menu__grid {
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  list-style: none;
 }
 
-.resource-menu__item:hover,
-.resource-menu__item[aria-current] {
-  background: var(--resource-accent-soft);
+.resource-menu__grid > li:first-child {
+  grid-column: span 2;
+}
+
+.resource-menu .resource-menu__item {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  color: var(--landing-ink);
+  transition: background 180ms ease-out;
+}
+
+.resource-menu .resource-menu__item:hover,
+.resource-menu .resource-menu__item:focus-visible,
+.resource-menu .resource-menu__item[aria-current] {
+  background: var(--landing-accent-soft);
+}
+
+.resource-menu__icon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--landing-accent) 16%, transparent);
+  color: var(--landing-accent-ink);
+}
+
+.resource-menu__text {
+  display: block;
+  min-width: 0;
+}
+
+.resource-menu__label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.resource-menu__short {
+  display: block;
+  margin-top: 2px;
+  color: var(--landing-muted);
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+@media (max-width: 560px) {
+  .resource-menu__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resource-menu__trigger,
+  .resource-menu__trigger svg,
+  .resource-menu .resource-menu__item {
+    transition: none;
+  }
 }
 
 /* The path leading to a page. */
