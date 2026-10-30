@@ -73,6 +73,28 @@ the lexicon, and the chapters that name it as links to the Bible. A place also s
 The pages are designed as the timeline's: a showcase of the product, not a column of text with a
 list under it. They take their values from the design system and its two themes.
 
+### Share images and titles
+
+Every page of the atlas has its share image (ADR-0081), drawn as the design system draws the
+others. An entity's card gives its family, its name, how many chapters name it and its line, beside
+a square picture:
+
+- a painted entity, its portrait cut out over the dusk ground of the atlas, or its painting;
+- a place that is not painted, the atlas map around it with the place marked and up to five of the
+  most named places around it, none covering another;
+- any other entity, its clay figure over the same ground.
+
+The entry of the atlas and a family's page show six of their most named painted entities. The
+renderer reads no WebP, hence the PNG copies of the portraits on the media host (ADR-0089) and of the
+clay figures on the site; the ground of the map is the site's `public/atlas/map.svg`, read by the
+Worker through its binding like the figures. The renderer reads every picture itself, past any
+cached answer, before the layout: a picture it cannot read fails the image, which the share card
+service does not keep, rather than leaving a card drawn without it and kept for good. A portrait is
+published, PNG included, before the catalog names it.
+
+A title does not repeat the name its line opens on (« Israël, le père des douze tribus », not
+« Israël – Israël, … »), and a description cut to its length never ends inside a parenthesis.
+
 ### The map, in the application too
 
 The map of the places is one drawing for the site and the application. The projection, the windows

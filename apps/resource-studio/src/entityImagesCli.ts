@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
-import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
@@ -12,12 +12,16 @@ import {
   entityImageKey,
   entityImageUrl,
   entityPlaceholderFile,
+  entityPlaceholderShareFile,
+  entityShareKey,
+  entityShareUrl,
   ENTITY_IMAGE_BUCKET,
   ENTITY_IMAGE_CATALOG_KEY,
   ENTITY_IMAGE_HOST,
   ENTITY_IMAGE_QUALITY,
   ENTITY_IMAGE_WIDTHS,
   ENTITY_PLACEHOLDER_WIDTH,
+  ENTITY_SHARE_WIDTH,
   missingPlaceholders,
   parseEntityImageSelection,
   type EntityCatalogData,
@@ -45,6 +49,10 @@ const DEFAULT_PLACEHOLDER_TARGET = path.resolve(
   STUDIO_ROOT,
   "../expo/src/assets/images/entity-avatars"
 );
+const DEFAULT_PLACEHOLDER_SITE_TARGET = path.resolve(
+  STUDIO_ROOT,
+  "../site/public/atlas/clay"
+);
 
 const USAGE = `Prepares the portraits of biblical entities for the media host (ADR-0089).
 
@@ -55,9 +63,11 @@ gives the titles, the stages with their chapters, the series and the roles (Enti
 
   yarn resources:entities:images build --selection <file> --data <file> [--output <dir>]
       Writes the ${ENTITY_IMAGE_WIDTHS.map((width) => `${width}`).join(", ")}-pixel WebP copies of every portrait and stage, cropped to a
-      centred square, and the catalog to publish. Needs cwebp (brew install webp).
-  yarn resources:entities:images placeholders --selection <file> [--target <dir>]
-      Writes the ${ENTITY_PLACEHOLDER_WIDTH}-pixel placeholders bundled in the application (default: apps/expo/src/assets/images/entity-avatars).
+      centred square, a ${ENTITY_SHARE_WIDTH}-pixel PNG of every portrait for share images, and the
+      catalog to publish. Needs cwebp, dwebp (brew install webp) and pngquant.
+  yarn resources:entities:images placeholders --selection <file> [--target <dir>] [--site-target <dir>]
+      Writes the ${ENTITY_PLACEHOLDER_WIDTH}-pixel placeholders bundled in the application (default: apps/expo/src/assets/images/entity-avatars),
+      and their ${ENTITY_PLACEHOLDER_WIDTH}-pixel WebP and ${ENTITY_SHARE_WIDTH}-pixel PNG copies on the public site (default: apps/site/public/atlas/clay).
   yarn resources:entities:images upload [--output <dir>] [--bucket <name>] [--dry-run]
       Puts the copies in the public media bucket (default: ${ENTITY_IMAGE_BUCKET}) through the operator's
       wrangler session, checks that each answers at ${ENTITY_IMAGE_HOST}, then puts the catalog.
@@ -82,6 +92,8 @@ const builtPath = (output: string) => path.join(output, "built.json");
 const catalogPath = (output: string) => path.join(output, "catalog.json");
 const copyPath = (output: string, hash: string, width: number) =>
   path.join(output, "portraits", hash, `w${width}.webp`);
+const sharePath = (output: string, hash: string) =>
+  path.join(output, "portraits", hash, `w${ENTITY_SHARE_WIDTH}.png`);
 
 const readSelection = async (
   args: string[]
@@ -99,7 +111,8 @@ const readSelection = async (
 const writeSquareWebp = async (
   source: string,
   target: string,
-  width: number
+  width: number,
+  lossless = false
 ) => {
   const bytes = await readFile(source);
   const size = readImageSize(bytes);
@@ -108,8 +121,7 @@ const writeSquareWebp = async (
   await mkdir(path.dirname(target), { recursive: true });
   await execFileAsync("cwebp", [
     "-quiet",
-    "-q",
-    String(ENTITY_IMAGE_QUALITY),
+    ...(lossless ? ["-lossless"] : ["-q", String(ENTITY_IMAGE_QUALITY)]),
     "-crop",
     String(square.x),
     String(square.y),
@@ -122,6 +134,45 @@ const writeSquareWebp = async (
     "-o",
     target
   ]);
+};
+
+/**
+ * The same square as a PNG, through a lossless WebP: cwebp crops and resizes, dwebp writes PNG,
+ * pngquant reduces it to a palette, which weighs 60 % less with no visible change. A picture
+ * pngquant cannot keep at that quality stays whole.
+ */
+const writeSquarePng = async (
+  source: string,
+  target: string,
+  width: number
+) => {
+  const step = `${target}.webp`;
+  const whole = `${target}.whole.png`;
+  await writeSquareWebp(source, step, width, true);
+  try {
+    await execFileAsync("dwebp", ["-quiet", step, "-o", whole]);
+    try {
+      await execFileAsync("pngquant", [
+        "--quality",
+        "80-95",
+        "--speed",
+        "1",
+        "--strip",
+        "--force",
+        "--output",
+        target,
+        whole
+      ]);
+    } catch (cause) {
+      // 98 and 99: the palette would fall under the quality asked for.
+      const code = (cause as { code?: number }).code;
+      if (code !== 98 && code !== 99) throw cause;
+      await rename(whole, target);
+    }
+  } finally {
+    await rm(step, { force: true });
+    await rm(whole, { force: true });
+  }
 };
 
 const buildImages = async (args: string[]) => {
@@ -141,6 +192,11 @@ const buildImages = async (args: string[]) => {
       const target = copyPath(output, hash, width);
       if (existsSync(target) && (await stat(target)).size > 0) continue;
       await writeSquareWebp(original, target, width);
+      written += 1;
+    }
+    const share = sharePath(output, hash);
+    if (!stage && !(existsSync(share) && (await stat(share)).size > 0)) {
+      await writeSquarePng(original, share, ENTITY_SHARE_WIDTH);
       written += 1;
     }
     built.push({
@@ -167,22 +223,36 @@ const buildImages = async (args: string[]) => {
 
 const writePlaceholders = async (args: string[]) => {
   const target = option(args, "--target") ?? DEFAULT_PLACEHOLDER_TARGET;
+  const siteTarget =
+    option(args, "--site-target") ?? DEFAULT_PLACEHOLDER_SITE_TARGET;
   const { selection, folder } = await readSelection(args);
   const missing = missingPlaceholders(selection.placeholders);
   if (missing.length > 0)
     throw new Error(`ENTITY_PLACEHOLDERS_MISSING: ${missing.join(", ")}`);
   for (const placeholder of selection.placeholders) {
+    const source = path.resolve(folder, placeholder.source);
+    const file = entityPlaceholderFile(placeholder.key, placeholder.index);
     await writeSquareWebp(
-      path.resolve(folder, placeholder.source),
-      path.join(
-        target,
-        entityPlaceholderFile(placeholder.key, placeholder.index)
-      ),
+      source,
+      path.join(target, file),
       ENTITY_PLACEHOLDER_WIDTH
+    );
+    await writeSquareWebp(
+      source,
+      path.join(siteTarget, file),
+      ENTITY_PLACEHOLDER_WIDTH
+    );
+    await writeSquarePng(
+      source,
+      path.join(
+        siteTarget,
+        entityPlaceholderShareFile(placeholder.key, placeholder.index)
+      ),
+      ENTITY_SHARE_WIDTH
     );
   }
   console.log(
-    `Wrote ${selection.placeholders.length} placeholders to ${target}.`
+    `Wrote ${selection.placeholders.length} placeholders to ${target} and ${siteTarget}.`
   );
 };
 
@@ -239,13 +309,29 @@ const uploadImages = async (args: string[]) => {
       });
     }
   }
+  const shares: MediaUpload[] = [];
+  for (const portrait of built) {
+    if (portrait.stage) continue;
+    const file = sharePath(output, portrait.hash);
+    if (!existsSync(file))
+      throw new Error(
+        `ENTITY_IMAGE_SHARE_COPY_MISSING: ${portrait.uniqueName}`
+      );
+    shares.push({
+      key: entityShareKey(portrait.uniqueName, portrait.hash),
+      file,
+      sha256: sha256Hex(await readFile(file)),
+      url: entityShareUrl(portrait.uniqueName, portrait.hash)
+    });
+  }
   const uploads = await pendingUploads(copies, ledgerPath);
+  const shareUploads = await pendingUploads(shares, ledgerPath);
 
   if (dryRun) {
     for (const upload of uploads.slice(0, 10)) console.log(`put ${upload.key}`);
     if (uploads.length > 10) console.log(`… ${uploads.length - 10} more`);
     console.log(
-      `Would upload ${uploads.length} of ${copies.length} copies to ${bucket}, check ${copies.length} addresses, then put ${ENTITY_IMAGE_CATALOG_KEY} naming ${built.length} pictures.`
+      `Would upload ${uploads.length} of ${copies.length} copies and ${shareUploads.length} of ${shares.length} PNG copies to ${bucket}, check ${copies.length + shares.length} addresses, then put ${ENTITY_IMAGE_CATALOG_KEY} naming ${built.length} pictures.`
     );
     return;
   }
@@ -256,11 +342,19 @@ const uploadImages = async (args: string[]) => {
     ledgerPath,
     "image/webp"
   );
-  console.log(`Uploaded ${done} copies to ${bucket}.`);
+  const sharesDone = await putImmutableCopies(
+    bucket,
+    shareUploads,
+    ledgerPath,
+    "image/png"
+  );
+  console.log(
+    `Uploaded ${done} copies and ${sharesDone} PNG copies to ${bucket}.`
+  );
 
   // The catalog must never name a picture its address does not serve.
   const unreachable = await unreachableAddresses(
-    copies.map((copy) => copy.url)
+    [...copies, ...shares].map((copy) => copy.url)
   );
   if (unreachable.length > 0) {
     throw new Error(
@@ -276,7 +370,7 @@ const uploadImages = async (args: string[]) => {
     CATALOG_CACHE_CONTROL
   );
   console.log(
-    `Checked ${copies.length} addresses and put the catalog naming ${built.length} pictures.`
+    `Checked ${copies.length + shares.length} addresses and put the catalog naming ${built.length} pictures.`
   );
 };
 

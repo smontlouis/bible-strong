@@ -45,4 +45,11 @@ export const loadShareCardFonts = (origin: string): Promise<ShareCardFont[]> => 
   return loaded
 }
 
+/** A public file of the site, read through the Worker's own binding as the fonts are. */
+export const readSiteFile = async (origin: string, path: string): Promise<Response> => {
+  const response = await env.ASSETS.fetch(new URL(path, origin))
+  if (!response.ok) throw new Error(`SHARE_CARD_FILE_UNAVAILABLE: ${response.status} ${path}`)
+  return response
+}
+
 export { Resvg, satori }

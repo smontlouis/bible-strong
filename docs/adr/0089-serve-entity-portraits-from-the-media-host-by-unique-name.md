@@ -41,6 +41,11 @@ Store each portrait in the media bucket, under `entity-images/`, in three WebP c
 The third size is the original's own width, about 110 KB a copy, and is decided now: adding
 a width later would change every hash and make every device fetch every portrait again.
 
+Each portrait, not each stage, also has `entity-images/<uniqueName>/<hash>/w512.png`, for the share
+image of its atlas page (ADR-0081, ADR-0091) only: that image's renderer reads PNG and JPEG, not WebP.
+It is transparent like the WebP copies and reduced to a palette by pngquant (about 115 KB). It was
+added under the same hash, the build settings unchanged, so no device fetches anything again.
+
 `uniqueName` is the entity's durable identity (ADR-0016); the address percent-encodes it. `hash` is
 a short hash of the original's bytes and of the build settings, so a changed portrait gets a new
 address. These objects are immutable and cached for a year
@@ -130,7 +135,7 @@ and each `<uniqueName>#<stage>`, to its validated original, and a data file givi
 stages with their chapters, the series and the roles. It writes the three copies, uploads and checks
 them through the operator's wrangler session, and only then uploads the new catalog. The selection
 also maps each `placeholder:<avatarKey>:<n>` to its original, from which `placeholders` writes the
-bundled files. It never deletes an earlier version, so a device holding an older catalog still
+bundled files and the site's copies, a WebP and a PNG of each, in `apps/site/public/atlas/clay/`. It never deletes an earlier version, so a device holding an older catalog still
 finds its pictures. Removing an entity from the selection returns it to its placeholder. Nothing of
 it runs in CI and no portrait is committed; the originals and the data file are produced outside
 the repository, from the portraits' working folder.

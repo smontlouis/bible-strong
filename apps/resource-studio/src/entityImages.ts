@@ -89,6 +89,25 @@ export const entityImageUrl = (
 ): string =>
   `${ENTITY_IMAGE_HOST}/${ENTITY_IMAGE_KEY_PREFIX}/${encodeURIComponent(uniqueName)}/${hash}/w${width}.webp`;
 
+/**
+ * The share image of a public page (ADR-0081) is drawn by a renderer that reads PNG and JPEG, not
+ * WebP: every portrait also has one PNG copy, transparent like its WebP ones, for that image only.
+ * Stages have none, since a page is shared with its portrait.
+ */
+export const ENTITY_SHARE_WIDTH = 512;
+
+export const entityShareKey = (uniqueName: string, hash: string): string =>
+  `${ENTITY_IMAGE_KEY_PREFIX}/${uniqueName}/${hash}/w${ENTITY_SHARE_WIDTH}.png`;
+
+export const entityShareUrl = (uniqueName: string, hash: string): string =>
+  `${ENTITY_IMAGE_HOST}/${ENTITY_IMAGE_KEY_PREFIX}/${encodeURIComponent(uniqueName)}/${hash}/w${ENTITY_SHARE_WIDTH}.png`;
+
+/** The PNG copy of a placeholder, beside its WebP copy on the public site. */
+export const entityPlaceholderShareFile = (
+  key: EntityPlaceholderKey,
+  index: number
+): string => `${key}-${index}.png`;
+
 export const ENTITY_IMAGE_CATALOG_KEY = `${ENTITY_IMAGE_KEY_PREFIX}/catalog.json`;
 
 /** Chapters as the application numbers books (1 to 66); verses only when two pictures share a chapter. */

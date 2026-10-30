@@ -14,6 +14,15 @@ export const entityPortraitUrl = (
   size: EntityPortraitSize
 ): string => `${ENTITY_PORTRAIT_BASE_URL}/${encodeURIComponent(uniqueName)}/${hash}/${size}.webp`
 
+/**
+ * The PNG copy of an entity's own picture, a portrait or a clay figure, which a share image can
+ * draw: its renderer reads no WebP. Stages have no such copy.
+ */
+export const entitySharePicture = (picture: string): string =>
+  picture.startsWith(ENTITY_PORTRAIT_BASE_URL)
+    ? picture.replace(/\/w\d+\.webp$/u, '/w512.png')
+    : picture.replace(/\.webp$/u, '.png')
+
 /** A text of the catalog in each language of the site. */
 export type AtlasText = { fr: string; en: string }
 

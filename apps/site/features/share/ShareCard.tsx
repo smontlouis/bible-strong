@@ -6,6 +6,7 @@ import {
 import type { CSSProperties, ReactNode } from 'react'
 import { fitShareCardText } from './shareCardFit'
 import { SANS, SERIF } from './shareCardFonts'
+import { SHARE_MAP_SIZE, shareMapPixel, shareMapWindow } from './shareCardMap'
 import { SHARE_CARD_COLORS as COLORS } from './shareCardTokens'
 
 // The share image of a public page, as the design system draws it (`ShareCard…` cards): one
@@ -29,12 +30,29 @@ const Corner = ({ svg }: { svg: string }) => (
   />
 )
 
-const Head = ({ kicker, chip }: { kicker?: string; chip?: string }) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+const Head = ({
+  kicker,
+  chip,
+  narrow = false,
+}: {
+  kicker?: string
+  chip?: string
+  /** Beside a picture: a smaller kicker, and the chip under it when they cannot share a line. */
+  narrow?: boolean
+}) => (
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      gap: narrow ? 14 : 20,
+      ...(narrow ? { maxWidth: TILE.left - PADDING.x - 40 } : {}),
+    }}
+  >
     {kicker && (
       <div
         style={{
-          fontSize: 44,
+          fontSize: narrow ? 36 : 44,
           lineHeight: 1,
           fontWeight: 800,
           letterSpacing: '-0.02em',
@@ -101,7 +119,11 @@ const Title = ({ children, size }: { children: ReactNode; size: number }) => (
   </div>
 )
 
-const body = (content: Exclude<ShareCardContent, { kind: 'default' }>) => {
+// The ground the atlas draws its cut-out portraits over, as its dark theme draws it: the dusk
+// blue they were painted on, which stands out of the light card.
+const GROUND = 'radial-gradient(circle at 50% 35%, #4d6a99 0%, #2e466a 55%, #1b2a43 100%)'
+
+const body = (content: Exclude<ShareCardContent, { kind: 'default' | 'entity' }>) => {
   if (content.kind === 'text') {
     const fit = fitShareCardText(content.text)
     return (
@@ -158,13 +180,19 @@ const photoFrame: CSSProperties = {
   borderRadius: 20,
 }
 
-const Gallery = ({ pictures }: { pictures: { src: string; caption: string }[] }) => (
+const Gallery = ({
+  pictures,
+  cutOut,
+}: {
+  pictures: { src: string; caption: string }[]
+  cutOut?: boolean
+}) => (
   <>
     {pictures.slice(0, GALLERY.length).map((picture, index) => {
       const { left, top, rotate } = GALLERY[index]
       return (
         <div
-          key={picture.src}
+          key={index}
           style={{
             position: 'absolute',
             left,
@@ -175,7 +203,12 @@ const Gallery = ({ pictures }: { pictures: { src: string; caption: string }[] })
             transform: `rotate(${rotate}deg)`,
           }}
         >
-          <img src={picture.src} width={160} height={204} style={{ ...photoFrame, left: 0, top: 0 }} />
+          <img
+            src={picture.src}
+            width={160}
+            height={204}
+            style={{ ...photoFrame, left: 0, top: 0, ...(cutOut ? { backgroundImage: GROUND } : {}) }}
+          />
           <div
             style={{
               position: 'absolute',
@@ -199,6 +232,84 @@ const Gallery = ({ pictures }: { pictures: { src: string; caption: string }[] })
 
 const PADDING = { x: 72, y: 64 } as const
 
+// The picture of an entity, a square standing on the right of the card.
+const TILE = {
+  left: SHARE_CARD_SIZE.width - PADDING.x - SHARE_MAP_SIZE,
+  top: (SHARE_CARD_SIZE.height - SHARE_MAP_SIZE) / 2,
+  size: SHARE_MAP_SIZE,
+} as const
+
+const tileFrame: CSSProperties = {
+  position: 'absolute',
+  left: TILE.left,
+  top: TILE.top,
+  width: TILE.size,
+  height: TILE.size,
+  display: 'flex',
+  overflow: 'hidden',
+  borderRadius: 36,
+  boxShadow: '0 24px 48px rgba(16, 27, 53, 0.18)',
+}
+
+const mapName: CSSProperties = {
+  position: 'absolute',
+  display: 'flex',
+  color: COLORS.ink,
+  textShadow: '0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff',
+  whiteSpace: 'nowrap',
+}
+
+type EntityContent = Extract<ShareCardContent, { kind: 'entity' }>
+
+// A name on one line when it can be, its longest word always: a sans letter is about 0.6 of
+// its size wide at this weight.
+const entityTitleSize = (title: string, beside: boolean) => {
+  const width = beside ? TILE.left - PADDING.x - 40 : 900
+  const longest = Math.max(...title.split(/\s+/u).map(word => word.length))
+  const fit = (length: number) => Math.floor(width / (length * 0.62))
+  return Math.max(56, Math.min(112, Math.max(fit(title.length), Math.min(fit(longest), 72))))
+}
+
+const EntityPicture = ({ content, map }: { content: EntityContent; map?: string }) => {
+  if (content.map && map) {
+    const window = shareMapWindow(content.map.x, content.map.y)
+    const self = shareMapPixel(window, content.map.x, content.map.y)
+    return (
+      <div style={{ ...tileFrame, background: '#d3e0f8' }}>
+        <img src={map} width={TILE.size} height={TILE.size} style={{ position: 'absolute', left: 0, top: 0 }} />
+        {content.map.neighbours.map(([name, x, y]) => {
+          const at = shareMapPixel(window, x, y)
+          return (
+            <div
+              key={name}
+              style={{ ...mapName, left: at.left + 10, top: at.top - 13, fontSize: 19, fontWeight: 500 }}
+            >
+              {name}
+            </div>
+          )
+        })}
+        <div
+          style={{
+            ...mapName,
+            left: self.left + 22,
+            top: self.top - 18,
+            fontSize: 26,
+            fontWeight: 700,
+          }}
+        >
+          {content.title}
+        </div>
+      </div>
+    )
+  }
+  if (!content.picture) return null
+  return (
+    <div style={{ ...tileFrame, backgroundImage: GROUND }}>
+      <img src={content.picture} width={TILE.size} height={TILE.size} style={{ objectFit: 'cover' }} />
+    </div>
+  )
+}
+
 // The renderer adds the padding to the width and the height it is given.
 // The headline of the home page, on two lines.
 const TAGLINE = {
@@ -219,7 +330,11 @@ const frame: CSSProperties = {
   fontFamily: SANS,
 }
 
-export const ShareCard = ({ content }: { content: ShareCardContent }) => {
+/**
+ * The card of a page. `map` is the drawing of the place an entity card shows, which the renderer
+ * prepares from the ground of the atlas map: an address cannot carry it.
+ */
+export const ShareCard = ({ content, map }: { content: ShareCardContent; map?: string }) => {
   if (content.kind === 'default') {
     return (
       <div style={frame}>
@@ -249,13 +364,39 @@ export const ShareCard = ({ content }: { content: ShareCardContent }) => {
     )
   }
 
+  if (content.kind === 'entity') {
+    const beside = Boolean(content.picture || (content.map && map))
+    return (
+      <div style={frame}>
+        {!beside && <Corner svg={ORNAMENT} />}
+        <EntityPicture content={content} map={map} />
+        <Head kicker={content.kicker} chip={content.chip} narrow={beside} />
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 20,
+            maxWidth: beside ? TILE.left - PADDING.x - 40 : 900,
+          }}
+        >
+          <Title size={entityTitleSize(content.title, beside)}>
+            {content.title}
+          </Title>
+          {content.facts && <Facts text={content.facts} />}
+          {content.excerpt && <Excerpt text={content.excerpt} lines={3} />}
+        </div>
+        <Lockup />
+      </div>
+    )
+  }
+
   const picture = content.kind === 'title' ? content.picture : undefined
   const pictures = content.kind === 'title' ? content.pictures : undefined
   return (
     <div style={frame}>
       <Corner svg={ORNAMENT} />
       {pictures?.length ? (
-        <Gallery pictures={pictures} />
+        <Gallery pictures={pictures} cutOut={content.kind === 'title' && content.cutOut} />
       ) : (
         picture && (
           <img

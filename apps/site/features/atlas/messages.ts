@@ -75,6 +75,7 @@ export const ATLAS_MESSAGES = {
     uncertain: 'incertain',
     entityHeadTitle: '{name} – {brief} | Atlas de la Bible',
     entityHeadTitlePlain: '{name} dans la Bible | Atlas de la Bible',
+    entityHeadTitleNamed: '{brief} | Atlas de la Bible',
     entityFallbackDescription:
       '{name} dans la Bible : qui est-ce, ses liens et les passages qui le nomment.',
     cards: 'Ses cartes',
@@ -163,6 +164,7 @@ export const ATLAS_MESSAGES = {
     uncertain: 'uncertain',
     entityHeadTitle: '{name} – {brief} | Bible Atlas',
     entityHeadTitlePlain: '{name} in the Bible | Bible Atlas',
+    entityHeadTitleNamed: '{brief} | Bible Atlas',
     entityFallbackDescription:
       '{name} in the Bible: who this is, relations and the passages that name it.',
     cards: 'Cards',
