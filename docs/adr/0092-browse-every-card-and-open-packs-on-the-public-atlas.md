@@ -87,11 +87,16 @@ A pack holds five cards of five different characters, drawn from every card or f
 drawn among the better known characters of the pack and three among the others, so that a pack mixes
 Moses with Jael. The reader:
 
-- tears the pack open, then turns its cards over one by one;
+- tears the pack open with a touch or a drag across it, the cards rising out of it, then turns them
+  over one by one;
 - opens a turned card as from the grid;
 - opens another pack.
 
 Cards already seen during the visit come back only once every card of the pack has been drawn.
+
+A pack is drawn like a card: a foil sachet with a painting from edge to edge and its most named
+characters, tilting under the pointer with the same springs, its folds and its foil following the
+light.
 
 Nothing is kept: no album, no count, nothing in the browser's storage. No card is worth more than
 another, and no pack is rarer than another. This is how a pack fits ADR-0090. A pack is a way of

@@ -7,32 +7,14 @@ import {
   usePresence,
   type Transition,
 } from 'motion/react'
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type PointerEvent as ReactPointerEvent,
-  type ReactNode,
-} from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { buildBibleReferencePath } from '../resources/editorialLinks'
 import type { ResourceLanguage } from '../resources/publicSite'
 import { buildStrongPath, displayStrongCode, parseStrongCode } from '../strong/strongRoutes'
-import {
-  adjust,
-  CardBack,
-  cardClasses,
-  CardFront,
-  clamp,
-  drawTextures,
-  paint,
-  REST,
-  restingSprings,
-  step,
-  type Springs,
-} from './AtlasCards'
+import { CardBack, cardClasses, CardFront } from './AtlasCards'
 import { CARD_FAMILY_LABELS, type AtlasGalleryCard } from './atlasCardCatalog'
 import { buildAtlasCardPath, buildAtlasEntityPath } from './atlasRoutes'
+import { useCardTilt } from './useCardTilt'
 
 // A card opened over the gallery, at its own address. Two levels move it: Motion carries the card
 // from its place in the page and back, and from one card to the next with the arrows; the springs
@@ -139,80 +121,10 @@ function ViewerCard({
   onFlip: () => void
 }) {
   const words = VIEWER_WORDS[language]
-  const element = useRef<HTMLDivElement>(null)
-  const rotator = useRef<HTMLButtonElement>(null)
-  const springs = useRef<Springs>(restingSprings())
-  const frame = useRef(0)
-  const still = useRef(false)
-  const endTimer = useRef(0)
-  const pressed = useRef(false)
-
-  const tick = () => {
-    let moving = false
-    const s = springs.current
-    for (const value of Object.values(s)) if (step(value, still.current)) moving = true
-    if (s.spin.t === 360 && Math.abs(s.spin.x - 360) < 0.5) {
-      s.spin.x = 0
-      s.spin.t = 0
-      s.spin.v = 0
-    }
-    if (element.current) paint(element.current, s)
-    frame.current = moving ? requestAnimationFrame(tick) : 0
-  }
-  const kick = () => {
-    if (!frame.current) frame.current = requestAnimationFrame(tick)
-  }
-
-  const rest = (delay = 400) => {
-    window.clearTimeout(endTimer.current)
-    endTimer.current = window.setTimeout(() => {
-      const s = springs.current
-      element.current?.classList.remove('is-interacting')
-      s.rx.t = 0
-      s.ry.t = 0
-      s.gx.t = REST.x
-      s.gy.t = REST.y
-      s.go.t = REST.shine
-      s.gl.t = 0
-      s.bx.t = adjust(REST.x, 0, 100, 37, 63)
-      s.by.t = adjust(REST.y, 0, 100, 33, 67)
-      kick()
-    }, delay)
-  }
-
-  const tilt = (clientX: number, clientY: number) => {
-    const rect = rotator.current?.getBoundingClientRect()
-    if (!rect) return
-    const px = clamp(((clientX - rect.left) / rect.width) * 100)
-    const py = clamp(((clientY - rect.top) / rect.height) * 100)
-    window.clearTimeout(endTimer.current)
-    element.current?.classList.add('is-interacting')
-    const s = springs.current
-    s.bx.t = adjust(px, 0, 100, 37, 63)
-    s.by.t = adjust(py, 0, 100, 33, 67)
-    s.rx.t = -((px - 50) / 3.5)
-    s.ry.t = (py - 50) / 3.5
-    s.gx.t = px
-    s.gy.t = py
-    s.go.t = 1
-    s.gl.t = 1
-    kick()
-  }
-
-  useEffect(() => {
-    drawTextures()
-    still.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (element.current) paint(element.current, springs.current)
-    if (spin && !still.current) springs.current.spin.t = 360
-    kick()
-    rest(spin ? 900 : 120)
-    return () => {
-      cancelAnimationFrame(frame.current)
-      frame.current = 0
-      window.clearTimeout(endTimer.current)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  const { element, surface, springs, kick, handlers } = useCardTilt<
+    HTMLDivElement,
+    HTMLButtonElement
+  >({ spin })
 
   useEffect(() => {
     springs.current.flip.t = flipped ? 180 : 0
@@ -220,35 +132,17 @@ function ViewerCard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flipped])
 
-  const onPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    pressed.current = true
-    tilt(event.clientX, event.clientY)
-  }
-  const onPointerMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (event.pointerType === 'mouse' || pressed.current) tilt(event.clientX, event.clientY)
-  }
-  const release = () => {
-    pressed.current = false
-    rest(250)
-  }
-
   const rank = siblings.findIndex(item => item.id === card.id) + 1
 
   return (
     <div ref={element} className={`${cardClasses(card)} acv__card is-active`}>
       <div className="ac-translater">
         <button
-          ref={rotator}
+          ref={surface}
           type="button"
           className="ac-rotator"
           aria-label={`${card.name}, ${card.title}. ${flipped ? words.front : words.flip}`}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={release}
-          onPointerCancel={release}
-          onPointerLeave={event => {
-            if (event.pointerType === 'mouse') rest()
-          }}
+          {...handlers}
           onClick={onFlip}
         >
           <div className="ac-face ac-front">

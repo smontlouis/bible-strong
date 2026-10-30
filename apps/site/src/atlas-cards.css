@@ -1199,8 +1199,7 @@
 }
 
 /* A card in a grid, a fan or a pack: still, its frame and its lettering without moving foil. */
-.acg__card,
-.acb__face--front .ac-card {
+.acg__card {
   --ac-w: 100%;
   display: block;
   width: 100%;
@@ -1406,13 +1405,22 @@
   border-top: 1px solid rgb(236 230 214 / 12%);
 }
 
+/* One line that scrolls sideways: God has 33 numbers. */
 .acv__strongs ul {
   display: flex;
-  flex-wrap: wrap;
   margin: 8px 0 0;
-  padding: 0;
+  padding: 0 24px 6px 0;
   gap: 6px;
   list-style: none;
+  mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-color: rgb(236 230 214 / 22%) transparent;
+  scrollbar-width: thin;
+}
+
+.acv__strongs li {
+  flex: none;
 }
 
 .acv__strongs a {
@@ -1426,6 +1434,7 @@
   color: #f2ecdc;
   font-size: 0.85rem;
   transition: background 180ms ease-out;
+  white-space: nowrap;
 }
 
 .acv__strongs a:hover,
@@ -1524,15 +1533,6 @@
   white-space: nowrap;
 }
 
-/* God has 33 numbers: beside the card the panel scrolls on its own. */
-@media (min-width: 861px) {
-  .acv__panel {
-    max-height: calc(100svh - 130px);
-    overflow-y: auto;
-    scrollbar-width: thin;
-  }
-}
-
 @media (max-width: 860px) {
   .acv__stage {
     flex-direction: column;
@@ -1615,7 +1615,7 @@
   padding: 72px 20px calc(36px + env(safe-area-inset-bottom, 0px));
   color: #ece6d6;
   outline: none;
-  overflow-y: auto;
+  overflow: hidden auto;
   overscroll-behavior: contain;
 }
 
@@ -1658,10 +1658,9 @@
 }
 
 .acb__choose,
-.acb__sealed,
 .acb__open {
   display: flex;
-  width: min(1000px, 100%);
+  width: min(1040px, 100%);
   flex-direction: column;
   align-items: center;
   margin: auto 0;
@@ -1685,9 +1684,9 @@
 .acb__packs {
   display: grid;
   width: 100%;
-  margin-top: 30px;
-  gap: 26px 20px;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  margin-top: 34px;
+  gap: 34px 26px;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
 }
 
 .acb__pack {
@@ -1695,12 +1694,13 @@
   flex-direction: column;
   align-items: center;
   padding: 0;
-  gap: 10px;
+  gap: 12px;
   border: 0;
   background: none;
   color: inherit;
   cursor: pointer;
-  animation: acb-deal 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: acb-deal 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .acb__pack:nth-child(2) {
@@ -1722,13 +1722,15 @@
   animation-delay: 240ms;
 }
 
-.acb__pack:hover .acb-wrapper,
-.acb__pack:focus-visible .acb-wrapper {
-  transform: translateY(-6px) rotate(-1.5deg);
+/* On the shelf the packs lean a little, each its own way. */
+.acb__pack .acp {
+  transform: rotate(calc(var(--acp-lean, 0) * 1.4deg));
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.acb__pack:hover .acb-wrapper__sheen {
-  animation: acb-sheen 1.4s ease-in-out;
+.acb__pack:hover .acp,
+.acb__pack:focus-visible .acp {
+  transform: rotate(0deg) translateY(-8px) scale(1.04);
 }
 
 .acb__pack-count {
@@ -1737,227 +1739,525 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* The wrapper of a pack: a foil sachet, crimped at both ends. */
-.acb-wrapper {
-  --pack-a: #2b3f6e;
-  --pack-b: #0f172b;
-  --pack-gold: linear-gradient(110deg, #8a6a2b, #e9cf8a 35%, #fff3cf 50%, #c9a457 65%, #8a6a2b);
+/*
+ * A pack: a sachet of crumpled foil. The layers follow the card's (a painting, the characters in
+ * front of it, foil and glare over them) and read the variables its springs write.
+ */
+.acp {
+  --acp-a: #2b3f6e;
+  --acp-b: #0c1428;
+  --acp-gold: linear-gradient(105deg, #8a6a2b, #e9cf8a 32%, #fff3cf 50%, #c9a457 68%, #8a6a2b);
+  --acp-crinkle: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='672'><filter id='c' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='.016 .009' numOctaves='5' seed='11'/><feDiffuseLighting lighting-color='white' surfaceScale='6' diffuseConstant='.64'><feDistantLight azimuth='235' elevation='54'/></feDiffuseLighting></filter><rect width='100%' height='100%' filter='url(%23c)'/></svg>");
   position: relative;
-  display: flex;
+  display: block;
   width: 100%;
-  flex-direction: column;
   aspect-ratio: 5 / 8;
-  filter: drop-shadow(0 16px 20px rgb(0 0 0 / 50%));
-  transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  perspective: 900px;
+  touch-action: pan-y;
+  user-select: none;
 }
 
-.acb-wrapper[data-era='0'] {
-  --pack-a: #2f6b5c;
-  --pack-b: #0e2620;
+.acp[data-era='0'] {
+  --acp-a: #2f6b5c;
+  --acp-b: #0a211b;
 }
-.acb-wrapper[data-era='1'] {
-  --pack-a: #8a6a3a;
-  --pack-b: #2e2112;
+.acp[data-era='1'] {
+  --acp-a: #8a6a3a;
+  --acp-b: #271b0e;
 }
-.acb-wrapper[data-era='2'] {
-  --pack-a: #9a4b2e;
-  --pack-b: #2e130c;
+.acp[data-era='2'] {
+  --acp-a: #9a4b2e;
+  --acp-b: #28100a;
 }
-.acb-wrapper[data-era='3'] {
-  --pack-a: #5b3f8f;
-  --pack-b: #1a1030;
+.acp[data-era='3'] {
+  --acp-a: #5b3f8f;
+  --acp-b: #160d29;
 }
-.acb-wrapper[data-era='4'] {
-  --pack-a: #2c6577;
-  --pack-b: #0b2129;
+.acp[data-era='4'] {
+  --acp-a: #2c6577;
+  --acp-b: #091c23;
 }
-.acb-wrapper[data-era='5'] {
-  --pack-a: #3555a0;
-  --pack-b: #0e1730;
+.acp[data-era='5'] {
+  --acp-a: #3555a0;
+  --acp-b: #0c1329;
 }
-.acb-wrapper[data-era='6'] {
-  --pack-a: #4b3a8a;
-  --pack-b: #120c26;
+.acp[data-era='6'] {
+  --acp-a: #4b3a8a;
+  --acp-b: #0f0a20;
 }
-.acb-wrapper[data-era='8'] {
-  --pack-a: #6b5534;
-  --pack-b: #1e160b;
-}
-
-.acb-wrapper__crimp {
-  height: 7%;
-  flex: none;
-  background:
-    repeating-linear-gradient(90deg, rgb(255 255 255 / 16%) 0 2px, transparent 2px 6px),
-    var(--pack-b);
+.acp[data-era='8'] {
+  --acp-a: #6b5534;
+  --acp-b: #1a1309;
 }
 
-.acb-wrapper__crimp--top {
-  border-radius: 6px 6px 0 0;
-  mask:
-    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / 10px 51% repeat-x,
-    linear-gradient(#000 0 0) bottom / 100% 50% no-repeat;
-  transition:
-    transform 480ms cubic-bezier(0.3, 0.7, 0.2, 1),
-    opacity 420ms ease-out;
+.acp__tilt {
+  position: absolute;
+  inset: 0;
+  display: block;
+  transform: rotateY(var(--rotate-x, 0deg)) rotateX(var(--rotate-y, 0deg));
 }
 
-.acb-wrapper__crimp--bottom {
-  border-radius: 0 0 6px 6px;
-  mask:
-    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / 10px 51%
-      repeat-x,
-    linear-gradient(#000 0 0) top / 100% 50% no-repeat;
+.acp__shape {
+  position: absolute;
+  inset: 0;
+  display: block;
+  filter: drop-shadow(0 18px 22px rgb(0 0 0 / 55%)) drop-shadow(0 2px 3px rgb(0 0 0 / 40%));
 }
 
-.acb-wrapper__body {
-  position: relative;
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12% 8% 10%;
+.acp__bag {
+  position: absolute;
+  inset: 0;
+  display: block;
   overflow: hidden;
-  background:
-    var(--ac-grain), radial-gradient(120% 70% at 50% 0%, var(--pack-a), transparent 72%),
-    linear-gradient(165deg, var(--pack-a), var(--pack-b));
-  text-align: center;
+  background: linear-gradient(165deg, var(--acp-a), var(--acp-b));
+  clip-path: url('#acp-sealed');
+  isolation: isolate;
 }
 
-.acb-wrapper__brand {
-  background: var(--pack-gold);
-  background-clip: text;
-  color: transparent;
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+.acp__bag > *,
+.acp__strip > * {
+  position: absolute;
+  display: block;
 }
 
-.acb-wrapper__figures {
-  display: flex;
+.acp__decor {
+  inset: 0;
   width: 100%;
-  justify-content: center;
+  height: 100%;
+  filter: saturate(1.15) contrast(1.06);
+  object-fit: cover;
+  transform: translate3d(calc(var(--tx, 0) * -1.6%), calc(var(--ty, 0) * -1.2%), 0) scale(1.14);
 }
 
-.acb-wrapper__figures img {
-  width: 46%;
-  margin: 0 -10%;
+/* The colour of the pack over its painting: deep at the top and bottom, clear around the figures. */
+.acp__tint {
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    var(--acp-b) 6%,
+    color-mix(in srgb, var(--acp-b) 62%, transparent) 18%,
+    color-mix(in srgb, var(--acp-a) 26%, transparent) 42%,
+    color-mix(in srgb, var(--acp-b) 40%, transparent) 62%
+  );
+}
+
+.acp__figures {
+  right: 0;
+  bottom: 13%;
+  left: 0;
+  display: flex;
+  height: 66%;
+  align-items: flex-end;
+  justify-content: center;
+  transform: translate3d(calc(var(--tx, 0) * 1.4%), calc(var(--ty, 0) * 1%), 0);
+}
+
+.acp__figures img {
+  display: block;
+  width: 62%;
+  flex: none;
+  margin: 0 -17%;
   aspect-ratio: 1;
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
   object-fit: cover;
   object-position: top;
 }
 
-.acb-wrapper__figures img:nth-child(2) {
+/* The middle figure stands in front, taller, its neighbours half behind it. */
+.acp__figures img:nth-child(2) {
   z-index: 1;
-  width: 56%;
-  margin-top: -6%;
+  width: 78%;
 }
 
-.acb-wrapper__title {
+.acp__band {
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  height: 40%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 9% 17%;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in srgb, var(--acp-b) 82%, transparent) 26%,
+    var(--acp-b) 46%
+  );
+  box-sizing: border-box;
+  container-type: inline-size;
+  text-align: center;
+}
+
+.acp__title {
+  background: var(--acp-gold);
+  background-clip: text;
+  color: transparent;
   font-family: 'Literata Reading', ui-serif, Georgia, serif;
-  font-size: 1rem;
-  line-height: 1.2;
+  font-size: 13cqw;
+  font-weight: 600;
+  line-height: 1.08;
   text-wrap: balance;
 }
 
-.acb-wrapper__count {
-  color: rgb(236 230 214 / 70%);
-  font-size: 0.7rem;
+.acp__count {
+  margin-top: 3cqw;
+  color: rgb(236 230 214 / 72%);
+  font-size: 5.6cqw;
+  letter-spacing: 0.06em;
 }
 
-.acb-wrapper--large .acb-wrapper__brand {
-  font-size: 0.85rem;
+.acp__brand {
+  top: 11%;
+  right: 0;
+  left: 0;
+  background: var(--acp-gold);
+  background-clip: text;
+  color: transparent;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-align: center;
+  text-transform: uppercase;
 }
 
-.acb-wrapper--large .acb-wrapper__title {
-  font-size: 1.5rem;
+.acp--large .acp__brand {
+  font-size: 0.82rem;
 }
 
-.acb-wrapper--large .acb-wrapper__count {
-  font-size: 0.85rem;
-}
-
-.acb-wrapper__sheen {
-  position: absolute;
+/* The foil, crumpled: its folds catch the light over the whole sachet. */
+.acp__crinkle {
   inset: 0;
-  background: linear-gradient(105deg, transparent 38%, rgb(255 255 255 / 26%) 48%, transparent 58%);
-  background-position: 120% 0;
-  background-size: 260% 100%;
-  mix-blend-mode: screen;
+  background: var(--acp-crinkle) center / cover;
+  filter: contrast(1.35);
+  mix-blend-mode: overlay;
+  opacity: 0.85;
+}
+
+/* The same folds, lit from where the pointer is. */
+.acp__gleam {
+  inset: 0;
+  background: var(--acp-crinkle) var(--background-x, 50%) var(--background-y, 50%) / 130% 130%;
+  filter: contrast(2.2) brightness(1.15);
+  mask-image: radial-gradient(
+    farthest-corner circle at var(--pointer-x, 50%) var(--pointer-y, 32%),
+    #000 0%,
+    rgb(0 0 0 / 50%) 22%,
+    transparent 52%
+  );
+  mix-blend-mode: soft-light;
+  opacity: calc(0.45 + var(--glare-opacity, 0) * 0.55);
+}
+
+/* The rainbow of the V cards, thinner: it runs across the foil as the pack turns. */
+.acp__holo {
+  --space: 5%;
+  inset: 0;
+  background-image:
+    var(--ac-glitter, none),
+    repeating-linear-gradient(
+      0deg,
+      hsl(2 100% 73%) calc(var(--space) * 1),
+      hsl(53 100% 69%) calc(var(--space) * 2),
+      hsl(93 100% 69%) calc(var(--space) * 3),
+      hsl(176 100% 76%) calc(var(--space) * 4),
+      hsl(228 100% 74%) calc(var(--space) * 5),
+      hsl(283 100% 73%) calc(var(--space) * 6),
+      hsl(2 100% 73%) calc(var(--space) * 7)
+    ),
+    repeating-linear-gradient(
+      128deg,
+      #0e152e 0%,
+      hsl(180 10% 60%) 3.8%,
+      hsl(180 29% 66%) 4.5%,
+      hsl(180 10% 60%) 5.2%,
+      #0e152e 10%,
+      #0e152e 12%
+    );
+  background-blend-mode: soft-light, hue, normal;
+  background-position:
+    center,
+    0% var(--background-y, 50%),
+    var(--background-x, 50%) var(--background-y, 50%);
+  background-size:
+    220px 220px,
+    200% 700%,
+    300% 100%;
+  filter: brightness(0.8) contrast(1.5) saturate(0.95);
+  mask-image: radial-gradient(
+    farthest-corner circle at var(--pointer-x, 50%) var(--pointer-y, 32%),
+    #000 0%,
+    rgb(0 0 0 / 35%) 40%,
+    rgb(0 0 0 / 12%) 80%
+  );
+  mix-blend-mode: color-dodge;
+  opacity: calc(0.16 + var(--glare-opacity, 0) * 0.3);
+}
+
+/* The volume of a sachet: its sides turn away, and it hollows at the crimps. */
+.acp__folds {
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      rgb(0 0 0 / 58%) 0%,
+      rgb(255 255 255 / 26%) 2.6%,
+      rgb(255 255 255 / 4%) 7%,
+      transparent 16%,
+      transparent 84%,
+      rgb(255 255 255 / 4%) 93%,
+      rgb(255 255 255 / 22%) 97.4%,
+      rgb(0 0 0 / 58%) 100%
+    ),
+    linear-gradient(
+      180deg,
+      transparent 7.6%,
+      rgb(0 0 0 / 42%) 8.4%,
+      rgb(255 255 255 / 14%) 10%,
+      transparent 15%,
+      transparent 85%,
+      rgb(255 255 255 / 10%) 90%,
+      rgb(0 0 0 / 42%) 91.6%,
+      transparent 92.4%
+    );
   pointer-events: none;
 }
 
-.acb__sealed {
-  gap: 18px;
+.acp__glare {
+  inset: 0;
+  background: radial-gradient(
+    farthest-corner circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+    hsl(0 0% 100% / 60%) 6%,
+    hsl(0 0% 100% / 22%) 24%,
+    hsl(0 0% 0% / 42%) 90%
+  );
+  mix-blend-mode: overlay;
+  opacity: calc(var(--glare-opacity, 0) * 0.55);
 }
 
-.acb__tear {
-  width: min(250px, 60vw);
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  animation: acb-arrive 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+/* The heat-sealed ends: flat foil pressed in fine ridges, catching the light along their length. */
+.acp__crimp {
+  right: 0;
+  left: 0;
+  height: 8.2%;
+  background:
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 13%) 0 1px, rgb(0 0 0 / 13%) 1px 3px),
+    linear-gradient(
+      100deg,
+      transparent 10%,
+      rgb(255 255 255 / 30%) var(--pointer-x, 50%),
+      transparent 90%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--acp-a) 76%, #fff) 0%,
+      var(--acp-a) 30%,
+      color-mix(in srgb, var(--acp-a) 70%, #000) 100%
+    );
 }
 
-.acb__tear .acb-wrapper__sheen {
-  animation: acb-sheen 1.6s 500ms ease-in-out 2;
+.acp__crimp--top {
+  top: 0;
 }
 
-.acb__tear:hover .acb-wrapper {
-  transform: rotate(-1.5deg) scale(1.02);
+.acp__crimp--bottom {
+  bottom: 0;
 }
 
-.acb__tear.is-tearing .acb-wrapper__crimp--top {
+/* The strip the tear takes away: over the sachet until it starts. */
+.acp__strip {
+  position: absolute;
+  inset: 0;
+  display: block;
+  clip-path: url('#acp-strip');
   opacity: 0;
-  transform: translate(36%, -180%) rotate(18deg);
+  pointer-events: none;
+  transform: translate(calc(var(--acp-tear, 0) * 4%), calc(var(--acp-tear, 0) * -9%))
+    rotate(calc(var(--acp-tear, 0) * 9deg));
+  transform-origin: 100% 8%;
 }
 
-.acb__tear.is-tearing .acb-wrapper {
+/* The light of the cards inside, through the tear. */
+.acp__light {
+  position: absolute;
+  top: 0;
+  right: 4%;
+  left: 4%;
+  display: block;
+  height: 22%;
+  background: radial-gradient(
+    ellipse 60% 70% at 50% 40%,
+    #fff3cf,
+    rgb(233 207 138 / 40%) 45%,
+    transparent 72%
+  );
+  filter: blur(10px);
   opacity: 0;
-  transform: translateY(18%) scale(0.94);
-  transition:
-    transform 520ms 140ms cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 380ms 240ms ease-in;
+  pointer-events: none;
+}
+
+.acp__spark {
+  position: absolute;
+  top: 8%;
+  left: calc(var(--acp-tear, 0) * 96% + 2%);
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow:
+    0 0 10px 3px #fff3cf,
+    0 0 26px 8px rgb(233 207 138 / 70%);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .acb__open {
-  gap: 22px;
+  gap: 20px;
+}
+
+/* The cards come up through where the hint stands. */
+.acb__hint {
+  transition: opacity 180ms ease-out;
+}
+
+.acb__open.is-rising .acb__hint,
+.acb__open.is-dropping .acb__hint {
+  opacity: 0;
+}
+
+.acb__table {
+  --acb-pack: min(320px, 62vw, 50svh);
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-height: calc(var(--acb-pack) * 1.6);
+  place-items: center;
+}
+
+.acb__open.is-dealt .acb__table {
+  min-height: 0;
+}
+
+.acb__tear {
+  position: relative;
+  z-index: 2;
+  width: var(--acb-pack);
+  padding: 0;
+  border: 0;
+  grid-area: 1 / 1;
+  background: none;
+  cursor: pointer;
+  touch-action: none;
+  animation: acb-arrive 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* A tear running: the sachet opens along its line, the strip lifts, light comes through. */
+.acb__tear.is-tearing .acp__bag {
+  clip-path: url('#acp-torn');
+}
+
+.acb__tear.is-tearing .acp__strip {
+  opacity: 1;
+}
+
+.acb__tear.is-tearing .acp__light {
+  opacity: var(--acp-tear, 0);
+}
+
+.acb__tear.is-tearing .acp__spark {
+  opacity: calc(1 - var(--acp-tear, 0) * var(--acp-tear, 0));
+}
+
+/* Torn through: the strip flies off. */
+.acb__tear.is-torn .acp__strip {
+  opacity: 0;
+  transform: translate(42%, -130%) rotate(34deg);
+  transition:
+    transform 520ms cubic-bezier(0.2, 0.7, 0.3, 1),
+    opacity 300ms 200ms ease-out;
+}
+
+/* The cards up, the pack falls away beneath them. */
+.acb__open.is-dropping .acb__tear {
+  opacity: 0;
+  transform: translateY(68vh) rotate(7deg);
+  transition:
+    transform 440ms cubic-bezier(0.5, 0, 0.9, 0.4),
+    opacity 260ms 180ms ease-in;
 }
 
 .acb__hand {
-  --ac-w: clamp(96px, 27vw, 180px);
+  --ac-w: clamp(96px, 27vw, 178px);
+  position: relative;
+  z-index: 1;
   display: flex;
+  width: 100%;
   flex-wrap: wrap;
   justify-content: center;
-  gap: clamp(10px, 2vw, 22px);
+  gap: clamp(10px, 2vw, 20px);
+  grid-area: 1 / 1;
   perspective: 1400px;
 }
 
-.acb__card {
-  position: relative;
+/* Inside the pack: one stack, hidden behind it. */
+.acb__hand.is-stacked {
+  height: calc(var(--ac-w) * 88 / 63);
+}
+
+.acb__hand.is-stacked .acb__slot {
+  position: absolute;
+  top: 0;
+  left: calc(50% - var(--ac-w) / 2);
+}
+
+.acb__open.is-rising .acb__hand,
+.acb__open.is-dropping .acb__hand {
+  transform: translateY(calc(var(--acb-pack) * -0.62));
+  transition: transform 560ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.acb__open.is-dropping .acb__hand {
+  transform: translateY(calc(var(--acb-pack) * -0.2));
+}
+
+.acb__slot {
   width: var(--ac-w);
+  flex: none;
+}
+
+.acb__card {
+  border-radius: 4.6% / 3.3%;
+}
+
+.acb__tilt {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
   padding: 0;
   border: 0;
-  aspect-ratio: 63 / 88;
+  border-radius: inherit;
   background: none;
+  color: inherit;
   cursor: pointer;
-  animation: acb-deal 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: calc(var(--acb-index) * 90ms);
+  font: inherit;
+  touch-action: pan-y;
+  transform: rotateY(var(--rotate-x, 0deg)) rotateX(var(--rotate-y, 0deg));
+  transform-style: preserve-3d;
   -webkit-tap-highlight-color: transparent;
 }
 
 .acb__flipper {
   position: absolute;
   inset: 0;
+  display: block;
+  border-radius: inherit;
   transform-style: preserve-3d;
   transition: transform 640ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.acb__card:hover:not(.is-turned) .acb__flipper {
-  transform: translateY(-6px) rotateY(-8deg);
 }
 
 .acb__card.is-turned .acb__flipper {
@@ -1967,7 +2267,8 @@
 .acb__face {
   position: absolute;
   inset: 0;
-  border-radius: 4.6% / 3.3%;
+  display: block;
+  border-radius: inherit;
   backface-visibility: hidden;
 }
 
@@ -1975,7 +2276,7 @@
   transform: rotateY(180deg);
 }
 
-.acb__card.is-turned .acb__face--front .ac-card {
+.acb__card.is-turned .acb__face--front {
   box-shadow:
     0 0 0 1px rgb(255 255 255 / 18%),
     0 0 26px 2px var(--glow),
@@ -1987,6 +2288,7 @@
 .acb__reverse {
   position: absolute;
   inset: 0;
+  display: block;
   border-radius: inherit;
   background:
     var(--ac-grain), radial-gradient(circle at 50% 50%, #496fda 0 4.5%, transparent 5%),
@@ -2014,6 +2316,14 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 320ms 520ms ease-out;
+}
+
+.acb__actions[data-shown] {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .acb__actions button {
@@ -2036,7 +2346,7 @@
 
 @media (max-width: 640px) {
   .acb__packs {
-    gap: 22px 14px;
+    gap: 26px 16px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -2051,26 +2361,19 @@
 @keyframes acb-arrive {
   from {
     opacity: 0;
-    transform: translateY(36px) scale(0.9);
-  }
-}
-
-@keyframes acb-sheen {
-  from {
-    background-position: 120% 0;
-  }
-
-  to {
-    background-position: -40% 0;
+    transform: translateY(36px) rotate(-3deg) scale(0.9);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .acg-fan__card,
   .acg__link,
-  .acb-wrapper,
+  .acb__pack .acp,
   .acb__flipper,
-  .acb-wrapper__crimp--top {
+  .acb__hand,
+  .acb__actions,
+  .acb__tear,
+  .acb__tear .acp__strip {
     transition: none;
   }
 
@@ -2082,10 +2385,7 @@
   .acv.is-leaving .acv__bar,
   .acb__shade,
   .acb__pack,
-  .acb__tear,
-  .acb__card,
-  .acb__tear .acb-wrapper__sheen,
-  .acb__pack:hover .acb-wrapper__sheen {
+  .acb__tear {
     animation: none;
   }
 }
