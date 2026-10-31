@@ -2276,6 +2276,15 @@
   transform: rotateY(180deg);
 }
 
+/*
+ * The mark and the name of the back are layers of their own, which WebKit paints over the front in
+ * spite of `backface-visibility`: the back leaves as the card passes edge-on, 80ms into its turn.
+ */
+.acb__card.is-turned .acb__face--back {
+  visibility: hidden;
+  transition: visibility 0s 80ms;
+}
+
 .acb__card.is-turned .acb__face--front {
   box-shadow:
     0 0 0 1px rgb(255 255 255 / 18%),
