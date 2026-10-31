@@ -2,6 +2,7 @@ import SiteLink from '@/components/SiteLink'
 import {
   BookMarked,
   BookOpen,
+  Compass,
   History,
   Languages,
   Map,
@@ -25,10 +26,49 @@ const SECTION_ICONS: Record<ResourceSectionKey, LucideIcon> = {
   atlas: Map,
 }
 
+/** Bible Strong World is a site of its own, not a section of this one: only the menu leads to it. */
+const WORLD = {
+  href: 'https://world.bible-strong.app',
+  label: { fr: 'World', en: 'World' },
+  short: { fr: 'Le monde à explorer', en: 'A world to explore' },
+} as const
+
+function MenuEntry({
+  href,
+  icon: Icon,
+  label,
+  short,
+  current,
+}: {
+  href: string
+  icon: LucideIcon
+  label: string
+  short: string
+  current?: boolean
+}) {
+  return (
+    <li>
+      <SiteLink
+        className="resource-menu__item"
+        aria-current={current ? 'true' : undefined}
+        href={href}
+      >
+        <span className="resource-menu__icon" aria-hidden="true">
+          <Icon size={18} strokeWidth={1.8} />
+        </span>
+        <span className="resource-menu__text">
+          <span className="resource-menu__label">{label}</span>
+          <span className="resource-menu__short">{short}</span>
+        </span>
+      </SiteLink>
+    </li>
+  )
+}
+
 /**
- * The sections of the site, in the header of every public page, the landing page included: a
- * grid of eight cells where the Bible, the first of them, takes two, so that seven sections leave
- * no hole. It opens on a click, closes outside it and with Escape, and works without the script.
+ * The sections of the site and Bible Strong World, in the header of every public page, the landing
+ * page included: a grid of eight equal cells. It opens on a click, closes outside it and with
+ * Escape, and works without the script.
  */
 export default function ExploreMenu({ section }: { section?: ResourceSectionKey }) {
   const locale = useCurrentLocale()
@@ -66,26 +106,22 @@ export default function ExploreMenu({ section }: { section?: ResourceSectionKey 
       </summary>
       <nav className="resource-menu__panel" aria-label={MENU_LABEL[locale]}>
         <ul className="resource-menu__grid">
-          {RESOURCE_SECTIONS.map(entry => {
-            const Icon = SECTION_ICONS[entry.key]
-            return (
-              <li key={entry.key}>
-                <SiteLink
-                  className="resource-menu__item"
-                  aria-current={entry.key === section ? 'true' : undefined}
-                  href={entry.path(locale)}
-                >
-                  <span className="resource-menu__icon" aria-hidden="true">
-                    <Icon size={18} strokeWidth={1.8} />
-                  </span>
-                  <span className="resource-menu__text">
-                    <span className="resource-menu__label">{entry.label[locale]}</span>
-                    <span className="resource-menu__short">{entry.short[locale]}</span>
-                  </span>
-                </SiteLink>
-              </li>
-            )
-          })}
+          {RESOURCE_SECTIONS.map(entry => (
+            <MenuEntry
+              key={entry.key}
+              href={entry.path(locale)}
+              icon={SECTION_ICONS[entry.key]}
+              label={entry.label[locale]}
+              short={entry.short[locale]}
+              current={entry.key === section}
+            />
+          ))}
+          <MenuEntry
+            href={WORLD.href}
+            icon={Compass}
+            label={WORLD.label[locale]}
+            short={WORLD.short[locale]}
+          />
         </ul>
       </nav>
     </details>

@@ -1191,16 +1191,12 @@ a.strong-letters__letter:hover,
   box-shadow: 0 24px 60px rgb(8 14 28 / 22%);
 }
 
-/* Eight cells: the Bible takes two of them, and seven sections leave no hole. */
+/* Eight equal cells: seven sections and World. */
 .resource-menu__grid {
   display: grid;
   gap: 4px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   list-style: none;
-}
-
-.resource-menu__grid > li:first-child {
-  grid-column: span 2;
 }
 
 .resource-menu .resource-menu__item {
