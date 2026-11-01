@@ -92,6 +92,7 @@
     "database:darby-notes:en",
     "database:douay-rheims-notes:en",
     "database:egw-writings:en",
+    "database:egw-writings:fr",
     "database:family-notes:en",
     "database:fourfold-gospel:en",
     "database:fre-aug:fr",
@@ -117,9 +118,9 @@
     "strong-lexicon:core",
     "strong-lexicon:entities",
     "strong-lexicon:resources",
-    "database:egw-writings:fr",
     "strong-lexicon:simple-en",
-    "strong-lexicon:simple-fr"
+    "strong-lexicon:simple-fr",
+    "study-links"
   ],
   "bundleRoles": {}
 }

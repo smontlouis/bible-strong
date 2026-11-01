@@ -1485,5 +1485,18 @@
       }
     ],
     "strategy": "archive-extract"
+  },
+  {
+    "id": "study-links",
+    "artifactUrl": "https://assets.bible-strong.app/databases/study-links.sqlite.zip",
+    "sources": [
+      {
+        "role": "canonical",
+        "sourceUrl": "https://assets.bible-strong.app/databases/study-links.sqlite",
+        "entry": "study-links.sqlite"
+      }
+    ],
+    "strategy": "archive-extract",
+    "resourceRevision": "study-links-2fe2e1f4e0bb247a8148"
   }
 ]
