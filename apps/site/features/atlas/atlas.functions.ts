@@ -1,3 +1,4 @@
+import { readStudyLinksOf, type StudyLinkItem } from '../studyLinks/studyLinksRead'
 import type {
   StrongLexiconEntitiesResponseDto,
   StrongLexiconEntityPassagesResponseDto,
@@ -154,6 +155,7 @@ export type AtlasEntityPageData = {
   point?: AtlasMapPoint
   /** Places on the map around it, for its own map. */
   neighbours: AtlasMapPoint[]
+  studyLinks: StudyLinkItem[]
   incomplete: boolean
 }
 
@@ -484,7 +486,7 @@ export const loadAtlasEntityPage = createServerFn({ method: 'GET' })
     if (!isResourceLanguage(data.language)) throw notFound()
     const { language, uniqueName } = data
     const reads = createPageReads()
-    const [response, passages, entities, catalog, cardCatalog] = await Promise.all([
+    const [response, passages, entities, catalog, cardCatalog, studyLinks] = await Promise.all([
       reads.queue(() =>
         readResource<StrongLexiconEntityResponseDto>(
           `/v1/strong-lexicon/entities/${encodeURIComponent(uniqueName)}`,
@@ -499,6 +501,7 @@ export const loadAtlasEntityPage = createServerFn({ method: 'GET' })
       reads.optional(() => listAtlasEntities(language)),
       reads.optional(readAtlasPortraitCatalog),
       reads.optional(readAtlasCardCatalog),
+      readStudyLinksOf('entity', uniqueName, language),
     ])
     const entity = response?.entity
     if (!entity) throw notFound()
@@ -645,6 +648,7 @@ export const loadAtlasEntityPage = createServerFn({ method: 'GET' })
         : {}),
       ...(point ? { point } : {}),
       neighbours,
+      studyLinks,
       incomplete: reads.incomplete,
     }
   })

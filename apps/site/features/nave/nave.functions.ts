@@ -1,3 +1,4 @@
+import { readStudyLinksOf, type StudyLinkItem } from '../studyLinks/studyLinksRead'
 import type { BibleVerseTextsDto } from '@bible-strong/resource-domain/contracts/bibleChapterContract'
 import type { NaveTopicResponseDto } from '@bible-strong/resource-domain/contracts/naveContract'
 import { notFound, redirect } from '@tanstack/react-router'
@@ -132,6 +133,7 @@ export type NaveTopicPageData = NaveListTopic & {
   referenceCount: number
   /** The first verses the topic cites, quoted in the reference Bible of the language. */
   verses: { label: string; path: string; text: string }[]
+  studyLinks: StudyLinkItem[]
   /** Whether the publication of the other language holds the same topic. */
   hasAlternate: boolean
   previous?: NaveListTopic
@@ -146,12 +148,13 @@ export const loadNaveTopicPage = createServerFn({ method: 'GET' })
     if (!isResourceLanguage(data.language) || !requested) throw notFound()
     const language = data.language
 
-    const [response, index, alternate] = await Promise.all([
+    const [response, index, alternate, studyLinks] = await Promise.all([
       readResource<NaveTopicResponseDto>(
         `/v1/naves/${language}/topics/${encodeURIComponent(requested)}`
       ),
       loadNaveIndex(language),
       loadNaveIndex(otherLanguage(language)),
+      readStudyLinksOf('nave', requested, language),
     ])
     if (!response) {
       // Published names are lower case: a capitalized one is sent to the topic it names
@@ -229,6 +232,7 @@ export const loadNaveTopicPage = createServerFn({ method: 'GET' })
           : []
       }),
       hasAlternate: alternate.positions.has(normalizedName),
+      studyLinks,
       previous: previous && listTopic(previous),
       next: next && listTopic(next),
     }

@@ -1,5 +1,6 @@
 import SiteLink from '@/components/SiteLink'
 import ResourceShell from '../resources/ResourceShell'
+import StudyLinks from '../studyLinks/StudyLinks'
 import type { DictionaryEntryPageData, DictionaryListEntry } from './dictionary.functions'
 import { dictionaryEntryBreadcrumbs } from './dictionaryBreadcrumbs'
 import {
@@ -93,6 +94,8 @@ export default function DictionaryEntryPage({ page }: { page: DictionaryEntryPag
             </SiteLink>
           </nav>
         )}
+
+        <StudyLinks language={language} links={page.studyLinks} />
 
         {related.length > 0 && (
           <section className="mt-12">

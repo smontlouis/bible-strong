@@ -1,5 +1,6 @@
 import SiteLink from '@/components/SiteLink'
 import ResourceShell from '../resources/ResourceShell'
+import StudyLinks from '../studyLinks/StudyLinks'
 import { NAVE_MESSAGES, naveCount } from './messages'
 import type { NaveTopicPageData } from './nave.functions'
 import { naveTopicBreadcrumbs } from './naveHead'
@@ -71,6 +72,8 @@ export default function NaveTopicPage({ topic }: { topic: NaveTopicPageData }) {
             </ul>
           </section>
         )}
+
+        <StudyLinks language={language} links={topic.studyLinks} />
 
         {(previous || next) && (
           <nav

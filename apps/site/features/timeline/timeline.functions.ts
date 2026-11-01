@@ -1,3 +1,4 @@
+import { readStudyLinksOf, type StudyLinkItem } from '../studyLinks/studyLinksRead'
 import type {
   BibleVerseTextsDto,
   BibleVersionCoverageDto,
@@ -306,6 +307,7 @@ export type TimelineEventPageData = {
   description: string
   images: { src: string; caption: string }[]
   passages: TimelinePagePassage[]
+  studyLinks: StudyLinkItem[]
   /** The Bible the passages are quoted from and open in. */
   bibleVersionId: string
   related: TimelineEventLink[]
@@ -323,10 +325,11 @@ export const loadTimelineEventPage = createServerFn({ method: 'GET' })
     if (!isResourceLanguage(data.language) || !isTimelineSlug(slug)) throw notFound()
     const language = data.language
 
-    const [response, events, otherEvents] = await Promise.all([
+    const [response, events, otherEvents, studyLinks] = await Promise.all([
       readResource<TimelineEventResponseDto>(`/v1/timelines/${language}/events/${slug}`),
       listTimelineEvents(language),
       listTimelineEvents(otherLanguage(language)),
+      readStudyLinksOf('timeline', slug, language),
     ])
     if (!response) throw notFound()
     const { event } = response
@@ -365,6 +368,7 @@ export const loadTimelineEventPage = createServerFn({ method: 'GET' })
       passages,
       bibleVersionId: defaultBibleVersionId(language),
       related,
+      studyLinks,
       previous: position > 0 ? toLink(events[position - 1]) : undefined,
       next:
         position >= 0 && position < events.length - 1 ? toLink(events[position + 1]) : undefined,

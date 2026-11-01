@@ -1,3 +1,4 @@
+import { readStudyLinksOf, type StudyLinkItem } from '../studyLinks/studyLinksRead'
 import type {
   DictionaryCatalogResponseDto,
   DictionaryDirectoryResponseDto,
@@ -318,6 +319,7 @@ export type DictionaryEntryPageData = {
   slug: string
   html: string
   description: string
+  studyLinks: StudyLinkItem[]
   /** The letter the article is filed under, with its neighbours in that list. */
   letter?: string
   previous?: DictionaryListEntry
@@ -343,12 +345,13 @@ export const loadDictionaryEntryPage = createServerFn({ method: 'GET' })
     // The article is complete without its neighbours and related articles: a list that
     // cannot be read leaves them out instead of failing the page.
     const letter = dictionaryLetter(word, language)
-    const [siblings, notion] = await Promise.all([
+    const [siblings, notion, studyLinks] = await Promise.all([
       letter ? listLetterEntries(language, work.id, letter).catch(() => []) : [],
       listRelatedArticles(language, work.id, { id, word }).catch(() => ({
         label: undefined,
         articles: [],
       })),
+      readStudyLinksOf('dictionary', `${work.id}:${id}`, language),
     ])
     const related = notion.articles
     const sameLanguage = related.filter(article => article.language === language).length
@@ -369,6 +372,7 @@ export const loadDictionaryEntryPage = createServerFn({ method: 'GET' })
       previous: position > 0 ? siblings[position - 1] : undefined,
       next: position >= 0 ? siblings[position + 1] : undefined,
       related,
+      studyLinks,
       term:
         notion.label && sameLanguage > 0
           ? { word: notion.label, count: sameLanguage + 1 }

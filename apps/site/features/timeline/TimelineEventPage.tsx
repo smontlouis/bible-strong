@@ -2,6 +2,7 @@ import SiteLink from '@/components/SiteLink'
 import { Fragment, type CSSProperties, type ReactNode } from 'react'
 import { bibleVersionName, findBibleVersion } from '../bible/bibleVersions'
 import ResourceShell from '../resources/ResourceShell'
+import StudyLinks from '../studyLinks/StudyLinks'
 import { TIMELINE_MESSAGES } from './messages'
 import type {
   TimelineEventLink,
@@ -208,6 +209,8 @@ export default function TimelineEventPage({ event }: { event: TimelineEventPageD
             <TimelineEventList events={event.related} language={language} />
           </Section>
         )}
+
+        <StudyLinks language={language} links={event.studyLinks} />
 
         {(event.previous || event.next) && (
           <nav className="timeline-neighbours mt-14" aria-label={messages.neighbours}>

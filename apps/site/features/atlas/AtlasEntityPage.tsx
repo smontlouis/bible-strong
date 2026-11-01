@@ -1,6 +1,7 @@
 import SiteLink from '@/components/SiteLink'
 import { useState } from 'react'
 import ResourceShell from '../resources/ResourceShell'
+import StudyLinks from '../studyLinks/StudyLinks'
 import type { AtlasEntityPageData } from './atlas.functions'
 import AtlasCards from './AtlasCards'
 import AtlasMap from './AtlasMap'
@@ -274,6 +275,9 @@ export default function AtlasEntityPage({ page }: { page: AtlasEntityPageData })
             </div>
           </section>
         )}
+        <div className="atlas-entity__section">
+          <StudyLinks language={language} links={page.studyLinks} />
+        </div>
       </article>
     </ResourceShell>
   )
