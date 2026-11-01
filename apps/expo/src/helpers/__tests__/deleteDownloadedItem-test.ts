@@ -32,6 +32,7 @@ jest.mock('../databases', () => ({
   getCommentaryDbPath: (resourceId: string, language: string) =>
     `file:///documents/SQLite/${language}/commentaries/${resourceId}.sqlite`,
   getDictionaryDirectoryDbPath: () => 'file:///documents/SQLite/shared/dictionary-directory.sqlite',
+  getStudyLinksDbPath: () => 'file:///documents/SQLite/shared/study-links.sqlite',
 }))
 
 jest.mock('~features/resources/resourceAvailability', () => ({
@@ -217,6 +218,10 @@ describe('deleteDownloadedItem', () => {
     )
     expect(FileSystem.deleteAsync).toHaveBeenCalledWith(
       'file:///documents/SQLite/shared/dictionary-directory.sqlite',
+      { idempotent: true }
+    )
+    expect(FileSystem.deleteAsync).toHaveBeenCalledWith(
+      'file:///documents/SQLite/shared/study-links.sqlite',
       { idempotent: true }
     )
   })

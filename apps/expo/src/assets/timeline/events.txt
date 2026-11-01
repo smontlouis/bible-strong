@@ -48,7 +48,7 @@
       },
       {
         "id": 664,
-        "title": "La marque de Caïn",
+        "title": "Caïn marqué",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-prcas1582_8-8-2013%209-54-54%20AM.jpg",
         "slug": "cain-marked",
         "start": -3825,
@@ -71,7 +71,7 @@
       },
       {
         "id": 666,
-        "title": "Hénoc",
+        "title": "Enosch",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-%20Enos_8-5-2013%205-22-39%20PM.jpg",
         "slug": "enos",
         "start": -3719,
@@ -126,7 +126,7 @@
       },
       {
         "id": 671,
-        "title": "Mathusalem",
+        "title": "Metuschélach",
         "image": "http://timeline.biblehistory.com/media/images/t/tissot-Building_the_Ark_7-31-2013%209-22-14%20AM.jpg",
         "slug": "methuselah",
         "start": -3267,
@@ -235,7 +235,7 @@
       },
       {
         "id": 613,
-        "title": "Le Déluge",
+        "title": "Le déluge",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-flood_8-5-2013%203-57-56%20PM.jpg",
         "slug": "flood",
         "start": -2298,
@@ -258,7 +258,7 @@
       },
       {
         "id": 615,
-        "title": "Arphaxad",
+        "title": "Arpacschad",
         "slug": "arphaxad",
         "start": -2296,
         "end": -1858,
@@ -269,7 +269,7 @@
       },
       {
         "id": 616,
-        "title": "Cush",
+        "title": "Cusch",
         "slug": "cush",
         "start": -2295,
         "end": -1898,
@@ -280,7 +280,7 @@
       },
       {
         "id": 617,
-        "title": "Migration vers la plaine de Shinar",
+        "title": "Migration vers la plaine de Schinear",
         "slug": "migration-to-plain-of-shinar",
         "start": -2280,
         "end": -2280,
@@ -336,7 +336,7 @@
       },
       {
         "id": 621,
-        "title": "Peleg",
+        "title": "Péleg",
         "slug": "peleg",
         "start": -2197,
         "end": -1958,
@@ -437,7 +437,7 @@
       },
       {
         "id": 666,
-        "title": "Hénoc",
+        "title": "Enosch",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-%20Enos_8-5-2013%205-22-39%20PM.jpg",
         "slug": "enos",
         "start": -3719,
@@ -481,7 +481,7 @@
       },
       {
         "id": 671,
-        "title": "Mathusalem",
+        "title": "Metuschélach",
         "image": "http://timeline.biblehistory.com/media/images/t/tissot-Building_the_Ark_7-31-2013%209-22-14%20AM.jpg",
         "slug": "methuselah",
         "start": -3267,
@@ -556,7 +556,7 @@
       },
       {
         "id": 643,
-        "title": "Mariage d'Abraham et de Sarah",
+        "title": "Mariage d'Abraham et de Sara",
         "slug": "marriage-of-abraham-and-sarah",
         "start": -1915,
         "end": -1809,
@@ -578,7 +578,7 @@
       },
       {
         "id": 647,
-        "title": "Terach quitte Ur pour la ville de Haran",
+        "title": "Térach quitte Ur pour la ville de Charan",
         "slug": "terah-leaves-ur-for-city-of-haran",
         "start": -1896,
         "end": -1896,
@@ -589,7 +589,7 @@
       },
       {
         "id": 648,
-        "title": "Abram appelé et quitte Haran",
+        "title": "Abram appelé, il quitte Charan",
         "slug": "abram-called-and-departs-haran",
         "start": -1871,
         "end": -1871,
@@ -611,7 +611,7 @@
       },
       {
         "id": 650,
-        "title": "Sarah et le roi égyptien",
+        "title": "Sara et le roi égyptien",
         "slug": "sarah-and-egyptian-king",
         "start": -1871,
         "end": -1871,
@@ -622,7 +622,7 @@
       },
       {
         "id": 651,
-        "title": "Lot déménage à Sodome",
+        "title": "Lot s'installe à Sodome",
         "slug": "lot-moves-to-sodom",
         "start": -1867,
         "end": -1867,
@@ -633,7 +633,7 @@
       },
       {
         "id": 655,
-        "title": "Abram livre Sodome aux quatre rois",
+        "title": "Abram délivre Sodome des quatre rois",
         "slug": "abram-delivers-sodom-from-four-kings",
         "start": -1866,
         "end": -1866,
@@ -644,7 +644,7 @@
       },
       {
         "id": 656,
-        "title": "Abram béni par Melchisedek",
+        "title": "Abram béni par Melchisédek",
         "slug": "abram-blessed-by-melchizedek",
         "start": -1866,
         "end": -1866,
@@ -655,7 +655,7 @@
       },
       {
         "id": 657,
-        "title": "L'alliance de Dieu avec Abram / Four à fumée",
+        "title": "L'alliance de Dieu avec Abram / Le four fumant",
         "slug": "gods-covenant-with-abram-smoking-furnace",
         "start": -1865,
         "end": -1865,
@@ -677,7 +677,7 @@
       },
       {
         "id": 611,
-        "title": "Ismael",
+        "title": "Ismaël",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/Navez_Agar_et_Ismael.jpg",
         "slug": "ishmael",
@@ -766,7 +766,7 @@
       },
       {
         "id": 601,
-        "title": "Isaac & Rebecca mariés",
+        "title": "Isaac et Rebecca mariés",
         "slug": "isaac-rebekah-married",
         "start": -1811,
         "end": -1811,
@@ -788,7 +788,7 @@
       },
       {
         "id": 602,
-        "title": "Esau",
+        "title": "Ésaü",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-prcas0680_8-7-2013%201-46-50%20PM.jpg",
         "slug": "esau",
         "start": -1791,
@@ -824,7 +824,7 @@
       },
       {
         "id": 603,
-        "title": "Esau épouse deux femmes",
+        "title": "Ésaü épouse deux femmes",
         "slug": "esau-marries-two-wives",
         "start": -1751,
         "end": -1751,
@@ -890,7 +890,7 @@
       },
       {
         "id": 689,
-        "title": "Esau épouse une troisième femme",
+        "title": "Ésaü épouse une troisième femme",
         "slug": "esau-marries-third-wife",
         "start": -1714,
         "end": -1714,
@@ -1000,7 +1000,7 @@
       },
       {
         "id": 701,
-        "title": "Asher",
+        "title": "Aser",
         "slug": "asher",
         "start": -1703,
         "end": -1601,
@@ -1066,7 +1066,7 @@
       },
       {
         "id": 705,
-        "title": "Jacob quitte Haran",
+        "title": "Jacob quitte Charan",
         "slug": "jacob-leaves-haran",
         "start": -1694,
         "end": -1694,
@@ -1154,7 +1154,7 @@
       },
       {
         "id": 712,
-        "title": "Juda part, il épouse une Cananéenne",
+        "title": "Juda part et épouse une Cananéenne",
         "slug": "judah-leaves-marries-a-canaanite",
         "start": -1683,
         "end": -1682,
@@ -1187,7 +1187,7 @@
       },
       {
         "id": 714,
-        "title": "Joseph - le Majordone et le Boulanger jetés en prison",
+        "title": "Joseph, l'échanson et le panetier jetés en prison",
         "slug": "joseph-butler-and-baker-cast-into-prison",
         "start": -1671,
         "end": -1671,
@@ -1198,7 +1198,7 @@
       },
       {
         "id": 605,
-        "title": "Joseph interprète le rêve du pharaon et se libère",
+        "title": "Joseph interprète le rêve du pharaon et est libéré",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-prcas2865_8-6-2013%2011-12-06%20AM.jpg",
         "slug": "joseph-freed-pharaohs-dream-7-years-of-plenty",
         "start": -1670,
@@ -1221,7 +1221,7 @@
       },
       {
         "id": 716,
-        "title": "Ephraïm",
+        "title": "Éphraïm",
         "slug": "ephraim",
         "start": -1665,
         "end": -1575,
@@ -1243,7 +1243,7 @@
       },
       {
         "id": 718,
-        "title": "Pharez (ou Perez)",
+        "title": "Pharès (ou Pérets)",
         "slug": "pharez-or-perez",
         "start": -1663,
         "end": -1573,
@@ -1254,7 +1254,7 @@
       },
       {
         "id": 719,
-        "title": "7 ans de sécheresse, les frères de Joseph viennent en Egypte",
+        "title": "7 ans de sécheresse, les frères de Joseph viennent en Égypte",
         "slug": "7-year-drought-josephs-brothers-come-to-egypt",
         "start": -1663,
         "end": -1663,
@@ -1323,7 +1323,7 @@
       },
       {
         "id": 615,
-        "title": "Arphaxad",
+        "title": "Arpacschad",
         "slug": "arphaxad",
         "start": -2296,
         "end": -1858,
@@ -1334,7 +1334,7 @@
       },
       {
         "id": 616,
-        "title": "Cush",
+        "title": "Cusch",
         "slug": "cush",
         "start": -2295,
         "end": -1898,
@@ -1464,7 +1464,7 @@
       },
       {
         "id": 722,
-        "title": "Esrom (ou Hezron)",
+        "title": "Esrom (ou Hetsron)",
         "slug": "esrom-or-hezron",
         "start": -1593,
         "end": -1503,
@@ -1508,7 +1508,7 @@
       },
       {
         "id": 725,
-        "title": "Les Égyptiens chassent les Hyksos, l'Égyptien du Nouveau Royaume",
+        "title": "Les Égyptiens chassent les Hyksos, début du Nouvel Empire égyptien",
         "slug": "egyptians-drive-out-hyksos-new-kingdom-egyptian",
         "start": -1566,
         "end": -1566,
@@ -1553,7 +1553,7 @@
       },
       {
         "id": 728,
-        "title": "Naasson (ou Nahshon)",
+        "title": "Naasson (ou Nachschon)",
         "slug": "naasson-or-nahshon",
         "start": -1383,
         "end": -1273,
@@ -1622,7 +1622,7 @@
       },
       {
         "id": 733,
-        "title": "Eléazar",
+        "title": "Éléazar",
         "slug": "eleazar",
         "start": -1463,
         "end": -1353,
@@ -1755,7 +1755,7 @@
       },
       {
         "id": 701,
-        "title": "Asher",
+        "title": "Aser",
         "slug": "asher",
         "start": -1703,
         "end": -1601,
@@ -1821,7 +1821,7 @@
       },
       {
         "id": 716,
-        "title": "Ephraïm",
+        "title": "Éphraïm",
         "slug": "ephraim",
         "start": -1665,
         "end": -1575,
@@ -1832,7 +1832,7 @@
       },
       {
         "id": 718,
-        "title": "Pharez (ou Perez)",
+        "title": "Pharès (ou Pérets)",
         "slug": "pharez-or-perez",
         "start": -1663,
         "end": -1573,
@@ -1942,7 +1942,7 @@
       },
       {
         "id": 746,
-        "title": "Joshua appelé, le soleil et la lune s'immobilisent",
+        "title": "Josué appelé, le soleil et la lune s'immobilisent",
         "slug": "joshua-called-sun-moon-stand-still",
         "start": -1405,
         "end": -1405,
@@ -1953,7 +1953,7 @@
       },
       {
         "id": 754,
-        "title": "Boaz",
+        "title": "Booz",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-prcas0067_8-13-2013%203-13-51%20PM.jpg",
         "slug": "boaz",
         "start": -1273,
@@ -1987,7 +1987,7 @@
       },
       {
         "id": 764,
-        "title": "Ruth et Naomi viennent à Bethléem",
+        "title": "Ruth et Noémi viennent à Bethléem",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-stdas0718_8-6-2013%203-00-22%20PM.jpg",
         "slug": "ruth-and-naomi-come-to-bethlehem",
         "start": -1230,
@@ -1999,7 +1999,7 @@
       },
       {
         "id": 755,
-        "title": "Ehud",
+        "title": "Éhud",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/Ehud_5-6-2013%205-07-09%20PM.jpg",
         "slug": "ehud",
@@ -2022,7 +2022,7 @@
       },
       {
         "id": 756,
-        "title": "Ehud abat le roi Eglon",
+        "title": "Éhud abat le roi Églon",
         "image": "http://timeline.biblehistory.com/media/images/t/Speculum_Darmstadt_2505_55r_cropped_8-6-2013%203-28-49%20PM.jpg",
         "slug": "40-years-peace-ends-moabite-oppression-begins",
         "start": -1297,
@@ -2034,7 +2034,7 @@
       },
       {
         "id": 762,
-        "title": "Gédeon",
+        "title": "Gédéon",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/507px-Gideon_Squeezed_the_Fleece_001_8-6-2013%203-34-47%20PM.jpg",
         "slug": "gideon",
@@ -2046,7 +2046,7 @@
       },
       {
         "id": 768,
-        "title": "Eli",
+        "title": "Éli",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-prcas5083_8-13-2013%203-28-45%20PM.jpg",
         "slug": "eli",
@@ -2094,7 +2094,7 @@
       },
       {
         "id": 780,
-        "title": "Samuel Juge Israël",
+        "title": "Samuel juge Israël",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-prcas1474_8-6-2013%203-59-48%20PM.jpg",
         "slug": "samuel-judges-israel",
         "start": -1143,
@@ -2106,7 +2106,7 @@
       },
       {
         "id": 777,
-        "title": "Les philistins capturent l'arche",
+        "title": "Les Philistins capturent l'arche",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-pcmas0005_8-6-2013%204-06-34%20PM.jpg",
         "slug": "philistines-capture-ark",
         "start": -1142,
@@ -2118,7 +2118,7 @@
       },
       {
         "id": 771,
-        "title": "Jesse",
+        "title": "Isaï",
         "slug": "jesse",
         "start": -1140,
         "end": -1020,
@@ -2208,7 +2208,7 @@
       },
       {
         "id": 728,
-        "title": "Naasson (ou Nahshon)",
+        "title": "Naasson (ou Nachschon)",
         "slug": "naasson-or-nahshon",
         "start": -1383,
         "end": -1273,
@@ -2254,7 +2254,7 @@
       },
       {
         "id": 733,
-        "title": "Eléazar",
+        "title": "Éléazar",
         "slug": "eleazar",
         "start": -1463,
         "end": -1353,
@@ -2341,7 +2341,7 @@
       },
       {
         "id": 784,
-        "title": "Ishbosheth",
+        "title": "Ish-Boscheth",
         "image": "http://timeline.biblehistory.com/media/images/t/ishbosheth_8-6-2013%205-16-18%20PM.jpg",
         "slug": "ishbosheth",
         "start": -1050,
@@ -2411,7 +2411,7 @@
       },
       {
         "id": 792,
-        "title": "David tue ses lions",
+        "title": "David tue des lions",
         "slug": "david-slays-his-lions",
         "start": -1027,
         "end": -1027,
@@ -2466,7 +2466,7 @@
       },
       {
         "id": 804,
-        "title": "David va chez Ahimelech, prêtre à Nob",
+        "title": "David va chez Achimélec, prêtre à Nob",
         "slug": "david-goes-to-ahimelech-priest-at-nob",
         "start": -1020,
         "end": -1020,
@@ -2532,7 +2532,7 @@
       },
       {
         "id": 813,
-        "title": "Mephibosheth",
+        "title": "Mephiboscheth",
         "slug": "mephibosheth",
         "start": -1015,
         "end": -969,
@@ -2543,7 +2543,7 @@
       },
       {
         "id": 814,
-        "title": "David s'enfuit dans la région sauvage de Paran",
+        "title": "David s'enfuit dans le désert de Paran",
         "slug": "david-flees-to-wilderness-of-paran",
         "start": -1015,
         "end": -1015,
@@ -2554,7 +2554,7 @@
       },
       {
         "id": 815,
-        "title": "David épouse Abigail",
+        "title": "David épouse Abigaïl",
         "slug": "david-marries-abigail",
         "start": -1015,
         "end": -1015,
@@ -2565,7 +2565,7 @@
       },
       {
         "id": 816,
-        "title": "David épargne la vie de Saul une deuxième fois",
+        "title": "David épargne la vie de Saül une deuxième fois",
         "slug": "david-spares-sauls-life-a-2nd-time",
         "start": -1014,
         "end": -1014,
@@ -2576,7 +2576,7 @@
       },
       {
         "id": 817,
-        "title": "David a reçu Ziklag du Roi Akish",
+        "title": "David reçoit Tsiklag du roi Akish",
         "slug": "david-received-ziklag-from-king-achish",
         "start": -1014,
         "end": -1014,
@@ -2587,7 +2587,7 @@
       },
       {
         "id": 786,
-        "title": "Délivrance de Jabesh, Israël unifié",
+        "title": "Délivrance de Jabès, Israël unifié",
         "slug": "deliverance-of-jabesh-israel-unified",
         "start": -1010,
         "end": -1010,
@@ -2598,7 +2598,7 @@
       },
       {
         "id": 818,
-        "title": "Raid philistin à Gilboa, Saul consulte une sorcière",
+        "title": "Raid philistin à Guilboa, Saül consulte une sorcière",
         "image": "http://timeline.biblehistory.com/media/images/t/saul-and-the-witch-of-endor-1777_7-30-2013%203-19-19%20PM.jpg",
         "slug": "philistine-raid-at-gilboa-saul-consults-witch",
         "start": -1010,
@@ -2621,7 +2621,7 @@
       },
       {
         "id": 802,
-        "title": "Bathsheba",
+        "title": "Bath-Schéba",
         "image": "http://timeline.biblehistory.com/media/images/t/bathsheba-receiving-david-s-letter_8-5-2013%203-48-46%20PM.jpg",
         "slug": "bathsheba",
         "start": -1009,
@@ -2645,7 +2645,7 @@
       },
       {
         "id": 822,
-        "title": "David King sur l'Israël unifié",
+        "title": "David roi d'Israël unifié",
         "slug": "david-king-over-united-israel",
         "start": -1003,
         "end": -970,
@@ -2691,7 +2691,7 @@
       },
       {
         "id": 828,
-        "title": "David fait preuve de gentillesse envers Mephibosheth",
+        "title": "David fait preuve de bonté envers Mephiboscheth",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-DavidMephibosheth_8-5-2013%205-34-41%20PM.jpg",
         "slug": "david-shows-kindness-to-mephibosheth",
         "start": -997,
@@ -2703,7 +2703,7 @@
       },
       {
         "id": 833,
-        "title": "L'adultère de David avec Bethsabée",
+        "title": "L'adultère de David avec Bath-Schéba",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-jcgas0037_8-5-2013%205-49-36%20PM.jpg",
         "slug": "davids-adultery-with-bathsheba",
         "start": -992,
@@ -2715,7 +2715,7 @@
       },
       {
         "id": 835,
-        "title": "David Rebuked par Nathan",
+        "title": "David repris par Nathan",
         "slug": "david-rebuked-by-nathan",
         "start": -991,
         "end": -991,
@@ -2726,7 +2726,7 @@
       },
       {
         "id": 836,
-        "title": "Mort de l'enfant de David d'un adultère, 1er jugement",
+        "title": "Mort de l'enfant adultérin de David, 1er jugement",
         "slug": "davids-child-from-adultery-dies-1st-judgment",
         "start": -991,
         "end": -991,
@@ -2748,7 +2748,7 @@
       },
       {
         "id": 838,
-        "title": "Solomon",
+        "title": "Salomon",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-lwjas0181_8-8-2013%2012-16-00%20PM.jpg",
         "slug": "solomon",
@@ -2771,7 +2771,7 @@
       },
       {
         "id": 842,
-        "title": "Absalom tue Amnon, 2e jugement",
+        "title": "Absalom assassine Amnon, 2e jugement",
         "slug": "absalom-murders-amnon-2nd-judgment",
         "start": -987,
         "end": -987,
@@ -2782,7 +2782,7 @@
       },
       {
         "id": 843,
-        "title": "Absalom revient de Geshur à Jérusalem",
+        "title": "Absalom revient de Guéchour à Jérusalem",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-prcas0690_8-22-2013%202-40-45%20PM.jpg",
         "slug": "absalom-returns-to-jerusalem-from-geshur",
         "start": -984,
@@ -2816,7 +2816,7 @@
       },
       {
         "id": 848,
-        "title": "David Numbers Israël",
+        "title": "David dénombre Israël",
         "slug": "david-numbers-israel",
         "start": -974,
         "end": -974,
@@ -2827,7 +2827,7 @@
       },
       {
         "id": 850,
-        "title": "Rehoboam",
+        "title": "Roboam",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-stdas0014_8-22-2013%202-52-06%20PM.jpg",
         "slug": "rehoboam",
@@ -2839,7 +2839,7 @@
       },
       {
         "id": 851,
-        "title": "Rébellion d'Adonijah, 4e arrêt",
+        "title": "Rébellion d'Adonija, 4e jugement",
         "slug": "rebellion-of-adonijah-4th-judgment",
         "start": -971,
         "end": -971,
@@ -2873,7 +2873,7 @@
       },
       {
         "id": 856,
-        "title": "Le pharaon conquiert Gezer, dot pour sa fille",
+        "title": "Le pharaon conquiert Guézer, dot pour sa fille",
         "slug": "pharaoh-conquers-gezer-gives-as-present-to-daughter",
         "start": -967,
         "end": -967,
@@ -2918,7 +2918,7 @@
       },
       {
         "id": 863,
-        "title": "Hiram inspecte son paiement dans les villes",
+        "title": "Hiram inspecte les villes reçues en paiement",
         "slug": "hiram-inspects-his-payment-in-cities",
         "start": -946,
         "end": -946,
@@ -2929,7 +2929,7 @@
       },
       {
         "id": 865,
-        "title": "Solomon fortifie les villes",
+        "title": "Salomon fortifie les villes",
         "slug": "solomon-works-on-millo-and-building-up-cities",
         "start": -945,
         "end": -931,
@@ -2985,7 +2985,7 @@
       },
       {
         "id": 873,
-        "title": "Baasha",
+        "title": "Baescha",
         "slug": "baasha",
         "start": -933,
         "end": -886,
@@ -2996,7 +2996,7 @@
       },
       {
         "id": 768,
-        "title": "Eli",
+        "title": "Éli",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-prcas5083_8-13-2013%203-28-45%20PM.jpg",
         "slug": "eli",
@@ -3020,7 +3020,7 @@
       },
       {
         "id": 780,
-        "title": "Samuel Juge Israël",
+        "title": "Samuel juge Israël",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-prcas1474_8-6-2013%203-59-48%20PM.jpg",
         "slug": "samuel-judges-israel",
         "start": -1143,
@@ -3032,7 +3032,7 @@
       },
       {
         "id": 771,
-        "title": "Jesse",
+        "title": "Isaï",
         "slug": "jesse",
         "start": -1140,
         "end": -1020,
@@ -3106,7 +3106,7 @@
       },
       {
         "id": 877,
-        "title": "Rehoboam abandonne la vertu",
+        "title": "Roboam abandonne la vertu",
         "slug": "rehoboam-forsakes-righteousness",
         "start": -928,
         "end": -928,
@@ -3117,7 +3117,7 @@
       },
       {
         "id": 878,
-        "title": "Le temple de Salomon mis à sac par Chishak",
+        "title": "Le temple de Salomon pillé par Schischak",
         "slug": "solomons-temple-sacked-by-shishak",
         "start": -926,
         "end": -926,
@@ -3128,7 +3128,7 @@
       },
       {
         "id": 890,
-        "title": "Ahab",
+        "title": "Achab",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/Elijah_4-17-2013%204-20-32%20PM.jpg",
         "slug": "ahab",
@@ -3151,7 +3151,7 @@
       },
       {
         "id": 868,
-        "title": "Abijah",
+        "title": "Abija",
         "slug": "abijah",
         "start": -913,
         "end": -911,
@@ -3162,7 +3162,7 @@
       },
       {
         "id": 883,
-        "title": "Elah",
+        "title": "Éla",
         "slug": "elah",
         "start": -912,
         "end": -885,
@@ -3173,7 +3173,7 @@
       },
       {
         "id": 876,
-        "title": "Melea",
+        "title": "Méléa",
         "slug": "melea",
         "start": -907,
         "end": -827,
@@ -3184,7 +3184,7 @@
       },
       {
         "id": 887,
-        "title": "Jehoshaphat",
+        "title": "Josaphat",
         "slug": "jehoshaphat",
         "start": -907,
         "end": -848,
@@ -3195,7 +3195,7 @@
       },
       {
         "id": 889,
-        "title": "Elijah",
+        "title": "Élie",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/Elijah%20taken%20up%201005-63_7-22-2013%203-12-23%20PM.JPG",
         "slug": "elijah",
@@ -3207,7 +3207,7 @@
       },
       {
         "id": 891,
-        "title": "La Palestine envahie par Zerah",
+        "title": "La Palestine envahie par Zérach",
         "slug": "palestine-invaded-by-zerah",
         "start": -900,
         "end": -900,
@@ -3218,7 +3218,7 @@
       },
       {
         "id": 892,
-        "title": "Benhadad II",
+        "title": "Ben-Hadad II",
         "slug": "benhadad-ii",
         "start": -900,
         "end": -841,
@@ -3229,7 +3229,7 @@
       },
       {
         "id": 902,
-        "title": "Athaliah",
+        "title": "Athalie",
         "slug": "athaliah",
         "start": -898,
         "end": -835,
@@ -3240,7 +3240,7 @@
       },
       {
         "id": 894,
-        "title": "Shalmaneser III",
+        "title": "Salmanasar III",
         "slug": "shalmaneser-iii",
         "start": -894,
         "end": -824,
@@ -3251,7 +3251,7 @@
       },
       {
         "id": 888,
-        "title": "Eliakim",
+        "title": "Éliakim",
         "slug": "eliakim-son-of-melea",
         "start": -887,
         "end": -807,
@@ -3262,7 +3262,7 @@
       },
       {
         "id": 899,
-        "title": "Elisha",
+        "title": "Élisée",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/ElishaRaisingShunammitesSon.jpg",
         "slug": "elisha",
@@ -3285,7 +3285,7 @@
       },
       {
         "id": 905,
-        "title": "Ahaziah",
+        "title": "Achazia",
         "slug": "ahaziah-9th-king",
         "start": -878,
         "end": -852,
@@ -3329,7 +3329,7 @@
       },
       {
         "id": 912,
-        "title": "Obadiah cache les prophètes de Dieu",
+        "title": "Abdias cache les prophètes de Dieu",
         "image": "http://timeline.biblehistory.com/media/images/t/Obadiah_hides_prophets_8-26-2013%205-48-34%20PM.jpg",
         "slug": "obadiah-hides-the-prophets-of-god",
         "start": -870,
@@ -3341,7 +3341,7 @@
       },
       {
         "id": 914,
-        "title": "Josaphat envoie des lévites pour enseigner le droit",
+        "title": "Josaphat envoie des Lévites enseigner la loi",
         "slug": "jehoshaphat-sends-levites-out-to-teach-the-law",
         "start": -869,
         "end": -869,
@@ -3374,7 +3374,7 @@
       },
       {
         "id": 918,
-        "title": "Fin de 3 ans et demi sans pluie, Elijah court à l'Horeb",
+        "title": "Fin de 3 ans et demi sans pluie, Élie court à l'Horeb",
         "image": "http://timeline.biblehistory.com/media/images/t/_GoodSalt-prcas2859_8-26-2013%206-09-22%20PM.jpg",
         "slug": "end-3-12-years-of-no-rain-elijah-runs-to-horeb",
         "start": -866,
@@ -3386,7 +3386,7 @@
       },
       {
         "id": 915,
-        "title": "Gehazi",
+        "title": "Guéhazi",
         "slug": "gehazi",
         "start": -864,
         "end": -800,
@@ -3397,7 +3397,7 @@
       },
       {
         "id": 917,
-        "title": "Ahaziah",
+        "title": "Achazia",
         "slug": "ahaziah-6th-king",
         "start": -863,
         "end": -841,
@@ -3408,7 +3408,7 @@
       },
       {
         "id": 922,
-        "title": "Le vignoble d'Ahab et Naboth",
+        "title": "Achab et la vigne de Naboth",
         "image": "http://timeline.biblehistory.com/media/images/t/456px-Jezebel_has_Naboth_killed_8-27-2013%209-42-38%20AM.jpg",
         "slug": "ahab-and-naboths-vineyard",
         "start": -855,
@@ -3420,7 +3420,7 @@
       },
       {
         "id": 921,
-        "title": "Achab vainc Benhadad Ier de Syrie",
+        "title": "Achab vainc Ben-Hadad Ier de Syrie",
         "slug": "ahab-defeats-benhadad-i-of-syria",
         "start": -853,
         "end": -853,
@@ -3431,7 +3431,7 @@
       },
       {
         "id": 923,
-        "title": "Micaiah Prophétise la défaite d'Achab",
+        "title": "Michée prophétise la défaite d'Achab",
         "slug": "micaiah-prophesies-defeat-of-ahab",
         "start": -853,
         "end": -853,
@@ -3442,7 +3442,7 @@
       },
       {
         "id": 924,
-        "title": "Ahab se bat avec Josaphat contre les Syriens",
+        "title": "Achab se bat avec Josaphat contre les Syriens",
         "slug": "ahab-battles-with-jehoshaphat-against-syrians",
         "start": -853,
         "end": -853,
@@ -3453,7 +3453,7 @@
       },
       {
         "id": 925,
-        "title": "Ahab se bat contre les Assyriens au Qarqar allié à Ben-hadad",
+        "title": "Achab combat les Assyriens à Qarqar, allié à Ben-Hadad",
         "slug": "ahab-battles-assyrians-at-qarqar-allied-w-benhadad",
         "start": -853,
         "end": -853,
@@ -3464,7 +3464,7 @@
       },
       {
         "id": 926,
-        "title": "Ahaziah d'Israël tente d'intimider Elie",
+        "title": "Achazia d'Israël tente d'intimider Élie",
         "slug": "ahaziah-of-israel-tries-to-intimidate-elijah",
         "start": -853,
         "end": -853,
@@ -3475,7 +3475,7 @@
       },
       {
         "id": 940,
-        "title": "Jehoram de Juda reçoit une lettre d'Élie",
+        "title": "Joram de Juda reçoit une lettre d'Élie",
         "slug": "jehoram-of-judah-receives-prophetic-writing-from-elijah",
         "start": -851,
         "end": -851,
@@ -3486,7 +3486,7 @@
       },
       {
         "id": 928,
-        "title": "Elisha raillé par les jeunes au Béthel",
+        "title": "Élisée raillé par les jeunes à Béthel",
         "slug": "elisha-mocked-by-youth-at-bethel",
         "start": -850,
         "end": -850,
@@ -3508,7 +3508,7 @@
       },
       {
         "id": 931,
-        "title": "Elisha et l'huile de la veuve",
+        "title": "Élisée et l'huile de la veuve",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-lwjas0179_8-6-2013%202-49-26%20PM.jpg",
         "slug": "elisha-and-the-widows-oil",
         "start": -849,
@@ -3520,7 +3520,7 @@
       },
       {
         "id": 936,
-        "title": "Elisha purifie le pot de ragoût",
+        "title": "Élisée purifie le pot de ragoût",
         "slug": "elisha-purifies-the-pot-of-stew",
         "start": -848,
         "end": -848,
@@ -3542,7 +3542,7 @@
       },
       {
         "id": 930,
-        "title": "Elisha promet un fils à la femme shunamite",
+        "title": "Élisée promet un fils à la femme sunamite",
         "slug": "elisha-promises-shunammite-woman-a-son",
         "start": -847,
         "end": -847,
@@ -3553,7 +3553,7 @@
       },
       {
         "id": 939,
-        "title": "Elisha nourrit 100 hommes",
+        "title": "Élisée nourrit 100 hommes",
         "slug": "elisha-feeds-100-men",
         "start": -847,
         "end": -847,
@@ -3564,7 +3564,7 @@
       },
       {
         "id": 941,
-        "title": "Elisha et le miracle de la tête de hache flottante",
+        "title": "Élisée et le miracle de la tête de hache flottante",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-pppas0209_8-6-2013%203-10-18%20PM.jpg",
         "slug": "elisha-and-miracle-of-the-floating-ax-head",
         "start": -846,
@@ -3576,7 +3576,7 @@
       },
       {
         "id": 942,
-        "title": "Elisha contrecarre les embuscades syriennes",
+        "title": "Élisée déjoue les embuscades syriennes",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-stdas0556_8-6-2013%203-12-36%20PM.jpg",
         "slug": "elisha-thwarts-syrian-ambushes",
         "start": -845,
@@ -3588,7 +3588,7 @@
       },
       {
         "id": 945,
-        "title": "Benhadad II : siège de la Samarie et délivrance",
+        "title": "Ben-Hadad II : siège de Samarie et délivrance",
         "slug": "benhadad-ii-siege-of-samaria-and-deliverance",
         "start": -845,
         "end": -845,
@@ -3599,7 +3599,7 @@
       },
       {
         "id": 943,
-        "title": "Jehoram de Judah atteint d'une maladie intestinale",
+        "title": "Joram de Juda atteint d'une maladie intestinale",
         "slug": "jehoram-of-judah-struck-with-bowel-disease",
         "start": -843,
         "end": -843,
@@ -3610,7 +3610,7 @@
       },
       {
         "id": 946,
-        "title": "Joash (ou Jehoash)",
+        "title": "Joas (ou Jéhoas)",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/_GoodSalt-stdas0028_8-27-2013%2012-10-43%20PM.jpg",
         "slug": "joash-or-jehoash",
@@ -3622,7 +3622,7 @@
       },
       {
         "id": 947,
-        "title": "Shalmaneser III bat Hazael",
+        "title": "Salmanasar III bat Hazaël",
         "slug": "shalmaneser-iii-of-assyria-defeats-hazael-of-damascus",
         "start": -841,
         "end": -841,
@@ -3633,7 +3633,7 @@
       },
       {
         "id": 934,
-        "title": "Elisha met en garde une femme shunamite contre une famine de 7 ans",
+        "title": "Élisée met en garde la femme sunamite contre une famine de 7 ans",
         "slug": "elisha-warns-shunammite-woman-of-7-year-famine",
         "start": -839,
         "end": -839,
@@ -3644,7 +3644,7 @@
       },
       {
         "id": 944,
-        "title": "La terre d'une femme shunamite restaurée",
+        "title": "La terre de la femme sunamite restaurée",
         "image": "http://timeline.biblehistory.com/media/images/t/_GoodSalt-prcas0990_8-27-2013%2012-26-23%20PM.jpg",
         "slug": "shunammite-womans-land-restored",
         "start": -832,
@@ -3656,7 +3656,7 @@
       },
       {
         "id": 938,
-        "title": "Naaman guérie, Gehazi Leprous",
+        "title": "Naaman guéri, Guéhazi lépreux",
         "image": "http://timeline.biblehistory.com/media/images/t/_GoodSalt-prcas1640_8-27-2013%2012-29-08%20PM.jpg",
         "slug": "naaman-healed-gehazi-leprous",
         "start": -830,
@@ -3679,7 +3679,7 @@
       },
       {
         "id": 952,
-        "title": "Jehoash",
+        "title": "Joas",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/Golden%20Calf_4-3-2013%205-18-17%20PM.jpg",
         "slug": "jehoash",
@@ -3691,7 +3691,7 @@
       },
       {
         "id": 960,
-        "title": "Jonah",
+        "title": "Jonas",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/Jonah_7-31-2013%2011-11-16%20AM.jpg",
         "slug": "jonah",
@@ -3703,7 +3703,7 @@
       },
       {
         "id": 954,
-        "title": "Amaziah",
+        "title": "Amatsia",
         "slug": "amaziah",
         "start": -821,
         "end": -767,
@@ -3726,7 +3726,7 @@
       },
       {
         "id": 957,
-        "title": "Uzziah",
+        "title": "Ozias",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/Rembrandt_Harmensz_van_Rijn_032.jpg",
         "slug": "uzziah",
@@ -3761,7 +3761,7 @@
       },
       {
         "id": 962,
-        "title": "Ouziah Azariah, le temps de la prospérité",
+        "title": "Ozias Azaria, temps de prospérité",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/_GoodSalt-stdas0031_8-27-2013%201-27-15%20PM.jpg",
         "slug": "uzziah-azariah-prosperous-time",
@@ -3807,7 +3807,7 @@
       },
       {
         "id": 1001,
-        "title": "Shalmaneser V",
+        "title": "Salmanasar V",
         "slug": "shalmaneser-v",
         "start": -772,
         "end": -722,
@@ -3818,7 +3818,7 @@
       },
       {
         "id": 975,
-        "title": "Pekahiah",
+        "title": "Pékachia",
         "slug": "pekahiah",
         "start": -767,
         "end": -740,
@@ -3840,7 +3840,7 @@
       },
       {
         "id": 981,
-        "title": "Isaiah",
+        "title": "Ésaïe",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/Isaiah_7-31-2013%2011-16-12%20AM.jpg",
         "slug": "isaiah",
@@ -3875,7 +3875,7 @@
       },
       {
         "id": 982,
-        "title": "Ahaz",
+        "title": "Achaz",
         "slug": "ahaz",
         "start": -755,
         "end": -715,
@@ -3897,7 +3897,7 @@
       },
       {
         "id": 989,
-        "title": "Ezéchias",
+        "title": "Ézéchias",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/_GoodSalt-prcas5185_8-27-2013%202-25-13%20PM.jpg",
         "slug": "hezekiah",
@@ -3909,7 +3909,7 @@
       },
       {
         "id": 992,
-        "title": "Sennacherib",
+        "title": "Sennachérib",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/Sennacherib.jpg",
         "slug": "sennacherib",
@@ -3921,7 +3921,7 @@
       },
       {
         "id": 993,
-        "title": "Immanuel",
+        "title": "Emmanuel",
         "slug": "immanuel",
         "start": -734,
         "end": -734,
@@ -3943,7 +3943,7 @@
       },
       {
         "id": 1008,
-        "title": "Eliazar",
+        "title": "Éliézer",
         "slug": "eliezer",
         "start": -729,
         "end": -647,
@@ -3954,7 +3954,7 @@
       },
       {
         "id": 997,
-        "title": "Célébration de la Pâque réformée en Judée",
+        "title": "Pâque de la réforme célébrée en Juda",
         "slug": "reformationpassover-celebrated-in-judah-option-1",
         "start": -727,
         "end": -727,
@@ -3965,7 +3965,7 @@
       },
       {
         "id": 937,
-        "title": "Deuxième invasion d'Israël à partir de l'Assyrie",
+        "title": "Deuxième invasion d'Israël par l'Assyrie",
         "slug": "second-invasion-of-israel-from-assyria",
         "start": -725,
         "end": -722,
@@ -3998,7 +3998,7 @@
       },
       {
         "id": 422,
-        "title": "Hilkiah",
+        "title": "Hilkija",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/_GoodSalt-prcas3129_8-27-2013%202-51-48%20PM.jpg",
         "slug": "hilkiah",
@@ -4021,7 +4021,7 @@
       },
       {
         "id": 423,
-        "title": "Esarhaddon",
+        "title": "Ésar-Haddon",
         "slug": "esarhaddon",
         "start": -711,
         "end": -669,
@@ -4032,7 +4032,7 @@
       },
       {
         "id": 1013,
-        "title": "L'invasion des philistins",
+        "title": "L'invasion des Philistins",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-prcas1040_8-7-2013%203-36-57%20PM.jpg",
         "slug": "invasion-of-philistines",
         "start": -710,
@@ -4044,7 +4044,7 @@
       },
       {
         "id": 1009,
-        "title": "Manasseh",
+        "title": "Manassé",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/_GoodSalt-stdas0040_8-27-2013%202-57-15%20PM.jpg",
         "slug": "manasseh-king-of-judah",
@@ -4056,7 +4056,7 @@
       },
       {
         "id": 1011,
-        "title": "Le soleil revient à 10 degrés, Ezéchias se rétablit",
+        "title": "Le soleil recule de 10 degrés, Ézéchias guéri",
         "slug": "sun-goes-back-10-degrees-hezekiah-recovers",
         "start": -702,
         "end": -702,
@@ -4078,7 +4078,7 @@
       },
       {
         "id": 1010,
-        "title": "Prophétie d'Esaïe concernant Cyrus II",
+        "title": "Prophétie d'Ésaïe concernant Cyrus II",
         "slug": "isaiah-prophecy-concerning-cyrus-ii",
         "start": -697,
         "end": -697,
@@ -4100,7 +4100,7 @@
       },
       {
         "id": 414,
-        "title": "Ashurbanipal",
+        "title": "Assurbanipal",
         "slug": "ashurbanipal",
         "start": -690,
         "end": -633,
@@ -4122,7 +4122,7 @@
       },
       {
         "id": 415,
-        "title": "Sennacherib rase Babylone",
+        "title": "Sennachérib rase Babylone",
         "slug": "sennacherib-razes-babylon",
         "start": -689,
         "end": -689,
@@ -4180,7 +4180,7 @@
       },
       {
         "id": 421,
-        "title": "L'Assyrie d'Esarhaddon envahit l'Egypte",
+        "title": "Ésar-Haddon d'Assyrie envahit l'Égypte",
         "slug": "esarhaddon-assyria-invades-egypt",
         "start": -675,
         "end": -675,
@@ -4235,7 +4235,7 @@
       },
       {
         "id": 433,
-        "title": "Josiah",
+        "title": "Josias",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/Josiah_7-31-2013%204-38-17%20PM.jpg",
         "slug": "josiah",
@@ -4258,7 +4258,7 @@
       },
       {
         "id": 439,
-        "title": "Ashurbanipal vainc l'Elam",
+        "title": "Assurbanipal vainc l'Élam",
         "slug": "ashurbanipal-defeats-elam",
         "start": -645,
         "end": -645,
@@ -4269,7 +4269,7 @@
       },
       {
         "id": 435,
-        "title": "Jeremiah",
+        "title": "Jérémie",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/Jeremiah_4-2-2013%202-17-43%20PM.jpg",
         "slug": "jeremiah",
@@ -4292,7 +4292,7 @@
       },
       {
         "id": 443,
-        "title": "Jehoiakim",
+        "title": "Jojakim",
         "slug": "jehoiakim",
         "start": -634,
         "end": -598,
@@ -4303,7 +4303,7 @@
       },
       {
         "id": 447,
-        "title": "Josiah se consacre à Dieu",
+        "title": "Josias se consacre à Dieu",
         "image": "http://timeline.biblehistory.com/media/images/t/_GoodSalt-prcas3303_8-27-2013%203-56-08%20PM.jpg",
         "slug": "josiah-consecrates-himself-to-god",
         "start": -633,
@@ -4327,7 +4327,7 @@
       },
       {
         "id": 446,
-        "title": "Jehoahaz",
+        "title": "Joachaz",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-Jehoahaz_8-6-2013%2011-06-04%20AM.jpg",
         "slug": "jehoahaz-son-of-josiah",
@@ -4339,7 +4339,7 @@
       },
       {
         "id": 451,
-        "title": "Ezekiel",
+        "title": "Ézéchiel",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-ValleyOfDryBones_8-5-2013%204-24-11%20PM.jpg",
         "slug": "ezekiel",
@@ -4351,7 +4351,7 @@
       },
       {
         "id": 452,
-        "title": "Josiah trouve la loi et garde la Pâque",
+        "title": "Josias trouve la loi et garde la Pâque",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/_GoodSalt-prcas1523_8-27-2013%204-22-30%20PM.jpg",
         "slug": "josiah-finds-law-keeps-passover",
@@ -4375,7 +4375,7 @@
       },
       {
         "id": 850,
-        "title": "Rehoboam",
+        "title": "Roboam",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-stdas0014_8-22-2013%202-52-06%20PM.jpg",
         "slug": "rehoboam",
@@ -4421,7 +4421,7 @@
       },
       {
         "id": 873,
-        "title": "Baasha",
+        "title": "Baescha",
         "slug": "baasha",
         "start": -933,
         "end": -886,
@@ -4450,7 +4450,7 @@
     "events": [
       {
         "id": 475,
-        "title": "La femme d'Ezekiel",
+        "title": "La femme d'Ézéchiel",
         "slug": "ezekiels-wife",
         "start": -620,
         "end": -588,
@@ -4461,7 +4461,7 @@
       },
       {
         "id": 502,
-        "title": "Neri",
+        "title": "Néri",
         "slug": "neri",
         "start": -620,
         "end": -530,
@@ -4472,7 +4472,7 @@
       },
       {
         "id": 458,
-        "title": "Jehoiachin",
+        "title": "Jojakin",
         "slug": "jehoiachin",
         "start": -616,
         "end": -597,
@@ -4505,7 +4505,7 @@
       },
       {
         "id": 466,
-        "title": "Daniel 1, Daniel Captive",
+        "title": "Daniel 1, Daniel captif",
         "slug": "daniel-1-daniel-captive",
         "start": -605,
         "end": -605,
@@ -4516,7 +4516,7 @@
       },
       {
         "id": 477,
-        "title": "Evil-Merodach",
+        "title": "Évil-Merodac",
         "slug": "evilmerodach",
         "start": -600,
         "end": -560,
@@ -4527,7 +4527,7 @@
       },
       {
         "id": 517,
-        "title": "Salathiel (ou Shealtiel)",
+        "title": "Salathiel (ou Schealthiel)",
         "slug": "salathiel-or-shealtiel",
         "start": -600,
         "end": -519,
@@ -4549,7 +4549,7 @@
       },
       {
         "id": 472,
-        "title": "Ezekiel fait prisonnier",
+        "title": "Ézéchiel fait prisonnier",
         "slug": "ezekiel-taken-captive",
         "start": -597,
         "end": -597,
@@ -4582,7 +4582,7 @@
       },
       {
         "id": 465,
-        "title": "Judah Falls, 15 août",
+        "title": "Chute de Juda, 15 août",
         "slug": "judah-falls-aug-15",
         "start": -586,
         "end": -586,
@@ -4604,7 +4604,7 @@
       },
       {
         "id": 487,
-        "title": "Belshazzar",
+        "title": "Belschatsar",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-belshazzar_8-6-2013%202-18-47%20PM.jpg",
         "slug": "belshazzar",
@@ -4616,7 +4616,7 @@
       },
       {
         "id": 469,
-        "title": "Cambyses",
+        "title": "Cambyse",
         "slug": "cambyses",
         "start": -570,
         "end": -522,
@@ -4627,7 +4627,7 @@
       },
       {
         "id": 485,
-        "title": "Rêves d'arbre et d'humiliation de Nabuchodonosor",
+        "title": "Nabuchodonosor rêve d'un arbre et est humilié",
         "slug": "daniel-4-begin-7-yrs-of-beast",
         "start": -570,
         "end": -570,
@@ -4649,7 +4649,7 @@
       },
       {
         "id": 492,
-        "title": "Jehoiachin libéré de prison",
+        "title": "Jojakin libéré de prison",
         "slug": "jehoiachin-released-from-prison",
         "start": -560,
         "end": -560,
@@ -4671,7 +4671,7 @@
       },
       {
         "id": 495,
-        "title": "Cambyses II",
+        "title": "Cambyse II",
         "slug": "cambyses-ii",
         "start": -553,
         "end": -522,
@@ -4682,7 +4682,7 @@
       },
       {
         "id": 497,
-        "title": "Le roi Belshazzar - Babylon Waning",
+        "title": "Le roi Belschatsar, Babylone en déclin",
         "slug": "belshazzar-king-babylon-waning",
         "start": -553,
         "end": -539,
@@ -4693,7 +4693,7 @@
       },
       {
         "id": 506,
-        "title": "Cyrus II à la conquête de Babylone 29 octobre",
+        "title": "Cyrus II conquiert Babylone, 29 octobre",
         "slug": "cyrus-ii-conquers-babylon-oct-29",
         "start": -539,
         "end": -539,
@@ -4760,7 +4760,7 @@
       },
       {
         "id": 516,
-        "title": "Le bâtiment de reprise du temple de Jérusalem",
+        "title": "Reprise de la construction du temple de Jérusalem",
         "slug": "jerusalem-temple-resume-building",
         "start": -520,
         "end": -520,
@@ -4795,7 +4795,7 @@
       },
       {
         "id": 530,
-        "title": "Artaxerxes I",
+        "title": "Artaxerxès I",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-prcas0699_8-28-2013%2012-48-10%20PM.jpg",
         "slug": "artaxerxes-i",
@@ -4807,7 +4807,7 @@
       },
       {
         "id": 531,
-        "title": "La reine Vashti tombe en disgrâce",
+        "title": "La reine Vasthi tombe en disgrâce",
         "slug": "queen-vashti-falls-into-disfavor",
         "start": -483,
         "end": -483,
@@ -4829,7 +4829,7 @@
       },
       {
         "id": 533,
-        "title": "Décret sur la mort de Haman Avril 474",
+        "title": "Décret de mort d'Haman, avril 474",
         "slug": "hamans-death-decree-april-474",
         "start": -474,
         "end": -474,
@@ -4851,7 +4851,7 @@
       },
       {
         "id": 535,
-        "title": "Nehemiah",
+        "title": "Néhémie",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-Nehemiah_8-1-2013%205-36-17%20PM.jpg",
         "slug": "nehemiah",
@@ -4863,7 +4863,7 @@
       },
       {
         "id": 536,
-        "title": "Rhesa",
+        "title": "Rhésa",
         "slug": "rhesa",
         "start": -470,
         "end": -390,
@@ -4885,7 +4885,7 @@
       },
       {
         "id": 538,
-        "title": "Décret Artaxerxes I",
+        "title": "Décret d'Artaxerxès Ier",
         "slug": "artaxerxes-i-decree",
         "start": -457,
         "end": -457,
@@ -4896,7 +4896,7 @@
       },
       {
         "id": 1283,
-        "title": "Prophétie du 2300e jour",
+        "title": "Prophétie des 2300 jours",
         "image": "http://timeline.biblehistory.com/media/images/t/Ark_Commandments_2-27-2013-2-58-25-PM_7-18-2013%2011-01-41%20AM.jpg",
         "slug": "sanctuary-cleansed-2300-day-prophecy",
         "start": -457,
@@ -4919,7 +4919,7 @@
       },
       {
         "id": 610,
-        "title": "Eliakim",
+        "title": "Éliakim",
         "slug": "eliakim",
         "start": -455,
         "end": -392,
@@ -4975,7 +4975,7 @@
       },
       {
         "id": 545,
-        "title": "Ezra, lecture publique de la loi",
+        "title": "Esdras, lecture publique de la loi",
         "slug": "ezra-public-reading-of-the-law",
         "start": -444,
         "end": -444,
@@ -5030,7 +5030,7 @@
       },
       {
         "id": 550,
-        "title": "Artaxerxes III",
+        "title": "Artaxerxès III",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/Persepolis_Artaxerxes_III_tomb.jpg",
         "slug": "artaxerxes-iii",
@@ -5098,7 +5098,7 @@
       },
       {
         "id": 558,
-        "title": "Arbela, Bataille de - Victoire décisive sur la Perse",
+        "title": "Bataille d'Arbèles, victoire décisive sur la Perse",
         "slug": "arbela-battle-of-decisive-victory-over-persia",
         "start": -331,
         "end": -331,
@@ -5109,7 +5109,7 @@
       },
       {
         "id": 562,
-        "title": "Nagge (ou Naggai)",
+        "title": "Nagge (ou Naggaï)",
         "slug": "nagge-or-naggai",
         "start": -320,
         "end": -270,
@@ -5208,7 +5208,7 @@
       },
       {
         "id": 575,
-        "title": "Janna (ou Jannai)",
+        "title": "Janna (ou Jannaï)",
         "slug": "janna-or-jannai",
         "start": -155,
         "end": -96,
@@ -5230,7 +5230,7 @@
       },
       {
         "id": 579,
-        "title": "Levi",
+        "title": "Lévi",
         "slug": "levi-son-of-melchi",
         "start": -105,
         "end": -50,
@@ -5277,7 +5277,7 @@
       },
       {
         "id": 1399,
-        "title": "Les prophéties de Daniel pour la Rome",
+        "title": "Les prophéties de Daniel sur Rome",
         "image": "http://timeline.biblehistory.com/media/images/t/Statue_Rome_8-22-2013%203-26-36%20PM.jpg",
         "slug": "daniels-rome-prophecies",
         "start": -168,
@@ -5300,7 +5300,7 @@
       },
       {
         "id": 422,
-        "title": "Hilkiah",
+        "title": "Hilkija",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/_GoodSalt-prcas3129_8-27-2013%202-51-48%20PM.jpg",
         "slug": "hilkiah",
@@ -5368,7 +5368,7 @@
       },
       {
         "id": 433,
-        "title": "Josiah",
+        "title": "Josias",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/Josiah_7-31-2013%204-38-17%20PM.jpg",
         "slug": "josiah",
@@ -5391,7 +5391,7 @@
       },
       {
         "id": 435,
-        "title": "Jeremiah",
+        "title": "Jérémie",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/Jeremiah_4-2-2013%202-17-43%20PM.jpg",
         "slug": "jeremiah",
@@ -5414,7 +5414,7 @@
       },
       {
         "id": 443,
-        "title": "Jehoiakim",
+        "title": "Jojakim",
         "slug": "jehoiakim",
         "start": -634,
         "end": -598,
@@ -5437,7 +5437,7 @@
       },
       {
         "id": 446,
-        "title": "Jehoahaz",
+        "title": "Joachaz",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-Jehoahaz_8-6-2013%2011-06-04%20AM.jpg",
         "slug": "jehoahaz-son-of-josiah",
@@ -5449,7 +5449,7 @@
       },
       {
         "id": 451,
-        "title": "Ezekiel",
+        "title": "Ézéchiel",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-ValleyOfDryBones_8-5-2013%204-24-11%20PM.jpg",
         "slug": "ezekiel",
@@ -5502,7 +5502,7 @@
       },
       {
         "id": 581,
-        "title": "Simeon",
+        "title": "Siméon",
         "approx": true,
         "image": "http://timeline.biblehistory.com/media/images/t/Yegorov-Simeon_the_Righteous.jpg",
         "slug": "simeon-of-the-temple",
@@ -5514,7 +5514,7 @@
       },
       {
         "id": 582,
-        "title": "Anna",
+        "title": "Anne",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-prcas4188_8-6-2013%203-54-10%20PM.jpg",
         "slug": "anna",
         "start": -89,
@@ -5549,7 +5549,7 @@
       },
       {
         "id": 585,
-        "title": "Syrie Royaume séleucide annexé par Rome",
+        "title": "Le royaume séleucide de Syrie annexé par Rome",
         "slug": "syria-seleucid-kingdom-annexed-by-rome",
         "start": -64,
         "end": -64,
@@ -5583,7 +5583,7 @@
       },
       {
         "id": 587,
-        "title": "Heli",
+        "title": "Héli",
         "slug": "heli",
         "start": -55,
         "end": 10,
@@ -5606,7 +5606,7 @@
       },
       {
         "id": 594,
-        "title": "L'Egypte a fait une province romaine",
+        "title": "L'Égypte devient une province romaine",
         "slug": "egypt-made-a-roman-province",
         "start": -30,
         "end": -30,
@@ -5641,7 +5641,7 @@
       },
       {
         "id": 597,
-        "title": "Peter",
+        "title": "Pierre",
         "slug": "peter",
         "start": -1,
         "end": 65,
@@ -5652,7 +5652,7 @@
       },
       {
         "id": 1295,
-        "title": "John",
+        "title": "Jean",
         "slug": "john",
         "start": 11,
         "end": 99,
@@ -5697,7 +5697,7 @@
       },
       {
         "id": 1028,
-        "title": "Le premier ministère du Christ",
+        "title": "Les débuts du ministère du Christ",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-prcas2553_8-6-2013%204-34-53%20PM.jpg",
         "slug": "christs-early-ministry",
         "start": 27,
@@ -5731,7 +5731,7 @@
       },
       {
         "id": 1051,
-        "title": "La belle-mère de Peter a guéri",
+        "title": "La belle-mère de Pierre guérie",
         "slug": "peters-motherinlaw-healed",
         "start": 29,
         "end": 29,
@@ -5753,7 +5753,7 @@
       },
       {
         "id": 1055,
-        "title": "L'appel de Levi Matthew",
+        "title": "L'appel de Lévi (Matthieu)",
         "slug": "call-of-levi-matthew",
         "start": 29,
         "end": 29,
@@ -5852,7 +5852,7 @@
       },
       {
         "id": 1075,
-        "title": "L'enquête des Disciples de John",
+        "title": "La question des disciples de Jean",
         "slug": "the-inquiry-by-johns-disciples",
         "start": 29,
         "end": 29,
@@ -5962,7 +5962,7 @@
       },
       {
         "id": 1184,
-        "title": "Jour du procès devant le Sanhédrin",
+        "title": "Procès de jour devant le Sanhédrin",
         "slug": "day-trial-before-sanhedrin",
         "start": 31,
         "end": 31,
@@ -5984,7 +5984,7 @@
       },
       {
         "id": 1186,
-        "title": "Premier procès devant la Cour d'appel Pilate",
+        "title": "Premier procès devant Pilate",
         "slug": "first-trial-before-pilate",
         "start": 31,
         "end": 31,
@@ -6039,7 +6039,7 @@
       },
       {
         "id": 1200,
-        "title": "Lapidation de Stephen",
+        "title": "Lapidation d'Étienne",
         "image": "http://timeline.biblehistory.com/media/images/t/StStephen_GiacomoCavedone_2-28-2013%202-06-41%20PM.jpg",
         "slug": "stoning-of-stephen",
         "start": 34,
@@ -6063,7 +6063,7 @@
       },
       {
         "id": 1237,
-        "title": "Église d'Ephèse, âge de l'Église apostolique",
+        "title": "Église d'Éphèse, âge de l'Église apostolique",
         "image": "http://timeline.biblehistory.com/media/images/t/149144388_2-28-2013%209-06-13%20AM.jpg",
         "slug": "church-of-ephesus-apostolic-church-age",
         "start": 31,
@@ -6119,7 +6119,7 @@
       },
       {
         "id": 1283,
-        "title": "Prophétie du 2300e jour",
+        "title": "Prophétie des 2300 jours",
         "image": "http://timeline.biblehistory.com/media/images/t/Ark_Commandments_2-27-2013-2-58-25-PM_7-18-2013%2011-01-41%20AM.jpg",
         "slug": "sanctuary-cleansed-2300-day-prophecy",
         "start": -457,
@@ -6153,7 +6153,7 @@
       },
       {
         "id": 575,
-        "title": "Janna (ou Jannai)",
+        "title": "Janna (ou Jannaï)",
         "slug": "janna-or-jannai",
         "start": -155,
         "end": -96,
@@ -6175,7 +6175,7 @@
       },
       {
         "id": 579,
-        "title": "Levi",
+        "title": "Lévi",
         "slug": "levi-son-of-melchi",
         "start": -105,
         "end": -50,
@@ -6186,7 +6186,7 @@
       },
       {
         "id": 1399,
-        "title": "Les prophéties de Daniel pour la Rome",
+        "title": "Les prophéties de Daniel sur Rome",
         "image": "http://timeline.biblehistory.com/media/images/t/Statue_Rome_8-22-2013%203-26-36%20PM.jpg",
         "slug": "daniels-rome-prophecies",
         "start": -168,
@@ -6274,7 +6274,7 @@
       },
       {
         "id": 1207,
-        "title": "Barnabas et Paul emmènent l'aide aux victimes de la famine à Jérusalem",
+        "title": "Barnabas et Paul portent à Jérusalem l'aide aux victimes de la famine",
         "slug": "barnabas-and-paul-take-famine-relief-to-jerusalem",
         "start": 45,
         "end": 45,
@@ -6296,7 +6296,7 @@
       },
       {
         "id": 1209,
-        "title": "Conseil de Jérusalem",
+        "title": "Concile de Jérusalem",
         "slug": "jerusalem-council",
         "start": 49,
         "end": 49,
@@ -6373,7 +6373,7 @@
       },
       {
         "id": 1216,
-        "title": "Le livre de 1 Corinthiens",
+        "title": "1 Corinthiens écrit",
         "slug": "1-corinthians-written",
         "start": 56,
         "end": 56,
@@ -6384,7 +6384,7 @@
       },
       {
         "id": 1217,
-        "title": "Le livre de 2 Corinthiens",
+        "title": "2 Corinthiens écrit",
         "slug": "2-corinthians-written",
         "start": 57,
         "end": 57,
@@ -6395,7 +6395,7 @@
       },
       {
         "id": 1218,
-        "title": "Épître aux Romains",
+        "title": "Épître aux Romains écrite",
         "slug": "romans-written",
         "start": 57,
         "end": 58,
@@ -6428,7 +6428,7 @@
       },
       {
         "id": 1223,
-        "title": "Ephésiens, Colossiens, Philémon Ecrit",
+        "title": "Éphésiens, Colossiens, Philémon écrits",
         "slug": "ephesians-colossians-philemon-written",
         "start": 60,
         "end": 62,
@@ -6550,7 +6550,7 @@
       },
       {
         "id": 1233,
-        "title": "1ère Epitre de Jean",
+        "title": "1 Jean écrit",
         "slug": "1-john-written",
         "start": 90,
         "end": 90,
@@ -6561,7 +6561,7 @@
       },
       {
         "id": 1234,
-        "title": "2ème Epitre de Jean",
+        "title": "2 Jean écrit",
         "slug": "2-john-written",
         "start": 91,
         "end": 91,
@@ -6572,7 +6572,7 @@
       },
       {
         "id": 1235,
-        "title": "3ème Epitre de Jean",
+        "title": "3 Jean écrit",
         "slug": "3-john-written",
         "start": 92,
         "end": 92,
@@ -6583,7 +6583,7 @@
       },
       {
         "id": 1236,
-        "title": "Révélation écrite",
+        "title": "Apocalypse écrite",
         "slug": "revelation-written",
         "start": 95,
         "end": 95,
@@ -6666,7 +6666,7 @@
       },
       {
         "id": 597,
-        "title": "Peter",
+        "title": "Pierre",
         "slug": "peter",
         "start": -1,
         "end": 65,
@@ -6677,7 +6677,7 @@
       },
       {
         "id": 1295,
-        "title": "John",
+        "title": "Jean",
         "slug": "john",
         "start": 11,
         "end": 99,
@@ -6711,7 +6711,7 @@
       },
       {
         "id": 1237,
-        "title": "Église d'Ephèse, âge de l'Église apostolique",
+        "title": "Église d'Éphèse, âge de l'Église apostolique",
         "image": "http://timeline.biblehistory.com/media/images/t/149144388_2-28-2013%209-06-13%20AM.jpg",
         "slug": "church-of-ephesus-apostolic-church-age",
         "start": 31,
@@ -6777,7 +6777,7 @@
       },
       {
         "id": 1303,
-        "title": "Peter Waldo crée l'église \"Waldenses\"",
+        "title": "Pierre Valdo fonde l'Église vaudoise",
         "slug": "peter-waldo-establishes-waldenses-church",
         "start": 1177,
         "end": 1177,
@@ -6811,7 +6811,7 @@
       },
       {
         "id": 1306,
-        "title": "Jan Hus (John Huss)",
+        "title": "Jan Hus",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-prcas2470_8-13-2013%201-52-01%20PM.jpg",
         "slug": "jan-hus-john-huss",
         "start": 1372,
@@ -6823,7 +6823,7 @@
       },
       {
         "id": 1314,
-        "title": "Le grand schisme papal",
+        "title": "Le grand schisme d'Occident",
         "slug": "the-great-papal-schism",
         "start": 1378,
         "end": 1417,
@@ -6857,7 +6857,7 @@
       },
       {
         "id": 1308,
-        "title": "Jan Hus (John Huss) excommunié",
+        "title": "Jan Hus excommunié",
         "slug": "jan-hus-john-huss-excommunicated",
         "start": 1410,
         "end": 1410,
@@ -6868,7 +6868,7 @@
       },
       {
         "id": 1316,
-        "title": "Conseil de Constance",
+        "title": "Concile de Constance",
         "slug": "council-of-constance",
         "start": 1414,
         "end": 1418,
@@ -6912,7 +6912,7 @@
       },
       {
         "id": 1320,
-        "title": "Desiderius Erasmus",
+        "title": "Érasme",
         "slug": "desiderius-erasmus",
         "start": 1466,
         "end": 1536,
@@ -7001,7 +7001,7 @@
       },
       {
         "id": 1327,
-        "title": "William Farel",
+        "title": "Guillaume Farel",
         "slug": "william-farel",
         "start": 1489,
         "end": 1565,
@@ -7056,7 +7056,7 @@
       },
       {
         "id": 1330,
-        "title": "Philipp Melanchthon",
+        "title": "Philippe Mélanchthon",
         "slug": "philip-melanchthon",
         "start": 1497,
         "end": 1560,
@@ -7078,7 +7078,7 @@
       },
       {
         "id": 1334,
-        "title": "John Calvin",
+        "title": "Jean Calvin",
         "image": "http://timeline.biblehistory.com/media/images/t/John%20Calvin%20small_2-26-2013%204-55-26%20PM.jpg",
         "slug": "john-calvin",
         "start": 1509,
@@ -7100,7 +7100,7 @@
       },
       {
         "id": 1336,
-        "title": "Luther commence à donner des conférences à Wittenburg",
+        "title": "Luther commence à enseigner à Wittenberg",
         "slug": "luther-begins-lecturing-at-wittenburg",
         "start": 1512,
         "end": 0,
@@ -7122,7 +7122,7 @@
       },
       {
         "id": 1338,
-        "title": "Le Nouveau Testament d'Erasmus",
+        "title": "Le Nouveau Testament d'Érasme",
         "slug": "erasmus-new-testament",
         "start": 1516,
         "end": 1516,
@@ -7287,7 +7287,7 @@
       },
       {
         "id": 1347,
-        "title": "Les litiges de Zurich",
+        "title": "Les disputes de Zurich",
         "slug": "the-zurich-disputations",
         "start": 1523,
         "end": 1523,
@@ -7320,7 +7320,7 @@
       },
       {
         "id": 1350,
-        "title": "Luther épouse Katherine von Bora",
+        "title": "Luther épouse Catherine de Bora",
         "slug": "luther-marries-katherine-von-bora",
         "start": 1525,
         "end": 1525,
@@ -7375,7 +7375,7 @@
       },
       {
         "id": 1356,
-        "title": "Henry VIII accepté comme chef de l'Eglise anglaise",
+        "title": "Henri VIII reconnu comme chef de l'Église anglaise",
         "slug": "henry-viii-acknowledged-as-head-of-the-english-church",
         "start": 1534,
         "end": 1534,
@@ -7420,7 +7420,7 @@
       },
       {
         "id": 1361,
-        "title": "Calvin envoyé loin de Genève",
+        "title": "Calvin expulsé de Genève",
         "slug": "calvin-sent-away-from-geneva",
         "start": 1538,
         "end": 1538,
@@ -7497,7 +7497,7 @@
       },
       {
         "id": 1368,
-        "title": "Le Conseil de Trente",
+        "title": "Le concile de Trente",
         "slug": "the-council-of-trent",
         "start": 1545,
         "end": 1545,
@@ -7520,7 +7520,7 @@
       },
       {
         "id": 1370,
-        "title": "Roi Edward VI",
+        "title": "Le roi Édouard VI",
         "slug": "king-edward-vi",
         "start": 1547,
         "end": 1553,
@@ -7598,7 +7598,7 @@
       },
       {
         "id": 1378,
-        "title": "Elizabeth I excommuniée",
+        "title": "Élisabeth Ire excommuniée",
         "slug": "elizabeth-i-excommunicated",
         "start": 1570,
         "end": 1570,
@@ -7698,7 +7698,7 @@
       },
       {
         "id": 1242,
-        "title": "Église de Philadelphie, le Grand Siècle des Lumières",
+        "title": "Église de Philadelphie, grand âge des Lumières",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-prcas2121_8-13-2013%202-05-30%20PM.jpg",
         "slug": "church-of-philadelphia-great-enlightenment-age",
         "start": 1755,
@@ -7768,7 +7768,7 @@
       },
       {
         "id": 1320,
-        "title": "Desiderius Erasmus",
+        "title": "Érasme",
         "slug": "desiderius-erasmus",
         "start": 1466,
         "end": 1536,
@@ -7857,7 +7857,7 @@
       },
       {
         "id": 1327,
-        "title": "William Farel",
+        "title": "Guillaume Farel",
         "slug": "william-farel",
         "start": 1489,
         "end": 1565,
@@ -7912,7 +7912,7 @@
       },
       {
         "id": 1330,
-        "title": "Philipp Melanchthon",
+        "title": "Philippe Mélanchthon",
         "slug": "philip-melanchthon",
         "start": 1497,
         "end": 1560,
@@ -7934,7 +7934,7 @@
       },
       {
         "id": 1334,
-        "title": "John Calvin",
+        "title": "Jean Calvin",
         "image": "http://timeline.biblehistory.com/media/images/t/John%20Calvin%20small_2-26-2013%204-55-26%20PM.jpg",
         "slug": "john-calvin",
         "start": 1509,
@@ -8055,7 +8055,7 @@
       },
       {
         "id": 1251,
-        "title": "Fin de la période de probation",
+        "title": "Fin du temps de grâce",
         "slug": "close-of-probation",
         "start": 2019,
         "end": 2019,
@@ -8066,7 +8066,7 @@
       },
       {
         "id": 1247,
-        "title": "Persécution mondiale par les bêtes venant de la Mer et de la Terre",
+        "title": "Persécution mondiale par les bêtes de la mer et de la terre",
         "slug": "global-persecution-by-sea-earth-beasts",
         "start": 2020,
         "end": 2020,
@@ -8122,7 +8122,7 @@
       },
       {
         "id": 1256,
-        "title": "Résurrection et traduction des saints",
+        "title": "Résurrection et transformation des saints",
         "slug": "resurrection-and-translation-of-the-saints",
         "start": 2020,
         "end": 2020,
@@ -8133,7 +8133,7 @@
       },
       {
         "id": 1257,
-        "title": "Emprisonnement de Satan sur Terre / Jugement des saints du Ciel",
+        "title": "Emprisonnement de Satan sur la terre / Jugement par les saints dans le ciel",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-millennium-1_8-5-2013%2012-13-14%20PM.jpg",
         "slug": "imprisonment-of-satan-on-earth-judgment-by-saints-in-heaven",
         "start": 2020,
@@ -8144,7 +8144,7 @@
       },
       {
         "id": 1267,
-        "title": "La mise en place du Royaume de Dieu - Pierre",
+        "title": "L'établissement du royaume de Dieu, la pierre",
         "slug": "gods-kingdom-setup-stone",
         "start": 2020,
         "end": 2020,
@@ -8199,7 +8199,7 @@
       },
       {
         "id": 1258,
-        "title": "La nouvelle Jérusalem descend du Ciel à la Terre",
+        "title": "La nouvelle Jérusalem descend du ciel sur la terre",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-smcas0179_8-5-2013%201-08-12%20PM.jpg",
         "slug": "new-jerusalem-descends-from-heaven-to-earth",
         "start": 3020,
@@ -8280,7 +8280,7 @@
       },
       {
         "id": 1242,
-        "title": "Église de Philadelphie, le Grand Siècle des Lumières",
+        "title": "Église de Philadelphie, grand âge des Lumières",
         "image": "http://timeline.biblehistory.com/media/images/t/GoodSalt-prcas2121_8-13-2013%202-05-30%20PM.jpg",
         "slug": "church-of-philadelphia-great-enlightenment-age",
         "isFixed": true,

@@ -27,6 +27,8 @@ export const getDictionaryDbPath = (work: string, lang: ResourceLanguage): strin
 export const getDictionaryDirectoryDbPath = (): string =>
   `${getSharedSqliteDirPath()}/dictionary-directory.sqlite`
 
+export const getStudyLinksDbPath = (): string => `${getSharedSqliteDirPath()}/study-links.sqlite`
+
 export const getCommentaryDbPath = (resourceId: string, lang: ResourceLanguage): string =>
   resourceId === 'MHY'
     ? getDbPath('MHY', lang)

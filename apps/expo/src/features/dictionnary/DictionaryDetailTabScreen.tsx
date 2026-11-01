@@ -15,6 +15,7 @@ import SwitchableHTMLView from '~common/SwitchableHTMLView'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import IconTile from '~common/ui/IconTile'
 import { STUDY_COLUMN_MAX_WIDTH, StudySection } from '~common/ui/StudySection'
+import StudyLinksSections from '~features/studyLinks/StudyLinksSections'
 import DictionnaryIcon from '~common/DictionnaryIcon'
 import { resolveUniverseColors } from '~themes/universeColors'
 import Text from '~common/ui/Text'
@@ -584,6 +585,11 @@ const DictionnaryDetailScreen = ({
             )
           )}
         </StudySection>
+        <StudyLinksSections
+          kind="dictionary"
+          subjectKey={dictionnaireItem?.id ? `${work}:${dictionnaireItem.id}` : undefined}
+          language={dictionaryResourceLanguage}
+        />
       </AppScrollView>
     </>
   )

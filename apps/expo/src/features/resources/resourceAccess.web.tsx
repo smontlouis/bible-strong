@@ -1,3 +1,8 @@
+import {
+  createHttpStudyLinksAccess,
+  type StudyLinksAccess,
+  unavailableStudyLinksAccess,
+} from './studyLinksAccess'
 import { createLayeredStrongLexiconAccess } from './layeredStrongLexiconAccess'
 import {
   createCommentaryReadingAccess,
@@ -74,6 +79,7 @@ export type ResourceAccessRegistry = {
   strongBible: StrongBibleResourceAccess
   interlinearBible: InterlinearBibleResourceAccess
   timeline: TimelineAccess
+  studyLinks: StudyLinksAccess
   commentaryReading: CommentaryReadingAccess
   commentary: CommentaryAccess
   offlineCopies: { isAvailable: (identity: LocalResourceRef) => Promise<boolean> }
@@ -255,6 +261,9 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
   strongBible,
   interlinearBible,
   timeline,
+  studyLinks: resourceApiBaseUrl
+    ? createHttpStudyLinksAccess({ baseUrl: resourceApiBaseUrl, fetcher: resourceApiFetch })
+    : unavailableStudyLinksAccess,
   commentaryReading: createCommentaryReadingAccess({
     baseUrl: resourceApiBaseUrl,
     fetcher: resourceApiFetch,

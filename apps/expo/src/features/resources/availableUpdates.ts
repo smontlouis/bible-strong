@@ -4,7 +4,12 @@ import type {
 } from './resourceAvailability'
 
 /** Resources installed as part of another one: they never appear in the downloads list. */
-const NOT_LISTED_SEPARATELY = new Set(['bible-pericope', 'bible-red-words', 'dictionary-directory'])
+const NOT_LISTED_SEPARATELY = new Set([
+  'bible-pericope',
+  'bible-red-words',
+  'dictionary-directory',
+  'study-links',
+])
 
 /**
  * An installed Offline copy needs an update when the catalog lists another archive, or when a

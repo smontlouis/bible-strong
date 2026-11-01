@@ -14,6 +14,7 @@ export type OfflineCopyIdentity =
       language: ResourceLanguage
     }
   | { kind: 'dictionary-directory' }
+  | { kind: 'study-links' }
   | { kind: 'commentary'; resourceId: string; language: ResourceLanguage }
   | { kind: 'database'; databaseId: Exclude<DatabaseId, 'BIBLES'>; language: ResourceLanguage }
   | { kind: 'bible-pericope'; versionId: string }
@@ -35,6 +36,8 @@ export const createOfflineCopyId = (identity: OfflineCopyIdentity): OfflineCopyI
       return `dictionary:${identity.work}:${identity.resourceId}:${identity.language}`
     case 'dictionary-directory':
       return 'dictionary-directory'
+    case 'study-links':
+      return 'study-links'
     case 'commentary':
       return `database:${identity.resourceId}:${identity.language}`
     case 'database':

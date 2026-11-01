@@ -62,6 +62,7 @@ const DATABASE_DOMAIN_QUERY_KEYS: Record<Exclude<DatabaseId, 'BIBLES'>, QueryKey
 export const parseOfflineCopyId = (id: string): OfflineCopyIdentity | undefined => {
   const parts = id.split(':')
   if (id === 'dictionary-directory') return { kind: 'dictionary-directory' }
+  if (id === 'study-links') return { kind: 'study-links' }
   if (parts[0] === 'bible' && parts.length === 2) {
     const versionId = parts[1]
     return versionId && Object.prototype.hasOwnProperty.call(versions, versionId)
@@ -198,6 +199,8 @@ export const getOfflineCopyInvalidationKeys = (identity: OfflineCopyIdentity): Q
         ['relation-dictionary-targets'],
         publicationKey,
       ]
+    case 'study-links':
+      return [['study-links']]
     case 'dictionary-directory':
       return [
         ['dictionary-passage-entries'],
@@ -300,6 +303,12 @@ export type DictionaryDirectoryDownloadItem = DownloadItemCommon & {
   archiveEntry: string
 }
 
+export type StudyLinksDownloadItem = DownloadItemCommon & {
+  type: 'study-links'
+  destinationPath: string
+  archiveEntry: string
+}
+
 export type CommentaryDownloadItem = DownloadItemCommon & {
   type: 'commentary'
   resourceId: string
@@ -315,6 +324,7 @@ export type DownloadItem =
   | StrongLexiconModuleDownloadItem
   | DictionaryDownloadItem
   | DictionaryDirectoryDownloadItem
+  | StudyLinksDownloadItem
   | CommentaryDownloadItem
   | DatabaseDownloadItem
 
@@ -339,6 +349,8 @@ export const getDownloadItemIdentity = (item: DownloadItem): OfflineCopyIdentity
       }
     case 'dictionary-directory':
       return { kind: 'dictionary-directory' }
+    case 'study-links':
+      return { kind: 'study-links' }
     case 'commentary':
       return { kind: 'commentary', resourceId: item.resourceId, language: item.lang }
     case 'database':

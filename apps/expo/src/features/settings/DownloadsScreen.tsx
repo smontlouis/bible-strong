@@ -569,6 +569,7 @@ const DownloadsScreen = () => {
         })
       case 'bible':
       case 'dictionary-directory':
+      case 'study-links':
       case 'commentary':
       case 'database':
         return createOfflineCopyDownloadPlan(identity)

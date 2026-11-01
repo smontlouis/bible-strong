@@ -19,6 +19,7 @@ import { radii } from '~common/ui/surfaces'
 import { calculateLabel } from './constants'
 import { TimelineEventDetail, TimelineEvent as TimelineEventProps } from './types'
 import { Image } from 'expo-image'
+import StudyLinksSections from '~features/studyLinks/StudyLinksSections'
 import Media from './EventDetailsMedia'
 import Loading from '~common/Loading'
 import { useResourceAccess } from '~features/resources/resourceAccess'
@@ -127,6 +128,7 @@ export const EventDetailsContent = ({
       </VStack>
       <Description {...event} />
       <Media {...event} onOpenEvent={onOpenEvent} />
+      <StudyLinksSections kind="timeline" subjectKey={slug} language={resourceLanguage} />
     </Box>
   )
 }

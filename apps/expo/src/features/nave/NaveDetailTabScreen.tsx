@@ -52,6 +52,7 @@ import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { localQueryOptions } from '~helpers/queryOptions'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
+import StudyLinksSections from '~features/studyLinks/StudyLinksSections'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import useConnection from '~helpers/useConnection'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
@@ -386,6 +387,11 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
             />
           </StudySection>
         ) : null}
+        <StudyLinksSections
+          kind="nave"
+          subjectKey={name_lower}
+          language={naveResourceLanguage}
+        />
       </ScrollView>
     </>
   )

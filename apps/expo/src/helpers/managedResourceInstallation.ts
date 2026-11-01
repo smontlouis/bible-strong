@@ -39,6 +39,8 @@ const getResourceInstallationRecoveryTarget = (
       return { kind: 'file', destinationPath: item.destinationPath }
     case 'dictionary-directory':
       return { kind: 'file', destinationPath: item.destinationPath }
+    case 'study-links':
+      return { kind: 'file', destinationPath: item.destinationPath }
     case 'commentary':
       return { kind: 'file', destinationPath: item.destinationPath }
     case 'bible-strong-sidecar':

@@ -13,6 +13,7 @@ import Card from '~common/ui/Card'
 import { StrongEntityRelationList, StrongEntitySummaryCard } from './StrongDetailUI'
 import { STUDY_COLUMN_MAX_WIDTH, StudyCardBody, StudySection } from '~common/ui/StudySection'
 import { StrongEntityRelationGraph } from './StrongEntityRelationGraph'
+import StudyLinksSections from '~features/studyLinks/StudyLinksSections'
 import StrongEntityPortraitHeader from './StrongEntityPortraitHeader'
 import StrongEntityPlaceMap from './biblicalMap/StrongEntityPlaceMap'
 import { useEntityPortraitCatalog } from './entityPortraitManifest'
@@ -132,6 +133,12 @@ const StrongEntityPage = ({
           <StrongEntityRelationList relations={remaining} onOpenEntity={onOpenEntityRelation} />
         </StudySection>
       )}
+
+      <StudyLinksSections
+        kind="entity"
+        subjectKey={entity.uniqueName}
+        language={language ?? (i18n.language === 'fr' ? 'fr' : 'en')}
+      />
     </ScrollView>
   )
 }

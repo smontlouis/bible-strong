@@ -1,3 +1,10 @@
+import { isStudyLinksInstalled, localStudyLinksAccess } from './studyLinksLocal'
+import {
+  createHttpStudyLinksAccess,
+  createHybridStudyLinksAccess,
+  type StudyLinksAccess,
+  unavailableStudyLinksAccess,
+} from './studyLinksAccess'
 import { createLayeredStrongLexiconAccess } from './layeredStrongLexiconAccess'
 import { createLocalStrongLexiconAccess } from './strongLexiconAccess'
 import { localCommentaryReading } from './commentaryReadingLocal'
@@ -119,6 +126,7 @@ export type ResourceAccessRegistry = {
   strongBible: StrongBibleResourceAccess
   interlinearBible: InterlinearBibleResourceAccess
   timeline: TimelineAccess
+  studyLinks: StudyLinksAccess
   commentaryReading: CommentaryReadingAccess
   commentary: CommentaryAccess
   offlineCopies: {
@@ -398,6 +406,13 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
   strongLexicon: strongLexiconAccess,
   strongBible: strongBibleAccess,
   interlinearBible: interlinearBibleAccess,
+  studyLinks: createHybridStudyLinksAccess({
+    offline: localStudyLinksAccess,
+    online: resourceApiBaseUrl
+      ? createHttpStudyLinksAccess({ baseUrl: resourceApiBaseUrl, fetcher: resourceApiFetch })
+      : unavailableStudyLinksAccess,
+    isInstalled: isStudyLinksInstalled,
+  }),
   timeline: createHybridTimelineAccess({
     offline: offlineSource('Timeline', localTimelineAccess),
     online: onlineTimelineAccess,

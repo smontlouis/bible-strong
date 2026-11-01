@@ -15,6 +15,7 @@ import type {
   DatabaseDownloadItem,
   DictionaryDownloadItem,
   DictionaryDirectoryDownloadItem,
+  StudyLinksDownloadItem,
   InterlinearIndexDownloadItem,
   StrongBibleIndexDownloadItem,
   StrongLexiconModuleDownloadItem,
@@ -43,6 +44,7 @@ const downloadFile = async (
     | DatabaseDownloadItem
     | DictionaryDownloadItem
     | DictionaryDirectoryDownloadItem
+    | StudyLinksDownloadItem
     | CommentaryDownloadItem,
   callbacks: ResourceInstallationCallbacks,
   destinationPath = item.destinationPath!
@@ -92,6 +94,7 @@ const installDatabase = async (
     | DatabaseDownloadItem
     | DictionaryDownloadItem
     | DictionaryDirectoryDownloadItem
+    | StudyLinksDownloadItem
     | CommentaryDownloadItem,
   callbacks: ResourceInstallationCallbacks
 ) => {
@@ -100,7 +103,9 @@ const installDatabase = async (
       ? item.databaseId
       : item.type === 'dictionary-directory'
         ? 'DICTIONARY_DIRECTORY'
-        : item.resourceId
+        : item.type === 'study-links'
+          ? 'STUDY_LINKS'
+          : item.resourceId
   const lang = 'lang' in item ? item.lang : 'shared'
   const destinationPath = item.destinationPath
   const destinationFileName = destinationPath.split('/').pop()!
@@ -158,19 +163,21 @@ const installDatabase = async (
         )
         const tableNames = new Set(tables.map(table => table.name.toLowerCase()))
         if (
-          (item.type === 'dictionary-directory'
-            ? [
-                'dictionary_works',
-                'dictionary_entries',
-                'dictionary_correspondences',
-                'dictionary_correspondence_members',
-                'dictionary_passage_anchors',
-              ]
-            : item.type === 'dictionary'
-              ? ['dictionnaire']
-              : item.type === 'commentary'
-                ? getCommentaryRequiredTables(tableNames)
-                : resourceDatabaseRequiredTables[dbId as DatabaseId]
+          (item.type === 'study-links'
+            ? ['study_link_nodes', 'study_links']
+            : item.type === 'dictionary-directory'
+              ? [
+                  'dictionary_works',
+                  'dictionary_entries',
+                  'dictionary_correspondences',
+                  'dictionary_correspondence_members',
+                  'dictionary_passage_anchors',
+                ]
+              : item.type === 'dictionary'
+                ? ['dictionnaire']
+                : item.type === 'commentary'
+                  ? getCommentaryRequiredTables(tableNames)
+                  : resourceDatabaseRequiredTables[dbId as DatabaseId]
           )?.some(table => !tableNames.has(table.toLowerCase()))
         ) {
           throw new Error(`RESOURCE_DATABASE_SCHEMA_MISMATCH:${dbId}:${lang}`)
@@ -275,6 +282,8 @@ export const installResourceDatabaseItem = async (
     case 'dictionary':
       return installDatabase(item, callbacks)
     case 'dictionary-directory':
+      return installDatabase(item, callbacks)
+    case 'study-links':
       return installDatabase(item, callbacks)
     case 'commentary':
       return installDatabase(item, callbacks)

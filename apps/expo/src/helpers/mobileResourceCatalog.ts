@@ -224,6 +224,9 @@ export const loadMobileResourceCatalog = (
   return catalogRequest
 }
 
+export const hasMobileResourceCatalogEntry = (resourceId: string) =>
+  resourceId in MOBILE_RESOURCE_CATALOG.resources
+
 export const getMobileResourceCatalogEntry = (resourceId: string): MobileResourceCatalogEntry => {
   const entry = MOBILE_RESOURCE_CATALOG.resources[resourceId]
   if (!entry) throw new Error(`MOBILE_RESOURCE_CATALOG_ENTRY_MISSING:${resourceId}`)

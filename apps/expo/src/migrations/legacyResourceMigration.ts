@@ -86,6 +86,7 @@ const serializeIdentity = (identity: OfflineCopyIdentity): { [key: string]: Json
         language: identity.language,
       }
     case 'dictionary-directory':
+    case 'study-links':
       return { kind: identity.kind }
     case 'commentary':
       return {
