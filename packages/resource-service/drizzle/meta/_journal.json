@@ -239,6 +239,13 @@
       "when": 1792611565657,
       "tag": "0036_commentary_chapter_sections",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1793466648812,
+      "tag": "0037_study_links",
+      "breakpoints": true
     }
   ]
 }

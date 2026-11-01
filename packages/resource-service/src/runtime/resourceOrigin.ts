@@ -15,6 +15,7 @@ import { makeKyselyDictionaryRepository } from '../repositories/dictionaryReposi
 import { makeKyselyStrongBibleRepository } from '../repositories/strongBibleRepository'
 import { makeKyselyInterlinearBibleRepository } from '../repositories/interlinearBibleRepository'
 import { makeKyselyStrongLexiconRepository } from '../repositories/strongLexiconRepository'
+import { makeKyselyStudyLinksRepository } from '../repositories/studyLinksRepository'
 import { makeKyselySupplementaryRepository } from '../repositories/supplementaryRepository'
 import { makeKyselyTimelineRepository } from '../repositories/timelineRepository'
 import {
@@ -155,6 +156,7 @@ export const resourceRequestServicesFor = ({
         strongLexicon: makeKyselyStrongLexiconRepository(database),
         supplementary: makeKyselySupplementaryRepository(database),
         timeline: makeKyselyTimelineRepository(database),
+        studyLinks: makeKyselyStudyLinksRepository(database),
         bibleSearch: makeKyselyBibleSearchRepository(database, {
           embeddingProvider: topicEmbeddingProvider,
           reportEmbeddingFailure: cause =>

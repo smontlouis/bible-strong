@@ -25,6 +25,8 @@ import { makeKyselyInterlinearBibleRepository } from '../repositories/interlinea
 import { makeKyselyStrongLexiconRepository } from '../repositories/strongLexiconRepository'
 import { makeKyselySupplementaryRepository } from '../repositories/supplementaryRepository'
 import { makeKyselyTimelineRepository } from '../repositories/timelineRepository'
+import { makeKyselyStudyLinksRepository } from '../repositories/studyLinksRepository'
+import { StudyLinksRepository } from '../domain/studyLinks'
 import { makeHttpTopicEmbeddingProvider } from '../search/topicEmbedding'
 import {
   parseResourceCorsOrigins,
@@ -71,6 +73,7 @@ const RepositoryLive = Layer.mergeAll(
   Layer.succeed(StrongLexiconRepository, makeKyselyStrongLexiconRepository(database)),
   Layer.succeed(SupplementaryRepository, makeKyselySupplementaryRepository(database)),
   Layer.succeed(TimelineRepository, makeKyselyTimelineRepository(database)),
+  Layer.succeed(StudyLinksRepository, makeKyselyStudyLinksRepository(database)),
   Layer.succeed(SearchAnalyticsSink, noOpSearchAnalyticsSink)
 )
 const ApiLive = ResourceApiLive.pipe(Layer.provide(RepositoryLive))

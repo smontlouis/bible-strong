@@ -560,6 +560,56 @@ export const dictionaryDirectoryVersePresences = pgTable(
   ]
 )
 
+export const studyLinkNodes = pgTable(
+  'study_link_nodes',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    kind: text('kind').notNull(),
+    key: text('key').notNull(),
+    label_fr: text('label_fr').notNull(),
+    label_en: text('label_en').notNull(),
+    detail_fr: text('detail_fr'),
+    detail_en: text('detail_en'),
+    language: text('language'),
+    position: integer('position'),
+  },
+  table => [
+    primaryKey({
+      name: 'study_link_nodes_primary',
+      columns: [table.publication_id, table.kind, table.key],
+    }),
+  ]
+)
+
+export const studyLinks = pgTable(
+  'study_links',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    left_kind: text('left_kind').notNull(),
+    left_key: text('left_key').notNull(),
+    right_kind: text('right_kind').notNull(),
+    right_key: text('right_key').notNull(),
+    role: text('role'),
+  },
+  table => [
+    primaryKey({
+      name: 'study_links_primary',
+      columns: [
+        table.publication_id,
+        table.left_kind,
+        table.left_key,
+        table.right_kind,
+        table.right_key,
+      ],
+    }),
+    index('study_links_right_lookup').on(table.publication_id, table.right_kind, table.right_key),
+  ]
+)
+
 export const strongBibleVerses = pgTable(
   'strong_bible_verses',
   {

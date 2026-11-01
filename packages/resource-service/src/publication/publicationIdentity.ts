@@ -7,6 +7,7 @@ import {
   isInterlinearBiblePublicationBundleManifest,
   isNavePublicationBundleManifest,
   isStrongLexiconPublicationBundleManifest,
+  isStudyLinksPublicationBundleManifest,
   isTimelinePublicationBundleManifest,
   type PublicationBundleManifest,
 } from './publicationBundle'
@@ -14,7 +15,9 @@ import {
 export const getPublicationIdentityProjection = (
   manifest: PublicationBundleManifest
 ): { resourceIdentity: string; mobileCatalogId: string } =>
-  isBiblePublicationBundleManifest(manifest)
+  isStudyLinksPublicationBundleManifest(manifest)
+    ? { resourceIdentity: 'study-links', mobileCatalogId: 'study-links' }
+    : isBiblePublicationBundleManifest(manifest)
     ? {
         resourceIdentity: `bible-text:${manifest.identity.versionId}`,
         mobileCatalogId: `bible:${manifest.identity.versionId}`,

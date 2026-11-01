@@ -93,6 +93,7 @@ const catalogResourceIdsFrom = (request: Request): string[] => {
       `bible-interlinear:${decodeURIComponent(interlinear[0])}:${decodeURIComponent(interlinear[1])}`,
     ]
   }
+  if (pathname.startsWith('/v1/study-links/')) return ['study-links']
   const database = match(/^\/v1\/(naves|timelines)\/([^/]+)\//)
   if (database) {
     const names = { naves: 'NAVE', timelines: 'TIMELINE' }
@@ -226,6 +227,7 @@ const LONG_LIVED_PATHS = [
   /^\/v1\/commentaries\/verses\/[^/]+\/sections$/,
   /^\/v1\/cross-references\/[^/]+\/verses\/[^/]+$/,
   /^\/v1\/timelines\/[^/]+\/events\/[^/]+$/,
+  /^\/v1\/study-links\/[^/]+\/[^/]+$/,
   // Lists and their pages: their keys name the content they read like those of reads.
   /^\/v1\/naves\/[^/]+\/topics$/,
   /^\/v1\/dictionaries\/directory$/,

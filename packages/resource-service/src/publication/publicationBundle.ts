@@ -218,6 +218,27 @@ const DictionaryDirectoryPublicationBundleManifestSchema = Schema.Struct({
   }),
 })
 
+const StudyLinksPublicationBundleManifestSchema = Schema.Struct({
+  ...PublicationBundleCommonFields,
+  canonical: Schema.Struct({
+    ...PublicationBundleCommonFields.canonical.fields,
+    schemaVersion: Schema.Literal(1),
+  }),
+  offlineArtifact: Schema.Struct({
+    ...PublicationBundleCommonFields.offlineArtifact.fields,
+    entry: Schema.Literal('study-links.sqlite'),
+  }),
+  identity: Schema.Struct({
+    kind: Schema.Literal('study-links'),
+    resourceId: Schema.Literal('STUDY_LINKS'),
+    language: Schema.Literal('mul'),
+  }),
+  counts: Schema.Struct({
+    nodes: Schema.NonNegativeInt,
+    links: Schema.NonNegativeInt,
+  }),
+})
+
 const CommentaryPublicationBundleManifestSchema = Schema.Struct({
   ...PublicationBundleCommonFields,
   canonical: Schema.Struct({
@@ -395,6 +416,7 @@ const PublicationBundleManifestSchema = Schema.Union(
   NavePublicationBundleManifestSchema,
   DictionaryPublicationBundleManifestSchema,
   DictionaryDirectoryPublicationBundleManifestSchema,
+  StudyLinksPublicationBundleManifestSchema,
   CommentaryPublicationBundleManifestSchema,
   CrossReferencePublicationBundleManifestSchema,
   TimelinePublicationBundleManifestSchema,
@@ -409,6 +431,8 @@ export type DictionaryPublicationBundleManifest =
   typeof DictionaryPublicationBundleManifestSchema.Type
 export type DictionaryDirectoryPublicationBundleManifest =
   typeof DictionaryDirectoryPublicationBundleManifestSchema.Type
+export type StudyLinksPublicationBundleManifest =
+  typeof StudyLinksPublicationBundleManifestSchema.Type
 export type CommentaryPublicationBundleManifest =
   typeof CommentaryPublicationBundleManifestSchema.Type
 export type CrossReferencePublicationBundleManifest =
@@ -425,6 +449,7 @@ export type PublicationBundleManifest =
   | NavePublicationBundleManifest
   | DictionaryPublicationBundleManifest
   | DictionaryDirectoryPublicationBundleManifest
+  | StudyLinksPublicationBundleManifest
   | CommentaryPublicationBundleManifest
   | CrossReferencePublicationBundleManifest
   | TimelinePublicationBundleManifest
@@ -448,6 +473,10 @@ export const isDictionaryDirectoryPublicationBundleManifest = (
   manifest: PublicationBundleManifest
 ): manifest is DictionaryDirectoryPublicationBundleManifest =>
   manifest.identity.kind === 'dictionary-directory'
+
+export const isStudyLinksPublicationBundleManifest = (
+  manifest: PublicationBundleManifest
+): manifest is StudyLinksPublicationBundleManifest => manifest.identity.kind === 'study-links'
 
 export const isCommentaryPublicationBundleManifest = (
   manifest: PublicationBundleManifest
@@ -571,6 +600,17 @@ export type CanonicalDictionaryDirectoryPublication = {
     entries: number
     correspondences: number
     passageAnchors: number
+  }
+}
+
+export type CanonicalStudyLinksPublication = {
+  format: 'bible-strong-canonical-study-links'
+  schemaVersion: 1
+  revision: string
+  contentSha256: string
+  counts: {
+    nodes: number
+    links: number
   }
 }
 
@@ -724,6 +764,7 @@ export type CanonicalPublication =
   | CanonicalNavePublication
   | CanonicalDictionaryPublication
   | CanonicalDictionaryDirectoryPublication
+  | CanonicalStudyLinksPublication
   | CanonicalCommentaryPublication
   | CanonicalCrossReferencePublication
   | CanonicalTimelinePublication
@@ -760,8 +801,9 @@ export const derivePublicationRevision = (manifest: PublicationBundleManifest): 
       ? manifest.identity.resourceId.toLowerCase()
       : manifest.identity.kind === 'dictionary'
         ? `dictionary-${manifest.identity.work}-${manifest.identity.language}`
-        : manifest.identity.kind === 'dictionary-directory'
-          ? 'dictionary-directory'
+        : manifest.identity.kind === 'dictionary-directory' ||
+            manifest.identity.kind === 'study-links'
+          ? manifest.identity.kind
           : manifest.identity.kind === 'commentary'
             ? `commentary-${manifest.identity.resourceId.toLowerCase()}-${manifest.identity.language}`
             : manifest.identity.kind === 'cross-references'
@@ -881,6 +923,14 @@ export const decodePublicationBundleManifest = (value: unknown): PublicationBund
     (manifest.offlineArtifact.entry !== 'dictionary-directory.sqlite' ||
       manifest.counts.works === 0 ||
       manifest.counts.entries === 0)
+  ) {
+    throw new Error('PUBLICATION_BUNDLE_MANIFEST_INVALID')
+  }
+  if (
+    isStudyLinksPublicationBundleManifest(manifest) &&
+    (manifest.offlineArtifact.entry !== 'study-links.sqlite' ||
+      manifest.counts.nodes === 0 ||
+      manifest.counts.links === 0)
   ) {
     throw new Error('PUBLICATION_BUNDLE_MANIFEST_INVALID')
   }
@@ -1162,6 +1212,26 @@ export const decodeCanonicalDictionaryDirectory = (
     throw new Error('CANONICAL_DICTIONARY_DIRECTORY_INVALID')
   }
   return candidate as CanonicalDictionaryDirectoryPublication
+}
+
+export const decodeCanonicalStudyLinks = (value: unknown): CanonicalStudyLinksPublication => {
+  if (!value || typeof value !== 'object') throw new Error('CANONICAL_STUDY_LINKS_INVALID')
+  const candidate = value as Partial<CanonicalStudyLinksPublication>
+  const counts = candidate.counts
+  if (
+    candidate.format !== 'bible-strong-canonical-study-links' ||
+    candidate.schemaVersion !== 1 ||
+    !isNonEmptyString(candidate.revision) ||
+    !/^[a-f0-9]{64}$/u.test(candidate.contentSha256 ?? '') ||
+    !counts ||
+    !isNonNegativeInteger(counts.nodes) ||
+    !isNonNegativeInteger(counts.links) ||
+    counts.nodes === 0 ||
+    counts.links === 0
+  ) {
+    throw new Error('CANONICAL_STUDY_LINKS_INVALID')
+  }
+  return candidate as CanonicalStudyLinksPublication
 }
 
 const isSupplementaryVerseKey = (value: unknown): value is string =>
@@ -2098,6 +2168,43 @@ const validateDictionaryDirectoryOfflineParity = async (
       requireSqliteInteger(metadata?.entries_count) !== canonical.counts.entries ||
       requireSqliteInteger(metadata?.correspondences_count) !== canonical.counts.correspondences ||
       requireSqliteInteger(metadata?.passage_anchors_count) !== canonical.counts.passageAnchors
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+    }
+  } catch (cause) {
+    if (cause instanceof Error && cause.message.startsWith('OFFLINE_ARTIFACT_')) throw cause
+    throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID', { cause })
+  } finally {
+    database?.close()
+  }
+}
+
+const validateStudyLinksOfflineParity = async (
+  offlineContent: Uint8Array,
+  canonical: CanonicalStudyLinksPublication
+) => {
+  const SQL = await initSqlJs()
+  let database: Database | undefined
+  try {
+    database = new SQL.Database(offlineContent)
+    const integrity = readSqliteRows(database, 'PRAGMA integrity_check')
+    if (integrity.length !== 1 || Object.values(integrity[0] ?? {}).some(value => value !== 'ok')) {
+      throw new Error('OFFLINE_ARTIFACT_INTEGRITY_INVALID')
+    }
+    const metadataRows = readSqliteRows(
+      database,
+      'SELECT revision, nodes_count, links_count FROM RESOURCE_METADATA'
+    )
+    const metadata = metadataRows[0]
+    const [nodes] = readSqliteRows(database, 'SELECT count(*) AS total FROM study_link_nodes')
+    const [links] = readSqliteRows(database, 'SELECT count(*) AS total FROM study_links')
+    if (
+      metadataRows.length !== 1 ||
+      requireSqliteString(metadata?.revision) !== canonical.revision ||
+      requireSqliteInteger(metadata?.nodes_count) !== canonical.counts.nodes ||
+      requireSqliteInteger(metadata?.links_count) !== canonical.counts.links ||
+      requireSqliteInteger(nodes?.total) !== canonical.counts.nodes ||
+      requireSqliteInteger(links?.total) !== canonical.counts.links
     ) {
       throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
     }
@@ -3427,6 +3534,7 @@ export const validatePublicationBundle = async (bundlePath: string) => {
     (isNavePublicationBundleManifest(manifest) ||
       isDictionaryPublicationBundleManifest(manifest) ||
       isDictionaryDirectoryPublicationBundleManifest(manifest) ||
+      isStudyLinksPublicationBundleManifest(manifest) ||
       isCommentaryPublicationBundleManifest(manifest) ||
       isCrossReferencePublicationBundleManifest(manifest) ||
       isStrongBiblePublicationBundleManifest(manifest) ||
@@ -3571,6 +3679,16 @@ export const validatePublicationBundle = async (bundlePath: string) => {
       throw new Error('PUBLICATION_BUNDLE_IDENTITY_MISMATCH')
     }
     await validateDictionaryDirectoryOfflineParity(offlineContent, canonical)
+  } else if (isStudyLinksPublicationBundleManifest(manifest)) {
+    canonical = decodeCanonicalStudyLinks(canonicalValue)
+    if (
+      canonical.revision !== manifest.revision ||
+      canonical.contentSha256 !== manifest.offlineArtifact.contentSha256 ||
+      JSON.stringify(canonical.counts) !== JSON.stringify(manifest.counts)
+    ) {
+      throw new Error('PUBLICATION_BUNDLE_IDENTITY_MISMATCH')
+    }
+    await validateStudyLinksOfflineParity(offlineContent, canonical)
   } else if (isCommentaryPublicationBundleManifest(manifest)) {
     const commentaryCanonical = decodeCanonicalCommentary(canonicalValue)
     canonical = commentaryCanonical

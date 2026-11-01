@@ -36,6 +36,11 @@ import {
   NaveVerseTopicsResponseDto,
 } from '@bible-strong/resource-domain/contracts/naveContract'
 import {
+  StudyLinkKind,
+  StudyLinksQuery,
+  StudyLinksResponseDto,
+} from '@bible-strong/resource-domain/contracts/studyLinksContract'
+import {
   DictionaryCatalogQuery,
   DictionaryCatalogResponseDto,
   DictionaryDirectoryQuery,
@@ -670,6 +675,22 @@ const TimelineApi = HttpApiGroup.make('timelines')
       .addError(ResourceInternalProblem, { status: 500 })
   )
 
+const StudyLinksPath = Schema.Struct({
+  kind: StudyLinkKind,
+  key: Schema.NonEmptyString,
+})
+
+const StudyLinksApi = HttpApiGroup.make('studyLinks').add(
+  HttpApiEndpoint.get('readStudyLinks', '/v1/study-links/:kind/:key')
+    .setPath(StudyLinksPath)
+    .setUrlParams(StudyLinksQuery)
+    .addSuccess(StudyLinksResponseDto)
+    .addError(InvalidResourceRequestProblem, { status: 400 })
+    .addError(ResourceNotFoundProblem, { status: 404 })
+    .addError(ResourceUnavailableProblem, { status: 503 })
+    .addError(ResourceInternalProblem, { status: 500 })
+)
+
 export class ResourceApi extends HttpApi.make('resource-api')
   .add(SystemApi)
   .add(SearchAnalyticsApi)
@@ -680,4 +701,5 @@ export class ResourceApi extends HttpApi.make('resource-api')
   .add(InterlinearBibleApi)
   .add(StrongLexiconApi)
   .add(SupplementaryApi)
-  .add(TimelineApi) {}
+  .add(TimelineApi)
+  .add(StudyLinksApi) {}

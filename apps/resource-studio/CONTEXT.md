@@ -56,6 +56,14 @@ _Avoid_: Dictionary passage anchor, fuzzy heading match, substring match
 A definition-free projection of dictionary works, entries, correspondence clusters, passage anchors, and verse presences used for global discovery.
 _Avoid_: Merged dictionary, universal dictionary
 
+**Study link**:
+An evidenced relationship between two study resources that treat the same subject. A person, place or group is reached through its Biblical entity; a theme is reached through its Nave topic.
+_Avoid_: Shared verse, related content
+
+**Entity spelling**:
+A way a Bible writes the name of a Biblical entity, read from the Strong spans of that entity's references.
+_Avoid_: Fuzzy alias, transliteration guess
+
 **Direct EGW paragraph association**:
 An ECSI relationship to one cited paragraph in an Ellen G. White work.
 _Avoid_: Chapter association, neighboring paragraph inference

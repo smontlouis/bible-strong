@@ -24,6 +24,8 @@ import type {
   dictionaryDirectoryVersePresences,
   dictionaryVerseLinks,
   resourcePublications,
+  studyLinkNodes,
+  studyLinks,
   strongBibleIdentities,
   strongBibleLexemes,
   strongBibleSpanIdentities,
@@ -65,6 +67,8 @@ export type ThematicImportRunRow = Kyselify<typeof thematicImportRuns>
 export type DictionaryEntryRow = Kyselify<typeof dictionaryEntries>
 export type DictionaryDirectoryVersePresenceRow = Kyselify<typeof dictionaryDirectoryVersePresences>
 export type DictionaryVerseLinkRow = Kyselify<typeof dictionaryVerseLinks>
+export type StudyLinkNodeRow = Kyselify<typeof studyLinkNodes>
+export type StudyLinkEdgeRow = Kyselify<typeof studyLinks>
 export type StrongBibleVerseRow = Kyselify<typeof strongBibleVerses>
 export type StrongBibleLexemeRow = Kyselify<typeof strongBibleLexemes>
 export type StrongBibleIdentityRow = Kyselify<typeof strongBibleIdentities>
@@ -112,6 +116,8 @@ export type ResourceDatabase = {
   dictionary_entries: DictionaryEntryRow
   dictionary_directory_verse_presences: DictionaryDirectoryVersePresenceRow
   dictionary_verse_links: DictionaryVerseLinkRow
+  study_link_nodes: StudyLinkNodeRow
+  study_links: StudyLinkEdgeRow
   strong_bible_verses: StrongBibleVerseRow
   strong_bible_lexemes: StrongBibleLexemeRow
   strong_bible_identities: StrongBibleIdentityRow

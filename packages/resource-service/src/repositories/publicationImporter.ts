@@ -15,6 +15,7 @@ import {
   isBiblePublicationBundleManifest,
   isDictionaryPublicationBundleManifest,
   isDictionaryDirectoryPublicationBundleManifest,
+  isStudyLinksPublicationBundleManifest,
   isCommentaryPublicationBundleManifest,
   isCrossReferencePublicationBundleManifest,
   isTimelinePublicationBundleManifest,
@@ -111,6 +112,45 @@ type DictionaryDirectoryVersePresence = {
   normalized_word: string
   correspondence_id: string | null
   evidence_kind: 'verse-name' | 'verse-phrase'
+}
+
+export const readStudyLinksGraph = async (offlineContent: Uint8Array) => {
+  const SQL = await initSqlJs()
+  const database = new SQL.Database(offlineContent)
+  const read = (sql: string) => {
+    const result = database.exec(sql)[0]
+    if (!result) return []
+    return result.values.map(values =>
+      Object.fromEntries(result.columns.map((column, index) => [column, values[index]]))
+    )
+  }
+  try {
+    return {
+      nodes: read(
+        'SELECT kind, key, label_fr, label_en, detail_fr, detail_en, language, position FROM study_link_nodes'
+      ) as {
+        kind: string
+        key: string
+        label_fr: string
+        label_en: string
+        detail_fr: string | null
+        detail_en: string | null
+        language: string | null
+        position: number | null
+      }[],
+      links: read(
+        'SELECT left_kind, left_key, right_kind, right_key, role FROM study_links'
+      ) as {
+        left_kind: string
+        left_key: string
+        right_kind: string
+        right_key: string
+        role: string | null
+      }[],
+    }
+  } finally {
+    database.close()
+  }
 }
 
 export const readDictionaryDirectoryVersePresences = async (
@@ -493,7 +533,8 @@ export const importPublicationBundle = (
                 resource_revision: manifest.revision,
                 offline_entry: manifest.offlineArtifact.entry,
               }
-            : isDictionaryDirectoryPublicationBundleManifest(manifest)
+            : isDictionaryDirectoryPublicationBundleManifest(manifest) ||
+                isStudyLinksPublicationBundleManifest(manifest)
               ? {
                   resource_id: manifest.identity.resourceId,
                   language: manifest.identity.language,
@@ -603,6 +644,13 @@ export const importPublicationBundle = (
                     revision: manifest.revision,
                     itemCount: manifest.counts.entries,
                   }
+                : isStudyLinksPublicationBundleManifest(manifest)
+                  ? {
+                      status,
+                      resourceIdentity,
+                      revision: manifest.revision,
+                      itemCount: manifest.counts.links,
+                    }
                 : isCommentaryPublicationBundleManifest(manifest)
                   ? {
                       status,
@@ -872,6 +920,18 @@ export const importPublicationBundle = (
                   publication_id: publication.id,
                   ...presence,
                 }))
+              )
+            } else if (canonical.format === 'bible-strong-canonical-study-links') {
+              const graph = await readStudyLinksGraph(offlineContent)
+              await insertChunks(
+                transaction,
+                'study_link_nodes',
+                graph.nodes.map(node => ({ publication_id: publication.id, ...node }))
+              )
+              await insertChunks(
+                transaction,
+                'study_links',
+                graph.links.map(link => ({ publication_id: publication.id, ...link }))
               )
             } else if (canonical.format === 'bible-strong-canonical-commentary') {
               const commentaryCanonical = canonical as CanonicalCommentaryPublication

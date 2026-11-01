@@ -54,7 +54,8 @@ export class ResourceUnavailableProblem extends Schema.TaggedError<ResourceUnava
       'INTERLINEAR_PUBLICATION_INACTIVE',
       'STRONG_LEXICON_PUBLICATION_INACTIVE',
       'SUPPLEMENTARY_PUBLICATION_INACTIVE',
-      'TIMELINE_PUBLICATION_INACTIVE'
+      'TIMELINE_PUBLICATION_INACTIVE',
+  'STUDY_LINKS_PUBLICATION_INACTIVE'
     ),
     retryAfterSeconds: Schema.Int.pipe(Schema.positive()),
   }

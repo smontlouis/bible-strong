@@ -1,0 +1,599 @@
+{
+  "format": "bible-strong-study-link-overrides",
+  "schemaVersion": 1,
+  "add": [
+    {
+      "kind": "entity-timeline",
+      "source": "1 John Written",
+      "target": "1-john-written",
+      "entity": "John@Mat.4.21-Rev",
+      "role": "participant",
+      "reason": "Épître attribuée à l'apôtre Jean par la tradition, comme la chronologie la présente."
+    },
+    {
+      "kind": "entity-timeline",
+      "source": "2 John Written",
+      "target": "2-john-written",
+      "entity": "John@Mat.4.21-Rev",
+      "role": "participant",
+      "reason": "Épître attribuée à l'apôtre Jean par la tradition, comme la chronologie la présente."
+    },
+    {
+      "kind": "entity-timeline",
+      "source": "3 John Written",
+      "target": "3-john-written",
+      "entity": "John@Mat.4.21-Rev",
+      "role": "participant",
+      "reason": "Épître attribuée à l'apôtre Jean par la tradition, comme la chronologie la présente."
+    },
+    {
+      "kind": "entity-dictionary",
+      "source": "Laish (easton-webster)",
+      "target": "easton-webster:4438",
+      "entity": "Dan@Gen.14.14-Amo",
+      "status": "reviewed",
+      "reason": "Lien vérifié par l'audit des entités majeures."
+    },
+    {
+      "kind": "entity-dictionary",
+      "source": "Galilee, Sea of (isbe)",
+      "target": "isbe:3635",
+      "entity": "Chinnereth@Num.34.11-Jhn",
+      "status": "reviewed",
+      "reason": "Lien vérifié par l'audit des entités majeures."
+    },
+    {
+      "kind": "entity-dictionary",
+      "source": "Laish (easton-webster)",
+      "target": "easton-webster:4438",
+      "entity": "Dan@Gen.14.14-Amo",
+      "status": "reviewed",
+      "reason": "Lien vérifié par l'audit des entités majeures."
+    },
+    {
+      "kind": "entity-dictionary",
+      "source": "Laish (isbe)",
+      "target": "isbe:5357",
+      "entity": "Dan@Gen.14.14-Amo",
+      "status": "reviewed",
+      "reason": "Lien vérifié par l'audit des entités majeures."
+    },
+    {
+      "kind": "entity-dictionary",
+      "source": "Idumea (smith)",
+      "target": "smith:2050",
+      "entity": "Edom@Gen.32.3-Mal",
+      "status": "reviewed",
+      "reason": "Lien vérifié par l'audit des entités majeures."
+    },
+    {
+      "kind": "entity-dictionary",
+      "source": "Édom (calmet)",
+      "target": "calmet:1542",
+      "entity": "Esau@Gen.25.25-Heb",
+      "status": "reviewed",
+      "reason": "Lien vérifié par l'audit des entités majeures."
+    },
+    {
+      "kind": "entity-dictionary",
+      "source": "Edom (easton-webster)",
+      "target": "easton-webster:2411",
+      "entity": "Esau@Gen.25.25-Heb",
+      "status": "reviewed",
+      "reason": "Lien vérifié par l'audit des entités majeures."
+    },
+    {
+      "kind": "entity-dictionary",
+      "source": "Edom, Edomite, Idumea (unfoldingword-translation-words)",
+      "target": "unfoldingword-translation-words:268",
+      "entity": "Esau@Gen.25.25-Heb",
+      "status": "reviewed",
+      "reason": "Lien vérifié par l'audit des entités majeures."
+    },
+    {
+      "kind": "entity-dictionary",
+      "source": "Ariel (bost)",
+      "target": "bost:207",
+      "entity": "Jerusalem@Gen.14.18-Rev",
+      "status": "reviewed",
+      "reason": "Lien vérifié par l'audit des entités majeures."
+    },
+    {
+      "kind": "entity-dictionary",
+      "source": "Ariel (calmet)",
+      "target": "calmet:540",
+      "entity": "Jerusalem@Gen.14.18-Rev",
+      "status": "reviewed",
+      "reason": "Lien vérifié par l'audit des entités majeures."
+    },
+    {
+      "kind": "entity-dictionary",
+      "source": "Ariel (easton-webster)",
+      "target": "easton-webster:499",
+      "entity": "Jerusalem@Gen.14.18-Rev",
+      "status": "reviewed",
+      "reason": "Lien vérifié par l'audit des entités majeures."
+    },
+    {
+      "kind": "entity-dictionary",
+      "source": "Ariel (isbe)",
+      "target": "isbe:720",
+      "entity": "Jerusalem@Gen.14.18-Rev",
+      "status": "reviewed",
+      "reason": "Lien vérifié par l'audit des entités majeures."
+    },
+    {
+      "kind": "entity-dictionary",
+      "source": "Ariel (westphal)",
+      "target": "westphal:10332",
+      "entity": "Jerusalem@Gen.14.18-Rev",
+      "status": "reviewed",
+      "reason": "Lien vérifié par l'audit des entités majeures."
+    },
+    {
+      "kind": "entity-dictionary",
+      "source": "Samaria, City of (isbe)",
+      "target": "isbe:7537",
+      "entity": "Samaria@1Ki.13.32-Act",
+      "status": "reviewed",
+      "reason": "Lien vérifié par l'audit des entités majeures."
+    }
+  ],
+  "remove": [
+    {
+      "kind": "entity-nave",
+      "target": "greek",
+      "entity": "Javan@Gen.10.2-Col",
+      "reason": "Le sujet traite de la philosophie grecque, pas de Javan, fils de Japhet."
+    },
+    {
+      "kind": "entity-nave",
+      "target": "kerioth",
+      "entity": "Kiriathaim@Gen.14.5-Amo",
+      "reason": "Kerioth est une autre ville de Moab que Kiriathaïm."
+    },
+    {
+      "kind": "entity-timeline",
+      "target": "1-john-written",
+      "entity": "John@Mat.3.1-Act",
+      "reason": "Le livre de Jean compte surtout Jean-Baptiste, mais cette épître n'est pas de lui."
+    },
+    {
+      "kind": "entity-timeline",
+      "target": "2-john-written",
+      "entity": "John@Mat.3.1-Act",
+      "reason": "Le livre de Jean compte surtout Jean-Baptiste, mais cette épître n'est pas de lui."
+    },
+    {
+      "kind": "entity-timeline",
+      "target": "3-john-written",
+      "entity": "John@Mat.3.1-Act",
+      "reason": "Le livre de Jean compte surtout Jean-Baptiste, mais cette épître n'est pas de lui."
+    },
+    {
+      "kind": "entity-nave",
+      "target": "seba",
+      "entity": "Sheba@1Ki.10.1-Luk",
+      "reason": "Seba, région de Cusch, n'est pas Séba d'Arabie : ils ne partagent que Ps 72:10."
+    },
+    {
+      "kind": "entity-nave",
+      "target": "tahtim-hodshi",
+      "entity": "Kadesh@2Sa.24.6",
+      "reason": "Tachthim-Hodschi n'est pas Kadès : le rapprochement ne repose que sur une conjecture du texte."
+    },
+    {
+      "kind": "entity-timeline",
+      "target": "shalmaneser-iii",
+      "entity": "Shalmaneser@2Ki.17.3-Hos",
+      "reason": "Cette entité est Salmanasar V ; Salmanasar III n'est pas nommé dans la Bible."
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "calmet:3339",
+      "entity": "Lasha@Gen.10.19-Num",
+      "reason": "Nahaliel est un campement de Nb 21:19, sans rapport avec Léscha."
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "easton-webster:5160",
+      "entity": "Lasha@Gen.10.19-Num",
+      "reason": "Nahaliel est un campement de Nb 21:19, sans rapport avec Léscha."
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "isbe:6201",
+      "entity": "Lasha@Gen.10.19-Num",
+      "reason": "Nahaliel est un campement de Nb 21:19, sans rapport avec Léscha."
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "smith:3048",
+      "entity": "Lasha@Gen.10.19-Num",
+      "reason": "Nahaliel est un campement de Nb 21:19, sans rapport avec Léscha."
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "westphal:6177",
+      "entity": "Lasha@Gen.10.19-Num",
+      "reason": "Nahaliel est un campement de Nb 21:19, sans rapport avec Léscha."
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "smith:3978",
+      "entity": "Shelah@Neh.2.14-Jhn",
+      "reason": "L'article traite de la tour de Siloé, l'entité du réservoir."
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "isbe:2455",
+      "entity": "Cush@Gen.2.13-Act",
+      "reason": "Cuschi est un nom de personne, pas la région de Cusch."
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "smith:1093",
+      "entity": "Cush@Gen.2.13-Act",
+      "reason": "Cuschi est un nom de personne, pas la région de Cusch."
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "bost:537",
+      "entity": "Chronicles@1Ki.14.19-Est",
+      "reason": "L'article traite des livres bibliques, l'entité des annales royales."
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "westphal:7748",
+      "entity": "Chronicles@1Ki.14.19-Est",
+      "reason": "L'article traite des livres bibliques, l'entité des annales royales."
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "unfoldingword-translation-words:36",
+      "entity": "Amaziah@1Ch.4.34",
+      "reason": "TW article is about King Amaziah of Judah; the Simeonite Amaziah of 1Ch 4:34 is only in the reference list"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "westphal:10671",
+      "entity": "Hophra@Jer.37.5-Ezk",
+      "reason": "Generic title 'Pharaon' article; cites Ezekiel verses as personification of Egypt, not specific to Hophra"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "isbe:6805",
+      "entity": "Hophra@Jer.37.5-Ezk",
+      "reason": "ISBE Pharaoh is about the title; Hophra only mentioned in passing"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "isbe:4291",
+      "entity": "Salome@Mat.14.6",
+      "reason": "Article is about Herodias (mother); entity Salome is her daughter"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "lelievre:14",
+      "entity": "Paddan@Gen.25.20-Hos",
+      "reason": "Article is about Arameans/Aramaic language; Gen 25:20 cited only for Laban being an Aramean, not Paddan-aram as a place"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "calmet:341",
+      "entity": "Ammon@Gen.19.38-Zep",
+      "reason": "Calmet 'Ammon (1)' is No-Ammon, a city of Egypt (Thebes), not the nation"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "calmet:3963",
+      "entity": "Ammon@Gen.19.38-Zep",
+      "reason": "Rabba of Judah (Josh 15:60), redirect to Arebba; not the Ammonite capital"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "isbe:822",
+      "entity": "Asher@Gen.30.13-Rev",
+      "reason": "Asher (2) is a town on the border of Manasseh, not the son of Jacob"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "westphal:10395",
+      "entity": "Asher@Gen.30.13-Rev",
+      "reason": "Aser of Tobit 1:2 is the place Hazor"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "smith:525",
+      "entity": "Baal@Num.25.3-Rom",
+      "reason": "Smith 'Baal' article is geographical: a town of Simeon / place-name prefix"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "isbe:1818",
+      "entity": "Canaan@Gen.10.18-Act",
+      "reason": "Redirects to Simon the Cananaean (Zealot)"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "westphal:9444",
+      "entity": "Cush@Gen.2.13-Act",
+      "reason": "The Ethiopian eunuch of Acts 8, a different person"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "isbe:2903",
+      "entity": "Egypt@Gen.12.10-Rev",
+      "reason": "The Egyptian false prophet of Acts 21:38, not the country"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "westphal:9211",
+      "entity": "Egypt@Gen.12.10-Rev",
+      "reason": "The Egyptian rebel of Acts 21:38, not the country"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "isbe:3608",
+      "entity": "Gad@Gen.30.11-Rev",
+      "reason": "Gad as a pagan god of Good Luck, not the son of Jacob"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "calmet:1920",
+      "entity": "Galilee@Jos.12.23-Act",
+      "reason": "Galileans as Christians and a Jewish sect of Judas the Galilean, not the region"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "westphal:8188",
+      "entity": "Job@Job.1.1-Jas",
+      "reason": "mainly the Book of Job (plus Job son of Issachar)"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "isbe:5145",
+      "entity": "Judah@Gen.29.35-Rev",
+      "reason": "redirects for Luke 1:39 city, Joda, Judas; not the patriarch"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "westphal:8269",
+      "entity": "Judah@Gen.29.35-Rev",
+      "reason": "Juda: place name in Josh 19:34"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "isbe:6070",
+      "entity": "Moab@Gen.19.37b-Zep",
+      "reason": "Moabitess: a Moabite woman, demonym not the entity"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "unfoldingword-translation-words:809",
+      "entity": "Peter@Mat.4.18-2Pe",
+      "reason": "Simon the Zealot, a different apostle"
+    },
+    {
+      "kind": "entity-nave",
+      "target": "cushi",
+      "entity": "Cush@Gen.2.13-Act",
+      "reason": "Cushi the messenger/father of Shelemiah is a different person from Cush land/son of Ham"
+    },
+    {
+      "kind": "entity-nave",
+      "target": "rabbah",
+      "entity": "Ammon@Gen.19.38-Zep",
+      "reason": "Rabbah is a city; entity is the nation Ammon"
+    },
+    {
+      "kind": "entity-timeline",
+      "target": "famine-in-the-land-isaac",
+      "entity": "Egypt@Gen.12.10-Rev",
+      "reason": "Isaac explicitly does not go to Egypt"
+    },
+    {
+      "kind": "entity-timeline",
+      "target": "nehemiah-returns-to-babylon",
+      "entity": "Babylon@Gen.10.10-Rev",
+      "reason": "Nehemiah returns to Susa in Persia, not Babylon"
+    },
+    {
+      "kind": "entity-timeline",
+      "target": "pauls-first-missionary-journey-ending-in-antioch",
+      "entity": "Jerusalem@Gen.14.18-Rev",
+      "reason": "Jerusalem is only where John Mark returns, not a stage of the journey"
+    },
+    {
+      "kind": "entity-timeline",
+      "target": "pauls-first-missionary-journey-ending-in-antioch",
+      "entity": "John@Mat.3.1-Act",
+      "reason": "John Mark is not John the Baptist"
+    },
+    {
+      "kind": "entity-nave",
+      "target": "kore",
+      "entity": "Korah@Exo.6.21-Jud",
+      "reason": "Kore the Korahite gatekeeper is a different person from Korah the rebel"
+    },
+    {
+      "kind": "entity-nave",
+      "target": "shilonite",
+      "entity": "Shiloh@Jos.18.1-Jer",
+      "reason": "Shilonite is a man of Shiloh (Ahijah), not the place"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "bost:1303",
+      "entity": "Kadesh@Gen.14.7-Psa",
+      "reason": "Kedesh of Naphtali/south Judah/Issachar, not Kadesh-barnea"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "easton-webster:3210",
+      "entity": "Javan@Gen.10.2-Col",
+      "reason": "Gentiles = non-Jewish nations in general, not Javan"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "easton-webster:3258",
+      "entity": "Gath@Jos.11.22-Mic",
+      "reason": "Gittite is a native of Gath (e.g. Obed-edom), not the city"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "easton-webster:4424",
+      "entity": "Korah@Exo.6.21-Jud",
+      "reason": "Kore the gatekeeper (son of Asaph/Korahite) is a different person from Korah the rebel"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "easton-webster:6482",
+      "entity": "Rome@Jhn.11.48-Phm",
+      "reason": "Webster definition of the adjective Roman, not the city"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "easton-webster:6909",
+      "entity": "Shiloh@Jos.18.1-Jer",
+      "reason": "Shilonite is Ahijah the man of Shiloh, not the place"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "isbe:1863",
+      "entity": "Carmel@Jos.12.22-Nam",
+      "reason": "Carmelite is a native of Carmel (Nabal, Hezro), not the town"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "isbe:3722",
+      "entity": "Javan@Gen.10.2-Col",
+      "reason": "Gentiles = non-Jewish nations in general, not Javan"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "isbe:3130",
+      "entity": "Ephesus@Act.18.19-Rev",
+      "reason": "Ephesians = inhabitants/cult adherents of Ephesus, not the city"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "isbe:5015",
+      "entity": "Jezreel@Jos.19.18-Hos",
+      "reason": "gentilic applied to Naboth, not the city"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "isbe:5162",
+      "entity": "Judas@Mat.10.4-Act",
+      "reason": "article on several Judases; Iscariot only by cross-reference"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "isbe:5163",
+      "entity": "Judas@Mat.10.4-Act",
+      "reason": "Judas the apostle not Iscariot, different person"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "isbe:5329",
+      "entity": "Korah@Exo.6.21-Jud",
+      "reason": "Kore is a Levite descendant of Korah, not Korah the rebel"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "isbe:7958",
+      "entity": "Zerubbabel@1Ch.3.19-Mat",
+      "reason": "Sheshbazzar probably distinct from Zerubbabel per article"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "isbe:7982",
+      "entity": "Shiloh@Jos.18.1-Jer",
+      "reason": "Shilonite is a gentilic applied to Ahijah and a Judahite family"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "smith:242",
+      "entity": "Amalek@Gen.14.7-Psa",
+      "reason": "mountain in Ephraim, not the people"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "smith:2470",
+      "entity": "Judas@Mat.10.4-Act",
+      "reason": "Jude/Thaddaeus, not Judas Iscariot the betrayer"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "smith:2563",
+      "entity": "Korah@Exo.6.21-Jud",
+      "reason": "Kore is a Korahite porter, not Korah the rebel"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "smith:2792",
+      "entity": "Mary@Mat.1.16-Act",
+      "reason": "article on other Marys (Rome, Clopas); the Virgin has a separate article"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "smith:3886",
+      "entity": "Shiloh@Jos.18.1-Jer",
+      "reason": "gentilic applied to Ahijah, not the city Shiloh"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "westphal:5978",
+      "entity": "Ramoth@Gen.31.47-Hos",
+      "reason": "Galaad is the Gilead region, entity is the city Ramoth-gilead"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "westphal:8273",
+      "entity": "Judas@Mat.10.4-Act",
+      "reason": "article on several Judases; Iscariot only by cross-reference"
+    },
+    {
+      "kind": "entity-timeline",
+      "target": "ahaziah-of-israel-tries-to-intimidate-elijah",
+      "entity": "Ahaziah@2Ki.8.24-2Ch",
+      "reason": "Ahaziah of Israel (2Ki 1), entity is Ahaziah of Judah"
+    },
+    {
+      "kind": "entity-timeline",
+      "target": "james-the-brother-of-john-is-martyred-peter-imprisoned",
+      "entity": "John@Mat.4.21-Rev",
+      "reason": "event is James's martyrdom and Peter's arrest; John not a participant"
+    },
+    {
+      "kind": "entity-timeline",
+      "target": "joram",
+      "entity": "Joram@2Ki.1.17-2Ch",
+      "reason": "event concerns Joram of Israel, entity is Joram of Judah"
+    },
+    {
+      "kind": "entity-dictionary",
+      "target": "smith:4468",
+      "entity": "Zechariah@2Ki.18.2-2Ch",
+      "reason": "Article is about the prophet Zechariah; the Zechariah of 2Ki 18:2 (Hezekiah's maternal grandfather) is not treated and no such citation appears"
+    }
+  ],
+  "rejectedSpellings": {
+    "Mizpah@Jos.18.26-Jhn": [
+      "Rama",
+      "Ramah",
+      "Ramathaïm",
+      "Arimathea",
+      "Arimathée"
+    ],
+    "Satan@Deu.13.13-Rev": [
+      "Belial",
+      "Bélial"
+    ],
+    "Baal@Num.25.3-Rom": [
+      "Peor"
+    ]
+  },
+  "spellingNotes": "rejectedSpellings écarte des noms que la source confond avec l'entité : Rama n'est pas Mitspa, Bélial est un nom commun, Peor une montagne."
+}

@@ -26,6 +26,7 @@ import {
   buildDictionaryDirectoryResourcePublication,
   validateDictionaryDirectoryResourcePublication
 } from "./packageDictionaryDirectoryResourcePublication.js";
+import { validateStudyLinksResourcePublication } from "./packageStudyLinksResourcePublication.js";
 import {
   assertResourcePublicationArtifact,
   decodeResourcePublicationEnvelope,
@@ -1018,11 +1019,18 @@ export async function synchronizeDictionaryCatalogContracts(
       const candidate = JSON.parse(
         await readFile(path.join(bundleDir, "manifest.json"), "utf8")
       ) as { identity?: { kind?: string } };
-      if (candidate.identity?.kind === "dictionary-directory") {
-        const manifest =
-          await validateDictionaryDirectoryResourcePublication(bundleDir);
-        const id = "dictionary-directory";
-        const file = "dictionaries/dictionary-directory.sqlite.zip";
+      if (
+        candidate.identity?.kind === "dictionary-directory" ||
+        candidate.identity?.kind === "study-links"
+      ) {
+        const isDirectory = candidate.identity.kind === "dictionary-directory";
+        const manifest = isDirectory
+          ? await validateDictionaryDirectoryResourcePublication(bundleDir)
+          : await validateStudyLinksResourcePublication(bundleDir);
+        const id = candidate.identity.kind;
+        const file = isDirectory
+          ? "dictionaries/dictionary-directory.sqlite.zip"
+          : "databases/study-links.sqlite.zip";
         const contentBytes = await zipEntryBytes(
           path.join(bundleDir, manifest.offlineArtifact.path),
           manifest.offlineArtifact.entry

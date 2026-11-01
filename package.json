@@ -111,7 +111,10 @@
     "resources:dictionaries:acquire-smith": "yarn workspace @bible-strong/resource-studio dictionaries:acquire-smith",
     "resources:dictionaries:acquire-isbe": "yarn workspace @bible-strong/resource-studio dictionaries:acquire-isbe",
     "resources:dictionaries:acquire-unfoldingword-tw": "yarn workspace @bible-strong/resource-studio dictionaries:acquire-unfoldingword-tw",
-    "resources:dictionaries:test": "yarn workspace @bible-strong/resource-studio dictionaries:test"
+    "resources:dictionaries:test": "yarn workspace @bible-strong/resource-studio dictionaries:test",
+    "resources:study-links:export": "yarn --cwd packages/resource-service dotenv -e .env.resource-publication.local -- yarn workspace @bible-strong/resource-studio study-links:export",
+    "resources:study-links:build": "yarn workspace @bible-strong/resource-studio study-links:build",
+    "resources:study-links:test": "yarn workspace @bible-strong/resource-studio study-links:test"
   },
   "resolutions": {
     "react-native-svg": "15.16.0",
