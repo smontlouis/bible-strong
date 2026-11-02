@@ -1,7 +1,7 @@
 {
   "format": "bible-strong-mobile-resource-catalog",
   "schemaVersion": 1,
-  "generatedAt": "2026-11-01T05:34:12.835Z",
+  "generatedAt": "2026-11-02T09:27:15.275Z",
   "resourceCount": 120,
   "resources": {
     "bible-interlinear:BHG:en": {
@@ -3278,29 +3278,29 @@
     },
     "study-links": {
       "id": "study-links",
-      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/study-links.sqlite.zip?sha256=acc71d42858dacd8a64a55fd0ef8bc8075926962a3b09f5578b5b37c76ae5371",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/study-links.sqlite.zip?sha256=c34dc1fcacc0a06d043791df599ae378c3ac4a6d0eeec282f19f580d601f92fd",
       "file": "databases/study-links.sqlite.zip",
       "entry": "study-links.sqlite",
       "entries": {
         "canonical": {
           "entry": "study-links.sqlite",
-          "sha256": "303bd68aa5055e49dedbf33a3a53718e95a6a3ebfce79b4d15145303454b0a9a",
-          "bytes": 4153344
+          "sha256": "d986c44ce7ea8f22c6be296d0370c9c6177ce1ec5ab66d9f5da1fbba2e3aceeb",
+          "bytes": 2863104
         }
       },
-      "archiveSha256": "acc71d42858dacd8a64a55fd0ef8bc8075926962a3b09f5578b5b37c76ae5371",
-      "archiveBytes": 1050307,
-      "contentSha256": "303bd68aa5055e49dedbf33a3a53718e95a6a3ebfce79b4d15145303454b0a9a",
-      "contentBytes": 4153344,
-      "resourceRevision": "study-links-2fe2e1f4e0bb247a8148",
-      "installedBytes": 4153344,
-      "peakInstallationBytes": 5984199,
+      "archiveSha256": "c34dc1fcacc0a06d043791df599ae378c3ac4a6d0eeec282f19f580d601f92fd",
+      "archiveBytes": 780008,
+      "contentSha256": "d986c44ce7ea8f22c6be296d0370c9c6177ce1ec5ab66d9f5da1fbba2e3aceeb",
+      "contentBytes": 2863104,
+      "resourceRevision": "study-links-fdd8c07f7fbe8c62fc46",
+      "installedBytes": 2863104,
+      "peakInstallationBytes": 4189579,
       "strategy": "archive-extract",
       "encryptedArchive": {
-        "url": "https://api.bible-strong.app/v1/offline-archives/databases/study-links.sqlite.encrypted.zip?sha256=8258e5b512eb024d567039b16a5902e07b4cff5f822b60a9f2c3e6f29faeacd2",
+        "url": "https://api.bible-strong.app/v1/offline-archives/databases/study-links.sqlite.encrypted.zip?sha256=175aa5377570dee339e10952aa3a6bf1216f2892d10bb3268208e8916cd3747e",
         "file": "databases/study-links.sqlite.encrypted.zip",
-        "sha256": "8258e5b512eb024d567039b16a5902e07b4cff5f822b60a9f2c3e6f29faeacd2",
-        "bytes": 1044777,
+        "sha256": "175aa5377570dee339e10952aa3a6bf1216f2892d10bb3268208e8916cd3747e",
+        "bytes": 776770,
         "keyVersion": 1
       }
     }
