@@ -46,6 +46,17 @@ const IMAGE_RATIO = 3 / 2
 const RULER_ROW = 12
 const RULER_MARK = 9
 
+// On the Web a press is the browser's click, which measures from its target in other names.
+const touchPoint = (touch: {
+  locationX?: number
+  locationY?: number
+  offsetX?: number
+  offsetY?: number
+}) => ({
+  x: touch.locationX ?? touch.offsetX ?? 0,
+  y: touch.locationY ?? touch.offsetY ?? 0,
+})
+
 const Picture = ({ uri, width }: { uri?: string; width?: number }) => (
   <Box className="bg-light-grey" style={{ width: width ?? '100%', aspectRatio: IMAGE_RATIO }}>
     {!!uri && (
@@ -86,16 +97,11 @@ const Ruler = ({
         style={{ height, marginHorizontal: RULER_MARK / 2 }}
         onLayout={(event: LayoutChangeEvent) => setWidth(event.nativeEvent.layout.width)}
         onPress={event => {
-          const { locationX: x, locationY: y } = event.nativeEvent
-          const mark = closestMark(
-            ruler.marks,
-            { x, y },
-            {
-              width,
-              rowHeight: RULER_ROW,
-              levels: ruler.levels,
-            }
-          )
+          const mark = closestMark(ruler.marks, touchPoint(event.nativeEvent), {
+            width,
+            rowHeight: RULER_ROW,
+            levels: ruler.levels,
+          })
           if (mark) onPoint(mark.event)
         }}
       >
