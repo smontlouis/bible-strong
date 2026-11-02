@@ -56,13 +56,16 @@ const byPosition = (left: StudyLinkRow, right: StudyLinkRow) =>
 
 const KIND_ORDER: readonly StudyLinkKind[] = ['entity', 'nave', 'dictionary', 'timeline']
 
+/** Another article on a word the subject already lists: it leads to the subject, not the reverse. */
+const SAME_WORD = 'same-word'
+
 const isStudyLinkRole = (value: string | null): value is StudyLinkRole =>
   value === 'subject' || value === 'participant' || value === 'mentioned'
 
 /**
  * What a reader sees from one subject, online and offline. A person only named by the description
  * of an event stays on the event: it is not one of that person's events. A dictionary article
- * shows in its own language only.
+ * shows in its own language only, and a subject lists one article per word.
  */
 export const readStudyLinks = (
   subjectKind: StudyLinkKind,
@@ -72,6 +75,7 @@ export const readStudyLinks = (
   [...rows]
     .filter(row => row.language === null || row.language === language)
     .filter(row => !(subjectKind === 'entity' && row.role === 'mentioned'))
+    .filter(row => !(row.kind === 'dictionary' && row.role === SAME_WORD))
     .sort(
       (left, right) =>
         KIND_ORDER.indexOf(left.kind) - KIND_ORDER.indexOf(right.kind) ||

@@ -35,6 +35,15 @@ describe('study links', () => {
     assert.equal(readStudyLinks('entity', 'en', [article]).length, 0)
   })
 
+  it('lists one article per word, and the other articles keep leading to the subject', () => {
+    const article = row({ kind: 'dictionary', language: 'fr', role: 'same-word' })
+    assert.equal(readStudyLinks('entity', 'fr', [article]).length, 0)
+    assert.deepEqual(
+      readStudyLinks('dictionary', 'fr', [row({ kind: 'entity', role: 'same-word' })]),
+      [{ kind: 'entity', key: 'key', label: 'Libellé' }]
+    )
+  })
+
   it('reads events in the order of time', () => {
     const labels = readStudyLinks('entity', 'fr', [
       row({ key: 'b', label_fr: 'Absalom', position: -970 }),

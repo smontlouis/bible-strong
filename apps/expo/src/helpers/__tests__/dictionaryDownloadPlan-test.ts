@@ -13,9 +13,7 @@ jest.mock('~helpers/databases', () => ({
   getDictionaryDirectoryDbPath: () => '/documents/dictionary-directory.sqlite',
   getStudyLinksDbPath: () => '/documents/study-links.sqlite',
 }))
-let mockStudyLinksPublished = false
 jest.mock('~helpers/mobileResourceCatalog', () => ({
-  hasMobileResourceCatalogEntry: () => mockStudyLinksPublished,
   getMobileResourceCatalogEntry: (id: string) => ({
     id,
     url: `https://example.test/${id}.zip`,
@@ -79,16 +77,5 @@ describe('dictionary download plan', () => {
         true
       ).map(item => item.id)
     ).toEqual(['dictionary:bost:BOST:fr'])
-  })
-
-  it('brings the study links along, with nothing waiting for them', () => {
-    mockStudyLinksPublished = true
-    const plan = createDictionaryDownloadPlan(
-      { kind: 'dictionary', work: 'bost', resourceId: 'BOST', language: 'fr' },
-      true
-    )
-    mockStudyLinksPublished = false
-    expect(plan.map(item => item.id)).toEqual(['dictionary:bost:BOST:fr', 'study-links'])
-    expect(plan[1]).not.toHaveProperty('dependsOnId')
   })
 })

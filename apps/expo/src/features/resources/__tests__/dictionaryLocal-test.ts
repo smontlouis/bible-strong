@@ -111,6 +111,62 @@ it('discovers entries offline with only Bost and Calmet installed using the publ
   }
 })
 
+it('opens the same article in a dictionary the device holds', async () => {
+  const schemaSource = readFileSync(
+    resolve(
+      __dirname,
+      '../../../../../resource-studio/workflows/dictionaries/scripts/build-directory.mjs'
+    ),
+    'utf8'
+  )
+  const database = new DatabaseSync(':memory:')
+  database.exec(schemaSource.match(/const schemaSql = `([\s\S]*?)`;/)![1])
+  database.exec(`
+    INSERT INTO dictionary_works VALUES (1, 'bost', 'BOST', 'fr', 'Bost', 'Bost');
+    INSERT INTO dictionary_works VALUES (2, 'westphal', 'WESTPHAL', 'fr', 'Westphal', 'Westphal');
+    INSERT INTO dictionary_works VALUES (3, 'easton-webster', 'EASTON', 'en', 'Easton', 'Easton');
+    INSERT INTO dictionary_entries VALUES (1, 10, 'fr', 'David', 'david');
+    INSERT INTO dictionary_entries VALUES (1, 11, 'fr', 'Saül', 'saul');
+    INSERT INTO dictionary_entries VALUES (2, 20, 'fr', 'David', 'david');
+    INSERT INTO dictionary_entries VALUES (3, 30, 'en', 'David', 'david');
+    INSERT INTO dictionary_correspondences VALUES (1, 'david', 'David');
+    INSERT INTO dictionary_correspondence_members VALUES (1, 3, 30, 0);
+    INSERT INTO dictionary_correspondence_members VALUES (1, 1, 10, 1);
+    INSERT INTO dictionary_correspondence_members VALUES (1, 2, 20, 2);
+  `)
+  const installed = ['westphal', 'easton-webster'].map(work => ({
+    resource: { kind: 'dictionary', work, resourceId: work.toUpperCase(), language: 'fr' },
+    availability: { status: 'available' },
+    installedRevision: 'installed',
+  }))
+  jest.mocked(offlineResourceRegistry.getSnapshot).mockReturnValue({
+    resources: new Map(installed.map(entry => [entry.resource.work, entry])),
+  } as never)
+  jest
+    .mocked(offlineResourceRegistry.getAvailability)
+    .mockResolvedValue({ status: 'available' } as never)
+  jest.mocked(openSQLiteDatabase).mockResolvedValue({
+    getAllAsync: async (sql: string, ...params: string[]) => database.prepare(sql).all(...params),
+    closeAsync: async () => {},
+  } as never)
+  const access = createHybridDictionaryAccess({
+    offline: localDictionaryAccess,
+    online: {} as DictionaryAccess,
+    remotelyReadableLanguages: new Set(['fr']),
+    isOnline: async () => false,
+  })
+  try {
+    expect(await access.findInstalledCounterpart!(10, 'fr', 'bost')).toMatchObject({
+      id: 20,
+      resourceId: 'WESTPHAL',
+      resource: { work: 'westphal', language: 'fr' },
+    })
+    expect(await access.findInstalledCounterpart!(11, 'fr', 'bost')).toBeUndefined()
+  } finally {
+    database.close()
+  }
+})
+
 describe('downloaded dictionaries without network access', () => {
   let database: DatabaseSync
   const resource = {

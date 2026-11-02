@@ -9,6 +9,7 @@ import {
   resolveEntityLinks,
   resolveEventParticipants,
   resolveThemeLinks,
+  SAME_WORD,
   subjectNames
 } from "./study-links.mjs";
 
@@ -374,35 +375,53 @@ describe("one article per subject", () => {
       { key: "bost:5", work: "bost", entryId: 5, language: "fr", cluster: "david" },
       { key: "calmet:7", work: "calmet", entryId: 7, language: "fr", cluster: "david" },
       { key: "isbe:1", work: "isbe", entryId: 1, language: "en", cluster: "david" },
+      { key: "bost:6", work: "bost", entryId: 6, language: "fr", cluster: "saul" },
+      { key: "calmet:8", work: "calmet", entryId: 8, language: "fr", cluster: "saul" },
+      { key: "easton-webster:2", work: "easton-webster", entryId: 2, language: "en", cluster: "david" },
       { key: "westphal:10", work: "westphal", entryId: 10, language: "fr", cluster: null },
       { key: "westphal:11", work: "westphal", entryId: 11, language: "fr", cluster: null }
     ].map((entry) => [entry.key, entry])
   );
   const article = (target, entity = "David") => ({ kind: "entity-dictionary", entity, target });
+  const listed = (links) =>
+    oneArticlePerSubject(links, entries)
+      .filter(({ role }) => role !== SAME_WORD)
+      .map(({ target }) => target);
 
-  it("keeps one article of a word, whatever the order", () => {
-    assert.deepEqual(
-      oneArticlePerSubject(
-        [article("westphal:9"), article("bost:5"), article("calmet:7")],
-        entries
-      ).map(({ target }) => target),
-      ["bost:5"]
-    );
+  it("keeps the default dictionary of a language, whatever the order", () => {
+    assert.deepEqual(listed([article("bost:5"), article("westphal:9"), article("calmet:7")]), [
+      "westphal:9"
+    ]);
+    assert.deepEqual(listed([article("isbe:1"), article("easton-webster:2")]), [
+      "easton-webster:2"
+    ]);
+  });
+
+  it("falls back on the first work when the default dictionary lacks the word", () => {
+    assert.deepEqual(listed([article("calmet:8"), article("bost:6")]), ["bost:6"]);
   });
 
   it("keeps each language, each subject and the articles that stand alone", () => {
     assert.deepEqual(
-      oneArticlePerSubject(
-        [
-          article("bost:5"),
-          article("isbe:1"),
-          article("calmet:7", "Jesse"),
-          article("westphal:10"),
-          article("westphal:11")
-        ],
-        entries
-      ).map(({ target }) => target),
+      listed([
+        article("bost:5"),
+        article("isbe:1"),
+        article("calmet:7", "Jesse"),
+        article("westphal:10"),
+        article("westphal:11")
+      ]),
       ["bost:5", "isbe:1", "calmet:7", "westphal:10", "westphal:11"]
+    );
+  });
+
+  it("keeps the link of an article the subject does not list", () => {
+    const links = oneArticlePerSubject([article("bost:5"), article("westphal:9")], entries);
+    assert.deepEqual(
+      links.map(({ target, role }) => [target, role]),
+      [
+        ["bost:5", SAME_WORD],
+        ["westphal:9", undefined]
+      ]
     );
   });
 

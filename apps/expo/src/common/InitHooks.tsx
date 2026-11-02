@@ -16,6 +16,7 @@ import { bibleDataRefreshSignalAtom } from '~state/app'
 import MigrationModal from '~common/MigrationModal'
 import AccountMigrationModal from '~features/migrations/AccountMigrationModal'
 import { useAppRatingCheck } from '~features/app-rating/useAppRatingCheck'
+import { useStudyLinksOfflineCopy } from '~features/resources/useStudyLinksOfflineCopy'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
 import { migrateBibleJsonToSqlite, needsBibleMigration } from '~helpers/bibleMigration'
 import { checkBiblesDbHealth, openBiblesDb, resetBiblesDb } from '~helpers/biblesDb'
@@ -215,6 +216,7 @@ const InitHooks = (_props: InitHooksProps) => {
       (accountEntryHydrationEnabled && accountMigrations.isAccountWriteReady) || isSessionLost,
   })
   useAppRatingCheck()
+  useStudyLinksOfflineCopy()
 
   return (
     <>

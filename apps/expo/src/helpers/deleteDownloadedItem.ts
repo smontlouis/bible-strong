@@ -19,6 +19,7 @@ import {
   getStudyLinksDbPath,
 } from './databases'
 import { offlineResourceRegistry } from '~features/resources/resourceAvailability'
+import { holdsPageWithStudyLinks } from '~features/resources/studyLinksOfflineCopy'
 
 interface DeleteDownloadedItemOptions {
   bibleMode?: 'remove' | 'replace'
@@ -125,6 +126,13 @@ const invalidateAndForgetPublication = async (identity: OfflineCopyIdentity): Pr
   await invalidateOfflineCopyQueries(identity)
 }
 
+/** The links leave with the last Offline copy that shows them. */
+const forgetUnreadStudyLinks = async (): Promise<void> => {
+  if (holdsPageWithStudyLinks(offlineResourceRegistry.getSnapshot())) return
+  await FileSystem.deleteAsync(getStudyLinksDbPath(), { idempotent: true })
+  await invalidateAndForgetPublication({ kind: 'study-links' })
+}
+
 export const deleteDownloadedItem = async (plan: DownloadedItemDeletionPlan): Promise<void> => {
   if (plan.kind === 'strong-lexicon-module') {
     await removeStrongLexiconModule(plan.moduleId)
@@ -132,6 +140,7 @@ export const deleteDownloadedItem = async (plan: DownloadedItemDeletionPlan): Pr
       kind: 'strong-lexicon-module',
       moduleId: plan.moduleId,
     })
+    await forgetUnreadStudyLinks()
     return
   }
   if (plan.kind === 'strong-sidecar') {
@@ -204,6 +213,7 @@ export const deleteDownloadedItem = async (plan: DownloadedItemDeletionPlan): Pr
       databaseId: plan.databaseId as Exclude<DatabaseId, 'BIBLES'>,
       language: plan.language,
     })
+    await forgetUnreadStudyLinks()
     return
   }
 
@@ -220,9 +230,8 @@ export const deleteDownloadedItem = async (plan: DownloadedItemDeletionPlan): Pr
     if (!hasInstalledDictionary) {
       await FileSystem.deleteAsync(getDictionaryDirectoryDbPath(), { idempotent: true })
       await invalidateAndForgetPublication({ kind: 'dictionary-directory' })
-      await FileSystem.deleteAsync(getStudyLinksDbPath(), { idempotent: true })
-      await invalidateAndForgetPublication({ kind: 'study-links' })
     }
+    await forgetUnreadStudyLinks()
     return
   }
 

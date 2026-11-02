@@ -578,9 +578,9 @@ const buildGraph = ({ links, titles, nave, dictionary, timeline, context }) => {
   for (const link of oneArticlePerSubject(links, entries)) {
     if (link.tier === "probable" && link.kind === "entity-timeline") continue;
     if (link.kind === "entity-nave") add(node("entity", link.entity), node("nave", link.target));
-    if (link.kind === "entity-dictionary") add(node("entity", link.entity), node("dictionary", link.target));
+    if (link.kind === "entity-dictionary") add(node("entity", link.entity), node("dictionary", link.target), link.role);
     if (link.kind === "entity-timeline") add(node("entity", link.entity), node("timeline", link.target), link.role);
-    if (link.kind === "nave-dictionary") add(node("nave", link.topic), node("dictionary", link.target));
+    if (link.kind === "nave-dictionary") add(node("nave", link.topic), node("dictionary", link.target), link.role);
     if (link.kind === "nave-timeline") add(node("nave", link.topic), node("timeline", link.target));
   }
   return { nodes: [...nodes.values()], edges: [...edges.values()] };

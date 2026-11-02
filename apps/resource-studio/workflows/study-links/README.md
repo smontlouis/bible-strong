@@ -36,8 +36,11 @@ Un nom ouvre une candidature, seules les preuves la confirment. Sans preuve, pas
   nommée par la description et présente dans les versets. Après la génération de Jacob, Israël
   désigne le peuple et ne renvoie pas à sa fiche.
 
-- **Dictionnaires.** Une fiche ne garde qu’un article par mot : celui de la première œuvre, dans
-  l’ordre alphabétique. La page de l’article mène aux dictionnaires qui traitent du même mot.
+- **Dictionnaires.** Une fiche n’affiche qu’un article par mot : celui du dictionnaire par défaut de
+  la langue (Westphal, Easton), sinon celui de la première œuvre dans l’ordre alphabétique. Les
+  autres articles restent reliés à la fiche avec le rôle `same-word`, qui ne se lit que dans leur
+  sens. La page de l’article mène aux dictionnaires qui traitent du même mot, et l’app ouvre celui
+  que le lecteur a hors ligne quand il n’a pas l’œuvre retenue.
 
 Les niveaux de preuve sont `confirmed`, `probable` et `reviewed`.
 
@@ -83,6 +86,6 @@ L’ordre de production est celui de la compétence `resource-publication`, avec
 avant l’import. Une application qui embarque `study-links` dans son catalogue exige que le Worker le
 connaisse : déployez le Worker avant de livrer cette application.
 
-La copie hors ligne arrive avec les dictionnaires. Un lecteur qui les a déjà installés lit les liens
-en ligne ; sans réseau, il n’a pas la section tant qu’il n’a pas réinstallé ou mis à jour un
-dictionnaire.
+La copie hors ligne s’installe et se met à jour seule sur tout appareil qui a une copie hors ligne
+d’un dictionnaire, de Nave, de la chronologie ou des entités. Sans elle, le lecteur n’a pas la section,
+et la page reste lisible.

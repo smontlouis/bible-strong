@@ -10,10 +10,7 @@ import {
   getDictionaryDirectoryDbPath,
   getStudyLinksDbPath,
 } from '~helpers/databases'
-import {
-  getMobileResourceCatalogEntry,
-  hasMobileResourceCatalogEntry,
-} from '~helpers/mobileResourceCatalog'
+import { getMobileResourceCatalogEntry } from '~helpers/mobileResourceCatalog'
 import {
   getStrongBiblePublication,
   isStrongCapableBibleVersion,
@@ -431,23 +428,13 @@ export function createStudyLinksDownloadItem(): DownloadItem {
   }
 }
 
-// The links come with the dictionaries, like the directory, but nothing waits for them: a reader
-// without them only misses a section.
-const studyLinksCompanion = (): DownloadItem[] =>
-  hasMobileResourceCatalogEntry('study-links') ? [createStudyLinksDownloadItem()] : []
-
 export const createDictionaryDownloadPlan = (
   identity: Extract<OfflineCopyIdentity, { kind: 'dictionary' }>,
   isDirectoryAvailable = false
 ): DownloadItem[] => {
-  if (isDirectoryAvailable)
-    return [createDictionaryDownloadItem(identity), ...studyLinksCompanion()]
+  if (isDirectoryAvailable) return [createDictionaryDownloadItem(identity)]
   const directory = createDictionaryDirectoryDownloadItem()
-  return [
-    directory,
-    { ...createDictionaryDownloadItem(identity), dependsOnId: directory.id },
-    ...studyLinksCompanion(),
-  ]
+  return [directory, { ...createDictionaryDownloadItem(identity), dependsOnId: directory.id }]
 }
 
 export function createDictionaryDownloadItem(

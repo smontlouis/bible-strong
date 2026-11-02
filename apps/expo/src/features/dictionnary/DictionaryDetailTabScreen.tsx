@@ -43,6 +43,7 @@ import { useTabContext } from '~features/app-switcher/context/TabContext'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import {
   getDefaultDictionaryWork,
+  type DictionaryDirectorySource,
   type DictionaryEntry,
 } from '~features/resources/dictionaryAccess'
 import { RootState } from '~redux/modules/reducer'
@@ -206,6 +207,36 @@ const DictionnaryDetailScreen = ({
     staleTime: Infinity,
     retry: false,
   })
+  // An article reached without its dictionary, as offline with another one: the reader has it.
+  const counterpartQuery = useQuery({
+    queryKey: ['dictionary-counterpart', work, dictionaryResourceLanguage, entryId],
+    queryFn: async () =>
+      (await resources.dictionary.findInstalledCounterpart?.(
+        entryId!,
+        dictionaryResourceLanguage,
+        work
+      )) ?? null,
+    enabled: dictionaryAvailabilityQuery.data?.status === 'unavailable' && entryId !== undefined,
+    ...localQueryOptions,
+  })
+  const counterpart = counterpartQuery.data
+  const openSource = (source: DictionaryDirectorySource, sourceCorrespondenceId?: string) =>
+    setDictionaryTab(
+      produce(draft => {
+        draft.title = source.word
+        draft.data.word = source.word
+        draft.data.entryId = source.id
+        draft.data.correspondenceId = sourceCorrespondenceId
+        draft.data.work = source.resource.work
+        draft.data.resourceId = source.resourceId
+        draft.data.dictionaryTitle = source.title
+        draft.data.language = source.resource.language
+      })
+    )
+  const openCounterpart = useEffectEvent((source: DictionaryDirectorySource) => openSource(source))
+  useEffect(() => {
+    if (counterpart) openCounterpart(counterpart)
+  }, [counterpart])
   const normalizedCurrentWord = word?.trim().toLocaleLowerCase() ?? ''
   const correspondenceSources = correspondenceQuery.data?.sources ?? []
   const isCurrentSource = (source: (typeof correspondenceSources)[number]) =>
@@ -355,7 +386,17 @@ const DictionnaryDetailScreen = ({
     return null
   }
 
+  // A form sheet has no container of its own: the box inside carries the ground there.
+  const screen = (content: React.ReactNode) => (
+    <FormSheetScreen className="bg-canvas" isFormSheet={isFormSheet}>
+      <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">{content}</Box>
+    </FormSheetScreen>
+  )
+
   if (dictionaryAvailabilityQuery.data?.status === 'unavailable') {
+    if (counterpart || counterpartQuery.isLoading) {
+      return screen(<Loading message={t('Chargement...')} />)
+    }
     return (
       <ResourceUnavailableView
         identity={offlineIdentity}
@@ -370,13 +411,6 @@ const DictionnaryDetailScreen = ({
       />
     )
   }
-
-  // A form sheet has no container of its own: the box inside carries the ground there.
-  const screen = (content: React.ReactNode) => (
-    <FormSheetScreen className="bg-canvas" isFormSheet={isFormSheet}>
-      <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">{content}</Box>
-    </FormSheetScreen>
-  )
 
   if (dictionaryAvailabilityQuery.isError || dictionaryQuery.isError) {
     return screen(
@@ -533,20 +567,7 @@ const DictionnaryDetailScreen = ({
                     key={`${source.resource.work}:${source.resource.language}:${source.id}`}
                     disabled={selected}
                     accessibilityState={{ selected }}
-                    onPress={() =>
-                      setDictionaryTab(
-                        produce(draft => {
-                          draft.title = source.word
-                          draft.data.word = source.word
-                          draft.data.entryId = source.id
-                          draft.data.correspondenceId = correspondenceQuery.data?.correspondenceId
-                          draft.data.work = source.resource.work
-                          draft.data.resourceId = source.resourceId
-                          draft.data.dictionaryTitle = source.title
-                          draft.data.language = source.resource.language
-                        })
-                      )
-                    }
+                    onPress={() => openSource(source, correspondenceQuery.data?.correspondenceId)}
                   >
                     <Text
                       className={twMerge('text-[13px]', selected && 'text-reverse font-semibold')}

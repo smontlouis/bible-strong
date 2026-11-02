@@ -34,8 +34,13 @@ released apps skip.
 
 ## Consequences
 
-The offline copy comes with a dictionary download, and a reader who misses it loses a section, not
-a page. A reader with dictionaries already installed reads the links online until one is updated.
+The offline copy follows the catalog on its own, on any device that holds an Offline copy of a page
+that shows links. A reader who misses it loses a section, not a page.
+
+A subject lists one dictionary article per word, the one of the default dictionary when it has the
+word. The other articles keep their link with the role `same-word`, which reads from the article to
+the subject only. The article page opens the same article in a dictionary the device holds when the
+listed one is not installed.
 
 The resource is rebuilt when an entity, Nave, dictionary or timeline revision changes what it names.
 An audit of the links must read every link of the most cited entities: their errors do not show in

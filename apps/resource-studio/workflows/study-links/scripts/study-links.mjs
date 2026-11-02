@@ -299,6 +299,12 @@ export const pickEventSubject = (links) => {
     : top.map((link) => ({ ...link, tier: "probable" }));
 };
 
+// The dictionary each language offers first: the one a reader is most likely to hold offline.
+const DEFAULT_DICTIONARY = { fr: "westphal", en: "easton-webster" };
+
+// Marks the articles a subject does not list, which still lead to the subject.
+export const SAME_WORD = "same-word";
+
 // The page of a dictionary article already switches between the articles of the other dictionaries
 // on the same word: a subject needs one door to them, not one per dictionary.
 export const oneArticlePerSubject = (links, entries) => {
@@ -309,8 +315,11 @@ export const oneArticlePerSubject = (links, entries) => {
       ? `${link.kind}|${link.entity ?? link.topic}|${entry.language}|${entry.cluster}`
       : null;
   };
+  const isDefault = (entry) => entry.work === DEFAULT_DICTIONARY[entry.language];
   const before = (left, right) =>
-    left.work.localeCompare(right.work) || left.entryId - right.entryId;
+    Number(isDefault(right)) - Number(isDefault(left)) ||
+    left.work.localeCompare(right.work) ||
+    left.entryId - right.entryId;
   const kept = new Map();
   for (const link of links) {
     const group = groupOf(link);
@@ -320,9 +329,9 @@ export const oneArticlePerSubject = (links, entries) => {
       kept.set(group, link.target);
     }
   }
-  return links.filter((link) => {
+  return links.map((link) => {
     const group = groupOf(link);
-    return !group || kept.get(group) === link.target;
+    return !group || kept.get(group) === link.target ? link : { ...link, role: SAME_WORD };
   });
 };
 

@@ -1,5 +1,9 @@
 import { ResourceAccessError } from './resourceAccessError'
-import { getLocalResourceAvailability, offlineResourceRegistry } from './resourceAvailability'
+import {
+  getLocalResourceAvailability,
+  offlineResourceRegistry,
+  type OfflineResourceRegistryEntry,
+} from './resourceAvailability'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { getDbPath, getDictionaryDbPath, getDictionaryDirectoryDbPath } from '~helpers/databases'
 import { openSQLiteDatabase } from '~helpers/sqlite'
@@ -198,6 +202,12 @@ export type DictionaryAccess = {
     language?: ResourceLanguage,
     work?: DictionaryWorkId
   ) => Promise<DictionaryEntry | undefined>
+  /** The same article in a dictionary the device holds, for one it does not. */
+  findInstalledCounterpart?: (
+    id: number,
+    language: ResourceLanguage,
+    work: DictionaryWorkId
+  ) => Promise<DictionaryDirectorySource | undefined>
   loadItems: (
     words: readonly string[],
     language?: ResourceLanguage,
@@ -291,6 +301,35 @@ const withInstalledDictionary = async <T>(
 }
 
 const dictionaryDirectoryIdentity = { kind: 'dictionary-directory' as const }
+
+type DirectorySourceRow = {
+  work: string
+  resource_id: string
+  language: ResourceLanguage
+  title: string
+  abbreviation: string
+  entry_id: number
+  word: string
+  normalized_word: string
+}
+
+const directorySourceFromRow = (
+  row: DirectorySourceRow,
+  { installedRevision, catalogRevision }: OfflineResourceRegistryEntry
+): DictionaryDirectorySource => ({
+  resource: {
+    kind: 'dictionary',
+    work: row.work,
+    language: row.language,
+    revision: installedRevision ?? catalogRevision ?? 'offline',
+  },
+  resourceId: row.resource_id,
+  title: row.title,
+  abbreviation: row.abbreviation,
+  id: row.entry_id,
+  word: row.word,
+  normalizedWord: row.normalized_word,
+})
 
 const withInstalledDictionaryDirectory = async <T>(
   query: (database: Awaited<ReturnType<typeof openSQLiteDatabase>>) => Promise<T>
@@ -491,6 +530,36 @@ export const localDictionaryAccess: DictionaryAccess = {
         id
       )
     ).then(entry => entry ?? undefined)
+  },
+  findInstalledCounterpart: async (id, language, work) => {
+    const installed = new Map(
+      getInstalledDictionaryEntries().flatMap(entry =>
+        entry.resource.kind === 'dictionary' ? [[entry.resource.work, entry] as const] : []
+      )
+    )
+    const directory = await offlineResourceRegistry.getAvailability(dictionaryDirectoryIdentity)
+    if (installed.size === 0 || directory.status !== 'available') return undefined
+    const rows = await withInstalledDictionaryDirectory(database =>
+      database.getAllAsync<DirectorySourceRow>(
+        `SELECT other_work.work, other_work.resource_id, other_work.language, other_work.title,
+                other_work.abbreviation, entry.entry_id, entry.word, entry.normalized_word
+         FROM dictionary_works own_work
+         JOIN dictionary_correspondence_members own ON own.work_key = own_work.work_key
+         JOIN dictionary_correspondence_members other
+           ON other.correspondence_key = own.correspondence_key
+         JOIN dictionary_entries entry
+           ON entry.work_key = other.work_key AND entry.entry_id = other.entry_id
+         JOIN dictionary_works other_work ON other_work.work_key = entry.work_key
+         WHERE own_work.work = ? AND own.entry_id = ?
+           AND other_work.work IN (${[...installed.keys()].map(() => '?').join(',')})
+         ORDER BY other.ordinal, other_work.work, entry.entry_id`,
+        work,
+        id,
+        ...installed.keys()
+      )
+    )
+    const sources = rows.map(row => directorySourceFromRow(row, installed.get(row.work)!))
+    return sources.find(source => source.resource.language === language) ?? sources[0]
   },
   loadItems: async (words, language = 'fr', work = getDefaultDictionaryWork(language)) => {
     const normalized = [...new Set(words.map(word => word.trim().toLocaleLowerCase()))]
@@ -737,20 +806,14 @@ const loadLocalDirectoryPage = async ({
   const normalizedInitial = initial?.trim().toLocaleLowerCase()
   const normalizedSearch = search?.trim().toLocaleLowerCase()
   const rows = await withInstalledDictionaryDirectory(database =>
-    database.getAllAsync<{
-      group_key: string
-      label: string
-      normalized_label: string
-      correspondence_id: string | null
-      work: string
-      resource_id: string
-      language: ResourceLanguage
-      title: string
-      abbreviation: string
-      entry_id: number
-      word: string
-      normalized_word: string
-    }>(
+    database.getAllAsync<
+      DirectorySourceRow & {
+        group_key: string
+        label: string
+        normalized_label: string
+        correspondence_id: string | null
+      }
+    >(
       `WITH installed_entries AS (
          SELECT CASE
                   WHEN correspondence.correspondence_id IS NOT NULL
@@ -811,20 +874,7 @@ const loadLocalDirectoryPage = async ({
   for (const row of rows) {
     const registryEntry = installedByWork.get(row.work)
     if (!registryEntry) continue
-    const source = {
-      resource: {
-        kind: 'dictionary' as const,
-        work: row.work,
-        language: row.language,
-        revision: registryEntry.installedRevision ?? registryEntry.catalogRevision ?? 'offline',
-      },
-      resourceId: row.resource_id,
-      title: row.title,
-      abbreviation: row.abbreviation,
-      id: row.entry_id,
-      word: row.word,
-      normalizedWord: row.normalized_word,
-    }
+    const source = directorySourceFromRow(row, registryEntry)
     const existing = grouped.get(row.group_key)
     if (existing)
       grouped.set(row.group_key, { ...existing, sources: [...existing.sources, source] })
@@ -1328,6 +1378,8 @@ export const createHybridDictionaryAccess = ({
       if (await isOnline()) return { status: 'available' }
       return local
     },
+    findInstalledCounterpart: (id, language, work) =>
+      offline.findInstalledCounterpart?.(id, language, work) ?? Promise.resolve(undefined),
     listByLetter: (letter, language = 'fr', work = getDefaultDictionaryWork(language)) =>
       runSearch(
         language,
