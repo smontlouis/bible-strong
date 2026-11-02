@@ -90,8 +90,9 @@ are produced outside the repository, from the portraits' working folder.
 
 - A painting is added or replaced by one command, without a Resource publication, a build or an update.
 - Versions of the application released before this change, 27.x and 28.0, keep the publication's
-  pictures until they are updated, and the publisher's thumbnail on the drawn timeline. The site follows
-  at its next deployment, and its pages need their cache emptied.
+  pictures until they are updated, and the publisher's thumbnail on the drawn timeline.
+- The public pages keep the catalog they were rendered with: a painting replaced later reaches them
+  once their folders are refreshed (`yarn cache:invalidate --site /timeline`, and `/atlas`).
 - A new image of a period is shipped with an application build and a deployment of the site.
 - The bucket holds about 195 MB more; old versions accumulate as ADR-0089 accepts for portraits.
 - ADR-0080 still holds for the documents and for earlier versions of the application: its copies are

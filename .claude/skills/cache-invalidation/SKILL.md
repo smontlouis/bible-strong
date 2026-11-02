@@ -40,6 +40,7 @@ deployed. Its public pages do not: they are kept until someone refreshes their f
 | --- | --- | --- |
 | A resource republished (new catalog entry), Worker deployed | nothing: its keys changed | the folders that show it (see below) |
 | A resource corrected in Neon without a new catalog entry | `--api <identity>` | its folders |
+| A timeline painting replaced (`yarn resources:timeline:paintings`) | nothing: the API does not name paintings | `/timeline` and `/atlas` |
 | Cross-references imported again | `--api cross-references:<language>` | the Bible folders that show them, often `/bible` |
 | A cached route answers differently for the same content (field, order, rule) | bump `RESOURCE_API_ANSWER_REVISION` in `packages/resource-service/src/runtime/resourceApiCache.ts`, or the route's own response revision there | the folders whose pages read that route |
 | Site code changed (component, route, style) | nothing | nothing: the site deployment changes the build revision and every page is rendered again |
