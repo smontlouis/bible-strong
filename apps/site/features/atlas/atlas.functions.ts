@@ -1,4 +1,6 @@
 import { readStudyLinksOf, type StudyLinkItem } from '../studyLinks/studyLinksRead'
+import { listTimelineEvents } from '../timeline/timeline.functions'
+import { buildAtlasChronology, type AtlasChronology } from './atlasChronologyData'
 import type {
   StrongLexiconEntitiesResponseDto,
   StrongLexiconEntityPassagesResponseDto,
@@ -155,6 +157,8 @@ export type AtlasEntityPageData = {
   point?: AtlasMapPoint
   /** Places on the map around it, for its own map. */
   neighbours: AtlasMapPoint[]
+  /** What the timeline holds on it; its other study links stay in `studyLinks`. */
+  chronology?: AtlasChronology
   studyLinks: StudyLinkItem[]
   incomplete: boolean
 }
@@ -575,6 +579,15 @@ export const loadAtlasEntityPage = createServerFn({ method: 'GET' })
         )
       : []
 
+    // The whole publication is only read for an entity the timeline knows.
+    const chronology = studyLinks.some(link => link.kind === 'timeline')
+      ? buildAtlasChronology(
+          studyLinks,
+          (await reads.optional(() => listTimelineEvents(language))) ?? [],
+          language
+        )
+      : undefined
+
     return {
       language,
       uniqueName,
@@ -648,7 +661,8 @@ export const loadAtlasEntityPage = createServerFn({ method: 'GET' })
         : {}),
       ...(point ? { point } : {}),
       neighbours,
-      studyLinks,
+      ...(chronology ? { chronology } : {}),
+      studyLinks: studyLinks.filter(link => link.kind !== 'timeline'),
       incomplete: reads.incomplete,
     }
   })

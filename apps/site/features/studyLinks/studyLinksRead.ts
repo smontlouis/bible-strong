@@ -1,6 +1,7 @@
 import type {
   StudyLinkDto,
   StudyLinkKind,
+  StudyLinkRole,
   StudyLinksResponseDto,
 } from '@bible-strong/resource-domain/contracts/studyLinksContract'
 import type { ResourceLanguage } from '../resources/publicSite'
@@ -12,8 +13,10 @@ import { buildTimelineEventPath } from '../timeline/timelineRoutes'
 
 export type StudyLinkItem = {
   kind: StudyLinkKind
+  key: string
   label: string
   detail?: string
+  role?: StudyLinkRole
   path: string
 }
 
@@ -49,8 +52,10 @@ export const readStudyLinksOf = async (
   ).catch(() => undefined)
   return (response?.links ?? []).map(link => ({
     kind: link.kind,
+    key: link.key,
     label: link.label,
     detail: link.detail,
+    role: link.role,
     path: studyLinkPath(link, language),
   }))
 }

@@ -4,6 +4,7 @@ import ResourceShell from '../resources/ResourceShell'
 import StudyLinks from '../studyLinks/StudyLinks'
 import type { AtlasEntityPageData } from './atlas.functions'
 import AtlasCards from './AtlasCards'
+import AtlasChronology from './AtlasChronology'
 import AtlasMap from './AtlasMap'
 import { AtlasPicture, AtlasStrip, AtlasTileLink } from './AtlasParts'
 import {
@@ -151,6 +152,8 @@ export default function AtlasEntityPage({ page }: { page: AtlasEntityPageData })
             </div>
           </section>
         )}
+
+        {page.chronology && <AtlasChronology chronology={page.chronology} language={language} />}
 
         {page.point && (
           <section className="atlas-entity__section">

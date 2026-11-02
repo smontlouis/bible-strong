@@ -788,3 +788,270 @@ a.atlas-passage:hover {
 .atlas-entity__cards-head .resource-link {
   font-weight: 600;
 }
+
+/* ---------- Chronology ---------- */
+
+.atlas-chronology__head {
+  display: flex;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 20px;
+}
+
+.atlas-chronology__actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.atlas-chronology__actions .resource-link {
+  font-weight: 600;
+}
+
+.atlas-chronology__arrows {
+  display: flex;
+  gap: 8px;
+}
+
+.atlas-chronology__arrows button {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid var(--resource-line);
+  border-radius: 999px;
+  background: var(--resource-surface);
+  color: var(--resource-ink);
+  transition:
+    border-color 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.atlas-chronology__arrows button:hover:not(:disabled) {
+  border-color: var(--resource-accent);
+}
+
+.atlas-chronology__arrows button:disabled {
+  opacity: 0.4;
+}
+
+/* A finger scrolls the strip itself. */
+@media (hover: none) {
+  .atlas-chronology__arrows {
+    display: none;
+  }
+}
+
+.atlas-chronology__frame {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 3 / 2;
+  border-radius: 12px;
+  background: var(--resource-accent-soft);
+}
+
+.atlas-chronology__frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.atlas-chronology__dates {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--resource-accent-ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.atlas-chronology__lead {
+  display: grid;
+  align-items: center;
+  gap: 20px;
+  grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
+  padding: 12px;
+  border: 1px solid var(--resource-line);
+  border-radius: 20px;
+  background: var(--resource-surface);
+  transition: border-color 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.atlas-chronology__lead:hover,
+.atlas-chronology__event:hover {
+  border-color: var(--resource-accent);
+}
+
+.atlas-chronology__lead-text {
+  display: flex;
+  max-width: 62ch;
+  flex-direction: column;
+  gap: 2px;
+  padding-inline-end: 12px;
+}
+
+.atlas-chronology__lead-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.atlas-chronology__summary {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 6px;
+  color: var(--resource-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+@media (max-width: 640px) {
+  .atlas-chronology__lead {
+    gap: 12px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .atlas-chronology__lead-text {
+    padding: 0 8px 8px;
+  }
+}
+
+/* Events of one year stack, so that each can be seen and pointed at. */
+.atlas-chronology__ruler {
+  margin-top: 24px;
+}
+
+.atlas-chronology__axis {
+  position: relative;
+  height: calc(var(--ruler-levels) * 13px);
+  margin-inline: 6px;
+}
+
+.atlas-chronology__axis::before {
+  position: absolute;
+  bottom: 5px;
+  height: 2px;
+  background: var(--resource-line);
+  content: '';
+  inset-inline: -6px;
+}
+
+.atlas-chronology__mark {
+  position: absolute;
+  bottom: calc(var(--mark-level) * 13px);
+  left: calc(var(--mark-left) - 6px);
+  width: calc(var(--mark-width) + 12px);
+  height: 12px;
+  border: 2px solid var(--resource-canvas);
+  border-radius: 999px;
+  background: var(--timeline-period);
+  background-clip: padding-box;
+  opacity: 0.4;
+  transition: opacity 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.atlas-chronology__mark::after {
+  position: absolute;
+  content: '';
+  inset: -6px -2px;
+}
+
+.atlas-chronology__mark[data-seen] {
+  opacity: 1;
+}
+
+.atlas-chronology__mark[data-pointed] {
+  background: var(--resource-ink);
+  background-clip: padding-box;
+  opacity: 1;
+}
+
+.atlas-chronology__scale {
+  display: flex;
+  margin-top: 8px;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--resource-muted);
+  font-size: 0.85rem;
+  line-height: 20px;
+}
+
+.atlas-chronology__scale > :not(.atlas-chronology__pointed) {
+  flex: none;
+}
+
+.atlas-chronology__pointed {
+  overflow: hidden;
+  min-width: 0;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.atlas-chronology__periods {
+  display: flex;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.atlas-chronology__strip,
+.atlas-chronology__row {
+  margin-top: 16px;
+}
+
+.atlas-chronology__strip {
+  gap: 12px;
+}
+
+.atlas-chronology__strip > li {
+  width: 216px;
+  flex: none;
+}
+
+.atlas-chronology__row {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(216px, 1fr));
+}
+
+.atlas-chronology__event {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  padding: 8px 8px 14px;
+  border: 1px solid var(--resource-line);
+  border-radius: 20px;
+  background: var(--resource-surface);
+  transition: border-color 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.atlas-chronology__event .atlas-chronology__dates {
+  margin-top: 10px;
+  padding-inline: 6px;
+}
+
+.atlas-chronology__title {
+  display: -webkit-box;
+  overflow: hidden;
+  padding: 2px 6px 0;
+  font-weight: 600;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atlas-chronology__arrows button,
+  .atlas-chronology__lead,
+  .atlas-chronology__event,
+  .atlas-chronology__mark {
+    transition: none;
+  }
+}

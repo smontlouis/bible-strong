@@ -47,6 +47,8 @@ export type TimelineEventLink = { slug: string; title: string; dates: string }
 export type TimelineListedEvent = TimelineEventLink & {
   id: string
   period: string
+  /** The short presentation of the event. */
+  summary: string
   /** The file of its first image. */
   image?: string
 }
@@ -90,12 +92,13 @@ export const listTimelineEvents = async (
   const events = (response?.events ?? [])
     // An event whose slug is outside the route grammar has no page to link to.
     .filter(event => isTimelineSlug(event.slug))
-    .map(({ id, slug, title, dates, period, images }) => ({
+    .map(({ id, slug, title, description, dates, period, images }) => ({
       id,
       slug,
       title: singleLine(title),
       dates,
       period,
+      summary: singleLine(description),
       image: images[0]?.file,
     }))
     .sort(compareTimelineEvents)
