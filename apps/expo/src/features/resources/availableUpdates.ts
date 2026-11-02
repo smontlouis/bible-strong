@@ -21,7 +21,7 @@ export const resourceNeedsUpdate = (entry: OfflineResourceRegistryEntry): boolea
   const { status } = entry.availability
   if (kind === 'strong-bible-index') return status === 'incompatible'
   if (kind === 'strong-lexicon-module')
-    return status === 'incompatible' || status === 'core-missing'
+    return status === 'outdated' || status === 'incompatible' || status === 'core-missing'
   // An index built for another text than the installed one is never read (ADR-0079).
   if (kind === 'interlinear-index') {
     return status === 'incompatible' || status === 'base-incompatible'

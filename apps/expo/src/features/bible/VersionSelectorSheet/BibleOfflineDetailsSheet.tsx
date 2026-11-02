@@ -174,7 +174,8 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
           strongVersionId,
           bibleInstalled === false
             ? 'base-missing'
-            : strongResourceState?.availability.status === 'core-missing'
+            : strongResourceState?.availability.status === 'core-missing' ||
+                strongResourceState?.availability.status === 'outdated'
               ? 'missing'
               : (strongResourceState?.availability.status ?? 'base-missing'),
           lexiconModuleId

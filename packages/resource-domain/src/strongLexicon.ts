@@ -7,6 +7,8 @@ export type StrongLexiconModuleAvailability =
   | { status: 'missing'; moduleId: StrongLexiconModuleId }
   | { status: 'core-missing'; moduleId: Exclude<StrongLexiconModuleId, 'core'> }
   | { status: 'incompatible'; moduleId: StrongLexiconModuleId; installedRevision?: string }
+  /** A sound copy of another revision than the catalog names: readable until it is updated. */
+  | { status: 'outdated'; moduleId: StrongLexiconModuleId; installedRevision?: string }
   | { status: 'corrupt'; moduleId: StrongLexiconModuleId; reason: string }
   | {
       status: 'available'
@@ -14,6 +16,11 @@ export type StrongLexiconModuleAvailability =
       revision?: string
       schemaVersion?: number
     }
+
+export const isStrongLexiconModuleReadable = (
+  availability: StrongLexiconModuleAvailability
+): availability is Extract<StrongLexiconModuleAvailability, { status: 'available' | 'outdated' }> =>
+  availability.status === 'available' || availability.status === 'outdated'
 
 export type StrongLexiconMorphology = { code: string; meaning: string; description?: string }
 export type StrongLexiconRelation = {

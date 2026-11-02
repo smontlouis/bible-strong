@@ -1,4 +1,7 @@
-import { getSimpleStrongModuleId } from '@bible-strong/resource-domain/strong-lexicon'
+import {
+  getSimpleStrongModuleId,
+  isStrongLexiconModuleReadable,
+} from '@bible-strong/resource-domain/strong-lexicon'
 import type { SQLiteDatabase } from '~helpers/sqlite'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import type {
@@ -825,12 +828,12 @@ const toEntry = async (
     }
   }
   const [resourceResult, entity] = await Promise.all([
-    resourcesAvailability.status === 'available'
+    isStrongLexiconModuleReadable(resourcesAvailability)
       ? withOptionalStrongLexiconDatabase('resources', database =>
           loadResources(database, row.id, language)
         ).then(result => result ?? { resources: [], lsjAbsent: false })
       : Promise.resolve({ resources: [], lsjAbsent: false }),
-    entitiesAvailability.status === 'available'
+    isStrongLexiconModuleReadable(entitiesAvailability)
       ? withOptionalStrongLexiconDatabase('entities', database =>
           loadEntityForEntry(core, database, row, language)
         ).then(result => result ?? undefined)
@@ -987,7 +990,7 @@ export const createLocalStrongLexiconAccess = (
 
     async loadEntity(uniqueName, language) {
       const availability = await getRegisteredStrongLexiconAvailability('entities')
-      if (availability.status !== 'available') return undefined
+      if (!isStrongLexiconModuleReadable(availability)) return undefined
       return withStrongLexiconDatabase(coreModule(language), core =>
         withOptionalStrongLexiconDatabase('entities', async database => {
           const row = await database.getFirstAsync<EntityRow>(
@@ -1013,7 +1016,7 @@ export const createLocalStrongLexiconAccess = (
       const bookCode = getTipnrBookCode(book)
       if (!bookCode) return []
       const availability = await getRegisteredStrongLexiconAvailability('entities')
-      if (availability.status !== 'available') return []
+      if (!isStrongLexiconModuleReadable(availability)) return []
       const normalizedStrongCodes = [
         ...new Set(strongCodes.map(code => code.trim().toUpperCase()).filter(Boolean)),
       ]
@@ -1050,7 +1053,7 @@ export const createLocalStrongLexiconAccess = (
 
     async loadPlaces(language) {
       const availability = await getRegisteredStrongLexiconAvailability('entities')
-      if (availability.status !== 'available') return []
+      if (!isStrongLexiconModuleReadable(availability)) return []
       return withOptionalStrongLexiconDatabase('entities', async database => {
         const rows = await database.getAllAsync<PlaceRow>(
           `SELECT e.uniqueName, e.displayName, e.type, e.brief,
@@ -1543,14 +1546,35 @@ export const createHybridStrongLexiconAccess = ({
   const coreModule = (language: ResourceLanguage) =>
     level === 'simple' ? getSimpleStrongModuleId(language) : 'core'
   const localAvailable = async (moduleId: StrongLexiconModuleId) =>
-    (await offline.getModuleAvailability(moduleId)).status === 'available'
+    isStrongLexiconModuleReadable(await offline.getModuleAvailability(moduleId))
+  const isConnectionFailure = (error: unknown) =>
+    error instanceof ResourceAccessError &&
+    (error.code === 'TEMPORARY_UNAVAILABLE' || error.code === 'NETWORK_OFFLINE')
+  // Online a reader gets the current edition; an outdated copy serves when the network cannot.
+  const prefersCurrentEdition = async (availability: StrongLexiconModuleAvailability) =>
+    availability.status === 'outdated' && remotelyReadable && (await isOnline())
+  const remoteBeforeOutdatedCopy = async <T>(
+    localOperation: () => Promise<T>,
+    remoteOperation: () => Promise<T>
+  ) => {
+    try {
+      return await remoteOperation()
+    } catch (error) {
+      if (isConnectionFailure(error)) return localOperation()
+      throw error
+    }
+  }
   const select = async <T>(
     moduleId: StrongLexiconModuleId,
     localOperation: () => Promise<T>,
     remoteOperation: () => Promise<T>
   ) => {
+    const availability = await offline.getModuleAvailability(moduleId)
+    if (await prefersCurrentEdition(availability)) {
+      return remoteBeforeOutdatedCopy(localOperation, remoteOperation)
+    }
     const source = await resolveHybridResourceSource({
-      localAvailable: await localAvailable(moduleId),
+      localAvailable: isStrongLexiconModuleReadable(availability),
       remotelyReadable,
       isOnline,
     })
@@ -1574,11 +1598,7 @@ export const createHybridStrongLexiconAccess = ({
       try {
         return await remoteOperation()
       } catch (error) {
-        if (
-          (await localAvailable(coreModule(language))) &&
-          error instanceof ResourceAccessError &&
-          (error.code === 'TEMPORARY_UNAVAILABLE' || error.code === 'NETWORK_OFFLINE')
-        ) {
+        if ((await localAvailable(coreModule(language))) && isConnectionFailure(error)) {
           return localOperation()
         }
         throw error
@@ -1592,8 +1612,15 @@ export const createHybridStrongLexiconAccess = ({
     language: ResourceLanguage,
     options?: StrongEntryLoadOptions
   ) => {
+    const availability = await offline.getModuleAvailability(coreModule(language))
+    if (await prefersCurrentEdition(availability)) {
+      return remoteBeforeOutdatedCopy(
+        () => offline.loadEntry(identity, language, options),
+        () => online.loadEntry(identity, language, options)
+      )
+    }
     const source = await resolveHybridResourceSource({
-      localAvailable: await localAvailable(coreModule(language)),
+      localAvailable: isStrongLexiconModuleReadable(availability),
       remotelyReadable,
       isOnline,
     })
@@ -1641,17 +1668,24 @@ export const createHybridStrongLexiconAccess = ({
   return {
     async getModuleAvailability(moduleId) {
       const local = await offline.getModuleAvailability(moduleId)
-      if (local.status === 'available' || !remotelyReadable) return local
-      if (!(await isOnline())) return local
+      // The update is offered from the registry; a reader only asks whether the module opens.
+      const readable: StrongLexiconModuleAvailability =
+        local.status === 'outdated'
+          ? { status: 'available', moduleId, revision: local.installedRevision }
+          : local
+      if (local.status === 'available' || !remotelyReadable) return readable
+      if (!(await isOnline())) return readable
       try {
         return await online.getModuleAvailability(moduleId)
       } catch {
-        return local
+        return readable
       }
     },
     async getModuleRecoveryActions(moduleId) {
       const local = await offline.getModuleAvailability(moduleId)
-      return local.status === 'available' || remotelyReadable ? [] : ['acquire-offline-copy']
+      return isStrongLexiconModuleReadable(local) || remotelyReadable
+        ? []
+        : ['acquire-offline-copy']
     },
     loadPreview: (identities, language) =>
       select(

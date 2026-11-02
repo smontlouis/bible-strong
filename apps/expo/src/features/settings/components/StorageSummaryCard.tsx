@@ -25,9 +25,8 @@ const StorageSummaryCard = () => {
   const { t } = useTranslation()
   const registry = useOfflineResourceRegistry()
   const usedBytes = [...registry.resources.values()].reduce((total, entry) => {
-    if (entry.availability.status !== 'available' && entry.availability.status !== 'corrupt') {
-      return total
-    }
+    const { status } = entry.availability
+    if (status !== 'available' && status !== 'corrupt' && status !== 'outdated') return total
     return (
       total +
       (MOBILE_RESOURCE_CATALOG.resources[getOfflineCopyCatalogId(entry.resource)]?.installedBytes ??

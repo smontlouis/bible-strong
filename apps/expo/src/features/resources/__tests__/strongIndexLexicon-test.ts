@@ -39,6 +39,12 @@ describe('Strong lexicon acquired with a Strong Bible index', () => {
     )
   })
 
+  it('counts an outdated lexicon, which still opens a Strong entry, as installed', () => {
+    expect(getStrongIndexLexiconModuleId(registry([lexicon('core', 'outdated')]), 'fr')).toBe(
+      undefined
+    )
+  })
+
   it('replaces an installed lexicon that can no longer be read', () => {
     expect(
       getStrongIndexLexiconModuleId(registry([lexicon('simple-fr', 'incompatible')]), 'fr')

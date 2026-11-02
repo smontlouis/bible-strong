@@ -64,6 +64,15 @@ describe('available updates', () => {
     expect(
       resourceNeedsUpdate(
         entry(
+          'strong-lexicon:core',
+          { kind: 'strong-lexicon-module', moduleId: 'core' },
+          'outdated'
+        )
+      )
+    ).toBe(true)
+    expect(
+      resourceNeedsUpdate(
+        entry(
           'bible-interlinear:BHG:fr',
           { kind: 'interlinear-index', versionId: 'BHG', language: 'fr' },
           'base-incompatible'

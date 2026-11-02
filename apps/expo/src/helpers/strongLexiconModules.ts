@@ -1,6 +1,7 @@
 import {
   getStrongModuleSchema,
   isStandaloneStrongModule,
+  isStrongLexiconModuleReadable,
 } from '@bible-strong/resource-domain/strong-lexicon'
 import * as FileSystem from 'expo-file-system/legacy'
 import type { StrongLexiconModuleAvailability } from '@bible-strong/resource-domain/strong-lexicon'
@@ -122,7 +123,6 @@ const REQUIRED_TABLES: Record<'core' | 'resources' | 'entities', string[]> = {
     'StepEntries',
     'StepEntryIdentities',
     'LexiconTranslations',
-    'LexiconNameMeanings',
     'RelationKinds',
     'LexiconRelations',
     'MorphologyCodes',
@@ -137,6 +137,11 @@ const REQUIRED_TABLES: Record<'core' | 'resources' | 'entities', string[]> = {
     'EntityRelations',
     'EntityPlaces',
   ],
+}
+
+// Absent from the editions before 25 August 2026, whose copies stay readable (ADR-0095).
+const OPTIONAL_TABLES: Partial<Record<'core' | 'resources' | 'entities', string[]>> = {
+  core: ['LexiconNameMeanings'],
 }
 
 const REQUIRED_TABLE_COLUMNS: Record<
@@ -260,7 +265,8 @@ export const validateStrongLexiconModuleDatabase = async (
   options: { integrityCheck?: 'full' | 'quick' } = {}
 ): Promise<StrongLexiconModuleAvailability> => {
   const publication = getExpectedStrongLexiconPublication(moduleId)
-  const requiredTables = REQUIRED_TABLES[getStrongModuleSchema(moduleId)]
+  const schema = getStrongModuleSchema(moduleId)
+  const requiredTables = REQUIRED_TABLES[schema]
   const integrityCheck = options.integrityCheck ?? 'full'
   const integrity = await database.getFirstAsync<{
     integrity_check?: string
@@ -302,14 +308,19 @@ export const validateStrongLexiconModuleDatabase = async (
   if ((await database.getAllAsync('PRAGMA foreign_key_check')).length > 0) {
     throw new Error(`STRONG_LEXICON_FOREIGN_KEY_FAILED:${moduleId}`)
   }
-  for (const table of requiredTables.filter(table => !table.endsWith('Meta'))) {
+  const presentOptionalTables = (OPTIONAL_TABLES[schema] ?? []).filter(table =>
+    tableNames.has(table)
+  )
+  for (const table of [...requiredTables, ...presentOptionalTables].filter(
+    table => !table.endsWith('Meta')
+  )) {
     const columns = await database.getAllAsync<{
       name: string
       type: string
       notnull: number
       pk: number
     }>(`PRAGMA table_info("${table}")`)
-    const expected = REQUIRED_TABLE_COLUMNS[getStrongModuleSchema(moduleId)][table]
+    const expected = REQUIRED_TABLE_COLUMNS[schema][table]
     const columnsByName = new Map(columns.map(column => [column.name, column]))
     if (expected.some(columnName => !columnsByName.has(columnName))) {
       throw new Error(`STRONG_LEXICON_SCHEMA_COLUMNS_MISMATCH:${moduleId}:${table}`)
@@ -356,9 +367,7 @@ export const validateStrongLexiconModuleDatabase = async (
   const revision = metadata.resourceRevision
   if (
     metadata.moduleKind !== moduleId ||
-    metadata.resourceIdentity !== `strong-lexicon:${moduleId}` ||
-    revision !== publication.resourceRevision ||
-    (!isStandaloneStrongModule(moduleId) && metadata.coreRevision !== publication.coreRevision)
+    metadata.resourceIdentity !== `strong-lexicon:${moduleId}`
   ) {
     return {
       status: 'incompatible',
@@ -369,12 +378,24 @@ export const validateStrongLexiconModuleDatabase = async (
 
   if (moduleId === 'resources' || moduleId === 'entities') {
     const core = await getCoreAvailability()
-    if (core.status !== 'available') {
+    if (!isStrongLexiconModuleReadable(core)) {
       return { status: 'core-missing', moduleId }
     }
-    if (core.revision !== publication.coreRevision) {
-      return { status: 'incompatible', moduleId, installedRevision: revision }
+    // Their rows point at core rows: a module only reads alongside the core it was built on.
+    const installedCoreRevision =
+      core.status === 'outdated' ? core.installedRevision : core.revision
+    if (installedCoreRevision !== metadata.coreRevision) {
+      return core.status === 'outdated'
+        ? { status: 'core-missing', moduleId }
+        : { status: 'incompatible', moduleId, installedRevision: revision }
     }
+  }
+
+  if (
+    revision !== publication.resourceRevision ||
+    (!isStandaloneStrongModule(moduleId) && metadata.coreRevision !== publication.coreRevision)
+  ) {
+    return { status: 'outdated', moduleId, installedRevision: revision }
   }
 
   return { status: 'available', moduleId, revision, schemaVersion }
@@ -438,7 +459,7 @@ export const withStrongLexiconDatabase = async <Result>(
   operation: (database: SQLiteDatabase) => Promise<Result>
 ): Promise<Result> => {
   const availability = await getStrongLexiconModuleAvailability(moduleId)
-  if (availability.status !== 'available') {
+  if (!isStrongLexiconModuleReadable(availability)) {
     throw new Error(`STRONG_LEXICON_MODULE_${availability.status.toUpperCase()}:${moduleId}`)
   }
   const installedModule = await withInstalledModule(moduleId, operation)
@@ -451,7 +472,7 @@ export const withOptionalStrongLexiconDatabase = async <Result>(
   operation: (database: SQLiteDatabase) => Promise<Result>
 ): Promise<Result | null> => {
   const availability = await getStrongLexiconModuleAvailability(moduleId)
-  if (availability.status !== 'available') return null
+  if (!isStrongLexiconModuleReadable(availability)) return null
   const installedModule = await withInstalledModule(moduleId, operation)
   return installedModule.found ? installedModule.result : null
 }

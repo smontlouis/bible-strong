@@ -142,6 +142,7 @@ export const resourceFailureFromStrongModuleAvailability = (
         ...(recoveries.length ? recoveries : (['acquire-offline-copy'] as const)),
         'manage-offline-copies',
       ])
+    case 'outdated':
     case 'available':
       return { cause: 'unknown', recoveries: [] }
   }

@@ -23,11 +23,15 @@ const getCatalogPublication = (moduleId: 'core' | 'resources' | 'simple-fr' | 's
 const createCoreDatabase = ({
   moduleId = 'core',
   schemaVersion = 3,
+  resourceRevision,
+  withNameMeanings = true,
   additionalTables = [],
   additionalStepEntryColumns = [],
 }: {
   moduleId?: 'core' | 'simple-fr' | 'simple-en'
   schemaVersion?: number
+  resourceRevision?: string
+  withNameMeanings?: boolean
   additionalTables?: string[]
   additionalStepEntryColumns?: string[]
 } = {}) =>
@@ -43,7 +47,7 @@ const createCoreDatabase = ({
           { name: 'StepEntries' },
           { name: 'StepEntryIdentities' },
           { name: 'LexiconTranslations' },
-          { name: 'LexiconNameMeanings' },
+          ...(withNameMeanings ? [{ name: 'LexiconNameMeanings' }] : []),
           { name: 'RelationKinds' },
           { name: 'LexiconRelations' },
           { name: 'MorphologyCodes' },
@@ -127,7 +131,10 @@ const createCoreDatabase = ({
         { key: 'moduleKind', value: moduleId },
         { key: 'moduleSchemaVersion', value: String(schemaVersion) },
         { key: 'resourceIdentity', value: `strong-lexicon:${moduleId}` },
-        { key: 'resourceRevision', value: getCatalogPublication(moduleId).resourceRevision },
+        {
+          key: 'resourceRevision',
+          value: resourceRevision ?? getCatalogPublication(moduleId).resourceRevision,
+        },
       ]
     }),
   }) as unknown as SQLiteDatabase
@@ -135,7 +142,8 @@ const createCoreDatabase = ({
 const createResourcesDatabase = (
   additionalTables: string[] = [],
   additionalColumns: string[] = [],
-  schemaVersion = 3
+  schemaVersion = 3,
+  revisions: { resourceRevision?: string; coreRevision?: string } = {}
 ) =>
   ({
     getFirstAsync: jest.fn(async (sql: string) =>
@@ -180,9 +188,12 @@ const createResourcesDatabase = (
         { key: 'resourceIdentity', value: 'strong-lexicon:resources' },
         {
           key: 'resourceRevision',
-          value: getCatalogPublication('resources').resourceRevision,
+          value: revisions.resourceRevision ?? getCatalogPublication('resources').resourceRevision,
         },
-        { key: 'coreRevision', value: getCatalogPublication('resources').coreRevision },
+        {
+          key: 'coreRevision',
+          value: revisions.coreRevision ?? getCatalogPublication('resources').coreRevision,
+        },
       ]
     }),
   }) as unknown as SQLiteDatabase
@@ -286,5 +297,75 @@ describe('Strong lexicon module validation', () => {
         })
       )
     ).resolves.toEqual(expect.objectContaining({ status: 'available', schemaVersion: 4 }))
+  })
+
+  it('keeps a sound copy of another revision readable as outdated', async () => {
+    await expect(
+      validateStrongLexiconModuleDatabase(
+        'core',
+        createCoreDatabase({ resourceRevision: 'strong-lexicon-core-older' })
+      )
+    ).resolves.toEqual({
+      status: 'outdated',
+      moduleId: 'core',
+      installedRevision: 'strong-lexicon-core-older',
+    })
+  })
+
+  it('reads a core published before the structured name meanings', async () => {
+    await expect(
+      validateStrongLexiconModuleDatabase(
+        'core',
+        createCoreDatabase({
+          schemaVersion: 2,
+          resourceRevision: 'strong-lexicon-core-older',
+          withNameMeanings: false,
+        })
+      )
+    ).resolves.toMatchObject({ status: 'outdated', moduleId: 'core' })
+  })
+
+  it('never lets an outdated candidate pass for the current publication', async () => {
+    await expect(
+      validateStrongLexiconModuleDatabase(
+        'simple-fr',
+        createCoreDatabase({ moduleId: 'simple-fr', resourceRevision: 'older' })
+      )
+    ).resolves.not.toMatchObject({ status: 'available' })
+  })
+
+  it('keeps an outdated module readable alongside the core it was built on', async () => {
+    await expect(
+      validateStrongLexiconModuleDatabase(
+        'resources',
+        createResourcesDatabase([], [], 3, {
+          resourceRevision: 'resources-older',
+          coreRevision: 'core-older',
+        }),
+        async () => ({ status: 'outdated', moduleId: 'core', installedRevision: 'core-older' })
+      )
+    ).resolves.toEqual({
+      status: 'outdated',
+      moduleId: 'resources',
+      installedRevision: 'resources-older',
+    })
+  })
+
+  it('refuses a module whose core is another edition than the one it was built on', async () => {
+    const database = createResourcesDatabase()
+    await expect(
+      validateStrongLexiconModuleDatabase('resources', database, async () => ({
+        status: 'outdated',
+        moduleId: 'core',
+        installedRevision: 'core-older',
+      }))
+    ).resolves.toEqual({ status: 'core-missing', moduleId: 'resources' })
+    await expect(
+      validateStrongLexiconModuleDatabase('resources', database, async () => ({
+        status: 'available',
+        moduleId: 'core',
+        revision: 'core-newer',
+      }))
+    ).resolves.toMatchObject({ status: 'incompatible', moduleId: 'resources' })
   })
 })

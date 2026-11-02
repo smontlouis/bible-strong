@@ -20,6 +20,7 @@ import {
 } from '~helpers/strongLexiconModules'
 import type { StrongLexiconModuleId } from '~helpers/strongLexiconPublications'
 import type { SQLiteDatabase } from '~helpers/sqlite'
+import { ResourceAccessError } from '../resourceAccessError'
 import {
   createHttpStrongLexiconAccess,
   createHybridStrongLexiconAccess,
@@ -1225,13 +1226,17 @@ describe('strongLexiconAccess', () => {
 const createHybridStub = (
   availability:
     | 'available'
+    | 'outdated'
     | 'missing'
-    | Partial<Record<StrongLexiconModuleId, 'available' | 'missing'>>,
+    | Partial<Record<StrongLexiconModuleId, 'available' | 'outdated' | 'missing'>>,
   label: string
 ): StrongLexiconAccess => ({
   getModuleAvailability: jest.fn(async moduleId => {
     const moduleAvailability =
       typeof availability === 'string' ? availability : (availability[moduleId] ?? 'missing')
+    if (moduleAvailability === 'outdated') {
+      return { status: 'outdated' as const, moduleId, installedRevision: label }
+    }
     return moduleAvailability === 'available'
       ? { status: 'available' as const, moduleId, revision: label, schemaVersion: 2 }
       : { status: 'missing' as const, moduleId }
@@ -1378,5 +1383,82 @@ describe('hybrid Strong lexicon routing', () => {
     await expect(access.search('parole', 'fr')).resolves.toEqual([
       expect.objectContaining({ gloss: 'offline' }),
     ])
+  })
+
+  it('reads an outdated copy while offline and reports the module as open', async () => {
+    const offline = createHybridStub('outdated', 'offline')
+    const online = createHybridStub('available', 'online')
+    const access = createHybridStrongLexiconAccess({
+      offline,
+      online,
+      remotelyReadable: true,
+      isOnline: async () => false,
+    })
+    const identity = { kind: 'strong' as const, code: 'G3056' }
+
+    await expect(access.loadEntry(identity, 'fr')).resolves.toMatchObject({ label: 'offline' })
+    await access.loadPreview([identity], 'fr')
+    await expect(access.search('parole', 'fr')).resolves.toEqual([
+      expect.objectContaining({ gloss: 'offline' }),
+    ])
+    await expect(access.getModuleAvailability('core')).resolves.toEqual({
+      status: 'available',
+      moduleId: 'core',
+      revision: 'offline',
+    })
+    expect(offline.loadPreview).toHaveBeenCalledTimes(1)
+    expect(online.loadEntry).not.toHaveBeenCalled()
+    expect(online.loadPreview).not.toHaveBeenCalled()
+  })
+
+  it('serves the current edition online rather than an outdated copy', async () => {
+    const offline = createHybridStub('outdated', 'offline')
+    const online = createHybridStub('available', 'online')
+    const access = createHybridStrongLexiconAccess({
+      offline,
+      online,
+      remotelyReadable: true,
+      isOnline: async () => true,
+    })
+
+    await expect(access.loadEntry({ kind: 'strong', code: 'G3056' }, 'fr')).resolves.toMatchObject({
+      label: 'online',
+    })
+    expect(offline.loadEntry).not.toHaveBeenCalled()
+  })
+
+  it('falls back on an outdated copy when a connected network cannot reach the server', async () => {
+    const offline = createHybridStub('outdated', 'offline')
+    const online = createHybridStub('available', 'online')
+    jest.mocked(online.loadEntry).mockRejectedValue(new ResourceAccessError('NETWORK_OFFLINE'))
+    jest.mocked(online.loadPreview).mockRejectedValue(new ResourceAccessError('NETWORK_OFFLINE'))
+    const access = createHybridStrongLexiconAccess({
+      offline,
+      online,
+      remotelyReadable: true,
+      isOnline: async () => true,
+    })
+    const identity = { kind: 'strong' as const, code: 'G3056' }
+
+    await expect(access.loadEntry(identity, 'fr')).resolves.toMatchObject({ label: 'offline' })
+    await access.loadPreview([identity], 'fr')
+    expect(offline.loadPreview).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not hide a real answer of the server behind an outdated copy', async () => {
+    const offline = createHybridStub('outdated', 'offline')
+    const online = createHybridStub('available', 'online')
+    jest.mocked(online.loadPreview).mockRejectedValue(new ResourceAccessError('NOT_FOUND'))
+    const access = createHybridStrongLexiconAccess({
+      offline,
+      online,
+      remotelyReadable: true,
+      isOnline: async () => true,
+    })
+
+    await expect(
+      access.loadPreview([{ kind: 'strong', code: 'G3056' }], 'fr')
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' })
+    expect(offline.loadPreview).not.toHaveBeenCalled()
   })
 })

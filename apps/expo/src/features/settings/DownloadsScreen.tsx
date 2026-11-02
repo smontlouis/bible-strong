@@ -318,6 +318,7 @@ function useDownloadedItems() {
     if (
       availability.status === 'available' ||
       availability.status === 'corrupt' ||
+      availability.status === 'outdated' ||
       availability.status === 'incompatible' ||
       availability.status === 'core-missing'
     ) {
