@@ -86,11 +86,20 @@ const store = createStore(() => ({
 }))
 let renderer: ReactTestRenderer
 const push = jest.fn()
-const renderCard = (offset: number, fallback?: () => void) => {
+const renderCard = (
+  offset: number,
+  fallback?: () => void,
+  onContentHeight?: (height: number) => void
+) => {
   act(() => {
     renderer = create(
       <Provider store={store}>
-        <DailyMeditationCard collectionId={collection.id} addDay={offset} onFallback={fallback} />
+        <DailyMeditationCard
+          collectionId={collection.id}
+          addDay={offset}
+          onFallback={fallback}
+          onContentHeight={onContentHeight}
+        />
       </Provider>
     )
   })
@@ -157,7 +166,7 @@ describe('daily meditation home card', () => {
     })
   })
 
-  it('exposes the full passage to accessibility even when the mobile preview is truncated', () => {
+  it('exposes the full passage to accessibility and opens the meditation of that day', () => {
     renderCard(0)
     const link = button('Une autre citation. Psaume 23:1.')
     act(() => link.props.onPress())
@@ -165,6 +174,18 @@ describe('daily meditation home card', () => {
       pathname: '/meditation',
       params: { collectionId: 'daily-book', date: '2026-09-14' },
     })
+  })
+
+  it('shows the whole passage on a phone and reports the height the card needs for it', () => {
+    const onContentHeight = jest.fn()
+    renderCard(0, undefined, onContentHeight)
+    const passage = renderer.root.find(node => String(node.type) === 'Paragraph')
+    expect(passage.props.numberOfLines).toBeUndefined()
+    const content = renderer.root.find(
+      node => String(node.type) === 'Box' && Boolean(node.props.onLayout)
+    )
+    act(() => content.props.onLayout({ nativeEvent: { layout: { height: 240.5 } } }))
+    expect(onContentHeight).toHaveBeenCalledWith(325)
   })
 
   it('offers an explicit fallback for a missing date without changing the selected source', () => {

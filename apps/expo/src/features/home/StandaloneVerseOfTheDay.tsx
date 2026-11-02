@@ -23,7 +23,7 @@ import { useVerseOfTheDay } from './useVerseOfTheDay'
 import { resolveFontFamily } from '~themes/styleValues'
 import { useTheme } from '~themes/ThemeProvider'
 import { selectFontFamily } from '~redux/selectors/user'
-export const VERSE_CARD_HEIGHT = 280
+import { getVerseCardHeight, VERSE_CARD_HEIGHT } from './verseCardLayout'
 
 export interface VerseCardProps {
   addDay: number
@@ -31,6 +31,7 @@ export interface VerseCardProps {
   navigation?: React.ReactNode
   footer?: React.ReactNode
   style?: ViewStyle
+  onContentHeight?: (height: number) => void
 }
 
 const dayToAgo = (day: number, t: TFunction<'translation'>) => {
@@ -105,6 +106,7 @@ const StandaloneVerseOfTheDay = ({
   navigation,
   footer,
   style,
+  onContentHeight,
 }: VerseCardProps) => {
   const { t, i18n } = useTranslation()
   const displayedDate = useLocalReadingDate(addDay)
@@ -128,7 +130,7 @@ const StandaloneVerseOfTheDay = ({
   const cardClassName = desktop
     ? 'flex-1 p-[24px] pb-[12px]'
     : 'overflow-hidden border-continuous px-[20px] rounded-[24px] bg-surface py-[20px]'
-  const cardStyle = desktop ? style : { height: VERSE_CARD_HEIGHT }
+  const cardStyle = desktop ? style : { minHeight: VERSE_CARD_HEIGHT, ...style }
   // The day navigation of the wide Web home wraps below the label when the card is narrow.
   const dayHeader = (
     <Box
@@ -177,39 +179,46 @@ const StandaloneVerseOfTheDay = ({
 
   return (
     <Box className={cardClassName} style={cardStyle}>
-      {dayHeader}
-      <Link
-        key={desktop ? `${addDay}:${version}:${title}:${content}` : 'verse'}
-        className={desktop ? 'bs-home-verse-fade' : undefined}
-        route="BibleView"
-        params={{
-          contextDisplayMode: 'focused',
-          book,
-          chapter,
-          verse,
-          version,
-          focusVerses: [verse],
-        }}
-        style={{ marginTop: desktop ? 22 : 10 }}
+      <Box
+        onLayout={({ nativeEvent }) =>
+          onContentHeight?.(getVerseCardHeight(nativeEvent.layout.height))
+        }
       >
-        <Paragraph
-          numberOfLines={desktop ? undefined : 3}
-          scaleLineHeight={-1}
-          style={{
-            fontFamily: resolveFontFamily(bibleFont),
-            fontWeight: 'normal',
-            ...(desktop ? { fontSize: 23, lineHeight: 34, maxWidth: 600 } : {}),
+        {dayHeader}
+        <Link
+          key={desktop ? `${addDay}:${version}:${title}:${content}` : 'verse'}
+          className={desktop ? 'bs-home-verse-fade' : undefined}
+          route="BibleView"
+          params={{
+            contextDisplayMode: 'focused',
+            book,
+            chapter,
+            verse,
+            version,
+            focusVerses: [verse],
           }}
+          style={{ marginTop: desktop ? 22 : 10 }}
         >
-          {removeBreakLines(content)}
-        </Paragraph>
-        <Text
-          className={desktop ? 'text-grey text-[14px] mt-[16px]' : 'text-grey text-[12px] mt-[5px]'}
-          numberOfLines={2}
-        >
-          {title} - {version}
-        </Text>
-      </Link>
+          <Paragraph
+            scaleLineHeight={-1}
+            style={{
+              fontFamily: resolveFontFamily(bibleFont),
+              fontWeight: 'normal',
+              ...(desktop ? { fontSize: 23, lineHeight: 34, maxWidth: 600 } : {}),
+            }}
+          >
+            {removeBreakLines(content)}
+          </Paragraph>
+          <Text
+            className={
+              desktop ? 'text-grey text-[14px] mt-[16px]' : 'text-grey text-[12px] mt-[5px]'
+            }
+            numberOfLines={2}
+          >
+            {title} - {version}
+          </Text>
+        </Link>
+      </Box>
       <Box
         className={
           desktop

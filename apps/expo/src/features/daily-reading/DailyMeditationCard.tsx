@@ -18,6 +18,7 @@ import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
 import { FeatherIcon } from '~common/ui/Icon'
 import { radii } from '~common/ui/surfaces'
+import { getVerseCardHeight, VERSE_CARD_HEIGHT } from '~features/home/verseCardLayout'
 import { useDailyMeditation, useLocalReadingDate } from './useDailyMeditation'
 
 export interface DailyMeditationCardProps {
@@ -28,6 +29,7 @@ export interface DailyMeditationCardProps {
   navigation?: React.ReactNode
   footer?: React.ReactNode
   style?: ViewStyle
+  onContentHeight?: (height: number) => void
 }
 
 const DailyMeditationCard = ({
@@ -38,6 +40,7 @@ const DailyMeditationCard = ({
   navigation,
   footer,
   style,
+  onContentHeight,
 }: DailyMeditationCardProps) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
@@ -66,80 +69,85 @@ const DailyMeditationCard = ({
           ? 'flex-1 p-[24px] pb-[12px]'
           : 'overflow-hidden border-continuous px-[20px] rounded-[24px] bg-surface py-[20px]'
       }
-      style={desktop ? style : { height: 280 }}
+      style={desktop ? style : { minHeight: VERSE_CARD_HEIGHT, ...style }}
     >
       <Box
-        className={`flex-row items-center justify-between gap-[12px] ${desktop ? 'flex-wrap' : ''}`}
+        onLayout={({ nativeEvent }) =>
+          onContentHeight?.(getVerseCardHeight(nativeEvent.layout.height))
+        }
       >
-        <Text className="text-grey text-[12px] font-medium uppercase tracking-[1.5px]">
-          {addDay === 0
-            ? t('dailyReading.meditationOfTheDay')
-            : dayLabels[-addDay]
-              ? t(dayLabels[-addDay])
-              : date}
-        </Text>
-        {navigation}
-        <Link
-          onPress={() => router.push('/daily-reading')}
-          accessibilityLabel={t('dailyReading.change')}
-          className="min-h-[44px] justify-center"
+        <Box
+          className={`flex-row items-center justify-between gap-[12px] ${desktop ? 'flex-wrap' : ''}`}
         >
-          <Text className="text-link font-bold text-[13px]">{t('dailyReading.changeShort')}</Text>
-        </Link>
-      </Box>
-      {opening ? (
-        <Link
-          onPress={open}
-          accessibilityLabel={opening.text}
-          accessibilityHint={t('dailyReading.read')}
-          style={{ marginTop: desktop ? 22 : 10 }}
-        >
-          <Paragraph
-            numberOfLines={desktop ? undefined : 3}
-            scaleLineHeight={-1}
-            style={{
-              fontFamily,
-              fontWeight: 'normal',
-              ...(desktop ? { fontSize: 20, lineHeight: 30, maxWidth: 600 } : {}),
-            }}
-          >
-            {opening.quote.replace(/\n+/g, ' ')}
-          </Paragraph>
-          {opening.reference && (
-            <Text
-              numberOfLines={2}
-              className={
-                desktop ? 'text-grey text-[14px] mt-[16px]' : 'text-grey text-[12px] mt-[5px]'
-              }
-            >
-              {opening.reference}
-            </Text>
-          )}
-        </Link>
-      ) : isError ? (
-        <Link
-          onPress={() => {
-            void retry()
-          }}
-          className="py-[12px]"
-        >
-          <Text className="text-grey">
-            {isOffline ? t('dailyReading.offlineContent') : t('dailyReading.downloadError')}
+          <Text className="text-grey text-[12px] font-medium uppercase tracking-[1.5px]">
+            {addDay === 0
+              ? t('dailyReading.meditationOfTheDay')
+              : dayLabels[-addDay]
+                ? t(dayLabels[-addDay])
+                : date}
           </Text>
-          <Text className="text-link mt-[8px]">{t('dailyReading.retry')}</Text>
-        </Link>
-      ) : lookup ? (
-        <Box className="gap-[8px] mt-[12px]">
-          <Text className="text-grey">{t('dailyReading.noEntry')}</Text>
-          {onFallback && (
-            <Link onPress={onFallback} className="py-[12px]">
-              <Text className="text-link font-bold">{t('dailyReading.fallback')}</Text>
-            </Link>
-          )}
+          {navigation}
+          <Link
+            onPress={() => router.push('/daily-reading')}
+            accessibilityLabel={t('dailyReading.change')}
+            className="min-h-[44px] justify-center"
+          >
+            <Text className="text-link font-bold text-[13px]">{t('dailyReading.changeShort')}</Text>
+          </Link>
         </Box>
-      ) : (
-        <ActivityIndicator accessibilityLabel={t('Chargement...')} />
-      )}
+        {opening ? (
+          <Link
+            onPress={open}
+            accessibilityLabel={opening.text}
+            accessibilityHint={t('dailyReading.read')}
+            style={{ marginTop: desktop ? 22 : 10 }}
+          >
+            <Paragraph
+              scaleLineHeight={-1}
+              style={{
+                fontFamily,
+                fontWeight: 'normal',
+                ...(desktop ? { fontSize: 20, lineHeight: 30, maxWidth: 600 } : {}),
+              }}
+            >
+              {opening.quote.replace(/\n+/g, ' ')}
+            </Paragraph>
+            {opening.reference && (
+              <Text
+                numberOfLines={2}
+                className={
+                  desktop ? 'text-grey text-[14px] mt-[16px]' : 'text-grey text-[12px] mt-[5px]'
+                }
+              >
+                {opening.reference}
+              </Text>
+            )}
+          </Link>
+        ) : isError ? (
+          <Link
+            onPress={() => {
+              void retry()
+            }}
+            className="py-[12px]"
+          >
+            <Text className="text-grey">
+              {isOffline ? t('dailyReading.offlineContent') : t('dailyReading.downloadError')}
+            </Text>
+            <Text className="text-link mt-[8px]">{t('dailyReading.retry')}</Text>
+          </Link>
+        ) : lookup ? (
+          <Box className="gap-[8px] mt-[12px]">
+            <Text className="text-grey">{t('dailyReading.noEntry')}</Text>
+            {onFallback && (
+              <Link onPress={onFallback} className="py-[12px]">
+                <Text className="text-link font-bold">{t('dailyReading.fallback')}</Text>
+              </Link>
+            )}
+          </Box>
+        ) : (
+          <ActivityIndicator accessibilityLabel={t('Chargement...')} />
+        )}
+      </Box>
       <Box
         className={
           desktop

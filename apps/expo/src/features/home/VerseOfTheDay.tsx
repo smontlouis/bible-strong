@@ -4,7 +4,6 @@ import DailyMeditationCard from '~features/daily-reading/DailyMeditationCard'
 import { useLocalReadingDate } from '~features/daily-reading/useDailyMeditation'
 import type { RootState } from '~redux/modules/reducer'
 import StandaloneVerseOfTheDay, { type VerseCardProps } from './StandaloneVerseOfTheDay'
-export { VERSE_CARD_HEIGHT } from './StandaloneVerseOfTheDay'
 
 const VerseOfTheDay = (props: VerseCardProps) => {
   const collectionId = useSelector(

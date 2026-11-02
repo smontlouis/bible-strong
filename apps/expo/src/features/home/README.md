@@ -24,9 +24,10 @@ light tint they were drawn on.
    Below it, only while Firebase has ended the session of the account shown, a card says the
    edits stay on the device and offers « Se reconnecter » (`SessionExpiredNotice`); offline it
    drops the button, since signing in needs a connection.
-2. **Aujourd’hui**: the verse or meditation of the day. Touch screens swipe the five days in a
-   carousel (`UserWidget`). The wide Web home pages through the same days with previous/next
-   buttons and dots, shows the full text and animates the card height
+2. **Aujourd’hui**: the verse or meditation of the day, always in full. Touch screens swipe the
+   five days in a carousel (`UserWidget`); every card takes the height of the day shown, 280
+   points at least, so the sections below move when a day needs more room. The wide Web home
+   pages through the same days with previous/next buttons and dots and animates the card height
    (`HomeToday.web.tsx`, `AnimatedVerseHeight.web.tsx`).
 3. **Ma bibliothèque**, what belongs to the reader: the six counters, the sign-in prompt,
    then the work in progress as parts (`HomeResumeSection`): **Reprendre** (latest History

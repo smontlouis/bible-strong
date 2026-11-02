@@ -3,10 +3,11 @@ import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useWindowDimensions, View } from 'react-native'
+import { useReducedMotion } from 'react-native-reanimated'
 import { Carousel } from 'react-native-reanimated-carousel'
 import { twMerge } from '~common/ui/classNames'
 
-import Box from '~common/ui/Box'
+import Box, { AnimatedBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Paragraph from '~common/ui/Paragraph'
 import { runAfterInteractions } from '~helpers/runAfterInteractions'
@@ -14,7 +15,8 @@ import useLogin from '~helpers/useLogin'
 import type { Theme as AppTheme } from '~themes'
 import { useTheme } from '~themes/ThemeProvider'
 import OfflineNotice from './OfflineNotice'
-import VerseOfTheDay, { VERSE_CARD_HEIGHT } from './VerseOfTheDay'
+import VerseOfTheDay from './VerseOfTheDay'
+import { VERSE_CARD_HEIGHT } from './verseCardLayout'
 import { VISIBLE_VERSE_OF_THE_DAY_OFFSETS } from './verseOfTheDayPolicy'
 
 const visibleVerseOffsets = [...VISIBLE_VERSE_OF_THE_DAY_OFFSETS]
@@ -50,19 +52,38 @@ const UserWidget = () => {
     return () => task.cancel()
   }, [])
 
+  const reduceMotion = useReducedMotion()
+  const [cardHeights, setCardHeights] = React.useState<Record<number, number>>({})
+  const reportCardHeight = (addDay: number, height: number) =>
+    setCardHeights(current =>
+      current[addDay] === height ? current : { ...current, [addDay]: height }
+    )
+  // Every card of the stack takes the height of the day shown, so none sticks out behind it.
+  const cardHeight = Math.max(
+    VERSE_CARD_HEIGHT,
+    cardHeights[visibleVerseOffsets[activeVerseIndex]] ?? 0
+  )
+  const followCardHeight = {
+    height: cardHeight,
+    transitionProperty: 'height',
+    transitionDuration: reduceMotion ? 0 : 250,
+    transitionTimingFunction: 'ease-out',
+  } as const
+  const carouselReady = showPreviousDays && carouselWidth > 0
+
   return (
     <Container>
       <OfflineNotice />
-      <Box
-        className="border-continuous overflow-visible items-center justify-center w-[100%]"
-        // Keep the carousel's room before it can measure, so the sections below never move.
-        style={{ height: VERSE_CARD_HEIGHT }}
+      <AnimatedBox
+        className="border-continuous overflow-visible items-center w-[100%]"
+        // Before the carousel, today's card sets the height itself, so its first frame is right.
+        style={carouselReady ? followCardHeight : { minHeight: VERSE_CARD_HEIGHT }}
         onLayout={({ nativeEvent }) => {
           const nextWidth = Math.round(nativeEvent.layout.width)
           setCarouselWidth(currentWidth => (currentWidth === nextWidth ? currentWidth : nextWidth))
         }}
       >
-        {showPreviousDays && carouselWidth > 0 ? (
+        {carouselReady ? (
           <Carousel
             layout={{
               type: 'vertical-stack',
@@ -79,7 +100,7 @@ const UserWidget = () => {
             loop={false}
             style={{
               width: carouselWidth,
-              height: VERSE_CARD_HEIGHT,
+              height: cardHeight,
               overflow: 'visible',
             }}
             contentContainerStyle={{
@@ -91,25 +112,33 @@ const UserWidget = () => {
             itemSize={Math.max(carouselWidth - 40, 1)}
             onSnapToItem={setActiveVerseIndex}
             renderItem={({ item: addDay, index }) => (
-              <Box
+              <AnimatedBox
                 accessibilityElementsHidden={index !== activeVerseIndex}
                 importantForAccessibility={
                   index === activeVerseIndex ? 'auto' : 'no-hide-descendants'
                 }
                 pointerEvents={index === activeVerseIndex ? 'auto' : 'none'}
+                style={followCardHeight}
               >
-                <VerseOfTheDay addDay={addDay} />
-              </Box>
+                <VerseOfTheDay
+                  addDay={addDay}
+                  style={{ height: '100%' }}
+                  onContentHeight={height => reportCardHeight(addDay, height)}
+                />
+              </AnimatedBox>
             )}
             defaultIndex={visibleVerseOffsets.length - 1}
           />
         ) : (
           // Where the carousel lays today's card: its 20px gutters, at the front of the stack.
           <Box className="w-[100%] px-[20px]">
-            <VerseOfTheDay addDay={todayOffset} />
+            <VerseOfTheDay
+              addDay={todayOffset}
+              onContentHeight={height => reportCardHeight(todayOffset, height)}
+            />
           </Box>
         )}
-      </Box>
+      </AnimatedBox>
     </Container>
   )
 }
