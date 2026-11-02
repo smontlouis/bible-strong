@@ -144,7 +144,6 @@ export const TIMELINE_PERIODS: readonly TimelinePeriod[] = [
     endYear: -100,
     yearsPerTick: 5,
     era: ISRAEL,
-    // The bundled timeline reads « L’Exode » in French, a slip for the exile its summary describes.
     title: { fr: 'L’Exil', en: 'The Exile' },
     span: { fr: 'v. 585 – v. 457 av. J.-C.', en: 'c. 585 – c. 457 BC' },
     summary: {

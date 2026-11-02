@@ -850,6 +850,8 @@
   "studyLinks.dictionaries": "Dictionaries",
   "studyLinks.timeline": "Timeline",
   "studyLinks.showAll": "Show all ({{count}})",
+  "studyLinks.eventCount": "{{count}} event",
+  "studyLinks.eventCount_plural": "{{count}} events",
   "strongDetail.entity.presentation": "Overview",
   "strongDetail.entity.seriesRank": "{{rank}} of {{total}}",
   "strongDetail.entity.allRelationships": "All relationships",

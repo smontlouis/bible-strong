@@ -4443,7 +4443,7 @@
     "startYear": -620,
     "endYear": -100,
     "interval": 10,
-    "title": "L'Exode",
+    "title": "L'Exil",
     "sectionTitle": "L'ère d'Israël",
     "subTitle": "c.585-c.457 BC",
     "color": "#33bdbb",

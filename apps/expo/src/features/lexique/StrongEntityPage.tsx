@@ -13,6 +13,7 @@ import Card from '~common/ui/Card'
 import { StrongEntityRelationList, StrongEntitySummaryCard } from './StrongDetailUI'
 import { STUDY_COLUMN_MAX_WIDTH, StudyCardBody, StudySection } from '~common/ui/StudySection'
 import { StrongEntityRelationGraph } from './StrongEntityRelationGraph'
+import EntityChronologySection from '~features/studyLinks/EntityChronologySection'
 import StudyLinksSections from '~features/studyLinks/StudyLinksSections'
 import StrongEntityPortraitHeader from './StrongEntityPortraitHeader'
 import StrongEntityPlaceMap from './biblicalMap/StrongEntityPlaceMap'
@@ -55,6 +56,7 @@ const StrongEntityPage = ({
   const place = entity.place
   // A painted entity opens on its portrait (ADR-0089); the others keep the compact card.
   const portrait = catalog?.entities[entity.uniqueName]
+  const studyLanguage = language ?? (i18n.language === 'fr' ? 'fr' : 'en')
 
   return (
     <ScrollView
@@ -103,6 +105,8 @@ const StrongEntityPage = ({
         </Card>
       )}
 
+      <EntityChronologySection subjectKey={entity.uniqueName} language={studyLanguage} />
+
       {entity.category === 'place' && !!place && onOpenMap && (
         <StudySection title={t('strongDetail.entity.location')}>
           <StrongEntityPlaceMap entity={entity} onOpenMap={onOpenMap} />
@@ -137,7 +141,8 @@ const StrongEntityPage = ({
       <StudyLinksSections
         kind="entity"
         subjectKey={entity.uniqueName}
-        language={language ?? (i18n.language === 'fr' ? 'fr' : 'en')}
+        language={studyLanguage}
+        without="timeline"
       />
     </ScrollView>
   )

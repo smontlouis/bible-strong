@@ -36,7 +36,7 @@ const StudyLinkRow = ({ link, onPress }: { link: StudyLinkView; onPress: () => v
   </TouchableBox>
 )
 
-const StudyLinksSection = ({
+export const StudyLinksSection = ({
   title,
   links,
   language,
@@ -69,19 +69,16 @@ const StudyLinksSection = ({
   )
 }
 
-/** What the other study resources hold on this subject, one section per resource. */
-const StudyLinksSections = ({
-  kind,
-  subjectKey,
-  language,
-}: {
-  kind: StudyLinkKind
-  subjectKey?: string
+const NO_LINKS: StudyLinkView[] = []
+
+/** The links of a subject, kept for the session: a page reads them once for all its sections. */
+export const useStudyLinks = (
+  kind: StudyLinkKind,
+  subjectKey: string | undefined,
   language: StudyLinkLanguage
-}) => {
-  const { t } = useTranslation()
+) => {
   const resources = useResourceAccess()
-  const { data: links = [] } = useQuery({
+  const { data = NO_LINKS } = useQuery({
     queryKey: ['study-links', kind, subjectKey, language],
     queryFn: ({ signal }) =>
       resources.studyLinks.load({ kind, key: subjectKey ?? '' }, language, signal),
@@ -89,11 +86,29 @@ const StudyLinksSections = ({
     staleTime: Infinity,
     networkMode: 'always',
   })
+  return data
+}
+
+/** What the other study resources hold on this subject, one section per resource. */
+const StudyLinksSections = ({
+  kind,
+  subjectKey,
+  language,
+  without,
+}: {
+  kind: StudyLinkKind
+  subjectKey?: string
+  language: StudyLinkLanguage
+  /** A resource the page shows in its own way. */
+  without?: StudyLinkKind
+}) => {
+  const { t } = useTranslation()
+  const links = useStudyLinks(kind, subjectKey, language)
   return (
     <>
       {STUDY_LINK_SECTIONS.map(section => {
         const sectionLinks = links.filter(link => link.kind === section.kind)
-        return sectionLinks.length > 0 ? (
+        return sectionLinks.length > 0 && section.kind !== without ? (
           <StudyLinksSection
             key={section.kind}
             title={t(section.titleKey)}

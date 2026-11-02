@@ -858,6 +858,8 @@
   "studyLinks.dictionaries": "Dictionnaires",
   "studyLinks.timeline": "Chronologie",
   "studyLinks.showAll": "Tout afficher ({{count}})",
+  "studyLinks.eventCount": "{{count}} événement",
+  "studyLinks.eventCount_plural": "{{count}} événements",
   "strongDetail.entity.presentation": "Présentation",
   "strongDetail.entity.seriesRank": "{{rank}}ᵉ sur {{total}}",
   "strongDetail.entity.allRelationships": "Toutes les relations",
