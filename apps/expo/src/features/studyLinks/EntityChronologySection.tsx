@@ -23,6 +23,7 @@ import {
   useOfflineResourceRegistry,
 } from '~features/resources/useOfflineResourceRegistry'
 import { timelineEventsQueryOptions } from '~features/timeline/timelineEventsQuery'
+import { useTimelinePaintings } from '~features/timeline/useTimelinePaintings'
 import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
@@ -348,6 +349,8 @@ const EntityChronologySection = ({
   })
   const sectionsQuery = useQuery({ ...timelineEventsQueryOptions, enabled })
 
+  const { paintings, known: paintingsKnown } = useTimelinePaintings()
+
   const index = indexQuery.data?.status === 'available' ? indexQuery.data.details : undefined
   const chronology =
     index &&
@@ -359,10 +362,11 @@ const EntityChronologySection = ({
         title: language === 'fr' ? section.title : section.titleEn,
         color: section.color,
       })),
-      language
+      language,
+      paintings
     )
 
-  if (!enabled || indexQuery.isPending || sectionsQuery.isPending) return null
+  if (!enabled || indexQuery.isPending || sectionsQuery.isPending || !paintingsKnown) return null
   if (!chronology) {
     return (
       <StudyLinksSection

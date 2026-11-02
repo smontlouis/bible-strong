@@ -6,7 +6,7 @@ import {
   formatTimelineYear,
   timelineYearSpan,
 } from '../timeline/timelineDates'
-import { timelineThumbnailUrl } from '../timeline/timelineEvents'
+import { timelineEventThumbnail, type TimelinePaintings } from '../timeline/timelinePaintings'
 import { findTimelinePeriod } from '../timeline/timelinePeriods'
 import { buildTimelineEventPlacePath } from '../timeline/timelineRoutes'
 
@@ -139,7 +139,8 @@ const buildPeriods = (
 export const buildAtlasChronology = (
   links: readonly StudyLinkItem[],
   listed: readonly TimelineListedEvent[],
-  language: ResourceLanguage
+  language: ResourceLanguage,
+  paintings: TimelinePaintings = {}
 ): AtlasChronology | undefined => {
   const timeline = links.filter(link => link.kind === 'timeline')
   if (timeline.length === 0) return undefined
@@ -147,7 +148,7 @@ export const buildAtlasChronology = (
   const bySlug = new Map(listed.map(event => [event.slug, event]))
   const toEvent = (link: StudyLinkItem): AtlasChronologyEvent => {
     const event = bySlug.get(link.key)
-    const thumbnail = event?.image && timelineThumbnailUrl(event.image)
+    const thumbnail = event && timelineEventThumbnail(paintings, event, 'w768')
     return {
       slug: link.key,
       path: link.path,

@@ -101,6 +101,7 @@
     "resources:entities:cards": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning ${NODE_OPTIONS:-}\" tsx src/entityCardsCli.ts",
     "resources:entities:images": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning ${NODE_OPTIONS:-}\" tsx src/entityImagesCli.ts",
     "resources:timeline:images": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning ${NODE_OPTIONS:-}\" tsx src/timelineImagesCli.ts",
+    "resources:timeline:paintings": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning ${NODE_OPTIONS:-}\" tsx src/timelinePaintingsCli.ts",
     "resources:publication:bible-source-patches": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning ${NODE_OPTIONS:-}\" tsx src/bibleSourcePatchesCli.ts",
     "words-of-jesus": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning ${NODE_OPTIONS:-}\" tsx src/wordsOfJesusCli.ts",
     "resources:publication:r2": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning ${NODE_OPTIONS:-}\" tsx src/r2ArtifactSources.ts",

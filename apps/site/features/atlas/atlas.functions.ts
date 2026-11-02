@@ -1,5 +1,6 @@
 import { readStudyLinksOf, type StudyLinkItem } from '../studyLinks/studyLinksRead'
 import { listTimelineEvents } from '../timeline/timeline.functions'
+import { readTimelinePaintings } from '../timeline/timelinePaintings'
 import { buildAtlasChronology, type AtlasChronology } from './atlasChronologyData'
 import type {
   StrongLexiconEntitiesResponseDto,
@@ -569,7 +570,8 @@ export const loadAtlasEntityPage = createServerFn({ method: 'GET' })
       ? buildAtlasChronology(
           studyLinks,
           (await reads.optional(() => listTimelineEvents(language))) ?? [],
-          language
+          language,
+          await readTimelinePaintings()
         )
       : undefined
 

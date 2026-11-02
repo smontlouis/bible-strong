@@ -26,6 +26,12 @@ par langue.
 - Indicateurs visuels différenciés (couleurs, tailles)
 - Liens vers les passages bibliques correspondants
 
+### Images
+- Chaque événement a sa peinture, servie par l'hôte média en 256, 768 et 1254 pixels (ADR-0096)
+- `timeline-paintings/catalog.json` dit quelles peintures existent et quels documents de la publication restent à côté
+- Un événement absent du catalogue garde les images de la publication
+- Les 13 images de période sont embarquées dans l'app et le site : `yarn resources:timeline:paintings periods`
+
 ### Interaction
 - Tap sur un événement pour voir les détails
 - Swipe horizontal pour naviguer dans le temps

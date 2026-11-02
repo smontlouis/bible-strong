@@ -16,6 +16,7 @@ import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { calculateLabel, offset, rowToPx } from './constants'
 import { TimelineEvent as TimelineEventProps } from './types'
+import { useTimelineEventPicture } from './useTimelinePaintings'
 const AnimatedBox = Animated.createAnimatedComponent(Box)
 const LinkBox = (props: React.ComponentProps<typeof Box> & React.ComponentProps<typeof Link>) => (
   <Box
@@ -38,6 +39,15 @@ interface Props extends TimelineEventProps {
 
 const descSize = 140
 const imageSize = 60
+
+const TimelineEventPicture = ({ slug, image }: Pick<Props, 'slug' | 'image'>) => {
+  const uri = useTimelineEventPicture(slug, image, 'w256')
+  return (
+    <Box className="overflow-hidden border-continuous ml-auto" style={{ width: imageSize }}>
+      {!!uri && <Image style={{ width: imageSize, height: '100%' }} source={{ uri }} />}
+    </Box>
+  )
+}
 
 const TimelineEvent = ({
   slug,
@@ -140,14 +150,7 @@ const TimelineEvent = ({
         <Box className="border-continuous overflow-hidden border-b-[1px] border-border" />
         <Text className="text-[10px] text-center">{label}</Text>
       </AnimatedBox>
-      <Box className="overflow-hidden border-continuous ml-auto" style={{ width: imageSize }}>
-        <Image
-          style={{ width: imageSize, height: '100%' }}
-          source={{
-            uri: image,
-          }}
-        />
-      </Box>
+      <TimelineEventPicture slug={slug} image={image} />
     </LinkBox>
   )
 }

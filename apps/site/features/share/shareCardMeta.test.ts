@@ -49,6 +49,9 @@ describe('Share card helpers', () => {
       'https://media.bible-strong.app/timeline-images/original/Adam%201.jpg'
     )
     expect(shareCardPicture('https://media.bible-strong.app/timeline-images/w1200/anim.gif.webp')).toBeUndefined()
+    expect(shareCardPicture('https://media.bible-strong.app/timeline-paintings/isaac/abcdef/w1254.webp')).toBe(
+      'https://media.bible-strong.app/timeline-paintings/isaac/abcdef/w768.jpg'
+    )
     expect(shareCardPicture(undefined)).toBeUndefined()
   })
 })

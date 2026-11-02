@@ -5,6 +5,10 @@ import type {
 import type { TimelineEventSummary } from '~features/resources/timelineAccess'
 import { parseSourcedTimelineDates } from '~features/timeline/sourcedDates'
 import { getTimelineImageUri } from '~features/timeline/timelineImage'
+import {
+  getTimelinePaintingUri,
+  type TimelinePaintings,
+} from '~features/timeline/timelinePaintings'
 
 /** Below this many events, a scale would say nothing their cards do not. */
 const RULER_MIN_EVENTS = 4
@@ -139,7 +143,8 @@ export const buildEntityChronology = (
   links: readonly StudyLinkView[],
   index: readonly TimelineEventSummary[],
   periods: readonly ChronologyPeriodName[],
-  language: StudyLinkLanguage
+  language: StudyLinkLanguage,
+  paintings?: TimelinePaintings
 ): EntityChronology | undefined => {
   const timeline = links.filter(link => link.kind === 'timeline')
   if (timeline.length === 0) return undefined
@@ -147,7 +152,10 @@ export const buildEntityChronology = (
   const bySlug = new Map(index.map(event => [event.slug, event]))
   const toEvent = (link: StudyLinkView): ChronologyEvent => {
     const event = bySlug.get(link.key)
-    const image = getTimelineImageUri(event?.images?.[0]?.file)
+    const painting = paintings?.[link.key]
+    const image = painting
+      ? getTimelinePaintingUri(link.key, painting.hash, 'w768')
+      : getTimelineImageUri(event?.images?.[0]?.file)
     return {
       link,
       title: link.label,

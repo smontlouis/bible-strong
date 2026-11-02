@@ -66,6 +66,8 @@
 
 **Tab group** — A persisted collection of Tabs with one active Tab.
 
+**Timeline painting** — The picture of a timeline event or period, painted for the application. It stands in for the pictures of the publication, whose real documents stay beside it; the rest of the publication's pictures are no longer shown. Paintings are artwork: a catalog on the media host says which exist, not the Timeline resource, and they have no Offline form (ADR-0096).
+
 **History** — A device-local list of the entities that open in a Tab and that the reader has had on screen: Bible chapters, Strong, dictionary and Nave entries, commentaries, timeline events, Studies, Notes, Reading plans and meditations. It keeps one entry per entity (per chapter whatever its version) and a separate bound per kind; deleted Studies and Notes drop out of it. It is independent from Tab persistence and from the Expo Router back stack, and is cleared when the current account session ends. The home shows its latest entries.
 
 **Guest session** — A period without an authenticated account in which locally created study data belongs to the device user.

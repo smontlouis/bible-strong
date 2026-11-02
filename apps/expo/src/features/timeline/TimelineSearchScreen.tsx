@@ -23,6 +23,7 @@ import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import { getTimelineImageUri } from './timelineImage'
+import { useTimelineEventPicture } from './useTimelinePaintings'
 const TimelineSearchResultItem = ({
   item,
   onPress,
@@ -30,17 +31,20 @@ const TimelineSearchResultItem = ({
   item: TimelineEventSummary
   onPress: (event: TimelineEventSummary) => void
 }) => {
-  const imageUri = getTimelineImageUri(item.images?.[0]?.file)
+  const publicationImage = getTimelineImageUri(item.images?.[0]?.file)
+  const imageUri = useTimelineEventPicture(item.slug, publicationImage, 'w256')
 
   return (
     <LinkBox className="px-[20px] py-[14px] flex-row" onPress={() => onPress(item)}>
-      {!!imageUri && (
+      {!!publicationImage && (
         <Box className="border-continuous overflow-visible mr-[16px] w-[70px] h-[70px] rounded-[8px] bg-light-grey">
-          <Image
-            contentFit="cover"
-            style={{ width: 70, height: 70, borderRadius: 8 }}
-            source={{ uri: imageUri }}
-          />
+          {!!imageUri && (
+            <Image
+              contentFit="cover"
+              style={{ width: 70, height: 70, borderRadius: 8 }}
+              source={{ uri: imageUri }}
+            />
+          )}
         </Box>
       )}
       <Box className="overflow-hidden border-continuous flex-[1]">

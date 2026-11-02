@@ -72,6 +72,16 @@ describe('buildEntityChronology', () => {
     expect(chronology?.ruler?.marks[0].left).toBeCloseTo((11 / 70) * 100)
   })
 
+  it('shows the painting of an event that has one', () => {
+    const chronology = buildEntityChronology(davidLinks, david, periods, 'fr', {
+      david: { hash: 'abcdef', documents: [] },
+    })
+    expect(chronology?.lead?.image).toBe(
+      'https://media.bible-strong.app/timeline-paintings/david/abcdef/w768.webp'
+    )
+    expect(chronology?.events[0].image).toContain('/timeline-images/w480/anointed.jpg.webp')
+  })
+
   it('gives events of one year their own rows and a span its length', () => {
     const marks = buildEntityChronology(davidLinks, david, periods, 'fr')?.ruler?.marks ?? []
     expect(marks[2].left).toBe(marks[3].left)

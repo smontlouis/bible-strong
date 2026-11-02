@@ -344,8 +344,8 @@ export default function TimelineStage({ page }: { page: TimelineIndexPageData })
                   <img
                     src={`/images/timeline/period-${extent.id}.jpg`}
                     alt=""
-                    width={640}
-                    height={800}
+                    width={768}
+                    height={768}
                     loading={index === 0 ? undefined : 'lazy'}
                     decoding="async"
                   />

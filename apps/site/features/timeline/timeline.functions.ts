@@ -20,14 +20,14 @@ import { notingStaleAnswers } from '../resources/staleAnswers'
 import { resourceResponseCacheControl } from '../resources/staleResponse'
 import { TIMELINE_MESSAGES } from './messages'
 import { formatTimelineDates, timelineYearSpan } from './timelineDates'
-import {
-  compareTimelineEvents,
-  timelineImageUrl,
-  timelineParagraphs,
-  timelineThumbnailUrl,
-} from './timelineEvents'
+import { compareTimelineEvents, timelineParagraphs } from './timelineEvents'
 import { estimateTimelinePillWidth, placeTimelineEvents } from './timelineGeometry'
 import { LAYOUT_CARD, LAYOUT_FIXED_WIDTH, TIMELINE_LAYOUT } from './timelineLayout'
+import {
+  readTimelinePaintings,
+  timelineEventPictures,
+  timelineEventThumbnail,
+} from './timelinePaintings'
 import { findTimelinePeriod, TIMELINE_BANDS, TIMELINE_CANVAS_WIDTH } from './timelinePeriods'
 import { isTimelineSlug } from './timelineRoutes'
 import {
@@ -124,9 +124,10 @@ export const loadTimelineIndexPage = createServerFn({ method: 'GET' })
   .handler(async ({ data }): Promise<TimelineIndexPageData> => {
     if (!isResourceLanguage(data.language)) throw notFound()
     const language = data.language
-    const [events, otherEvents] = await Promise.all([
+    const [events, otherEvents, paintings] = await Promise.all([
       listTimelineEvents(language),
       listTimelineEvents(otherLanguage(language)),
+      readTimelinePaintings(),
     ])
     if (!events.length) throw notFound()
 
@@ -157,13 +158,14 @@ export const loadTimelineIndexPage = createServerFn({ method: 'GET' })
       const id = findTimelinePeriod(event.period)?.id ?? ''
       const placement = placements.get(event.slug)
       const card = ((TIMELINE_LAYOUT[event.slug]?.[2] ?? 0) & LAYOUT_CARD) !== 0
+      const thumbnail = card ? timelineEventThumbnail(paintings, event, 'w256') : undefined
       const listed: TimelineIndexEvent = {
         ...toLink(event),
         ...(placement
           ? {
               box: [placement.left, placement.top, placement.width],
               ...(card ? { card } : {}),
-              ...(card && event.image ? { thumbnail: timelineThumbnailUrl(event.image) } : {}),
+              ...(thumbnail ? { thumbnail } : {}),
             }
           : {}),
       }
@@ -274,9 +276,10 @@ export const loadTimelinePreview = createServerFn({ method: 'GET' })
   .handler(async ({ data }): Promise<TimelinePreviewData> => {
     const { slug } = data
     if (!isResourceLanguage(data.language) || !isTimelineSlug(slug)) throw notFound()
-    const response = await readResource<TimelineEventResponseDto>(
-      `/v1/timelines/${data.language}/events/${slug}`
-    )
+    const [response, paintings] = await Promise.all([
+      readResource<TimelineEventResponseDto>(`/v1/timelines/${data.language}/events/${slug}`),
+      readTimelinePaintings(),
+    ])
     if (!response) throw notFound()
     const { event } = response
     const summary = singleLine(event.description)
@@ -292,7 +295,7 @@ export const loadTimelinePreview = createServerFn({ method: 'GET' })
       summary,
       // An article opening on its own summary would say it twice.
       excerpt: opening === summary ? '' : truncateText(opening, PREVIEW_EXCERPT_LENGTH),
-      image: event.images[0] && timelineImageUrl(event.images[0].file),
+      image: timelineEventPictures(slug, event.images, paintings[slug])[0]?.src,
     }
   })
 
@@ -328,11 +331,12 @@ export const loadTimelineEventPage = createServerFn({ method: 'GET' })
     if (!isResourceLanguage(data.language) || !isTimelineSlug(slug)) throw notFound()
     const language = data.language
 
-    const [response, events, otherEvents, studyLinks] = await Promise.all([
+    const [response, events, otherEvents, studyLinks, paintings] = await Promise.all([
       readResource<TimelineEventResponseDto>(`/v1/timelines/${language}/events/${slug}`),
       listTimelineEvents(language),
       listTimelineEvents(otherLanguage(language)),
       readStudyLinksOf('timeline', slug, language),
+      readTimelinePaintings(),
     ])
     if (!response) throw notFound()
     const { event } = response
@@ -364,10 +368,10 @@ export const loadTimelineEventPage = createServerFn({ method: 'GET' })
         summary || singleLine(paragraphs[0] ?? '') || fallbackDescription,
         DESCRIPTION_LENGTH
       ),
-      images: event.images.flatMap(image => {
-        const src = timelineImageUrl(image.file)
-        return src ? [{ src, caption: singleLine(image.caption) }] : []
-      }),
+      images: timelineEventPictures(slug, event.images, paintings[slug]).map(picture => ({
+        src: picture.src,
+        caption: singleLine(picture.caption),
+      })),
       passages,
       bibleVersionId: defaultBibleVersionId(language),
       related,

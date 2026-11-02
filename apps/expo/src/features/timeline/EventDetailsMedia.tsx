@@ -13,16 +13,18 @@ import { useQuery } from '@tanstack/react-query'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import EventDetailVerse from './EventDetailVerse'
 import { timelineEventsQueryOptions } from './timelineEventsQuery'
-import { getTimelineImageUri } from './timelineImage'
+import { getTimelineEventPictures, type TimelinePicture } from './timelinePaintings'
 import { TimelineEvent, TimelineEventDetail } from './types'
+import { useTimelinePaintings } from './useTimelinePaintings'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 const Media = ({
+  slug,
   images,
   scriptures,
   related,
   onOpenEvent,
-}: Pick<TimelineEventDetail, 'images' | 'scriptures' | 'videos' | 'related'> & {
+}: Pick<TimelineEventDetail, 'slug' | 'images' | 'scriptures' | 'videos' | 'related'> & {
   onOpenEvent?: (event: TimelineEvent) => void
 }) => {
   const pushRouteOnce = usePushRouteOnce()
@@ -30,6 +32,8 @@ const Media = ({
   const { ref, size, onLayout } = useLayoutSize()
   const sliderWidth = size.width
   const imageWidth = Math.max(0, sliderWidth * 0.8)
+  const { paintings, known } = useTimelinePaintings()
+  const pictures = known ? getTimelineEventPictures(slug, images, paintings?.[slug]) : []
 
   const { data: events } = useQuery(timelineEventsQueryOptions)
 
@@ -47,26 +51,30 @@ const Media = ({
           ))}
         </StudySection>
       )}
-      {!!images?.length && (
+      {!!pictures.length && (
         <StudySection title={t('Images')} surface="none">
           {/* The carousel runs to the edges of the page, its images take a card's corners. */}
           <Carousel
             loop
             itemSize={imageWidth + 20}
-            data={images}
+            data={pictures}
             contentContainerStyle={{
               alignItems: 'center',
               justifyContent: 'center',
             }}
-            renderItem={({ item }: { item: TimelineEventDetail['images'][0] }) => (
+            renderItem={({ item }: { item: TimelinePicture }) => (
               <Box className="overflow-hidden border-continuous">
                 <Image
                   draggable={false}
                   style={{ width: imageWidth, height: imageWidth, borderRadius: radii.card }}
-                  source={{ uri: getTimelineImageUri(item.file, 'original') }}
+                  source={{ uri: item.uri }}
                   contentFit="contain"
                 />
-                <Text className="mt-[10px] text-center text-[13px] text-grey">{item.caption}</Text>
+                {!!item.caption && (
+                  <Text className="mt-[10px] text-center text-[13px] text-grey">
+                    {item.caption}
+                  </Text>
+                )}
               </Box>
             )}
             onConfigurePanGesture={configureCarouselPan([-10, 10])}

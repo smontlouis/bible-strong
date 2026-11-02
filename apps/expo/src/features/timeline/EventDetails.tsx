@@ -18,6 +18,7 @@ import Paragraph from '~common/ui/Paragraph'
 import { radii } from '~common/ui/surfaces'
 import { calculateLabel } from './constants'
 import { TimelineEventDetail, TimelineEvent as TimelineEventProps } from './types'
+import { useTimelineEventPicture } from './useTimelinePaintings'
 import { Image } from 'expo-image'
 import StudyLinksSections from '~features/studyLinks/StudyLinksSections'
 import Media from './EventDetailsMedia'
@@ -69,6 +70,7 @@ export const EventDetailsContent = ({
   const stylingTheme = useStylingTheme()
   const lang = languageOverride || preferredLanguage
   const date = dateLabel || calculateLabel(start, end, lang)
+  const picture = useTimelineEventPicture(slug, image, 'w768')
   const resources = useResourceAccess()
   const preferredResourceLanguage = useAtomValue(resourcesLanguageAtom).TIMELINE
   const resourceLanguage = languageOverride || preferredResourceLanguage
@@ -108,11 +110,11 @@ export const EventDetailsContent = ({
   return (
     <Box className="overflow-hidden border-continuous">
       <VStack className="gap-[10px] pt-[2px] pb-[4px]">
-        {image && (
+        {picture && (
           <Image
             style={{ width: 120, height: 120, borderRadius: radii.card, marginBottom: 6 }}
             source={{
-              uri: image,
+              uri: picture,
             }}
           />
         )}

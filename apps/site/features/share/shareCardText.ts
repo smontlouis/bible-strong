@@ -39,9 +39,11 @@ export const afterReference = (description: string, reference: string): string =
 
 /**
  * The address of a picture the renderer can read. It reads JPEG and PNG, not the WebP copy a
- * page shows: the card takes the original the media host keeps beside it.
+ * page shows: the card takes the JPEG of a painting, or the original the media host keeps beside
+ * the picture of the publication.
  */
 export const shareCardPicture = (webp: string | undefined): string | undefined => {
+  if (webp?.includes('/timeline-paintings/')) return webp.replace(/\/w\d+\.webp$/u, '/w768.jpg')
   const original = webp?.replace('/w1200/', '/original/').replace(/\.webp$/u, '')
   return original && /\.(?:jpe?g|png)$/iu.test(original) ? original : undefined
 }
