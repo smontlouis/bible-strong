@@ -1,6 +1,7 @@
 import { styled } from 'goober'
 import type { CSSProperties, ReactNode } from 'react'
 
+import ResourceIconDOM from '~common/icons/ResourceIconDOM'
 import { radii } from '~common/ui/surfaces'
 import {
   getEntityAvatarRadius,
@@ -158,7 +159,7 @@ const FocusVerseStudy = ({
     )
   const chips = (
     items: { key: string; label: string; action: FocusStudyAction }[],
-    dotColor: string
+    kind: 'nave' | 'dictionary'
   ) => (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
       {items.map(item => (
@@ -172,14 +173,15 @@ const FocusVerseStudy = ({
             gap: 8,
             background: colors.surface,
             borderRadius: radii.pill,
-            padding: '9px 14px',
+            padding: '8px 14px 8px 10px',
             fontSize: 14,
             color: colors.default,
           }}
         >
-          <span
-            aria-hidden="true"
-            style={{ width: 8, height: 8, borderRadius: radii.pill, background: dotColor }}
+          <ResourceIconDOM
+            kind={kind}
+            size={18}
+            color={resolveUniverseColors(colors, kind).foreground}
           />
           {item.label}
         </Pressable>
@@ -490,7 +492,7 @@ const FocusVerseStudy = ({
                 label: topic.name,
                 action: { kind: 'open-topic', name: topic.name, nameLower: topic.nameLower },
               })),
-              resolveUniverseColors(colors, 'nave').foreground
+              'nave'
             )
           )}
 
@@ -505,7 +507,7 @@ const FocusVerseStudy = ({
                 label: entry.word,
                 action: { kind: 'open-dictionary', entry },
               })),
-              resolveUniverseColors(colors, 'dictionary').foreground
+              'dictionary'
             )
           )}
     </div>

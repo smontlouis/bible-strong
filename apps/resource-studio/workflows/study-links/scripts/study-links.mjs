@@ -299,6 +299,33 @@ export const pickEventSubject = (links) => {
     : top.map((link) => ({ ...link, tier: "probable" }));
 };
 
+// The page of a dictionary article already switches between the articles of the other dictionaries
+// on the same word: a subject needs one door to them, not one per dictionary.
+export const oneArticlePerSubject = (links, entries) => {
+  const groupOf = (link) => {
+    const entry = entries.get(link.target);
+    const isArticle = link.kind === "entity-dictionary" || link.kind === "nave-dictionary";
+    return isArticle && entry?.cluster
+      ? `${link.kind}|${link.entity ?? link.topic}|${entry.language}|${entry.cluster}`
+      : null;
+  };
+  const before = (left, right) =>
+    left.work.localeCompare(right.work) || left.entryId - right.entryId;
+  const kept = new Map();
+  for (const link of links) {
+    const group = groupOf(link);
+    if (!group) continue;
+    const best = kept.get(group);
+    if (!best || before(entries.get(link.target), entries.get(best)) < 0) {
+      kept.set(group, link.target);
+    }
+  }
+  return links.filter((link) => {
+    const group = groupOf(link);
+    return !group || kept.get(group) === link.target;
+  });
+};
+
 export const resolveThemeLinks = ({ verses, entries, entryVerses }) =>
   entries
     .map((entry) => {

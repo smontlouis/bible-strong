@@ -200,3 +200,22 @@ export const entityClayUrl = (category: string, type: string, uniqueName: string
   const key = clayKey(category, type)
   return `/atlas/clay/${key}-${(stableHash(uniqueName) % CLAY_COUNTS[key]) + 1}.webp`
 }
+
+const CATALOG_KEPT_MS = 60 * 60 * 1000
+const CATALOG_TIMEOUT_MS = 5_000
+
+let catalogCache: { at: number; catalog: AtlasPortraitCatalog } | undefined
+
+/** The portrait catalog of the media host; nothing when it cannot be read. */
+export const readAtlasPortraitCatalog = async (): Promise<AtlasPortraitCatalog | undefined> => {
+  if (catalogCache && Date.now() - catalogCache.at < CATALOG_KEPT_MS) return catalogCache.catalog
+  const response = await fetch(ENTITY_PORTRAIT_CATALOG_URL, {
+    headers: { accept: 'application/json' },
+    signal: AbortSignal.timeout(CATALOG_TIMEOUT_MS),
+  })
+  if (!response.ok) throw new Error(`Portrait catalog responded ${response.status}`)
+  const catalog = parseAtlasPortraitCatalog(await response.json())
+  if (!catalog) throw new Error('Portrait catalog unreadable')
+  catalogCache = { at: Date.now(), catalog }
+  return catalog
+}

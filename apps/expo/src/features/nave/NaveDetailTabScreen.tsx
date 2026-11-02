@@ -16,15 +16,13 @@ import Header from '~common/Header'
 import Loading from '~common/Loading'
 import Empty from '~common/Empty'
 import SwitchableHTMLView from '~common/SwitchableHTMLView'
-import NaveIcon from '~common/NaveIcon'
 import { toast } from '~helpers/toast'
 import EntityChipList from '~common/EntityChipList'
 import Box, { HStack, VStack } from '~common/ui/Box'
-import IconTile from '~common/ui/IconTile'
+import ResourceTile from '~common/ui/ResourceTile'
 import Text from '~common/ui/Text'
 import { STUDY_COLUMN_MAX_WIDTH, StudySection } from '~common/ui/StudySection'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
-import { resolveUniverseColors } from '~themes/universeColors'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
@@ -291,8 +289,6 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     )
   }
 
-  const naveUniverse = resolveUniverseColors(stylingTheme.colors, 'nave')
-
   return screen(
     <>
       <Header
@@ -368,9 +364,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
             />
           )}
           <HStack className="items-center gap-[10px]">
-            <IconTile bg={naveUniverse.background}>
-              <NaveIcon size={18} color={naveUniverse.foreground} />
-            </IconTile>
+            <ResourceTile kind="nave" />
             <Text className="text-[15px] text-grey">{t('nave.topic.kind')}</Text>
           </HStack>
           <Text className="text-[34px] leading-[42px]" style={titleFontStyle(stylingTheme)}>
@@ -387,11 +381,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
             />
           </StudySection>
         ) : null}
-        <StudyLinksSections
-          kind="nave"
-          subjectKey={name_lower}
-          language={naveResourceLanguage}
-        />
+        <StudyLinksSections kind="nave" subjectKey={name_lower} language={naveResourceLanguage} />
       </ScrollView>
     </>
   )

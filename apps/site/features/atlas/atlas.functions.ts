@@ -31,10 +31,9 @@ import {
 } from './atlasCardCatalog'
 import { projectAtlasPlace } from './atlasProjection'
 import {
-  ENTITY_PORTRAIT_CATALOG_URL,
   entityClayUrl,
   entityPortraitUrl,
-  parseAtlasPortraitCatalog,
+  readAtlasPortraitCatalog,
   type AtlasChapterRange,
   type AtlasPortraitCatalog,
 } from './atlasPortraits'
@@ -48,6 +47,8 @@ import {
 
 const CACHE_TTL_MS = 60 * 60 * 1000
 const CATALOG_TIMEOUT_MS = 5_000
+
+export { readAtlasPortraitCatalog }
 const ABSENT_CATALOG_TTL_MS = 5 * 60 * 1000
 /** The entities of a family a page names beside its painted ones, the most named first. */
 const MOST_NAMED_COUNT = 120
@@ -182,22 +183,6 @@ export const listAtlasEntities = async (
   const entities = [...(response?.entities ?? [])]
   if (response && !stale) entitiesCache.set(language, { at: Date.now(), entities })
   return entities
-}
-
-let catalogCache: { at: number; catalog: AtlasPortraitCatalog } | undefined
-
-/** The portrait catalog of the media host; nothing when it cannot be read. */
-export const readAtlasPortraitCatalog = async (): Promise<AtlasPortraitCatalog | undefined> => {
-  if (catalogCache && Date.now() - catalogCache.at < CACHE_TTL_MS) return catalogCache.catalog
-  const response = await fetch(ENTITY_PORTRAIT_CATALOG_URL, {
-    headers: { accept: 'application/json' },
-    signal: AbortSignal.timeout(CATALOG_TIMEOUT_MS),
-  })
-  if (!response.ok) throw new Error(`Portrait catalog responded ${response.status}`)
-  const catalog = parseAtlasPortraitCatalog(await response.json())
-  if (!catalog) throw new Error('Portrait catalog unreadable')
-  catalogCache = { at: Date.now(), catalog }
-  return catalog
 }
 
 const EMPTY_CATALOG: AtlasPortraitCatalog = { entities: {}, series: [], roles: {} }

@@ -16,6 +16,19 @@ export const STUDY_LINK_SECTIONS: readonly { kind: StudyLinkKind; titleKey: stri
 /** A section shows this many links before it offers the rest. */
 export const STUDY_LINKS_SHOWN = 5
 
+/**
+ * What a row says under its title. A dictionary article opens on the other dictionaries of its
+ * word, so its work only tells apart two articles of one name.
+ */
+export const studyLinkDetail = (link: StudyLinkView, links: readonly StudyLinkView[]) => {
+  if (link.kind === 'nave') return undefined
+  if (link.kind !== 'dictionary') return link.detail
+  const name = link.label.toLocaleLowerCase()
+  return links.filter(other => other.label.toLocaleLowerCase() === name).length > 1
+    ? link.detail
+    : undefined
+}
+
 const splitDictionaryKey = (key: string) => {
   const separator = key.lastIndexOf(':')
   return { work: key.slice(0, separator), entryId: key.slice(separator + 1) }

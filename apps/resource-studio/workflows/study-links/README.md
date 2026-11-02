@@ -36,6 +36,9 @@ Un nom ouvre une candidature, seules les preuves la confirment. Sans preuve, pas
   nommée par la description et présente dans les versets. Après la génération de Jacob, Israël
   désigne le peuple et ne renvoie pas à sa fiche.
 
+- **Dictionnaires.** Une fiche ne garde qu’un article par mot : celui de la première œuvre, dans
+  l’ordre alphabétique. La page de l’article mène aux dictionnaires qui traitent du même mot.
+
 Les niveaux de preuve sont `confirmed`, `probable` et `reviewed`.
 
 ## Corrections relues

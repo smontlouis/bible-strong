@@ -1055,3 +1055,55 @@ a.atlas-passage:hover {
     transition: none;
   }
 }
+
+/* An item of a study resource wears the mark of the resource, wherever it appears. */
+.resource-shell {
+  --resource-universe-dictionary: #ffbc00;
+  --resource-universe-nave: #30336b;
+}
+
+@media (prefers-color-scheme: dark) {
+  .resource-shell:not([data-theme='light']) {
+    --resource-universe-nave: #fd79a8;
+  }
+}
+
+.resource-shell[data-theme='dark'] {
+  --resource-universe-nave: #fd79a8;
+}
+
+.study-link {
+  align-items: center;
+  padding-inline-start: 8px;
+}
+
+.resource-mark {
+  flex: none;
+  color: var(--resource-muted);
+}
+
+.resource-mark--dictionary {
+  color: var(--resource-universe-dictionary);
+}
+
+.resource-mark--nave {
+  color: var(--resource-universe-nave);
+}
+
+.study-link__portrait {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  flex: none;
+  place-items: center;
+  border-radius: 6px;
+  background: var(--atlas-ground);
+  object-fit: cover;
+}
+
+.study-link__portrait--initial {
+  background: var(--resource-surface);
+  color: var(--resource-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}

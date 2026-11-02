@@ -14,6 +14,7 @@ import {
   resolveThemeLinks,
   pickEventSubject,
   namesOnePerson,
+  oneArticlePerSubject,
   subjectNames,
   verseChapter
 } from "./study-links.mjs";
@@ -574,7 +575,7 @@ const buildGraph = ({ links, titles, nave, dictionary, timeline, context }) => {
   const edges = new Map();
   const add = (left, right, role = null) =>
     edges.set(`${left.kind}|${left.key}|${right.kind}|${right.key}`, { left, right, role });
-  for (const link of links) {
+  for (const link of oneArticlePerSubject(links, entries)) {
     if (link.tier === "probable" && link.kind === "entity-timeline") continue;
     if (link.kind === "entity-nave") add(node("entity", link.entity), node("nave", link.target));
     if (link.kind === "entity-dictionary") add(node("entity", link.entity), node("dictionary", link.target));

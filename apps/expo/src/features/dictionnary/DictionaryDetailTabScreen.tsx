@@ -13,11 +13,9 @@ import truncHTML from 'trunc-html'
 import books from '~assets/bible_versions/books-desc'
 import SwitchableHTMLView from '~common/SwitchableHTMLView'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
-import IconTile from '~common/ui/IconTile'
+import ResourceTile from '~common/ui/ResourceTile'
 import { STUDY_COLUMN_MAX_WIDTH, StudySection } from '~common/ui/StudySection'
 import StudyLinksSections from '~features/studyLinks/StudyLinksSections'
-import DictionnaryIcon from '~common/DictionnaryIcon'
-import { resolveUniverseColors } from '~themes/universeColors'
 import Text from '~common/ui/Text'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -187,7 +185,7 @@ const DictionnaryDetailScreen = ({
       isConnected,
     ],
     queryFn: async () => {
-      if (!word || !isConnected) return null
+      if (!word) return null
       const page = await resources.dictionary.searchDirectoryPage(
         word,
         { limit: 100 },
@@ -203,7 +201,7 @@ const DictionnaryDetailScreen = ({
         }) ?? null
       )
     },
-    enabled: !!word && isConnected,
+    enabled: !!word,
     placeholderData: previousData => previousData,
     staleTime: Infinity,
     retry: false,
@@ -420,8 +418,6 @@ const DictionnaryDetailScreen = ({
     )
   }
 
-  const dictionaryUniverse = resolveUniverseColors(stylingTheme.colors, 'dictionary')
-
   return screen(
     <>
       <Header
@@ -503,9 +499,7 @@ const DictionnaryDetailScreen = ({
             />
           )}
           <HStack className="items-center gap-[10px]">
-            <IconTile bg={dictionaryUniverse.background}>
-              <DictionnaryIcon size={18} color={dictionaryUniverse.foreground} />
-            </IconTile>
+            <ResourceTile kind="dictionary" />
             <Text className="text-[15px] text-grey">
               {capitalizeFirst(resolvedDictionaryTitle)}
             </Text>

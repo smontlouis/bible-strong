@@ -15,13 +15,20 @@ export const STUDY_CARD_INSET = 16
 export const STUDY_COLUMN_MAX_WIDTH = 600
 
 /** Rows in one card, split by hairlines that start where their text starts. */
-export const StudyRowsCard = ({ children }: { children: React.ReactNode }) => {
+export const StudyRowsCard = ({
+  children,
+  inset = STUDY_CARD_INSET,
+}: {
+  children: React.ReactNode
+  /** Where the text of the rows starts, past a mark when they have one. */
+  inset?: number
+}) => {
   const rows = React.Children.toArray(children)
   return (
     <Card>
       {rows.map((row, index) => (
         <React.Fragment key={React.isValidElement(row) && row.key != null ? row.key : index}>
-          {index > 0 && <ListSeparator inset={STUDY_CARD_INSET} />}
+          {index > 0 && <ListSeparator inset={inset} />}
           {row}
         </React.Fragment>
       ))}
@@ -65,6 +72,7 @@ export const StudySection = ({
   expanded,
   onToggle,
   surface = 'body',
+  rowInset,
   className,
 }: {
   title: string
@@ -75,6 +83,8 @@ export const StudySection = ({
   expanded?: boolean
   onToggle?: () => void
   surface?: 'body' | 'rows' | 'none'
+  /** With `rows`, where the text of the rows starts. */
+  rowInset?: number
   className?: string
 }) => (
   <PageContent
@@ -106,7 +116,7 @@ export const StudySection = ({
         )}
       </Card>
     ) : surface === 'rows' ? (
-      <StudyRowsCard>{children}</StudyRowsCard>
+      <StudyRowsCard inset={rowInset}>{children}</StudyRowsCard>
     ) : surface === 'body' ? (
       <Card>
         <StudyCardBody>{children}</StudyCardBody>

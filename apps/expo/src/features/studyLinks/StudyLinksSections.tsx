@@ -8,27 +8,54 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableBox, VStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
-import { StudyMoreRow, StudySection } from '~common/ui/StudySection'
+import { ICON_TILE_SIZE } from '~common/ui/IconTile'
+import ResourceTile from '~common/ui/ResourceTile'
+import { STUDY_CARD_INSET, StudyMoreRow, StudySection } from '~common/ui/StudySection'
 import Text from '~common/ui/Text'
+import StrongEntityAvatar from '~features/lexique/StrongEntityAvatar'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import { STUDY_LINK_SECTIONS, STUDY_LINKS_SHOWN, studyLinkRoute } from './studyLinksPresentation'
+import {
+  STUDY_LINK_SECTIONS,
+  STUDY_LINKS_SHOWN,
+  studyLinkDetail,
+  studyLinkRoute,
+} from './studyLinksPresentation'
 
-const StudyLinkRow = ({ link, onPress }: { link: StudyLinkView; onPress: () => void }) => (
+const ROW_GAP = 12
+
+/** A person or a place wears its portrait; a resource, its mark. */
+const StudyLinkMark = ({ link }: { link: StudyLinkView }) =>
+  link.kind === 'entity' ? (
+    <StrongEntityAvatar uniqueName={link.key} category="other" type="" size={ICON_TILE_SIZE} />
+  ) : (
+    <ResourceTile kind={link.kind} />
+  )
+
+const StudyLinkRow = ({
+  link,
+  detail,
+  onPress,
+}: {
+  link: StudyLinkView
+  detail?: string
+  onPress: () => void
+}) => (
   <TouchableBox
     className="flex-row items-center gap-[12px] px-[16px] py-[12px]"
     onPress={onPress}
     activeOpacity={0.7}
     accessibilityRole="button"
-    accessibilityLabel={link.detail ? `${link.label}, ${link.detail}` : link.label}
+    accessibilityLabel={detail ? `${link.label}, ${detail}` : link.label}
   >
+    <StudyLinkMark link={link} />
     <VStack className="flex-[1] gap-[2px]">
       <Text className="text-[15px]" numberOfLines={2}>
         {link.label}
       </Text>
-      {link.detail ? (
+      {detail ? (
         <Text className="text-[13px] text-grey" numberOfLines={1}>
-          {link.detail}
+          {detail}
         </Text>
       ) : null}
     </VStack>
@@ -50,11 +77,16 @@ export const StudyLinksSection = ({
   const [expanded, setExpanded] = useState(false)
   const shown = expanded ? links : links.slice(0, STUDY_LINKS_SHOWN)
   return (
-    <StudySection title={title} surface="rows">
+    <StudySection
+      title={title}
+      surface="rows"
+      rowInset={STUDY_CARD_INSET + ICON_TILE_SIZE + ROW_GAP}
+    >
       {shown.map(link => (
         <StudyLinkRow
           key={`${link.kind}:${link.key}`}
           link={link}
+          detail={studyLinkDetail(link, links)}
           onPress={() => pushRouteOnce(studyLinkRoute(link, language))}
         />
       ))}

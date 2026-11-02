@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import {
   buildSpanIndex,
   namesOnePerson,
+  oneArticlePerSubject,
   parseScripture,
   pickEventSubject,
   resolveEntityLinks,
@@ -363,5 +364,50 @@ describe("theme links", () => {
       ])
     });
     assert.deepEqual(links.map(({ entry }) => entry.key), ["a"]);
+  });
+});
+
+describe("one article per subject", () => {
+  const entries = new Map(
+    [
+      { key: "westphal:9", work: "westphal", entryId: 9, language: "fr", cluster: "david" },
+      { key: "bost:5", work: "bost", entryId: 5, language: "fr", cluster: "david" },
+      { key: "calmet:7", work: "calmet", entryId: 7, language: "fr", cluster: "david" },
+      { key: "isbe:1", work: "isbe", entryId: 1, language: "en", cluster: "david" },
+      { key: "westphal:10", work: "westphal", entryId: 10, language: "fr", cluster: null },
+      { key: "westphal:11", work: "westphal", entryId: 11, language: "fr", cluster: null }
+    ].map((entry) => [entry.key, entry])
+  );
+  const article = (target, entity = "David") => ({ kind: "entity-dictionary", entity, target });
+
+  it("keeps one article of a word, whatever the order", () => {
+    assert.deepEqual(
+      oneArticlePerSubject(
+        [article("westphal:9"), article("bost:5"), article("calmet:7")],
+        entries
+      ).map(({ target }) => target),
+      ["bost:5"]
+    );
+  });
+
+  it("keeps each language, each subject and the articles that stand alone", () => {
+    assert.deepEqual(
+      oneArticlePerSubject(
+        [
+          article("bost:5"),
+          article("isbe:1"),
+          article("calmet:7", "Jesse"),
+          article("westphal:10"),
+          article("westphal:11")
+        ],
+        entries
+      ).map(({ target }) => target),
+      ["bost:5", "isbe:1", "calmet:7", "westphal:10", "westphal:11"]
+    );
+  });
+
+  it("leaves the other links alone", () => {
+    const event = { kind: "entity-timeline", entity: "David", target: "bost:5" };
+    assert.deepEqual(oneArticlePerSubject([event, event], entries), [event, event]);
   });
 });

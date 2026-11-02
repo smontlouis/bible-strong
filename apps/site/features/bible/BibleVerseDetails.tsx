@@ -1,3 +1,4 @@
+import ResourceMark from '../studyLinks/ResourceMark'
 import SiteLink from '@/components/SiteLink'
 import type { ReactNode } from 'react'
 import { useI18n } from '@/locales'
@@ -83,7 +84,10 @@ export default function BibleVerseDetails({
               </SiteLink>
             ))}
           </p>
-          <SiteLink className="resource-link mt-4 inline-block text-sm font-semibold" href={chapterPath}>
+          <SiteLink
+            className="resource-link mt-4 inline-block text-sm font-semibold"
+            href={chapterPath}
+          >
             {t('bible.readChapter').replace('{chapter}', chapterLabel)}
           </SiteLink>
         </Section>
@@ -182,7 +186,8 @@ export default function BibleVerseDetails({
           <ul className="flex flex-wrap gap-2">
             {study.topics.map(topic => (
               <li key={topic.path}>
-                <SiteLink className="resource-chip" href={topic.path}>
+                <SiteLink className="resource-chip study-link" href={topic.path}>
+                  <ResourceMark kind="nave" />
                   {topic.name}
                 </SiteLink>
               </li>
@@ -196,7 +201,8 @@ export default function BibleVerseDetails({
           <ul className="flex flex-wrap gap-2">
             {study.dictionary.map(entry => (
               <li key={entry.path}>
-                <SiteLink className="resource-chip" href={entry.path}>
+                <SiteLink className="resource-chip study-link" href={entry.path}>
+                  <ResourceMark kind="dictionary" />
                   {entry.word}
                 </SiteLink>
               </li>
