@@ -4457,7 +4457,7 @@ __metadata:
 
 "@expo/cli@patch:@expo/cli@npm%3A58.1.11#~/.yarn/patches/@expo-cli-npm-58.1.11-9bf913ac4e.patch":
   version: 58.1.11
-  resolution: "@expo/cli@patch:@expo/cli@npm%3A58.1.11#~/.yarn/patches/@expo-cli-npm-58.1.11-9bf913ac4e.patch::version=58.1.11&hash=b6c7c9"
+  resolution: "@expo/cli@patch:@expo/cli@npm%3A58.1.11#~/.yarn/patches/@expo-cli-npm-58.1.11-9bf913ac4e.patch::version=58.1.11&hash=8fbd2f"
   dependencies:
     2g: "npm:^1.0.1"
     "@expo/code-signing-certificates": "npm:^0.0.7"
@@ -4533,7 +4533,7 @@ __metadata:
       optional: true
   bin:
     expo-internal: bin/cli.js
-  checksum: 10c0/6654776829c94b58113e487696b97c5d2aca4f148083dded7acf3a2744cc600a1f8b1dec645b4f9f6e40afc45f0e3ce655fdb70c03330f6138734945658d8632
+  checksum: 10c0/85125b90790ef04c8e4c5eb10f16d561537d1e5edf42e4763c9a9708bf83edb9fe6175a2c0a5b6d343ce3f1bcfc51e11b135c1c34a037fb4fe46b8d275ea1e06
   languageName: node
   linkType: hard
 

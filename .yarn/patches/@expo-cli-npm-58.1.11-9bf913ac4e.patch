@@ -1,3 +1,21 @@
+diff --git a/build/src/export/exportApp.js b/build/src/export/exportApp.js
+index 201becc..c92317f 100644
+--- a/build/src/export/exportApp.js
++++ b/build/src/export/exportApp.js
+@@ -265,9 +265,12 @@ async function exportAppAsync(projectRoot, { platforms, outputDir, clear, dev, d
+                         files,
+                         htmlOutputName
+                     });
++                    // Read the list only after the await: DOM components export concurrently, so reading it
++                    // first lets two components that finish together drop one of them from the metadata.
++                    const domBundleMetadata = await (0, _exportDomComponents.addDomBundleToMetadataAsync)(platformDomComponentsBundle);
+                     domComponentAssetsMetadata[platform] = [
+                         ...domComponentAssetsMetadata[platform] || [],
+-                        ...await (0, _exportDomComponents.addDomBundleToMetadataAsync)(platformDomComponentsBundle),
++                        ...domBundleMetadata,
+                         ...(0, _exportDomComponents.transformDomEntryForMd5Filename)({
+                             files,
+                             htmlOutputName
 diff --git a/build/src/export/exportDomComponents.js b/build/src/export/exportDomComponents.js
 index b08f8fc7570b3b478be85511dc87868060420738..d8581af2913773e938d9f5e11d415cda212abda4 100644
 --- a/build/src/export/exportDomComponents.js

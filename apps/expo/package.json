@@ -5,9 +5,9 @@
   "scripts": {
     "eas-build-pre-install": "corepack enable",
     "start": "expo start --dev-client",
-    "update:staging": "dotenv -c staging -- sh -c 'EXPO_NO_BUNDLE_SPLITTING=true expo export --platform ios --platform android --source-maps --output-dir dist && open-ota publish --skip-export --dist dist --branch staging \"$@\" && sentry-expo-upload-sourcemaps dist' --",
+    "update:staging": "dotenv -c staging -- sh -c 'EXPO_NO_BUNDLE_SPLITTING=true expo export --platform ios --platform android --source-maps --output-dir dist && node scripts/check-update-dom-pages.mjs dist && open-ota publish --skip-export --dist dist --branch staging \"$@\" && sentry-expo-upload-sourcemaps dist' --",
     "update:rollback-to-embedded:staging": "dotenv -c staging -- open-ota rollback-to-embedded --branch staging",
-    "update:production": "dotenv -c production -- sh -c 'EXPO_NO_BUNDLE_SPLITTING=true expo export --platform ios --platform android --source-maps --output-dir dist && open-ota publish --skip-export --dist dist --branch production \"$@\" && sentry-expo-upload-sourcemaps dist' --",
+    "update:production": "dotenv -c production -- sh -c 'EXPO_NO_BUNDLE_SPLITTING=true expo export --platform ios --platform android --source-maps --output-dir dist && node scripts/check-update-dom-pages.mjs dist && open-ota publish --skip-export --dist dist --branch production \"$@\" && sentry-expo-upload-sourcemaps dist' --",
     "update:rollback-to-embedded:production": "dotenv -c production -- open-ota rollback-to-embedded --branch production",
     "build:android:dev": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c development -- eas build -p android --local --profile development --non-interactive",
     "build:android:staging": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c staging -- eas build -p android --local --profile staging --non-interactive",
