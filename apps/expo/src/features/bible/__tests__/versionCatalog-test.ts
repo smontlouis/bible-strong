@@ -223,6 +223,36 @@ describe('Bible version catalog query', () => {
     ])
   })
 
+  it('keeps the families of a language together at its head, and the alphabet for the rest', () => {
+    const sections = getVersionCatalogSections({
+      catalog: [
+        versions.BDS,
+        versions.FRC97,
+        versions.NEG79,
+        versions.DBY,
+        versions.LSG,
+        versions.CHU,
+        versions.S21,
+        versions.BFC,
+      ],
+      grouping: 'language',
+      query: '',
+      uiLanguage: 'fr',
+      labels,
+    })
+
+    expect(sections[0].data.map(version => version.id)).toEqual([
+      'LSG',
+      'S21',
+      'NEG79',
+      'DBY',
+      'BFC',
+      'FRC97',
+      'CHU',
+      'BDS',
+    ])
+  })
+
   it('puts the Hebrew and Greek section just before the Greek one', () => {
     const sections = getVersionCatalogSections({
       catalog: [versions.VUL, versions.KJV, versions.LSG, versions.BHG, versions.BHS, versions.LXX],

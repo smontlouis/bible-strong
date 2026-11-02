@@ -14,6 +14,10 @@ La feature Bible est le cœur de l'application Bible Strong. Elle fournit une ex
 
 ### Affichage du texte
 - Support de multiples versions bibliques (LSG, Martin, Darby, etc.)
+- Changer de version garde le lecteur sur le même verset (`ReadingPositionKeeper`) : une
+  seule mesure au changement, rien pendant le défilement
+- Dans le catalogue, les familles d'une langue (Segond, Darby, Français courant, King James)
+  restent groupées en tête de leur section, puis viennent les autres par ordre alphabétique
 - Mode parallèle pour comparer plusieurs versions côte à côte
 - Affichage interlinéaire (texte original avec traduction)
 - Personnalisation de la taille de police et de l'interligne
@@ -26,6 +30,11 @@ que le lecteur normal ; le badge « Focus » et sa commande d'agrandissement son
 retirés. Le bouton Strong « S » reste disponible. Le menu reprend les mêmes
 actions et leur ordre que le chapitre normal, sauf l'affichage parallèle ; les
 gestionnaires d'actions sont partagés entre les deux présentations.
+
+L'en-tête du focus garde la référence et ajoute une puce de version, qui ouvre le
+même sélecteur que le chapitre et conserve les versets ciblés. Annoter ne quitte pas
+le focus : le chapitre ne revient pas, et le bloc « Autour de… » reste visible sous le
+texte, ses liens inactifs jusqu'à la sortie de l'annotation.
 
 Un sous-header natif s'affiche sous le header, au-dessus du texte : « Lire le chapitre entier »
 développe le contexte, puis « Revenir au passage » rétablit le focus en conservant

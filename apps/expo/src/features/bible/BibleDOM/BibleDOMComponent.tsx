@@ -89,6 +89,7 @@ import { getScrollTargetVerse } from './verseRenderingModel'
 import { shouldSuppressVerseGestures } from '~helpers/interlinearDisplayMode'
 import ChapterEntities from './ChapterEntities'
 import FocusVerseStudy from './FocusVerseStudy'
+import ReadingPositionKeeper from './ReadingPositionKeeper'
 import ChapterOpening from './ChapterOpening'
 import { getOverlayLayoutTransition } from './overlayStagger'
 import PlanDayStepCard, { type PlanDayStepView } from './PlanDayStepCard'
@@ -1684,6 +1685,14 @@ const LoadedBibleContent = ({
                     void onFocusedMetadataPress?.(type, id)
                   }}
                 />
+                <ReadingPositionKeeper
+                  verses={verses}
+                  version={version}
+                  location={`${book.Numero}-${chapter}`}
+                  isDisabled={isContextFocused}
+                  readingLine={headerHeight}
+                  containerRef={containerRef}
+                />
                 <m.div
                   ref={versesContentRef}
                   style={{ position: 'relative' }}
@@ -1748,13 +1757,14 @@ const LoadedBibleContent = ({
                 </m.div>
               </ColumnsBlock>
             </HorizontalScrollWrapper>
-            {isContextFocused && focusStudy && focusStudyTranslations && !annotationMode && (
+            {isContextFocused && focusStudy && focusStudyTranslations && (
               <FocusVerseStudy
                 study={focusStudy}
                 translations={focusStudyTranslations}
                 entities={chapterEntities}
                 portraits={chapterEntityPortraits}
                 settings={settings}
+                isDisabled={annotationMode}
                 onAction={focusAction => {
                   void dispatch({ type: FOCUS_STUDY_ACTION, payload: focusAction })
                 }}

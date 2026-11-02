@@ -207,7 +207,13 @@ const BibleTabScreen = ({
     return null
   }
 
-  if (!entityReference && resolvedResourceSelectionKey !== resourceSelectionKey) {
+  // Only the first resolution holds the reader back: a change of version keeps it on screen, so
+  // that the page does not blank and the reader stays on the same verse.
+  if (
+    !entityReference &&
+    !resourceResolutionQuery.isPlaceholderData &&
+    resolvedResourceSelectionKey !== resourceSelectionKey
+  ) {
     return null
   }
 

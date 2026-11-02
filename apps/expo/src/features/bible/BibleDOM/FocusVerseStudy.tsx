@@ -31,6 +31,8 @@ type Props = RootStyles & {
   portraits: EntityPortraitSources
   onAction: (action: FocusStudyAction) => void
   onOpenEntity: (uniqueName: string) => void
+  /** While annotating, the study stays in view but its links wait. */
+  isDisabled?: boolean
 }
 
 // Every tap target of the study answers the finger the same way.
@@ -76,6 +78,7 @@ const FocusVerseStudy = ({
   settings,
   onAction,
   onOpenEntity,
+  isDisabled,
 }: Props) => {
   const colors = settings.colors[settings.theme]
   const bibleFont = settings.fontFamily
@@ -205,6 +208,7 @@ const FocusVerseStudy = ({
         gap: 28,
         userSelect: 'none',
         WebkitUserSelect: 'none',
+        pointerEvents: isDisabled ? 'none' : undefined,
       }}
     >
       {/* In a focus of several verses, the studied one is marked in the text above. */}

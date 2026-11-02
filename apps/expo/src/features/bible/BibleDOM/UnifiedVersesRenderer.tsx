@@ -211,11 +211,8 @@ export function UnifiedVersesRenderer({
           const isFocused = focusVersesNumeric
             ? focusVersesNumeric.includes(verseNumber)
             : undefined
-          const fadePosition = annotationMode
-            ? undefined
-            : getFadePosition(verseNumber, isContextFocused, adjacentVerses)
+          const fadePosition = getFadePosition(verseNumber, isContextFocused, adjacentVerses)
           if (
-            !annotationMode &&
             !shouldRenderVerseInFocusedContext({
               verseNumber,
               isContextFocused,
@@ -287,6 +284,22 @@ export function UnifiedVersesRenderer({
           )
         }
 
+        // In focused context mode, only show focused verses and adjacent fading verses,
+        // while annotating too.
+        const isFocused = focusVersesNumeric ? focusVersesNumeric.includes(verseNumber) : undefined
+        const fadePosition = getFadePosition(verseNumber, isContextFocused, adjacentVerses)
+        if (
+          !shouldRenderVerseInFocusedContext({
+            verseNumber,
+            isContextFocused,
+            hasFocusVerses: Boolean(focusVerses),
+            isFocused,
+            fadePosition,
+          })
+        ) {
+          return null
+        }
+
         // In annotation mode, use simplified rendering (no interlinear, etc.)
         if (annotationMode) {
           return (
@@ -314,6 +327,7 @@ export function UnifiedVersesRenderer({
                 tag={tag}
                 annotationMode={annotationMode}
                 bookmark={bookmark}
+                fadePosition={fadePosition}
                 isTouched={isTouched}
                 otherVersionAnnotations={otherVersionAnnotations}
                 hasAnnotationNotes={versesWithAnnotationNotes?.[String(Verset)]}
@@ -328,22 +342,6 @@ export function UnifiedVersesRenderer({
         }
 
         // Normal mode rendering
-
-        // In focused context mode, only show focused verses and adjacent fading verses
-        const isFocused = focusVersesNumeric ? focusVersesNumeric.includes(verseNumber) : undefined
-        const fadePosition = getFadePosition(verseNumber, isContextFocused, adjacentVerses)
-        if (
-          !shouldRenderVerseInFocusedContext({
-            verseNumber,
-            isContextFocused,
-            hasFocusVerses: Boolean(focusVerses),
-            isFocused,
-            fadePosition,
-          })
-        ) {
-          return null
-        }
-
         const isSelected = selectedVersion === version
         const isHighlighted = Boolean(highlightedVerses[verseKey])
         const highlightedColor = isHighlighted

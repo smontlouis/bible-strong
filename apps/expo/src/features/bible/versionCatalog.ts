@@ -56,6 +56,27 @@ const READING_PROFILE_ORDER: TranslationReadingProfile[] = [
   'paraphrase',
 ]
 
+// The families the alphabet would scatter: Segond, Darby, Français courant, King James.
+const VERSIONS_LEADING_THEIR_LANGUAGE = [
+  'LSG',
+  'S21',
+  'NBS',
+  'NVS78P',
+  'NEG79',
+  'DBY',
+  'DBR',
+  'BFC',
+  'FRC97',
+  'NFC',
+  'KJV',
+  'NKJV',
+]
+
+const getLeadingRank = (versionId: string) => {
+  const rank = VERSIONS_LEADING_THEIR_LANGUAGE.indexOf(versionId)
+  return rank < 0 ? VERSIONS_LEADING_THEIR_LANGUAGE.length : rank
+}
+
 const normalizeSearchText = (value: string) =>
   value
     .normalize('NFD')
@@ -129,7 +150,9 @@ export const getVersionCatalogSections = ({
     return languages.map(language => ({
       key: language,
       title: labels.languages[language],
-      data: versionsByLanguage.get(language) || [],
+      data: (versionsByLanguage.get(language) || []).sort(
+        (left, right) => getLeadingRank(left.id) - getLeadingRank(right.id)
+      ),
     }))
   }
 

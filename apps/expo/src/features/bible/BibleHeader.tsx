@@ -384,50 +384,45 @@ const Header = ({
       ? isInterlinearModeEnabled(interlinearMode)
       : strongMode !== 'hidden'
 
-  // After the version in the chip; alone, a whole pill, in focus where the version is a label
-  const renderTextModeSegment = (standalone: boolean) =>
-    textModeKind ? (
-      <DisplayModeTrigger
-        kind={textModeKind}
-        bibleAtom={bibleAtom}
-        className={`overflow-hidden border-continuous items-center justify-center pr-[11px] h-[32px] ${
-          standalone ? 'pl-[11px]' : 'pl-[8px]'
-        }`}
-        onPress={() => onOpenTextMode(textModeKind, 0)}
-        accessibilityRole="button"
-        accessibilityLabel={
-          textModeKind === 'interlinear'
-            ? t('Options du texte original')
-            : t('Choisir l’affichage de la Bible Strong')
-        }
-        accessibilityState={{ selected: isTextModeActive }}
-      >
-        <AnimatedBox
-          className={`overflow-hidden border-continuous bg-light-grey rounded-tr-[16px] rounded-br-[16px] absolute left-[0px] bottom-[0px] right-[0px] top-[0px] ${
-            standalone ? 'rounded-tl-[16px] rounded-bl-[16px]' : ''
-          }`}
-          style={opacityTransitionStyle}
-        />
-        <AnimatedBox style={opacityTransitionStyle}>
-          {textModeKind === 'interlinear' ? (
-            <InterlinearMark highlighted={isTextModeActive} />
-          ) : (
-            <StrongMark highlighted={isTextModeActive} />
-          )}
-        </AnimatedBox>
-      </DisplayModeTrigger>
-    ) : null
+  // After the version in the chip
+  const textModeSegment = textModeKind ? (
+    <DisplayModeTrigger
+      kind={textModeKind}
+      bibleAtom={bibleAtom}
+      className="overflow-hidden border-continuous items-center justify-center pl-[8px] pr-[11px] h-[32px]"
+      onPress={() => onOpenTextMode(textModeKind, 0)}
+      accessibilityRole="button"
+      accessibilityLabel={
+        textModeKind === 'interlinear'
+          ? t('Options du texte original')
+          : t('Choisir l’affichage de la Bible Strong')
+      }
+      accessibilityState={{ selected: isTextModeActive }}
+    >
+      <AnimatedBox
+        className="overflow-hidden border-continuous bg-light-grey rounded-tr-[16px] rounded-br-[16px] absolute left-[0px] bottom-[0px] right-[0px] top-[0px]"
+        style={opacityTransitionStyle}
+      />
+      <AnimatedBox style={opacityTransitionStyle}>
+        {textModeKind === 'interlinear' ? (
+          <InterlinearMark highlighted={isTextModeActive} />
+        ) : (
+          <StrongMark highlighted={isTextModeActive} />
+        )}
+      </AnimatedBox>
+    </DisplayModeTrigger>
+  ) : null
 
-  // The version opens its selector, after the book
-  const versionChip = (
+  // The version opens its selector, after the book, or alone beside a focus's reference
+  const renderVersionChip = (standalone: boolean) => (
     <>
       <BibleSelectorTrigger
         kind="version"
         data={getDefaultStore().get(bibleAtom).data}
         actions={actions}
-        className={`overflow-hidden border-continuous items-center justify-center pl-[7px] h-[32px] ${
-          textModeKind ? 'pr-[7px]' : 'pr-[12px]'
-        }`}
+        className={`overflow-hidden border-continuous items-center justify-center h-[32px] ${
+          standalone ? 'pl-[12px]' : 'pl-[7px]'
+        } ${textModeKind ? 'pr-[7px]' : 'pr-[12px]'}`}
         onPress={() =>
           openVersionSelector({
             actions,
@@ -440,14 +435,14 @@ const Header = ({
         <AnimatedBox
           className={`overflow-hidden border-continuous bg-light-grey absolute left-[0px] bottom-[0px] right-[0px] top-[0px] ${
             textModeKind ? '' : 'rounded-tr-[16px] rounded-br-[16px]'
-          }`}
+          } ${standalone ? 'rounded-tl-[16px] rounded-bl-[16px]' : ''}`}
           style={opacityTransitionStyle}
         />
         <AnimatedText className="font-bold text-[14px]" style={translateYTransitionStyle}>
           {version}
         </AnimatedText>
       </BibleSelectorTrigger>
-      {renderTextModeSegment(false)}
+      {textModeSegment}
     </>
   )
 
@@ -593,9 +588,13 @@ const Header = ({
                 numberOfLines={1}
                 style={[{ flexShrink: 1 }, translateYTransitionStyle]}
               >
-                {`${focusedReference} - ${version}`}
+                {isParallel ? `${focusedReference} - ${version}` : focusedReference}
               </AnimatedText>
-              {renderTextModeSegment(true)}
+              {!isParallel && (
+                <HStack className="overflow-hidden border-continuous shrink-0">
+                  {renderVersionChip(true)}
+                </HStack>
+              )}
             </HStack>
             {paramsButton}
             <BibleOptionsMenu
@@ -648,7 +647,7 @@ const Header = ({
                   </BibleSelectorTrigger>
                 )}
               </HStack>
-              {!isParallel && versionChip}
+              {!isParallel && renderVersionChip(false)}
             </HStack>
 
             <VerseSelectorPopup bibleAtom={bibleAtom} coverage={coverage} preferCoverage>
