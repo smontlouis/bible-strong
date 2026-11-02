@@ -10,6 +10,44 @@ import {
   type Springs,
 } from './AtlasCards'
 
+/** With no hand on it, on a stand, a card tilts by itself under a light that wanders over its foil. */
+export const useCardSway = (springs: { current: Springs }, kick: () => void, swaying: boolean) => {
+  useEffect(() => {
+    if (!swaying) return
+    let frame = 0
+    const wander = (time: number) => {
+      const px = 50 + 36 * Math.sin(time / 2100)
+      const py = 46 + 30 * Math.sin(time / 3000 + 1)
+      const s = springs.current
+      s.bx.t = adjust(px, 0, 100, 37, 63)
+      s.by.t = adjust(py, 0, 100, 33, 67)
+      s.rx.t = -((px - 50) / 5)
+      s.ry.t = (py - 50) / 5
+      s.gx.t = px
+      s.gy.t = py
+      s.go.t = 0.85
+      s.gl.t = 0.3
+      kick()
+      frame = requestAnimationFrame(wander)
+    }
+    frame = requestAnimationFrame(wander)
+    return () => {
+      cancelAnimationFrame(frame)
+      const s = springs.current
+      s.rx.t = 0
+      s.ry.t = 0
+      s.gx.t = REST.x
+      s.gy.t = REST.y
+      s.go.t = REST.shine
+      s.gl.t = 0
+      s.bx.t = adjust(REST.x, 0, 100, 37, 63)
+      s.by.t = adjust(REST.y, 0, 100, 33, 67)
+      kick()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [swaying])
+}
+
 /**
  * The springs of a card, or of a pack: it tilts under the pointer and its foil follows the light.
  * `element` carries the CSS variables its layers read, `surface` is what the pointer is measured

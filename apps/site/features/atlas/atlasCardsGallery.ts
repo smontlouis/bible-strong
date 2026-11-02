@@ -237,3 +237,23 @@ export const drawPack = (
   take(known, PACK_SIZE - drawn.length)
   return shuffle(drawn, random)
 }
+
+/**
+ * A pack for a stand, where a passer-by should recognise a face: four cards among the most named
+ * of the pack and one of the others. The gods and idols, which a stand has no reason to greet
+ * people with, are left out of `pool` by its caller.
+ */
+export const drawStandPack = (
+  pool: AtlasGalleryCard[],
+  seen: ReadonlySet<string>,
+  random: () => number = Math.random
+): AtlasGalleryCard[] => {
+  const named = [...pool].sort(SORTS.named)
+  const famousCount = Math.max(Math.ceil(named.length * 0.4), PACK_SIZE * 2)
+  const drawn = drawPack(named.slice(0, famousCount), seen, random)
+  const kept = drawn.slice(0, PACK_SIZE - 1)
+  const rarer = shuffle(named.slice(famousCount), random).find(
+    card => !seen.has(card.id) && !kept.some(other => other.entity === card.entity)
+  )
+  return rarer ? shuffle([...kept, rarer], random) : drawn
+}

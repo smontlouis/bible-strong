@@ -6,7 +6,7 @@
  */
 
 /* The words, papers and colours of a card, wherever cards are drawn. */
-:is(.ac-deck, .acg, .acg-fan, .acv, .acb) {
+:is(.ac-deck, .acg, .acg-fan, .acv, .acb, .acs) {
   --ac-display: 'Literata Reading', ui-serif, Georgia, serif;
   --ac-text: 'Literata Reading', ui-serif, Georgia, serif;
   --ac-hebrew: 'SBL Hebrew', 'Times New Roman', serif;
@@ -2394,6 +2394,303 @@
   border-color: transparent;
   background: #7e9cf2;
   color: #0e1521;
+}
+
+/* ---------- The cards on a stand ---------- */
+
+/* A screen seen from afar, laid out on 1920 by 1080: `--u` is one of those pixels. */
+.acs {
+  --ac-w: calc(590 * var(--u));
+  --acb-pack: calc(450 * var(--u));
+  position: fixed;
+  z-index: 200;
+  inset: 0;
+  overflow: hidden;
+  background: #0e1521;
+  color: #edf2ff;
+  cursor: none;
+  font-family: var(--ac-text);
+}
+
+.acs__shade,
+.acs__veil,
+.acs__ground {
+  position: absolute;
+  inset: 0;
+}
+
+.acs__shade {
+  background:
+    radial-gradient(ellipse 70% 80% at 28% 50%, rgb(54 82 140 / 55%), transparent 70%),
+    linear-gradient(180deg, #0d1426, #070b16);
+}
+
+.acs__ground {
+  width: 100%;
+  height: 100%;
+  filter: blur(calc(38 * var(--u))) saturate(1.15);
+  object-fit: cover;
+  transform: scale(1.12);
+}
+
+/* The painting stays behind the card; the words sit on a darker ground. */
+.acs__veil {
+  background: linear-gradient(90deg, rgb(7 11 22 / 8%) 30%, rgb(7 11 22 / 78%) 58%, rgb(7 11 22 / 88%));
+}
+
+.acs__frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(1920 * var(--u));
+  height: calc(1080 * var(--u));
+  transform: translate(-50%, -50%);
+}
+
+.acs__brand {
+  position: absolute;
+  top: calc(44 * var(--u));
+  left: calc(56 * var(--u));
+  display: flex;
+  align-items: center;
+  gap: calc(14 * var(--u));
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+  font-size: calc(28 * var(--u));
+  font-weight: 800;
+}
+
+.acs__brand img {
+  width: calc(46 * var(--u));
+  height: calc(46 * var(--u));
+}
+
+.acs__brand-atlas {
+  color: #abb7c9;
+  font-weight: 500;
+}
+
+.acs__table {
+  position: absolute;
+  inset: 0;
+}
+
+.acs__slot {
+  position: absolute;
+  top: calc(var(--ac-w) * -44 / 63);
+  left: calc(var(--ac-w) / -2);
+  width: var(--ac-w);
+  perspective: calc(1500 * var(--u));
+}
+
+.acs__pack {
+  position: absolute;
+  z-index: 8;
+  top: calc(var(--acb-pack) * -0.8);
+  left: calc(var(--acb-pack) / -2);
+  width: var(--acb-pack);
+}
+
+.acs .acb__tear {
+  animation: none;
+  cursor: none;
+}
+
+.acs__beside {
+  position: absolute;
+  top: calc(96 * var(--u));
+  left: calc(1010 * var(--u));
+  width: calc(850 * var(--u));
+  height: calc(724 * var(--u));
+}
+
+.acs__eyebrow {
+  margin: 0 0 calc(20 * var(--u));
+  color: #abb7c9;
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+  font-size: calc(21 * var(--u));
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.acs__name,
+.acs__headline {
+  margin: 0;
+  color: #edf2ff;
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.acs__name {
+  font-size: calc(104 * var(--u));
+  line-height: 1.04;
+}
+
+.acs__name.is-long {
+  font-size: calc(78 * var(--u));
+}
+
+.acs__headline {
+  margin-top: calc(120 * var(--u));
+  font-size: calc(84 * var(--u));
+  line-height: 1.08;
+}
+
+.acs__eyebrow + .acs__headline {
+  margin-top: 0;
+}
+
+.acs__title {
+  margin: calc(10 * var(--u)) 0 0;
+  color: #e9cf8a;
+  font-size: calc(40 * var(--u));
+  font-style: italic;
+}
+
+.acs__lead {
+  margin: calc(26 * var(--u)) 0 0;
+  color: #dfe6f5;
+  font-size: calc(36 * var(--u));
+  line-height: 1.4;
+}
+
+.acs__word {
+  display: flex;
+  align-items: center;
+  gap: calc(30 * var(--u));
+  margin-top: calc(34 * var(--u));
+}
+
+.acs__original {
+  color: #fff0c2;
+  font-family: var(--ac-hebrew);
+  font-size: calc(88 * var(--u));
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.acs__original:lang(grc) {
+  font-family: var(--ac-display);
+  font-size: calc(70 * var(--u));
+}
+
+.acs__reading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(6 * var(--u)) calc(16 * var(--u));
+  color: #dfe6f5;
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+  font-size: calc(29 * var(--u));
+}
+
+.acs__strong {
+  padding: calc(3 * var(--u)) calc(14 * var(--u));
+  border: 1px solid rgb(233 207 138 / 50%);
+  border-radius: 999px;
+  color: #e9cf8a;
+  font-size: calc(21 * var(--u));
+  font-weight: 600;
+}
+
+.acs__meaning {
+  flex-basis: 100%;
+  font-family: var(--ac-text);
+}
+
+.acs__sentence {
+  margin: calc(32 * var(--u)) 0 0;
+  padding: 0 0 0 calc(26 * var(--u));
+  border-left: calc(3 * var(--u)) solid #5983f0;
+  color: #edf2ff;
+  font-size: calc(36 * var(--u));
+  line-height: 1.38;
+}
+
+.acs__sentence cite {
+  display: block;
+  margin-top: calc(10 * var(--u));
+  color: #abb7c9;
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+  font-size: calc(24 * var(--u));
+  font-style: normal;
+}
+
+.acs__facts {
+  display: flex;
+  gap: calc(56 * var(--u));
+  margin: calc(30 * var(--u)) 0 0;
+}
+
+.acs__facts dt {
+  color: #abb7c9;
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+  font-size: calc(22 * var(--u));
+}
+
+.acs__facts dd {
+  margin: calc(4 * var(--u)) 0 0;
+  font-size: calc(30 * var(--u));
+}
+
+/* The time left on a card, as the progress bar of a video frame. */
+.acs__time {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: calc(3 * var(--u));
+  background: #5983f0;
+  animation: acs-time 8900ms linear both;
+  transform-origin: left;
+}
+
+.acs__scan {
+  position: absolute;
+  right: calc(56 * var(--u));
+  bottom: calc(44 * var(--u));
+  display: flex;
+  align-items: center;
+  gap: calc(20 * var(--u));
+}
+
+.acs__scan img {
+  width: calc(190 * var(--u));
+  height: calc(190 * var(--u));
+  padding: calc(12 * var(--u));
+  border-radius: calc(20 * var(--u));
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.acs__scan p {
+  display: flex;
+  width: calc(150 * var(--u));
+  flex-direction: column;
+  gap: calc(8 * var(--u));
+  margin: 0;
+  font-family: 'Pulp Reading', ui-sans-serif, system-ui, sans-serif;
+}
+
+.acs__scan strong {
+  font-size: calc(30 * var(--u));
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.acs__scan span {
+  color: #abb7c9;
+  font-size: calc(20 * var(--u));
+}
+
+@keyframes acs-time {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 
 @media (max-width: 640px) {

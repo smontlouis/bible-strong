@@ -4,6 +4,7 @@ import {
   cardPacks,
   cardsByEra,
   drawPack,
+  drawStandPack,
   filterCards,
   NO_FILTERS,
   PACK_SIZE,
@@ -184,5 +185,23 @@ describe('packs of cards', () => {
       ['era-1', 16],
     ])
     expect(packs[0].cover).toHaveLength(3)
+  })
+})
+
+describe('drawStandPack', () => {
+  const pool = Array.from({ length: 40 }, (_, index) =>
+    card(`person-${index}`, `Person ${index}`, { chapterCount: 400 - index })
+  )
+  const famous = new Set(pool.slice(0, 16).map(item => item.id))
+
+  it('draws four of the most named and one of the others', () => {
+    const drawn = drawStandPack(pool, new Set())
+    expect(new Set(drawn.map(item => item.entity)).size).toBe(PACK_SIZE)
+    expect(drawn.filter(item => famous.has(item.id))).toHaveLength(PACK_SIZE - 1)
+  })
+
+  it('still fills a pack of an era too small to hold others', () => {
+    const drawn = drawStandPack(pool.slice(0, PACK_SIZE + 1), new Set())
+    expect(drawn).toHaveLength(PACK_SIZE)
   })
 })

@@ -51,6 +51,7 @@ import { Route as StrongLanguageCodeRouteImport } from './routes/strong.$languag
 import { Route as TimelineLanguageSlugRouteImport } from './routes/timeline.$language_.$slug'
 import { Route as AtlasLanguageCardsIndexRouteImport } from './routes/atlas.$language_.cards.index'
 import { Route as AtlasLanguageCardsCardRouteImport } from './routes/atlas.$language_.cards.$card'
+import { Route as AtlasLanguageCardsStandRouteImport } from './routes/atlas.$language_.cards_.stand'
 import { Route as DictionaryLanguageWorkLetterRouteImport } from './routes/dictionary.$language_.$work_.$letter'
 import { Route as DictionaryLanguageTermSlugRouteImport } from './routes/dictionary.$language_.term.$slug'
 import { Route as NaveLanguageIndexLetterRouteImport } from './routes/nave.$language_.index.$letter'
@@ -277,6 +278,11 @@ const AtlasLanguageCardsCardRoute = AtlasLanguageCardsCardRouteImport.update({
   path: '/$card',
   getParentRoute: () => AtlasLanguageCardsRoute,
 } as any)
+const AtlasLanguageCardsStandRoute = AtlasLanguageCardsStandRouteImport.update({
+  id: '/atlas/$language_/cards_/stand',
+  path: '/atlas/$language/cards/stand',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DictionaryLanguageWorkLetterRoute =
   DictionaryLanguageWorkLetterRouteImport.update({
     id: '/dictionary/$language_/$work_/$letter',
@@ -379,6 +385,7 @@ export interface FileRoutesByFullPath {
   '/strong/$language/$code': typeof StrongLanguageCodeRoute
   '/timeline/$language/$slug': typeof TimelineLanguageSlugRoute
   '/atlas/$language/cards/$card': typeof AtlasLanguageCardsCardRoute
+  '/atlas/$language/cards/stand': typeof AtlasLanguageCardsStandRoute
   '/dictionary/$language/$work/$letter': typeof DictionaryLanguageWorkLetterRoute
   '/dictionary/$language/term/$slug': typeof DictionaryLanguageTermSlugRoute
   '/strong/$language/$code/concordance': typeof StrongLanguageCodeConcordanceRoute
@@ -432,6 +439,7 @@ export interface FileRoutesByTo {
   '/strong/$language/$code': typeof StrongLanguageCodeRoute
   '/timeline/$language/$slug': typeof TimelineLanguageSlugRoute
   '/atlas/$language/cards/$card': typeof AtlasLanguageCardsCardRoute
+  '/atlas/$language/cards/stand': typeof AtlasLanguageCardsStandRoute
   '/dictionary/$language/$work/$letter': typeof DictionaryLanguageWorkLetterRoute
   '/dictionary/$language/term/$slug': typeof DictionaryLanguageTermSlugRoute
   '/strong/$language/$code/concordance': typeof StrongLanguageCodeConcordanceRoute
@@ -487,6 +495,7 @@ export interface FileRoutesById {
   '/strong/$language/$code': typeof StrongLanguageCodeRoute
   '/timeline/$language_/$slug': typeof TimelineLanguageSlugRoute
   '/atlas/$language_/cards/$card': typeof AtlasLanguageCardsCardRoute
+  '/atlas/$language_/cards_/stand': typeof AtlasLanguageCardsStandRoute
   '/dictionary/$language_/$work_/$letter': typeof DictionaryLanguageWorkLetterRoute
   '/dictionary/$language_/term/$slug': typeof DictionaryLanguageTermSlugRoute
   '/strong/$language/$code_/concordance': typeof StrongLanguageCodeConcordanceRoute
@@ -543,6 +552,7 @@ export interface FileRouteTypes {
     | '/strong/$language/$code'
     | '/timeline/$language/$slug'
     | '/atlas/$language/cards/$card'
+    | '/atlas/$language/cards/stand'
     | '/dictionary/$language/$work/$letter'
     | '/dictionary/$language/term/$slug'
     | '/strong/$language/$code/concordance'
@@ -596,6 +606,7 @@ export interface FileRouteTypes {
     | '/strong/$language/$code'
     | '/timeline/$language/$slug'
     | '/atlas/$language/cards/$card'
+    | '/atlas/$language/cards/stand'
     | '/dictionary/$language/$work/$letter'
     | '/dictionary/$language/term/$slug'
     | '/strong/$language/$code/concordance'
@@ -650,6 +661,7 @@ export interface FileRouteTypes {
     | '/strong/$language/$code'
     | '/timeline/$language_/$slug'
     | '/atlas/$language_/cards/$card'
+    | '/atlas/$language_/cards_/stand'
     | '/dictionary/$language_/$work_/$letter'
     | '/dictionary/$language_/term/$slug'
     | '/strong/$language/$code_/concordance'
@@ -704,6 +716,7 @@ export interface RootRouteChildren {
   NaveLanguageTopicRoute: typeof NaveLanguageTopicRoute
   StrongLanguageCodeRoute: typeof StrongLanguageCodeRoute
   TimelineLanguageSlugRoute: typeof TimelineLanguageSlugRoute
+  AtlasLanguageCardsStandRoute: typeof AtlasLanguageCardsStandRoute
   DictionaryLanguageWorkLetterRoute: typeof DictionaryLanguageWorkLetterRoute
   DictionaryLanguageTermSlugRoute: typeof DictionaryLanguageTermSlugRoute
   StrongLanguageCodeConcordanceRoute: typeof StrongLanguageCodeConcordanceRoute
@@ -1012,6 +1025,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtlasLanguageCardsCardRouteImport
       parentRoute: typeof AtlasLanguageCardsRoute
     }
+    '/atlas/$language_/cards_/stand': {
+      id: '/atlas/$language_/cards_/stand'
+      path: '/atlas/$language/cards/stand'
+      fullPath: '/atlas/$language/cards/stand'
+      preLoaderRoute: typeof AtlasLanguageCardsStandRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dictionary/$language_/$work_/$letter': {
       id: '/dictionary/$language_/$work_/$letter'
       path: '/dictionary/$language/$work/$letter'
@@ -1140,6 +1160,7 @@ const rootRouteChildren: RootRouteChildren = {
   NaveLanguageTopicRoute: NaveLanguageTopicRoute,
   StrongLanguageCodeRoute: StrongLanguageCodeRoute,
   TimelineLanguageSlugRoute: TimelineLanguageSlugRoute,
+  AtlasLanguageCardsStandRoute: AtlasLanguageCardsStandRoute,
   DictionaryLanguageWorkLetterRoute: DictionaryLanguageWorkLetterRoute,
   DictionaryLanguageTermSlugRoute: DictionaryLanguageTermSlugRoute,
   StrongLanguageCodeConcordanceRoute: StrongLanguageCodeConcordanceRoute,

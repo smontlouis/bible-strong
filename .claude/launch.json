@@ -97,6 +97,69 @@
         "dev:client"
       ],
       "port": 5186
+    },
+    {
+      "name": "portrait-atlas",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8766",
+        "--bind",
+        "127.0.0.1",
+        "--directory",
+        "/Users/stephane/Projects/bible-strong/portraits"
+      ],
+      "port": 8766
+    },
+    {
+      "name": "resource-api-neon",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "RESOURCE_API_PORT=8788",
+        "yarn",
+        "workspace",
+        "@bible-strong/resource-service",
+        "dotenv",
+        "-e",
+        ".env.resource-publication.local",
+        "--",
+        "tsx",
+        "src/runtime/node.ts"
+      ],
+      "port": 8788
+    },
+    {
+      "name": "site-local-api",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "CLOUDFLARE_INCLUDE_PROCESS_ENV=true",
+        "RESOURCE_API_URL=http://127.0.0.1:8788",
+        "ENTITY_CARD_BASE_URL=http://127.0.0.1:8792/entity-cards",
+        "yarn",
+        "workspace",
+        "@bible-strong/site",
+        "exec",
+        "vite",
+        "dev",
+        "--port",
+        "3214"
+      ],
+      "port": 3214
+    },
+    {
+      "name": "atlas-cards-mirror",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8792",
+        "--bind",
+        "127.0.0.1",
+        "--directory",
+        "/private/tmp/claude-501/-Users-stephane-Projects-bible-strong-bible-strong-app/79ffde6c-666c-4db0-a5aa-c9e3ec120458/scratchpad/cards-mirror"
+      ],
+      "port": 8792
     }
   ]
 }

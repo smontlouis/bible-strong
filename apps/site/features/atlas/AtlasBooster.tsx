@@ -10,7 +10,7 @@ import type { ResourceLanguage } from '../resources/publicSite'
 import { cardClasses, CardFront } from './AtlasCards'
 import type { AtlasGalleryCard } from './atlasCardCatalog'
 import { cardPacks, drawPack, PACK_SIZE, type CardPack } from './atlasCardsGallery'
-import { useCardTilt } from './useCardTilt'
+import { useCardSway, useCardTilt } from './useCardTilt'
 
 // Packs of five cards drawn at random, opened for the pleasure of tearing them and turning the
 // cards over. Nothing is kept and nothing is worth more than another (ADR-0090): a pack is a way of
@@ -92,7 +92,7 @@ const SEALED_OUTLINE = `M ${teethAt(0, 0.0055).join(' L ')} ${RIGHT_SIDE} L ${bo
 const TORN_OUTLINE = `M ${tornEdge().join(' L ')} ${RIGHT_SIDE} L ${bottomTeeth.join(' L ')} ${LEFT_SIDE} Z`
 const STRIP_OUTLINE = `M ${teethAt(0, 0.0055).join(' L ')} L ${[...tornEdge()].reverse().join(' L ')} Z`
 
-function PackOutlines() {
+export function PackOutlines() {
   return (
     <svg className="sr-only" aria-hidden="true" width="0" height="0">
       <defs>
@@ -113,19 +113,25 @@ function PackOutlines() {
 // ---------- A pack ----------
 
 /** A foil sachet: a painting from edge to edge, its characters, crumpled foil over them. */
-function Pack({
+export function Pack({
   pack,
   language,
   large = false,
   tilting = true,
+  swaying = false,
 }: {
   pack: CardPack
   language: ResourceLanguage
   large?: boolean
   tilting?: boolean
+  swaying?: boolean
 }) {
   const words = BOOSTER_WORDS[language]
-  const { element, surface, handlers } = useCardTilt<HTMLSpanElement, HTMLSpanElement>()
+  const { element, surface, springs, kick, handlers } = useCardTilt<
+    HTMLSpanElement,
+    HTMLSpanElement
+  >()
+  useCardSway(springs, kick, swaying)
   const decor = pack.cover.find(card => card.backdrop)?.backdrop
   // The most named stands in the middle, in front.
   const [first, second, third] = pack.cover
