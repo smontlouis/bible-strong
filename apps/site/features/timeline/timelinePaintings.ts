@@ -1,5 +1,6 @@
 // The paintings of the timeline as the application shows them (ADR-0096). The rules mirror
 // `apps/expo/src/features/timeline/timelinePaintings.ts`: an event wears the same picture in both.
+import { markStaleResponse } from '../resources/resourceApi'
 import { noteStaleAnswer } from '../resources/staleAnswers'
 import { timelineImageUrl, timelineThumbnailUrl } from './timelineEvents'
 
@@ -73,6 +74,7 @@ export const readTimelinePaintings = async (): Promise<TimelinePaintings> => {
     return paintings
   } catch {
     noteStaleAnswer()
+    markStaleResponse()
     return catalogCache?.paintings ?? {}
   }
 }

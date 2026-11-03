@@ -5,7 +5,7 @@ import type {
   StudyLinksResponseDto,
 } from '@bible-strong/resource-domain/contracts/studyLinksContract'
 import type { ResourceLanguage } from '../resources/publicSite'
-import { readResource } from '../resources/resourceApi'
+import { markStaleResponse, readResource } from '../resources/resourceApi'
 import { entityPortraitUrl, readAtlasPortraitCatalog } from '../atlas/atlasPortraits'
 import { buildAtlasEntityPath } from '../atlas/atlasRoutes'
 import { buildDictionaryEntryPath } from '../dictionary/dictionaryRoutes'
@@ -68,10 +68,16 @@ export const readStudyLinksOf = async (
   const response = await readResource<StudyLinksResponseDto>(
     `/v1/study-links/${kind}/${encodeURIComponent(key)}`,
     { language }
-  ).catch(() => undefined)
+  ).catch(() => {
+    markStaleResponse()
+    return undefined
+  })
   const links = response?.links ?? []
   const catalog = links.some(link => link.kind === 'entity')
-    ? await readAtlasPortraitCatalog().catch(() => undefined)
+    ? await readAtlasPortraitCatalog().catch(() => {
+        markStaleResponse()
+        return undefined
+      })
     : undefined
   return links.map(link => {
     const portrait = link.kind === 'entity' ? catalog?.entities[link.key] : undefined

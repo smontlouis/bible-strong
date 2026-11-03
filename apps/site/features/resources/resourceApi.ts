@@ -9,8 +9,9 @@ const REQUEST_TIMEOUT_MS = 10_000
 const RESOURCE_CACHE_HEADER = 'x-resource-cache'
 
 // The browser loads this module with the pages that read on the server, and builds no
-// response: the mark and what it imports stay on the server.
-const markStaleResponse = createIsomorphicFn()
+// response: the mark and what it imports stay on the server. A read that fails and leaves
+// its part out of a page marks it too: such a page is kept a minute only.
+export const markStaleResponse = createIsomorphicFn()
   .server(() => markResponseStale())
   .client(() => undefined)
 
