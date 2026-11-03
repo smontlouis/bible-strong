@@ -269,11 +269,19 @@ describe('queue completion of download plans', () => {
   })
 })
 
+// A republished artifact carries its archive's hash in its address.
+const databaseArtifactUrl = (file: string) =>
+  expect.stringMatching(
+    new RegExp(
+      `^https://api\\.bible-strong\\.app/v1/offline-artifacts/databases/${file.replaceAll('.', '\\.')}(\\?sha256=[a-f0-9]{64})?$`
+    )
+  )
+
 describe('historical resource database download planning', () => {
   it('uses the global ZIP catalog and declared archive entry', () => {
     expect(createDatabaseDownloadItem('NAVE', 'fr')).toEqual(
       expect.objectContaining({
-        url: 'https://api.bible-strong.app/v1/offline-artifacts/databases/nave-fr.sqlite.zip',
+        url: databaseArtifactUrl('nave-fr.sqlite.zip'),
         archiveEntry: 'nave-fr.sqlite',
         destinationPath: '/documents/SQLite/fr/nave.sqlite',
         expectedArchiveSha256: expect.stringMatching(/^[a-f0-9]{64}$/),
@@ -286,7 +294,7 @@ describe('historical resource database download planning', () => {
       expect.objectContaining({
         id: 'database:TRESOR:fr',
         lang: 'fr',
-        url: 'https://api.bible-strong.app/v1/offline-artifacts/databases/commentaires-tresor.sqlite.zip',
+        url: databaseArtifactUrl('commentaires-tresor.sqlite.zip'),
       })
     )
   })
