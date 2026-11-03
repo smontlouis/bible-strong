@@ -4,11 +4,26 @@ Allow: /
 Disallow: /_serverFn/
 # A Bible page with commentaries in its text adds them to a page that is indexed without them.
 Disallow: /*?*commentary=
+# A card's address renders the whole gallery around it (about 1 MB) and is not indexed: the
+# gallery itself stays open.
+Disallow: /atlas/*/cards/
 
 # ClaudeBot keeps to one request a second. A group of its own replaces the one above, so it
 # repeats the rules.
 User-agent: ClaudeBot
 Crawl-delay: 1
+Allow: /
+Disallow: /_serverFn/
+Disallow: /*?*commentary=
+Disallow: /atlas/*/cards/
+
+# Link previews read a shared card's address for its image, so they keep it.
+User-agent: Twitterbot
+User-agent: LinkedInBot
+User-agent: Slackbot-LinkExpanding
+User-agent: Discordbot
+User-agent: facebookexternalhit
+User-agent: TelegramBot
 Allow: /
 Disallow: /_serverFn/
 Disallow: /*?*commentary=
