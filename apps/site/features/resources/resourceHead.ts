@@ -59,6 +59,10 @@ export const pageAddressLinks = (
     hrefLang,
     href: absoluteSiteUrl(alternatePath),
   })),
+  // A reader of another language is sent to the French page, as on a Strong page.
+  ...(alternates.fr && alternates.en
+    ? [{ rel: 'alternate', hrefLang: 'x-default', href: absoluteSiteUrl(alternates.fr) }]
+    : []),
 ]
 
 /** Title, description, canonical, language alternates and structured data of a resource page. */
