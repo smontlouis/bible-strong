@@ -49,7 +49,7 @@ type Payload = Record<string, string | number | null>
 type Publication = { id: number; revision: string; metadata: Record<string, unknown> }
 
 const DOMAIN_TABLE_SOURCES: Record<string, string> = {
-  StepEntries: `SELECT publication_id, md5(payload::text) AS record_key, entry_id, language, e_strong AS code, NULL::text AS unique_name, payload FROM strong_lexicon_entries`,
+  StepEntries: `SELECT publication_id, md5(payload::text) AS record_key, entry_id, language, e_strong AS code, NULL::text AS unique_name, u_strong, payload FROM strong_lexicon_entries`,
   StepEntryIdentities: `SELECT publication_id, md5(step_entry_id::text || step_code) AS record_key, step_entry_id AS entry_id, NULL::text AS language, step_code AS code, NULL::text AS unique_name, jsonb_build_object('stepEntryId', step_entry_id, 'stepCode', step_code) AS payload FROM strong_lexicon_entry_identities`,
   LexiconTranslations: `SELECT publication_id, md5(step_entry_id::text || language) AS record_key, step_entry_id AS entry_id, language, NULL::text AS code, NULL::text AS unique_name, payload FROM strong_lexicon_translations`,
   LexiconRelations: `SELECT publication_id, md5(relation_id::text) AS record_key, from_entry_id AS entry_id, NULL::text AS language, NULL::text AS code, NULL::text AS unique_name, payload FROM strong_lexicon_relations`,
@@ -58,7 +58,7 @@ const DOMAIN_TABLE_SOURCES: Record<string, string> = {
   MorphologyCodeTranslations: `SELECT publication_id, md5(morphology_code_id::text || language) AS record_key, morphology_code_id AS entry_id, language, NULL::text AS code, NULL::text AS unique_name, payload FROM strong_lexicon_morphology_code_translations`,
   LexiconResources: `SELECT publication_id, md5(resource_id::text) AS record_key, step_entry_id AS entry_id, NULL::text AS language, NULL::text AS code, NULL::text AS unique_name, payload FROM strong_lexicon_resources`,
   LexiconResourceTranslations: `SELECT publication_id, md5(resource_id::text || language) AS record_key, resource_id AS entry_id, language, NULL::text AS code, NULL::text AS unique_name, payload FROM strong_lexicon_resource_translations`,
-  Entities: `SELECT publication_id, md5(entity_id::text) AS record_key, entity_id AS entry_id, NULL::text AS language, NULL::text AS code, unique_name, payload FROM strong_lexicon_entities`,
+  Entities: `SELECT publication_id, md5(entity_id::text) AS record_key, entity_id AS entry_id, NULL::text AS language, NULL::text AS code, unique_name, u_strong, payload FROM strong_lexicon_entities`,
   EntityTranslations: `SELECT publication_id, md5(translation_id::text) AS record_key, entity_id AS entry_id, language, NULL::text AS code, NULL::text AS unique_name, payload FROM strong_lexicon_entity_translations`,
   EntityRefs: `SELECT publication_id, md5(entity_id::text || book || chapter::text || verse::text || suffix) AS record_key, entity_id AS entry_id, NULL::text AS language, NULL::text AS code, NULL::text AS unique_name, payload FROM strong_lexicon_entity_refs`,
   EntityRelations: `SELECT publication_id, md5(relation_id::text) AS record_key, from_entity_id AS entry_id, NULL::text AS language, NULL::text AS code, NULL::text AS unique_name, payload FROM strong_lexicon_entity_relations`,
@@ -1555,7 +1555,7 @@ export const makeKyselyStrongLexiconRepository = (
     const coreEntries = relevantUStrongs.length
       ? await records(core.id, 'StepEntries', query =>
           query.where(
-            sql<boolean>`payload->>'uStrong' IN (${sql.join(relevantUStrongs.map(code => sql`${code}`))})`
+            sql<boolean>`u_strong IN (${sql.join(relevantUStrongs.map(code => sql`${code}`))})`
           )
         )
       : []
@@ -1690,7 +1690,7 @@ export const makeKyselyStrongLexiconRepository = (
       let entityCandidates = entityPublication
         ? await records(entityPublication.id, 'Entities', query =>
             query.where(
-              sql<boolean>`(payload->>'uStrong' = ${text(entry, 'uStrong')} OR payload->>'uStrong' = ${text(entry, 'eStrong')})`
+              sql<boolean>`u_strong IN (${text(entry, 'uStrong')}, ${text(entry, 'eStrong')})`
             )
           )
         : []
