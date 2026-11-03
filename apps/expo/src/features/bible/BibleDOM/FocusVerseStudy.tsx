@@ -390,6 +390,8 @@ const FocusVerseStudy = ({
                   <img
                     src={avatar.src}
                     onError={avatar.onError}
+                    loading="lazy"
+                    decoding="async"
                     alt=""
                     width={ENTITY_AVATAR_SIZE}
                     height={ENTITY_AVATAR_SIZE}

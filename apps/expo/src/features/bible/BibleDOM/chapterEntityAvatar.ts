@@ -28,6 +28,9 @@ export const getChapterEntityAvatar = (
   const placeholder = getChapterEntityPlaceholderUri(entity)
   return {
     src: portraits[entity.uniqueName] ?? placeholder,
+    // The entities close the chapter: their pictures wait until the reader comes near them.
+    loading: 'lazy' as const,
+    decoding: 'async' as const,
     onError: (event: SyntheticEvent<HTMLImageElement>) => {
       // The attribute, not `src`, which is absolute: a placeholder that fails must not load again.
       if (event.currentTarget.getAttribute('src') !== placeholder) {
