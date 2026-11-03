@@ -46,6 +46,9 @@ const Figure = ({
     <div className="timeline-figure__frame">
       <img
         src={image.src}
+        {...(image.srcSet
+          ? { srcSet: image.srcSet, sizes: '(max-width: 760px) calc(100vw - 40px), 720px' }
+          : {})}
         alt={alt}
         width={720}
         height={480}

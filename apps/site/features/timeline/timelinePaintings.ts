@@ -95,13 +95,22 @@ export const timelineEventPictures = (
   slug: string,
   images: readonly { caption: string; file: string }[],
   painting: TimelinePainting | undefined
-): { src: string; caption: string }[] => {
+): { src: string; srcSet?: string; caption: string }[] => {
   const shown = images.filter(image => !painting || painting.documents.includes(image.file))
   const pictures = shown.flatMap(image => {
     const src = timelineImageUrl(image.file)
     return src ? [{ src, caption: image.caption }] : []
   })
   return painting
-    ? [{ src: timelinePaintingUrl(slug, painting.hash, 'w1254'), caption: '' }, ...pictures]
+    ? [
+        {
+          src: timelinePaintingUrl(slug, painting.hash, 'w1254'),
+          // A page drawn at most 720 pixels wide takes the middle copy on a screen of one or two
+          // pixels per point.
+          srcSet: `${timelinePaintingUrl(slug, painting.hash, 'w768')} 768w, ${timelinePaintingUrl(slug, painting.hash, 'w1254')} 1254w`,
+          caption: '',
+        },
+        ...pictures,
+      ]
     : pictures
 }

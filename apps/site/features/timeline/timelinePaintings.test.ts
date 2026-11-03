@@ -34,6 +34,8 @@ describe('Timeline paintings', () => {
     ).toEqual([
       {
         src: 'https://media.bible-strong.app/timeline-paintings/isaac/abcdef/w1254.webp',
+        srcSet:
+          'https://media.bible-strong.app/timeline-paintings/isaac/abcdef/w768.webp 768w, https://media.bible-strong.app/timeline-paintings/isaac/abcdef/w1254.webp 1254w',
         caption: '',
       },
       {
