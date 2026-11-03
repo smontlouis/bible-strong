@@ -10,7 +10,6 @@ import type {
   StrongLexiconEntryCard,
   StrongLexiconEntity,
   StrongLexiconEntityCategory,
-  StrongLexiconListedEntity,
   StrongLexiconListRequest,
   StrongLexiconMorphology,
   StrongLexiconPage,
@@ -18,6 +17,7 @@ import type {
   StrongLexiconRelation,
   StrongLexiconResource,
   StrongLexiconSearchResult,
+  StrongLexiconPlace,
 } from '@bible-strong/resource-domain/strong-lexicon'
 import * as Schema from 'effect/Schema'
 import {
@@ -37,12 +37,12 @@ import {
   decodeStrongLexiconPageCursor,
   encodeStrongLexiconPageCursor,
   StrongLexiconChapterEntitiesResponseDto,
-  StrongLexiconEntitiesResponseDto,
   StrongLexiconEntryDto,
   StrongLexiconEntryCardsDto,
   StrongLexiconEntityResponseDto,
   StrongLexiconModuleStateDto,
   StrongLexiconMorphologyResponseDto,
+  StrongLexiconPlacesResponseDto,
   StrongLexiconSearchResponseDto,
 } from './strongLexiconContract'
 import { resolveHybridResourceSource } from './hybridResourcePolicy'
@@ -562,9 +562,6 @@ type PlaceRow = {
   uniqueName: string
   displayName: string
   localizedDisplayName: string | null
-  type: string
-  brief: string
-  localizedBrief: string | null
   latitude: number
   longitude: number
   chapterCount: number
@@ -901,7 +898,7 @@ export type StrongLexiconAccess = {
     strongCodes?: string[]
   ) => Promise<StrongLexiconChapterEntity[]>
   /** Every place the entity publication locates, for the map of the places of the Bible. */
-  loadPlaces: (language: ResourceLanguage) => Promise<StrongLexiconListedEntity[]>
+  loadPlaces: (language: ResourceLanguage) => Promise<StrongLexiconPlace[]>
   listEntries: (request: StrongLexiconListRequest) => Promise<StrongLexiconPage>
   search: (
     query: string,
@@ -1056,8 +1053,7 @@ export const createLocalStrongLexiconAccess = (
       if (!isStrongLexiconModuleReadable(availability)) return []
       return withOptionalStrongLexiconDatabase('entities', async database => {
         const rows = await database.getAllAsync<PlaceRow>(
-          `SELECT e.uniqueName, e.displayName, e.type, e.brief,
-                tr.displayName AS localizedDisplayName, tr.brief AS localizedBrief,
+          `SELECT e.uniqueName, e.displayName, tr.displayName AS localizedDisplayName,
                 p.latitude, p.longitude,
                 (SELECT COUNT(DISTINCT refs.book || '.' || refs.chapter)
                    FROM EntityRefs refs WHERE refs.entityId=e.id) AS chapterCount
@@ -1069,14 +1065,11 @@ export const createLocalStrongLexiconAccess = (
           [language]
         )
         return rows.map(
-          (row): StrongLexiconListedEntity => ({
+          (row): StrongLexiconPlace => ({
             uniqueName: row.uniqueName,
             name: formatStrongEntityDisplayName(
               chooseLocalized(language, row.localizedDisplayName, row.displayName)
             ),
-            category: 'place',
-            type: row.type,
-            brief: chooseLocalized(language, row.localizedBrief, row.brief),
             chapterCount: row.chapterCount,
             latitude: row.latitude,
             longitude: row.longitude,
@@ -1494,17 +1487,12 @@ export const createHttpStrongLexiconAccess = ({
       return response.entities.map(entity => ({ ...entity, verses: [...entity.verses] }))
     },
     async loadPlaces(language) {
-      // The list of the whole publication, kept by the answer cache; the map keeps its places.
+      // The located places alone, a fifth of the list of every entity.
       const response = await get(
-        `/v1/strong-lexicon/entities?${languageQuery(language)}`,
-        StrongLexiconEntitiesResponseDto
+        `/v1/strong-lexicon/places?${languageQuery(language)}`,
+        StrongLexiconPlacesResponseDto
       )
-      return response.entities.filter(
-        entity =>
-          entity.category === 'place' &&
-          entity.latitude !== undefined &&
-          entity.longitude !== undefined
-      )
+      return [...response.places]
     },
     listEntries({ signal, language, lexicalLanguage, search, prefix, limit = 100, cursor }) {
       const query = new URLSearchParams({ language, limit: String(limit) })
