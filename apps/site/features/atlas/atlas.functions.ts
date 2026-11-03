@@ -558,10 +558,13 @@ export const loadAtlasEntityPage = createServerFn({ method: 'GET' })
 
     const series = portraits.series.find(item => item.members.includes(uniqueName))
     const point = self ? pointOf(self, portraits) : undefined
+    // The small map of a place shows only its own painting: its neighbours go without theirs.
     const neighbours = point
-      ? mapPoints(entities ?? [], portraits).filter(
-          other =>
-            other[1] !== uniqueName && Math.hypot(other[2] - point[2], other[3] - point[3]) < 220
+      ? mapPoints(entities ?? [], portraits).flatMap(
+          ([name, otherName, x, y, chapterCount]): AtlasMapPoint[] =>
+            otherName !== uniqueName && Math.hypot(x - point[2], y - point[3]) < 220
+              ? [[name, otherName, x, y, chapterCount]]
+              : []
         )
       : []
 

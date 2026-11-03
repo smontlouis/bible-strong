@@ -506,6 +506,21 @@ export default function BiblicalMapCanvas({
             const thumb = thumbRadius(place)
             const radius =
               (focused ? 7 : brought ? 5.5 : picture ? 5 : place.chapterCount >= 20 ? 4 : 3) * unit
+            // A place's own small map opens the places it names; the other dots only show how the
+            // land is settled. Hundreds of links would weigh on its page and on every move.
+            if (compact && !focused && !brought && !labelled.has(uniqueName)) {
+              return (
+                <circle
+                  key={uniqueName}
+                  className="biblical-map__dot"
+                  cx={x}
+                  cy={y}
+                  r={radius}
+                  strokeWidth={1.5 * unit}
+                  opacity={bright.size ? 0.35 : undefined}
+                />
+              )
+            }
             const classes = [
               'biblical-map__place',
               focused || brought ? 'is-accent' : '',
