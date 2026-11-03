@@ -21,7 +21,9 @@ export function usePublishedLinks() {
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
       const link = (event.target as Element).closest?.('a')
       const href = link?.getAttribute('href')
-      if (!link || !href || (link.target && link.target !== '_self')) return
+      // The attribute, not the property: on a link of an SVG map `target` is an object.
+      const target = link?.getAttribute('target')
+      if (!link || !href || (target && target !== '_self')) return
       if (!siteAddress(href)) return
       event.preventDefault()
       void router.navigate({ href })
