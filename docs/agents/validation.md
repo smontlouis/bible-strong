@@ -143,6 +143,8 @@ yarn workspace @bible-strong/expo build:ios:staging
 yarn workspace @bible-strong/expo build:ios:prod
 ```
 
+`build:ios:prod` then registers the build with the update server (`scripts/register-store-build.mjs`), so its embedded JavaScript becomes a base for delta patches; Android production AABs come from `android-pc build-prod`, which does the same from the Mac. Register any other store build by hand: `dotenv -c production -- node scripts/register-store-build.mjs <file.aab|file.ipa>` in `apps/expo`.
+
 ## UI Validation Notes
 
 Argent is the preferred simulator tooling and should be verified against the target booted simulator before runtime validation. The existing `builds/biblestrong.dev.app` was installed and launched with bundle id `com.smontlouis.biblestrong.dev`.
