@@ -906,12 +906,13 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.35s ease;
-  backdrop-filter: blur(6px);
 }
 
+/* Blurred only when shown: hidden, it would still blur the whole page under it. */
 .ac-backdrop.is-shown {
   opacity: 1;
   pointer-events: auto;
+  backdrop-filter: blur(6px);
 }
 
 .ac-toolbar {

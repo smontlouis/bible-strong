@@ -278,7 +278,7 @@ export default function AtlasCardsPage({ page }: { page: AtlasCardsPageData }) {
               >
                 <span className={`${cardClasses(card)} acg__card`}>
                   <span className="ac-face ac-front">
-                    <CardFront card={card} grid />
+                    <CardFront card={card} grid eager />
                   </span>
                 </span>
               </SiteLink>

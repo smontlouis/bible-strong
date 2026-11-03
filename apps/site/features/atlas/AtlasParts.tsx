@@ -31,6 +31,8 @@ export function AtlasPicture({
         width={size}
         height={size}
         loading={eager ? 'eager' : 'lazy'}
+        // The picture at the head of a page is what its reader sees first.
+        fetchPriority={eager ? 'high' : undefined}
         decoding="async"
       />
     </span>

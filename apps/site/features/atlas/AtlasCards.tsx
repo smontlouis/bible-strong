@@ -193,7 +193,17 @@ const GRID_SIZES = '(max-width: 640px) 85px, 220px'
 const gridSource = (url: string, small: string) =>
   `${url.replace('/w768.webp', `/${small}.webp`)} ${small.slice(1)}w, ${url} 768w`
 
-export function CardFront({ card, grid = false }: { card: AtlasCardView; grid?: boolean }) {
+export function CardFront({
+  card,
+  grid = false,
+  eager = false,
+}: {
+  card: AtlasCardView
+  grid?: boolean
+  /** A card on the first screen: its pictures load with the page. */
+  eager?: boolean
+}) {
+  const loading = eager ? 'eager' : 'lazy'
   return (
     <>
       <div className="ac-fr-bg" />
@@ -207,7 +217,7 @@ export function CardFront({ card, grid = false }: { card: AtlasCardView; grid?: 
               src={card.picture}
               {...(grid ? { srcSet: gridSource(card.picture, 'w256'), sizes: GRID_SIZES } : {})}
               alt=""
-              loading="lazy"
+              loading={loading}
               decoding="async"
               draggable={false}
             />
@@ -217,7 +227,7 @@ export function CardFront({ card, grid = false }: { card: AtlasCardView; grid?: 
               src={card.backdrop}
               {...(grid ? { srcSet: gridSource(card.backdrop, 'w384'), sizes: GRID_SIZES } : {})}
               alt=""
-              loading="lazy"
+              loading={loading}
               decoding="async"
               draggable={false}
               onLoad={event => event.currentTarget.classList.add('is-loaded')}
@@ -238,7 +248,7 @@ export function CardFront({ card, grid = false }: { card: AtlasCardView; grid?: 
               src={card.picture}
               {...(grid ? { srcSet: gridSource(card.picture, 'w256'), sizes: GRID_SIZES } : {})}
               alt=""
-              loading="lazy"
+              loading={loading}
               decoding="async"
               draggable={false}
             />
