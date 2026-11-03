@@ -55,6 +55,12 @@ API identities are catalog identities, or `cross-references:fr|en`:
 - `bible-strong:<VERSION>` — `/bible/<version>/strong` and `/bible/<version>/reverse-interlinear`;
   the concordance of `/strong/<language>` counts its occurrences too
 - `strong-lexicon:<module>` — `/strong`, or `/strong/<language>` for a simple lexicon
+- `strong-lexicon:entities` — `/atlas` and `/strong`; the study of a verse names the entities of
+  its chapter too, so `/bible` holds them. Emptying `/bible` renders every verse page of every
+  version again, with the Neon reads that follow: name it only when what a verse page shows of
+  an entity changed (its name, its portrait), and say so to the user first
+- `study-links` — `/atlas`, `/nave`, `/dictionary` and `/timeline`: every page that shows study
+  links
 - `bible-interlinear:BHG:<language>` — `/bible/bhg/interlinear` (the folder holds both languages)
 - `database:<work>:<language>` — a commentary (`/commentary/<language>/<slug>`), a dictionary
   (`/dictionary/<language>/<work>`), `database:NAVE:<language>` (`/nave/<language>`),
