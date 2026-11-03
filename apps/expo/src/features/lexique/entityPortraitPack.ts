@@ -16,6 +16,7 @@ import {
 const PACK_FOLDER = `${FileSystem.documentDirectory}entity-portraits/`
 const PACK_SIZES: EntityPortraitSize[] = ['w256', 'w768']
 const CONCURRENT_DOWNLOADS = 4
+const RECORD_EVERY = 20
 
 /** About 62 KB per picture for its two copies, measured on 2026-10-28. */
 export const ENTITY_PORTRAIT_PACK_BYTES_PER_PICTURE = 62_000
@@ -95,18 +96,27 @@ const runSync = async () => {
   })
 
   const queue = [...missing]
+  // Downloaded pictures are recorded a few at a time: every reader of the pack, the Bible
+  // reader among them, renders again at each record.
+  let unrecorded: string[] = []
+  const record = () => {
+    if (!unrecorded.length) return
+    const downloaded = unrecorded
+    unrecorded = []
+    store.set(entityPortraitPackAtom, current => ({
+      ...current,
+      hashes: [...current.hashes, ...downloaded],
+    }))
+  }
   const worker = async () => {
     for (let hash = queue.shift(); hash; hash = queue.shift()) {
       if (run !== generation) return
       try {
         await downloadPicture(owners.get(hash)!, hash)
         if (run !== generation) return
-        const downloaded = hash
-        store.set(entityPortraitPackAtom, current => ({
-          ...current,
-          hashes: [...current.hashes, downloaded],
-        }))
+        unrecorded.push(hash)
         done += 1
+        if (unrecorded.length >= RECORD_EVERY) record()
       } catch {
         // Offline or unreachable: the picture is fetched again at the next sync.
         failed += 1
@@ -116,6 +126,7 @@ const runSync = async () => {
   }
   await Promise.all(Array.from({ length: CONCURRENT_DOWNLOADS }, worker))
   if (run !== generation) return
+  record()
   store.set(entityPortraitPackProgressAtom, { status: failed ? 'failed' : 'idle', done, total })
 }
 
