@@ -21,7 +21,8 @@ export const makeKyselyStudyLinksRepository = (
           database
             .selectFrom('resource_publications')
             .select(['id', 'revision'])
-            .where('resource_kind', '=', 'study-links')
+            // The identity, not the kind: one active publication per identity is indexed.
+            .where('resource_identity', '=', 'study-links')
             .where('status', '=', 'active')
             .executeTakeFirst(),
         catch: cause => new StudyLinksRepositoryFailure({ cause }),

@@ -3030,29 +3030,35 @@ export const makeKyselyStrongLexiconRepository = (
 
     findEntityPassages: input =>
       tryDatabasePromise('strong-lexicon.entity-passages', async () => {
-        const core = await requiredCore('en')
-        const entityPublication = await activePublication('entities')
+        const [core, entityPublication] = await Promise.all([
+          requiredCore('en'),
+          activePublication('entities'),
+        ])
         const state = moduleStateFrom('entities', entityPublication, core.revision)
         if (!entityPublication || state.status !== 'available') {
           throw new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'entities' })
         }
-        const entity = (
-          await sql<{ entity_id: number }>`
-            SELECT entity_id FROM strong_lexicon_entities
-             WHERE publication_id = ${entityPublication.id} AND unique_name = ${input.uniqueName}
-          `.execute(database)
-        ).rows[0]
-        if (!entity) throw new StrongLexiconEntityNotFound({ uniqueName: input.uniqueName })
-        type PassageRow = { book: string; chapter: number; verses: number[] | null }
-        const rows = (
+        // One statement finds the entity and its passages: an entity named nowhere has a row
+        // without a book, an unknown one none.
+        type PassageRow = { book: string | null; chapter: number | null; verses: number[] | null }
+        const found = (
           await sql<PassageRow>`
-            SELECT book, chapter,
-                   array_agg(DISTINCT verse ORDER BY verse) FILTER (WHERE verse > 0) AS verses
-              FROM strong_lexicon_entity_refs
-             WHERE publication_id = ${entityPublication.id} AND entity_id = ${entity.entity_id}
-             GROUP BY book, chapter
+            SELECT refs.book, refs.chapter,
+                   array_agg(DISTINCT refs.verse ORDER BY refs.verse)
+                     FILTER (WHERE refs.verse > 0) AS verses
+              FROM strong_lexicon_entities entity
+              LEFT JOIN strong_lexicon_entity_refs refs
+                ON refs.publication_id = entity.publication_id AND refs.entity_id = entity.entity_id
+             WHERE entity.publication_id = ${entityPublication.id}
+               AND entity.unique_name = ${input.uniqueName}
+             GROUP BY refs.book, refs.chapter
           `.execute(database)
         ).rows
+        if (!found.length) throw new StrongLexiconEntityNotFound({ uniqueName: input.uniqueName })
+        const rows = found.filter(
+          (row): row is PassageRow & { book: string; chapter: number } =>
+            row.book !== null && row.chapter !== null
+        )
         // A book the publication codes otherwise goes after the Bible's own.
         const bookOrder = (book: string) => {
           const index = (TIPNR_BOOK_CODES as readonly string[]).indexOf(book)
