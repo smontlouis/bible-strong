@@ -491,7 +491,7 @@ export const loadAtlasEntityPage = createServerFn({ method: 'GET' })
       reads.optional(() => listAtlasEntities(language)),
       reads.optional(readAtlasPortraitCatalog),
       reads.optional(readAtlasCardCatalog),
-      readStudyLinksOf('entity', uniqueName, language),
+      reads.queue(() => readStudyLinksOf('entity', uniqueName, language)),
     ])
     const entity = response?.entity
     if (!entity) throw notFound()
@@ -568,14 +568,15 @@ export const loadAtlasEntityPage = createServerFn({ method: 'GET' })
         )
       : []
 
-    // The whole publication is only read for an entity the timeline knows.
-    const chronology = studyLinks.some(link => link.kind === 'timeline')
-      ? buildAtlasChronology(
-          studyLinks,
-          (await reads.optional(() => listTimelineEvents(language))) ?? [],
-          language,
-          await readTimelinePaintings()
-        )
+    // The whole publication is only read for an entity the timeline knows, with its paintings.
+    const timeline = studyLinks.some(link => link.kind === 'timeline')
+      ? await Promise.all([
+          reads.optional(() => listTimelineEvents(language)),
+          readTimelinePaintings(),
+        ])
+      : undefined
+    const chronology = timeline
+      ? buildAtlasChronology(studyLinks, timeline[0] ?? [], language, timeline[1])
       : undefined
 
     return {
