@@ -74,9 +74,23 @@
   height: 100%;
   perspective: 900px;
   transform: translate3d(var(--translate-x, 0px), var(--translate-y, 0px), 0)
-    scale(var(--card-scale, 1));
+    scale(calc(var(--card-scale, 1) / var(--card-size, 1)));
   transform-origin: center;
   will-change: transform;
+}
+
+/*
+ * An opened card of a deck is laid out at the size it is shown, around the middle of its slot,
+ * and drawn smaller while it is closed. The browser draws a moving card once and scales the
+ * drawing: scaled up it blurs, scaled down it stays sharp.
+ */
+.ac-deck .ac-translater {
+  position: absolute;
+  top: calc((1 - var(--card-size, 1)) * 50%);
+  left: calc((1 - var(--card-size, 1)) * 50%);
+  width: calc(var(--card-size, 1) * 100%);
+  height: calc(var(--card-size, 1) * 100%);
+  perspective: calc(var(--card-size, 1) * 900px);
 }
 
 .ac-rotator {

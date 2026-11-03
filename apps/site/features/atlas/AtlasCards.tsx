@@ -362,6 +362,14 @@ type CardState = {
   endTimer?: number
   down?: { x: number; y: number }
   moved: boolean
+  /** How much larger than its slot the card is laid out: its size once opened, 1 when closed. */
+  size: number
+}
+
+const resize = (state: CardState, size: number) => {
+  if (state.size === size) return
+  state.size = size
+  state.element.style.setProperty('--card-size', size.toFixed(4))
 }
 
 /** The cards of an entity, side by side; one at a time comes forward. */
@@ -399,6 +407,7 @@ export default function AtlasCards({
         state.s.spin.v = 0
       }
       paint(state.element, state.s)
+      if (!moving && state.size !== 1 && activeRef.current !== state) resize(state, 1)
       if (moving) running = true
     }
     frame.current = running ? requestAnimationFrame(tick) : 0
@@ -458,6 +467,7 @@ export default function AtlasCards({
       ((window.innerHeight - toolbar) / height) * 0.9,
       1.9
     )
+    resize(state, Math.max(state.size, state.s.sc.t))
   }
 
   const deactivate = (state: CardState) => {
@@ -539,6 +549,7 @@ export default function AtlasCards({
       s: restingSprings(),
       firstPop: true,
       moved: false,
+      size: 1,
     }
     states.current.set(card.id, state)
     paint(element, state.s)
