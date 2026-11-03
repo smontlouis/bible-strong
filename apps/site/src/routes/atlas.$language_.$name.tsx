@@ -1,4 +1,5 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
+import { withAtlasCardsStylesheet } from '@/features/atlas/atlasCardsStylesheet'
 import AtlasEntityPage from '@/features/atlas/AtlasEntityPage'
 import AtlasFamilyPage from '@/features/atlas/AtlasFamilyPage'
 import { loadAtlasEntityPage, loadAtlasFamilyPage } from '@/features/atlas/atlas.functions'
@@ -44,7 +45,7 @@ export const Route = createFileRoute('/atlas/$language_/$name')({
       ? {}
       : loaderData.kind === 'family'
         ? buildAtlasFamilyHead(loaderData.page)
-        : buildAtlasEntityHead(loaderData.page),
+        : withAtlasCardsStylesheet(buildAtlasEntityHead(loaderData.page)),
   // Only a rendered page is cacheable: a failed load must not be kept by the CDN.
   headers: ({ loaderData }) => resourcePageHeaders(loaderData?.page),
   component: AtlasNameRoute,

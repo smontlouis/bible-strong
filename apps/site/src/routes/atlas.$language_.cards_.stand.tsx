@@ -1,4 +1,5 @@
 import { createFileRoute, notFound } from '@tanstack/react-router'
+import { ATLAS_CARDS_STYLESHEET } from '@/features/atlas/atlasCardsStylesheet'
 import AtlasCardStand from '@/features/atlas/AtlasCardStand'
 import { loadAtlasCardsPage } from '@/features/atlas/atlas.functions'
 import { parseAtlasRoute } from '@/features/atlas/atlasRoutes'
@@ -15,6 +16,7 @@ export const Route = createFileRoute('/atlas/$language_/cards_/stand')({
   headers: ({ loaderData }) => resourcePageHeaders(loaderData),
   head: () => ({
     meta: [{ title: 'Bible Strong' }, { name: 'robots', content: 'noindex, nofollow' }],
+    links: [ATLAS_CARDS_STYLESHEET],
   }),
   component: AtlasCardStandRoute,
 })

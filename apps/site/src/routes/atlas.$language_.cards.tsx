@@ -1,4 +1,5 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
+import { ATLAS_CARDS_STYLESHEET } from '@/features/atlas/atlasCardsStylesheet'
 import AtlasCardsPage from '@/features/atlas/AtlasCardsPage'
 import { loadAtlasCardsPage } from '@/features/atlas/atlas.functions'
 import { rememberCardsPage, rememberedCardsPage } from '@/features/atlas/atlasCardsMemory'
@@ -30,6 +31,7 @@ export const Route = createFileRoute('/atlas/$language_/cards')({
   // Opening a card, or closing it, keeps the gallery as it is.
   staleTime: Infinity,
   shouldReload: false,
+  head: () => ({ links: [ATLAS_CARDS_STYLESHEET] }),
   headers: ({ loaderData }) => resourcePageHeaders(loaderData),
   component: AtlasCardsRoute,
 })
