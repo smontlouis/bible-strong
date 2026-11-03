@@ -11,6 +11,7 @@ import {
   type BiblicalMapView,
 } from '@bible-strong/resource-domain/biblical-map'
 import {
+  memo,
   useEffect,
   useId,
   useMemo,
@@ -97,6 +98,108 @@ type Props = {
 type Drag = { x: number; y: number; view: BiblicalMapView; moved: boolean; id: number }
 type Sample = { time: number; x: number; y: number }
 
+type MapPlaceProps = {
+  place: BiblicalMapPlace
+  unit: number
+  focused: boolean
+  brought: boolean
+  /** Places are brought forward: the others are dimmed. */
+  dimmed: boolean
+  named: boolean
+  /** Only a link or a button: the place is a bare dot. */
+  bare: boolean
+  thumb: number | undefined
+  clipId: string
+  href: string | undefined
+}
+
+/**
+ * One place on the map. While the map moves, only the places whose zoom, name or mark changed
+ * are drawn again: a hand moving across the Holy Land passes over hundreds of them.
+ */
+const MapPlace = memo(function MapPlace({
+  place,
+  unit,
+  focused,
+  brought,
+  dimmed,
+  named,
+  bare,
+  thumb,
+  clipId,
+  href,
+}: MapPlaceProps) {
+  const { name, uniqueName, x, y, picture } = place
+  const radius =
+    (focused ? 7 : brought ? 5.5 : picture ? 5 : place.chapterCount >= 20 ? 4 : 3) * unit
+  if (bare) {
+    return (
+      <circle
+        className="biblical-map__dot"
+        cx={x}
+        cy={y}
+        r={radius}
+        strokeWidth={1.5 * unit}
+        opacity={dimmed ? 0.35 : undefined}
+      />
+    )
+  }
+  const classes = [
+    'biblical-map__place',
+    focused || brought ? 'is-accent' : '',
+    dimmed ? 'is-dimmed' : '',
+  ].join(' ')
+  const content = (
+    <>
+      <circle
+        className="biblical-map__hit"
+        cx={x}
+        cy={y}
+        r={Math.max(thumb ?? 0, HIT_RADIUS) * unit}
+      />
+      {thumb !== undefined ? (
+        <>
+          <clipPath id={clipId}>
+            <circle cx={x} cy={y} r={thumb * unit} />
+          </clipPath>
+          <circle className="biblical-map__ring" cx={x} cy={y} r={(thumb + 1.5) * unit} />
+          <image
+            href={picture}
+            x={x - thumb * unit}
+            y={y - thumb * unit}
+            width={thumb * 2 * unit}
+            height={thumb * 2 * unit}
+            clipPath={`url(#${clipId})`}
+            preserveAspectRatio="xMidYMid slice"
+          />
+        </>
+      ) : (
+        <circle className="biblical-map__dot" cx={x} cy={y} r={radius} strokeWidth={1.5 * unit} />
+      )}
+      {named && (
+        <text
+          className="biblical-map__name"
+          x={x}
+          y={y + (thumb !== undefined ? thumb + 13 : 15) * unit}
+          fontSize={(focused ? 14 : 12) * unit}
+          strokeWidth={3 * unit}
+        >
+          {name}
+        </text>
+      )}
+    </>
+  )
+  return href ? (
+    <a href={href} className={classes} aria-label={name}>
+      {content}
+    </a>
+  ) : (
+    <g className={classes} role="button" aria-label={name} data-place={uniqueName}>
+      {content}
+    </g>
+  )
+})
+
 export default function BiblicalMapCanvas({
   places,
   focus,
@@ -111,7 +214,8 @@ export default function BiblicalMapCanvas({
   className,
   style,
 }: Props) {
-  // Clip paths are named by position: a unique name may hold characters an address cannot.
+  // Clip paths are named by a place's position in the list, which a move does not change: a
+  // unique name may hold characters an address cannot.
   const clipPrefix = `biblical-map${useId().replace(/[^a-z0-9]/giu, '')}`
   const frameRef = useRef<HTMLDivElement>(null)
   const [frame, setFrame] = useState({ width: compact ? 640 : 1200, height: compact ? 360 : 640 })
@@ -129,6 +233,22 @@ export default function BiblicalMapCanvas({
     viewRef.current = next
     setView(next)
   }
+  // A finger or a wheel moves the map more often than the screen draws: the view follows it at
+  // once and the map is drawn once a frame.
+  const drawing = useRef<number | undefined>(undefined)
+  const follow = (next: BiblicalMapView) => {
+    viewRef.current = next
+    drawing.current ??= requestAnimationFrame(() => {
+      drawing.current = undefined
+      setView(viewRef.current)
+    })
+  }
+  useEffect(
+    () => () => {
+      if (drawing.current !== undefined) cancelAnimationFrame(drawing.current)
+    },
+    []
+  )
 
   // Until the reader moves the map, a new frame size or region opens it again on its region.
   const touched = useRef(false)
@@ -271,7 +391,7 @@ export default function BiblicalMapCanvas({
     stop()
     touched.current = true
     const { px, py } = pointIn(event.clientX, event.clientY)
-    show(zoomedAt(Math.exp(event.deltaY * 0.0016), px, py))
+    follow(zoomedAt(Math.exp(event.deltaY * 0.0016), px, py))
   }
 
   const drag = useRef<Drag | undefined>(undefined)
@@ -331,7 +451,7 @@ export default function BiblicalMapCanvas({
       // The map point that was under the fingers' middle stays under it, wherever it moves.
       const fromX = start.x + ((pinch.current.x - rect.left) / rect.width) * start.width
       const fromY = start.y + ((pinch.current.y - rect.top) / rect.height) * start.height
-      show(
+      follow(
         clampBiblicalMapView(
           {
             x: fromX - ((both.x - rect.left) / rect.width) * width,
@@ -357,7 +477,7 @@ export default function BiblicalMapCanvas({
     samples.current.push({ time: event.timeStamp, x: event.clientX, y: event.clientY })
     if (samples.current.length > 8) samples.current.shift()
     const scale = current.view.width / frame.width
-    show(
+    follow(
       clampBiblicalMapView(
         { ...current.view, x: current.view.x - dx * scale, y: current.view.y - dy * scale },
         aspect
@@ -407,6 +527,10 @@ export default function BiblicalMapCanvas({
   // One pixel in map units: marks and names keep their size whatever the zoom.
   const unit = view.width / frame.width
   const bright = useMemo(() => new Set(highlighted ?? []), [highlighted])
+  const order = useMemo(
+    () => new Map(places.map((place, index) => [place.uniqueName, index])),
+    [places]
+  )
   // A place's own small map shows only its own painting, larger, so that it stands out.
   const showPictures = !compact && 1 / unit >= PICTURES_FROM
   const thumbRadius = (place: BiblicalMapPlace) =>
@@ -499,98 +623,27 @@ export default function BiblicalMapCanvas({
             height={BIBLICAL_MAP_HEIGHT * 3}
           />
           {renderGround(unit)}
-          {visible.map((place, index) => {
-            const { name, uniqueName, x, y, picture } = place
+          {visible.map(place => {
+            const { uniqueName } = place
             const focused = uniqueName === focus
             const brought = bright.has(uniqueName)
-            const thumb = thumbRadius(place)
-            const radius =
-              (focused ? 7 : brought ? 5.5 : picture ? 5 : place.chapterCount >= 20 ? 4 : 3) * unit
-            // A place's own small map opens the places it names; the other dots only show how the
-            // land is settled. Hundreds of links would weigh on its page and on every move.
-            if (compact && !focused && !brought && !labelled.has(uniqueName)) {
-              return (
-                <circle
-                  key={uniqueName}
-                  className="biblical-map__dot"
-                  cx={x}
-                  cy={y}
-                  r={radius}
-                  strokeWidth={1.5 * unit}
-                  opacity={bright.size ? 0.35 : undefined}
-                />
-              )
-            }
-            const classes = [
-              'biblical-map__place',
-              focused || brought ? 'is-accent' : '',
-              bright.size && !brought && !focused ? 'is-dimmed' : '',
-            ].join(' ')
-            const content = (
-              <>
-                <circle
-                  className="biblical-map__hit"
-                  cx={x}
-                  cy={y}
-                  r={Math.max(thumb ?? 0, HIT_RADIUS) * unit}
-                />
-                {thumb !== undefined ? (
-                  <>
-                    <clipPath id={`${clipPrefix}-${index}`}>
-                      <circle cx={x} cy={y} r={thumb * unit} />
-                    </clipPath>
-                    <circle className="biblical-map__ring" cx={x} cy={y} r={(thumb + 1.5) * unit} />
-                    <image
-                      href={picture}
-                      x={x - thumb * unit}
-                      y={y - thumb * unit}
-                      width={thumb * 2 * unit}
-                      height={thumb * 2 * unit}
-                      clipPath={`url(#${clipPrefix}-${index})`}
-                      preserveAspectRatio="xMidYMid slice"
-                    />
-                  </>
-                ) : (
-                  <circle
-                    className="biblical-map__dot"
-                    cx={x}
-                    cy={y}
-                    r={radius}
-                    strokeWidth={1.5 * unit}
-                  />
-                )}
-                {labelled.has(uniqueName) && (
-                  <text
-                    className="biblical-map__name"
-                    x={x}
-                    y={y + (thumb !== undefined ? thumb + 13 : 15) * unit}
-                    fontSize={(focused ? 14 : 12) * unit}
-                    strokeWidth={3 * unit}
-                  >
-                    {name}
-                  </text>
-                )}
-              </>
-            )
-            return placeHref ? (
-              <a
+            const named = labelled.has(uniqueName)
+            return (
+              <MapPlace
                 key={uniqueName}
-                href={placeHref(uniqueName)}
-                className={classes}
-                aria-label={name}
-              >
-                {content}
-              </a>
-            ) : (
-              <g
-                key={uniqueName}
-                className={classes}
-                role="button"
-                aria-label={name}
-                data-place={uniqueName}
-              >
-                {content}
-              </g>
+                place={place}
+                unit={unit}
+                focused={focused}
+                brought={brought}
+                dimmed={bright.size > 0 && !brought && !focused}
+                named={named}
+                // A place's own small map opens the places it names; the other dots only show
+                // how the land is settled. Hundreds of links would weigh on its page.
+                bare={compact && !focused && !brought && !named}
+                thumb={thumbRadius(place)}
+                clipId={`${clipPrefix}-${order.get(uniqueName)}`}
+                href={placeHref?.(uniqueName)}
+              />
             )
           })}
         </svg>
