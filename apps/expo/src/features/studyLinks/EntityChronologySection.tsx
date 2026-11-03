@@ -266,14 +266,21 @@ const Timeline = ({
           horizontal
           showsHorizontalScrollIndicator={false}
           style={{ marginHorizontal: -PAGE_GUTTER }}
-          contentContainerStyle={{ paddingHorizontal: PAGE_GUTTER }}
+          // The margins are items of the list, not its padding: padded, the strip opened on the
+          // Web scrolled by a margin, its first card under the edge.
+          ListHeaderComponent={<Box style={{ width: PAGE_GUTTER }} />}
+          ListFooterComponent={<Box style={{ width: PAGE_GUTTER }} />}
           snapToInterval={CARD_STEP}
           decelerationRate="fast"
           initialNumToRender={3}
           maxToRenderPerBatch={3}
           windowSize={3}
           keyExtractor={event => event.link.key}
-          getItemLayout={(_, index) => ({ length: CARD_STEP, offset: CARD_STEP * index, index })}
+          getItemLayout={(_, index) => ({
+            length: CARD_STEP,
+            offset: PAGE_GUTTER + CARD_STEP * index,
+            index,
+          })}
           ItemSeparatorComponent={() => <Box style={{ width: CARD_GAP }} />}
           scrollEventThrottle={64}
           onLayout={(event: LayoutChangeEvent) => {
