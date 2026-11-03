@@ -13,18 +13,18 @@ import { useQuery } from '@tanstack/react-query'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import EventDetailVerse from './EventDetailVerse'
 import { timelineEventsQueryOptions } from './timelineEventsQuery'
-import { getTimelineEventPictures, type TimelinePicture } from './timelinePaintings'
+import { type TimelinePicture } from './timelinePaintings'
 import { TimelineEvent, TimelineEventDetail } from './types'
-import { useTimelinePaintings } from './useTimelinePaintings'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 const Media = ({
-  slug,
-  images,
+  pictures,
   scriptures,
   related,
   onOpenEvent,
-}: Pick<TimelineEventDetail, 'slug' | 'images' | 'scriptures' | 'videos' | 'related'> & {
+}: Pick<TimelineEventDetail, 'scriptures' | 'related'> & {
+  /** The pictures of the event other than the one shown at the top. */
+  pictures: TimelinePicture[]
   onOpenEvent?: (event: TimelineEvent) => void
 }) => {
   const pushRouteOnce = usePushRouteOnce()
@@ -32,8 +32,20 @@ const Media = ({
   const { ref, size, onLayout } = useLayoutSize()
   const sliderWidth = size.width
   const imageWidth = Math.max(0, sliderWidth * 0.8)
-  const { paintings, known } = useTimelinePaintings()
-  const pictures = known ? getTimelineEventPictures(slug, images, paintings?.[slug]) : []
+
+  const renderPicture = (item: TimelinePicture) => (
+    <Box className="overflow-hidden border-continuous">
+      <Image
+        draggable={false}
+        style={{ width: imageWidth, height: imageWidth, borderRadius: radii.card }}
+        source={{ uri: item.uri }}
+        contentFit="contain"
+      />
+      {!!item.caption && (
+        <Text className="mt-[10px] text-center text-[13px] text-grey">{item.caption}</Text>
+      )}
+    </Box>
+  )
 
   const { data: events } = useQuery(timelineEventsQueryOptions)
 
@@ -51,7 +63,13 @@ const Media = ({
           ))}
         </StudySection>
       )}
-      {!!pictures.length && (
+      {pictures.length === 1 && (
+        <StudySection title={t('Images')} surface="none">
+          {/* A single picture would loop on itself in a carousel. */}
+          <Box className="items-center">{renderPicture(pictures[0])}</Box>
+        </StudySection>
+      )}
+      {pictures.length > 1 && (
         <StudySection title={t('Images')} surface="none">
           {/* The carousel runs to the edges of the page, its images take a card's corners. */}
           <Carousel
@@ -62,21 +80,7 @@ const Media = ({
               alignItems: 'center',
               justifyContent: 'center',
             }}
-            renderItem={({ item }: { item: TimelinePicture }) => (
-              <Box className="overflow-hidden border-continuous">
-                <Image
-                  draggable={false}
-                  style={{ width: imageWidth, height: imageWidth, borderRadius: radii.card }}
-                  source={{ uri: item.uri }}
-                  contentFit="contain"
-                />
-                {!!item.caption && (
-                  <Text className="mt-[10px] text-center text-[13px] text-grey">
-                    {item.caption}
-                  </Text>
-                )}
-              </Box>
-            )}
+            renderItem={({ item }: { item: TimelinePicture }) => renderPicture(item)}
             onConfigurePanGesture={configureCarouselPan([-10, 10])}
             style={{
               width: sliderWidth,

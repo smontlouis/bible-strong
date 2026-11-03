@@ -18,7 +18,8 @@ import Paragraph from '~common/ui/Paragraph'
 import { radii } from '~common/ui/surfaces'
 import { calculateLabel } from './constants'
 import { TimelineEventDetail, TimelineEvent as TimelineEventProps } from './types'
-import { useTimelineEventPicture } from './useTimelinePaintings'
+import { getTimelineEventPictures, type TimelinePicture } from './timelinePaintings'
+import { useTimelineEventPicture, useTimelinePaintings } from './useTimelinePaintings'
 import { Image } from 'expo-image'
 import StudyLinksSections from '~features/studyLinks/StudyLinksSections'
 import Media from './EventDetailsMedia'
@@ -70,7 +71,8 @@ export const EventDetailsContent = ({
   const stylingTheme = useStylingTheme()
   const lang = languageOverride || preferredLanguage
   const date = dateLabel || calculateLabel(start, end, lang)
-  const picture = useTimelineEventPicture(slug, image, 'w768')
+  const fallbackPicture = useTimelineEventPicture(slug, image, 'w1254')
+  const { paintings, known } = useTimelinePaintings()
   const resources = useResourceAccess()
   const preferredResourceLanguage = useAtomValue(resourcesLanguageAtom).TIMELINE
   const resourceLanguage = languageOverride || preferredResourceLanguage
@@ -106,17 +108,30 @@ export const EventDetailsContent = ({
   }
 
   const timelineUniverse = resolveUniverseColors(stylingTheme.colors, 'timeline')
+  // The first picture is shown large at the top; the gallery below only shows the others.
+  const pictures: TimelinePicture[] = known
+    ? getTimelineEventPictures(slug, event.images, paintings?.[slug])
+    : []
+  const [cover, ...otherPictures] =
+    pictures.length || !fallbackPicture ? pictures : [{ uri: fallbackPicture, caption: '' }]
+  const painted = Boolean(paintings?.[slug])
 
   return (
     <Box className="overflow-hidden border-continuous">
       <VStack className="gap-[10px] pt-[2px] pb-[4px]">
-        {picture && (
-          <Image
-            style={{ width: 120, height: 120, borderRadius: radii.card, marginBottom: 6 }}
-            source={{
-              uri: picture,
-            }}
-          />
+        {cover && (
+          <VStack className="mb-[6px] gap-[8px]">
+            <Image
+              style={{ width: '100%', aspectRatio: 1, borderRadius: radii.card }}
+              source={{ uri: cover.uri }}
+              // A painting fills its square; a picture of the publication keeps its own shape.
+              contentFit={painted ? 'cover' : 'contain'}
+              accessibilityLabel={getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
+            />
+            {!!cover.caption && (
+              <Text className="text-center text-[13px] text-grey">{cover.caption}</Text>
+            )}
+          </VStack>
         )}
         <HStack className="items-center gap-[10px]">
           <IconTile bg={timelineUniverse.background}>
@@ -129,7 +144,7 @@ export const EventDetailsContent = ({
         </Text>
       </VStack>
       <Description {...event} />
-      <Media {...event} onOpenEvent={onOpenEvent} />
+      <Media {...event} pictures={otherPictures} onOpenEvent={onOpenEvent} />
       <StudyLinksSections kind="timeline" subjectKey={slug} language={resourceLanguage} />
     </Box>
   )
