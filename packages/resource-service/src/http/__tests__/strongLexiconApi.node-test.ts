@@ -342,6 +342,20 @@ describe('v1 Strong lexicon API', () => {
         ]
       )
 
+      // A map reads the located places alone, with what it draws of them.
+      const places = await web.handler(request('/v1/strong-lexicon/places?language=fr'))
+      assert.equal(places.status, 200)
+      assert.ok(places.headers.get('etag'))
+      assert.deepEqual(((await places.json()) as { places: unknown[] }).places, [
+        {
+          uniqueName: 'Eden@Gen.2.8-Eze',
+          name: 'Éden',
+          chapterCount: 12,
+          latitude: 31.1,
+          longitude: 47.5,
+        },
+      ])
+
       const passages = await web.handler(
         request('/v1/strong-lexicon/entities/Adam%40Gen.2.19-Jud/passages')
       )

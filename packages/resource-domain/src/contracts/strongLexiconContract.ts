@@ -337,6 +337,27 @@ export class StrongLexiconEntitiesResponseDto extends Schema.Class<StrongLexicon
   entities: Schema.Array(StrongLexiconListedEntityDto),
 }) {}
 
+export class StrongLexiconPlaceDto extends Schema.Class<StrongLexiconPlaceDto>(
+  'StrongLexiconPlaceDto'
+)({
+  uniqueName: Schema.String,
+  name: Schema.String,
+  chapterCount: Schema.Int,
+  latitude: Schema.Number,
+  longitude: Schema.Number,
+}) {}
+
+/**
+ * The located places of the publication, with what a map draws of them: a fifth of the list of
+ * every entity, which a map would otherwise read whole for its places.
+ */
+export class StrongLexiconPlacesResponseDto extends Schema.Class<StrongLexiconPlacesResponseDto>(
+  'StrongLexiconPlacesResponseDto'
+)({
+  resource: Schema.Struct({ revision: Schema.String }),
+  places: Schema.Array(StrongLexiconPlaceDto),
+}) {}
+
 export class StrongLexiconEntityPassageDto extends Schema.Class<StrongLexiconEntityPassageDto>(
   'StrongLexiconEntityPassageDto'
 )({

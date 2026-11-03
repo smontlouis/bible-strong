@@ -86,6 +86,7 @@ import {
   StrongLexiconChapterEntitiesQuery,
   StrongLexiconChapterEntitiesResponseDto,
   StrongLexiconEntitiesResponseDto,
+  StrongLexiconPlacesResponseDto,
   StrongLexiconEntityPassagesResponseDto,
   StrongLexiconEntryQuery,
   StrongLexiconEntryDto,
@@ -544,6 +545,14 @@ const StrongLexiconApi = HttpApiGroup.make('strongLexicon')
     HttpApiEndpoint.get('listStrongLexiconEntities', '/v1/strong-lexicon/entities')
       .setUrlParams(StrongLexiconLanguageQuery)
       .addSuccess(StrongLexiconEntitiesResponseDto)
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('listStrongLexiconPlaces', '/v1/strong-lexicon/places')
+      .setUrlParams(StrongLexiconLanguageQuery)
+      .addSuccess(StrongLexiconPlacesResponseDto)
       .addError(ResourceNotFoundProblem, { status: 404 })
       .addError(ResourceUnavailableProblem, { status: 503 })
       .addError(ResourceInternalProblem, { status: 500 })

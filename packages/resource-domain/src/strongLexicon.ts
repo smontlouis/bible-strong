@@ -93,6 +93,14 @@ export type StrongLexiconListedEntity = {
   latitude?: number
   longitude?: number
 }
+/** A located place as a map draws it. */
+export type StrongLexiconPlace = {
+  uniqueName: string
+  name: string
+  chapterCount: number
+  latitude: number
+  longitude: number
+}
 /** The book codes of the entity publication (TIPNR), in the order of the Bible: book `n` is at `n - 1`. */
 export const TIPNR_BOOK_CODES = [
   'Gen',

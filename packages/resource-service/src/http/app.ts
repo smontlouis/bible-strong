@@ -96,6 +96,7 @@ import {
   readRandomStrongLexiconEntry,
   readStrongLexiconChapterEntities,
   readStrongLexiconEntities,
+  readStrongLexiconPlaces,
   readStrongLexiconEntityPassages,
   readStrongLexiconEntry,
   readStrongLexiconEntryCards,
@@ -1061,6 +1062,17 @@ const StrongLexiconApiLive = HttpApiBuilder.group(ResourceApi, 'strongLexicon', 
         requestId,
         request.headers['if-none-match'],
         ['strong-lexicon', 'entities', urlParams.language]
+      )
+    })
+    .handle('listStrongLexiconPlaces', ({ urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readStrongLexiconPlaces({ language: urlParams.language }).pipe(
+          Effect.mapError(cause => toHttpProblem(cause, requestId))
+        ),
+        requestId,
+        request.headers['if-none-match'],
+        ['strong-lexicon', 'places', urlParams.language]
       )
     })
     .handle('getStrongLexiconEntityPassages', ({ path, request }) => {

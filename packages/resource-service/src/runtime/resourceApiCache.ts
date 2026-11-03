@@ -235,6 +235,7 @@ const LONG_LIVED_PATHS = [
   /^\/v1\/strong-bibles\/[^/]+\/books\/\d+\/identities\/[^/]+\/occurrences$/,
   /^\/v1\/strong-lexicon\/entries$/,
   /^\/v1\/strong-lexicon\/entities$/,
+  /^\/v1\/strong-lexicon\/places$/,
   /^\/v1\/timelines\/[^/]+\/events$/,
 ] as const
 

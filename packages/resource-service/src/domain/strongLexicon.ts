@@ -7,6 +7,8 @@ import {
   StrongLexiconEntityPassageDto,
   StrongLexiconEntityPassagesResponseDto,
   StrongLexiconListedEntityDto,
+  StrongLexiconPlaceDto,
+  StrongLexiconPlacesResponseDto,
   StrongLexiconEntryDto,
   StrongLexiconEntryCardDto,
   StrongLexiconEntryCardsDto,
@@ -348,6 +350,29 @@ export const readStrongLexiconEntities = (input: { language: StrongLexiconLangua
     return new StrongLexiconEntitiesResponseDto({
       resource: { revision: active.revision },
       entities: active.value.map(entity => new StrongLexiconListedEntityDto(entity)),
+    })
+  })
+
+export const readStrongLexiconPlaces = (input: { language: StrongLexiconLanguage }) =>
+  Effect.gen(function* () {
+    const active = yield* (yield* StrongLexiconRepository).findEntities(input)
+    return new StrongLexiconPlacesResponseDto({
+      resource: { revision: active.revision },
+      places: active.value.flatMap(entity =>
+        entity.category === 'place' &&
+        entity.latitude !== undefined &&
+        entity.longitude !== undefined
+          ? [
+              new StrongLexiconPlaceDto({
+                uniqueName: entity.uniqueName,
+                name: entity.name,
+                chapterCount: entity.chapterCount,
+                latitude: entity.latitude,
+                longitude: entity.longitude,
+              }),
+            ]
+          : []
+      ),
     })
   })
 
