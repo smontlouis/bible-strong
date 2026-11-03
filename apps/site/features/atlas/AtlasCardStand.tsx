@@ -1,7 +1,8 @@
 import { animate, AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import type { ResourceLanguage } from '../resources/publicSite'
-import { BOOSTER_WORDS, Pack, PackOutlines } from './AtlasBooster'
+import { Pack, PackOutlines } from './AtlasBooster'
+import { BOOSTER_WORDS } from './atlasBoosterWords'
 import { CARD_WORDS, cardClasses, CardFront } from './AtlasCards'
 import { CARD_FAMILY_LABELS, type AtlasGalleryCard } from './atlasCardCatalog'
 import { cardPacks, drawStandPack, PACK_SIZE, type CardPack } from './atlasCardsGallery'
@@ -44,7 +45,8 @@ const PACKS_HELD = 12
 /** What a new pack and its cards take to create, before they are seen to move. */
 const CREATION_TIME = 900
 
-type Phase = 'waiting' | 'sealed' | 'tearing' | 'rising' | 'dropping' | 'fanned' | 'dealing' | 'clearing'
+type Phase =
+  'waiting' | 'sealed' | 'tearing' | 'rising' | 'dropping' | 'fanned' | 'dealing' | 'clearing'
 type Deal = { pack: CardPack; cards: AtlasGalleryCard[] }
 type Place = { x: number; y: number; scale: number; rotate: number; opacity: number }
 
@@ -59,7 +61,13 @@ const middle = (index: number) => index - (PACK_SIZE - 1) / 2
 
 const placeOf = (index: number, phase: Phase, focus: number): Place => {
   const rank = middle(index)
-  const tray = { x: TRAY.x + index * TRAY.step, y: TRAY.y, scale: TRAY.scale, rotate: 0, opacity: 1 }
+  const tray = {
+    x: TRAY.x + index * TRAY.step,
+    y: TRAY.y,
+    scale: TRAY.scale,
+    rotate: 0,
+    opacity: 1,
+  }
   switch (phase) {
     // Below the window while the browser creates them, on a screen where nothing moves.
     case 'waiting':
@@ -236,10 +244,7 @@ function CardFacts({
         {' · '}
         {card.era || CARD_FAMILY_LABELS[card.family][language]}
       </motion.p>
-      <motion.h1
-        className={`acs__name ${card.name.length > 15 ? 'is-long' : ''}`}
-        variants={LINE}
-      >
+      <motion.h1 className={`acs__name ${card.name.length > 15 ? 'is-long' : ''}`} variants={LINE}>
         {card.name}
       </motion.h1>
       <motion.p className="acs__title" variants={LINE}>
@@ -473,9 +478,7 @@ export default function AtlasCardStand({
                     opacity: phase === 'dropping' ? 0 : 1,
                   }}
                   transition={
-                    phase === 'dropping'
-                      ? { duration: 0.46, ease: [0.5, 0, 0.9, 0.4] }
-                      : ARRIVAL
+                    phase === 'dropping' ? { duration: 0.46, ease: [0.5, 0, 0.9, 0.4] } : ARRIVAL
                   }
                 >
                   <div

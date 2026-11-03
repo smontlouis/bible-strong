@@ -2,6 +2,8 @@ import SiteLink from '@/components/SiteLink'
 import { Outlet, useMatch, useNavigate } from '@tanstack/react-router'
 import { AnimatePresence } from 'motion/react'
 import {
+  lazy,
+  Suspense,
   useCallback,
   useDeferredValue,
   useEffect,
@@ -13,7 +15,7 @@ import {
 import { WEB_APP_ORIGIN } from '../resources/publicSite'
 import ResourceShell from '../resources/ResourceShell'
 import type { AtlasCardsPageData } from './atlas.functions'
-import AtlasBooster, { BOOSTER_WORDS } from './AtlasBooster'
+import { BOOSTER_WORDS } from './atlasBoosterWords'
 import AtlasCardViewer from './AtlasCardViewer'
 import { cardClasses, CardFront } from './AtlasCards'
 import { CARD_FAMILY_LABELS, type AtlasGalleryCard } from './atlasCardCatalog'
@@ -37,6 +39,10 @@ import {
   parseAtlasCardId,
 } from './atlasRoutes'
 import { ATLAS_MESSAGES, countLabel } from './messages'
+
+// The packs load when the reader reaches for the button, not with the gallery.
+const loadAtlasBooster = () => import('./AtlasBooster')
+const AtlasBooster = lazy(loadAtlasBooster)
 
 const WORDS = {
   fr: {
@@ -248,6 +254,8 @@ export default function AtlasCardsPage({ page }: { page: AtlasCardsPageData }) {
             <button
               type="button"
               className="resource-cta acg-hero__pack"
+              onPointerEnter={() => void loadAtlasBooster()}
+              onFocus={() => void loadAtlasBooster()}
               onClick={() => setBooster(true)}
             >
               {BOOSTER_WORDS[language].open}
@@ -443,12 +451,14 @@ export default function AtlasCardsPage({ page }: { page: AtlasCardsPageData }) {
       )}
 
       {booster && (
-        <AtlasBooster
-          cards={page.cards}
-          language={language}
-          onClose={() => setBooster(false)}
-          onOpenCard={open}
-        />
+        <Suspense fallback={null}>
+          <AtlasBooster
+            cards={page.cards}
+            language={language}
+            onClose={() => setBooster(false)}
+            onOpenCard={open}
+          />
+        </Suspense>
       )}
 
       <AnimatePresence>

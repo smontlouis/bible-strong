@@ -11,49 +11,11 @@ import { cardClasses, CardFront } from './AtlasCards'
 import type { AtlasGalleryCard } from './atlasCardCatalog'
 import { cardPacks, drawPack, PACK_SIZE, type CardPack } from './atlasCardsGallery'
 import { useCardSway, useCardTilt } from './useCardTilt'
+import { BOOSTER_WORDS } from './atlasBoosterWords'
 
 // Packs of five cards drawn at random, opened for the pleasure of tearing them and turning the
 // cards over. Nothing is kept and nothing is worth more than another (ADR-0090): a pack is a way of
 // meeting characters one would not have looked for, not a collection.
-
-export const BOOSTER_WORDS = {
-  fr: {
-    open: 'Ouvrir un paquet',
-    choose: 'Choisissez un paquet',
-    chooseLead:
-      'Cinq cartes au hasard, à retourner une à une. Rien n’est gardé : ouvrez-en autant que vous voulez.',
-    everything: 'Toute la Bible',
-    brand: 'Atlas de la Bible',
-    cards: '{count} cartes',
-    perPack: '{count} cartes',
-    tear: 'Touchez le paquet ou glissez dessus pour le déchirer',
-    turn: 'Touchez une carte pour la retourner',
-    look: 'Touchez une carte pour l’ouvrir',
-    turnAll: 'Tout retourner',
-    again: 'Un autre paquet',
-    other: 'Changer de paquet',
-    close: 'Fermer',
-    hidden: 'Carte face cachée, {rank} sur {count}',
-  },
-  en: {
-    open: 'Open a pack',
-    choose: 'Choose a pack',
-    chooseLead:
-      'Five cards at random, to turn over one by one. Nothing is kept: open as many as you like.',
-    everything: 'The whole Bible',
-    brand: 'Bible Atlas',
-    cards: '{count} cards',
-    perPack: '{count} cards',
-    tear: 'Tap the pack or swipe across it to tear it open',
-    turn: 'Tap a card to turn it over',
-    look: 'Tap a card to open it',
-    turnAll: 'Turn them all',
-    again: 'Another pack',
-    other: 'Another kind of pack',
-    close: 'Close',
-    hidden: 'Card face down, {rank} of {count}',
-  },
-} as const
 
 /** Sealed, the pack lies on the cards; torn, they rise out of it; dropped, it falls away; dealt. */
 type Phase = 'sealed' | 'rising' | 'dropping' | 'dealt'
