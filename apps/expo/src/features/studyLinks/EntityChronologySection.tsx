@@ -4,8 +4,8 @@ import { Image } from 'expo-image'
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  FlatList,
   Pressable,
-  ScrollView,
   View,
   type LayoutChangeEvent,
   type NativeScrollEvent,
@@ -63,6 +63,7 @@ const Picture = ({ uri, width }: { uri?: string; width?: number }) => (
     {!!uri && (
       <Image
         source={{ uri }}
+        recyclingKey={uri}
         contentFit="cover"
         transition={150}
         style={{ width: '100%', height: '100%' }}
@@ -165,7 +166,7 @@ const Timeline = ({
 }) => {
   const { t } = useTranslation()
   const pushRouteOnce = usePushRouteOnce()
-  const strip = useRef<ScrollView>(null)
+  const strip = useRef<FlatList<ChronologyEvent>>(null)
   const viewport = useRef(0)
   const [seen, setSeen] = useState<{ first: number; last: number }>()
   const [pointed, setPointed] = useState<number>()
@@ -188,7 +189,7 @@ const Timeline = ({
   }
 
   const reveal = (event: number) =>
-    strip.current?.scrollTo({ x: event * CARD_STEP, animated: true })
+    strip.current?.scrollToOffset({ offset: event * CARD_STEP, animated: true })
 
   return (
     <StudySection title={t('studyLinks.timeline')} surface="none">
@@ -257,14 +258,23 @@ const Timeline = ({
       )}
 
       {events.length > 0 && (
-        <ScrollView
+        // A life can hold some fifty events: only the cards near the screen are drawn, and
+        // their paintings loaded.
+        <FlatList
           ref={strip}
+          data={events}
           horizontal
           showsHorizontalScrollIndicator={false}
           style={{ marginHorizontal: -PAGE_GUTTER }}
-          contentContainerStyle={{ gap: CARD_GAP, paddingHorizontal: PAGE_GUTTER }}
+          contentContainerStyle={{ paddingHorizontal: PAGE_GUTTER }}
           snapToInterval={CARD_STEP}
           decelerationRate="fast"
+          initialNumToRender={3}
+          maxToRenderPerBatch={3}
+          windowSize={3}
+          keyExtractor={event => event.link.key}
+          getItemLayout={(_, index) => ({ length: CARD_STEP, offset: CARD_STEP * index, index })}
+          ItemSeparatorComponent={() => <Box style={{ width: CARD_GAP }} />}
           scrollEventThrottle={64}
           onLayout={(event: LayoutChangeEvent) => {
             viewport.current = event.nativeEvent.layout.width
@@ -274,14 +284,12 @@ const Timeline = ({
             measure(event.nativeEvent.contentOffset.x)
           }
           onScrollBeginDrag={() => setPointed(undefined)}
-        >
-          {events.map(event => (
+          renderItem={({ item: event }) => (
             <TouchableBox
-              key={event.link.key}
               activeOpacity={0.7}
               accessibilityRole="button"
               accessibilityLabel={`${event.title}, ${event.dates}`}
-              style={{ width: CARD_WIDTH }}
+              style={{ width: CARD_WIDTH, flex: 1 }}
               onPress={() => open(event)}
             >
               <Card className="flex-[1]">
@@ -306,8 +314,8 @@ const Timeline = ({
                 </VStack>
               </Card>
             </TouchableBox>
-          ))}
-        </ScrollView>
+          )}
+        />
       )}
     </StudySection>
   )
