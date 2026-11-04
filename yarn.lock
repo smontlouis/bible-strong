@@ -2618,10 +2618,10 @@ __metadata:
     expo-dev-client: "npm:~58.0.14"
     expo-device: "npm:~58.0.5"
     expo-document-picker: "npm:~58.0.4"
-    expo-file-system: "npm:~58.0.9"
-    expo-font: "patch:expo-font@npm%3A58.0.8#~/.yarn/patches/expo-font-npm-58.0.8-76500d8bdc.patch"
+    expo-file-system: "npm:~58.0.13"
+    expo-font: "npm:~58.0.11"
     expo-haptics: "npm:~58.0.7"
-    expo-image: "npm:~58.0.15"
+    expo-image: "npm:~58.0.18"
     expo-keep-awake: "npm:~58.0.3"
     expo-linear-gradient: "npm:~58.0.3"
     expo-linking: "npm:~58.0.13"
@@ -20298,35 +20298,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-file-system@npm:~58.0.9":
-  version: 58.0.9
-  resolution: "expo-file-system@npm:58.0.9"
+"expo-file-system@npm:~58.0.13, expo-file-system@npm:~58.0.9":
+  version: 58.0.13
+  resolution: "expo-file-system@npm:58.0.13"
   peerDependencies:
     expo: "*"
     react-native: "*"
-  checksum: 10c0/8851e867cf235853e4f4eca3d74a96f4921dd5a897ac5c87169c9e95451c7fcad1dd2f4c57cd399bc37e23048444c0e1a4f085a4f8468ae6e86b2f7742560859
+  checksum: 10c0/e68fb7b8ee0b99c0683037f9754e90d176bcfae4ce823f3e2c1fcede9cebf4428a420e529c870b10af3e6b3a2160933b652b700ca68d57f08960512764868c66
   languageName: node
   linkType: hard
 
-"expo-font@npm:58.0.8":
-  version: 58.0.8
-  resolution: "expo-font@npm:58.0.8"
+"expo-font@npm:~58.0.11, expo-font@npm:~58.0.8":
+  version: 58.0.11
+  resolution: "expo-font@npm:58.0.11"
   peerDependencies:
     expo: "*"
     react: "*"
     react-native: "*"
-  checksum: 10c0/b9bf84143f30f0243f9d08f34188b772970997289bb49be238f883d6bf298d754c798b8ee67f54d101c07544e078120290ce5fa62b0e3d486114c7814bbe1132
-  languageName: node
-  linkType: hard
-
-"expo-font@patch:expo-font@npm%3A58.0.8#~/.yarn/patches/expo-font-npm-58.0.8-76500d8bdc.patch":
-  version: 58.0.8
-  resolution: "expo-font@patch:expo-font@npm%3A58.0.8#~/.yarn/patches/expo-font-npm-58.0.8-76500d8bdc.patch::version=58.0.8&hash=499ee5"
-  peerDependencies:
-    expo: "*"
-    react: "*"
-    react-native: "*"
-  checksum: 10c0/b77c3943a349ae54932b0744ea265de223108e07e2feee21152f0ad470c6868439161c6004487a2e857888c7037c861e277e13354134fbeeaa969ca0831ec899
+  checksum: 10c0/238d03dfb63e9d2dbe2d03c8bc87ea87909fa22057b788c36e7421f41a23a2754c60773e30c2e28c6ba29b01406d53a57b9bc86bce60bf575613e4eff835b1c9
   languageName: node
   linkType: hard
 
@@ -20350,9 +20339,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-image@npm:~58.0.15":
-  version: 58.0.15
-  resolution: "expo-image@npm:58.0.15"
+"expo-image@npm:~58.0.18":
+  version: 58.0.18
+  resolution: "expo-image@npm:58.0.18"
   dependencies:
     sf-symbols-typescript: "npm:^2.2.0"
   peerDependencies:
@@ -20363,7 +20352,7 @@ __metadata:
   peerDependenciesMeta:
     react-native-web:
       optional: true
-  checksum: 10c0/d7b1f019ae50f806593f3f2658fa5656d33c7d690400372c4340a11510002f39de02389d136032b7793879f7633679fcf9f3a29dde5d21492d0fa30b17778915
+  checksum: 10c0/268cf769d7e2527558ac93f485fa2c43754f8e448f6e1b786becf45d96dac58fab6c9a567e56678c0586a0fd7db2f950f3d2e39a67f567da34152b22156e843e
   languageName: node
   linkType: hard
 

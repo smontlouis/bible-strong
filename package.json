@@ -126,7 +126,6 @@
     "metro-runtime": "patch:metro-runtime@npm%3A0.87.1#~/.yarn/patches/metro-runtime-npm-0.87.1-3b7e80ac3a.patch",
     "@effect/platform-node@4.0.0-rc.112/@effect/platform-node-shared": "4.0.0-rc.112",
     "@expo/cli@npm:^58.1.11": "patch:@expo/cli@npm%3A58.1.11#~/.yarn/patches/@expo-cli-npm-58.1.11-9bf913ac4e.patch",
-    "expo-font@npm:~58.0.8": "patch:expo-font@npm%3A58.0.8#~/.yarn/patches/expo-font-npm-58.0.8-76500d8bdc.patch",
     "react-native-screens@npm:^4.30.0 || ^5.0.0-alpha.3": "patch:react-native-screens@npm%3A4.30.0#~/.yarn/patches/react-native-screens-npm-4.30.0-e2241f2fe4.patch"
   }
 }
