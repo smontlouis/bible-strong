@@ -1102,6 +1102,11 @@ export const strongLexiconEntryIdentities = pgTable(
       'gin',
       sql`lower(${table.step_code}) gin_trgm_ops`
     ),
+    // The code as the lexicon search normalizes it.
+    index('strong_lexicon_entry_identities_normalized_code_search').using(
+      'gin',
+      sql`bible_search_normalize(${table.step_code}) gin_trgm_ops`
+    ),
   ]
 )
 
@@ -1126,6 +1131,11 @@ export const strongLexiconTranslations = pgTable(
     index('strong_lexicon_translations_gloss_search').using(
       'gin',
       sql`lower(coalesce(${table.payload}->>'gloss', '')) gin_trgm_ops`
+    ),
+    // The gloss as the lexicon search normalizes it.
+    index('strong_lexicon_translations_normalized_gloss_search').using(
+      'gin',
+      sql`bible_search_normalize(coalesce(${table.payload}->>'gloss', '')) gin_trgm_ops`
     ),
   ]
 )

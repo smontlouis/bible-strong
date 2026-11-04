@@ -443,6 +443,21 @@ describe('Strong lexicon PostgreSQL repository', { skip: !runIntegration }, () =
       assert.deepEqual(await codes({ search: 'dieu' }), ['H0410G', 'H0433'])
       assert.deepEqual(await codes({ search: 'dieu', identities: 'all' }), everyEntry.slice(0, 3))
 
+      // A search also finds an entry by its code and by its gloss in the reader's language,
+      // accents and case aside.
+      await database
+        .insertInto('strong_lexicon_translations')
+        .values({
+          publication_id: publication.id,
+          step_entry_id: 4,
+          language: 'fr',
+          payload: { gloss: 'Éternel des armées' },
+        })
+        .execute()
+      assert.deepEqual(await codes({ search: 'ARMEES' }), ['H0433'])
+      assert.deepEqual(await codes({ language: 'en', search: 'armees' }), [])
+      assert.deepEqual(await codes({ search: 'h0430' }), ['H0430G'])
+
       const paged: string[] = []
       let cursor: string | undefined
       for (let page = 0; page < entries.length + 1; page += 1) {

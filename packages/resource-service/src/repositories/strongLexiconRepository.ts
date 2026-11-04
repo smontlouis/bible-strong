@@ -2620,15 +2620,30 @@ export const makeKyselyStrongLexiconRepository = (
         if (input.lexicalLanguage) {
           candidateFilters.push(sql<boolean>`e.language = ${input.lexicalLanguage}`)
         }
+        // The entries a search matches are found table by table, each through its trigram index:
+        // the same test across the joined tables read the whole lexicon on every keystroke.
+        let matchedEntries = sql``
         if (search) {
           const pattern = `%${likeLiteral(normalizeBibleSearchText(search))}%`
-          candidateFilters.push(
-            sql<boolean>`(
-              bible_search_normalize(coalesce(e.payload->>'original', '') || ' ' || coalesce(nullif(e.payload->>'classicTransliteration', ''), e.payload->>'transliteration', '') || ' ' || coalesce(e.payload->>'gloss', '') || ' ' || e.e_strong || ' ' || e.d_strong || ' ' || e.u_strong) LIKE ${pattern}
-              OR bible_search_normalize(i.step_code) LIKE ${pattern}
-              OR bible_search_normalize(coalesce(tr.payload->>'gloss', '')) LIKE ${pattern}
-            )`
-          )
+          matchedEntries = sql`
+            matched_entries AS MATERIALIZED (
+              SELECT e.entry_id
+                FROM strong_lexicon_entries e
+               WHERE e.publication_id=${core.id}
+                 AND bible_search_normalize(coalesce(e.payload->>'original', '') || ' ' || coalesce(nullif(e.payload->>'classicTransliteration', ''), e.payload->>'transliteration', '') || ' ' || coalesce(e.payload->>'gloss', '') || ' ' || e.e_strong || ' ' || e.d_strong || ' ' || e.u_strong) LIKE ${pattern}
+              UNION
+              SELECT i.step_entry_id
+                FROM strong_lexicon_entry_identities i
+               WHERE i.publication_id=${core.id}
+                 AND bible_search_normalize(i.step_code) LIKE ${pattern}
+              UNION
+              SELECT tr.step_entry_id
+                FROM strong_lexicon_translations tr
+               WHERE tr.publication_id=${core.id}
+                 AND tr.language=${input.language}
+                 AND bible_search_normalize(coalesce(tr.payload->>'gloss', '')) LIKE ${pattern}
+            ),`
+          candidateFilters.push(sql<boolean>`e.entry_id IN (SELECT entry_id FROM matched_entries)`)
         }
         if (prefix) {
           const pattern = `${likeLiteral(prefix.toLocaleLowerCase())}%`
@@ -2654,7 +2669,8 @@ export const makeKyselyStrongLexiconRepository = (
           sort_gloss: string
         }
         const result = await sql<ListRow>`
-          WITH candidates AS (
+          WITH ${matchedEntries}
+          candidates AS (
             SELECT e.entry_id,
                    e.language,
                    (e.payload->>'baseCode')::integer AS base_code,

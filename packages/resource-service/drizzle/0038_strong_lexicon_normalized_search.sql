@@ -1,0 +1,2 @@
+CREATE INDEX "strong_lexicon_entry_identities_normalized_code_search" ON "strong_lexicon_entry_identities" USING gin (bible_search_normalize("step_code") gin_trgm_ops);--> statement-breakpoint
+CREATE INDEX "strong_lexicon_translations_normalized_gloss_search" ON "strong_lexicon_translations" USING gin (bible_search_normalize(coalesce("payload"->>'gloss', '')) gin_trgm_ops);

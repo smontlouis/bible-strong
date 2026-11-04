@@ -103,6 +103,76 @@ export const makeKyselyDictionaryRepository = (
         const cursor = decodeDictionaryDirectoryPageCursor(input.cursor)
         const initial = input.initial?.trim().toLocaleLowerCase()
         const search = input.search?.trim()
+        const searchPattern = search ? `%${likeLiteral(search)}%` : null
+        const activePublication = sql<boolean>`
+          publication.resource_kind = 'dictionary'
+          AND publication.status = 'active'
+          AND publication.resource_identity ~ '^dictionary:[a-z0-9]+(?:-[a-z0-9]+)*:(?:fr|en)$'
+          AND coalesce(publication.metadata->>'resource_id', '') <> ''
+          AND coalesce(publication.metadata->>'title', '') <> ''
+          AND coalesce(publication.metadata->>'abbreviation', '') <> ''
+        `
+        const activeEntryColumns = sql`
+          CASE
+            WHEN entry.correspondence_id IS NOT NULL
+              THEN 'c:' || entry.correspondence_id
+            ELSE 'e:' || publication.id::text || ':' || entry.entry_id::text
+          END AS group_key,
+          entry.correspondence_id,
+          publication.resource_identity,
+          publication.revision,
+          publication.language,
+          -- The names a source shows, rather than the whole metadata on every entry.
+          publication.metadata->>'resource_id' AS resource_id,
+          publication.metadata->>'title' AS title,
+          publication.metadata->>'abbreviation' AS abbreviation,
+          entry.entry_id,
+          entry.word,
+          entry.normalized_word
+        `
+        // A search gathers only the notions holding a matching heading: the headings are found
+        // through their trigram indexes, then every entry of their notions. Gathering the whole
+        // directory to keep a few notions of it cost a fifth of a second a call.
+        const activeEntries = search
+          ? sql`
+              active_publications AS MATERIALIZED (
+                SELECT id, resource_identity, revision, language, metadata
+                FROM resource_publications publication
+                WHERE ${activePublication}
+              ),
+              matched_entries AS MATERIALIZED (
+                SELECT entry.publication_id, entry.entry_id, entry.correspondence_id
+                FROM dictionary_entries entry
+                WHERE entry.publication_id IN (SELECT id FROM active_publications)
+                  AND (entry.word ILIKE ${searchPattern} OR entry.normalized_word ILIKE ${searchPattern})
+              ),
+              notion_entries AS (
+                SELECT entry.publication_id, entry.entry_id, entry.correspondence_id, entry.word, entry.normalized_word
+                FROM dictionary_entries entry
+                WHERE entry.correspondence_id IN (
+                  SELECT correspondence_id FROM matched_entries WHERE correspondence_id IS NOT NULL
+                )
+                UNION ALL
+                SELECT entry.publication_id, entry.entry_id, entry.correspondence_id, entry.word, entry.normalized_word
+                FROM dictionary_entries entry
+                JOIN matched_entries matched
+                  ON matched.publication_id = entry.publication_id AND matched.entry_id = entry.entry_id
+                WHERE matched.correspondence_id IS NULL
+              ),
+              active_entries AS (
+                SELECT ${activeEntryColumns}
+                FROM notion_entries entry
+                JOIN active_publications publication ON publication.id = entry.publication_id
+              )
+            `
+          : sql`
+              active_entries AS (
+                SELECT ${activeEntryColumns}
+                FROM dictionary_entries entry
+                JOIN resource_publications publication ON publication.id = entry.publication_id
+                WHERE ${activePublication}
+              )
+            `
         const result = await sql<{
           group_key: string
           label: string
@@ -120,40 +190,14 @@ export const makeKyselyDictionaryRepository = (
             normalizedWord: string
           }>
         }>`
-          WITH active_entries AS (
-            SELECT
-              CASE
-                WHEN entry.correspondence_id IS NOT NULL
-                  THEN 'c:' || entry.correspondence_id
-                ELSE 'e:' || publication.id::text || ':' || entry.entry_id::text
-              END AS group_key,
-              entry.correspondence_id,
-              publication.resource_identity,
-              publication.revision,
-              publication.language,
-              -- The names a source shows, rather than the whole metadata on every entry.
-              publication.metadata->>'resource_id' AS resource_id,
-              publication.metadata->>'title' AS title,
-              publication.metadata->>'abbreviation' AS abbreviation,
-              entry.entry_id,
-              entry.word,
-              entry.normalized_word
-            FROM dictionary_entries entry
-            JOIN resource_publications publication ON publication.id = entry.publication_id
-            WHERE publication.resource_kind = 'dictionary'
-              AND publication.status = 'active'
-              AND publication.resource_identity ~ '^dictionary:[a-z0-9]+(?:-[a-z0-9]+)*:(?:fr|en)$'
-              AND coalesce(publication.metadata->>'resource_id', '') <> ''
-              AND coalesce(publication.metadata->>'title', '') <> ''
-              AND coalesce(publication.metadata->>'abbreviation', '') <> ''
-          ),
+          WITH ${activeEntries},
           directory_keys AS (
             SELECT
               group_key,
               (array_agg(word ORDER BY (language = ${input.language}) DESC, normalized_word, resource_identity, entry_id))[1] AS label,
               (array_agg(normalized_word ORDER BY (language = ${input.language}) DESC, normalized_word, resource_identity, entry_id))[1] AS normalized_label,
               max(correspondence_id) AS correspondence_id,
-              bool_or(${search ?? null}::text IS NULL OR word ILIKE ${search ? `%${likeLiteral(search)}%` : null} OR normalized_word ILIKE ${search ? `%${likeLiteral(search)}%` : null}) AS matches_search
+              bool_or(${search ?? null}::text IS NULL OR word ILIKE ${searchPattern} OR normalized_word ILIKE ${searchPattern}) AS matches_search
             FROM active_entries
             GROUP BY group_key
             HAVING bool_or(language = ${input.language})
