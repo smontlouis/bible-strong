@@ -2,229 +2,81 @@
 
 ## Vue d'ensemble
 
-La feature Timeline offre une chronologie biblique interactive permettant de naviguer à travers les événements historiques de la Bible. Elle présente une visualisation temporelle avec sections, sous-sections et événements détaillés.
+La chronologie biblique est une seule frise, dessinée comme sur le site public (ADR-0097) : les
+treize périodes se suivent sur un axe, chacune avec sa scène, et chaque événement daté de la
+publication est posé sur un couloir au-dessus de l'axe. Les vies et les grands événements sont des
+cartes avec leur peinture, et un ruban sur les années qu'ils durent ; les autres sont des pastilles.
+La bande des périodes, en bas, montre où l'on est et permet d'aller n'importe où. Chaque période y
+garde au moins 120 points pour son numéro et son nom ; sur un téléphone la bande dépasse donc de
+l'écran et glisse sous lui : toute l'histoire tient entre ses deux bords, la première période au
+bord gauche, la dernière au bord droit, et la fenêtre reste sous le doigt qui glisse. Toucher une
+période sans glisser mène à son début.
 
-La langue de la ressource (`resourcesLanguage.TIMELINE`) s'applique aux articles,
-aux titres et descriptions des sections, aux événements et aux repères de dates.
-`useTimelineLanguage` centralise ce choix pour les métadonnées bilingues locales ;
-`useTimelineTranslation` lie les libellés de dates à cette langue sans modifier
-la langue générale de l'interface. Le cache des métadonnées reste commun car le
-fichier embarqué contient les deux langues ; les articles distants restent indexés
-par langue.
+La langue de la ressource (`resourcesLanguage.TIMELINE`) s'applique aux événements, aux périodes et
+aux repères de dates ; l'interface garde la langue de l'app. `useTimelineLanguage` centralise ce
+choix et `useTimelineTranslation` lie les libellés de dates à cette langue.
 
-## Fonctionnalités principales
+## Géométrie partagée avec le site
 
-### Navigation temporelle
-- Vue d'ensemble par sections chronologiques
-- Navigation fluide entre les périodes
-- Barre de date interactive avec année courante
-- Zoom sur des périodes spécifiques
+La frise de l'app et celle du site sont calculées par le même code, dans
+`@bible-strong/resource-domain` :
 
-### Types d'événements
-- **Événements majeurs** : Points clés de l'histoire biblique
-- **Événements mineurs** : Détails et contexte historique
-- Indicateurs visuels différenciés (couleurs, tailles)
-- Liens vers les passages bibliques correspondants
+- `timeline-stage` : échelles et textes des périodes, axe, graduations, placement des événements sur
+  des couloirs sans chevauchement, ordre des événements, et `drawTimelineEvents`, qui place les
+  événements de la publication ;
+- `timeline-dates` : lecture et écriture des datations de la publication.
 
-### Images
+La publication ne porte qu'une datation en mots. Les années et le type (carte ou pastille) d'un
+événement viennent de `events.txt` via `timelineLayout.json`, à reconstruire après une modification
+de `events.txt` :
+
+```bash
+yarn workspace @bible-strong/resource-domain timeline:layout
+```
+
+Un événement que `events.txt` ne connaît pas est placé par sa datation ; un événement daté seulement
+« Future » n'a pas de place sur l'axe.
+
+## Composants
+
+```
+timeline/
+├── TimelineStageScreen       # Page : en-tête (recherche, menu) et scène
+├── TimelineStage             # La scène : gestes, couches, suivi de la fiche ouverte
+│   ├── TimelineStageBackdrop # Teinte et scène de chaque période, carte du nom, grande année
+│   ├── TimelineStageEvents   # Cartes et pastilles proches de la vue
+│   ├── TimelineStageRuler    # Axe, graduations, curseur de l'année
+│   └── TimelineStageStrip    # Bande des périodes
+├── timelineStageModel        # Modèle pur de la scène (testé)
+├── TimelineTabScreen         # La scène dans un onglet, qui retient son année
+├── TimelineResourceBoundary  # Charge les événements de la publication
+├── EventScreen               # Fiche d'un événement (feuille)
+├── EventDetails              # Contenu de la fiche, « Situer sur la frise », avant et après
+└── TimelineSearchScreen      # Recherche locale dans la publication
+```
+
+Seuls les événements et les graduations à moins d'un écran de la vue sont dessinés ; la vue se
+déplace sur le fil de l'interface (Reanimated), et React ne redessine qu'à chaque écran parcouru et
+à chaque période, en basse priorité (`startTransition`). L'année du curseur et la grande année sont
+écrites par le fil de l'interface (`TimelineStageYearText`), sans rendu. Le dessin de la frise
+(tri et placement des 625 événements) est calculé une fois par publication, place et langue
+(`getTimelineStageDrawing`), et les worklets n'emportent que des nombres, jamais le dessin.
+
+## Navigation
+
+- `/timeline` ouvre la frise ; `event=<slug>` l'ouvre sur un événement, `period=<id>` au début d'une
+  période. `goTo`, l'index d'une période, reste lu pour les anciens liens.
+- `/timeline/:language` est la route publique (ADR-0056), `/timeline-home` y redirige.
+- Toucher un événement ouvre sa fiche (`/event`). Tant que la feuille reste ouverte sur la frise (sur
+  iPhone, une feuille non assombrie), la frise suit l'événement qu'elle montre : précédent, suivant,
+  événement associé, ou résultat de la recherche ouverte depuis la frise (`timelineStageAtoms`).
+- Un onglet de chronologie retient l'année au milieu de la vue. Un onglet ouvert sur un événement
+  (assistant, recherche du catalogue, « Ouvrir dans un nouvel onglet ») l'affiche dans sa feuille
+  au-dessus de la frise.
+
+## Images
+
 - Chaque événement a sa peinture, servie par l'hôte média en 256, 768 et 1254 pixels (ADR-0096)
 - `timeline-paintings/catalog.json` dit quelles peintures existent et quels documents de la publication restent à côté
 - Un événement absent du catalogue garde les images de la publication
 - Les 13 images de période sont embarquées dans l'app et le site : `yarn resources:timeline:paintings periods`
-
-### Interaction
-- Tap sur un événement pour voir les détails
-- Swipe horizontal pour naviguer dans le temps
-- Modal de détails avec description complète
-- Recherche d'événements en local (filtrage en mémoire)
-
-## Architecture
-
-### Structure des composants
-
-```
-timeline/
-├── TimelineScreen           # Navigation entre sections
-├── TimelineHomeScreen       # Liste des sections disponibles
-├── TimelineSection          # Vue d'une section temporelle
-│   ├── Datebar             # Barre de navigation temporelle
-│   ├── CurrentYear         # Indicateur année courante
-│   ├── TimelineEvent       # Événement individuel
-│   └── ScrollView          # Container scrollable
-├── EventScreen             # Détails d'un événement en route formSheet
-├── Modals/
-│   └── SectionDetailsModal # Détails d'une section
-└── types.ts                # Types TypeScript
-```
-
-### Structure des données
-
-```typescript
-interface Section {
-  id: number
-  title: TranslatedText
-  subtitle: TranslatedText
-  description: TranslatedText
-  image: string
-  color: string
-  startYear: number
-  endYear: number
-  subSections: SubSection[]
-}
-
-interface Event {
-  id: number
-  title: TranslatedText
-  description: TranslatedText
-  startYear: number
-  endYear?: number
-  color: string
-  type: 'major' | 'minor'
-  bibleReferences?: string[]
-}
-
-interface TranslatedText {
-  fr: string
-  en: string
-}
-```
-
-### Système de coordonnées
-
-```typescript
-// Conversion année vers position pixel
-const yearToPixel = (year: number): number => {
-  const ratio = (year - section.startYear) / 
-                (section.endYear - section.startYear)
-  return ratio * TIMELINE_WIDTH
-}
-
-// Positionnement des événements
-const eventStyle = {
-  left: yearToPixel(event.startYear),
-  width: event.endYear 
-    ? yearToPixel(event.endYear) - yearToPixel(event.startYear)
-    : DEFAULT_EVENT_WIDTH
-}
-```
-
-## Données
-
-### Source
-- Fichier statique `events.txt` (JSON)
-- Chargé via `expo-asset`
-- Structure hiérarchique : Sections → Sous-sections → Événements
-
-### Exemple de structure
-```json
-{
-  "sections": [{
-    "id": 1,
-    "title": { "fr": "Création", "en": "Creation" },
-    "startYear": -4000,
-    "endYear": -2000,
-    "subSections": [{
-      "events": [{
-        "title": { "fr": "Création du monde", "en": "Creation of the world" },
-        "startYear": -4000,
-        "type": "major"
-      }]
-    }]
-  }]
-}
-```
-
-## Animations
-
-### Transitions entre sections
-```typescript
-// Animation avec react-native-reanimated
-const translateX = useSharedValue(0)
-
-const animatedStyle = useAnimatedStyle(() => ({
-  transform: [{ translateX: translateX.value }]
-}))
-
-// Navigation fluide
-const navigateToSection = (index: number) => {
-  translateX.value = withSpring(index * -SCREEN_WIDTH)
-}
-```
-
-### Feedback visuel
-- Scale animation au tap
-- Fade in/out des modales
-- Smooth scrolling horizontal
-- Haptic feedback sur les interactions
-
-## Utilisation
-
-### Navigation vers la timeline
-```typescript
-navigation.navigate('Timeline')
-```
-
-### Affichage d'un événement
-```typescript
-const handleEventPress = (event: Event) => {
-  router.push({ pathname: '/event', params: { slug: event.slug } })
-}
-```
-
-### Navigation vers un verset
-```typescript
-if (event.bibleReferences) {
-  dispatch({
-    type: 'NAVIGATE_TO_BIBLE_VIEW',
-    payload: parseReference(event.bibleReferences[0])
-  })
-}
-```
-
-## Personnalisation
-
-### Thème et couleurs
-- Chaque section a sa propre couleur
-- Support du mode sombre
-- Adaptation automatique des contrastes
-
-### Paramètres d'affichage
-- Hauteur de la timeline ajustable
-- Taille des événements configurable
-- Densité d'information variable
-
-## Performance
-
-### Optimisations
-- Chargement unique des données au démarrage
-- Rendu conditionnel des événements visibles
-- Utilisation de `InteractionManager` pour les animations
-- Mise en cache des calculs de position
-
-## Intégrations
-
-### Avec la recherche
-- Recherche d'événements via SearchTab
-- Filtrage par période ou type
-- Navigation directe vers l'événement
-
-### Avec la Bible
-- Liens vers les passages bibliques
-- Contexte historique pour la lecture
-- Références croisées
-
-## Points d'extension
-
-Pour ajouter de nouveaux événements :
-1. Modifier le fichier `events.txt`
-2. Respecter la structure TranslatedText
-3. Définir les années et le type
-4. Ajouter les références bibliques
-
-## Dépendances clés
-
-- `react-native-reanimated` : Animations performantes
-- `~common/sheet` : Modales sheet
-- `expo-asset` : Chargement des données
-- `expo-haptics` : Retour haptique
-- `date-fns` : Manipulation des dates

@@ -1,114 +1,82 @@
-import useTimelineLanguage from './useTimelineLanguage'
-import { getLegacyLocalizedField } from '~helpers/languageUtils'
+import { findTimelinePeriod } from '@bible-strong/resource-domain/timeline-stage'
 import { produce } from 'immer'
-import { useAtom } from 'jotai/react'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import React from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { useQuery } from '@tanstack/react-query'
-import { subscribeToHardwareBackPress } from '~helpers/hardwareBackPress'
-import { TimelineTab, useIsCurrentTab } from '~state/tabs'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import { timelineEventsQueryOptions } from './timelineEventsQuery'
-import TimelineEventDetailView from './TimelineEventDetailView'
-import TimelineHomeScreen from './TimelineHomeScreen'
-import TimelineScreen from './TimelineScreen'
-import { TimelineEvent } from './types'
+import { activeTabIdAtom, TimelineTab } from '~state/tabs'
+import TimelineStageScreen from './TimelineStageScreen'
+import type { TimelineStagePosition } from './TimelineStage'
+import { timelineUnderSheetAtom } from './timelineStageAtoms'
+import useTimelineLanguage from './useTimelineLanguage'
 
 interface Props {
   timelineAtom: PrimitiveAtom<TimelineTab>
 }
 
+/** A tab keeps the year it shows once the view has come to rest. */
+const REMEMBER_AFTER = 600
+
+/** The timeline in a tab: it opens where the tab was left, and names the period it shows. */
 const TimelineTabScreen = ({ timelineAtom }: Props) => {
-  const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
-  const language = useTimelineLanguage()
+  const preferredLanguage = useTimelineLanguage()
   const [timelineTab, setTimelineTab] = useAtom(timelineAtom)
-  const isCurrentTab = useIsCurrentTab()
-  const { data: sections } = useQuery(timelineEventsQueryOptions)
+  const language = timelineTab.data.language ?? preferredLanguage
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  // Tabs opened before the timeline had a single axis name a period by its index.
+  const [start] = useState(() => {
+    const { eventSlug, year, sectionIndex } = timelineTab.data
+    if (eventSlug) return { event: eventSlug }
+    if (year !== undefined) return { year }
+    if (sectionIndex !== undefined) return { period: String(sectionIndex + 1) }
+    return undefined
+  })
 
-  const eventsWithSection = sections?.flatMap((section, sectionIndex) =>
-    section.events.map(event => ({ ...event, sectionIndex }))
+  useEffect(() => () => clearTimeout(timer.current), [])
+
+  // A tab opened on an event shows it, in its sheet over the timeline, once the tab is in front.
+  const isCurrent = useAtomValue(activeTabIdAtom) === timelineTab.id
+  const pushRouteOnce = usePushRouteOnce()
+  const setUnderSheet = useSetAtom(timelineUnderSheetAtom)
+  const startEventOpened = useRef(false)
+  const openStartEvent = useEffectEvent(() => {
+    if (startEventOpened.current || !start?.event) return
+    startEventOpened.current = true
+    setUnderSheet(true)
+    pushRouteOnce({ pathname: '/event', params: { slug: start.event, language } })
+  })
+  useEffect(() => {
+    if (isCurrent) openStartEvent()
+  }, [isCurrent])
+
+  const remember = ({ period, year }: TimelineStagePosition) => {
+    clearTimeout(timer.current)
+    timer.current = setTimeout(() => {
+      setTimelineTab(
+        produce(draft => {
+          draft.title = period
+            ? (findTimelinePeriod(period)?.title[language] ?? t('Chronologie de la Bible'))
+            : t('Chronologie de la Bible')
+          draft.data.year = period ? year : undefined
+          draft.data.eventSlug = undefined
+          draft.data.event = undefined
+          draft.data.sectionIndex = undefined
+        })
+      )
+    }, REMEMBER_AFTER)
+  }
+
+  return (
+    <TimelineStageScreen
+      languageOverride={timelineTab.data.language}
+      hasBackButton={false}
+      start={start}
+      onPositionChange={remember}
+    />
   )
-  const activeEvent =
-    eventsWithSection?.find(event => event.slug === timelineTab.data.eventSlug) ||
-    timelineTab.data.event
-
-  const goHome = () => {
-    setTimelineTab(
-      produce(draft => {
-        draft.title = t('Chronologie de la Bible')
-        draft.data.sectionIndex = undefined
-        draft.data.eventSlug = undefined
-        draft.data.event = undefined
-      })
-    )
-  }
-
-  const goToSection = (sectionIndex: number) => {
-    const section = sections?.[sectionIndex]
-
-    setTimelineTab(
-      produce(draft => {
-        draft.title = section
-          ? getLegacyLocalizedField(language, { fr: section.title, en: section.titleEn })
-          : t('Chronologie de la Bible')
-        draft.data.sectionIndex = sectionIndex
-        draft.data.eventSlug = undefined
-        draft.data.event = undefined
-      })
-    )
-  }
-
-  const goToEvent = (event: TimelineEvent) => {
-    pushRouteOnce({
-      pathname: '/event',
-      params: { slug: event.slug, language: timelineTab.data.language ?? language },
-    })
-  }
-
-  const goHomeOnBackPress = React.useEffectEvent(() => goHome())
-
-  React.useEffect(() => {
-    return subscribeToHardwareBackPress(() => {
-      if (!isCurrentTab(timelineAtom)) return false
-
-      if (timelineTab.data.eventSlug) {
-        return true
-      }
-
-      if (timelineTab.data.sectionIndex !== undefined) {
-        goHomeOnBackPress()
-        return true
-      }
-
-      return false
-    })
-  }, [isCurrentTab, timelineAtom, timelineTab.data.eventSlug, timelineTab.data.sectionIndex])
-
-  if (timelineTab.data.eventSlug) {
-    return (
-      <TimelineEventDetailView
-        languageOverride={timelineTab.data.language}
-        assistantScope={`tab:${timelineTab.id}`}
-        event={activeEvent}
-        onOpenEvent={goToEvent}
-      />
-    )
-  }
-
-  if (timelineTab.data.sectionIndex !== undefined) {
-    return (
-      <TimelineScreen
-        initialSectionIndex={timelineTab.data.sectionIndex}
-        onBackPress={goHome}
-        onSectionChange={goToSection}
-      />
-    )
-  }
-
-  return <TimelineHomeScreen hasBackButton={false} onSectionPress={goToSection} />
 }
 
 export default TimelineTabScreen

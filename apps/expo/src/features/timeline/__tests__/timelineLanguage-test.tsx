@@ -3,7 +3,6 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import { atom, createStore } from 'jotai/vanilla'
 import { Provider } from 'jotai/react'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import TimelineItem from '../TimelineItem'
 import { useTimelineTranslation } from '../useTimelineLanguage'
 
 const mockResourceLanguages = atom({ TIMELINE: 'fr' as ResourceLanguage })
@@ -20,25 +19,6 @@ jest.mock('react-i18next', () => ({
     },
   }),
 }))
-jest.mock('~themes/ThemeProvider', () => ({
-  useTheme: () => ({ fontFamily: { title: 'System' } }),
-}))
-jest.mock('~themes/styleValues', () => ({
-  resolveThemeColor: (_theme: unknown, color: string) => color,
-  resolveFontFamily: () => 'System',
-  titleFontStyle: () => ({ fontFamily: 'System', fontWeight: '700' }),
-}))
-jest.mock('~common/ui/Box', () => {
-  const React = jest.requireActual('react')
-  return { __esModule: true, default: (props: object) => React.createElement('Box', props) }
-})
-jest.mock('~common/ui/Text', () => {
-  const React = jest.requireActual('react')
-  return { __esModule: true, default: (props: object) => React.createElement('Text', props) }
-})
-jest.mock('~common/Link', () => ({ __esModule: true, default: () => null }))
-jest.mock('expo-image', () => ({ Image: () => null }))
-jest.mock('../timelinePeriodImages', () => ({ getTimelinePeriodImageSource: () => undefined }))
 
 beforeAll(() => {
   ;(
@@ -46,25 +26,8 @@ beforeAll(() => {
   ).IS_REACT_ACT_ENVIRONMENT = true
 })
 
-it('updates sections and date labels with the resource language while the app stays French', () => {
+it('writes the date labels in the resource language while the app stays French', () => {
   const store = createStore()
-  const period = {
-    id: 'first-generation',
-    image: '',
-    color: 'red',
-    startYear: -4000,
-    endYear: -2500,
-    interval: 100,
-    title: 'Première génération',
-    titleEn: 'First Generation',
-    sectionTitle: 'L’ère des patriarches',
-    sectionTitleEn: 'Age of Patriarchs',
-    subTitle: 'Création - 2500 avant J.-C.',
-    subTitleEn: 'Creation - 2500 B.C.',
-    description: '',
-    descriptionEn: '',
-    events: [],
-  }
   function DateProbe() {
     const { t } = useTimelineTranslation()
     return <>{t('Futur')}</>
@@ -74,21 +37,13 @@ it('updates sections and date labels with the resource language while the app st
     act(() => {
       tree = create(
         <Provider store={store}>
-          <TimelineItem {...period} goTo={0} />
           <DateProbe />
         </Provider>
       )
     })
-    expect(JSON.stringify(tree.toJSON())).toContain('Première génération')
+    expect(JSON.stringify(tree.toJSON())).toContain('fr:Futur')
     act(() => store.set(mockResourceLanguages, { TIMELINE: 'en' }))
-    const english = JSON.stringify(tree.toJSON())
-    expect(english).toContain('First Generation')
-    expect(english).toContain('Age of Patriarchs')
-    expect(english).toContain('Creation - 2500 B.C.')
-    expect(english).toContain('en:Futur')
-    expect(english).not.toContain('Première génération')
-    act(() => store.set(mockResourceLanguages, { TIMELINE: 'fr' }))
-    expect(JSON.stringify(tree.toJSON())).toContain('Première génération')
+    expect(JSON.stringify(tree.toJSON())).toContain('en:Futur')
   } finally {
     act(() => tree?.unmount())
   }

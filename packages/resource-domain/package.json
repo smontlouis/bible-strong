@@ -18,11 +18,14 @@
     "./strong-definition-presentation": "./src/strongDefinitionPresentation.ts",
     "./strong-identities": "./src/strongIdentities.ts",
     "./strong-lexicon": "./src/strongLexicon.ts",
+    "./timeline-dates": "./src/timelineDates.ts",
+    "./timeline-stage": "./src/timelineStage.ts",
     "./verse-study": "./src/verseStudy.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/**/*.node-test.ts"
+    "test": "tsx --test src/**/*.node-test.ts",
+    "timeline:layout": "node scripts/generate-timeline-layout.mjs"
   },
   "dependencies": {
     "@babel/runtime": "^7.28.4",

@@ -7,8 +7,8 @@ import {
   type TimelineIndexEvent,
   type TimelinePreviewData,
 } from './timeline.functions'
-import { formatTimelineDates } from './timelineDates'
-import type { TimelinePeriod } from './timelinePeriods'
+import { formatTimelineDates } from '@bible-strong/resource-domain/timeline-dates'
+import type { TimelinePeriod } from '@bible-strong/resource-domain/timeline-stage'
 import { buildTimelineEventPath } from './timelineRoutes'
 
 // One request per event and language for the life of the page.

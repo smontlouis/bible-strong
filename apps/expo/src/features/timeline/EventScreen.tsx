@@ -4,7 +4,9 @@ import { parseSourcedTimelineDates } from './sourcedDates'
 import type { EventDetailsProps } from './EventDetails'
 import useTimelineLanguage from './useTimelineLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
-import { useLocalSearchParams } from 'expo-router'
+import { useIsFocused, useLocalSearchParams } from 'expo-router'
+import { useSetAtom } from 'jotai/react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
@@ -14,6 +16,7 @@ import { timelineEventsQueryOptions } from './timelineEventsQuery'
 import TimelineEventDetailView from './TimelineEventDetailView'
 import { TimelineEvent } from './types'
 import { IS_FORM_SHEET } from '~helpers/constants'
+import { timelineShownEventAtom } from './timelineStageAtoms'
 
 const EventScreen = () => {
   const pushRouteOnce = usePushRouteOnce()
@@ -50,6 +53,13 @@ const EventScreen = () => {
       }
     : undefined
   const event = metadata || directEvent
+
+  // The timeline under this sheet, when it opened it, follows the event shown.
+  const isFocused = useIsFocused()
+  const setShownEvent = useSetAtom(timelineShownEventAtom)
+  useEffect(() => {
+    if (isFocused && params.slug) setShownEvent({ slug: params.slug })
+  }, [isFocused, params.slug, setShownEvent])
 
   const openEvent = (nextEvent: TimelineEvent) => {
     pushRouteOnce({

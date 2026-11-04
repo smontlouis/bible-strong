@@ -1,14 +1,14 @@
-// Rebuilds features/timeline/timelineLayout.json from the timeline bundled with the study
-// workspace. The Timeline publication carries no placement; the workspace does.
+// Rebuilds src/timelineLayout.json from the timeline bundled with the study workspace. The
+// Timeline publication carries no placement; the workspace does.
 //
-//   node apps/site/scripts/generate-timeline-layout.mjs
+//   yarn workspace @bible-strong/resource-domain timeline:layout
 import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const site = join(dirname(fileURLToPath(import.meta.url)), '..')
-const source = join(site, '../expo/src/assets/timeline/events.txt')
-const target = join(site, 'features/timeline/timelineLayout.json')
+const domain = join(dirname(fileURLToPath(import.meta.url)), '..')
+const source = join(domain, '../../apps/expo/src/assets/timeline/events.txt')
+const target = join(domain, 'src/timelineLayout.json')
 
 const MAJOR = 1
 const FIXED_WIDTH = 2

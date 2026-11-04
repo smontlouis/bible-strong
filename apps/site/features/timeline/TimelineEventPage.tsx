@@ -9,9 +9,9 @@ import type {
   TimelineEventPageData,
   TimelinePagePassage,
 } from './timeline.functions'
-import { formatTimelineDates } from './timelineDates'
+import { formatTimelineDates } from '@bible-strong/resource-domain/timeline-dates'
 import TimelineEventList from './TimelineEventList'
-import { findTimelinePeriod } from './timelinePeriods'
+import { findTimelinePeriod } from '@bible-strong/resource-domain/timeline-stage'
 import {
   buildTimelineEventPath,
   buildTimelineEventPlacePath,

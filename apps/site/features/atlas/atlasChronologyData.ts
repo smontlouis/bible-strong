@@ -5,9 +5,9 @@ import {
   formatTimelineDates,
   formatTimelineYear,
   timelineYearSpan,
-} from '../timeline/timelineDates'
+} from '@bible-strong/resource-domain/timeline-dates'
 import { timelineEventThumbnail, type TimelinePaintings } from '../timeline/timelinePaintings'
-import { findTimelinePeriod } from '../timeline/timelinePeriods'
+import { findTimelinePeriod } from '@bible-strong/resource-domain/timeline-stage'
 import { buildTimelineEventPlacePath } from '../timeline/timelineRoutes'
 
 /** Below this many events, a scale would say nothing their cards do not. */

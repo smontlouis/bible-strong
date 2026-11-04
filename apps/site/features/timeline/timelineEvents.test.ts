@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { TIMELINE_MESSAGES } from './messages'
-import { compareTimelineEvents, timelineImageUrl, timelineParagraphs, timelineThumbnailUrl } from './timelineEvents'
-import { findTimelinePeriod, TIMELINE_PERIODS, timelinePeriodRank } from './timelinePeriods'
+import { timelineImageUrl, timelineParagraphs, timelineThumbnailUrl } from './timelineEvents'
 import {
   fitTimelinePassage,
   listTimelinePassages,
@@ -9,66 +8,6 @@ import {
   timelineExcerptVerses,
   timelinePassageLabel,
 } from './timelineScriptures'
-
-const event = (id: string, period: string, dates: string, slug = `event-${id}`) => ({
-  id,
-  slug,
-  period,
-  dates,
-})
-
-describe('Timeline order', () => {
-  const order = (events: ReturnType<typeof event>[]) =>
-    [...events].sort(compareTimelineEvents).map(({ id }) => id)
-
-  it('follows the periods, then the first year of each event', () => {
-    expect(
-      order([
-        event('5', '9', '27 AD'),
-        event('4', '2', '2298-2297 BC'),
-        event('3', '1', '3897-3825 BC'),
-        event('2', '1', '3954-3024 BC'),
-        event('1', '9', '100-44 BC'),
-      ])
-    ).toEqual(['2', '3', '4', '1', '5'])
-  })
-
-  it('keeps the narrative order of the events of one year', () => {
-    expect(
-      order([
-        event('1193', '9', '31 AD', 'the-resurrection'),
-        event('1147', '9', '31 AD', 'the-triumphal-entry'),
-        event('1189', '9', '31 AD', 'the-crucifixion'),
-        event('1146', '9', '31 AD', 'passion-week'),
-      ])
-    ).toEqual(['1146', '1147', '1189', '1193'])
-  })
-
-  it('closes a period with its undated events and an unknown period with the others', () => {
-    expect(
-      order([
-        event('9', '', '4000 BC'),
-        event('1259', '13', 'After Millenium'),
-        event('1255', '13', 'Future'),
-        event('1245', '13', '1844-'),
-        event('7', '13', 'someday'),
-        event('1244', '13', '1798-1929 AD'),
-      ])
-    ).toEqual(['1244', '1245', '1255', '1259', '7', '9'])
-  })
-})
-
-describe('Timeline periods', () => {
-  it('names the thirteen periods of the publication in both languages', () => {
-    expect(TIMELINE_PERIODS.map(period => period.id)).toEqual(
-      Array.from({ length: 13 }, (_, index) => String(index + 1))
-    )
-    expect(findTimelinePeriod('8')?.title).toEqual({ fr: 'L’Exil', en: 'The Exile' })
-    expect(findTimelinePeriod('14')).toBeUndefined()
-    expect(timelinePeriodRank('1')).toBeLessThan(timelinePeriodRank('13'))
-    expect(timelinePeriodRank('13')).toBeLessThan(timelinePeriodRank('unknown'))
-  })
-})
 
 describe('Timeline article text', () => {
   it('ends a paragraph on a blank line, whatever spaces surround it', () => {

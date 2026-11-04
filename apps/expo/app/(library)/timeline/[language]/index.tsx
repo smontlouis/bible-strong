@@ -1,6 +1,6 @@
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router'
 
-import TimelineHomeScreen from '~features/timeline/TimelineHomeScreen'
+import TimelineStageScreen from '~features/timeline/TimelineStageScreen'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import {
   buildPublicTimelineIndexPath,
@@ -24,7 +24,7 @@ const PublicTimelineIndexRoute = () => {
   if (requestedLanguage !== route.language) return <Redirect href={canonicalPath} />
 
   return (
-    <TimelineHomeScreen
+    <TimelineStageScreen
       languageOverride={route.language}
       onLanguageChange={language => router.replace(buildPublicTimelineIndexPath(language))}
     />

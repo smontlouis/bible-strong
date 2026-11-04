@@ -1,9 +1,9 @@
-import TimelineHomeScreen from '~features/timeline/TimelineHomeScreen'
+import TimelineStageScreen from '~features/timeline/TimelineStageScreen'
 import { LegacyPublicRouteRedirect } from '~navigation/LegacyPublicRouteRedirect'
 
 const TimelineHomeRoute = () => (
   <LegacyPublicRouteRedirect pathname="/timeline-home">
-    <TimelineHomeScreen />
+    <TimelineStageScreen />
   </LegacyPublicRouteRedirect>
 )
 

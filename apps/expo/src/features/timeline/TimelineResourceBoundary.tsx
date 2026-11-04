@@ -1,15 +1,13 @@
 import { createContext, useContext, type ReactNode } from 'react'
-import { useAtomValue } from 'jotai/react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import Loading from '~common/Loading'
-import Header from '~common/Header'
 import Box from '~common/ui/Box'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { databases } from '~helpers/databases'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
-import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import {
   getOfflineResourceQuerySignal,
   useOfflineResourceRegistry,
@@ -23,20 +21,11 @@ const TimelineDetailsContext = createContext<TimelineEventSummary[]>([])
 
 export const useTimelineDetails = () => useContext(TimelineDetailsContext)
 
-const TimelineResourceBoundary = ({
-  children,
-  hasBackButton,
-  onBackPress,
-}: {
-  children: ReactNode
-  hasBackButton?: boolean
-  onBackPress?: () => void
-}) => {
-  const { t } = useTranslation()
+/** The query of the events of the Timeline publication in one language. */
+export const useTimelineIndexQuery = (language: ResourceLanguage) => {
   const resources = useResourceAccess()
-  const language = useAtomValue(resourcesLanguageAtom).TIMELINE
   const resourceRegistry = useOfflineResourceRegistry()
-  const query = useQuery({
+  return useQuery({
     queryKey: [
       ...resourceQueryKeys.timeline(language),
       getOfflineResourceQuerySignal(resourceRegistry, {
@@ -48,6 +37,18 @@ const TimelineResourceBoundary = ({
     queryFn: () => resources.timeline.loadIndex(language),
     networkMode: 'always',
   })
+}
+
+/** Draws its children once the events of the publication are there, or says why they are not. */
+const TimelineResourceBoundary = ({
+  children,
+  language,
+}: {
+  children: ReactNode
+  language: ResourceLanguage
+}) => {
+  const { t } = useTranslation()
+  const query = useTimelineIndexQuery(language)
 
   if (query.isPending) {
     return (
@@ -60,11 +61,6 @@ const TimelineResourceBoundary = ({
   if (query.isError || !query.data || query.data.status === 'unavailable') {
     return (
       <Box className="overflow-hidden border-continuous flex-[1] bg-reverse">
-        <Header
-          hasBackButton={hasBackButton}
-          title={t('La Chronologie biblique')}
-          onCustomBackPress={onBackPress}
-        />
         <ResourceUnavailableView
           identity={{ kind: 'database', databaseId: 'TIMELINE', language }}
           title={t('La Chronologie biblique')}

@@ -2,14 +2,17 @@ import { absoluteSiteUrl, RESOURCE_LANGUAGES } from '../resources/publicSite'
 import { buildResourceHead } from '../resources/resourceHead'
 import { TIMELINE_MESSAGES } from './messages'
 import type { TimelineEventPageData, TimelineIndexPageData } from './timeline.functions'
-import { formatTimelineDates, parseTimelineDates } from './timelineDates'
+import {
+  formatTimelineDates,
+  parseTimelineDates,
+} from '@bible-strong/resource-domain/timeline-dates'
 import {
   buildTimelineEventPath,
   buildTimelineIndexPath,
   timelineEventBreadcrumbs,
 } from './timelineRoutes'
 import { shareCardExcerpt, shareCardPicture } from '../share/shareCardText'
-import { findTimelinePeriod } from './timelinePeriods'
+import { findTimelinePeriod } from '@bible-strong/resource-domain/timeline-stage'
 
 /** Title, description, canonical and language alternates of the timeline of a language. */
 export const buildTimelineIndexHead = (page: TimelineIndexPageData) => {

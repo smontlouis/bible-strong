@@ -1,4 +1,7 @@
-import type { ResourceLanguage } from '../resources/publicSite'
+// The datings of the Timeline publication, read and written the same way by the public site and
+// the application (ADR-0097).
+
+export type TimelineLanguage = 'fr' | 'en'
 
 /**
  * The dating of an event as the publication writes it. Years are negative before Christ.
@@ -97,7 +100,7 @@ const LABELS = {
 export const TIMELINE_FUTURE_YEAR = 2020
 
 /** Names a year of the drawn timeline. There is no year zero: it reads as the first year. */
-export const formatTimelineYear = (year: number, language: ResourceLanguage): string => {
+export const formatTimelineYear = (year: number, language: TimelineLanguage): string => {
   const labels = LABELS[language]
   if (year >= TIMELINE_FUTURE_YEAR) return labels.future
   const named = year === 0 ? 1 : year
@@ -117,7 +120,7 @@ export const formatTimelineYearNumber = (year: number): string => {
  * Writes a dating in the language of the page. The publication carries English era marks
  * in both languages; a dating outside its grammar is shown as written.
  */
-export const formatTimelineDates = (value: string, language: ResourceLanguage): string => {
+export const formatTimelineDates = (value: string, language: TimelineLanguage): string => {
   const dates = parseTimelineDates(value)
   if (!dates) return value.trim()
   const labels = LABELS[language]

@@ -1,7 +1,7 @@
 import SiteLink from '@/components/SiteLink'
 import type { ResourceLanguage } from '../resources/publicSite'
 import type { TimelineEventLink } from './timeline.functions'
-import { formatTimelineDates } from './timelineDates'
+import { formatTimelineDates } from '@bible-strong/resource-domain/timeline-dates'
 import { buildTimelineEventPath } from './timelineRoutes'
 
 /** Events in chronological order, each linked to its page, hung on the rail of the timeline. */

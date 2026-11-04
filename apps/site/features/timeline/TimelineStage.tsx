@@ -15,22 +15,18 @@ import {
   formatTimelineYear,
   formatTimelineYearNumber,
   TIMELINE_FUTURE_YEAR,
-} from './timelineDates'
-import TimelineEventPanel from './TimelineEventPanel'
+} from '@bible-strong/resource-domain/timeline-dates'
 import {
+  findTimelinePeriod,
   TIMELINE_RULER_HEIGHT,
   timelineBandAt,
   timelinePeriodExtents,
   timelineTicks,
   timelineWidth,
   timelineXToYear,
-} from './timelineGeometry'
-import {
-  findTimelinePeriod,
-  TIMELINE_BANDS,
-  TIMELINE_INTRO_WIDTH,
-  TIMELINE_OUTRO_WIDTH,
-} from './timelinePeriods'
+} from '@bible-strong/resource-domain/timeline-stage'
+import TimelineEventPanel from './TimelineEventPanel'
+import { TIMELINE_BANDS, TIMELINE_INTRO_WIDTH, TIMELINE_OUTRO_WIDTH } from './timelinePeriods'
 import {
   buildTimelineEventPath,
   timelineEventAnchor,

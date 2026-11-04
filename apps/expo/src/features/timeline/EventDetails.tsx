@@ -1,12 +1,16 @@
+import { formatTimelineDates, timelineYearSpan } from '@bible-strong/resource-domain/timeline-dates'
+import { TIMELINE_LAYOUT } from '@bible-strong/resource-domain/timeline-stage'
 import { timelineContext } from '~features/study-assistant/referenceContext'
 import { titleFontStyle } from '~themes/styleValues'
 import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai/react'
+import { useRouter } from 'expo-router'
+import ListSection, { ListRow } from '~common/ui/ListSection'
 import useTimelineLanguage from './useTimelineLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
-import Box, { HStack, VStack } from '~common/ui/Box'
+import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import IconTile from '~common/ui/IconTile'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -31,6 +35,9 @@ import {
   getOfflineResourceQuerySignal,
   useOfflineResourceRegistry,
 } from '~features/resources/useOfflineResourceRegistry'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
+import { timelineUnderSheetAtom } from './timelineStageAtoms'
+import { useTimelineNeighbours } from './useTimelineNeighbours'
 export type EventDetailsProps = Pick<
   TimelineEventProps,
   'slug' | 'image' | 'title' | 'titleEn' | 'start' | 'end'
@@ -48,6 +55,59 @@ const Description = ({ description, article }: Partial<TimelineEventDetail>) => 
       )}
       {!!article && <Paragraph scale={-1}>{article}</Paragraph>}
     </StudySection>
+  )
+}
+
+/** Takes the reader to the place of an event on the timeline. */
+const LocateOnTimeline = ({ slug, language }: { slug: string; language: ResourceLanguage }) => {
+  const { t } = useTranslation()
+  const router = useRouter()
+  return (
+    <TouchableBox
+      className="self-start py-[4px]"
+      accessibilityRole="link"
+      onPress={() => router.dismissTo({ pathname: '/timeline', params: { event: slug, language } })}
+    >
+      <Text className="text-[15px] font-semibold text-link">{t('timeline.event.locate')}</Text>
+    </TouchableBox>
+  )
+}
+
+/** The events before and after this one, one step away, as the public site shows them. */
+const Neighbours = ({ slug, language }: { slug: string; language: ResourceLanguage }) => {
+  const { t } = useTranslation()
+  const router = useRouter()
+  const { previous, next } = useTimelineNeighbours(slug, language)
+  if (!previous && !next) return null
+  // The sheet turns to the neighbour rather than piling one more page on the way back.
+  const step = (neighbour: string) => router.setParams({ slug: neighbour })
+  return (
+    <ListSection title={t('timeline.event.neighbours')} className="mx-[0px] mt-[26px]">
+      {[
+        previous && (
+          <ListRow
+            key="previous"
+            icon={<FeatherIcon name="arrow-left" size={18} color="grey" />}
+            iconTint="grey"
+            label={previous.title}
+            description={`${t('timeline.event.previous')} · ${formatTimelineDates(previous.dates, language)}`}
+            hasChevron={false}
+            onPress={() => step(previous.slug)}
+          />
+        ),
+        next && (
+          <ListRow
+            key="next"
+            icon={<FeatherIcon name="arrow-right" size={18} color="grey" />}
+            iconTint="grey"
+            label={next.title}
+            description={`${t('timeline.event.next')} · ${formatTimelineDates(next.dates, language)}`}
+            hasChevron={false}
+            onPress={() => step(next.slug)}
+          />
+        ),
+      ].filter(Boolean)}
+    </ListSection>
   )
 }
 
@@ -92,6 +152,8 @@ export const EventDetailsContent = ({
     networkMode: 'always',
   })
   const event = eventQuery.data?.status === 'available' ? eventQuery.data.detail : undefined
+  // Under a timeline that opened this sheet, the event is already shown on it.
+  const underTimeline = useAtomValue(timelineUnderSheetAtom)
 
   useAssistantResourceContext(assistantScope, timelineContext(event, resourceLanguage))
 
@@ -137,15 +199,22 @@ export const EventDetailsContent = ({
           <IconTile bg={timelineUniverse.background}>
             <FeatherIcon name="clock" size={18} color={timelineUniverse.foreground} />
           </IconTile>
-          <Text className="flex-[1] text-[15px] text-grey">{date}</Text>
+          <Text className="flex-[1] text-[15px] text-grey">
+            {/* Written from the dating of the publication, as on the timeline and the site. */}
+            {event.dates ? formatTimelineDates(event.dates, resourceLanguage) : date}
+          </Text>
         </HStack>
         <Text className="text-[30px] leading-[38px]" style={titleFontStyle(stylingTheme)}>
           {getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
         </Text>
+        {!underTimeline && (TIMELINE_LAYOUT[slug] || timelineYearSpan(event.dates)) && (
+          <LocateOnTimeline slug={slug} language={resourceLanguage} />
+        )}
       </VStack>
       <Description {...event} />
       <Media {...event} pictures={otherPictures} onOpenEvent={onOpenEvent} />
       <StudyLinksSections kind="timeline" subjectKey={slug} language={resourceLanguage} />
+      <Neighbours slug={slug} language={resourceLanguage} />
     </Box>
   )
 }

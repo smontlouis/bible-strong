@@ -19,16 +19,19 @@ import { readResource } from '../resources/resourceApi'
 import { notingStaleAnswers } from '../resources/staleAnswers'
 import { resourceResponseCacheControl } from '../resources/staleResponse'
 import { TIMELINE_MESSAGES } from './messages'
-import { formatTimelineDates, timelineYearSpan } from './timelineDates'
-import { compareTimelineEvents, timelineParagraphs } from './timelineEvents'
-import { estimateTimelinePillWidth, placeTimelineEvents } from './timelineGeometry'
-import { LAYOUT_CARD, LAYOUT_FIXED_WIDTH, TIMELINE_LAYOUT } from './timelineLayout'
+import { formatTimelineDates } from '@bible-strong/resource-domain/timeline-dates'
+import {
+  compareTimelineEvents,
+  drawTimelineEvents,
+  findTimelinePeriod,
+} from '@bible-strong/resource-domain/timeline-stage'
+import { timelineParagraphs } from './timelineEvents'
 import {
   readTimelinePaintings,
   timelineEventPictures,
   timelineEventThumbnail,
 } from './timelinePaintings'
-import { findTimelinePeriod, TIMELINE_BANDS, TIMELINE_CANVAS_WIDTH } from './timelinePeriods'
+import { TIMELINE_BANDS, TIMELINE_CANVAS_WIDTH } from './timelinePeriods'
 import { isTimelineSlug } from './timelineRoutes'
 import {
   fitTimelinePassage,
@@ -131,40 +134,20 @@ export const loadTimelineIndexPage = createServerFn({ method: 'GET' })
     ])
     if (!events.length) throw notFound()
 
-    const { placements, height } = placeTimelineEvents(
-      TIMELINE_BANDS,
-      events.flatMap(event => {
-        const drawn = TIMELINE_LAYOUT[event.slug]
-        const span = drawn
-          ? { startYear: drawn[0], endYear: drawn[1] }
-          : timelineYearSpan(event.dates)
-        // An event without years stays in the list of its period.
-        if (!span) return []
-        const flags = drawn?.[2] ?? 0
-        return [
-          {
-            key: event.slug,
-            ...span,
-            card: (flags & LAYOUT_CARD) !== 0,
-            fixedWidth: (flags & LAYOUT_FIXED_WIDTH) !== 0,
-            pillWidth: estimateTimelinePillWidth(event.title),
-          },
-        ]
-      })
-    )
+    // An event without years stays in the list of its period.
+    const { boxes, height } = drawTimelineEvents(TIMELINE_BANDS, events)
 
     const periods: TimelineIndexPageData['periods'] = []
     for (const event of events) {
       const id = findTimelinePeriod(event.period)?.id ?? ''
-      const placement = placements.get(event.slug)
-      const card = ((TIMELINE_LAYOUT[event.slug]?.[2] ?? 0) & LAYOUT_CARD) !== 0
-      const thumbnail = card ? timelineEventThumbnail(paintings, event, 'w256') : undefined
+      const box = boxes.get(event.slug)
+      const thumbnail = box?.card ? timelineEventThumbnail(paintings, event, 'w256') : undefined
       const listed: TimelineIndexEvent = {
         ...toLink(event),
-        ...(placement
+        ...(box
           ? {
-              box: [placement.left, placement.top, placement.width],
-              ...(card ? { card } : {}),
+              box: [box.left, box.top, box.width],
+              ...(box.card ? { card: true } : {}),
               ...(thumbnail ? { thumbnail } : {}),
             }
           : {}),

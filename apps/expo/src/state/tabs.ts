@@ -203,8 +203,13 @@ export interface TimelineTab extends TabBase {
   type: 'timeline'
   data: {
     language?: 'fr' | 'en'
+    /** The year under the middle of the view, where the timeline reopens. */
+    year?: number
+    /** The period the tab opens on, by index: what tabs kept before the timeline had one axis. */
     sectionIndex?: number
+    /** The event the tab opens on. */
     eventSlug?: string
+    /** What tabs kept of their event before the timeline had one axis; no longer read. */
     event?: {
       dateLabel?: string
       slug: string
