@@ -37,6 +37,7 @@ describe('Timeline paintings', () => {
         srcSet:
           'https://media.bible-strong.app/timeline-paintings/isaac/abcdef/w768.webp 768w, https://media.bible-strong.app/timeline-paintings/isaac/abcdef/w1254.webp 1254w',
         caption: '',
+        painting: true,
       },
       {
         src: 'https://media.bible-strong.app/timeline-images/w1200/tomb.jpg.webp',

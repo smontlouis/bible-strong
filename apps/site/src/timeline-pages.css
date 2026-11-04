@@ -469,7 +469,11 @@
   height: 100%;
   flex: none;
   /* The colour of the period holds the place of a picture on its way. */
-  background: color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 22%, var(--resource-surface));
+  background: color-mix(
+    in srgb,
+    var(--timeline-period, var(--resource-accent)) 22%,
+    var(--resource-surface)
+  );
   object-fit: cover;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -685,7 +689,11 @@
 
 .timeline-map a:hover,
 .timeline-map a[aria-current] {
-  background: color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 15%, var(--resource-surface));
+  background: color-mix(
+    in srgb,
+    var(--timeline-period, var(--resource-accent)) 15%,
+    var(--resource-surface)
+  );
   color: var(--resource-ink);
 }
 
@@ -733,6 +741,8 @@
 }
 
 .timeline-panel__content {
+  display: flex;
+  flex-direction: column;
   animation: timeline-content-in 0.3s ease-out;
 }
 
@@ -743,12 +753,21 @@
   }
 }
 
-/* The small picture of the card stands in, blurred, until the full one has arrived. */
+/*
+ * The picture is square, as the paintings are, and shown whole; a picture of another shape
+ * stands on the blur. The small picture of the card stands in, blurred, until the full one has
+ * arrived. A wide panel shows it first.
+ */
 .timeline-panel__media {
   position: relative;
-  aspect-ratio: 16 / 10;
+  order: -1;
+  aspect-ratio: 1;
   overflow: hidden;
-  background: color-mix(in srgb, var(--timeline-period, var(--resource-accent)) 22%, var(--resource-surface))
+  background: color-mix(
+      in srgb,
+      var(--timeline-period, var(--resource-accent)) 22%,
+      var(--resource-surface)
+    )
     center / cover;
 }
 
@@ -763,16 +782,24 @@
   position: relative;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   animation: timeline-content-in 0.4s ease-out;
 }
 
+.timeline-panel__head,
 .timeline-panel__body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
-  padding: 20px 24px 26px;
+}
+
+.timeline-panel__head {
+  padding: 20px 24px 0;
+}
+
+.timeline-panel__body {
+  padding: 8px 24px 26px;
 }
 
 .timeline-panel__period {
@@ -935,8 +962,15 @@
     animation-name: timeline-sheet-in;
   }
 
+  /* The sheet opens on the name; the picture follows it, clear of the close button. */
+  .timeline-panel__head {
+    padding-right: 60px;
+  }
+
   .timeline-panel__media {
-    aspect-ratio: 16 / 7;
+    order: 0;
+    margin: 16px 24px 0;
+    border-radius: 12px;
   }
 }
 
@@ -1036,6 +1070,11 @@
   width: 100%;
   height: 100%;
   object-fit: scale-down;
+}
+
+/* A painting is square, and its frame too. */
+.timeline-figure--painting .timeline-figure__frame {
+  aspect-ratio: 1;
 }
 
 .timeline-figure figcaption {

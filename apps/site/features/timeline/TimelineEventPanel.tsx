@@ -89,6 +89,21 @@ export default function TimelineEventPanel({
       <div className="timeline-panel__scroll">
         {/* Keyed by event, so stepping to a neighbour replays the entrance of the content. */}
         <div key={event.slug} className="timeline-panel__content">
+          <div className="timeline-panel__head">
+            {period && (
+              <p className="timeline-panel__period">
+                <span aria-hidden="true" />
+                {period.title[language]}
+              </p>
+            )}
+            <h2 id="timeline-panel-title" ref={titleRef} tabIndex={-1}>
+              {event.title}
+            </h2>
+            <p className="timeline-panel__dates">{formatTimelineDates(event.dates, language)}</p>
+          </div>
+
+          {/* Square like the paintings, and whole: a wide panel shows it above the title, a
+              sheet on a phone under it, so that the sheet opens on the name. */}
           {(preview?.image ?? event.thumbnail) && (
             <div
               className="timeline-panel__media"
@@ -101,17 +116,6 @@ export default function TimelineEventPanel({
           )}
 
           <div className="timeline-panel__body">
-            {period && (
-              <p className="timeline-panel__period">
-                <span aria-hidden="true" />
-                {period.title[language]}
-              </p>
-            )}
-            <h2 id="timeline-panel-title" ref={titleRef} tabIndex={-1}>
-              {event.title}
-            </h2>
-            <p className="timeline-panel__dates">{formatTimelineDates(event.dates, language)}</p>
-
             {preview ? (
               <>
                 {preview.summary && <p className="timeline-panel__summary">{preview.summary}</p>}

@@ -42,7 +42,9 @@ const Figure = ({
   captionLang: string | undefined
   lazy?: boolean
 }) => (
-  <figure className="timeline-figure">
+  <figure
+    className={image.painting ? 'timeline-figure timeline-figure--painting' : 'timeline-figure'}
+  >
     <div className="timeline-figure__frame">
       <img
         src={image.src}
@@ -51,7 +53,7 @@ const Figure = ({
           : {})}
         alt={alt}
         width={720}
-        height={480}
+        height={image.painting ? 720 : 480}
         loading={lazy ? 'lazy' : undefined}
         decoding="async"
         referrerPolicy="no-referrer"

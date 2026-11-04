@@ -2,7 +2,10 @@ import SiteLink from '@/components/SiteLink'
 import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from 'react'
 import type { ResourceLanguage } from '../resources/publicSite'
 import { TIMELINE_MESSAGES } from '../timeline/messages'
-import type { AtlasChronology as AtlasChronologyData, AtlasChronologyEvent } from './atlasChronologyData'
+import type {
+  AtlasChronology as AtlasChronologyData,
+  AtlasChronologyEvent,
+} from './atlasChronologyData'
 import { ATLAS_MESSAGES, countLabel } from './messages'
 
 /** Up to this many events stand side by side; more run in a strip that scrolls. */
@@ -33,7 +36,7 @@ const Thumbnail = ({ src }: { src?: string }) => (
         src={src}
         alt=""
         width={480}
-        height={320}
+        height={480}
         loading="lazy"
         decoding="async"
         referrerPolicy="no-referrer"

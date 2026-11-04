@@ -95,7 +95,7 @@ export const timelineEventPictures = (
   slug: string,
   images: readonly { caption: string; file: string }[],
   painting: TimelinePainting | undefined
-): { src: string; srcSet?: string; caption: string }[] => {
+): { src: string; srcSet?: string; caption: string; painting?: true }[] => {
   const shown = images.filter(image => !painting || painting.documents.includes(image.file))
   const pictures = shown.flatMap(image => {
     const src = timelineImageUrl(image.file)
@@ -109,6 +109,8 @@ export const timelineEventPictures = (
           // pixels per point.
           srcSet: `${timelinePaintingUrl(slug, painting.hash, 'w768')} 768w, ${timelinePaintingUrl(slug, painting.hash, 'w1254')} 1254w`,
           caption: '',
+          // Paintings are square.
+          painting: true as const,
         },
         ...pictures,
       ]

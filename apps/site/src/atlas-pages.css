@@ -844,10 +844,12 @@ a.atlas-passage:hover {
   }
 }
 
+/* Square like the paintings of the timeline, and whole; a picture of another shape stands on the
+   accent. */
 .atlas-chronology__frame {
   display: block;
   overflow: hidden;
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 1;
   border-radius: 12px;
   background: var(--resource-accent-soft);
 }
@@ -855,7 +857,7 @@ a.atlas-passage:hover {
 .atlas-chronology__frame img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .atlas-chronology__dates {

@@ -294,7 +294,8 @@ export type TimelineEventPageData = {
   paragraphs: string[]
   /** Plain text for metadata. */
   description: string
-  images: { src: string; srcSet?: string; caption: string }[]
+  /** `painting` marks the painting of the event, which is square. */
+  images: { src: string; srcSet?: string; caption: string; painting?: true }[]
   passages: TimelinePagePassage[]
   studyLinks: StudyLinkItem[]
   /** The Bible the passages are quoted from and open in. */
@@ -354,6 +355,7 @@ export const loadTimelineEventPage = createServerFn({ method: 'GET' })
       images: timelineEventPictures(slug, event.images, paintings[slug]).map(picture => ({
         src: picture.src,
         ...(picture.srcSet ? { srcSet: picture.srcSet } : {}),
+        ...(picture.painting ? { painting: true as const } : {}),
         caption: singleLine(picture.caption),
       })),
       passages,
