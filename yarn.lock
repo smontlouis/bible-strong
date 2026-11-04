@@ -2561,13 +2561,13 @@ __metadata:
     "@react-native-clipboard/clipboard": "npm:^1.14.0"
     "@react-native-community/cli-config": "npm:^13.6.4"
     "@react-native-community/netinfo": "npm:12.0.1"
-    "@react-native-firebase/analytics": "npm:26.4.0"
-    "@react-native-firebase/app": "npm:26.4.0"
-    "@react-native-firebase/app-check": "npm:26.4.0"
-    "@react-native-firebase/auth": "npm:26.4.0"
-    "@react-native-firebase/firestore": "npm:26.4.0"
-    "@react-native-firebase/remote-config": "npm:26.4.0"
-    "@react-native-firebase/storage": "npm:26.4.0"
+    "@react-native-firebase/analytics": "npm:26.4.1"
+    "@react-native-firebase/app": "npm:26.4.1"
+    "@react-native-firebase/app-check": "npm:26.4.1"
+    "@react-native-firebase/auth": "npm:26.4.1"
+    "@react-native-firebase/firestore": "npm:26.4.1"
+    "@react-native-firebase/remote-config": "npm:26.4.1"
+    "@react-native-firebase/storage": "npm:26.4.1"
     "@react-native-google-signin/google-signin": "npm:^16.0.0"
     "@react-native-masked-view/masked-view": "patch:@react-native-masked-view/masked-view@npm%3A0.3.2#~/.yarn/patches/@react-native-masked-view-masked-view-npm-0.3.2-7e49df0087.patch"
     "@react-native/jest-preset": "npm:0.88.0"
@@ -2674,7 +2674,7 @@ __metadata:
     react-native-gesture-handler: "npm:~3.3.0"
     react-native-keyboard-controller: "npm:1.22.7"
     react-native-mmkv: "npm:4.3.2"
-    react-native-nitro-modules: "npm:^0.37.1"
+    react-native-nitro-modules: "npm:^0.37.2"
     react-native-reanimated: "npm:4.7.0"
     react-native-reanimated-carousel: "npm:^5.2.0"
     react-native-reanimated-dnd: "patch:react-native-reanimated-dnd@npm%3A2.0.0#~/.yarn/patches/react-native-reanimated-dnd-npm-2.0.0-b5a7ddfd0c.patch"
@@ -11245,37 +11245,37 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-firebase/analytics@npm:26.4.0":
-  version: 26.4.0
-  resolution: "@react-native-firebase/analytics@npm:26.4.0"
+"@react-native-firebase/analytics@npm:26.4.1":
+  version: 26.4.1
+  resolution: "@react-native-firebase/analytics@npm:26.4.1"
   dependencies:
     superstruct: "npm:^2.0.2"
   peerDependencies:
-    "@react-native-firebase/app": 26.4.0
+    "@react-native-firebase/app": 26.4.1
     expo: ">=47.0.0"
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: 10c0/635ad0909c594090127e152fb47c406b879a2e6984221a45003b5d175c14a502df6fa5e7b505847f62c380c9a10c9f328b8117f6fba3dbd6636de9bb83a63ca0
+  checksum: 10c0/75933254291e06481c17b51040fb3c025829a79b53ee4a4cb0764697d48627957120570b5b603b02b3545b3cb73c1da0f48b894210e1ecc2c68e8e62923aa673
   languageName: node
   linkType: hard
 
-"@react-native-firebase/app-check@npm:26.4.0":
-  version: 26.4.0
-  resolution: "@react-native-firebase/app-check@npm:26.4.0"
+"@react-native-firebase/app-check@npm:26.4.1":
+  version: 26.4.1
+  resolution: "@react-native-firebase/app-check@npm:26.4.1"
   peerDependencies:
-    "@react-native-firebase/app": 26.4.0
+    "@react-native-firebase/app": 26.4.1
     expo: ">=47.0.0"
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: 10c0/96857b86bf58abfc50d96a366624abb4a61fec293406b7cb2c9c3358f50fdfc9c1d009df65d8304c9a604a0a3905dc1b98232021d9c7583724681cf3e1f80daa
+  checksum: 10c0/4c039af549411a7a137a0a897ad7a7e41b9ad20a592cf10e09c220d3aa2aa41f7b6f06e8c20ea9325dee8c44afcca63f34152ae77811e72c54b09fcb515fa13f
   languageName: node
   linkType: hard
 
-"@react-native-firebase/app@npm:26.4.0":
-  version: 26.4.0
-  resolution: "@react-native-firebase/app@npm:26.4.0"
+"@react-native-firebase/app@npm:26.4.1":
+  version: 26.4.1
+  resolution: "@react-native-firebase/app@npm:26.4.1"
   dependencies:
     firebase: "npm:12.17.1"
   peerDependencies:
@@ -11285,56 +11285,56 @@ __metadata:
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: 10c0/da5efa6546ab953499c94ab263470a781f97351f23d361b6068a224f349f24a87d8e9c6fe88381ceffc293d75c35b79c065ddae3ceb00c92c52a825d441bdfe9
+  checksum: 10c0/c67f083a79630c5c30664ab803fa1a949d9866a9b48cfa1cc80743fc447e9f3ee9dccc7e83abe85969b9679c35f78a0eb3facb235b774305ce731bbce95c22fe
   languageName: node
   linkType: hard
 
-"@react-native-firebase/auth@npm:26.4.0":
-  version: 26.4.0
-  resolution: "@react-native-firebase/auth@npm:26.4.0"
+"@react-native-firebase/auth@npm:26.4.1":
+  version: 26.4.1
+  resolution: "@react-native-firebase/auth@npm:26.4.1"
   dependencies:
     "@expo/plist": "npm:^0.8.1"
   peerDependencies:
-    "@react-native-firebase/app": 26.4.0
+    "@react-native-firebase/app": 26.4.1
     expo: ">=47.0.0"
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: 10c0/23f52c65f6578ba096e865fba479d132847f7845e29aa9ff4d10476e2ee9de273d56941af1d9de5efd5f896b0abb23847772acd203a8cd4accd7b711abc16300
+  checksum: 10c0/c89f93894daa0db66a7c7bd885910f16767631911c8316a6e8bc04afffee215159ad7e3a80c19461507e1cccfe14c77daa253952c3f9ea5aeb12a397e158ba95
   languageName: node
   linkType: hard
 
-"@react-native-firebase/firestore@npm:26.4.0":
-  version: 26.4.0
-  resolution: "@react-native-firebase/firestore@npm:26.4.0"
+"@react-native-firebase/firestore@npm:26.4.1":
+  version: 26.4.1
+  resolution: "@react-native-firebase/firestore@npm:26.4.1"
   dependencies:
     react-native-url-polyfill: "npm:4.0.0"
   peerDependencies:
-    "@react-native-firebase/app": 26.4.0
-  checksum: 10c0/873ebb6201af3655820a9897cbe39904a8d76b942d8a4b02ececaab0e04cd967d7d010d55571bf3e06623ca3fd2f04246bbab3ffbb7e6a4a865d64a0ebba21f3
+    "@react-native-firebase/app": 26.4.1
+  checksum: 10c0/b0c24a5bda4d4f2bc734fb75861db2790c3bec25dd18bd302816e2592dc6c7157bbf2adccae8d75a4764321100ca6330645127a7c551e93f12fb22a52f5402af
   languageName: node
   linkType: hard
 
-"@react-native-firebase/remote-config@npm:26.4.0":
-  version: 26.4.0
-  resolution: "@react-native-firebase/remote-config@npm:26.4.0"
+"@react-native-firebase/remote-config@npm:26.4.1":
+  version: 26.4.1
+  resolution: "@react-native-firebase/remote-config@npm:26.4.1"
   dependencies:
     react-native-fetch-api: "npm:^3.0.0"
     text-encoding: "npm:^0.7.0"
     web-streams-polyfill: "npm:^4.2.0"
   peerDependencies:
-    "@react-native-firebase/analytics": 26.4.0
-    "@react-native-firebase/app": 26.4.0
-  checksum: 10c0/140cdd8ae7011e3741aaae309605440cab0ec03eb07993d1371b95f85113e4d6a0e7a41157374ccde82d2bf9059d8da2189b10bbf1b4d680d15b792a3c0b6923
+    "@react-native-firebase/analytics": 26.4.1
+    "@react-native-firebase/app": 26.4.1
+  checksum: 10c0/69e44298ce97a1dc3950df4a6454ca1c5fedded9b60fd86911522c1954ae624fb3d7ce6ead122e2d879ce82258a52df30ea254275e5dd2159565764a9c887140
   languageName: node
   linkType: hard
 
-"@react-native-firebase/storage@npm:26.4.0":
-  version: 26.4.0
-  resolution: "@react-native-firebase/storage@npm:26.4.0"
+"@react-native-firebase/storage@npm:26.4.1":
+  version: 26.4.1
+  resolution: "@react-native-firebase/storage@npm:26.4.1"
   peerDependencies:
-    "@react-native-firebase/app": 26.4.0
-  checksum: 10c0/5ddaad0b872b1f4dcd43e1d3238943554e76484b0dc36c43e4976024f0304879d8b5992feea98663449c605140b8097b4ae5e4a1403e95a3f9e2fc653ee12301
+    "@react-native-firebase/app": 26.4.1
+  checksum: 10c0/b5f2249c29d63447f0c6360429ecd62ecb60a736d7f39dc2bf8deb762839479ab7a611a1da67b8ea759b704052dae9e7dd10767fce027deb016bb6470d4d4a4f
   languageName: node
   linkType: hard
 
@@ -27570,6 +27570,13 @@ multer@emadalam/multer:
   languageName: node
   linkType: hard
 
+"nitro-core@npm:0.37.2":
+  version: 0.37.2
+  resolution: "nitro-core@npm:0.37.2"
+  checksum: 10c0/03f5a50ed5a88777e10851de80808f8576a49443b48cbd933016a87bbc4b6d1381c98701ae0ebfc1163624e33214a760e4033c132daf931268db6f0e8c2cafd1
+  languageName: node
+  linkType: hard
+
 "no-case@npm:^3.0.4":
   version: 3.0.4
   resolution: "no-case@npm:3.0.4"
@@ -29801,13 +29808,15 @@ multer@emadalam/multer:
   languageName: node
   linkType: hard
 
-"react-native-nitro-modules@npm:^0.37.1":
-  version: 0.37.1
-  resolution: "react-native-nitro-modules@npm:0.37.1"
+"react-native-nitro-modules@npm:^0.37.2":
+  version: 0.37.2
+  resolution: "react-native-nitro-modules@npm:0.37.2"
+  dependencies:
+    nitro-core: "npm:0.37.2"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10c0/5178f2ee891cb746b084fdf382b6020e366d8e4a81922a3f1d60a453d34fca6ebb1b00c4c28785c36385bc182ab76a30cba70441c39abbc25d3ad54db612e46e
+  checksum: 10c0/226396e7e355e4c1962b8f8742eea9efd6f04bc322b264b7d6133757c16a59d431005610ca2f4dd2e7ef125cc5e05e5c3be042a1bb0d5846b995f77af6647541
   languageName: node
   linkType: hard
 
