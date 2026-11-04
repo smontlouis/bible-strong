@@ -170,7 +170,7 @@ export const EventDetailsContent = ({
   }
 
   const timelineUniverse = resolveUniverseColors(stylingTheme.colors, 'timeline')
-  // The first picture is shown large at the top; the gallery below only shows the others.
+  // The first picture is shown large under the title; the gallery below only shows the others.
   const pictures: TimelinePicture[] = known
     ? getTimelineEventPictures(slug, event.images, paintings?.[slug])
     : []
@@ -181,20 +181,6 @@ export const EventDetailsContent = ({
   return (
     <Box className="overflow-hidden border-continuous">
       <VStack className="gap-[10px] pt-[2px] pb-[4px]">
-        {cover && (
-          <VStack className="mb-[6px] gap-[8px]">
-            <Image
-              style={{ width: '100%', aspectRatio: 1, borderRadius: radii.card }}
-              source={{ uri: cover.uri }}
-              // A painting fills its square; a picture of the publication keeps its own shape.
-              contentFit={painted ? 'cover' : 'contain'}
-              accessibilityLabel={getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
-            />
-            {!!cover.caption && (
-              <Text className="text-center text-[13px] text-grey">{cover.caption}</Text>
-            )}
-          </VStack>
-        )}
         <HStack className="items-center gap-[10px]">
           <IconTile bg={timelineUniverse.background}>
             <FeatherIcon name="clock" size={18} color={timelineUniverse.foreground} />
@@ -209,6 +195,20 @@ export const EventDetailsContent = ({
         </Text>
         {!underTimeline && (TIMELINE_LAYOUT[slug] || timelineYearSpan(event.dates)) && (
           <LocateOnTimeline slug={slug} language={resourceLanguage} />
+        )}
+        {cover && (
+          <VStack className="mt-[6px] gap-[8px]">
+            <Image
+              style={{ width: '100%', aspectRatio: 1, borderRadius: radii.card }}
+              source={{ uri: cover.uri }}
+              // A painting fills its square; a picture of the publication keeps its own shape.
+              contentFit={painted ? 'cover' : 'contain'}
+              accessibilityLabel={getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
+            />
+            {!!cover.caption && (
+              <Text className="text-center text-[13px] text-grey">{cover.caption}</Text>
+            )}
+          </VStack>
         )}
       </VStack>
       <Description {...event} />
