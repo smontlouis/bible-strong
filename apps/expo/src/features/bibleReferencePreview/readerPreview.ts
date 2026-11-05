@@ -1,11 +1,13 @@
 import { getDefaultDictionaryWork } from '~features/resources/dictionaryAccess'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import { Platform } from 'react-native'
 import type { RelationEndpoint } from '~features/studyRelations/domain'
 import verseToReference from '~helpers/verseToReference'
 import type { PreviewRequest } from './state'
 
-/** Individual linked reading content can be previewed on Web. */
+/**
+ * The preview the web shows of an object linked to the reading, in place of its page. Whether to
+ * preview is the rule of the one asking (the Reader intents read it from `world.platform`).
+ */
 export function createReaderPreview(
   endpoint: RelationEndpoint,
   version: string,
@@ -16,7 +18,6 @@ export function createReaderPreview(
     dictionary: 'fr',
   }
 ): PreviewRequest | undefined {
-  if (Platform.OS !== 'web') return
   if (endpoint.type === 'externalLink')
     return {
       kind: 'link',

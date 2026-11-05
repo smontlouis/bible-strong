@@ -1,4 +1,4 @@
-import { useDispatch } from './DispatchProvider'
+import { useReaderIntent } from './useReaderIntent'
 import { scaleFontSize } from './scaleFontSize'
 import type { SelectedCode, Verse } from '~common/types'
 import { radii } from '~common/ui/surfaces'
@@ -14,7 +14,7 @@ import {
   collectStrongSelectionMorphologies,
   type StrongSelectionMorphology,
 } from '~helpers/strongSelection'
-import { dispatchStrongSelection } from './strongSelectionAction'
+import { openStrongWord } from './strongSelectionAction'
 import UntranslatedStrongMarker from './UntranslatedStrongMarker'
 
 interface Props {
@@ -34,7 +34,7 @@ const StructuredInterlinearVerse = ({
   selectedCode,
   mode,
 }: Props) => {
-  const dispatch = useDispatch()
+  const sendReaderIntent = useReaderIntent()
   const colors = settings.colors[settings.theme]
   const tokens = verse.InterlinearTokens ?? []
   const openStrongSelection = (
@@ -43,7 +43,7 @@ const StructuredInterlinearVerse = ({
     morphologies: StrongSelectionMorphology[],
     occurrenceId: string
   ) => {
-    dispatchStrongSelection(dispatch, identities, verse.Livre, version, {
+    openStrongWord(sendReaderIntent, identities, verse.Livre, version, {
       occurrenceId,
       word,
       chapter: verse.Chapitre,

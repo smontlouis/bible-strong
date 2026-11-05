@@ -2,10 +2,8 @@ import React, { useEffect } from 'react'
 import { keyframes, styled } from 'goober'
 
 import {
-  NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_VERSE_STUDY_RELATIONS,
   OPEN_BOOKMARK_MODAL,
-  OPEN_CANONICAL_BIBLE_NOTE,
   OPEN_CROSS_VERSION_MODAL,
   OPEN_VERSE_TAGS_MODAL,
 } from './dispatch'
@@ -19,6 +17,7 @@ import RelationsText from './RelationsText'
 import TagsIndicator from './TagsIndicator'
 import { RootState } from '~redux/modules/reducer'
 import { useDispatch } from './DispatchProvider'
+import { useReaderIntent } from './useReaderIntent'
 import { Bookmark, SelectedCode, StudyNavigateBibleType, Verse as TVerse } from '~common/types'
 import { RootStyles, TaggedVerse, VerseRelationItem } from './BibleDOMWrapper'
 import { BibleStrongRef } from './BibleStrongReference'
@@ -33,10 +32,6 @@ import StructuredInterlinearVerse from './StructuredInterlinearVerse'
 import ReverseInterlinearVerse from './ReverseInterlinearVerse'
 import VerseTags from './VerseTags'
 import { useTranslations } from './TranslationsContext'
-import {
-  getRelationItemNavigationActions,
-  getVerseStudyRelationsPayload,
-} from './relationDisplayActions'
 import {
   buildCanonicalVersePresentation,
   shouldInsertCanonicalParagraphBreak,
@@ -431,6 +426,16 @@ export interface VerseContentProps {
 
 const getVerseKey = ({ Livre, Chapitre, Verset }: TVerse) => `${Livre}-${Chapitre}-${Verset}`
 
+const getVerseStudyRelationsPayload = (verseKey: string, relationItem?: VerseRelationItem) =>
+  relationItem
+    ? {
+        verseKey,
+        verseIds: relationItem.verseIds,
+        relationId: relationItem.relationId,
+        ...(relationItem.activeEndpoint && { endpoint: relationItem.activeEndpoint }),
+      }
+    : verseKey
+
 /** Bookmark, relation count and tag count, shown next to the verse number. */
 export const VerseMarkers = ({
   verse,
@@ -540,12 +545,6 @@ export const VerseEndContent = ({
 }: VerseContentProps) => {
   const dispatch = useDispatch()
 
-  const navigateToRelationItem = (item: VerseRelationItem) => {
-    getRelationItemNavigationActions(getVerseKey(verse), item).forEach(action => {
-      dispatch(action)
-    })
-  }
-
   const openCrossVersionModal = () => {
     if (otherVersionAnnotations && otherVersionAnnotations.length > 0) {
       dispatch({
@@ -576,7 +575,7 @@ export const VerseEndContent = ({
         !isSelectionMode && (
           <RelationsText
             settings={settings}
-            onClick={navigateToRelationItem}
+            verseKey={getVerseKey(verse)}
             relationItems={relationItems}
             isDisabled={annotationMode}
           />
@@ -676,7 +675,7 @@ const Verse = ({
   passageMedia,
   passageMediaGallerySections,
 }: Props) => {
-  const dispatch = useDispatch()
+  const sendReaderIntent = useReaderIntent()
   const translations = useTranslations()
 
   const isStrongModeVerse = Boolean(verse.StrongSpans)
@@ -691,9 +690,12 @@ const Verse = ({
     redWords,
     openCanonicalBibleNoteLabel: translations.openCanonicalBibleNote,
     onOpenCanonicalNote: note => {
-      dispatch({
-        type: OPEN_CANONICAL_BIBLE_NOTE,
-        payload: note,
+      void sendReaderIntent({
+        kind: 'open',
+        origin: 'text',
+        verseKey: getVerseKey(verse),
+        version,
+        target: { kind: 'canonical-note', note },
       })
     },
   })

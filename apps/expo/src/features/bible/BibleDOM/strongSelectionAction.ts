@@ -1,8 +1,8 @@
 import { createStrongSelection, type StrongSelectionContext } from '~helpers/strongSelection'
 import type { StrongIdentity } from '~helpers/strongIdentities'
-import { OPEN_STRONG_SELECTION } from './dispatch'
+import type { ReaderIntent } from '../readerIntent/types'
 
-type StrongSelectionDispatch = (action: { type: string; payload?: unknown }) => void
+type SendReaderIntent = (intent: ReaderIntent) => unknown
 
 export const getStrongSelectionWordFromTextSegment = (
   textSegment: string | undefined
@@ -14,18 +14,28 @@ export const getStrongSelectionWordFromTextSegment = (
   return word || undefined
 }
 
-export const dispatchStrongSelection = (
-  dispatch: StrongSelectionDispatch,
+/** A word of the text opens its Strong entries, with the verse and the version it was read in. */
+export const openStrongWord = (
+  send: SendReaderIntent,
   identities: readonly StrongIdentity[],
   book: string | number,
   version: string,
-  context?: StrongSelectionContext
+  context: StrongSelectionContext = {}
 ) => {
   const selection = createStrongSelection(identities, book, version, context)
   if (!selection) return
 
-  dispatch({
-    type: OPEN_STRONG_SELECTION,
-    payload: selection,
+  void send({
+    kind: 'open',
+    origin: 'text',
+    target: {
+      kind: 'strong-word',
+      identities: selection.identities,
+      ...(selection.morphologies && { morphologies: selection.morphologies }),
+      ...(selection.word && { word: selection.word }),
+      ...(selection.occurrenceId && { occurrenceId: selection.occurrenceId }),
+    },
+    verseKey: `${selection.book}-${context.chapter}-${context.verse}`,
+    version: selection.version,
   })
 }

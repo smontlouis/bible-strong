@@ -1,7 +1,7 @@
 import type React from 'react'
 import { styled } from 'goober'
 import { RootStyles } from './BibleDOMWrapper'
-import { useDispatch } from './DispatchProvider'
+import { useReaderIntent } from './useReaderIntent'
 import { SelectedCode } from '~common/types'
 import { RootState } from '~redux/modules/reducer'
 import { scaleFontSize } from './scaleFontSize'
@@ -9,7 +9,7 @@ import { noSelect } from './utils'
 import { getDisabledStyles } from './disabledStyles'
 import { scaleLineHeight } from './scaleLineHeight'
 import { getStrongReferenceNumber, type StrongIdentity } from '~helpers/strongIdentities'
-import { dispatchStrongSelection } from './strongSelectionAction'
+import { openStrongWord } from './strongSelectionAction'
 import type { StrongSelectionMorphology } from '~helpers/strongSelection'
 import UntranslatedStrongMarker from './UntranslatedStrongMarker'
 import { referenceHalo } from './referenceHalo'
@@ -92,7 +92,7 @@ export const BibleStrongRef = ({
   selectedCode?: SelectedCode | null
   settings: RootState['user']['bible']['settings']
 }) => {
-  const dispatch = useDispatch()
+  const sendReaderIntent = useReaderIntent()
   const numericReferences = identities.flatMap(identity => {
     const numericReference = getStrongReferenceNumber(identity.code)
     return numericReference ? [numericReference] : []
@@ -108,7 +108,7 @@ export const BibleStrongRef = ({
     event: React.MouseEvent<HTMLSpanElement> | React.KeyboardEvent<HTMLSpanElement>
   ) => {
     event.stopPropagation()
-    dispatchStrongSelection(dispatch, identities, book, version, {
+    openStrongWord(sendReaderIntent, identities, book, version, {
       occurrenceId,
       word,
       chapter,

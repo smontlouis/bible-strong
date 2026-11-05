@@ -13,12 +13,9 @@ import {
   type StrongSelectionMorphology,
 } from '~helpers/strongSelection'
 
-import { useDispatch } from './DispatchProvider'
+import { useReaderIntent } from './useReaderIntent'
 import { scaleFontSize } from './scaleFontSize'
-import {
-  dispatchStrongSelection,
-  getStrongSelectionWordFromTextSegment,
-} from './strongSelectionAction'
+import { openStrongWord, getStrongSelectionWordFromTextSegment } from './strongSelectionAction'
 import UntranslatedStrongMarker from './UntranslatedStrongMarker'
 
 interface Props {
@@ -30,7 +27,7 @@ interface Props {
 
 const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode }: Props) => {
   const isWide = useResponsiveWorkspace()
-  const dispatch = useDispatch()
+  const sendReaderIntent = useReaderIntent()
   const colors = settings.colors[settings.theme]
   const isHebrew = Number(verse.Livre) <= 39
   const layout = buildTokenizedVerseLayout(verse.Texte, verse.ReverseInterlinearSpans ?? [])
@@ -43,7 +40,7 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode }: Pro
     morphologies: StrongSelectionMorphology[],
     occurrenceId: string
   ) => {
-    dispatchStrongSelection(dispatch, identities, verse.Livre, version, {
+    openStrongWord(sendReaderIntent, identities, verse.Livre, version, {
       occurrenceId,
       word,
       chapter: verse.Chapitre,

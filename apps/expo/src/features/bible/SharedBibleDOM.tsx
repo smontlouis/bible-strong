@@ -100,7 +100,6 @@ const SharedBibleDOM = () => {
       afterVerses: {},
       chapterResources: [],
     },
-    setSelectedCode: noop,
     selectedCode: null,
     chapterEntities: [],
     chapterEntitiesLoaded: false,

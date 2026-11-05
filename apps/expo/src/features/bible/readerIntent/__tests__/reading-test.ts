@@ -15,6 +15,19 @@ jest.mock('~helpers/biblesDb', () => ({ getChapterVerseCount: jest.fn() }))
 jest.mock('~helpers/firebase', () => ({
   cdnUrl: (path: string) => `https://assets.example/${path}`,
 }))
+jest.mock('~features/resources/dictionaryAccess', () => ({
+  getDefaultDictionaryWork: () => 'westphal',
+}))
+jest.mock('~state/resourcesLanguage', () => ({
+  resourcesLanguageAtom: jest
+    .requireActual('jotai/vanilla')
+    .atom({ NAVE: 'fr', DICTIONNAIRE: 'fr' }),
+}))
+jest.mock('~i18n', () => ({
+  __esModule: true,
+  getLanguage: () => 'fr',
+  default: { t: (key: string) => key },
+}))
 
 import { getBook } from '~helpers/bibleBookCatalog'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
@@ -71,6 +84,11 @@ const setup = ({
     store,
     routes,
     openVersionSelector: openVersionSelector ?? (request => void versionSelectors.push(request)),
+    navigate: jest.fn(),
+    openStudyObject: jest.fn(),
+    openUrl: jest.fn(async () => undefined),
+    notify: jest.fn(),
+    t: key => key,
   }
   const reader: Reader = {
     now: () => ({
@@ -80,6 +98,9 @@ const setup = ({
       isFormSheet: false,
       keepControlsVisible: false,
       hasPlanDayStep: false,
+      hidesPersonalData: false,
+      parallelColumnVersions: [],
+      inlineCommentaries: { chips: [], indexes: [] },
       ...snapshot,
     }),
     surface: presentation => void surfaced.push(presentation),

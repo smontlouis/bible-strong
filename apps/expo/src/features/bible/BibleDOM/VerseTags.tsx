@@ -4,10 +4,11 @@ import Feather from '@expo/vector-icons/Feather'
 import { personalContentIcons } from '~common/personalContent'
 import { resolveUniverseColors } from '~themes/universeColors'
 import { scaleFontSize } from './scaleFontSize'
-import { OPEN_HIGHLIGHT_TAGS, NAVIGATE_TO_TAG } from './dispatch'
+import { OPEN_HIGHLIGHT_TAGS } from './dispatch'
 import { RootStyles, TaggedVerse } from './BibleDOMWrapper'
 import { RootState } from '~redux/modules/reducer'
 import { useDispatch } from './DispatchProvider'
+import { useReaderIntent } from './useReaderIntent'
 import { InlineItemContainer, InlineItemIconWrapper } from './InlineItem'
 import { noSelect } from './utils'
 
@@ -74,6 +75,7 @@ interface Props {
 
 const VerseTags = ({ tag, settings, isDisabled, onOpenTags }: Props) => {
   const dispatch = useDispatch()
+  const sendReaderIntent = useReaderIntent()
   const [isExpanded, setIsExpanded] = useState(false)
 
   if (!tag.tags?.length) {
@@ -102,10 +104,7 @@ const VerseTags = ({ tag, settings, isDisabled, onOpenTags }: Props) => {
 
   const handleTagClick = (tagId: string) => (e: React.MouseEvent) => {
     e.stopPropagation()
-    dispatch({
-      type: NAVIGATE_TO_TAG,
-      payload: { tagId },
-    })
+    void sendReaderIntent({ kind: 'open', origin: 'tag', target: { kind: 'tag', tagId } })
   }
 
   const handleExpandClick = (e: React.MouseEvent) => {

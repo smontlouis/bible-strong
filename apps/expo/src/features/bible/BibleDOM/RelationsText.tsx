@@ -8,6 +8,7 @@ import { RootStyles, VerseRelationItem } from './BibleDOMWrapper'
 import { InlineItemContainer } from './InlineItem'
 import truncate from './truncate'
 import { scaleFontSize } from './scaleFontSize'
+import { useReaderIntent } from './useReaderIntent'
 import { noSelect } from './utils'
 
 type SvgAsset = string | { uri?: string; default?: string }
@@ -24,7 +25,8 @@ const resolveSvgAssetUri = (source: SvgAsset): string =>
 interface Props {
   relationItems: VerseRelationItem[]
   settings: RootState['user']['bible']['settings']
-  onClick: (item: VerseRelationItem) => void
+  /** The verse the items stand beside: a Relation whose target is gone falls back on it. */
+  verseKey: string
   isDisabled?: boolean
 }
 
@@ -173,8 +175,26 @@ const RelationIcon = ({
   }
 }
 
-const RelationsText = ({ relationItems, settings, onClick, isDisabled }: Props) => {
+const RelationsText = ({ relationItems, settings, verseKey, isDisabled }: Props) => {
+  const sendReaderIntent = useReaderIntent()
   const [isExpanded, setIsExpanded] = useState(false)
+  // One intent per item: the module decides what its target opens, or what stands in for it.
+  const openRelationItem = (item: VerseRelationItem) => {
+    void sendReaderIntent({
+      kind: 'open',
+      origin: 'relation',
+      verseKey,
+      target: {
+        kind: 'endpoint',
+        endpoint: item.targetEndpoint,
+        relation: {
+          ...(item.activeEndpoint && { activeEndpoint: item.activeEndpoint }),
+          verseIds: item.verseIds,
+          targetExists: item.targetEntityExists,
+        },
+      },
+    })
+  }
   const visibleItems = isExpanded ? relationItems : relationItems.slice(0, 3)
   const hiddenCount = relationItems.length - visibleItems.length
   const hasMoreItems = relationItems.length > 3
@@ -207,11 +227,11 @@ const RelationsText = ({ relationItems, settings, onClick, isDisabled }: Props) 
             if (isDisabled || event.key !== 'Enter') return
             event.preventDefault()
             event.stopPropagation()
-            onClick(item)
+            openRelationItem(item)
           }}
           onClick={(e: React.MouseEvent) => {
             e.stopPropagation()
-            onClick(item)
+            openRelationItem(item)
           }}
         >
           <RelationIconWrapper settings={settings}>

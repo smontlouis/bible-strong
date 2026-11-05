@@ -6,8 +6,7 @@ import { formatCommentaryExcerpt } from '~features/commentaries/commentaryExcerp
 import type { InlineCommentaryChip } from '~features/commentaries/inlineCommentaryPlacement'
 import { radii } from '~common/ui/surfaces'
 import type { RootStyles } from './BibleDOMWrapper'
-import { useDispatch } from './DispatchProvider'
-import { OPEN_INLINE_COMMENTARY } from './dispatch'
+import { useReaderIntent } from './useReaderIntent'
 
 export type LabeledCommentaryChip = Omit<InlineCommentaryChip, 'sections'> & {
   label: string
@@ -21,7 +20,7 @@ export default function InlineCommentaryChips({
   chips?: readonly LabeledCommentaryChip[]
   settings: RootStyles['settings']
 }) {
-  const dispatch = useDispatch()
+  const sendReaderIntent = useReaderIntent()
   if (!chips?.length) return null
   const colors = settings.colors[settings.theme]
   return (
@@ -44,9 +43,11 @@ export default function InlineCommentaryChips({
           key={`${chip.resourceId}:${chip.language}:${chip.sectionId}`}
           type="button"
           onClick={() =>
-            dispatch({
-              type: OPEN_INLINE_COMMENTARY,
-              payload: {
+            void sendReaderIntent({
+              kind: 'open',
+              origin: 'inline-commentary',
+              target: {
+                kind: 'commentary-section',
                 sectionId: chip.sectionId,
                 resourceId: chip.resourceId,
                 language: chip.language,

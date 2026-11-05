@@ -1,16 +1,13 @@
 import { getPassageContextHeaderHeight } from '../passagePreviewPresentation'
 import type { PlanDayStepView } from './PlanDayStepCard'
 import type { LabeledCommentaryChip } from './InlineCommentaryChips'
-import { FOCUS_STUDY_ACTION, OPEN_INLINE_COMMENTARY } from './dispatch'
+import { FOCUS_STUDY_ACTION } from './dispatch'
 import {
   isFocusStudyAction,
   type FocusStudyAction,
   type FocusStudyTranslations,
   type FocusVerseStudy,
 } from '../focusStudy/focusVerseStudyTypes'
-import { useResourcesLanguageValue } from '~state/resourcesLanguage'
-import { previewHistoryAtom } from '~features/bibleReferencePreview/state'
-import { createReaderPreview } from '~features/bibleReferencePreview/readerPreview'
 import { getEntityChipListState } from '~common/entityChips'
 import type { TagsObj } from '~common/types'
 import { createVerseEndpoint } from '~features/studyRelations/endpoints'
@@ -25,7 +22,7 @@ import { getDefaultStore } from 'jotai/vanilla'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
-import { AppState, Linking, Platform, useWindowDimensions, type ViewStyle } from 'react-native'
+import { AppState, Platform, useWindowDimensions, type ViewStyle } from 'react-native'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isBibleOverlayOpenAtom, isFullScreenBibleAtom } from 'src/state/app'
@@ -41,18 +38,9 @@ import {
   getAnnotationNotesInfo,
   getVerseRelationsMetadata,
 } from './computeVerseMetadata'
-import booksJson from '~assets/bible_versions/books.json'
 import { Book } from '~assets/bible_versions/books-desc'
 import type { Bookmark } from '~common/types'
-import {
-  BibleResource,
-  Pericope,
-  SelectedCode,
-  Tag,
-  Verse,
-  VerseIds,
-  StudyNavigateBibleType,
-} from '~common/types'
+import { Pericope, SelectedCode, Tag, Verse, VerseIds, StudyNavigateBibleType } from '~common/types'
 import Box from '~common/ui/Box'
 import {
   BIBLE_FORM_SHEET_HEADER_HEIGHT,
@@ -74,12 +62,9 @@ import {
 } from '~redux/modules/user'
 import type { CrossVersionAnnotation } from '~redux/selectors/bible'
 import type { RelationEndpoint, RelationKind, RelationType } from '~features/studyRelations/domain'
-import { useOpenRelationEndpoint } from '~features/studyRelations/useOpenRelationEndpoint'
 import type { StrongLexiconChapterEntity } from '~features/resources/strongLexiconAccess'
 import type { EntityPortraitSources } from '~features/lexique/entityPortraits'
 import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
-import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
-import { createStrongIdentity } from '~helpers/strongIdentities'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import type { AnnotationType, SelectionRange, WordPosition } from '../hooks/useAnnotationMode'
 import { BibleDOMTranslations } from './TranslationsContext'
@@ -91,31 +76,17 @@ import {
   CLEAR_SELECTED_VERSES,
   DOWNLOAD_BIBLE_VERSION,
   ERASE_SELECTION,
-  NAVIGATE_TO_BIBLE_LINK,
-  NAVIGATE_TO_BIBLE_NOTE,
-  NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-  NAVIGATE_TO_BIBLICAL_ENTITY,
-  NAVIGATE_TO_BIBLICAL_MAP,
-  NAVIGATE_TO_STRONG,
   DOWNLOAD_CHAPTER_ENTITIES,
   DISMISS_CONTEXTUAL_INFORMATION,
   DOM_COMPONENT_MOUNTED,
-  NAVIGATE_TO_BIBLE_VIEW,
-  NAVIGATE_TO_PERICOPE,
-  NAVIGATE_TO_RELATION_ENDPOINT,
-  OPEN_STRONG_SELECTION,
-  NAVIGATE_TO_TAG,
   NAVIGATE_TO_VERSE_LINKS,
   NAVIGATE_TO_VERSE_STUDY_RELATIONS,
   OPEN_BOOKMARK_MODAL,
-  OPEN_CANONICAL_BIBLE_NOTE,
-  OPEN_CANONICAL_BIBLE_REFERENCE,
   OPEN_CROSS_VERSION_MODAL,
   OPEN_HIGHLIGHT_TAGS,
   OPEN_ANNOTATION_TAGS,
   OPEN_VERSE_TAGS_MODAL,
   OPEN_DOWNLOADS,
-  OPEN_PASSAGE_MEDIA_SOURCE,
   RESET_BIBLE_DATABASE,
   RETRY_BIBLE_RESOURCE,
   SET_BIBLE_OVERLAY_OPEN,
@@ -125,9 +96,6 @@ import {
 } from './dispatch'
 import {
   getBookmarkPayload,
-  getCanonicalBibleNotePayload,
-  getNoteNavigationPayload,
-  getStrongRelationSelectionPayload,
   getStringPayload,
   getPayloadVersion,
   getVerseSelectionPayload,
@@ -147,8 +115,6 @@ import {
 } from '~helpers/downloadItemFactory'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { resetBiblesDb } from '~helpers/biblesDb'
-import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
-import { getStrongSelectionPayload, type StrongSelection } from '~helpers/strongSelection'
 import type { ResolvedPassageMediaChapter } from '../passageMedia'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import useConnection from '~helpers/useConnection'
@@ -196,8 +162,6 @@ export type PericopeChapter = Pericope[string][string]
 type TagsModalPayload = Exclude<UnifiedTagsModalProps, false>
 
 export type Dispatch = (props: BibleDOMBridgeAction) => Promise<void>
-
-const books = booksJson as Record<string, string[]>
 
 /**
  * Prevents rapid empty→loaded prop updates on the Expo DOM bridge.
@@ -266,18 +230,9 @@ export type WebViewProps = {
   // Section headings of the parallel versions, for the displayed chapter
   parallelPericopeChapters?: Record<string, PericopeChapter | undefined>
   passageMedia: ResolvedPassageMediaChapter
-  openNote?: (noteId: string, verseIds?: string[]) => void
-  openLink?: (linkId: string) => void
-  setSelectedCode: (selectedCode: StrongSelection) => void
   selectedCode: SelectedCode | null
   setUnifiedTagsModal?: (payload: TagsModalPayload) => void
-  onOpenResourceForVerse?: (
-    resourceType: BibleResource,
-    verseKey: string,
-    version?: VersionCode
-  ) => void
   onOpenBookmarkModal?: (bookmark: Bookmark) => void
-  onOpenCanonicalBibleReference?: (osis: string) => void
   /** Plan mode shows its banner under the header, focus or not. */
   inPlan?: boolean
   /** Plan mode: the way on to the next element of the day, under the passage's last chapter. */
@@ -310,7 +265,6 @@ export type WebViewProps = {
   taggedVersesInChapter?: Record<number, number>
   versesWithNonHighlightTags?: Record<number, boolean>
   onOpenVerseTagsModal?: (verseKey: string) => void
-  onOpenCanonicalBibleNote?: (note: CanonicalBibleNote) => void
   onOpenStudyRelationsModal?: (target: StudyRelationsModalTarget) => void
   isFormSheet?: boolean
   // Enter annotation mode from double-tap, on the version the reader double-tapped
@@ -325,7 +279,6 @@ export type WebViewProps = {
     introduction: LabeledCommentaryChip[]
     afterVerses: Record<number, LabeledCommentaryChip[]>
   }
-  onOpenInlineCommentary?: (chip: LabeledCommentaryChip) => void
   chapterEntities: StrongLexiconChapterEntity[]
   chapterEntitiesLoaded: boolean
   /** The portraits of the chapter's entities, by unique name (ADR-0089). */
@@ -429,12 +382,7 @@ export const BibleDOMWrapper = ({
   wordAnnotationsInOtherVersions,
   taggedVersesInChapter,
   versesWithNonHighlightTags,
-  onOpenResourceForVerse,
   onOpenStudyRelationsModal,
-  onOpenCanonicalBibleReference,
-  openNote,
-  openLink,
-  setSelectedCode,
   removeSelectedVerse,
   clearSelectedVerses,
   addSelectedVerse,
@@ -445,7 +393,6 @@ export const BibleDOMWrapper = ({
   onOpenBookmarkModal,
   onOpenCrossVersionModal,
   onOpenVerseTagsModal,
-  onOpenCanonicalBibleNote,
   setUnifiedTagsModal,
   onEnterAnnotationMode,
   onExitAnnotationMode,
@@ -454,7 +401,6 @@ export const BibleDOMWrapper = ({
   parallelRedWords,
   parallelPericopeChapters,
   inlineCommentaries,
-  onOpenInlineCommentary,
   chapterEntities,
   chapterEntitiesLoaded,
   chapterEntityPortraits,
@@ -471,18 +417,6 @@ export const BibleDOMWrapper = ({
 }: WebViewProps) => {
   const keepControlsVisible = useWindowDimensions().width >= 768
   const isConnected = useConnection()
-  const openRelationEndpoint = useOpenRelationEndpoint()
-  const previewLanguages = useResourcesLanguageValue()
-  const setPreviewHistory = useSetAtom(previewHistoryAtom)
-  const previewReaderEndpoint = (endpoint: RelationEndpoint, open: () => void) => {
-    const request = createReaderPreview(endpoint, version, t('Note'), open, {
-      nave: previewLanguages.NAVE,
-      dictionary: previewLanguages.DICTIONNAIRE,
-    })
-    if (!request) return false
-    setPreviewHistory([request])
-    return true
-  }
 
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
   useEffect(() => {
@@ -657,78 +591,8 @@ export const BibleDOMWrapper = ({
         setIsFullScreenBible(action.payload ? true : wasFullScreenBeforeOverlayRef.current)
         break
       }
-      case OPEN_PASSAGE_MEDIA_SOURCE: {
-        const sourceUrl = getStringPayload(action.payload)
-        if (!sourceUrl || !/^https:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\//i.test(sourceUrl)) {
-          break
-        }
-
-        try {
-          await Linking.openURL(sourceUrl)
-        } catch (error) {
-          appLogger.captureError('webview', 'passage_media.open_source_failed', error, {
-            sourceUrl,
-          })
-          toast.error(t('bible.passageMedia.openFailed'))
-        }
-        break
-      }
       case FOCUS_STUDY_ACTION: {
         if (isFocusStudyAction(action.payload)) onFocusStudyAction?.(action.payload)
-        break
-      }
-      case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {
-        if (!action.params) break
-        const { Livre, Chapitre, Verset } = action.params.verse
-        if (__DEV__) console.log(`[Bible] ${Livre}-${Chapitre}-${Verset}`)
-        onOpenResourceForVerse?.(
-          'strong',
-          `${Livre}-${Chapitre}-${Verset}`,
-          getDisplayedVersion(action.params.version)
-        )
-
-        break
-      }
-      case NAVIGATE_TO_BIBLICAL_ENTITY: {
-        const entityKey = getStringPayload(action.payload)
-        if (!entityKey) break
-        pushRouteOnce(
-          createStrongDetailRoute(
-            'entity',
-            {
-              book: book.Numero,
-              bibleVersion: version,
-              bibleChapter: chapter,
-            },
-            { entityKey }
-          )
-        )
-        break
-      }
-      case NAVIGATE_TO_BIBLICAL_MAP: {
-        const places = getStringPayload(action.payload)
-        if (!places) break
-        pushRouteOnce({
-          pathname: '/strong/map',
-          params: { places, title: `${t(book.Nom)} ${chapter}` },
-        })
-        break
-      }
-      case NAVIGATE_TO_STRONG: {
-        const strongCode = getStringPayload(action.payload)
-        if (!strongCode) break
-        const lexicalLanguage = strongCode.trim().toUpperCase().startsWith('G') ? 'greek' : 'hebrew'
-        const identity = createStrongIdentity(strongCode, lexicalLanguage)
-        pushRouteOnce(
-          createStrongDetailRoute('index', {
-            book: lexicalLanguage === 'greek' ? 40 : 1,
-            reference: identity.code,
-            identityKind: identity.kind,
-            identityCode: identity.code,
-            bibleVersion: version,
-            bibleChapter: chapter,
-          })
-        )
         break
       }
       case DOWNLOAD_CHAPTER_ENTITIES: {
@@ -767,18 +631,6 @@ export const BibleDOMWrapper = ({
         if (target) onOpenStudyRelationsModal?.(target)
         break
       }
-      case NAVIGATE_TO_PERICOPE: {
-        router.push({
-          pathname: '/pericope',
-          params: { book: String(book.Numero), version },
-        })
-        break
-      }
-      case OPEN_STRONG_SELECTION: {
-        const selection = getStrongSelectionPayload(action.payload)
-        if (selection) setSelectedCode(selection)
-        break
-      }
       case TOGGLE_SELECTED_VERSE: {
         if (Platform.OS === 'ios') {
           Haptics.selectionAsync()
@@ -797,38 +649,6 @@ export const BibleDOMWrapper = ({
         break
       }
 
-      case NAVIGATE_TO_BIBLE_NOTE: {
-        const payload = getNoteNavigationPayload(action.payload)
-        if (payload.noteId) {
-          const noteId = payload.noteId
-          const open = () => openNote?.(noteId, payload.verseIds)
-          if (!previewReaderEndpoint({ type: 'note', noteId }, open)) open()
-        }
-        break
-      }
-      case NAVIGATE_TO_BIBLE_LINK: {
-        const linkId = getStringPayload(action.payload)
-        if (linkId) {
-          const open = () => openLink?.(linkId)
-          if (Platform.OS === 'web') {
-            setPreviewHistory([{ kind: 'link', linkId, title: t('Lien'), open }])
-          } else open()
-        }
-        break
-      }
-      case NAVIGATE_TO_RELATION_ENDPOINT: {
-        if (isRecord(action.payload)) {
-          const strongSelection = getStrongRelationSelectionPayload(action.payload, version)
-          if (strongSelection) {
-            setSelectedCode(strongSelection)
-          } else {
-            const endpoint = action.payload as RelationEndpoint
-            const open = () => openRelationEndpoint(endpoint)
-            if (!previewReaderEndpoint(endpoint, open)) open()
-          }
-        }
-        break
-      }
       case SHOW_TOAST: {
         const { message, type } = getToastPayload(action.payload)
         if (!message) break
@@ -839,49 +659,6 @@ export const BibleDOMWrapper = ({
         } else {
           toast.info(t(message))
         }
-        break
-      }
-      case NAVIGATE_TO_BIBLE_VIEW: {
-        const targetBook = Object.keys(books).find(
-          key => books[key]?.[0]?.toUpperCase() === action.bookCode
-        )
-
-        if (!targetBook) {
-          toast.error("Erreur lors de l'ouverture du verset")
-          appLogger.captureError(
-            'webview',
-            'bible_navigation.unknown_book_code',
-            new Error('BIBLE_NAVIGATION_BOOK_CODE_UNKNOWN'),
-            {
-              actionType: action.type,
-              bookCode: action.bookCode,
-            }
-          )
-          return
-        }
-
-        const open = () =>
-          pushRouteOnce({
-            pathname: '/bible-view',
-            params: {
-              contextDisplayMode: 'focused',
-              book: targetBook,
-              chapter: String(action.chapter),
-              verse: String(action.verse),
-            },
-          })
-
-        if (
-          !previewReaderEndpoint(
-            createVerseEndpoint(
-              [`${targetBook}-${action.chapter}-${action.verse}`],
-              undefined,
-              version
-            ),
-            open
-          )
-        )
-          open()
         break
       }
       case OPEN_HIGHLIGHT_TAGS: {
@@ -911,43 +688,6 @@ export const BibleDOMWrapper = ({
       case OPEN_BOOKMARK_MODAL: {
         const bookmark = getBookmarkPayload(action.payload)
         if (bookmark) onOpenBookmarkModal?.(bookmark)
-        break
-      }
-
-      case OPEN_CANONICAL_BIBLE_NOTE: {
-        const note = getCanonicalBibleNotePayload(action.payload)
-        if (note) onOpenCanonicalBibleNote?.(note)
-        break
-      }
-
-      case OPEN_INLINE_COMMENTARY: {
-        const payload = action.payload
-        if (isRecord(payload) && typeof payload.sectionId === 'string') {
-          const chips = [
-            ...(inlineCommentaries?.introduction ?? []),
-            ...Object.values(inlineCommentaries?.afterVerses ?? {}).flat(),
-          ]
-          const chip = chips.find(
-            chip =>
-              chip.sectionId === payload.sectionId &&
-              chip.resourceId === payload.resourceId &&
-              chip.language === payload.language &&
-              chip.revision === payload.revision
-          )
-          if (chip) onOpenInlineCommentary?.(chip)
-        }
-        break
-      }
-      case OPEN_CANONICAL_BIBLE_REFERENCE: {
-        const osis = getStringPayload(action.payload)
-        if (osis) onOpenCanonicalBibleReference?.(osis)
-        break
-      }
-
-      case NAVIGATE_TO_TAG: {
-        if (!isRecord(action.payload) || typeof action.payload.tagId !== 'string') break
-        const { tagId } = action.payload
-        pushRouteOnce({ pathname: '/tag', params: { tagId } })
         break
       }
 

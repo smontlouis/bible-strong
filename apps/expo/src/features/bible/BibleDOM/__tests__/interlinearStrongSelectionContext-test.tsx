@@ -2,8 +2,8 @@ import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 
 import type { RootState } from '~redux/modules/reducer'
-import { DispatchProvider } from '../DispatchProvider'
-import { OPEN_STRONG_SELECTION } from '../dispatch'
+import type { ReaderIntentMessage } from '../../readerIntent/types'
+import { ReaderIntentProvider } from '../useReaderIntent'
 import ReverseInterlinearVerse from '../ReverseInterlinearVerse'
 import StructuredInterlinearVerse from '../StructuredInterlinearVerse'
 
@@ -46,12 +46,14 @@ describe('interlinear Strong selection context', () => {
   })
 
   it('keeps the actual Bible book when an untranslated Strong is opened from Job', () => {
-    const dispatch = jest.fn()
+    const onReaderIntent = jest.fn(
+      async (_message: ReaderIntentMessage) => ({ status: 'done' }) as const
+    )
     let renderer: ReactTestRenderer
 
     act(() => {
       renderer = create(
-        <DispatchProvider dispatch={dispatch}>
+        <ReaderIntentProvider tabId="tab-1" onReaderIntent={onReaderIntent}>
           <ReverseInterlinearVerse
             settings={settings}
             version="LSG"
@@ -71,7 +73,7 @@ describe('interlinear Strong selection context', () => {
               ],
             }}
           />
-        </DispatchProvider>
+        </ReaderIntentProvider>
       )
     })
 
@@ -79,25 +81,32 @@ describe('interlinear Strong selection context', () => {
       renderer!.root.findByType('button').props.onClick()
     })
 
-    expect(dispatch).toHaveBeenCalledWith({
-      type: OPEN_STRONG_SELECTION,
-      payload: expect.objectContaining({
-        book: 18,
-        chapter: 3,
-        verse: 2,
-        reference: '347',
-      }),
+    expect(onReaderIntent).toHaveBeenCalledWith({
+      tabId: 'tab-1',
+      intent: {
+        kind: 'open',
+        origin: 'text',
+        verseKey: '18-3-2',
+        version: 'LSG',
+        target: expect.objectContaining({
+          kind: 'strong-word',
+          identities: [{ kind: 'strong', code: 'H0347' }],
+        }),
+      },
     })
-    expect(dispatch.mock.calls[0]?.[0].payload).not.toHaveProperty('word')
+    const intent = onReaderIntent.mock.calls[0]?.[0].intent
+    expect(intent?.kind === 'open' && intent.target).not.toHaveProperty('word')
   })
 
   it('keeps the actual Bible book when a BHG interlinear token is opened from Job', () => {
-    const dispatch = jest.fn()
+    const onReaderIntent = jest.fn(
+      async (_message: ReaderIntentMessage) => ({ status: 'done' }) as const
+    )
     let renderer: ReactTestRenderer
 
     act(() => {
       renderer = create(
-        <DispatchProvider dispatch={dispatch}>
+        <ReaderIntentProvider tabId="tab-1" onReaderIntent={onReaderIntent}>
           <StructuredInterlinearVerse
             isHebreu
             mode="strong"
@@ -129,7 +138,7 @@ describe('interlinear Strong selection context', () => {
               ],
             }}
           />
-        </DispatchProvider>
+        </ReaderIntentProvider>
       )
     })
 
@@ -137,13 +146,17 @@ describe('interlinear Strong selection context', () => {
       renderer!.root.findByType('button').props.onClick()
     })
 
-    expect(dispatch).toHaveBeenCalledWith({
-      type: OPEN_STRONG_SELECTION,
-      payload: expect.objectContaining({
-        book: 18,
-        chapter: 3,
-        verse: 2,
-        reference: '347',
+    expect(onReaderIntent).toHaveBeenCalledWith({
+      tabId: 'tab-1',
+      intent: expect.objectContaining({
+        kind: 'open',
+        origin: 'text',
+        verseKey: '18-3-2',
+        version: 'BHG',
+        target: expect.objectContaining({
+          kind: 'strong-word',
+          identities: [{ kind: 'strong', code: 'H0347' }],
+        }),
       }),
     })
   })
