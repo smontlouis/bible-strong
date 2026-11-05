@@ -10,6 +10,8 @@
 
 **Selected verses** — The current verse selection on which the reader can perform study actions.
 
+**Reader intent** — What the reader asks of the study workspace from the Bible text (open a study object, select verses, annotate words, change chapter, install a Bible version), independent of the gesture that expressed it and of how the text is drawn.
+
 **Highlight** — A verse-level visual mark owned by the user.
 
 **Word annotation** — A user-owned visual or semantic mark attached to a word or word range.
@@ -84,6 +86,7 @@
 - Use **History**, not “recently viewed content”, for the list of consulted chapters and entries.
 - Use **Strong entry**, not “Strong word”, when referring to the lexical object.
 - Use **Relation endpoint**, not “relation item” or “linkable thing”.
+- Use **Reader intent**, not “bridge action”, “dispatch action” or “DOM message”.
 - Use **Bible version** for a readable Bible source; reserve **Resource identity** for publication and delivery lifecycle discussions.
 
 Detailed product invariants and implementation references live in `../../docs/study-workspace-domain-reference.md`.
