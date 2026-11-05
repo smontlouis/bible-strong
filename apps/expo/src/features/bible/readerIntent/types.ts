@@ -2,6 +2,10 @@
  * Reader intents (ADR-0098): what the Bible reader page asks of the study workspace. The page
  * imports this file for its types only; `handleReaderIntent` decodes and handles each intent.
  */
+import type { RelationEndpoint } from '~features/studyRelations/domain'
+import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
+import type { StrongIdentity } from '~helpers/strongIdentities'
+import type { StrongSelectionMorphology } from '~helpers/strongSelection'
 
 /** Reading: the chapter, the controls, the plan day, the versions and modes of the columns. */
 export type ReadingIntent =
@@ -14,7 +18,80 @@ export type ReadingIntent =
   | { kind: 'choose-column-version'; column: number }
   | { kind: 'open-column-text-mode'; mode: 'strong' | 'interlinear'; column: number }
 
-export type ReaderIntent = ReadingIntent
+/** Where the reader touched what it opens. */
+export type OpenOrigin =
+  /** A word, or a note mark, of the text. */
+  | 'text'
+  /** An item of a Relation, beside a verse or under a Word annotation. */
+  | 'relation'
+  /** A tag of a verse or of a Word annotation. */
+  | 'tag'
+  /** A section heading of the chapter. */
+  | 'heading'
+  /** The verse itself: a tap or a long press on it. */
+  | 'verse'
+  /** The entities of the chapter. */
+  | 'chapter-entities'
+  /** The study of a verse in focus. */
+  | 'focus-study'
+  /** A commentary shown within the text. */
+  | 'inline-commentary'
+  /** The media of the passage, in their overlay. */
+  | 'passage-media'
+
+/** The Relation an object is opened from: its fallbacks need it. */
+export type OpenedRelation = {
+  /** The endpoint the reader stands on: the verse, or the Word annotation. */
+  activeEndpoint?: RelationEndpoint
+  /** The verses of that endpoint. */
+  verseIds: string[]
+  /** The other endpoint still exists among the study data of the user. */
+  targetExists: boolean
+}
+
+/** What the reader opens: a Relation endpoint whenever one describes it, a target of its own otherwise. */
+export type OpenTarget =
+  | { kind: 'endpoint'; endpoint: RelationEndpoint; relation?: OpenedRelation }
+  /** The Strong entries of a word of the text, with what the text tells of them. */
+  | {
+      kind: 'strong-word'
+      identities: StrongIdentity[]
+      morphologies?: StrongSelectionMorphology[]
+      word?: string
+      occurrenceId?: string
+    }
+  | { kind: 'biblical-entity'; entityKey: string }
+  /** The places of the chapter on the map, by unique name. */
+  | { kind: 'map'; places: string[] }
+  | { kind: 'tag'; tagId: string }
+  /** The index of the pericopes of the book. */
+  | { kind: 'pericopes' }
+  | {
+      kind: 'commentary-section'
+      resourceId: string
+      language: string
+      revision: string
+      sectionId: string
+    }
+  /** A note of the Bible version's own text. */
+  | { kind: 'canonical-note'; note: CanonicalBibleNote }
+  /** The page a passage media comes from. */
+  | { kind: 'media-source'; url: string }
+  /** A resource of the verse touched, in its sheet. */
+  | { kind: 'verse-resource'; resource: 'strong' }
+
+/** Open: a study object, and where the reader touched it. */
+export type OpenIntent = {
+  kind: 'open'
+  target: OpenTarget
+  origin: OpenOrigin
+  /** The verse touched, as `book-chapter-verse`. */
+  verseKey?: string
+  /** The Bible version of the column touched. */
+  version?: string
+}
+
+export type ReaderIntent = ReadingIntent | OpenIntent
 
 /** What the page sends: an intent stamped with the Tab the page shows. */
 export type ReaderIntentMessage = { tabId: string; intent: ReaderIntent }
@@ -37,6 +114,10 @@ export type ReaderRule =
   | 'controls-kept-visible'
   /** The passage leads to no next element of a plan day. */
   | 'no-plan-day-step'
+  /** The reader hides personal Bible data (ADR-0030): notes, links, Relations and tags stay shut. */
+  | 'personal-data'
+  /** The reader leaves for no source of a passage media but YouTube. */
+  | 'unknown-media-source'
 
 export type ReaderOutcome =
   | { status: 'done' }

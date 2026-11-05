@@ -1,11 +1,9 @@
-import { previewHistoryAtom } from '~features/bibleReferencePreview/state'
 import { getCommentaryByPublicationId } from '@bible-strong/resource-catalog/commentaries'
 import { getInlineCommentaryResources } from '~features/commentaries/inlineCommentarySelection'
 import {
   placeInlineCommentaries,
   summarizeInlineCommentaryChip,
 } from '~features/commentaries/inlineCommentaryPlacement'
-import type { InlineCommentaryRequest } from '~features/commentaries/InlineCommentaryReader'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import * as Sentry from '@sentry/react-native'
 import { useCallback, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react'
@@ -70,8 +68,6 @@ import { bibleChapterQueryOptions, loadBibleVerseTexts } from '~features/resourc
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
-import { osisToBibleReferenceTarget } from '~helpers/bcvParser'
-import { getBook } from '~helpers/bibleBookCatalog'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import generateUUID from '~helpers/generateUUID'
 import getVersesContent from '~helpers/getVersesContent'
@@ -170,6 +166,8 @@ import {
 import { getBibleDOMDestination } from './SharedBibleDOM'
 import BibleDOMPortalHost from './BibleDOMPortalHost'
 import { shouldUseSharedBibleDOM } from './sharedBibleDOMPlatform'
+import { osisToBibleReferenceTarget } from '~helpers/osisReference'
+import { getBook } from '~helpers/bibleBookCatalog'
 import SnapshotPlaceholder from './SnapshotPlaceholder'
 import VerseTagsModal from './VerseTagsModal'
 import CanonicalBibleNoteSheet from './CanonicalBibleNoteSheet'
@@ -568,7 +566,6 @@ const BibleViewer = ({
     resources,
     resourceRegistry,
   })
-  const setCommentaryPreview = useSetAtom(previewHistoryAtom)
   const readingCommentaries = getInlineCommentaryResources(
     settings.inlineCommentaries,
     settings.commentarySelection,
@@ -1291,14 +1288,6 @@ const BibleViewer = ({
     openEntityRelations(createVerseEndpoint(verseIds, undefined, version))
   }
 
-  const openLink = (linkId: string) => {
-    pushRouteOnce({ pathname: '/link', params: { linkId } })
-  }
-
-  const openBibleNote = (noteId: string, verseIds?: string[]) => {
-    openNote({ noteId, verseKeys: verseIds, version })
-  }
-
   const openResourceForVerse = (res: BibleResource, ver: string, verseVersion = version) => {
     setResourceModalSelection({
       selectedVersion: verseVersion,
@@ -1491,6 +1480,7 @@ const BibleViewer = ({
     canonicalBibleNoteModal.open()
   }
 
+  // A reference in a note of the version's own text, opened from its sheet.
   const handleCanonicalBibleReferencePress = (osis: string) => {
     const target = osisToBibleReferenceTarget(osis)
     if (!target) return
@@ -1561,6 +1551,15 @@ const BibleViewer = ({
       isFormSheet: Boolean(isFormSheet),
       keepControlsVisible,
       hasPlanDayStep: Boolean(planDayStep),
+      hidesPersonalData: hidePersonalBibleData,
+      parallelColumnVersions: displayedParallelVerses.map(parallel => parallel.id),
+      inlineCommentaries: {
+        chips: [
+          ...inlinePlacement.introduction,
+          ...Object.values(inlinePlacement.afterVerses).flat(),
+        ],
+        indexes: inlineCommentaryQuery.data?.indexes ?? [],
+      },
     }),
     surface: presentation => {
       switch (presentation.kind) {
@@ -1569,6 +1568,15 @@ const BibleViewer = ({
           return
         case 'plan-day-step':
           planDayStep?.onPress()
+          return
+        case 'strong-selection':
+          setSelectedCode(presentation.selection)
+          return
+        case 'verse-resource':
+          openResourceForVerse(presentation.resource, presentation.verseKey, presentation.version)
+          return
+        case 'canonical-note':
+          handleOpenCanonicalBibleNote(presentation.note)
           return
       }
     },
@@ -1615,14 +1623,9 @@ const BibleViewer = ({
     pericopeChapter: getPericopeChapter(pericope, displayedBook, displayedChapter),
     parallelPericopeChapters,
     passageMedia,
-    openNote: hidePersonalBibleData ? undefined : openBibleNote,
-    openLink: hidePersonalBibleData ? undefined : openLink,
-    setSelectedCode,
     selectedCode,
     setUnifiedTagsModal: hidePersonalBibleData ? undefined : setUnifiedTagsModal,
-    onOpenResourceForVerse: openResourceForVerse,
     onOpenBookmarkModal: hidePersonalBibleData ? undefined : handleOpenBookmarkModal,
-    onOpenCanonicalBibleReference: handleCanonicalBibleReferencePress,
     planDayStep: planDayStepView,
     // Annotation mode props
     annotationMode: viewerPersonalData.annotationMode,
@@ -1644,7 +1647,6 @@ const BibleViewer = ({
     taggedVersesInChapter: viewerPersonalData.taggedVersesInChapter,
     versesWithNonHighlightTags: viewerPersonalData.versesWithNonHighlightTags,
     onOpenVerseTagsModal: hidePersonalBibleData ? undefined : handleOpenVerseTagsModal,
-    onOpenCanonicalBibleNote: handleOpenCanonicalBibleNote,
     onOpenStudyRelationsModal: hidePersonalBibleData ? undefined : openVerseStudyRelationsModal,
     // Double-tap to enter annotation mode
     onEnterAnnotationMode: hidePersonalBibleData ? undefined : handleEnterAnnotationModeFromBible,
@@ -1653,60 +1655,6 @@ const BibleViewer = ({
     redWords: settings.redWordsDisplay ? redWords : null,
     parallelRedWords: settings.redWordsDisplay ? parallelRedWords : undefined,
     inlineCommentaries,
-    onOpenInlineCommentary: summary => {
-      const chip = [
-        ...inlinePlacement.introduction,
-        ...Object.values(inlinePlacement.afterVerses).flat(),
-      ].find(
-        candidate =>
-          candidate.sectionId === summary.sectionId &&
-          candidate.resourceId === summary.resourceId &&
-          candidate.language === summary.language &&
-          candidate.revision === summary.revision
-      )
-      if (!chip) return
-      const entry = getCommentaryByPublicationId(chip.resourceId, chip.language)
-      if (!entry) return
-      const openCommentary = (sectionId?: string) =>
-        pushRouteOnce({
-          pathname: '/commentary-entry',
-          params: {
-            projectionId: `${entry.id}:${chip.language}`,
-            book: String(book.Numero),
-            chapter: String(chapter),
-            sectionId: sectionId === undefined ? chip.sectionId : sectionId,
-          },
-        })
-      if (Platform.OS !== 'web') {
-        openCommentary()
-        return
-      }
-      const index = inlineCommentaryQuery.data?.indexes.find(
-        item =>
-          item.resource.resourceId === chip.resourceId &&
-          item.resource.language === chip.language &&
-          item.resource.revision === chip.revision
-      )
-      const request: InlineCommentaryRequest = {
-        resourceId: chip.resourceId,
-        language: chip.language,
-        revision: chip.revision,
-        book: book.Numero,
-        chapter,
-        sectionId: chip.sectionId,
-        sections:
-          index?.sections.map(section => ({
-            sectionId: section.id,
-            rangeStartVerse: section.rangeStartVerse,
-            rangeEndVerse: section.rangeEndVerse,
-            excerpt: section.excerpt,
-          })) ?? chip.sections,
-        excerpt: chip.excerpt,
-      }
-      setCommentaryPreview([
-        { kind: 'commentary', title: entry.shortName, request, open: openCommentary },
-      ])
-    },
     chapterEntities,
     chapterEntitiesLoaded,
     chapterEntityPortraits,

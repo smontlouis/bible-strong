@@ -1,30 +1,62 @@
 import { appLogger } from '~helpers/agentObservability'
+import { applyOpenIntent, decodeOpenIntent, getOpenRefusal } from './open'
 import { applyReadingIntent, decodeReadingIntent, getReadingRefusal } from './reading'
-import type { ReaderIntent, ReaderOutcome } from './types'
-import type { Reader, ReaderWorld } from './world'
+import type { ReaderIntent, ReaderOutcome, ReaderRule } from './types'
+import type { Reader, ReaderSnapshot, ReaderWorld } from './world'
 
 export type {
+  OpenIntent,
+  OpenOrigin,
+  OpenTarget,
   ReaderIntent,
   ReaderIntentHandler,
   ReaderIntentMessage,
   ReaderOutcome,
   ReaderRule,
 } from './types'
-export type { Reader, ReaderPresentation, ReaderSnapshot, ReaderWorld } from './world'
+export type {
+  Reader,
+  ReaderNotice,
+  ReaderPresentation,
+  ReaderRoute,
+  ReaderSnapshot,
+  ReaderWorld,
+} from './world'
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null
 
+const decodeIntent = (value: unknown): ReaderIntent | undefined =>
+  decodeReadingIntent(value) ?? decodeOpenIntent(value)
+
 const decodeMessage = (message: unknown): { tabId: string; intent: ReaderIntent } | undefined => {
   if (!isRecord(message) || typeof message.tabId !== 'string' || !message.tabId) return undefined
-  const intent = decodeReadingIntent(message.intent)
+  const intent = decodeIntent(message.intent)
   return intent ? { tabId: message.tabId, intent } : undefined
 }
+
+const getRefusal = (
+  intent: ReaderIntent,
+  context: { snapshot: ReaderSnapshot; world: ReaderWorld }
+): ReaderRule | undefined =>
+  intent.kind === 'open' ? getOpenRefusal(intent, context) : getReadingRefusal(intent, context)
+
+const applyIntent = (
+  intent: ReaderIntent,
+  context: { reader: Reader; snapshot: ReaderSnapshot; world: ReaderWorld }
+) =>
+  intent.kind === 'open' ? applyOpenIntent(intent, context) : applyReadingIntent(intent, context)
 
 const getKind = (message: unknown) =>
   isRecord(message) && isRecord(message.intent) && typeof message.intent.kind === 'string'
     ? message.intent.kind
     : undefined
+
+/** What the logs say of an intent: its kind, and for an open what it opens and from where. */
+const describeIntent = (intent: ReaderIntent) =>
+  intent.kind === 'open'
+    ? { kind: intent.kind, target: intent.target.kind, origin: intent.origin }
+    : { kind: intent.kind }
 
 /**
  * The only way in for what the Bible reader page asks (ADR-0098). It decodes the message once,
@@ -50,21 +82,21 @@ export const handleReaderIntent = async (
   try {
     const snapshot = reader.now()
     if (tabId !== snapshot.tabId) {
-      appLogger.info('webview', 'reader_intent.stale_tab', { kind: intent.kind })
+      appLogger.info('webview', 'reader_intent.stale_tab', describeIntent(intent))
       return { status: 'refused', rule: 'stale-tab' }
     }
 
-    const rule = getReadingRefusal(intent, { snapshot, world })
+    const rule = getRefusal(intent, { snapshot, world })
     if (rule) {
-      appLogger.debug('webview', 'reader_intent.refused', { kind: intent.kind, rule })
+      appLogger.debug('webview', 'reader_intent.refused', { ...describeIntent(intent), rule })
       return { status: 'refused', rule }
     }
 
-    await applyReadingIntent(intent, { reader, snapshot, world })
-    appLogger.debug('webview', 'reader_intent.done', { kind: intent.kind })
+    await applyIntent(intent, { reader, snapshot, world })
+    appLogger.debug('webview', 'reader_intent.done', describeIntent(intent))
     return { status: 'done' }
   } catch (error) {
-    appLogger.captureError('webview', 'reader_intent.failed', error, { kind: intent.kind })
+    appLogger.captureError('webview', 'reader_intent.failed', error, describeIntent(intent))
     return { status: 'failed' }
   }
 }

@@ -1,6 +1,4 @@
-import type { Bookmark, StudyNavigateBibleType, Verse } from '~common/types'
-import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
-import { createStrongSelection, type StrongSelection } from '~helpers/strongSelection'
+import type { Bookmark } from '~common/types'
 import type { RelationEndpoint } from '~features/studyRelations/domain'
 import * as bridgeCommands from './dispatch'
 
@@ -16,15 +14,6 @@ export type StudyRelationsModalTarget =
 export type BibleDOMBridgeAction = {
   type: string
   payload?: unknown
-  params?: {
-    verse: Verse
-    isSelectionMode?: StudyNavigateBibleType
-    /** Parallel reading: the version of the verse. */
-    version?: string
-  }
-  bookCode?: string
-  chapter?: string | number
-  verse?: string | number
 }
 
 const bridgeCommandTypes = new Set<string>(
@@ -33,20 +22,6 @@ const bridgeCommandTypes = new Set<string>(
 
 export const decodeBibleDOMBridgeAction = (value: unknown): BibleDOMBridgeAction | undefined => {
   if (!isRecord(value) || typeof value.type !== 'string' || !bridgeCommandTypes.has(value.type)) {
-    return undefined
-  }
-  if (
-    value.chapter !== undefined &&
-    typeof value.chapter !== 'string' &&
-    typeof value.chapter !== 'number'
-  ) {
-    return undefined
-  }
-  if (
-    value.verse !== undefined &&
-    typeof value.verse !== 'string' &&
-    typeof value.verse !== 'number'
-  ) {
     return undefined
   }
   return value as unknown as BibleDOMBridgeAction
@@ -86,9 +61,6 @@ export const isRecord = (value: unknown): value is Record<string, unknown> =>
 export const getStringPayload = (payload: unknown): string | undefined =>
   typeof payload === 'string' ? payload : undefined
 
-export const getNumberPayload = (payload: unknown): number | undefined =>
-  typeof payload === 'number' ? payload : undefined
-
 /** A verse tapped in the reader, with the version it was tapped in when parallel reading. */
 export const getVerseSelectionPayload = (
   payload: unknown
@@ -103,26 +75,6 @@ export const getVerseSelectionPayload = (
 /** The version an annotation-mode payload refers to, when the reader names one. */
 export const getPayloadVersion = (payload: unknown): string | undefined =>
   isRecord(payload) ? getStringPayload(payload.version) : undefined
-
-export const getStrongRelationSelectionPayload = (
-  payload: unknown,
-  version: string
-): StrongSelection | undefined => {
-  if (
-    !isRecord(payload) ||
-    payload.type !== 'strong' ||
-    typeof payload.code !== 'string' ||
-    (payload.language !== 'hebrew' && payload.language !== 'greek')
-  ) {
-    return undefined
-  }
-
-  return createStrongSelection(
-    [{ kind: 'strong', code: payload.code }],
-    payload.language === 'hebrew' ? 1 : 40,
-    version
-  )
-}
 
 export const getToastPayload = (payload: unknown): { message?: string; type?: string } => {
   if (!isRecord(payload)) return {}
@@ -160,39 +112,5 @@ export const getStudyRelationsModalTarget = (
   }
 }
 
-export const getNoteNavigationPayload = (
-  payload: unknown
-): { noteId?: string; verseIds: string[] } => {
-  if (typeof payload === 'string') {
-    return { noteId: payload, verseIds: [] }
-  }
-  if (!isRecord(payload)) {
-    return { verseIds: [] }
-  }
-  return {
-    noteId: getStringPayload(payload.noteId),
-    verseIds: getVerseIdsPayload(payload),
-  }
-}
-
 export const getBookmarkPayload = (payload: unknown): Bookmark | undefined =>
   isRecord(payload) ? (payload as unknown as Bookmark) : undefined
-
-export const getCanonicalBibleNotePayload = (payload: unknown): CanonicalBibleNote | undefined => {
-  if (
-    !isRecord(payload) ||
-    typeof payload.offset !== 'number' ||
-    typeof payload.order !== 'number' ||
-    payload.kind !== 'note' ||
-    typeof payload.markup !== 'string'
-  ) {
-    return undefined
-  }
-
-  return {
-    offset: payload.offset,
-    order: payload.order,
-    kind: 'note',
-    markup: payload.markup,
-  }
-}

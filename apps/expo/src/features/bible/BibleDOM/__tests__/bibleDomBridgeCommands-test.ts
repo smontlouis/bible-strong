@@ -1,10 +1,6 @@
-import { NAVIGATE_TO_BIBLE_NOTE, NAVIGATE_TO_PERICOPE, TOGGLE_SELECTED_VERSE } from '../dispatch'
+import { OPEN_BOOKMARK_MODAL, RETRY_BIBLE_RESOURCE, TOGGLE_SELECTED_VERSE } from '../dispatch'
 import {
   decodeBibleDOMBridgeAction,
-  getCanonicalBibleNotePayload,
-  getNoteNavigationPayload,
-  getNumberPayload,
-  getStrongRelationSelectionPayload,
   getStringPayload,
   getStudyRelationsModalTarget,
   getToastPayload,
@@ -26,28 +22,9 @@ describe('Bible DOM bridge', () => {
     expect(getPayloadVersion({})).toBeUndefined()
   })
 
-  it('parses primitive string and number payloads conservatively', () => {
+  it('parses primitive string payloads conservatively', () => {
     expect(getStringPayload('note-1')).toBe('note-1')
     expect(getStringPayload({ value: 'note-1' })).toBeUndefined()
-    expect(getNumberPayload(2)).toBe(2)
-    expect(getNumberPayload('2')).toBeUndefined()
-  })
-
-  it('turns Strong relation endpoints into viewer Strong selections', () => {
-    expect(
-      getStrongRelationSelectionPayload({ type: 'strong', language: 'hebrew', code: '3068' }, 'DBY')
-    ).toEqual({
-      book: 1,
-      reference: '3068',
-      identities: [{ kind: 'strong', code: 'H3068' }],
-      version: 'DBY',
-    })
-    expect(
-      getStrongRelationSelectionPayload(
-        { type: 'strong', language: 'unknown', code: '3068' },
-        'DBY'
-      )
-    ).toBeUndefined()
   })
 
   it('parses toast payloads from object messages only', () => {
@@ -89,44 +66,8 @@ describe('Bible DOM bridge', () => {
     })
   })
 
-  it('parses note navigation payloads from legacy and structured commands', () => {
-    expect(getNoteNavigationPayload('note-1')).toEqual({ noteId: 'note-1', verseIds: [] })
-    expect(
-      getNoteNavigationPayload({
-        noteId: 'note-1',
-        verseIds: ['1-1-1', 4, '1-1-2'],
-      })
-    ).toEqual({
-      noteId: 'note-1',
-      verseIds: ['1-1-1', '1-1-2'],
-    })
-    expect(getNoteNavigationPayload(null)).toEqual({ verseIds: [] })
-  })
-
-  it('accepts only complete canonical Bible note payloads from the DOM bridge', () => {
-    expect(
-      getCanonicalBibleNotePayload({
-        offset: 36,
-        order: 17,
-        kind: 'note',
-        markup: '<note n="a">le vide</note>',
-      })
-    ).toEqual({
-      offset: 36,
-      order: 17,
-      kind: 'note',
-      markup: '<note n="a">le vide</note>',
-    })
-    expect(
-      getCanonicalBibleNotePayload({ kind: 'note', markup: 'missing offsets' })
-    ).toBeUndefined()
-  })
-
-  it('rejects unknown commands and malformed coordinates at the boundary', () => {
+  it('rejects unknown commands at the boundary', () => {
     expect(decodeBibleDOMBridgeAction({ type: 'EXECUTE_ARBITRARY_CODE' })).toBeUndefined()
-    expect(
-      decodeBibleDOMBridgeAction({ type: NAVIGATE_TO_PERICOPE, chapter: { unsafe: true } })
-    ).toBeUndefined()
   })
 
   it('blocks personal data commands before invoking native handlers', async () => {
@@ -134,7 +75,7 @@ describe('Bible DOM bridge', () => {
 
     await expect(
       routeBibleDOMBridgeAction(
-        { type: NAVIGATE_TO_BIBLE_NOTE, payload: 'note-1' },
+        { type: OPEN_BOOKMARK_MODAL, payload: { id: 'bookmark-1' } },
         { personalBibleDataEnabled: false, handle }
       )
     ).resolves.toBe('blocked')
@@ -161,9 +102,9 @@ describe('Bible DOM bridge', () => {
     expect(handle).toHaveBeenCalledWith(textColumnAction)
   })
 
-  it('routes a recognized reading command through the injected native handler', async () => {
+  it('routes a recognized command through the injected native handler', async () => {
     const handle = jest.fn(async () => undefined)
-    const action = { type: NAVIGATE_TO_PERICOPE }
+    const action = { type: RETRY_BIBLE_RESOURCE }
 
     await expect(
       routeBibleDOMBridgeAction(action, { personalBibleDataEnabled: false, handle })

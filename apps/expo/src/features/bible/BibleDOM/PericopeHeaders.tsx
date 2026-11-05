@@ -10,8 +10,8 @@ import {
   getCanonicalBibleHeadingReferences,
   type CanonicalBibleHeading,
 } from '~helpers/canonicalBibleHeadings'
-import { OPEN_CANONICAL_BIBLE_REFERENCE } from './dispatch'
-import { useDispatch } from './DispatchProvider'
+import { osisToBibleReferenceTarget } from '~helpers/osisReference'
+import { useReaderIntent } from './useReaderIntent'
 import { useTranslations } from './TranslationsContext'
 
 const pericopeHeading = (tag: 'h1' | 'h2' | 'h3' | 'h4', level: 1 | 2 | 3 | 4, size: number) =>
@@ -89,9 +89,28 @@ export function PericopeHeaders({
   isCompact?: boolean
 }): JSX.Element | null {
   const { h1, h2, h3, h4 } = pericope
-  const dispatch = useDispatch()
+  const sendReaderIntent = useReaderIntent()
   const translations = useTranslations()
   if (!h1 && !h2 && !h3 && !h4) return null
+
+  // A reference of a heading opens its verses: those to focus, or the first one.
+  const openHeadingReference = (osis: string) => {
+    const target = osisToBibleReferenceTarget(osis)
+    if (!target) return
+    void sendReaderIntent({
+      kind: 'open',
+      origin: 'heading',
+      target: {
+        kind: 'endpoint',
+        endpoint: {
+          type: 'verse',
+          verseKeys: (target.focusVerses ?? [target.verse]).map(
+            verse => `${target.book}-${target.chapter}-${verse}`
+          ),
+        },
+      },
+    })
+  }
 
   const findCanonicalHeading = (text: string) =>
     headings?.find(heading => heading.text.trim() === text)
@@ -123,10 +142,7 @@ export function PericopeHeaders({
                 onClick={event => {
                   event.preventDefault()
                   event.stopPropagation()
-                  dispatch({
-                    type: OPEN_CANONICAL_BIBLE_REFERENCE,
-                    payload: reference.osis,
-                  })
+                  openHeadingReference(reference.osis)
                 }}
               >
                 {reference.text}

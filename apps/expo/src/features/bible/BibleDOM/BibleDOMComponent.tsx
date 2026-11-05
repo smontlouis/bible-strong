@@ -36,10 +36,6 @@ import {
   EXIT_ANNOTATION_MODE,
   CLEAR_SELECTED_VERSES,
   DOWNLOAD_BIBLE_VERSION,
-  NAVIGATE_TO_PERICOPE,
-  NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-  NAVIGATE_TO_BIBLICAL_ENTITY,
-  NAVIGATE_TO_BIBLICAL_MAP,
   TOGGLE_SELECTED_VERSE,
   OPEN_DOWNLOADS,
   RESET_BIBLE_DATABASE,
@@ -991,13 +987,17 @@ const LoadedBibleContent = ({
     }).catch(console.error)
   }
 
+  // The Strong resources of the verse, in the version it was touched in.
   const navigateToVerseDetail = (target: VerseTarget) => {
     const verse = getVerse(target)
     if (!verse) return
-    dispatch({
-      type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-      params: { verse, version: target.version },
-    }).catch(console.error)
+    void sendReaderIntent({
+      kind: 'open',
+      origin: 'verse',
+      verseKey: `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`,
+      ...(target.version && { version: target.version }),
+      target: { kind: 'verse-resource', resource: 'strong' },
+    })
   }
 
   const handleTapVerseSelectionMode = (target: VerseTarget) => {
@@ -1006,19 +1006,7 @@ const LoadedBibleContent = ({
       return
     }
 
-    if (isSelectionMode?.includes('strong')) {
-      const verse = getVerse(target)
-      if (verse) {
-        dispatch({
-          type: NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-          params: {
-            isSelectionMode,
-            verse,
-            version: target.version,
-          },
-        }).catch(console.error)
-      }
-    }
+    if (isSelectionMode?.includes('strong')) navigateToVerseDetail(target)
   }
 
   const handleTapVerseNormalMode = (target: VerseTarget) => {
@@ -1485,9 +1473,7 @@ const LoadedBibleContent = ({
   }, [selectedVerseElementId, headerHeight])
 
   const navigateToPericope = () => {
-    dispatch({
-      type: NAVIGATE_TO_PERICOPE,
-    })
+    void sendReaderIntent({ kind: 'open', origin: 'heading', target: { kind: 'pericopes' } })
   }
 
   const chooseColumnVersion = (column: number) => {
@@ -1758,7 +1744,11 @@ const LoadedBibleContent = ({
                   void dispatch({ type: FOCUS_STUDY_ACTION, payload: focusAction })
                 }}
                 onOpenEntity={uniqueName => {
-                  void dispatch({ type: NAVIGATE_TO_BIBLICAL_ENTITY, payload: uniqueName })
+                  void sendReaderIntent({
+                    kind: 'open',
+                    origin: 'focus-study',
+                    target: { kind: 'biblical-entity', entityKey: uniqueName },
+                  })
                 }}
               />
             )}
@@ -1783,10 +1773,18 @@ const LoadedBibleContent = ({
                 ) : null
               }
               onOpenEntity={uniqueName => {
-                void dispatch({ type: NAVIGATE_TO_BIBLICAL_ENTITY, payload: uniqueName })
+                void sendReaderIntent({
+                  kind: 'open',
+                  origin: 'chapter-entities',
+                  target: { kind: 'biblical-entity', entityKey: uniqueName },
+                })
               }}
               onOpenMap={places => {
-                void dispatch({ type: NAVIGATE_TO_BIBLICAL_MAP, payload: places.join(',') })
+                void sendReaderIntent({
+                  kind: 'open',
+                  origin: 'chapter-entities',
+                  target: { kind: 'map', places },
+                })
               }}
               onDownload={() => {
                 void dispatch({ type: DOWNLOAD_CHAPTER_ENTITIES })

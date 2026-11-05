@@ -3,8 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { radii } from '~common/ui/surfaces'
 import { getPassageMediaEmbedUrl, type ResolvedPassageMedia } from '../passageMedia'
-import { OPEN_PASSAGE_MEDIA_SOURCE } from './dispatch'
-import { useDispatch } from './DispatchProvider'
+import { useReaderIntent } from './useReaderIntent'
 import { INTERFACE_FONT } from './interfaceFont'
 import PassageMediaImage from './PassageMediaImage'
 import { useTranslations } from './TranslationsContext'
@@ -27,7 +26,7 @@ const PassageMediaPlayer = ({
   buttonBackgroundColor,
 }: Props) => {
   const shouldReduceMotion = useReducedMotion()
-  const dispatch = useDispatch()
+  const sendReaderIntent = useReaderIntent()
   const translations = useTranslations()
   const [isReady, setIsReady] = useState(false)
   const readyTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -99,7 +98,11 @@ const PassageMediaPlayer = ({
         type="button"
         onClick={event => {
           event.stopPropagation()
-          void dispatch({ type: OPEN_PASSAGE_MEDIA_SOURCE, payload: item.sourceUrl })
+          void sendReaderIntent({
+            kind: 'open',
+            origin: 'passage-media',
+            target: { kind: 'media-source', url: item.sourceUrl },
+          })
         }}
         style={{
           appearance: 'none',

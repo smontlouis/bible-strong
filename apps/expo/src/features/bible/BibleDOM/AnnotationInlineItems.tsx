@@ -8,7 +8,6 @@ import { getAnnotationInsertionPoint } from './AnnotationMode/annotationDomText'
 import { findVerseTextElement } from './AnnotationMode/verseTargets'
 import { useDispatch } from './DispatchProvider'
 import { OPEN_ANNOTATION_TAGS } from './dispatch'
-import { getRelationItemNavigationActions } from './relationDisplayActions'
 import RelationsText from './RelationsText'
 import VerseTags from './VerseTags'
 import { getAnnotationInlineAnchorKey } from './annotationInlineModel'
@@ -106,9 +105,7 @@ const AnnotationInlineItems = ({
             settings={settings}
             relationItems={relationItems}
             isDisabled={annotationMode}
-            onClick={item => {
-              getRelationItemNavigationActions(verseKey, item).forEach(dispatch)
-            }}
+            verseKey={verseKey}
           />
         )}
         {tags.length > 0 && (

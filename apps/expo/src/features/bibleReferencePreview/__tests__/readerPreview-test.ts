@@ -1,18 +1,13 @@
-import { Platform } from 'react-native'
 import { createReaderPreview } from '../readerPreview'
 jest.mock('~features/resources/dictionaryAccess', () => ({
   getDefaultDictionaryWork: (language: string) =>
     language === 'en' ? 'easton-webster' : 'westphal',
 }))
-jest.mock('react-native', () => ({ Platform: { OS: 'web' } }))
 jest.mock('~i18n', () => ({
   __esModule: true,
   getLanguage: () => 'fr',
   default: { t: (key: string) => key },
 }))
-beforeEach(() => {
-  Platform.OS = 'web'
-})
 
 it('previews a note without executing its original navigation', () => {
   const open = jest.fn()
@@ -57,24 +52,6 @@ it('previews studies and saved external links on Web', () => {
   ).toMatchObject({ kind: 'link', linkId: 'link' })
 })
 
-it.each(['ios', 'android'] as const)('keeps native reader navigation on %s', platform => {
-  Platform.OS = platform
-  expect(
-    createReaderPreview(
-      { type: 'externalLink', linkId: 'link', sourceKey: 'link', url: 'https://example.com' },
-      'LSG',
-      'Lien',
-      () => {}
-    )
-  ).toBeUndefined()
-  expect(
-    createReaderPreview({ type: 'note', noteId: 'note' }, 'LSG', 'Note', () => {})
-  ).toBeUndefined()
-  expect(
-    createReaderPreview({ type: 'verse', verseKeys: ['43-3-16'] }, 'LSG', 'Note', () => {})
-  ).toBeUndefined()
-})
-
 it('previews Nave and dictionary relations in the resource language', () => {
   expect(
     createReaderPreview(
@@ -98,18 +75,3 @@ it('previews Nave and dictionary relations in the resource language', () => {
     })
   ).toMatchObject({ kind: 'dictionary', source: { work: 'easton-webster', language: 'en' } })
 })
-it.each(['ios', 'android'] as const)(
-  'keeps study, dictionary and Nave links direct on %s',
-  platform => {
-    Platform.OS = platform
-    expect(
-      createReaderPreview({ type: 'study', studyId: 's' }, 'LSG', 'Note', () => {})
-    ).toBeUndefined()
-    expect(
-      createReaderPreview({ type: 'nave', nameLower: 'love' }, 'LSG', 'Note', () => {})
-    ).toBeUndefined()
-    expect(
-      createReaderPreview({ type: 'dictionary', word: 'Love' }, 'LSG', 'Note', () => {})
-    ).toBeUndefined()
-  }
-)

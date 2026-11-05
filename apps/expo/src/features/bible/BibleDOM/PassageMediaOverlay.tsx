@@ -14,8 +14,7 @@ import {
   getOverlaySourceDelay,
   OVERLAY_ADDITIONAL_STAGGER_SECONDS,
 } from './overlayStagger'
-import { NAVIGATE_TO_STRONG } from './dispatch'
-import { useDispatch } from './DispatchProvider'
+import { useReaderIntent } from './useReaderIntent'
 import { INTERFACE_FONT } from './interfaceFont'
 import { withColorAlpha } from './themeOverlayColor'
 
@@ -230,7 +229,7 @@ const PassageMediaOverlay = ({
   colors,
 }: Props) => {
   const translations = useTranslations()
-  const dispatch = useDispatch()
+  const sendReaderIntent = useReaderIntent()
   const shouldReduceMotion = useReducedMotion()
   const isOpen = mode !== 'closed'
   const overlayRef = useModalOverlayLifecycle({
@@ -304,7 +303,18 @@ const PassageMediaOverlay = ({
         onSelect={onSelect}
         colors={colors}
         onOpenStrong={strongCode => {
-          void dispatch({ type: NAVIGATE_TO_STRONG, payload: strongCode })
+          void sendReaderIntent({
+            kind: 'open',
+            origin: 'passage-media',
+            target: {
+              kind: 'endpoint',
+              endpoint: {
+                type: 'strong',
+                code: strongCode,
+                language: strongCode.trim().toUpperCase().startsWith('G') ? 'greek' : 'hebrew',
+              },
+            },
+          })
         }}
       />
     )
