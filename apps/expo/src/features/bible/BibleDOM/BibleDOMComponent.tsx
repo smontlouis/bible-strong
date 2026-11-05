@@ -37,12 +37,6 @@ import {
   CLEAR_SELECTED_VERSES,
   DOWNLOAD_BIBLE_VERSION,
   NAVIGATE_TO_PERICOPE,
-  NAVIGATE_TO_VERSION,
-  OPEN_COLUMN_TEXT_MODE,
-  SWIPE_LEFT,
-  SWIPE_RIGHT,
-  SWIPE_DOWN,
-  SWIPE_UP,
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_BIBLICAL_ENTITY,
   NAVIGATE_TO_BIBLICAL_MAP,
@@ -53,10 +47,10 @@ import {
   DOWNLOAD_CHAPTER_ENTITIES,
   DISMISS_CONTEXTUAL_INFORMATION,
   FOCUS_STUDY_ACTION,
-  PLAN_DAY_STEP,
   DOM_COMPONENT_MOUNTED,
 } from './dispatch'
 import { DispatchProvider } from './DispatchProvider'
+import { ReaderIntentProvider, useReaderIntent } from './useReaderIntent'
 import { TranslationsProvider, BibleDOMTranslations } from './TranslationsContext'
 import { scaleFontSize } from './scaleFontSize'
 import { useFonts } from 'expo-font'
@@ -176,6 +170,8 @@ const GlobalStyles = createGlobalStyles`
 
 type Props = Pick<
   WebViewProps,
+  | 'tabId'
+  | 'onReaderIntent'
   | 'verses'
   | 'parallelVerses'
   | 'parallelColumnWidth'
@@ -736,6 +732,11 @@ const LoadedBibleContent = ({
   // in the margins beside it is a tap away from it
   const readerSurfaceRef = useRef<HTMLDivElement>(null)
   const shouldReduceMotion = useReducedMotion()
+  const sendReaderIntent = useReaderIntent()
+  // The scroll listener keeps its own state between events: an effect event leaves it subscribed.
+  const sendControlsIntent = useEffectEvent((kind: 'hide-controls' | 'show-controls') => {
+    void sendReaderIntent({ kind })
+  })
   const [parallelViewportWidth, setParallelViewportWidth] = useState(0)
   useEffect(() => {
     if (!keepControlsVisible) return
@@ -1212,9 +1213,9 @@ const LoadedBibleContent = ({
           ? scrollToAdjacentColumn
           : undefined
         : direction => {
-            dispatch({
-              type: direction === 'left' ? SWIPE_LEFT : SWIPE_RIGHT,
-            }).catch(console.error)
+            void sendReaderIntent({
+              kind: direction === 'left' ? 'next-chapter' : 'previous-chapter',
+            })
           },
     },
   })
@@ -1313,9 +1314,7 @@ const LoadedBibleContent = ({
       // Don't dispatch if scroll is beyond boundaries (iOS momentum scrolling)
       if (currentScrollTop < 0 || currentScrollTop > totalHeight) {
         if (!reachedBoundaries) {
-          dispatch({
-            type: SWIPE_UP,
-          })
+          sendControlsIntent('show-controls')
           document.documentElement.style.setProperty('--header-height', `${expandedHeaderHeight}px`)
           setReaderFooterHeight(true)
         }
@@ -1329,17 +1328,13 @@ const LoadedBibleContent = ({
       if (velocity * 1000 > VELOCITY_THRESHOLD) {
         if (scrollDiff > 0 && canSwipeDown) {
           if (window.disableSwipeDownEvent) return
-          dispatch({
-            type: SWIPE_DOWN,
-          })
+          sendControlsIntent('hide-controls')
           document.documentElement.style.setProperty('--header-height', `${HEADER_HEIGHT_MIN}px`)
           setReaderFooterHeight(false)
           canSwipeDown = false
           canSwipeUp = true
         } else if (scrollDiff < 0 && canSwipeUp) {
-          dispatch({
-            type: SWIPE_UP,
-          })
+          sendControlsIntent('show-controls')
           document.documentElement.style.setProperty('--header-height', `${expandedHeaderHeight}px`)
           setReaderFooterHeight(true)
           canSwipeUp = false
@@ -1352,7 +1347,7 @@ const LoadedBibleContent = ({
     }
 
     return addDOMScrollListener(scrollTarget, handleScroll)
-  }, [dispatch, isFormSheet, keepControlsVisible, expandedHeaderHeight])
+  }, [isFormSheet, keepControlsVisible, expandedHeaderHeight])
 
   const hasVerses = verses.length > 0
   const headerHeight =
@@ -1495,18 +1490,12 @@ const LoadedBibleContent = ({
     })
   }
 
-  const navigateToVersion = (version: string, index: number) => {
-    dispatch({
-      type: NAVIGATE_TO_VERSION,
-      payload: { version, index },
-    })
+  const chooseColumnVersion = (column: number) => {
+    void sendReaderIntent({ kind: 'choose-column-version', column })
   }
 
-  const openColumnTextMode = (kind: 'strong' | 'interlinear', column: number) => {
-    dispatch({
-      type: OPEN_COLUMN_TEXT_MODE,
-      payload: { kind, column },
-    })
+  const openColumnTextMode = (mode: 'strong' | 'interlinear', column: number) => {
+    void sendReaderIntent({ kind: 'open-column-text-mode', mode, column })
   }
 
   const isHebreu = version === 'BHS' || (version === 'BHG' && Number(verses[0].Livre) < 40)
@@ -1604,7 +1593,7 @@ const LoadedBibleContent = ({
                           hasError={Boolean(p.error)}
                           controls={columnTextModeControls?.[i]}
                           withChevron
-                          onVersionPress={() => navigateToVersion(p.id, i)}
+                          onVersionPress={() => chooseColumnVersion(i)}
                           onTextModePress={kind => openColumnTextMode(kind, i)}
                         />
                       </VersionTitleGroup>
@@ -1811,7 +1800,7 @@ const LoadedBibleContent = ({
                 step={planDayStep}
                 settings={settings}
                 onPress={() => {
-                  void dispatch({ type: PLAN_DAY_STEP })
+                  void sendReaderIntent({ kind: 'plan-day-step' })
                 }}
               />
             )}
@@ -2057,9 +2046,11 @@ const VersesRendererContent = ({ settings, dispatch, translations, verses, ...re
 }
 
 const VersesRenderer = (props: Props) => (
-  <LazyMotion features={domMax} strict>
-    <VersesRendererContent {...props} />
-  </LazyMotion>
+  <ReaderIntentProvider tabId={props.tabId} onReaderIntent={props.onReaderIntent}>
+    <LazyMotion features={domMax} strict>
+      <VersesRendererContent {...props} />
+    </LazyMotion>
+  </ReaderIntentProvider>
 )
 
 export default VersesRenderer
