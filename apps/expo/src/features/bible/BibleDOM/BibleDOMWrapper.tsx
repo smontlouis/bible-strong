@@ -84,17 +84,13 @@ import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import type { AnnotationType, SelectionRange, WordPosition } from '../hooks/useAnnotationMode'
 import { BibleDOMTranslations } from './TranslationsContext'
 import {
-  ADD_PARALLEL_VERSION,
   ANNOTATION_SELECTED,
-  CLEAR_FOCUS_VERSES,
   CREATE_ANNOTATION,
   ENTER_ANNOTATION_MODE,
   EXIT_ANNOTATION_MODE,
   CLEAR_SELECTED_VERSES,
-  COLLAPSE_CONTEXT,
   DOWNLOAD_BIBLE_VERSION,
   ERASE_SELECTION,
-  EXPAND_CONTEXT,
   NAVIGATE_TO_BIBLE_LINK,
   NAVIGATE_TO_BIBLE_NOTE,
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
@@ -120,7 +116,6 @@ import {
   OPEN_VERSE_TAGS_MODAL,
   OPEN_DOWNLOADS,
   OPEN_PASSAGE_MEDIA_SOURCE,
-  REMOVE_PARALLEL_VERSION,
   RESET_BIBLE_DATABASE,
   RETRY_BIBLE_RESOURCE,
   SET_BIBLE_OVERLAY_OPEN,
@@ -132,7 +127,6 @@ import {
   getBookmarkPayload,
   getCanonicalBibleNotePayload,
   getNoteNavigationPayload,
-  getNumberPayload,
   getStrongRelationSelectionPayload,
   getStringPayload,
   getPayloadVersion,
@@ -276,8 +270,6 @@ export type WebViewProps = {
   openLink?: (linkId: string) => void
   setSelectedCode: (selectedCode: StrongSelection) => void
   selectedCode: SelectedCode | null
-  removeParallelVersion?: (index: number) => void
-  addParallelVersion?: () => void
   setUnifiedTagsModal?: (payload: TagsModalPayload) => void
   onOpenResourceForVerse?: (
     resourceType: BibleResource,
@@ -286,9 +278,6 @@ export type WebViewProps = {
   ) => void
   onOpenBookmarkModal?: (bookmark: Bookmark) => void
   onOpenCanonicalBibleReference?: (osis: string) => void
-  expandContext?: () => void
-  collapseContext?: () => void
-  clearFocusVerses?: () => void
   /** Plan mode shows its banner under the header, focus or not. */
   inPlan?: boolean
   /** Plan mode: the way on to the next element of the day, under the passage's last chapter. */
@@ -445,15 +434,10 @@ export const BibleDOMWrapper = ({
   onOpenCanonicalBibleReference,
   openNote,
   openLink,
-  removeParallelVersion,
-  addParallelVersion,
   setSelectedCode,
   removeSelectedVerse,
   clearSelectedVerses,
   addSelectedVerse,
-  expandContext,
-  collapseContext,
-  clearFocusVerses,
   onSelectionChanged,
   onCreateAnnotation,
   onEraseSelection,
@@ -790,15 +774,6 @@ export const BibleDOMWrapper = ({
         })
         break
       }
-      case REMOVE_PARALLEL_VERSION: {
-        const index = getNumberPayload(action.payload)
-        if (typeof index === 'number') removeParallelVersion?.(index - 1)
-        break
-      }
-      case ADD_PARALLEL_VERSION: {
-        addParallelVersion?.()
-        break
-      }
       case OPEN_STRONG_SELECTION: {
         const selection = getStrongSelectionPayload(action.payload)
         if (selection) setSelectedCode(selection)
@@ -973,21 +948,6 @@ export const BibleDOMWrapper = ({
         if (!isRecord(action.payload) || typeof action.payload.tagId !== 'string') break
         const { tagId } = action.payload
         pushRouteOnce({ pathname: '/tag', params: { tagId } })
-        break
-      }
-
-      case EXPAND_CONTEXT: {
-        expandContext?.()
-        break
-      }
-
-      case COLLAPSE_CONTEXT: {
-        collapseContext?.()
-        break
-      }
-
-      case CLEAR_FOCUS_VERSES: {
-        clearFocusVerses?.()
         break
       }
 
