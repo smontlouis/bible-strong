@@ -9,7 +9,7 @@ import type { InlineCommentaryRequest } from '~features/commentaries/InlineComme
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import * as Sentry from '@sentry/react-native'
 import { useCallback, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react'
-import { Platform, type LayoutChangeEvent } from 'react-native'
+import { Platform, useWindowDimensions, type LayoutChangeEvent } from 'react-native'
 import { useDispatch, useSelector, useStore } from 'react-redux'
 import Box, { RightInsetCleared, TouchableBox, useRightInsetToClear } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -134,6 +134,8 @@ import {
   type StudyRelationsModalTarget,
 } from './BibleDOM/BibleDOMWrapper'
 import BibleParamsModal from './BibleParamsModal'
+import { handleReaderIntent, type Reader } from './readerIntent'
+import { useReaderWorld } from './readerIntent/world'
 import {
   getDisplayedParallelVerses,
   loadBibleReadingParallelVerses,
@@ -321,6 +323,9 @@ const BibleViewer = ({
   const parallelColumnWidth = useAtomValue(parallelColumnWidthAtom)
   const parallelDisplayMode = useAtomValue(parallelDisplayModeAtom)
   const actions = useBibleTabActions(bibleAtom)
+  const readerWorld = useReaderWorld()
+  // A wide screen keeps the controls of the reader visible.
+  const keepControlsVisible = useWindowDimensions().width >= 768
   const [verseNavigationRequest, setVerseNavigationRequest] = useState(0)
 
   const {
@@ -1547,9 +1552,31 @@ const BibleViewer = ({
     versesWithNonHighlightTags,
   })
 
+  const reader: Reader = {
+    now: () => ({
+      tabId: bible.id,
+      tabAtom: bibleAtom,
+      coverage: coverageData,
+      annotationMode: viewerPersonalData.annotationMode ?? false,
+      isFormSheet: Boolean(isFormSheet),
+      keepControlsVisible,
+      hasPlanDayStep: Boolean(planDayStep),
+    }),
+    surface: presentation => {
+      switch (presentation.kind) {
+        case 'column-text-mode':
+          textModeSheetsRef.current?.open(presentation.mode, presentation.column)
+          return
+        case 'plan-day-step':
+          planDayStep?.onPress()
+          return
+      }
+    },
+  }
+
   const domProps = {
     tabId: bible.id,
-    bibleAtom,
+    onReaderIntent: message => handleReaderIntent(message, reader, readerWorld),
     book,
     chapter,
     isLoading,
@@ -1570,8 +1597,6 @@ const BibleViewer = ({
     columnTextModeControls: parallelVersions.length
       ? getColumnTextModeControls(bible.data)
       : undefined,
-    openColumnTextMode: (kind: 'strong' | 'interlinear', column: number) =>
-      textModeSheetsRef.current?.open(kind, column),
     focusVerses,
     inPlan: Boolean(planPassage),
     selectedVerses: viewerPersonalData.selectedVerses,
@@ -1594,19 +1619,11 @@ const BibleViewer = ({
     openLink: hidePersonalBibleData ? undefined : openLink,
     setSelectedCode,
     selectedCode,
-    removeParallelVersion: actions.removeParallelVersion,
-    addParallelVersion: actions.addParallelVersion,
-    goToPrevChapter: goToPrevAvailableChapter,
-    goToNextChapter: goToNextAvailableChapter,
     setUnifiedTagsModal: hidePersonalBibleData ? undefined : setUnifiedTagsModal,
     onOpenResourceForVerse: openResourceForVerse,
     onOpenBookmarkModal: hidePersonalBibleData ? undefined : handleOpenBookmarkModal,
     onOpenCanonicalBibleReference: handleCanonicalBibleReferencePress,
-    expandContext: actions.expandContext,
-    collapseContext: actions.collapseContext,
-    clearFocusVerses: actions.clearFocusVerses,
     planDayStep: planDayStepView,
-    onPlanDayStep: planDayStep?.onPress,
     // Annotation mode props
     annotationMode: viewerPersonalData.annotationMode,
     clearSelectionTrigger: annotationMode.clearSelectionTrigger,

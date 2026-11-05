@@ -14,9 +14,8 @@ import type { ColumnTextModeControls, PericopeChapter, RootStyles } from './Bibl
 import type { VerseTarget } from './AnnotationMode/verseTargets'
 import InlineCommentaryChips, { type LabeledCommentaryChip } from './InlineCommentaryChips'
 import { PericopeHeaders, getPericopeVerse, hasPericopeHeadings } from './PericopeHeaders'
-import { NAVIGATE_TO_VERSION, OPEN_COLUMN_TEXT_MODE } from './dispatch'
 import VersionChip from './VersionChip'
-import { useDispatch } from './DispatchProvider'
+import { useReaderIntent } from './useReaderIntent'
 import { useTranslations } from './TranslationsContext'
 import Verse, {
   VerseEndContent,
@@ -229,7 +228,7 @@ const ParallelVerseRow = ({
   commentaryChips,
   textModeControls,
 }: ParallelVerseRowProps) => {
-  const dispatch = useDispatch()
+  const sendReaderIntent = useReaderIntent()
   const translations = useTranslations()
   const isVertical = displayMode === 'vertical'
   const verseNumber = Number(verse.Verset)
@@ -267,16 +266,10 @@ const ParallelVerseRow = ({
             controls={textModeControls?.[index]}
             height={VERTICAL_VERSION_CHIP_HEIGHT}
             onVersionPress={() => {
-              dispatch({
-                type: NAVIGATE_TO_VERSION,
-                payload: { version: cell.version, index },
-              })
+              void sendReaderIntent({ kind: 'choose-column-version', column: index })
             }}
-            onTextModePress={kind => {
-              dispatch({
-                type: OPEN_COLUMN_TEXT_MODE,
-                payload: { kind, column: index },
-              })
+            onTextModePress={mode => {
+              void sendReaderIntent({ kind: 'open-column-text-mode', mode, column: index })
             }}
           />
         </VerticalVersionTitle>

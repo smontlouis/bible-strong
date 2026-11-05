@@ -20,9 +20,8 @@ import { webFontFamily } from '~helpers/webFontFamily'
 import { useTheme } from '~themes/ThemeProvider'
 import * as Haptics from 'expo-haptics'
 import { useRouter } from 'expo-router'
-import produce from 'immer'
 import { useSetAtom } from 'jotai/react'
-import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
+import { getDefaultStore } from 'jotai/vanilla'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
@@ -30,10 +29,8 @@ import { AppState, Linking, Platform, useWindowDimensions, type ViewStyle } from
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isBibleOverlayOpenAtom, isFullScreenBibleAtom } from 'src/state/app'
-import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
 import {
   BibleContextDisplayMode,
-  BibleTab,
   ParallelColumnWidth,
   ParallelDisplayMode,
   VersionCode,
@@ -62,7 +59,6 @@ import {
   HEADER_HEIGHT,
 } from '~features/app-switcher/utils/constants'
 import { HelpTip } from '~features/tips/HelpTip'
-import { resetParallelColumnTextModes } from '~helpers/bibleColumnTextModes'
 import { appLogger } from '~helpers/agentObservability'
 import { BibleError } from '~helpers/bibleErrors'
 import type { InterlinearMode } from '~helpers/interlinearDisplayMode'
@@ -85,22 +81,16 @@ import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModu
 import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
 import { createStrongIdentity } from '~helpers/strongIdentities'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import { useBookAndVersionSelector } from '../BookSelectorSheet/BookSelectorSheetProvider'
 import type { AnnotationType, SelectionRange, WordPosition } from '../hooks/useAnnotationMode'
 import { BibleDOMTranslations } from './TranslationsContext'
 import {
-  ADD_PARALLEL_VERSION,
   ANNOTATION_SELECTED,
-  CLEAR_FOCUS_VERSES,
-  PLAN_DAY_STEP,
   CREATE_ANNOTATION,
   ENTER_ANNOTATION_MODE,
   EXIT_ANNOTATION_MODE,
   CLEAR_SELECTED_VERSES,
-  COLLAPSE_CONTEXT,
   DOWNLOAD_BIBLE_VERSION,
   ERASE_SELECTION,
-  EXPAND_CONTEXT,
   NAVIGATE_TO_BIBLE_LINK,
   NAVIGATE_TO_BIBLE_NOTE,
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
@@ -117,8 +107,6 @@ import {
   NAVIGATE_TO_TAG,
   NAVIGATE_TO_VERSE_LINKS,
   NAVIGATE_TO_VERSE_STUDY_RELATIONS,
-  NAVIGATE_TO_VERSION,
-  OPEN_COLUMN_TEXT_MODE,
   OPEN_BOOKMARK_MODAL,
   OPEN_CANONICAL_BIBLE_NOTE,
   OPEN_CANONICAL_BIBLE_REFERENCE,
@@ -128,23 +116,17 @@ import {
   OPEN_VERSE_TAGS_MODAL,
   OPEN_DOWNLOADS,
   OPEN_PASSAGE_MEDIA_SOURCE,
-  REMOVE_PARALLEL_VERSION,
   RESET_BIBLE_DATABASE,
   RETRY_BIBLE_RESOURCE,
   SET_BIBLE_OVERLAY_OPEN,
   SELECTION_CHANGED,
   SHOW_TOAST,
-  SWIPE_DOWN,
-  SWIPE_LEFT,
-  SWIPE_RIGHT,
-  SWIPE_UP,
   TOGGLE_SELECTED_VERSE,
 } from './dispatch'
 import {
   getBookmarkPayload,
   getCanonicalBibleNotePayload,
   getNoteNavigationPayload,
-  getNumberPayload,
   getStrongRelationSelectionPayload,
   getStringPayload,
   getPayloadVersion,
@@ -174,6 +156,7 @@ import { getOriginalBookTitle } from '~helpers/originalBookTitles'
 import { getReadingBookName, translateForReading } from '~helpers/readingLanguage'
 import { getWordAnnotationText } from '~redux/modules/user/wordAnnotationRanges'
 import type { UnifiedTagsModalProps } from '~state/app'
+import type { ReaderIntentHandler } from '../readerIntent/types'
 export type { StudyRelationsModalTarget } from './bibleDomBridgeCommands'
 
 export type ParallelVerse = {
@@ -239,8 +222,10 @@ const DOM_WEBVIEW_INITIAL_SCRIPT =
   "document.documentElement.style.backgroundColor='transparent';document.body.style.backgroundColor='transparent';document.body.style.margin='0';true;"
 
 export type WebViewProps = {
+  /** The Tab shown: the page stamps it on each Reader intent. */
   tabId: string
-  bibleAtom: PrimitiveAtom<BibleTab>
+  /** Every Reader intent of the page goes through here (ADR-0098). */
+  onReaderIntent: ReaderIntentHandler
   book: Book
   chapter: number
   isLoading: boolean
@@ -261,7 +246,6 @@ export type WebViewProps = {
   parallelDisplayMode?: ParallelDisplayMode
   /** Parallel reading: the Strong and interlinear buttons of each column, 0 being the main one. */
   columnTextModeControls?: ColumnTextModeControls[]
-  openColumnTextMode?: (kind: 'strong' | 'interlinear', column: number) => void
 
   focusVerses: (string | number)[] | undefined
   selectedVerses: VerseIds
@@ -286,10 +270,6 @@ export type WebViewProps = {
   openLink?: (linkId: string) => void
   setSelectedCode: (selectedCode: StrongSelection) => void
   selectedCode: SelectedCode | null
-  removeParallelVersion?: (index: number) => void
-  addParallelVersion?: () => void
-  goToPrevChapter?: () => void
-  goToNextChapter?: () => void
   setUnifiedTagsModal?: (payload: TagsModalPayload) => void
   onOpenResourceForVerse?: (
     resourceType: BibleResource,
@@ -298,14 +278,10 @@ export type WebViewProps = {
   ) => void
   onOpenBookmarkModal?: (bookmark: Bookmark) => void
   onOpenCanonicalBibleReference?: (osis: string) => void
-  expandContext?: () => void
-  collapseContext?: () => void
-  clearFocusVerses?: () => void
   /** Plan mode shows its banner under the header, focus or not. */
   inPlan?: boolean
   /** Plan mode: the way on to the next element of the day, under the passage's last chapter. */
   planDayStep?: PlanDayStepView
-  onPlanDayStep?: () => void
   // Annotation mode props
   annotationMode?: boolean
   clearSelectionTrigger?: number
@@ -412,12 +388,13 @@ export type VerseRelationItem = {
 }
 
 export const BibleDOMWrapper = ({
+  tabId,
+  onReaderIntent,
   verses,
   parallelVerses,
   parallelColumnWidth = 75,
   parallelDisplayMode = 'horizontal',
   columnTextModeControls,
-  openColumnTextMode,
   focusVerses,
   selectedVerses,
   selectedVersesVersion,
@@ -443,7 +420,6 @@ export const BibleDOMWrapper = ({
   selectedCode,
   inPlan,
   planDayStep,
-  onPlanDayStep,
   annotationMode,
   clearSelectionTrigger,
   applyAnnotationTrigger,
@@ -458,15 +434,10 @@ export const BibleDOMWrapper = ({
   onOpenCanonicalBibleReference,
   openNote,
   openLink,
-  removeParallelVersion,
-  addParallelVersion,
   setSelectedCode,
   removeSelectedVerse,
   clearSelectedVerses,
   addSelectedVerse,
-  expandContext,
-  collapseContext,
-  clearFocusVerses,
   onSelectionChanged,
   onCreateAnnotation,
   onEraseSelection,
@@ -476,9 +447,6 @@ export const BibleDOMWrapper = ({
   onOpenVerseTagsModal,
   onOpenCanonicalBibleNote,
   setUnifiedTagsModal,
-  bibleAtom,
-  goToPrevChapter,
-  goToNextChapter,
   onEnterAnnotationMode,
   onExitAnnotationMode,
   isFormSheet,
@@ -503,7 +471,6 @@ export const BibleDOMWrapper = ({
 }: WebViewProps) => {
   const keepControlsVisible = useWindowDimensions().width >= 768
   const isConnected = useConnection()
-  const { openVersionSelector } = useBookAndVersionSelector()
   const openRelationEndpoint = useOpenRelationEndpoint()
   const previewLanguages = useResourcesLanguageValue()
   const setPreviewHistory = useSetAtom(previewHistoryAtom)
@@ -517,7 +484,6 @@ export const BibleDOMWrapper = ({
     return true
   }
 
-  const isContextFocused = contextDisplayMode === 'focused'
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
   useEffect(() => {
     if (keepControlsVisible) setIsFullScreenBible(false)
@@ -808,52 +774,6 @@ export const BibleDOMWrapper = ({
         })
         break
       }
-      case NAVIGATE_TO_VERSION: {
-        if (!isRecord(action.payload)) break
-        const { version, index } = action.payload
-        if (typeof version !== 'string' || typeof index !== 'number') break
-
-        // index = 0 is Default one
-        openVersionSelector({
-          actions: {
-            setSelectedVersion: (version: VersionCode) =>
-              getDefaultStore().set(
-                bibleAtom,
-                produce(draft => {
-                  draft.data = selectBibleTabVersion(draft.data, version)
-                })
-              ),
-            setParallelVersion: (version: VersionCode, index: number) =>
-              getDefaultStore().set(
-                bibleAtom,
-                produce(draft => {
-                  // A column taking a new version starts without any text mode.
-                  resetParallelColumnTextModes(draft.data, index, version)
-                  draft.data.parallelVersions[index] = version
-                })
-              ),
-          },
-          data: getDefaultStore().get(bibleAtom).data,
-          parallelVersionIndex: index === 0 ? undefined : index - 1,
-        })
-        break
-      }
-      case REMOVE_PARALLEL_VERSION: {
-        const index = getNumberPayload(action.payload)
-        if (typeof index === 'number') removeParallelVersion?.(index - 1)
-        break
-      }
-      case ADD_PARALLEL_VERSION: {
-        addParallelVersion?.()
-        break
-      }
-      case OPEN_COLUMN_TEXT_MODE: {
-        if (!isRecord(action.payload)) break
-        const { kind, column } = action.payload
-        if ((kind !== 'strong' && kind !== 'interlinear') || typeof column !== 'number') break
-        openColumnTextMode?.(kind, column)
-        break
-      }
       case OPEN_STRONG_SELECTION: {
         const selection = getStrongSelectionPayload(action.payload)
         if (selection) setSelectedCode(selection)
@@ -964,30 +884,6 @@ export const BibleDOMWrapper = ({
           open()
         break
       }
-      case SWIPE_LEFT: {
-        // Disable chapter navigation in focused context or annotation mode
-        if (isContextFocused || annotationMode) break
-
-        goToNextChapter?.()
-        break
-      }
-      case SWIPE_RIGHT: {
-        // Disable chapter navigation in focused context or annotation mode
-        if (isContextFocused || annotationMode) break
-
-        goToPrevChapter?.()
-        break
-      }
-      case SWIPE_DOWN: {
-        if (isFormSheet || keepControlsVisible) break
-        setIsFullScreenBible(true)
-        break
-      }
-      case SWIPE_UP: {
-        if (isFormSheet) break
-        setIsFullScreenBible(false)
-        break
-      }
       case OPEN_HIGHLIGHT_TAGS: {
         const verseIds = getVerseIdsPayload(action.payload)
         const obj = {
@@ -1052,26 +948,6 @@ export const BibleDOMWrapper = ({
         if (!isRecord(action.payload) || typeof action.payload.tagId !== 'string') break
         const { tagId } = action.payload
         pushRouteOnce({ pathname: '/tag', params: { tagId } })
-        break
-      }
-
-      case EXPAND_CONTEXT: {
-        expandContext?.()
-        break
-      }
-
-      case COLLAPSE_CONTEXT: {
-        collapseContext?.()
-        break
-      }
-
-      case CLEAR_FOCUS_VERSES: {
-        clearFocusVerses?.()
-        break
-      }
-
-      case PLAN_DAY_STEP: {
-        onPlanDayStep?.()
         break
       }
 
@@ -1269,6 +1145,8 @@ export const BibleDOMWrapper = ({
       }}
     >
       <BibleDOMComponent
+        tabId={tabId}
+        onReaderIntent={onReaderIntent}
         focusedMetadataItems={focusedMetadataItems}
         onFocusedMetadataPress={async (type, id) => {
           if (type === 'relation' && focusedEndpoint) openFocusedRelations(focusedEndpoint)

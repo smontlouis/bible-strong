@@ -11,16 +11,11 @@ import { StrongReference, StudyNavigateBibleType, VerseIds } from '~common/types
 import type { StrongIdentityKind } from '~helpers/strongIdentities'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
 import { storage } from '~helpers/storage'
-import { getBibleVersionCanonId, versions } from '~helpers/bibleVersions'
+import { versions } from '~helpers/bibleVersions'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import i18n, { getLanguage } from '~i18n'
 import { clampTabIndex, updateTabGroupActiveIndex, updateTabGroupTabs } from './tabWorkspace'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
-import {
-  getNextAvailableChapterLocation,
-  getPreviousAvailableChapterLocation,
-  resolveBibleCoverageCanonId,
-} from '~helpers/bibleCoverage'
 import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
 import { type StrongBibleVersionId, type StrongMode } from '~helpers/strongBiblePublications'
 import type { InterlinearMode } from '~helpers/interlinearBiblePublications'
@@ -38,6 +33,11 @@ import { omitSessionTabPreview, withTabPreviewUri, withoutLegacyTabPreview } fro
 import { appLogger } from '~helpers/agentObservability'
 import { useBibleRouteNavigation } from './bibleRouteNavigation'
 import { getSelectedVersesVersion, setSelectedVersesVersion } from './bibleSelectionVersion'
+import {
+  getAdjacentChapter,
+  openAdjacentChapter,
+  setParallelColumnVersion,
+} from './bibleTabRecipes'
 
 // ============================================================================
 // SHARED BIBLE DOM (single WebView instance for all Bible tabs)
@@ -68,11 +68,7 @@ export type BibleContextDisplayMode = 'focused' | 'fullChapter'
 
 export { getSelectedVersesVersion } from './bibleSelectionVersion'
 
-export const getBibleContextDisplayMode = (data: {
-  contextDisplayMode?: BibleContextDisplayMode
-  isReadOnly?: boolean
-}): BibleContextDisplayMode =>
-  data.contextDisplayMode ?? (data.isReadOnly ? 'focused' : 'fullChapter')
+export { getBibleContextDisplayMode } from './bibleTabRecipes'
 
 /** A reading-plan passage: one book, from a first to a last chapter. */
 export type BiblePlanPassage = {
@@ -947,8 +943,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const setParallelVersion = (version: VersionCode, index: number) => {
     setBibleTab(
       produce(draft => {
-        resetParallelColumnTextModes(draft.data, index, version)
-        draft.data.parallelVersions[index] = version
+        setParallelColumnVersion(draft.data, index, version)
       })
     )
 
@@ -1164,81 +1159,24 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
       })
     )
 
-  const goToPrevChapter = (coverage?: BibleVersionCoverage) => {
+  const goToAdjacentChapter = (direction: 'previous' | 'next', coverage?: BibleVersionCoverage) => {
     if (routeNavigation) {
-      const current = getDefaultStore().get(tabAtom).data
-      const target = getPreviousAvailableChapterLocation(
-        current.selectedBook,
-        current.selectedChapter,
-        coverage,
-        resolveBibleCoverageCanonId(coverage, getBibleVersionCanonId(current.selectedVersion))
-      )
+      const target = getAdjacentChapter(getDefaultStore().get(tabAtom).data, direction, coverage)
       if (target) routeNavigation.openChapter(target.book, target.chapter)
       return
     }
     setBibleTab(
       produce(draft => {
-        const currentBook = draft.data.selectedBook
-        const target = getPreviousAvailableChapterLocation(
-          currentBook,
-          draft.data.selectedChapter,
-          coverage,
-          resolveBibleCoverageCanonId(coverage, getBibleVersionCanonId(draft.data.selectedVersion))
-        )
-        if (!target) return
-
-        draft.data.selectedBook = target.book
-        draft.data.selectedChapter = target.chapter
-        draft.data.selectedVerse = 1
-        draft.data.focusVerses = undefined
-        draft.data.temp = {
-          selectedBook: target.book,
-          selectedChapter: target.chapter,
-          selectedVerse: 1,
-        }
-
-        return
+        const target = getAdjacentChapter(draft.data, direction, coverage)
+        if (target) openAdjacentChapter(draft.data, target)
       })
     )
   }
 
-  const goToNextChapter = (coverage?: BibleVersionCoverage) => {
-    if (routeNavigation) {
-      const current = getDefaultStore().get(tabAtom).data
-      const target = getNextAvailableChapterLocation(
-        current.selectedBook,
-        current.selectedChapter,
-        coverage,
-        resolveBibleCoverageCanonId(coverage, getBibleVersionCanonId(current.selectedVersion))
-      )
-      if (target) routeNavigation.openChapter(target.book, target.chapter)
-      return
-    }
-    setBibleTab(
-      produce(draft => {
-        const currentBook = draft.data.selectedBook
-        const target = getNextAvailableChapterLocation(
-          currentBook,
-          draft.data.selectedChapter,
-          coverage,
-          resolveBibleCoverageCanonId(coverage, getBibleVersionCanonId(draft.data.selectedVersion))
-        )
-        if (!target) return
+  const goToPrevChapter = (coverage?: BibleVersionCoverage) =>
+    goToAdjacentChapter('previous', coverage)
 
-        draft.data.selectedBook = target.book
-        draft.data.selectedChapter = target.chapter
-        draft.data.selectedVerse = 1
-        draft.data.focusVerses = undefined
-        draft.data.temp = {
-          selectedBook: target.book,
-          selectedChapter: target.chapter,
-          selectedVerse: 1,
-        }
-
-        return
-      })
-    )
-  }
+  const goToNextChapter = (coverage?: BibleVersionCoverage) => goToAdjacentChapter('next', coverage)
 
   const goToChapter = ({ book, chapter }: { book: Book; chapter: number }) => {
     if (routeNavigation) return routeNavigation.openChapter(book, chapter)

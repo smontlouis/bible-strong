@@ -1,6 +1,5 @@
 import * as Sentry from '@sentry/react-native'
 import { useAtomValue } from 'jotai/react'
-import { atom } from 'jotai'
 import { useEffect, useRef } from 'react'
 import { View, StyleSheet } from 'react-native'
 import { Portal, PortalHost } from 'react-native-teleport'
@@ -20,11 +19,12 @@ import type { RootState } from '~redux/modules/reducer'
 export const getBibleDOMDestination = (tabId: string) => `bible-dom-${tabId}`
 const SHARED_BIBLE_DOM_PARK_HOST = 'bible-dom-parked'
 
-// Static default atom for pre-warming the WebView
+// Static default tab for pre-warming the WebView
 const defaultBibleTab = getDefaultBibleTab()
-const defaultBibleAtom = atom(defaultBibleTab)
 
 const noop = () => {}
+// A parked page shows no Tab: whatever it asks is for a Tab that is not on screen.
+const refuseReaderIntent = async () => ({ status: 'refused', rule: 'stale-tab' }) as const
 
 /**
  * Single shared BibleDOMWrapper instance that gets portaled to the active
@@ -69,7 +69,7 @@ const SharedBibleDOM = () => {
   // Default props to pre-warm the WebView (empty verses, no-op callbacks)
   const defaultProps: WebViewProps = {
     tabId: defaultBibleTab.id,
-    bibleAtom: defaultBibleAtom,
+    onReaderIntent: refuseReaderIntent,
     book: defaultBibleTab.data.selectedBook,
     chapter: defaultBibleTab.data.selectedChapter,
     isLoading: true,
