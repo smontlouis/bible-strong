@@ -54,3 +54,48 @@ index 6fcad21b91dae2d029671aca1a6588a031831236..fab59450da935b11ec10a490764f3d63
      get AppRegistry() {
          return require('react-native').AppRegistry
      },
+diff --git a/dist/common/components/web/createOrderedCSSStyleSheet.js b/dist/common/components/web/createOrderedCSSStyleSheet.js
+index 4b66f9988e79d307bb2adebc307821c4fcb607ed..695ec292cfe5d57f1b28a288120c23fd860d1b57 100644
+--- a/dist/common/components/web/createOrderedCSSStyleSheet.js
++++ b/dist/common/components/web/createOrderedCSSStyleSheet.js
+@@ -7,6 +7,10 @@ Object.defineProperty(exports, "__esModule", {
+ var _createOrderedCSSStyleSheet = _interopRequireDefault(require("react-native-web/dist/exports/StyleSheet/dom/createOrderedCSSStyleSheet"));
+ function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+ const createOrderedCSSStyleSheet = sheet => {
++  // Chromium < 99 has no cascade layers: `insertRule('@layer ...')` throws before React mounts.
++  if (sheet !== null && typeof CSSLayerBlockRule === "undefined") {
++    return (0, _createOrderedCSSStyleSheet.default)(sheet);
++  }
+   let layerRule = null;
+   let fakeSheet = null;
+   if (sheet !== null) {
+diff --git a/dist/module/components/web/createOrderedCSSStyleSheet.js b/dist/module/components/web/createOrderedCSSStyleSheet.js
+index f10d8b35f9644ae964b3a96a9a87860a4cc9dea1..ad88047a8b12d6816b6b315a745342d793c9d43c 100644
+--- a/dist/module/components/web/createOrderedCSSStyleSheet.js
++++ b/dist/module/components/web/createOrderedCSSStyleSheet.js
+@@ -1,5 +1,9 @@
+ import originalCreateOrderedCSSStyleSheet from "react-native-web/dist/exports/StyleSheet/dom/createOrderedCSSStyleSheet";
+ const createOrderedCSSStyleSheet = (sheet) => {
++  // Chromium < 99 has no cascade layers: `insertRule('@layer ...')` throws before React mounts.
++  if (sheet !== null && typeof CSSLayerBlockRule === "undefined") {
++    return originalCreateOrderedCSSStyleSheet(sheet);
++  }
+   let layerRule = null;
+   let fakeSheet = null;
+   if (sheet !== null) {
+diff --git a/src/components/web/createOrderedCSSStyleSheet.ts b/src/components/web/createOrderedCSSStyleSheet.ts
+index 891ae6a24906091803375792bf2e269daa2d46f6..7b0527db2bcf2f69aa357582b8517e0d03038092 100644
+--- a/src/components/web/createOrderedCSSStyleSheet.ts
++++ b/src/components/web/createOrderedCSSStyleSheet.ts
+@@ -11,6 +11,11 @@ type OrderedCSSStyleSheet = {
+  * This ensures proper CSS cascade ordering with Tailwind v4 styles.
+  */
+ const createOrderedCSSStyleSheet = (sheet: CSSStyleSheet | null) => {
++    // Chromium < 99 has no cascade layers: `insertRule('@layer ...')` throws before React mounts.
++    if (sheet !== null && typeof CSSLayerBlockRule === 'undefined') {
++        return originalCreateOrderedCSSStyleSheet(sheet) as OrderedCSSStyleSheet
++    }
++
+     let layerRule = null
+     let fakeSheet = null
+ 
