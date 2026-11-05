@@ -73,9 +73,21 @@ export function AtlasTileLink({
 }
 
 /** A row of tiles that scrolls sideways, with the snap of a gallery. */
-export function AtlasStrip({ children, label }: { children: React.ReactNode; label: string }) {
+export function AtlasStrip({
+  children,
+  label,
+  className,
+}: {
+  children: React.ReactNode
+  label: string
+  className?: string
+}) {
   return (
-    <div className="atlas-strip" role="list" aria-label={label}>
+    <div
+      className={className ? `atlas-strip ${className}` : 'atlas-strip'}
+      role="list"
+      aria-label={label}
+    >
       {children}
     </div>
   )

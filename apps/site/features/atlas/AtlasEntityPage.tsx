@@ -225,7 +225,7 @@ export default function AtlasEntityPage({ page }: { page: AtlasEntityPageData })
         {page.series && page.series.members.length > 1 && (
           <section className="atlas-entity__section atlas-entity__section--wide">
             <h2 className="atlas-heading">{page.series.title}</h2>
-            <AtlasStrip label={page.series.title}>
+            <AtlasStrip label={page.series.title} className="atlas-series">
               {page.series.members.map(member => (
                 <AtlasTileLink
                   key={member.uniqueName}

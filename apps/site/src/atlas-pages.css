@@ -400,6 +400,24 @@ a.atlas-chip:hover {
   scroll-snap-align: start;
 }
 
+/* A series is read whole where a mouse may have no sideways wheel; a finger still slides it on a
+   phone. */
+@media (min-width: 641px) {
+  .atlas-series {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+    gap: 20px 12px;
+    margin: 0;
+    overflow: visible;
+    padding: 4px 0 0;
+    scroll-snap-type: none;
+  }
+
+  .atlas-series > .atlas-tile {
+    width: auto;
+  }
+}
+
 /* ---------- Tiles ---------- */
 
 .atlas-tile {
@@ -429,6 +447,15 @@ a.atlas-chip:hover {
 
 .atlas-tile:hover .atlas-picture {
   transform: translateY(-3px);
+}
+
+/* The entity of the page, among its series. */
+.atlas-tile[aria-current='page'] .atlas-picture {
+  box-shadow: 0 0 0 3px var(--resource-accent);
+}
+
+.atlas-tile[aria-current='page'] .atlas-tile__name {
+  color: var(--resource-accent-ink);
 }
 
 .atlas-tile__name {
