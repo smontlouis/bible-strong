@@ -50,3 +50,17 @@ Start one product from the root with `yarn dev:expo`, `yarn dev:site`, `yarn dev
 ## Validation
 
 Use `docs/agents/validation.md` for the canonical validation matrix. At minimum, validate the workspaces touched by a change. Run root-wide checks for dependency, lockfile, shared package, or workspace configuration changes.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues of `smontlouis/bible-strong`, through the `gh` CLI; issue titles and bodies are written in English. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five default labels (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`), plus the domain label `bible`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Multi-context: `CONTEXT-MAP.md` at the root and one `CONTEXT.md` per app or package. When a skill says `GLOSSARY.md` or `GLOSSARY-MAP.md`, it means these files; never create a `GLOSSARY.md`. See `docs/agents/domain.md`.
