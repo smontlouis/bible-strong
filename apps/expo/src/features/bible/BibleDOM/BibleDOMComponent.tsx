@@ -1,5 +1,6 @@
 'use dom'
 
+import './arrayAtPolyfill'
 import { getPassageContextHeaderHeight } from '../passagePreviewPresentation'
 import EntityChipsDOM from '~common/EntityChipsDOM'
 import type { EntityChip } from '~common/entityChips'
