@@ -1,38 +1,20 @@
-import type { InlineCommentaryRequest } from '~features/commentaries/InlineCommentaryReader'
 import { Platform } from 'react-native'
 import { createContext, useContext } from 'react'
 import { useResourcesLanguageValue } from '~state/resourcesLanguage'
-import {
-  parseResourcePreviewLink,
-  type PreviewSource,
-  type ResourcePreviewTarget,
-} from './resourceTarget'
+import { parseResourcePreviewLink, type PreviewSource } from './resourceTarget'
 import { atom } from 'jotai/vanilla'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { activeTabIndexAtom, tabsAtom } from '~state/tabs'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 import type { HTMLViewLinkPayload } from '~common/htmlContentTypes'
-import { parseReferencePreviewLink, type ReferencePreviewTarget } from './referenceTarget'
+import { parseReferencePreviewLink } from './referenceTarget'
+import { previewHistoryAtom, type PreviewRequest } from './previewHistory'
 
-export type ReferencePreviewRequest = ReferencePreviewTarget & {
-  kind: 'bible'
-  version: string
-  open: () => void
-}
-export type PreviewRequest =
-  | { kind: 'excerpt'; title: string; text: string; open: () => void }
-  | {
-      kind: 'commentary'
-      title: string
-      request: InlineCommentaryRequest
-      open: (sectionId?: string) => void
-    }
-  | { kind: 'link'; linkId: string; title: string; open: () => void }
-  | { kind: 'study'; studyId: string; title: string; open: () => void }
-  | { kind: 'note'; noteId: string; title: string; open: () => void }
-  | ReferencePreviewRequest
-  | (ResourcePreviewTarget & { open: () => void })
-export const previewHistoryAtom = atom<PreviewRequest[]>([])
+export {
+  previewHistoryAtom,
+  type PreviewRequest,
+  type ReferencePreviewRequest,
+} from './previewHistory'
 export const PreviewNestedContext = createContext(false)
 const readerVersionAtom = atom(get => {
   const active = get(tabsAtom)[get(activeTabIndexAtom)]

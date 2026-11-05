@@ -4,7 +4,13 @@ import {
 } from '@bible-strong/bible-reference-parser/reference-parser'
 
 import { getLanguage } from '../../i18n'
-import { getSupportedOsisBookNumber, normalizeOsisReference } from './osisReference'
+import {
+  osisToBibleReferenceTarget,
+  parseOsisRef,
+  type BibleReferenceTarget,
+} from './osisReference'
+
+export { osisToBibleReferenceTarget, type BibleReferenceTarget }
 
 export type BcvLanguage = 'fr' | 'en'
 
@@ -12,14 +18,6 @@ interface OsisAndIndices {
   osis: string
   indices: number[]
   translations: string[]
-}
-
-export interface BibleReferenceTarget {
-  book: number
-  chapter: number
-  verse: number
-  focusVerses?: number[]
-  osis: string
 }
 
 export interface InlineBibleReference {
@@ -35,88 +33,6 @@ const bcvByLanguage: Record<BcvLanguage, BibleReferenceParser> = {
 }
 
 const getBcvParser = (parserLanguage: BcvLanguage = getLanguage()) => bcvByLanguage[parserLanguage]
-
-const getBookNumber = (book: string, _parserLanguage?: BcvLanguage): number | undefined =>
-  getSupportedOsisBookNumber(book)
-
-const parseOsisRef = (osisRef: string, parserLanguage?: BcvLanguage) => {
-  const [book, chapterStr, verseStr] = osisRef.split('.')
-  const bookNumber = getBookNumber(book, parserLanguage)
-  const chapter = Number(chapterStr)
-  const verse = verseStr ? Number(verseStr) : undefined
-
-  if (!bookNumber || !Number.isFinite(chapter)) {
-    return undefined
-  }
-
-  return {
-    book,
-    bookNumber,
-    chapter,
-    verse: verse && Number.isFinite(verse) ? verse : undefined,
-  }
-}
-
-const getFocusVersesFromOsis = (osis: string, parserLanguage?: BcvLanguage) => {
-  const focusVerses: number[] = []
-  let commonBook: string | undefined
-  let commonChapter: number | undefined
-
-  for (const segment of osis.split(',')) {
-    const [startRef, endRef] = segment.split('-')
-    const start = parseOsisRef(startRef, parserLanguage)
-
-    if (!start?.verse) {
-      return undefined
-    }
-
-    if (commonBook === undefined) commonBook = start.book
-    if (commonChapter === undefined) commonChapter = start.chapter
-
-    if (commonBook !== start.book || commonChapter !== start.chapter) {
-      return undefined
-    }
-
-    if (!endRef) {
-      focusVerses.push(start.verse)
-      continue
-    }
-
-    const end = parseOsisRef(endRef, parserLanguage)
-
-    if (!end?.verse || end.book !== commonBook || end.chapter !== commonChapter) {
-      return undefined
-    }
-
-    for (let verse = start.verse; verse <= end.verse; verse += 1) {
-      focusVerses.push(verse)
-    }
-  }
-
-  return [...new Set(focusVerses)]
-}
-
-export const osisToBibleReferenceTarget = (
-  osis: string,
-  parserLanguage?: BcvLanguage
-): BibleReferenceTarget | undefined => {
-  const normalizedOsis = normalizeOsisReference(osis)
-  const firstSegment = normalizedOsis.split(',')[0]
-  const firstRef = firstSegment.split('-')[0]
-  const start = parseOsisRef(firstRef, parserLanguage)
-
-  if (!start) {
-    return undefined
-  }
-
-  return {
-    book: start.bookNumber,
-    chapter: start.chapter,
-    verse: start.verse ?? 1,
-    focusVerses: getFocusVersesFromOsis(normalizedOsis, parserLanguage),
-    osis: normalizedOsis,
-  }
-}
 
 const mergeSameChapterSequence = (
   text: string,

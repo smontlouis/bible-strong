@@ -1,5 +1,5 @@
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import { serializeNoteVerseKeys } from './routeParams'
+import { getNoteRoute } from './routeParams'
 
 type OpenNoteParams = {
   noteId?: string | null
@@ -10,14 +10,7 @@ type OpenNoteParams = {
 export const useOpenNote = () => {
   const pushRouteOnce = usePushRouteOnce()
 
-  return ({ noteId, verseKeys, version }: OpenNoteParams = {}) => {
-    pushRouteOnce({
-      pathname: '/note',
-      params: {
-        ...(noteId ? { noteId } : {}),
-        ...(verseKeys?.length ? { verseKeys: serializeNoteVerseKeys(verseKeys) } : {}),
-        ...(version ? { version } : {}),
-      },
-    })
+  return (params: OpenNoteParams = {}) => {
+    pushRouteOnce(getNoteRoute(params))
   }
 }
