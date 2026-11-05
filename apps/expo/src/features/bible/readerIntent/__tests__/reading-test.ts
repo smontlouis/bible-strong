@@ -7,6 +7,9 @@ jest.mock('~helpers/agentObservability', () => ({
 jest.mock('~state/app', () => ({
   isFullScreenBibleAtom: jest.requireActual('jotai/vanilla').atom(false),
 }))
+jest.mock('~state/tabs', () => ({
+  savedParallelVersionsAtom: jest.requireActual('jotai/vanilla').atom([]),
+}))
 jest.mock('~helpers/bibleVersions', () => ({ getBibleVersionCanonId: () => 'protestant-66' }))
 jest.mock('~helpers/biblesDb', () => ({ getChapterVerseCount: jest.fn() }))
 jest.mock('~helpers/firebase', () => ({
@@ -18,7 +21,7 @@ import type { BibleVersionCoverage } from '~helpers/biblesDb'
 import { appLogger } from '~helpers/agentObservability'
 import type { BibleRouteNavigationAdapter } from '~state/bibleRouteNavigation'
 import { isFullScreenBibleAtom } from '~state/app'
-import type { BibleTab } from '~state/tabs'
+import { savedParallelVersionsAtom, type BibleTab } from '~state/tabs'
 import { handleReaderIntent } from '..'
 import type { Reader, ReaderPresentation, ReaderSnapshot, ReaderWorld } from '..'
 
@@ -297,6 +300,7 @@ describe.each(['ios', 'web'] as const)('reading intents (%s)', platform => {
         version: 'DBY',
         strongMode: 'hidden',
       })
+      expect(reader.store.get(savedParallelVersionsAtom)).toEqual(['KJV', 'DBY'])
     })
 
     it.each(['strong', 'interlinear'] as const)('opens the %s mode of a column', async mode => {

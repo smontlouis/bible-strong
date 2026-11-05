@@ -7,7 +7,7 @@ import {
   openAdjacentChapter,
   setParallelColumnVersion,
 } from '~state/bibleTabRecipes'
-import type { VersionCode } from '~state/tabs'
+import { savedParallelVersionsAtom, type VersionCode } from '~state/tabs'
 import { canGoToNextPlanChapter, canGoToPreviousPlanChapter } from '../planPassage'
 import type { ReaderRule, ReadingIntent } from './types'
 import type { Reader, ReaderSnapshot, ReaderWorld } from './world'
@@ -126,13 +126,16 @@ export const applyReadingIntent = (
                 draft.data = selectBibleTabVersion(draft.data, version)
               })
             ),
-          setParallelVersion: (version: VersionCode, index: number) =>
+          setParallelVersion: (version: VersionCode, index: number) => {
             store.set(
               tabAtom,
               produce(draft => {
                 setParallelColumnVersion(draft.data, index, version)
               })
-            ),
+            )
+            // The next parallel reading starts from the columns chosen last.
+            store.set(savedParallelVersionsAtom, store.get(tabAtom).data.parallelVersions)
+          },
         },
         data: store.get(tabAtom).data,
         parallelVersionIndex: intent.column === 0 ? undefined : intent.column - 1,
