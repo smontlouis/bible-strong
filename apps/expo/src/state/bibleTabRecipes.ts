@@ -7,6 +7,7 @@ import {
 } from '~helpers/bibleCoverage'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
 import { getBibleVersionCanonId } from '~helpers/bibleVersions'
+import { getSelectedVersesVersion, setSelectedVersesVersion } from './bibleSelectionVersion'
 import type { BibleContextDisplayMode, BibleTab, VersionCode } from './tabs'
 
 /**
@@ -62,4 +63,24 @@ export const setParallelColumnVersion = (
 ) => {
   resetParallelColumnTextModes(data, index, version)
   data.parallelVersions[index] = version
+}
+
+/** Without a version, the verse joins the selection in the version it is in. */
+export const selectVerse = (data: BibleTabData, verseKey: string, version?: VersionCode) => {
+  // A selection stays in one version: a verse of another version starts a new one.
+  if (version && version !== getSelectedVersesVersion(data)) {
+    data.selectedVerses = {}
+    delete data.selectedVersesVersion
+    setSelectedVersesVersion(data, version)
+  }
+  data.selectedVerses[verseKey] = true
+}
+
+export const unselectVerse = (data: BibleTabData, verseKey: string) => {
+  delete data.selectedVerses[verseKey]
+}
+
+export const clearVerseSelection = (data: BibleTabData) => {
+  data.selectedVerses = {}
+  delete data.selectedVersesVersion
 }
