@@ -13,6 +13,9 @@ import {
 
 const sha256 = (value: string | Uint8Array) => createHash('sha256').update(value).digest('hex')
 
+// Archives written by the fixtures carry this date, not the time they were made.
+const FIXTURE_ARCHIVE_DATE = new Date('2026-01-01T00:00:00Z')
+
 export const canonicalStrongFixture: CanonicalStrongBiblePublication = {
   format: 'bible-strong-canonical-strong-index',
   schemaVersion: 1,
@@ -153,10 +156,13 @@ export const writeStrongPublicationFixture = async (
   }
   const canonicalJson = `${JSON.stringify(canonical)}\n`
   const sqlite = await makeOfflineSqlite(canonical, options)
-  const offline = zipSync({
-    'bible-lsg-strong.sqlite': sqlite,
-    ...(options.extraOfflineEntry ? { 'unexpected.txt': new TextEncoder().encode('bad') } : {}),
-  })
+  const offline = zipSync(
+    {
+      'bible-lsg-strong.sqlite': sqlite,
+      ...(options.extraOfflineEntry ? { 'unexpected.txt': new TextEncoder().encode('bad') } : {}),
+    },
+    { mtime: FIXTURE_ARCHIVE_DATE }
+  )
   const onlineAccess = options.onlineAccess ?? true
   const offlineAccess = options.offlineAccess ?? true
   const manifest: StrongBiblePublicationBundleManifest = {

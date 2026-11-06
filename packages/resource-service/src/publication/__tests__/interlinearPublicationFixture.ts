@@ -39,6 +39,9 @@ const baseCanonical = {
   segmentIdentities: [{ segmentId: 11, identityOrder: 0, kind: 'strong' as const, code: 'H07225' }],
 }
 
+// Archives written by the fixtures carry this date, not the time they were made.
+const FIXTURE_ARCHIVE_DATE = new Date('2026-01-01T00:00:00Z')
+
 export const canonicalInterlinearFixture: CanonicalInterlinearBiblePublication = {
   ...baseCanonical,
   indexRevision: deriveInterlinearBibleResourceRevision(baseCanonical),
@@ -170,10 +173,13 @@ export const writeInterlinearPublicationFixture = async (
     omitQueryIndexes: options.omitQueryIndexes,
   })
   const entry = `bible-step-interlinear-${language}.sqlite`
-  const offline = zipSync({
-    [entry]: sqlite,
-    ...(options.extraOfflineEntry ? { 'unexpected.txt': new TextEncoder().encode('bad') } : {}),
-  })
+  const offline = zipSync(
+    {
+      [entry]: sqlite,
+      ...(options.extraOfflineEntry ? { 'unexpected.txt': new TextEncoder().encode('bad') } : {}),
+    },
+    { mtime: FIXTURE_ARCHIVE_DATE }
+  )
   const onlineAccess = options.onlineAccess ?? true
   const manifest: InterlinearBiblePublicationBundleManifest = {
     format: 'bible-strong-resource-publication',
