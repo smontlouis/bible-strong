@@ -75,6 +75,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     googleServicesFile:
       process.env.IOS_GOOGLE_SERVICES_FILE ?? './firebase/dev/GoogleService-Info.plist',
     userInterfaceStyle: 'automatic',
+    // Icon Composer document: iOS draws its light, dark, tinted and clear appearances from
+    // these layers, and Xcode flattens them for systems before iOS 26.
+    icon: './assets/images/AppIcon.icon',
     supportsTablet: true,
     infoPlist: {
       UIBackgroundModes: ['audio'],
