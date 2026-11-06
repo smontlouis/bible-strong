@@ -84,6 +84,7 @@ const setup = ({
     platform,
     store,
     dispatch: jest.fn() as unknown as ReaderWorld['dispatch'],
+    getState: jest.fn() as unknown as ReaderWorld['getState'],
     routes,
     openVersionSelector: openVersionSelector ?? (request => void versionSelectors.push(request)),
     navigate: jest.fn(),

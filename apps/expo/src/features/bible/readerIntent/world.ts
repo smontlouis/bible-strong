@@ -2,7 +2,7 @@ import * as Haptics from 'expo-haptics'
 import { getDefaultStore, type PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { Linking, Platform } from 'react-native'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useStore } from 'react-redux'
 import type { BibleResource, Bookmark, Verse } from '~common/types'
 import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
 import type { InlineCommentaryChip } from '~features/commentaries/inlineCommentaryPlacement'
@@ -14,6 +14,7 @@ import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import type { StrongSelection } from '~helpers/strongSelection'
 import { toast } from '~helpers/toast'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import type { RootState } from '~redux/modules/reducer'
 import type { WordAnnotationsObj } from '~redux/modules/user'
 import type { CrossVersionAnnotation } from '~redux/selectors/bible'
 import type { AppDispatch } from '~redux/store'
@@ -57,7 +58,10 @@ export type ReaderSnapshot = {
   inlineCommentaries: { chips: InlineCommentaryChip[]; indexes: ReadingIndex[] }
   /** The bookmarks of the chapter, by verse, as the page shows them. */
   bookmarks: Record<number, Bookmark>
-  /** The Word annotations of the chapter, as the page shows them. */
+  /**
+   * The Word annotations of the chapter, as the page shows them: their ranges carry no words, the
+   * stored annotations do.
+   */
   wordAnnotations: WordAnnotationsObj
   /** By verse, the versions not on screen that hold Word annotations of it. */
   wordAnnotationsInOtherVersions: Record<string, CrossVersionAnnotation[]>
@@ -100,6 +104,8 @@ export type ReaderWorld = {
   store: ReturnType<typeof getDefaultStore>
   /** The Redux store of the user's data: Word annotations are written there. */
   dispatch: AppDispatch
+  /** The user's data as stored, words of the Word annotations included. */
+  getState(): RootState
   /** The routes of a public Bible page, which replace the Tab's own navigation on the web. */
   routes?: BibleRouteNavigationAdapter
   openVersionSelector: ReturnType<typeof useBookAndVersionSelector>['openVersionSelector']
@@ -124,11 +130,13 @@ export const useReaderWorld = (): ReaderWorld => {
   const openStudyObject = useOpenStudyObject()
   const { t } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
+  const reduxStore = useStore<RootState>()
   const openTags = useUnifiedTagsModal()
   return {
     platform: Platform.OS,
     store: getDefaultStore(),
     dispatch,
+    getState: () => reduxStore.getState(),
     routes,
     openVersionSelector,
     navigate: route => pushRouteOnce(route as Parameters<typeof pushRouteOnce>[0]),

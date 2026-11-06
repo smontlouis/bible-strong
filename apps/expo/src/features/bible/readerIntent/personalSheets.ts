@@ -74,13 +74,15 @@ export const applyPersonalSheetIntent = (
       })
       return
     case 'open-annotation-tags': {
-      const annotation = snapshot.wordAnnotations[intent.annotationId]
-      if (!annotation) return
+      const shown = snapshot.wordAnnotations[intent.annotationId]
+      if (!shown) return
+      // The page's copy carries no words: the sheet is named after the stored annotation
+      const stored = world.getState().user.bible.wordAnnotations[intent.annotationId]
       world.openTags({
         mode: 'select',
         id: intent.annotationId,
         entity: 'wordAnnotations',
-        title: getWordAnnotationText(annotation),
+        title: getWordAnnotationText(stored ?? shown),
       })
       return
     }

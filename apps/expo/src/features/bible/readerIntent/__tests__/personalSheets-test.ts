@@ -91,10 +91,15 @@ const annotation: WordAnnotation = {
   date: 1,
 }
 
-/** What a chapter of the reader shows of the user's data. */
+/** What a chapter of the reader shows of the user's data: Word annotations without their words. */
 const personalData = {
   bookmarks: { 3: bookmark },
-  wordAnnotations: { [annotation.id]: annotation },
+  wordAnnotations: {
+    [annotation.id]: {
+      ...annotation,
+      ranges: annotation.ranges.map(range => ({ ...range, text: '' })),
+    },
+  },
   wordAnnotationsInOtherVersions: { '1-1-2': [{ version: 'KJV', count: 2 }] },
 }
 
@@ -116,6 +121,10 @@ const setup = ({
     platform,
     store,
     dispatch: jest.fn() as unknown as ReaderWorld['dispatch'],
+    getState: () =>
+      ({
+        user: { bible: { wordAnnotations: { [annotation.id]: annotation } } },
+      }) as unknown as ReturnType<ReaderWorld['getState']>,
     openVersionSelector: jest.fn(),
     navigate: route => void routes.push(route),
     openStudyObject: jest.fn(),
@@ -169,7 +178,7 @@ describe.each(['ios', 'web'] as const)('personal sheets (%s)', platform => {
     ])
   })
 
-  it('opens the tags sheet of a Word annotation, named by its words', async () => {
+  it('names the tags sheet of a Word annotation after its stored words, which the page lacks', async () => {
     const { send, tagsSheets } = setup({ platform })
 
     await expect(
