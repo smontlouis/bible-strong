@@ -23,6 +23,8 @@ export interface AnnotationApplyTrigger {
 export interface AnnotationSessionState {
   enabled: boolean
   version?: VersionCode
+  /** Desktop: the verse the mode started from, where its menu opens until words are chosen. */
+  entryVerseKey?: string
   hasSelection: boolean
   selection: SelectionRange | null
   clearSelectionTrigger: number
@@ -43,10 +45,14 @@ export const INITIAL_ANNOTATION_SESSION_STATE: AnnotationSessionState = {
   clearAnnotationSelectionTrigger: 0,
 }
 
-export const enterAnnotationSession = (version: VersionCode): AnnotationSessionState => ({
+export const enterAnnotationSession = (
+  version: VersionCode,
+  entryVerseKey?: string
+): AnnotationSessionState => ({
   ...INITIAL_ANNOTATION_SESSION_STATE,
   enabled: true,
   version,
+  ...(entryVerseKey && { entryVerseKey }),
 })
 
 export const exitAnnotationSession = (): AnnotationSessionState => INITIAL_ANNOTATION_SESSION_STATE

@@ -7,16 +7,6 @@ export const OPEN_HIGHLIGHT_TAGS = 'OPEN_HIGHLIGHT_TAGS'
 export const OPEN_BOOKMARK_MODAL = 'OPEN_BOOKMARK_MODAL'
 export const SET_BIBLE_OVERLAY_OPEN = 'SET_BIBLE_OVERLAY_OPEN'
 
-// Annotation mode actions
-export const ENTER_ANNOTATION_MODE = 'ENTER_ANNOTATION_MODE'
-// A tap outside the selected words, or away from the text: annotation mode ends
-export const EXIT_ANNOTATION_MODE = 'EXIT_ANNOTATION_MODE'
-export const SELECTION_CHANGED = 'SELECTION_CHANGED'
-export const CREATE_ANNOTATION = 'CREATE_ANNOTATION'
-export const ERASE_SELECTION = 'ERASE_SELECTION'
-export const CLEAR_SELECTION = 'CLEAR_SELECTION'
-export const ANNOTATION_SELECTED = 'ANNOTATION_SELECTED'
-
 // Cross-version annotation indicator actions
 export const OPEN_CROSS_VERSION_MODAL = 'OPEN_CROSS_VERSION_MODAL'
 
@@ -31,19 +21,13 @@ export const RESET_BIBLE_DATABASE = 'RESET_BIBLE_DATABASE'
 export const RETRY_BIBLE_RESOURCE = 'RETRY_BIBLE_RESOURCE'
 export const DOM_COMPONENT_MOUNTED = 'DOM_COMPONENT_MOUNTED'
 
-// Opening a Note, a link, a Relation or a tag, and selecting verses, are Reader intents refused by
-// their own rules.
+// Opening a Note, a link, a Relation or a tag, selecting verses and annotating words are Reader
+// intents refused by their own rules.
 const PERSONAL_BIBLE_DATA_ACTIONS = new Set<string>([
   NAVIGATE_TO_VERSE_LINKS,
   NAVIGATE_TO_VERSE_STUDY_RELATIONS,
   OPEN_HIGHLIGHT_TAGS,
   OPEN_BOOKMARK_MODAL,
-  ENTER_ANNOTATION_MODE,
-  EXIT_ANNOTATION_MODE,
-  SELECTION_CHANGED,
-  CREATE_ANNOTATION,
-  ERASE_SELECTION,
-  ANNOTATION_SELECTED,
   OPEN_CROSS_VERSION_MODAL,
   OPEN_VERSE_TAGS_MODAL,
   OPEN_ANNOTATION_TAGS,

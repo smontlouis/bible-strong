@@ -3,7 +3,8 @@
 import { useEffect, RefObject } from 'react'
 import { Verse as TVerse } from '~common/types'
 import { WordToken } from '~helpers/wordTokenizer'
-import { Dispatch, WebViewProps } from '../BibleDOMWrapper'
+import type { ReaderIntent, ReaderOutcome } from '~features/bible/readerIntent/types'
+import { WebViewProps } from '../BibleDOMWrapper'
 import { HighlightRect } from './HighlightComponents'
 import { SelectionRange } from './selectionUtils'
 import { useTouchSelection } from './useTouchSelection'
@@ -51,7 +52,7 @@ interface UseAnnotationModeControllerProps {
   annotationMode: boolean | undefined
   // The verses of every version on screen
   versesByVersion: Record<string, TVerse[]>
-  dispatch: Dispatch
+  sendReaderIntent: (intent: ReaderIntent) => Promise<ReaderOutcome>
   // Selection state (managed by parent)
   selection: SelectionRange | null
   setSelection: (
@@ -83,7 +84,7 @@ export function useAnnotationModeController({
   highlightOriginRef,
   annotationMode,
   versesByVersion,
-  dispatch,
+  sendReaderIntent,
   selection,
   setSelection,
   getTokens,
@@ -130,10 +131,7 @@ export function useAnnotationModeController({
       onLongPressVerse,
       onDragStart: () => {
         if (selectedAnnotationId) {
-          dispatch({
-            type: 'ANNOTATION_SELECTED',
-            payload: { annotationId: null },
-          }).catch(console.error)
+          void sendReaderIntent({ kind: 'select-word-annotation', annotationId: null })
         }
       },
       onTouchedVerseChange,
@@ -148,7 +146,7 @@ export function useAnnotationModeController({
     selection: annotationMode ? selection : null,
     setSelection,
     versesByVersion,
-    dispatch,
+    sendReaderIntent,
     getTokens,
     clearSelectionTrigger,
     applyAnnotationTrigger,
@@ -161,11 +159,7 @@ export function useAnnotationModeController({
     if (!annotationMode) return
 
     const timeoutId = setTimeout(() => {
-      // Dispatch to native
-      dispatch({
-        type: 'SELECTION_CHANGED',
-        payload: { hasSelection: selection !== null, selection },
-      }).catch(console.error)
+      void sendReaderIntent({ kind: 'change-word-selection', selection })
     }, 300) // 300ms debounce - waits for user to stop dragging
 
     return () => clearTimeout(timeoutId)

@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { Verse as TVerse } from '~common/types'
 import { WordToken } from '~helpers/wordTokenizer'
-import { Dispatch } from '../BibleDOMWrapper'
+import type { ReaderIntent, ReaderOutcome } from '~features/bible/readerIntent/types'
 import { AnnotationType } from './HighlightComponents'
 import { SelectionRange, normalizeRange, buildRangesFromSelection } from './selectionUtils'
 
@@ -11,7 +11,7 @@ export interface AnnotationEventsConfig {
   selection: SelectionRange | null
   setSelection: (value: SelectionRange | null) => void
   versesByVersion: Record<string, TVerse[]>
-  dispatch: Dispatch
+  sendReaderIntent: (intent: ReaderIntent) => Promise<ReaderOutcome>
   getTokens: (verseKey: string, text: string) => WordToken[]
   // Triggers from props
   clearSelectionTrigger?: number
@@ -23,7 +23,7 @@ export function useAnnotationEvents({
   selection,
   setSelection,
   versesByVersion,
-  dispatch,
+  sendReaderIntent,
   getTokens,
   clearSelectionTrigger,
   applyAnnotationTrigger,
@@ -35,20 +35,25 @@ export function useAnnotationEvents({
     const ranges = buildRangesFromSelection(selection, verses, getTokens)
 
     if (ranges.length > 0) {
-      dispatch({
-        type: 'CREATE_ANNOTATION',
-        payload: { ranges, color, type, version: selection.version },
-      }).catch(console.error)
+      void sendReaderIntent({
+        kind: 'create-word-annotation',
+        ranges,
+        color,
+        type,
+        version: selection.version,
+      })
     }
   }
 
   const eraseSelection = (selection: SelectionRange) => {
     const { start, end } = normalizeRange(selection, versesByVersion[selection.version] ?? [])
 
-    dispatch({
-      type: 'ERASE_SELECTION',
-      payload: { start, end, version: selection.version },
-    }).catch(console.error)
+    void sendReaderIntent({
+      kind: 'erase-word-annotations',
+      start,
+      end,
+      version: selection.version,
+    })
   }
 
   // Window event: applyAnnotation
@@ -65,7 +70,7 @@ export function useAnnotationEvents({
 
     window.addEventListener('applyAnnotation', handleApplyAnnotation)
     return () => window.removeEventListener('applyAnnotation', handleApplyAnnotation)
-  }, [selection, versesByVersion, dispatch])
+  }, [selection, versesByVersion, sendReaderIntent])
 
   // Window event: eraseSelection
   useEffect(() => {
@@ -78,7 +83,7 @@ export function useAnnotationEvents({
 
     window.addEventListener('eraseSelection', handleEraseSelection)
     return () => window.removeEventListener('eraseSelection', handleEraseSelection)
-  }, [selection, versesByVersion, dispatch])
+  }, [selection, versesByVersion, sendReaderIntent])
 
   // Window event: clearSelection
   useEffect(() => {

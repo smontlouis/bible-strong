@@ -61,7 +61,7 @@ export const isRecord = (value: unknown): value is Record<string, unknown> =>
 export const getStringPayload = (payload: unknown): string | undefined =>
   typeof payload === 'string' ? payload : undefined
 
-/** The version an annotation-mode payload refers to, when the reader names one. */
+/** The version a personal-data payload refers to, when the reader names one. */
 export const getPayloadVersion = (payload: unknown): string | undefined =>
   isRecord(payload) ? getStringPayload(payload.version) : undefined
 

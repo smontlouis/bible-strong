@@ -260,8 +260,6 @@ const BibleViewer = ({
 
   // Annotation mode
   const annotationMode = useAnnotationMode()
-  // Desktop: the verse the free mode started from, where its menu opens until words are chosen.
-  const [annotationEntryVerseKey, setAnnotationEntryVerseKey] = useState<string>()
   const didOpenInitialAnnotationRef = useRef(false)
   const initialAnnotation = useSelector((state: RootState) =>
     initialAnnotationId ? state.user.bible.wordAnnotations[initialAnnotationId] : undefined
@@ -891,20 +889,6 @@ const BibleViewer = ({
       })
     : EMPTY_PASSAGE_MEDIA
 
-  // Entering annotation mode from the Bible view: a double tap on a verse, or a selection handle
-  // dragged off the verses it was on. Those verses stop being selected: the words take over.
-  const handleEnterAnnotationModeFromBible = (
-    annotatedVersion: VersionCode = version,
-    verseKey?: string
-  ) => {
-    if (hidePersonalBibleData) return
-    if (hasSelectedVerses(selectedVerses)) {
-      actions.clearSelectedVerses()
-    }
-    setAnnotationEntryVerseKey(verseKey)
-    annotationMode.enterMode(annotatedVersion)
-  }
-
   // Handler for exiting annotation mode
   const handleExitAnnotationMode = useCallback(() => {
     // exitMode will auto-save pending annotations
@@ -1007,17 +991,6 @@ const BibleViewer = ({
       annotationMode.deleteSelectedAnnotation()
     }
   }, [annotationMode, annotationRelationCount, t, confirmDeletion])
-
-  // Keep annotation mode's verses reference updated, for every version that can be annotated
-  const { enabled: annotationModeEnabled, setVerses: setAnnotationVerses } = annotationMode
-  useEffect(() => {
-    if (annotationModeEnabled && verses.length > 0) {
-      setAnnotationVerses({
-        [version]: verses,
-        ...Object.fromEntries(parallelVerses.map(parallel => [parallel.id, parallel.verses])),
-      })
-    }
-  }, [verses, parallelVerses, version, annotationModeEnabled, setAnnotationVerses])
 
   const selectionVerses =
     parallelVerses.find(parallel => parallel.id === selectionVersion)?.verses ?? verses
@@ -1548,6 +1521,14 @@ const BibleViewer = ({
       tabAtom: bibleAtom,
       coverage: coverageData,
       annotationMode: viewerPersonalData.annotationMode ?? false,
+      annotationSession: annotationMode.session,
+      // The verses of each column, the main version's first, as the page holds them
+      versesByVersion: {
+        ...Object.fromEntries(
+          displayedParallelVerses.map(parallel => [parallel.id, parallel.verses])
+        ),
+        [version]: verses,
+      },
       isFormSheet: Boolean(isFormSheet),
       keepControlsVisible,
       hasPlanDayStep: Boolean(planDayStep),
@@ -1630,12 +1611,6 @@ const BibleViewer = ({
     clearSelectionTrigger: annotationMode.clearSelectionTrigger,
     applyAnnotationTrigger: annotationMode.applyAnnotationTrigger,
     eraseSelectionTrigger: annotationMode.eraseSelectionTrigger,
-    onSelectionChanged: hidePersonalBibleData ? undefined : annotationMode.handleSelectionChanged,
-    onCreateAnnotation: hidePersonalBibleData ? undefined : annotationMode.handleCreateAnnotation,
-    onEraseSelection: hidePersonalBibleData ? undefined : annotationMode.handleEraseSelection,
-    onAnnotationSelected: hidePersonalBibleData
-      ? undefined
-      : annotationMode.handleAnnotationSelected,
     clearAnnotationSelectionTrigger: annotationMode.clearAnnotationSelectionTrigger,
     selectedAnnotationId: annotationMode.selectedAnnotation?.id ?? null,
     // Cross-version annotations
@@ -1646,9 +1621,6 @@ const BibleViewer = ({
     versesWithNonHighlightTags: viewerPersonalData.versesWithNonHighlightTags,
     onOpenVerseTagsModal: hidePersonalBibleData ? undefined : handleOpenVerseTagsModal,
     onOpenStudyRelationsModal: hidePersonalBibleData ? undefined : openVerseStudyRelationsModal,
-    // Double-tap to enter annotation mode
-    onEnterAnnotationMode: hidePersonalBibleData ? undefined : handleEnterAnnotationModeFromBible,
-    onExitAnnotationMode: handleExitAnnotationMode,
     // Red words
     redWords: settings.redWordsDisplay ? redWords : null,
     parallelRedWords: settings.redWordsDisplay ? parallelRedWords : undefined,
@@ -2018,7 +1990,7 @@ const BibleViewer = ({
             tagsCount: Object.keys(annotationMode.selectedAnnotation?.tags || {}).length,
             relationsCount: annotationRelationCount,
             annotatedVersion: annotationMode.version,
-            entryVerseKey: annotationEntryVerseKey,
+            entryVerseKey: annotationMode.entryVerseKey,
             isEnabled: isAnnotating,
             verses: annotatedVerses,
             focusVerses,

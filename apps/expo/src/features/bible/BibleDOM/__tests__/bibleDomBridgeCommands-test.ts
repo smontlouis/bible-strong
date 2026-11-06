@@ -1,4 +1,4 @@
-import { ENTER_ANNOTATION_MODE, OPEN_BOOKMARK_MODAL, RETRY_BIBLE_RESOURCE } from '../dispatch'
+import { OPEN_BOOKMARK_MODAL, RETRY_BIBLE_RESOURCE } from '../dispatch'
 import {
   decodeBibleDOMBridgeAction,
   getStringPayload,
@@ -81,15 +81,15 @@ describe('Bible DOM bridge', () => {
 
     await expect(
       routeBibleDOMBridgeAction(
-        { type: ENTER_ANNOTATION_MODE, payload: { verseKey: '1-2-2', version: 'DBY' } },
+        { type: OPEN_BOOKMARK_MODAL, payload: { id: 'bookmark-1', version: 'DBY' } },
         options
       )
     ).resolves.toBe('blocked')
     expect(handle).not.toHaveBeenCalled()
 
     const textColumnAction = {
-      type: ENTER_ANNOTATION_MODE,
-      payload: { verseKey: '1-2-2', version: 'LSG' },
+      type: OPEN_BOOKMARK_MODAL,
+      payload: { id: 'bookmark-1', version: 'LSG' },
     }
     await expect(routeBibleDOMBridgeAction(textColumnAction, options)).resolves.toBe('handled')
     expect(handle).toHaveBeenCalledWith(textColumnAction)
