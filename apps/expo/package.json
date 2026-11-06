@@ -280,7 +280,7 @@
       "/modules/bible-strong-archive$": "<rootDir>/test/jestBibleStrongArchiveMock.js"
     },
     "transformIgnorePatterns": [
-      "/node_modules/(?!@bible-strong/bible-reference-parser/)"
+      "/node_modules/(?!@bible-strong/bible-reference-parser/|react-native-web/)"
     ]
   },
   "staticFeatureFlags": {
