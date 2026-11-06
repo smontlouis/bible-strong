@@ -132,6 +132,10 @@ const setup = ({
     notify: jest.fn(),
     openTags: sheet => void tagsSheets.push(sheet),
     haptic: jest.fn(),
+    confirm: jest.fn(async () => false),
+    queueOfflineCopy: jest.fn(),
+    refetch: jest.fn(async () => undefined),
+    repairBibleDatabase: jest.fn(async () => undefined),
     t: key => key,
   }
   const reader: Reader = {
@@ -148,6 +152,7 @@ const setup = ({
       interlinearReadingVersions: [],
       parallelColumnVersions: [],
       inlineCommentaries: { chips: [], indexes: [] },
+      biblicalEntitiesStatus: null,
       ...personalData,
       ...snapshot,
     }),

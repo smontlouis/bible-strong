@@ -32,16 +32,7 @@ import {
 import { BibleError } from '~helpers/bibleErrors'
 import { getBibleDOMErrorPresentation } from './bibleDOMErrorPresentation'
 import VersionChip from './VersionChip'
-import {
-  DOWNLOAD_BIBLE_VERSION,
-  OPEN_DOWNLOADS,
-  RESET_BIBLE_DATABASE,
-  RETRY_BIBLE_RESOURCE,
-  DOWNLOAD_CHAPTER_ENTITIES,
-  DISMISS_CONTEXTUAL_INFORMATION,
-  FOCUS_STUDY_ACTION,
-  DOM_COMPONENT_MOUNTED,
-} from './dispatch'
+import { FOCUS_STUDY_ACTION, DOM_COMPONENT_MOUNTED } from './dispatch'
 import { DispatchProvider } from './DispatchProvider'
 import { ReaderIntentProvider, useReaderIntent } from './useReaderIntent'
 import { TranslationsProvider, BibleDOMTranslations } from './TranslationsContext'
@@ -1776,10 +1767,10 @@ const LoadedBibleContent = ({
                 })
               }}
               onDownload={() => {
-                void dispatch({ type: DOWNLOAD_CHAPTER_ENTITIES })
+                void sendReaderIntent({ kind: 'install-biblical-entities' })
               }}
               onDismiss={() => {
-                void dispatch({ type: DISMISS_CONTEXTUAL_INFORMATION })
+                void sendReaderIntent({ kind: 'hide-contextual-information' })
               }}
             />
             {planDayStep && !annotationMode && (
@@ -1859,6 +1850,7 @@ const BibleDOMErrorContent = ({
     errorDownloadState?.status === 'queued' ||
     errorDownloadState?.status === 'downloading' ||
     errorDownloadState?.status === 'inserting'
+  const sendReaderIntent = useReaderIntent()
   const progressLabel =
     errorDownloadState?.status === 'inserting' ? translations.inserting : translations.downloading
   const failurePresentation = getBibleDOMErrorPresentation(error, isConnected, { onlineOnly })
@@ -1904,9 +1896,10 @@ const BibleDOMErrorContent = ({
                   onClick={() =>
                     connectionRequired
                       ? undefined
-                      : dispatch({ type: DOWNLOAD_BIBLE_VERSION, payload: error.version }).catch(
-                          console.error
-                        )
+                      : void sendReaderIntent({
+                          kind: 'install-bible-version',
+                          version: error.version,
+                        })
                   }
                 >
                   {connectionRequired
@@ -1920,7 +1913,7 @@ const BibleDOMErrorContent = ({
               <ErrorButton
                 settings={settings}
                 type="button"
-                onClick={() => dispatch({ type: RETRY_BIBLE_RESOURCE }).catch(console.error)}
+                onClick={() => void sendReaderIntent({ kind: 'retry-bible-resource' })}
               >
                 {translations.retry}
               </ErrorButton>
@@ -1931,7 +1924,7 @@ const BibleDOMErrorContent = ({
                   <ErrorButton
                     settings={settings}
                     type="button"
-                    onClick={() => dispatch({ type: OPEN_DOWNLOADS }).catch(console.error)}
+                    onClick={() => void sendReaderIntent({ kind: 'open-downloads' })}
                   >
                     {translations.goToDownloads}
                   </ErrorButton>
@@ -1942,7 +1935,7 @@ const BibleDOMErrorContent = ({
                     $secondary
                     type="button"
                     disabled={isResettingDatabase}
-                    onClick={() => dispatch({ type: RESET_BIBLE_DATABASE }).catch(console.error)}
+                    onClick={() => void sendReaderIntent({ kind: 'repair-bible-database' })}
                   >
                     {translations.resetDatabase}
                   </ErrorButton>

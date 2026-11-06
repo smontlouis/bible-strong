@@ -93,6 +93,10 @@ const setup = ({
     notify: jest.fn(),
     openTags: jest.fn(),
     haptic: jest.fn(),
+    confirm: jest.fn(async () => false),
+    queueOfflineCopy: jest.fn(),
+    refetch: jest.fn(async () => undefined),
+    repairBibleDatabase: jest.fn(async () => undefined),
     t: key => key,
   }
   const reader: Reader = {
@@ -112,6 +116,7 @@ const setup = ({
       bookmarks: {},
       wordAnnotations: {},
       wordAnnotationsInOtherVersions: {},
+      biblicalEntitiesStatus: null,
       ...snapshot,
     }),
     surface: presentation => void surfaced.push(presentation),

@@ -1,16 +1,23 @@
+import { useQueryClient } from '@tanstack/react-query'
 import * as Haptics from 'expo-haptics'
 import { getDefaultStore, type PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { Linking, Platform } from 'react-native'
 import { useDispatch, useStore } from 'react-redux'
 import type { BibleResource, Bookmark, Verse } from '~common/types'
+import type { ConfirmDialogOptions } from '~common/ConfirmDialog/types'
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
 import type { InlineCommentaryChip } from '~features/commentaries/inlineCommentaryPlacement'
 import type { ReadingIndex } from '~features/resources/commentaryReadingAccess'
 import type { RelationEndpoint } from '~features/studyRelations/domain'
 import { useOpenStudyObject } from '~features/studyRelations/useOpenStudyObject'
-import type { BibleVersionCoverage } from '~helpers/biblesDb'
+import { resetBiblesDb, type BibleVersionCoverage } from '~helpers/biblesDb'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
+import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
+import { downloadManager } from '~helpers/downloadManager'
+import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
+import { createStrongLexiconModuleDownloadItem } from '~helpers/strongLexiconDownloadItems'
 import type { StrongSelection } from '~helpers/strongSelection'
 import { toast } from '~helpers/toast'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
@@ -65,6 +72,11 @@ export type ReaderSnapshot = {
   wordAnnotations: WordAnnotationsObj
   /** By verse, the versions not on screen that hold Word annotations of it. */
   wordAnnotationsInOtherVersions: Record<string, CrossVersionAnnotation[]>
+  /**
+   * Whether the biblical entities of the Strong lexicon are installed, while the chapter shows its
+   * contextual information: none when it does not.
+   */
+  biblicalEntitiesStatus: StrongLexiconModuleAvailability['status'] | null
 }
 
 /**
@@ -92,7 +104,10 @@ type RouteParams = Record<string, string | number | boolean | string[] | undefin
 /** A page of the application. */
 export type ReaderRoute = { pathname: string; params?: RouteParams }
 
-export type ReaderNotice = { type: 'info' | 'warning' | 'error'; message: string }
+export type ReaderNotice = { type: 'info' | 'success' | 'warning' | 'error'; message: string }
+
+/** An Offline copy the reader asks for. */
+export type ReaderOfflineCopy = { kind: 'bible'; version: string } | { kind: 'biblical-entities' }
 
 /** What the tags sheet is asked to tag. */
 export type ReaderTagsSheet = Exclude<UnifiedTagsModalProps, false>
@@ -120,6 +135,14 @@ export type ReaderWorld = {
   openTags(sheet: ReaderTagsSheet): void
   /** The feedback of the device under the finger. */
   haptic(feedback: 'selection'): void
+  /** Asks the reader to confirm, and resolves to the answer. */
+  confirm(dialog: ConfirmDialogOptions): Promise<boolean>
+  /** Puts an Offline copy in the downloads queue. Throws for a resource the catalog lacks. */
+  queueOfflineCopy(copy: ReaderOfflineCopy): void
+  /** Drops the cached answers under a query key: what reads them fetches them again. */
+  refetch(queryKey: readonly unknown[]): Promise<void>
+  /** Closes, deletes and reopens the Bible database of the device. */
+  repairBibleDatabase(): Promise<void>
   t(key: string, options?: Record<string, unknown>): string
 }
 
@@ -132,6 +155,8 @@ export const useReaderWorld = (): ReaderWorld => {
   const dispatch = useDispatch<AppDispatch>()
   const reduxStore = useStore<RootState>()
   const openTags = useUnifiedTagsModal()
+  const confirm = useConfirmDialog()
+  const queryClient = useQueryClient()
   return {
     platform: Platform.OS,
     store: getDefaultStore(),
@@ -147,12 +172,23 @@ export const useReaderWorld = (): ReaderWorld => {
     notify: ({ type, message }) => {
       if (type === 'warning') toast.warning(message)
       else if (type === 'error') toast.error(message)
+      else if (type === 'success') toast.success(message)
       else toast.info(message)
     },
     openTags,
     haptic: () => {
       void Haptics.selectionAsync()
     },
+    confirm,
+    queueOfflineCopy: copy => {
+      downloadManager.enqueue([
+        copy.kind === 'bible'
+          ? createBibleDownloadItem(copy.version)
+          : createStrongLexiconModuleDownloadItem('entities'),
+      ])
+    },
+    refetch: queryKey => queryClient.invalidateQueries({ queryKey }),
+    repairBibleDatabase: resetBiblesDb,
     t: (key, options) => t(key, options),
   }
 }

@@ -7,6 +7,7 @@ import {
   getPersonalSheetRefusal,
 } from './personalSheets'
 import { applyReadingIntent, decodeReadingIntent, getReadingRefusal } from './reading'
+import { applyResourceIntent, decodeResourceIntent, getResourceRefusal } from './resources'
 import { applySelectIntent, decodeSelectIntent, getSelectRefusal } from './select'
 import type { ReaderIntent, ReaderOutcome, ReaderRule } from './types'
 import type { Reader, ReaderSnapshot, ReaderWorld } from './world'
@@ -22,11 +23,13 @@ export type {
   ReaderIntentMessage,
   ReaderOutcome,
   ReaderRule,
+  ResourceIntent,
   SelectIntent,
 } from './types'
 export type {
   Reader,
   ReaderNotice,
+  ReaderOfflineCopy,
   ReaderPresentation,
   ReaderRoute,
   ReaderSnapshot,
@@ -42,7 +45,8 @@ const decodeIntent = (value: unknown): ReaderIntent | undefined =>
   decodeOpenIntent(value) ??
   decodeSelectIntent(value) ??
   decodeAnnotateIntent(value) ??
-  decodePersonalSheetIntent(value)
+  decodePersonalSheetIntent(value) ??
+  decodeResourceIntent(value)
 
 const decodeMessage = (message: unknown): { tabId: string; intent: ReaderIntent } | undefined => {
   if (!isRecord(message) || typeof message.tabId !== 'string' || !message.tabId) return undefined
@@ -74,6 +78,13 @@ const getRefusal = (
     case 'open-cross-version-annotations':
     case 'open-verse-relations':
       return getPersonalSheetRefusal(intent, context)
+    case 'install-bible-version':
+    case 'open-downloads':
+    case 'repair-bible-database':
+    case 'retry-bible-resource':
+    case 'install-biblical-entities':
+    case 'hide-contextual-information':
+      return getResourceRefusal(intent, context)
     default:
       return getReadingRefusal(intent, context)
   }
@@ -103,6 +114,13 @@ const applyIntent = (
     case 'open-cross-version-annotations':
     case 'open-verse-relations':
       return applyPersonalSheetIntent(intent, context)
+    case 'install-bible-version':
+    case 'open-downloads':
+    case 'repair-bible-database':
+    case 'retry-bible-resource':
+    case 'install-biblical-entities':
+    case 'hide-contextual-information':
+      return applyResourceIntent(intent, context)
     default:
       return applyReadingIntent(intent, context)
   }
@@ -115,7 +133,7 @@ const getKind = (message: unknown) =>
 
 /**
  * What the logs say of an intent: its kind, for an open what it opens and from where, for a verse
- * selected or words annotated the version they were touched in.
+ * selected or words annotated the version they were touched in, for an install the version.
  */
 const describeIntent = (intent: ReaderIntent) => {
   switch (intent.kind) {
@@ -125,6 +143,7 @@ const describeIntent = (intent: ReaderIntent) => {
     case 'enter-annotation-mode':
     case 'create-word-annotation':
     case 'erase-word-annotations':
+    case 'install-bible-version':
       return { kind: intent.kind, version: intent.version }
     default:
       return { kind: intent.kind }
