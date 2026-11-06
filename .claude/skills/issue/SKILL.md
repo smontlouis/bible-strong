@@ -72,6 +72,7 @@ Wait for `[lane] PRÊT` (or `node "$LANE" status`). Then:
 - Load `argent-device-interact` and `argent-react-native-app-workflow` before the first device call.
 - iOS: argent tools (`mcp__argent__*`), device = the lane's `simUdid`. Android: `mcp__argent-android__*`, device `emulator-5554`.
 - Metro debugger: `debugger-connect` with `port` = the lane's port. Pass the device id explicitly: several simulators can be booted, so never pick "the booted one".
+- App tools: `debugger-evaluate` on `__BIBLE_STRONG_AGENT__.help()` lists what the app can do for you (open a passage, sync state, data counts, Offline copies; see `apps/expo/AGENTS.md`).
 - App not on Metro or showing the dev launcher: `node "$LANE" open <slug>`. Metro died: `node "$LANE" metro <slug>`, then `open`. Metro log: the `metroLog` path in the state.
 - Most tests run on the dev client. Two ways to look at « production », only when the test needs it:
   - **The lane's code with production performance** (no dev mode, minified bundle): `node "$LANE" metro <slug> --prod`, then `open`. Back to dev mode: `metro <slug>` without the flag. Only a native performance question (profiling) needs a Release build of the worktree.
