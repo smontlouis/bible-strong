@@ -671,6 +671,179 @@ describe('BibleContentAccess', () => {
 
       expect(result.success).toBe(false)
     })
+
+    it('reads the original words of the chapter only when none is missing', async () => {
+      const dependencies = createTransliterationDependencies()
+
+      await loadBibleContentChapter(
+        { book: 43, chapter: 3, version: 'BSB', strongMode: 'transliteration' },
+        dependencies
+      )
+
+      expect(dependencies.loadInterlinearChapterTokens).toHaveBeenCalledTimes(1)
+      expect(dependencies.loadInterlinearChapterTokens).toHaveBeenCalledWith('BHG', 'fr', 43, 3)
+    })
+  })
+
+  // LSG numbers verses and chapters as the Hebrew does (2 Ch 2:1 LSG = 2 Ch 2:2 BHG, Gn 32:1
+  // LSG = Gn 31:55 BHG, Joel 4 LSG = Joel 3 BHG): a span names its tokens by id, not by verse.
+  describe('original words of a Bible numbered otherwise than BHG', () => {
+    const segment = (transliteration: string, code: string, morphology = '') => ({
+      ordinal: 0,
+      startOffset: 0,
+      length: 4,
+      transliteration,
+      lemma: '',
+      morphology,
+      gloss: '',
+      identities: [{ kind: 'strong' as const, code }],
+    })
+    const token = (id: number, transliteration: string, code: string, morphology = '') => ({
+      id,
+      ordinal: 0,
+      startOffset: 0,
+      length: 4,
+      segments: [segment(transliteration, code, morphology)],
+    })
+    const createShiftedDependencies = (
+      tokensByChapter: Record<number, Record<number, ReturnType<typeof token>[]>>
+    ) => {
+      const dependencies = createDependencies()
+      dependencies.getChapterVerses.mockResolvedValue([
+        { Livre: 1, Chapitre: 32, Verset: 1, Texte: 'Jacob poursuivit' },
+        { Livre: 1, Chapitre: 32, Verset: 2, Texte: 'Jacob dit' },
+      ])
+      const loadStrongBibleChapterSpans = jest.fn().mockResolvedValue({
+        1: [
+          {
+            ordinal: 0,
+            startOffset: 0,
+            length: 5,
+            stepTokenIds: [100],
+            identities: [{ kind: 'strong', code: 'H3290' }],
+          },
+        ],
+        2: [
+          {
+            ordinal: 0,
+            startOffset: 0,
+            length: 5,
+            stepTokenIds: [200],
+            identities: [{ kind: 'strong', code: 'H559' }],
+          },
+        ],
+      })
+      const loadInterlinearChapterTokens = jest.fn(
+        async (_version: 'BHG', _locale: string, _book: number, chapter: number) => {
+          const tokens = tokensByChapter[chapter]
+          if (!tokens) throw new ResourceAccessError('NOT_FOUND')
+          return tokens
+        }
+      )
+      return { ...dependencies, loadStrongBibleChapterSpans, loadInterlinearChapterTokens }
+    }
+    const transliterations = (
+      result: Awaited<ReturnType<typeof loadBibleContentChapter>>
+    ): (string | undefined)[] =>
+      result.success
+        ? result.data.verses.flatMap(
+            verse => verse.StrongSpans?.map(span => span.transliteration) ?? []
+          )
+        : []
+
+    it('finds the original words in another verse of the chapter', async () => {
+      const dependencies = createShiftedDependencies({
+        32: { 2: [token(100, "ya'a.Qov", 'H3290')], 3: [token(200, 'va.Yo.mer', 'H559')] },
+      })
+
+      const result = await loadBibleContentChapter(
+        { book: 1, chapter: 32, version: 'LSG', strongMode: 'transliteration' },
+        dependencies
+      )
+
+      expect(transliterations(result)).toEqual(["ya'a.Qov", 'va.Yo.mer'])
+      expect(dependencies.loadInterlinearChapterTokens).toHaveBeenCalledTimes(1)
+    })
+
+    it('completes the chapter with the original words of the chapter next to it', async () => {
+      const dependencies = createShiftedDependencies({
+        31: { 55: [token(100, "ya'a.Qov", 'H3290')] },
+        32: { 1: [token(200, 'va.Yo.mer', 'H559')] },
+        33: { 1: [] },
+      })
+
+      const result = await loadBibleContentChapter(
+        { book: 1, chapter: 32, version: 'LSG', strongMode: 'transliteration' },
+        dependencies
+      )
+
+      expect(transliterations(result)).toEqual(["ya'a.Qov", 'va.Yo.mer'])
+      expect(
+        dependencies.loadInterlinearChapterTokens.mock.calls.map(([, , , chapter]) => chapter)
+      ).toEqual([32, 31, 33])
+    })
+
+    it('reads a chapter BHG does not number from the chapter next to it', async () => {
+      const dependencies = createShiftedDependencies({
+        31: { 1: [token(100, "ya'a.Qov", 'H3290'), token(200, 'va.Yo.mer', 'H559')] },
+      })
+
+      const result = await loadBibleContentChapter(
+        { book: 1, chapter: 32, version: 'LSG', strongMode: 'transliteration' },
+        dependencies
+      )
+
+      expect(result.success).toBe(true)
+      expect(transliterations(result)).toEqual(["ya'a.Qov", 'va.Yo.mer'])
+    })
+
+    it('keeps the code of a span whose original word no chapter holds', async () => {
+      const dependencies = createShiftedDependencies({
+        32: { 1: [token(200, 'va.Yo.mer', 'H559')] },
+      })
+
+      const result = await loadBibleContentChapter(
+        { book: 1, chapter: 32, version: 'LSG', strongMode: 'transliteration' },
+        dependencies
+      )
+
+      expect(result.success).toBe(true)
+      expect(transliterations(result)).toEqual([undefined, 'va.Yo.mer'])
+    })
+
+    it('still fails the transliterations when the chapter cannot be read', async () => {
+      const dependencies = createShiftedDependencies({})
+      dependencies.loadInterlinearChapterTokens.mockRejectedValue(
+        new ResourceAccessError('NETWORK_OFFLINE')
+      )
+
+      const result = await loadBibleContentChapter(
+        { book: 1, chapter: 32, version: 'LSG', strongMode: 'transliteration' },
+        dependencies
+      )
+
+      expect(result.success).toBe(false)
+      expect(dependencies.loadInterlinearChapterTokens).toHaveBeenCalledTimes(1)
+    })
+
+    it('brings the BHG morphology of the Strong numbers mode from another verse', async () => {
+      const dependencies = createShiftedDependencies({
+        31: { 55: [token(100, "ya'a.Qov", 'H3290', 'HNpm')] },
+        32: { 3: [token(200, 'va.Yo.mer', 'H559', 'HVqw3ms')] },
+      })
+
+      const result = await loadBibleContentChapter(
+        { book: 1, chapter: 32, version: 'LSG', strongMode: 'visible' },
+        dependencies
+      )
+
+      expect(result.success).toBe(true)
+      if (!result.success) return
+      expect(
+        result.data.verses.map(verse => verse.StrongSpans?.[0]?.morphologies?.[0]?.codes)
+      ).toEqual([['HNpm'], ['HVqw3ms']])
+      expect(transliterations(result)).toEqual([undefined, undefined])
+    })
   })
 
   it('overlays a Strong Bible with the aligned original text in reverse interlinear mode', async () => {
