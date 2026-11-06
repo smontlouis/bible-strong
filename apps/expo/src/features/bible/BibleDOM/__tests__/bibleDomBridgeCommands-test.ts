@@ -1,4 +1,4 @@
-import { RETRY_BIBLE_RESOURCE } from '../dispatch'
+import { SHOW_TOAST } from '../dispatch'
 import {
   decodeBibleDOMBridgeAction,
   getStringPayload,
@@ -26,7 +26,7 @@ describe('Bible DOM bridge', () => {
 
   it('routes a recognized command through the injected native handler', async () => {
     const handle = jest.fn(async () => undefined)
-    const action = { type: RETRY_BIBLE_RESOURCE }
+    const action = { type: SHOW_TOAST, payload: { message: 'hello' } }
 
     await expect(routeBibleDOMBridgeAction(action, { handle })).resolves.toBe('handled')
     expect(handle).toHaveBeenCalledWith(action)

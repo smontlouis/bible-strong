@@ -87,7 +87,6 @@ import {
   addHighlight,
   isContextualInformationDisplayEnabled,
   removeHighlight,
-  setSettingsContextualInformationDisplay,
   type RelationEndpoint,
 } from '~redux/modules/user'
 import {
@@ -1521,6 +1520,7 @@ const BibleViewer = ({
       bookmarks: viewerPersonalData.bookmarkedVerses,
       wordAnnotations: viewerPersonalData.wordAnnotations,
       wordAnnotationsInOtherVersions: viewerPersonalData.wordAnnotationsInOtherVersions ?? {},
+      biblicalEntitiesStatus: chapterEntityModuleStatus,
     }),
     surface: presentation => {
       switch (presentation.kind) {
@@ -1615,7 +1615,6 @@ const BibleViewer = ({
     onFocusStudyAction: handleFocusStudyAction,
     chapterEntityModuleStatus,
     chapterEntityDownloadState,
-    onDisableContextualInformation: () => dispatch(setSettingsContextualInformationDisplay(false)),
     isFormSheet,
     error,
   } satisfies Parameters<typeof BibleDOMWrapper>[0]

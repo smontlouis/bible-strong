@@ -15,16 +15,14 @@ import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { webFontFamily } from '~helpers/webFontFamily'
 import { useTheme } from '~themes/ThemeProvider'
-import { useRouter } from 'expo-router'
-import { useSetAtom } from 'jotai/react'
+import { useAtomValue, useSetAtom } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQueryClient } from '@tanstack/react-query'
 import { AppState, Platform, useWindowDimensions, type ViewStyle } from 'react-native'
-import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isBibleOverlayOpenAtom, isFullScreenBibleAtom } from 'src/state/app'
+import { isRepairingBibleDatabaseAtom } from '~state/bibleDatabaseRepair'
 import {
   BibleContextDisplayMode,
   ParallelColumnWidth,
@@ -67,34 +65,16 @@ import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModu
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import type { AnnotationType } from '../hooks/useAnnotationMode'
 import { BibleDOMTranslations } from './TranslationsContext'
+import { DOM_COMPONENT_MOUNTED, SET_BIBLE_OVERLAY_OPEN, SHOW_TOAST } from './dispatch'
 import {
-  DOWNLOAD_BIBLE_VERSION,
-  DOWNLOAD_CHAPTER_ENTITIES,
-  DISMISS_CONTEXTUAL_INFORMATION,
-  DOM_COMPONENT_MOUNTED,
-  OPEN_DOWNLOADS,
-  RESET_BIBLE_DATABASE,
-  RETRY_BIBLE_RESOURCE,
-  SET_BIBLE_OVERLAY_OPEN,
-  SHOW_TOAST,
-} from './dispatch'
-import {
-  getStringPayload,
   getToastPayload,
   isRecord,
   routeBibleDOMBridgeAction,
   type BibleDOMBridgeAction,
 } from './bibleDomBridgeCommands'
 import AndroidWebViewWarningModal from '../AndroidWebViewWarningModal'
-import { downloadManager } from '~helpers/downloadManager'
-import {
-  createBibleDownloadItem,
-  createStrongLexiconModuleDownloadItem,
-} from '~helpers/downloadItemFactory'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
-import { resetBiblesDb } from '~helpers/biblesDb'
 import type { ResolvedPassageMediaChapter } from '../passageMedia'
-import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import useConnection from '~helpers/useConnection'
 import { getOriginalBookTitle } from '~helpers/originalBookTitles'
 import { getReadingBookName, translateForReading } from '~helpers/readingLanguage'
@@ -234,7 +214,6 @@ export type WebViewProps = {
   onFocusStudyAction?: (action: FocusStudyAction) => void
   chapterEntityModuleStatus: StrongLexiconModuleAvailability['status'] | null
   chapterEntityDownloadState: BibleDOMDownloadState
-  onDisableContextualInformation?: () => void
   error?: BibleError | null
 }
 
@@ -340,7 +319,6 @@ export const BibleDOMWrapper = ({
   onFocusStudyAction,
   chapterEntityModuleStatus,
   chapterEntityDownloadState,
-  onDisableContextualInformation,
   isLoading,
   personalBibleDataEnabled = true,
   error,
@@ -359,8 +337,6 @@ export const BibleDOMWrapper = ({
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
-  const confirm = useConfirmDialog()
-  const router = useRouter()
   const focusedEndpoint =
     personalBibleDataEnabled && focusVerses?.length
       ? createVerseEndpoint(
@@ -381,9 +357,8 @@ export const BibleDOMWrapper = ({
     canOpenRelations: !!focusedEndpoint,
   }).items
 
-  const queryClient = useQueryClient()
   const pushRouteOnce = usePushRouteOnce()
-  const [isResettingDatabase, setIsResettingDatabase] = useState(false)
+  const isResettingDatabase = useAtomValue(isRepairingBibleDatabaseAtom)
   const errorDownloadItemId = createOfflineCopyId({
     kind: 'bible',
     versionId: error?.version ?? version,
@@ -521,25 +496,6 @@ export const BibleDOMWrapper = ({
         if (isFocusStudyAction(action.payload)) onFocusStudyAction?.(action.payload)
         break
       }
-      case DOWNLOAD_CHAPTER_ENTITIES: {
-        if (Platform.OS === 'web') break
-        if (!chapterEntityModuleStatus || chapterEntityModuleStatus === 'available') break
-        // The entities status says nothing of the core until entities are installed: the queue
-        // brings the core when it is not installed at the catalog revision.
-        downloadManager.enqueue([createStrongLexiconModuleDownloadItem('entities')])
-        break
-      }
-      case DISMISS_CONTEXTUAL_INFORMATION: {
-        void confirm({
-          title: t('bible.chapterEntities.dismissTitle'),
-          message: t('bible.chapterEntities.dismissMessage'),
-          cancelLabel: t('Annuler'),
-          confirmLabel: t('bible.chapterEntities.dismissConfirm'),
-        }).then(confirmed => {
-          if (confirmed) onDisableContextualInformation?.()
-        })
-        break
-      }
       case SHOW_TOAST: {
         const { message, type } = getToastPayload(action.payload)
         if (!message) break
@@ -552,49 +508,6 @@ export const BibleDOMWrapper = ({
         }
         break
       }
-      case DOWNLOAD_BIBLE_VERSION: {
-        if (Platform.OS === 'web') {
-          await queryClient.invalidateQueries({ queryKey: resourceQueryKeys.bibleContent() })
-          break
-        }
-        const requestedVersion = getStringPayload(action.payload)
-        if (!requestedVersion) break
-        try {
-          downloadManager.enqueue([createBibleDownloadItem(requestedVersion)])
-        } catch (e) {
-          console.error('[BibleDOMWrapper] Failed to enqueue download:', e)
-          toast.error(t('bible.error.unknown'))
-        }
-        break
-      }
-
-      case OPEN_DOWNLOADS: {
-        if (Platform.OS !== 'web') router.push('/downloads')
-        break
-      }
-
-      case RESET_BIBLE_DATABASE: {
-        if (Platform.OS === 'web') {
-          await queryClient.invalidateQueries({ queryKey: resourceQueryKeys.bibleContent() })
-          break
-        }
-        setIsResettingDatabase(true)
-        try {
-          await resetBiblesDb()
-          toast.success(t('bible.error.databaseRecovered'))
-        } catch {
-          toast.error(t('bible.error.databaseOpenFailed'))
-        } finally {
-          setIsResettingDatabase(false)
-        }
-        break
-      }
-
-      case RETRY_BIBLE_RESOURCE: {
-        await queryClient.invalidateQueries({ queryKey: resourceQueryKeys.bibleContent() })
-        break
-      }
-
       case DOM_COMPONENT_MOUNTED: {
         appLogger.info('webview', 'bible_dom.mounted', {
           version,

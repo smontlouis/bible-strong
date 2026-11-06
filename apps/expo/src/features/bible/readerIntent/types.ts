@@ -142,12 +142,28 @@ export type PersonalSheetIntent =
   /** The Relations of a verse. */
   | { kind: 'open-verse-relations'; verseKey: string }
 
+/** Resources: what the reader asks of the resources behind the text it shows. */
+export type ResourceIntent =
+  /** The Offline copy of a Bible version is queued; the web reads the version again. */
+  | { kind: 'install-bible-version'; version: string }
+  /** The downloads of the application. */
+  | { kind: 'open-downloads' }
+  /** The Bible database of the device is rebuilt; the web reads the text again. */
+  | { kind: 'repair-bible-database' }
+  /** The Bible text is read again. */
+  | { kind: 'retry-bible-resource' }
+  /** The biblical entities of the Strong lexicon are queued for an Offline copy. */
+  | { kind: 'install-biblical-entities' }
+  /** The contextual information under the chapter is hidden, once the reader confirms it. */
+  | { kind: 'hide-contextual-information' }
+
 export type ReaderIntent =
   | ReadingIntent
   | OpenIntent
   | SelectIntent
   | AnnotateIntent
   | PersonalSheetIntent
+  | ResourceIntent
 
 /** What the page sends: an intent stamped with the Tab the page shows. */
 export type ReaderIntentMessage = { tabId: string; intent: ReaderIntent }
@@ -184,6 +200,8 @@ export type ReaderRule =
   | 'words-not-on-screen'
   /** The reader leaves for no source of a passage media but YouTube. */
   | 'unknown-media-source'
+  /** The web keeps no Offline copy: it has no downloads to open and nothing to install. */
+  | 'no-offline-copies'
 
 export type ReaderOutcome =
   | { status: 'done' }
