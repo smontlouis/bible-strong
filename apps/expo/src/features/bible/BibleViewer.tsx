@@ -8,6 +8,7 @@ import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import * as Sentry from '@sentry/react-native'
 import { useCallback, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react'
 import { Platform, useWindowDimensions, type LayoutChangeEvent } from 'react-native'
+import { useIsFocused } from 'expo-router'
 import { useDispatch, useSelector, useStore } from 'react-redux'
 import Box, { RightInsetCleared, TouchableBox, useRightInsetToClear } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -1096,6 +1097,8 @@ const BibleViewer = ({
     !mainReadingQuery.isPlaceholderData && Boolean(mainResult?.success && mainResult.data)
   // Cached tabs stay mounted behind the active one: only the reader on screen is consulting.
   const isViewerOnScreen = isFormSheet || !isInTab || isActiveBibleTab
+  // A screen opened over the reader (a Strong page, an entity) is in front of it.
+  const isScreenFocused = useIsFocused()
 
   useEffect(() => {
     if (!isPassageLoaded) return
@@ -1558,6 +1561,7 @@ const BibleViewer = ({
     chapterEntityModuleStatus,
     chapterEntityDownloadState,
     isFormSheet,
+    isReaderInFront: isScreenFocused && isViewerOnScreen,
     error,
   } satisfies Parameters<typeof BibleDOMWrapper>[0]
 

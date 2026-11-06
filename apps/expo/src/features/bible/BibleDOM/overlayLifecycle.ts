@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useRef } from 'react'
+import { createContext, useContext, useEffect, useEffectEvent, useRef } from 'react'
 
 import { useReaderPageSignal } from './useReaderIntent'
 
@@ -14,11 +14,23 @@ type ModalOverlayLifecycleOptions = {
   focus?: ModalOverlayFocus
 }
 
-export const useBibleOverlayOpen = (isOpen: boolean) => {
+/** How many times the application asked the page to close its overlay (Android back). */
+const OverlayCloseRequestContext = createContext(0)
+
+export const OverlayCloseRequestProvider = OverlayCloseRequestContext.Provider
+
+/**
+ * Tells the application that an overlay of the page is open, and closes it when the application
+ * asks: only a request made after the page mounted counts.
+ */
+export const useBibleOverlayOpen = (isOpen: boolean, close: () => void) => {
   const sendPageSignal = useReaderPageSignal()
   const signalOverlayOpen = useEffectEvent((open: boolean) =>
     sendPageSignal({ kind: 'overlay-open', open })
   )
+  const closeRequest = useContext(OverlayCloseRequestContext)
+  const handledCloseRequestRef = useRef(closeRequest)
+  const handleClose = useEffectEvent(close)
 
   useEffect(() => {
     if (!isOpen) return
@@ -28,6 +40,12 @@ export const useBibleOverlayOpen = (isOpen: boolean) => {
       signalOverlayOpen(false)
     }
   }, [isOpen])
+
+  useEffect(() => {
+    if (closeRequest === handledCloseRequestRef.current) return
+    handledCloseRequestRef.current = closeRequest
+    if (isOpen) handleClose()
+  }, [closeRequest, isOpen])
 }
 
 export const useModalOverlayLifecycle = ({
