@@ -1945,6 +1945,27 @@ const VersesRendererContent = ({ settings, translations, verses, ...rest }: Prop
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // On Android one page serves every Bible Tab, and it reaches a Tab before it has painted that
+  // Tab's chapter. Once the browser has painted the verses, the application learns which Tab and
+  // chapter are on screen, so that a Tab's preview never shows the chapter of another Tab.
+  const { tabId } = rest
+  const paintedBook = verses[0] ? Number(verses[0].Livre) : undefined
+  const paintedChapter = verses[0] ? Number(verses[0].Chapitre) : undefined
+  const signalPaint = useEffectEvent((book: number, chapter: number) => {
+    sendPageSignal({ kind: 'painted', tabId, book, chapter })
+  })
+  useEffect(() => {
+    if (paintedBook === undefined || paintedChapter === undefined) return
+    let secondFrame = 0
+    const firstFrame = requestAnimationFrame(() => {
+      secondFrame = requestAnimationFrame(() => signalPaint(paintedBook, paintedChapter))
+    })
+    return () => {
+      cancelAnimationFrame(firstFrame)
+      cancelAnimationFrame(secondFrame)
+    }
+  }, [tabId, paintedBook, paintedChapter])
+
   useEffect(() => {
     const reverseColor = settings.colors[settings.theme].reverse
     document.documentElement.style.setProperty('--header-height', `${headerHeight}px`)

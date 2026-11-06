@@ -255,5 +255,10 @@ export type ReaderPageSignal =
   | { kind: 'overlay-open'; open: boolean }
   /** A message for the reader, by its translation key. */
   | { kind: 'toast'; message: string; type?: 'info' | 'warning' | 'error' }
+  /**
+   * The browser painted the verses of a chapter, for the Tab whose props the page had: on Android
+   * one page serves every Bible Tab, and a Tab's preview waits for its own chapter.
+   */
+  | { kind: 'painted'; tabId: string; book: number; chapter: number }
 
 export type ReaderPageSignalHandler = (signal: ReaderPageSignal) => void | Promise<void>

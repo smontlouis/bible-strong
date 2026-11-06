@@ -32,7 +32,7 @@ const useTabButtonPress = () => {
   const onPress = async () => {
     // If there are tabs, take a snapshot before minimizing
     if (tabs.length > 0 && !tabs[activeTabIndex]?.previewUri) {
-      await captureSnapshot(activeTabIndex, activeAtomId)
+      await captureSnapshot(activeTabIndex, activeAtomId, { paintTimeoutMs: 0 })
     }
     minimizeTab()
   }

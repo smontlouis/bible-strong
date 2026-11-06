@@ -65,6 +65,10 @@ export const saveTabPreviewFile = async (tabId: string, capturedUri: string) => 
   }
 }
 
+/** Deletes a capture left in the temporary directory, never saved onto its tab. */
+export const discardCapturedPreview = (capturedUri: string) =>
+  FileSystem.deleteAsync(toFileUri(capturedUri), { idempotent: true }).catch(() => {})
+
 /** The capture is now on its tab, or was dropped: the sweep judges it like any other file. */
 export const settleTabPreviewFile = (uri: string) => {
   pendingPreviews.delete(tabPreviewFilePath(uri))
