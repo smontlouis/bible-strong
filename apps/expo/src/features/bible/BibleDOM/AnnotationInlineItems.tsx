@@ -6,8 +6,7 @@ import { getWordAnnotationAnchorRange } from '~redux/modules/user/wordAnnotation
 import type { RootStyles, VerseRelationItem, WebViewProps } from './BibleDOMWrapper'
 import { getAnnotationInsertionPoint } from './AnnotationMode/annotationDomText'
 import { findVerseTextElement } from './AnnotationMode/verseTargets'
-import { useDispatch } from './DispatchProvider'
-import { OPEN_ANNOTATION_TAGS } from './dispatch'
+import { useReaderIntent } from './useReaderIntent'
 import RelationsText from './RelationsText'
 import VerseTags from './VerseTags'
 import { getAnnotationInlineAnchorKey } from './annotationInlineModel'
@@ -36,7 +35,7 @@ const AnnotationInlineItems = ({
   annotationMode,
   contentKey,
 }: Props) => {
-  const dispatch = useDispatch()
+  const sendReaderIntent = useReaderIntent()
   const [portalTargets, setPortalTargets] = useState<PortalTarget[]>([])
   const relationsAreInline = (settings.relationsDisplay || 'inline') === 'inline'
   const tagsAreInline = settings.tagsDisplay === 'inline'
@@ -119,7 +118,7 @@ const AnnotationInlineItems = ({
               lastVerse: verseKey,
               tags,
             }}
-            onOpenTags={() => dispatch({ type: OPEN_ANNOTATION_TAGS, payload: annotationId })}
+            onOpenTags={() => void sendReaderIntent({ kind: 'open-annotation-tags', annotationId })}
           />
         )}
       </span>,

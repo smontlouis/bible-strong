@@ -1,12 +1,6 @@
 import React, { useEffect } from 'react'
 import { keyframes, styled } from 'goober'
 
-import {
-  NAVIGATE_TO_VERSE_STUDY_RELATIONS,
-  OPEN_BOOKMARK_MODAL,
-  OPEN_CROSS_VERSION_MODAL,
-  OPEN_VERSE_TAGS_MODAL,
-} from './dispatch'
 import VersionAnnotationIndicator, { CrossVersionAnnotation } from './VersionAnnotationIndicator'
 
 import { scaleFontSize } from './scaleFontSize'
@@ -16,7 +10,6 @@ import RelationsCount from './RelationsCount'
 import RelationsText from './RelationsText'
 import TagsIndicator from './TagsIndicator'
 import { RootState } from '~redux/modules/reducer'
-import { useDispatch } from './DispatchProvider'
 import { useReaderIntent } from './useReaderIntent'
 import { Bookmark, SelectedCode, StudyNavigateBibleType, Verse as TVerse } from '~common/types'
 import { RootStyles, TaggedVerse, VerseRelationItem } from './BibleDOMWrapper'
@@ -426,16 +419,6 @@ export interface VerseContentProps {
 
 const getVerseKey = ({ Livre, Chapitre, Verset }: TVerse) => `${Livre}-${Chapitre}-${Verset}`
 
-const getVerseStudyRelationsPayload = (verseKey: string, relationItem?: VerseRelationItem) =>
-  relationItem
-    ? {
-        verseKey,
-        verseIds: relationItem.verseIds,
-        relationId: relationItem.relationId,
-        ...(relationItem.activeEndpoint && { endpoint: relationItem.activeEndpoint }),
-      }
-    : verseKey
-
 /** Bookmark, relation count and tag count, shown next to the verse number. */
 export const VerseMarkers = ({
   verse,
@@ -446,29 +429,18 @@ export const VerseMarkers = ({
   relationCount,
   taggedItemsCount = 0,
 }: VerseContentProps) => {
-  const dispatch = useDispatch()
+  const sendReaderIntent = useReaderIntent()
 
   const openBookmarkModal = () => {
-    if (bookmark) {
-      dispatch({
-        type: OPEN_BOOKMARK_MODAL,
-        payload: bookmark,
-      })
-    }
+    if (bookmark) void sendReaderIntent({ kind: 'open-bookmark', bookmarkId: bookmark.id })
   }
 
-  const navigateToVerseStudyRelations = (relationItem?: VerseRelationItem) => {
-    dispatch({
-      type: NAVIGATE_TO_VERSE_STUDY_RELATIONS,
-      payload: getVerseStudyRelationsPayload(getVerseKey(verse), relationItem),
-    })
+  const navigateToVerseStudyRelations = () => {
+    void sendReaderIntent({ kind: 'open-verse-relations', verseKey: getVerseKey(verse) })
   }
 
   const navigateToVerseTags = () => {
-    dispatch({
-      type: OPEN_VERSE_TAGS_MODAL,
-      payload: getVerseKey(verse),
-    })
+    void sendReaderIntent({ kind: 'open-verse-tags', verseKey: getVerseKey(verse) })
   }
 
   return (
@@ -543,16 +515,13 @@ export const VerseEndContent = ({
   tag,
   otherVersionAnnotations,
 }: VerseContentProps) => {
-  const dispatch = useDispatch()
+  const sendReaderIntent = useReaderIntent()
 
   const openCrossVersionModal = () => {
     if (otherVersionAnnotations && otherVersionAnnotations.length > 0) {
-      dispatch({
-        type: OPEN_CROSS_VERSION_MODAL,
-        payload: {
-          verseKey: getVerseKey(verse),
-          versions: otherVersionAnnotations,
-        },
+      void sendReaderIntent({
+        kind: 'open-cross-version-annotations',
+        verseKey: getVerseKey(verse),
       })
     }
   }

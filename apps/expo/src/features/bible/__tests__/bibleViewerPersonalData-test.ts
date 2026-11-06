@@ -3,19 +3,6 @@ import {
   getInterlinearReadingVersions,
   shouldHideBibleViewerPersonalData,
 } from '../bibleViewerPersonalData'
-import {
-  DOWNLOAD_CHAPTER_ENTITIES,
-  FOCUS_STUDY_ACTION,
-  NAVIGATE_TO_VERSE_LINKS,
-  NAVIGATE_TO_VERSE_STUDY_RELATIONS,
-  OPEN_BOOKMARK_MODAL,
-  OPEN_CROSS_VERSION_MODAL,
-  OPEN_HIGHLIGHT_TAGS,
-  OPEN_ANNOTATION_TAGS,
-  OPEN_VERSE_TAGS_MODAL,
-  RETRY_BIBLE_RESOURCE,
-  isPersonalBibleDataAction,
-} from '../BibleDOM/dispatch'
 
 describe('Bible viewer personal data policy', () => {
   it.each(['visible', 'interlinear', 'strong', 'transliteration'] as const)(
@@ -136,23 +123,4 @@ describe('Bible viewer personal data policy', () => {
     })
     expect(getBibleViewerPersonalData(false, content)).toBe(content)
   })
-
-  it.each([
-    NAVIGATE_TO_VERSE_LINKS,
-    NAVIGATE_TO_VERSE_STUDY_RELATIONS,
-    OPEN_HIGHLIGHT_TAGS,
-    OPEN_ANNOTATION_TAGS,
-    OPEN_BOOKMARK_MODAL,
-    OPEN_CROSS_VERSION_MODAL,
-    OPEN_VERSE_TAGS_MODAL,
-  ])('classifies %s as a personal Bible data action', actionType => {
-    expect(isPersonalBibleDataAction(actionType)).toBe(true)
-  })
-
-  it.each([DOWNLOAD_CHAPTER_ENTITIES, FOCUS_STUDY_ACTION, RETRY_BIBLE_RESOURCE])(
-    'keeps %s available in interlinear reading modes',
-    actionType => {
-      expect(isPersonalBibleDataAction(actionType)).toBe(false)
-    }
-  )
 })

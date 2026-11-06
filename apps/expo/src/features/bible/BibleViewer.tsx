@@ -85,7 +85,6 @@ import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { RootState } from '~redux/modules/reducer'
 import {
   addHighlight,
-  createVerseEndpoint,
   isContextualInformationDisplayEnabled,
   removeHighlight,
   setSettingsContextualInformationDisplay,
@@ -124,11 +123,7 @@ import {
 import BibleSelectionSheet from './BibleSelectionSheet'
 import { getLastAnnotationMark } from './annotationWords'
 import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
-import {
-  BibleDOMWrapper,
-  type BibleDOMDownloadState,
-  type StudyRelationsModalTarget,
-} from './BibleDOM/BibleDOMWrapper'
+import { BibleDOMWrapper, type BibleDOMDownloadState } from './BibleDOM/BibleDOMWrapper'
 import BibleParamsModal from './BibleParamsModal'
 import { handleReaderIntent, type Reader } from './readerIntent'
 import { useReaderWorld } from './readerIntent/world'
@@ -1242,25 +1237,6 @@ const BibleViewer = ({
     actions.clearSelectedVerses()
   }
 
-  const openVerseStudyRelationsModal = (target: StudyRelationsModalTarget) => {
-    if (typeof target !== 'string' && target.endpoint) {
-      openEntityRelations(target.endpoint)
-      return
-    }
-    const verseIds =
-      typeof target === 'string'
-        ? [target]
-        : target.verseIds?.length
-          ? target.verseIds
-          : target.verseKey
-            ? [target.verseKey]
-            : []
-
-    if (!verseIds.length) return
-
-    openEntityRelations(createVerseEndpoint(verseIds, undefined, version))
-  }
-
   const openResourceForVerse = (res: BibleResource, ver: string, verseVersion = version) => {
     setResourceModalSelection({
       selectedVersion: verseVersion,
@@ -1542,6 +1518,9 @@ const BibleViewer = ({
         ],
         indexes: inlineCommentaryQuery.data?.indexes ?? [],
       },
+      bookmarks: viewerPersonalData.bookmarkedVerses,
+      wordAnnotations: viewerPersonalData.wordAnnotations,
+      wordAnnotationsInOtherVersions: viewerPersonalData.wordAnnotationsInOtherVersions ?? {},
     }),
     surface: presentation => {
       switch (presentation.kind) {
@@ -1560,6 +1539,15 @@ const BibleViewer = ({
         case 'canonical-note':
           handleOpenCanonicalBibleNote(presentation.note)
           return
+        case 'bookmark':
+          handleOpenBookmarkModal(presentation.bookmark)
+          return
+        case 'cross-version-annotations':
+          handleOpenCrossVersionModal(presentation.verseKey, presentation.versions)
+          return
+        case 'verse-tags':
+          handleOpenVerseTagsModal(presentation.verseKey)
+          return
       }
     },
   }
@@ -1571,7 +1559,6 @@ const BibleViewer = ({
     chapter,
     isLoading,
     personalBibleDataEnabled: !hidePersonalBibleData,
-    interlinearReadingVersions,
     setSelectedVerse: actions.setSelectedVerse,
     version,
     interlinearMode,
@@ -1603,8 +1590,6 @@ const BibleViewer = ({
     parallelPericopeChapters,
     passageMedia,
     selectedCode,
-    setUnifiedTagsModal: hidePersonalBibleData ? undefined : setUnifiedTagsModal,
-    onOpenBookmarkModal: hidePersonalBibleData ? undefined : handleOpenBookmarkModal,
     planDayStep: planDayStepView,
     // Annotation mode props
     annotationMode: viewerPersonalData.annotationMode,
@@ -1615,12 +1600,9 @@ const BibleViewer = ({
     selectedAnnotationId: annotationMode.selectedAnnotation?.id ?? null,
     // Cross-version annotations
     wordAnnotationsInOtherVersions: viewerPersonalData.wordAnnotationsInOtherVersions,
-    onOpenCrossVersionModal: hidePersonalBibleData ? undefined : handleOpenCrossVersionModal,
     // Verse tags
     taggedVersesInChapter: viewerPersonalData.taggedVersesInChapter,
     versesWithNonHighlightTags: viewerPersonalData.versesWithNonHighlightTags,
-    onOpenVerseTagsModal: hidePersonalBibleData ? undefined : handleOpenVerseTagsModal,
-    onOpenStudyRelationsModal: hidePersonalBibleData ? undefined : openVerseStudyRelationsModal,
     // Red words
     redWords: settings.redWordsDisplay ? redWords : null,
     parallelRedWords: settings.redWordsDisplay ? parallelRedWords : undefined,

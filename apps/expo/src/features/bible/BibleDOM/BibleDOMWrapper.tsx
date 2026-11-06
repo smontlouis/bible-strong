@@ -72,13 +72,6 @@ import {
   DOWNLOAD_CHAPTER_ENTITIES,
   DISMISS_CONTEXTUAL_INFORMATION,
   DOM_COMPONENT_MOUNTED,
-  NAVIGATE_TO_VERSE_LINKS,
-  NAVIGATE_TO_VERSE_STUDY_RELATIONS,
-  OPEN_BOOKMARK_MODAL,
-  OPEN_CROSS_VERSION_MODAL,
-  OPEN_HIGHLIGHT_TAGS,
-  OPEN_ANNOTATION_TAGS,
-  OPEN_VERSE_TAGS_MODAL,
   OPEN_DOWNLOADS,
   RESET_BIBLE_DATABASE,
   RETRY_BIBLE_RESOURCE,
@@ -86,15 +79,11 @@ import {
   SHOW_TOAST,
 } from './dispatch'
 import {
-  getBookmarkPayload,
   getStringPayload,
-  getStudyRelationsModalTarget,
   getToastPayload,
-  getVerseIdsPayload,
   isRecord,
   routeBibleDOMBridgeAction,
   type BibleDOMBridgeAction,
-  type StudyRelationsModalTarget,
 } from './bibleDomBridgeCommands'
 import AndroidWebViewWarningModal from '../AndroidWebViewWarningModal'
 import { downloadManager } from '~helpers/downloadManager'
@@ -109,10 +98,7 @@ import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import useConnection from '~helpers/useConnection'
 import { getOriginalBookTitle } from '~helpers/originalBookTitles'
 import { getReadingBookName, translateForReading } from '~helpers/readingLanguage'
-import { getWordAnnotationText } from '~redux/modules/user/wordAnnotationRanges'
-import type { UnifiedTagsModalProps } from '~state/app'
 import type { ReaderIntentHandler } from '../readerIntent/types'
-export type { StudyRelationsModalTarget } from './bibleDomBridgeCommands'
 
 export type ParallelVerse = {
   id: VersionCode
@@ -148,8 +134,6 @@ export type RootStyles = {
 
 export type PericopeChapter = Pericope[string][string]
 
-type TagsModalPayload = Exclude<UnifiedTagsModalProps, false>
-
 export type Dispatch = (props: BibleDOMBridgeAction) => Promise<void>
 
 /**
@@ -183,8 +167,6 @@ export type WebViewProps = {
   chapter: number
   isLoading: boolean
   personalBibleDataEnabled?: boolean
-  /** Versions shown only in interlinear presentations: they hold no personal Bible data. */
-  interlinearReadingVersions?: string[]
   setSelectedVerse: (selectedVerse: number) => void
   version: VersionCode
   interlinearMode?: InterlinearMode
@@ -217,8 +199,6 @@ export type WebViewProps = {
   parallelPericopeChapters?: Record<string, PericopeChapter | undefined>
   passageMedia: ResolvedPassageMediaChapter
   selectedCode: SelectedCode | null
-  setUnifiedTagsModal?: (payload: TagsModalPayload) => void
-  onOpenBookmarkModal?: (bookmark: Bookmark) => void
   /** Plan mode shows its banner under the header, focus or not. */
   inPlan?: boolean
   /** Plan mode: the way on to the next element of the day, under the passage's last chapter. */
@@ -232,12 +212,9 @@ export type WebViewProps = {
   selectedAnnotationId?: string | null
   // Cross-version annotations
   wordAnnotationsInOtherVersions?: Record<string, CrossVersionAnnotation[]>
-  onOpenCrossVersionModal?: (verseKey: string, versions: CrossVersionAnnotation[]) => void
   // Verse tags
   taggedVersesInChapter?: Record<number, number>
   versesWithNonHighlightTags?: Record<number, boolean>
-  onOpenVerseTagsModal?: (verseKey: string) => void
-  onOpenStudyRelationsModal?: (target: StudyRelationsModalTarget) => void
   isFormSheet?: boolean
   // Red words data
   redWords?: Record<string, { start: number; end: number }[]> | null
@@ -350,11 +327,6 @@ export const BibleDOMWrapper = ({
   wordAnnotationsInOtherVersions,
   taggedVersesInChapter,
   versesWithNonHighlightTags,
-  onOpenStudyRelationsModal,
-  onOpenBookmarkModal,
-  onOpenCrossVersionModal,
-  onOpenVerseTagsModal,
-  setUnifiedTagsModal,
   isFormSheet,
   redWords,
   parallelRedWords,
@@ -371,7 +343,6 @@ export const BibleDOMWrapper = ({
   onDisableContextualInformation,
   isLoading,
   personalBibleDataEnabled = true,
-  interlinearReadingVersions,
   error,
 }: WebViewProps) => {
   const keepControlsVisible = useWindowDimensions().width >= 768
@@ -569,23 +540,6 @@ export const BibleDOMWrapper = ({
         })
         break
       }
-      case NAVIGATE_TO_VERSE_LINKS: {
-        const verseKey = getStringPayload(action.payload)
-        if (!verseKey) break
-        router.push({
-          pathname: '/bible-verse-links',
-          params: {
-            verse: verseKey,
-            withBack: 'true',
-          },
-        })
-        break
-      }
-      case NAVIGATE_TO_VERSE_STUDY_RELATIONS: {
-        const target = getStudyRelationsModalTarget(action.payload)
-        if (target) onOpenStudyRelationsModal?.(target)
-        break
-      }
       case SHOW_TOAST: {
         const { message, type } = getToastPayload(action.payload)
         if (!message) break
@@ -598,51 +552,6 @@ export const BibleDOMWrapper = ({
         }
         break
       }
-      case OPEN_HIGHLIGHT_TAGS: {
-        const verseIds = getVerseIdsPayload(action.payload)
-        const obj = {
-          mode: 'select' as const,
-          entity: 'highlights' as const,
-          ids: Object.fromEntries(verseIds.map(v => [v, true])) as Record<string, true>,
-        }
-        setUnifiedTagsModal?.(obj)
-        break
-      }
-
-      case OPEN_ANNOTATION_TAGS: {
-        const annotationId = getStringPayload(action.payload)
-        const annotation = annotationId ? wordAnnotations[annotationId] : undefined
-        if (!annotationId || !annotation) break
-        setUnifiedTagsModal?.({
-          mode: 'select',
-          id: annotationId,
-          entity: 'wordAnnotations',
-          title: getWordAnnotationText(annotation),
-        })
-        break
-      }
-
-      case OPEN_BOOKMARK_MODAL: {
-        const bookmark = getBookmarkPayload(action.payload)
-        if (bookmark) onOpenBookmarkModal?.(bookmark)
-        break
-      }
-
-      case OPEN_CROSS_VERSION_MODAL: {
-        if (!isRecord(action.payload)) break
-        const { verseKey, versions } = action.payload
-        if (typeof verseKey === 'string' && Array.isArray(versions)) {
-          onOpenCrossVersionModal?.(verseKey, versions as CrossVersionAnnotation[])
-        }
-        break
-      }
-
-      case OPEN_VERSE_TAGS_MODAL: {
-        const verseKey = getStringPayload(action.payload)
-        if (verseKey) onOpenVerseTagsModal?.(verseKey)
-        break
-      }
-
       case DOWNLOAD_BIBLE_VERSION: {
         if (Platform.OS === 'web') {
           await queryClient.invalidateQueries({ queryKey: resourceQueryKeys.bibleContent() })
@@ -703,8 +612,6 @@ export const BibleDOMWrapper = ({
   }
   const dispatch: Dispatch = async action => {
     await routeBibleDOMBridgeAction(action, {
-      personalBibleDataEnabled,
-      interlinearReadingVersions,
       handle: handleBridgeAction,
       rejected: value => {
         appLogger.captureError(

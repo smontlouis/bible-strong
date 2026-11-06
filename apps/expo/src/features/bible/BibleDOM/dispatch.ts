@@ -1,18 +1,7 @@
 export const DOWNLOAD_CHAPTER_ENTITIES = 'DOWNLOAD_CHAPTER_ENTITIES'
 export const DISMISS_CONTEXTUAL_INFORMATION = 'DISMISS_CONTEXTUAL_INFORMATION'
 export const SHOW_TOAST = 'SHOW_TOAST'
-export const NAVIGATE_TO_VERSE_LINKS = 'NAVIGATE_TO_VERSE_LINKS'
-export const NAVIGATE_TO_VERSE_STUDY_RELATIONS = 'NAVIGATE_TO_VERSE_STUDY_RELATIONS'
-export const OPEN_HIGHLIGHT_TAGS = 'OPEN_HIGHLIGHT_TAGS'
-export const OPEN_BOOKMARK_MODAL = 'OPEN_BOOKMARK_MODAL'
 export const SET_BIBLE_OVERLAY_OPEN = 'SET_BIBLE_OVERLAY_OPEN'
-
-// Cross-version annotation indicator actions
-export const OPEN_CROSS_VERSION_MODAL = 'OPEN_CROSS_VERSION_MODAL'
-
-// Verse tags modal
-export const OPEN_VERSE_TAGS_MODAL = 'OPEN_VERSE_TAGS_MODAL'
-export const OPEN_ANNOTATION_TAGS = 'OPEN_ANNOTATION_TAGS'
 
 // Error/download actions
 export const DOWNLOAD_BIBLE_VERSION = 'DOWNLOAD_BIBLE_VERSION'
@@ -20,21 +9,6 @@ export const OPEN_DOWNLOADS = 'OPEN_DOWNLOADS'
 export const RESET_BIBLE_DATABASE = 'RESET_BIBLE_DATABASE'
 export const RETRY_BIBLE_RESOURCE = 'RETRY_BIBLE_RESOURCE'
 export const DOM_COMPONENT_MOUNTED = 'DOM_COMPONENT_MOUNTED'
-
-// Opening a Note, a link, a Relation or a tag, selecting verses and annotating words are Reader
-// intents refused by their own rules.
-const PERSONAL_BIBLE_DATA_ACTIONS = new Set<string>([
-  NAVIGATE_TO_VERSE_LINKS,
-  NAVIGATE_TO_VERSE_STUDY_RELATIONS,
-  OPEN_HIGHLIGHT_TAGS,
-  OPEN_BOOKMARK_MODAL,
-  OPEN_CROSS_VERSION_MODAL,
-  OPEN_VERSE_TAGS_MODAL,
-  OPEN_ANNOTATION_TAGS,
-])
-
-export const isPersonalBibleDataAction = (actionType: string): boolean =>
-  PERSONAL_BIBLE_DATA_ACTIONS.has(actionType)
 
 /** A tap in the study under a verse in focus (ADR-0088). */
 export const FOCUS_STUDY_ACTION = 'FOCUS_STUDY_ACTION'
