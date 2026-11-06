@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react-native'
-import { useAtomValue } from 'jotai/react'
+import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useEffect, useRef } from 'react'
 import { View, StyleSheet } from 'react-native'
 import { Portal, PortalHost } from 'react-native-teleport'
@@ -14,6 +14,7 @@ import {
 } from '~state/tabs'
 import type { WebViewProps } from './BibleDOM/BibleDOMWrapper'
 import { BibleDOMWrapper } from './BibleDOM/BibleDOMWrapper'
+import { sharedBibleDOMPaintAtom } from './sharedBibleDOMPaint'
 import type { RootState } from '~redux/modules/reducer'
 
 export const getBibleDOMDestination = (tabId: string) => `bible-dom-${tabId}`
@@ -41,6 +42,7 @@ const SharedBibleDOM = () => {
   const sharedProps = useAtomValue(sharedBibleDOMPropsAtom)
   const bibleDomRemountSignal = useAtomValue(bibleDomRemountSignalAtom)
   const settings = useSelector((state: RootState) => state.user.bible.settings)
+  const setPaint = useSetAtom(sharedBibleDOMPaintAtom)
 
   const activeProps =
     activeBibleTabId && sharedProps?.tabId === activeBibleTabId ? sharedProps : null
@@ -114,7 +116,11 @@ const SharedBibleDOM = () => {
       {/* A change of size remounts the WebView (orientation); a change of tab only moves it,
           so switching tabs keeps the page loaded instead of reloading it. */}
       <Portal key={portalLayoutKey} hostName={destination}>
-        <BibleDOMWrapper key={`${bibleDomRemountSignal}-${portalLayoutKey}`} {...props} />
+        <BibleDOMWrapper
+          key={`${bibleDomRemountSignal}-${portalLayoutKey}`}
+          {...props}
+          onContentPainted={setPaint}
+        />
       </Portal>
     </View>
   )

@@ -66,6 +66,7 @@ import useConnection from '~helpers/useConnection'
 import { getOriginalBookTitle } from '~helpers/originalBookTitles'
 import { getReadingBookName, translateForReading } from '~helpers/readingLanguage'
 import type { ReaderIntentHandler, ReaderPageSignal } from '../readerIntent/types'
+import type { BibleDOMPaint } from '../sharedBibleDOMPaint'
 
 export type ParallelVerse = {
   id: VersionCode
@@ -125,6 +126,12 @@ const decodePageSignal = (value: unknown): ReaderPageSignal | undefined => {
         message: value.message,
         ...(value.type !== undefined && { type: value.type as 'info' | 'warning' | 'error' }),
       }
+    case 'painted':
+      return typeof value.tabId === 'string' &&
+        typeof value.book === 'number' &&
+        typeof value.chapter === 'number'
+        ? { kind: value.kind, tabId: value.tabId, book: value.book, chapter: value.chapter }
+        : undefined
     default:
       return undefined
   }
@@ -157,6 +164,8 @@ export type WebViewProps = {
   tabId: string
   /** Every Reader intent of the page goes through here (ADR-0098). */
   onReaderIntent: ReaderIntentHandler
+  /** The page painted the verses of a chapter (the shared Android page, for Tab previews). */
+  onContentPainted?: (paint: BibleDOMPaint) => void
   book: Book
   chapter: number
   isLoading: boolean
@@ -280,6 +289,7 @@ export type VerseRelationItem = {
 export const BibleDOMWrapper = ({
   tabId,
   onReaderIntent,
+  onContentPainted,
   verses,
   parallelVerses,
   parallelColumnWidth = 75,
@@ -512,6 +522,10 @@ export const BibleDOMWrapper = ({
         if (signal.type === 'warning') toast.warning(message)
         else if (signal.type === 'error') toast.error(message)
         else toast.info(message)
+        return
+      }
+      case 'painted': {
+        onContentPainted?.({ tabId: signal.tabId, book: signal.book, chapter: signal.chapter })
         return
       }
       case 'mounted': {

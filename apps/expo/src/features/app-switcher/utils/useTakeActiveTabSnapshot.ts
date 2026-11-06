@@ -3,9 +3,16 @@ import { runAfterInteractions } from '~helpers/runAfterInteractions'
 import { useSetAtom, useStore } from 'jotai/react'
 import { captureRef } from 'react-native-view-shot'
 import useDynamicRefs from '~helpers/useDynamicRefs'
+import { shouldUseSharedBibleDOM } from '~features/bible/sharedBibleDOMPlatform'
+import {
+  isPaintOfTab,
+  sharedBibleDOMPaintAtom,
+  waitForPaintOfTab,
+} from '~features/bible/sharedBibleDOMPaint'
 import { setTabPreviewAtom, tabGroupsAtom, tabsAtom } from '../../../state/tabs'
 import {
   deleteTabPreviewFile,
+  discardCapturedPreview,
   isTabPreviewReferenced,
   saveTabPreviewFile,
   settleTabPreviewFile,
@@ -34,12 +41,26 @@ const measurePreviewSize = (view: View) =>
     }
   })
 
+/**
+ * How long a capture waits for the shared Bible page to paint its tab before giving up. Nothing
+ * waits on the capture, and a report of another tab never matches: a slow phone may take seconds.
+ */
+export const SHARED_BIBLE_PAINT_TIMEOUT_MS = 10_000
+
 const useTakeActiveTabSnapshot = () => {
   const store = useStore()
   const setTabPreview = useSetAtom(setTabPreviewAtom)
   const [getRef] = useDynamicRefs<View>()
 
-  const captureSnapshot = async (activeTabIndex: number, activeAtomId: string) => {
+  /**
+   * `paintTimeoutMs`: how long to wait for the shared Bible page to paint the tab. A tab left by
+   * the user is already painted: it passes 0, so that leaving a tab never waits.
+   */
+  const captureSnapshot = async (
+    activeTabIndex: number,
+    activeAtomId: string,
+    { paintTimeoutMs = SHARED_BIBLE_PAINT_TIMEOUT_MS }: { paintTimeoutMs?: number } = {}
+  ) => {
     if (typeof activeTabIndex === 'undefined') {
       console.log('[useTakeActiveTabSnapshot] No active tab')
       return
@@ -57,17 +78,45 @@ const useTakeActiveTabSnapshot = () => {
       return
     }
 
+    // On Android one page serves every Bible tab and reaches a tab before it has painted that
+    // tab's chapter: the capture waits until the page shows this tab, or keeps the old preview.
+    const getCapturedTab = () => store.get(tabsAtom).find(item => item.id === activeAtomId)
+    const capturedTab = getCapturedTab()
+    const showsSharedBiblePage =
+      capturedTab?.type === 'bible' && shouldUseSharedBibleDOM(Platform.OS, true)
+    if (showsSharedBiblePage && !(await waitForPaintOfTab(store, getCapturedTab, paintTimeoutMs))) {
+      console.log('[useTakeActiveTabSnapshot] The shared Bible page did not paint the tab')
+      return
+    }
+
     // The web keeps a data URI for the session; native writes a file kept across launches.
     const isWeb = Platform.OS === 'web'
     const size = await measurePreviewSize(cachedTabScreen)
-    const uri = await captureRef(cachedTabScreen, {
+    const captured = await captureRef(cachedTabScreen, {
       result: isWeb ? 'data-uri' : 'tmpfile',
       format: 'jpg',
       quality: 0.8,
       ...size,
-    })
-      .then(captured => (isWeb ? captured : saveTabPreviewFile(activeAtomId, captured)))
-      .catch(error => console.error('Oops, snapshot failed', error))
+    }).catch(error => console.error('Oops, snapshot failed', error))
+
+    if (!captured) {
+      return
+    }
+
+    // The page moved on to another tab during the capture: the picture may show that tab.
+    if (
+      showsSharedBiblePage &&
+      !isPaintOfTab(store.get(sharedBibleDOMPaintAtom), getCapturedTab())
+    ) {
+      discardCapturedPreview(captured)
+      return
+    }
+
+    const uri = isWeb
+      ? captured
+      : await saveTabPreviewFile(activeAtomId, captured).catch(error =>
+          console.error('Oops, snapshot failed', error)
+        )
 
     if (!uri) {
       return

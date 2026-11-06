@@ -52,7 +52,7 @@ the Strong sheet and the Strong page: the module decides from where the intent c
 - it never throws, and returns an outcome to the page: done, refused with the rule that refused it,
   rejected, or failed.
 
-The signals of the page itself (mounted, overlay open, toast) are a separate small union,
+The signals of the page itself (mounted, overlay open, toast, painted) are a separate small union,
 `ReaderPageSignal`, outside the module. What the application sends to the page (its data props and
 the four trigger counters) does not change.
 
