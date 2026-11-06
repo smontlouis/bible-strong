@@ -295,3 +295,5 @@ keep passage-only actions. The UI revalidates each action before creating a fres
 existing tab. No personal destinations or arbitrary routes are accepted. Search
 initializes passage-only filters, and editorial reading tabs load with no enrollment
 or progress write. See ADR-0058 for the public/private boundary.
+
+Inline widgets: the app announces `inline_widgets`. The study service then sends a widget only when the answer places its link, `[title](https://bible-strong.app/assistant-widget/<id>)`, and `widgetSegments.ts` splits the answer so each card is drawn at that place, on the web and on mobile. Answers saved before this change have no such links and keep their widgets at the end. The study service must be deployed before an app version that announces the capability, since an older service rejects it.

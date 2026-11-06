@@ -26,7 +26,7 @@ import { parseStudySource, type StudySource } from './sources'
 export { parseStudySource, sourceLink, sourceIdFromLink, type StudySource } from './sources'
 export const STREAM_VERSION = 1
 export type HistoryMessage = { role: 'user' | 'assistant'; content: string }
-export const CLIENT_CAPABILITIES = ['open_tab', 'open_public_tab'] as const
+export const CLIENT_CAPABILITIES = ['open_tab', 'open_public_tab', 'inline_widgets'] as const
 export type ClientCapability = (typeof CLIENT_CAPABILITIES)[number]
 export const STUDY_SURFACE_KINDS = [
   'passage',

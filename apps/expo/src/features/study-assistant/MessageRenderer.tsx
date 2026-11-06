@@ -15,6 +15,7 @@ import Text from '~common/ui/Text'
 import AssistantMessageMarkdown from './AssistantMessageMarkdown'
 import ToolTimeline from './ToolTimeline'
 import StudyWidget from './widgets/StudyWidget'
+import { messageSegments, placedWidgetIds } from './widgetSegments'
 import { type ReadingContext } from './conversations'
 import { messagePartNames } from './messageRuntime'
 
@@ -92,6 +93,10 @@ export function AssistantMessage({
   const tools = toolActivities(message.content)
   const streaming = message.status?.type === 'running' && busy
   const incomplete = message.status?.type === 'incomplete'
+  // Cards the answer places are shown at their link; older answers keep them at the end.
+  const widgetIds = new Set(widgets.map(widget => widget.id))
+  const text = message.content.find(part => part.type === 'text')?.text || ''
+  const placed = placedWidgetIds(text, widgetIds)
   return (
     <MessagePrimitive.Root className="mb-6">
       {!!tools.length && <ToolTimeline tools={tools} running={streaming} />}
@@ -99,17 +104,29 @@ export function AssistantMessage({
         {({ part }) => {
           if (part.type === 'text')
             return part.text ? (
-              <AssistantMessageMarkdown
-                text={part.text}
-                streaming={streaming}
-                sources={sources}
-                widgets={widgets}
-              />
+              <>
+                {messageSegments(part.text, widgetIds).map((segment, index) => {
+                  if (segment.type === 'markdown')
+                    return (
+                      <AssistantMessageMarkdown
+                        key={`markdown-${index}`}
+                        text={segment.text}
+                        streaming={streaming}
+                        sources={sources}
+                        widgets={widgets}
+                      />
+                    )
+                  const widget = widgets.find(item => item.id === segment.id)
+                  return widget ? <StudyWidget key={`widget-${widget.id}`} widget={widget} /> : null
+                })}
+              </>
             ) : null
           if (part.type === 'tool-call') return <></>
           if (part.type !== 'data') return null
-          if (part.name === messagePartNames.widget)
-            return <StudyWidget widget={part.data as StudyWidgetDescriptor} />
+          if (part.name === messagePartNames.widget) {
+            const widget = part.data as StudyWidgetDescriptor
+            return placed.has(widget.id) ? null : <StudyWidget widget={widget} />
+          }
           return null
         }}
       </MessagePrimitive.Parts>

@@ -8,22 +8,33 @@ import remarkBibleLinks from './remarkBibleLinks'
 import PassageLink from './PassageLink.web'
 import SourceCitation from './SourceCitation.web'
 import { prepareMarkdown, safeLink } from './markdown'
+import { messageSegments } from './widgetSegments'
 import './assistant-markdown.css'
 
 export default function AssistantMessageMarkdown({
   sources,
   widgets,
+  segment,
 }: {
   sources: StudySource[]
   widgets: StudyWidget[]
+  /** Index of the Markdown segment to show when the answer places cards in its text. */
+  segment?: number
 }) {
   const { colors } = useTheme()
   const passageVersion = responseBibleVersion(sources, widgets)
+  // The primitive reads the whole text part; each instance keeps only its own segment.
+  const widgetIds = new Set(widgets.map(widget => widget.id))
+  const preprocess = (text: string) => {
+    if (segment === undefined) return prepareMarkdown(text)
+    const part = messageSegments(text, widgetIds)[segment]
+    return part?.type === 'markdown' ? prepareMarkdown(part.text) : ''
+  }
   return (
     <StreamdownTextPrimitive
       containerClassName="study-assistant-markdown"
       containerProps={{ style: { color: colors.default } }}
-      preprocess={prepareMarkdown}
+      preprocess={preprocess}
       defer
       controls={false}
       remarkPlugins={[...Object.values(defaultRemarkPlugins), remarkBibleLinks]}

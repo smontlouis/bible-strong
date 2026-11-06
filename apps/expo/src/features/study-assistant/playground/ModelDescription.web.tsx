@@ -84,14 +84,14 @@ export default function ModelDescription({ kind }: { kind: string }) {
             <strong>
               {entry.mode === 'explicit'
                 ? 'Choix explicite du widget'
-                : 'Widget automatique après lecture'}
+                : 'Widget proposé après lecture'}
             </strong>
             <span>Code serveur local · {query.data?.promptVersion}</span>
           </div>
           <p>
             {entry.mode === 'explicit'
-              ? 'Le modèle choisit le type de présentation dans les arguments de l’outil.'
-              : 'Le modèle choisit une ressource à lire. L’application affiche ensuite ce widget lorsque la lecture réussit ; il n’existe pas de description distincte envoyée pour ce widget.'}
+              ? 'Le modèle choisit le type de présentation dans les arguments de l’outil, puis place la carte dans sa réponse.'
+              : 'Le modèle choisit une ressource à lire. Si la carte aide le lecteur, il la place dans sa réponse avec le lien que renvoie la lecture ; il n’existe pas de description distincte envoyée pour ce widget.'}
           </p>
           <p className="ai-pg-model-trigger">
             <strong>Déclenchement côté application : </strong>

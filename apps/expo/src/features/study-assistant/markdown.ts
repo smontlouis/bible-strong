@@ -5,7 +5,7 @@ export const safeLink = (url: string) => {
     const parsed = new URL(url)
     if (
       parsed.hostname === 'bible-strong.app' &&
-      /^\/assistant-(source|passage)\//.test(parsed.pathname)
+      /^\/assistant-(source|passage|widget)\//.test(parsed.pathname)
     )
       return undefined
     return ['https:', 'http:'].includes(parsed.protocol) ? parsed.href : undefined

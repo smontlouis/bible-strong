@@ -139,7 +139,7 @@ export async function runConversation({
       {
         ...preferenceSnapshot,
         question,
-        clientCapabilities: ['open_tab', 'open_public_tab'],
+        clientCapabilities: ['open_tab', 'open_public_tab', 'inline_widgets'],
         ...(snapshot?.bibleVersion ? { readingBibleVersion: snapshot.bibleVersion } : {}),
         history: memory.history,
         memorySummary: memory.memorySummary,
