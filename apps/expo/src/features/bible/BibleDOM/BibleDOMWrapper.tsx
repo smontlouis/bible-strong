@@ -65,15 +65,10 @@ import type { StrongLexiconChapterEntity } from '~features/resources/strongLexic
 import type { EntityPortraitSources } from '~features/lexique/entityPortraits'
 import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import type { AnnotationType, SelectionRange, WordPosition } from '../hooks/useAnnotationMode'
+import type { AnnotationType } from '../hooks/useAnnotationMode'
 import { BibleDOMTranslations } from './TranslationsContext'
 import {
-  ANNOTATION_SELECTED,
-  CREATE_ANNOTATION,
-  ENTER_ANNOTATION_MODE,
-  EXIT_ANNOTATION_MODE,
   DOWNLOAD_BIBLE_VERSION,
-  ERASE_SELECTION,
   DOWNLOAD_CHAPTER_ENTITIES,
   DISMISS_CONTEXTUAL_INFORMATION,
   DOM_COMPONENT_MOUNTED,
@@ -88,13 +83,11 @@ import {
   RESET_BIBLE_DATABASE,
   RETRY_BIBLE_RESOURCE,
   SET_BIBLE_OVERLAY_OPEN,
-  SELECTION_CHANGED,
   SHOW_TOAST,
 } from './dispatch'
 import {
   getBookmarkPayload,
   getStringPayload,
-  getPayloadVersion,
   getStudyRelationsModalTarget,
   getToastPayload,
   getVerseIdsPayload,
@@ -235,20 +228,6 @@ export type WebViewProps = {
   clearSelectionTrigger?: number
   applyAnnotationTrigger?: { count: number; color: string; type: AnnotationType }
   eraseSelectionTrigger?: number
-  // Annotation mode handlers
-  onSelectionChanged?: (hasSelection: boolean, selection: SelectionRange | null) => void
-  onCreateAnnotation?: (payload: {
-    ranges: { verseKey: string; startWordIndex: number; endWordIndex: number; text: string }[]
-    color: string
-    type: AnnotationType
-    version?: VersionCode
-  }) => void
-  onEraseSelection?: (payload: {
-    start: WordPosition
-    end: WordPosition
-    version?: VersionCode
-  }) => void
-  onAnnotationSelected?: (annotationId: string | null) => void
   clearAnnotationSelectionTrigger?: number
   selectedAnnotationId?: string | null
   // Cross-version annotations
@@ -260,10 +239,6 @@ export type WebViewProps = {
   onOpenVerseTagsModal?: (verseKey: string) => void
   onOpenStudyRelationsModal?: (target: StudyRelationsModalTarget) => void
   isFormSheet?: boolean
-  // Enter annotation mode from double-tap, on the version the reader double-tapped
-  /** The verse touched to enter the mode, where the desktop menu opens. */
-  onEnterAnnotationMode?: (version?: VersionCode, verseKey?: string) => void
-  onExitAnnotationMode?: () => void
   // Red words data
   redWords?: Record<string, { start: number; end: number }[]> | null
   // Red words of the parallel versions, by version
@@ -376,16 +351,10 @@ export const BibleDOMWrapper = ({
   taggedVersesInChapter,
   versesWithNonHighlightTags,
   onOpenStudyRelationsModal,
-  onSelectionChanged,
-  onCreateAnnotation,
-  onEraseSelection,
-  onAnnotationSelected,
   onOpenBookmarkModal,
   onOpenCrossVersionModal,
   onOpenVerseTagsModal,
   setUnifiedTagsModal,
-  onEnterAnnotationMode,
-  onExitAnnotationMode,
   isFormSheet,
   redWords,
   parallelRedWords,
@@ -555,10 +524,6 @@ export const BibleDOMWrapper = ({
     downloadFailed: t('bible.chapterEntities.downloadFailed'),
     dismiss: t('bible.chapterEntities.dismissAccessibility'),
   }
-  // A version named by the reader, kept only when it is on screen: the main one otherwise.
-  const getDisplayedVersion = (candidate?: string): VersionCode =>
-    parallelVerses.find(parallel => parallel.id === candidate)?.id ?? version
-
   const handleBridgeAction = async (action: BibleDOMBridgeAction) => {
     appLogger.debug('webview', 'bible_dom.dispatch', { actionType: action.type })
     if (__DEV__) console.log('[Bible] DISPATCH:', action.type)
@@ -660,57 +625,6 @@ export const BibleDOMWrapper = ({
       case OPEN_BOOKMARK_MODAL: {
         const bookmark = getBookmarkPayload(action.payload)
         if (bookmark) onOpenBookmarkModal?.(bookmark)
-        break
-      }
-
-      case EXIT_ANNOTATION_MODE: {
-        onExitAnnotationMode?.()
-        break
-      }
-
-      case ENTER_ANNOTATION_MODE: {
-        onEnterAnnotationMode?.(
-          getDisplayedVersion(getPayloadVersion(action.payload)),
-          isRecord(action.payload) ? getStringPayload(action.payload.verseKey) : undefined
-        )
-        break
-      }
-
-      case SELECTION_CHANGED: {
-        if (!isRecord(action.payload)) break
-        const { hasSelection, selection } = action.payload
-        if (typeof hasSelection === 'boolean') {
-          onSelectionChanged?.(hasSelection, (selection as SelectionRange | null) || null)
-        }
-        break
-      }
-
-      case CREATE_ANNOTATION: {
-        if (isRecord(action.payload)) {
-          onCreateAnnotation?.({
-            ...(action.payload as Parameters<NonNullable<WebViewProps['onCreateAnnotation']>>[0]),
-            version: getDisplayedVersion(getPayloadVersion(action.payload)),
-          })
-        }
-        break
-      }
-
-      case ERASE_SELECTION: {
-        if (isRecord(action.payload)) {
-          onEraseSelection?.({
-            ...(action.payload as Parameters<NonNullable<WebViewProps['onEraseSelection']>>[0]),
-            version: getDisplayedVersion(getPayloadVersion(action.payload)),
-          })
-        }
-        break
-      }
-
-      case ANNOTATION_SELECTED: {
-        if (!isRecord(action.payload)) break
-        const { annotationId } = action.payload
-        if (typeof annotationId === 'string' || annotationId === null) {
-          onAnnotationSelected?.(annotationId)
-        }
         break
       }
 

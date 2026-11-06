@@ -22,11 +22,11 @@ export interface SelectionRange {
   column?: number
 }
 
+/** The words of one verse an annotation marks: the application reads their text (ADR-0098). */
 export interface AnnotationRangeData {
   verseKey: string
   startWordIndex: number
   endWordIndex: number
-  text: string
 }
 
 /** Returns negative if a < b, 0 if equal, positive if a > b */
@@ -85,17 +85,14 @@ export function buildRangesFromSelection(
     const startWordIdx = isFirst ? normalizedStart.wordIndex : 0
     const endWordIdx = isLast ? normalizedEnd.wordIndex : wordTokens[wordTokens.length - 1].index
 
-    const startToken = getTokenByWordIndex(tokens, startWordIdx)
-    const endToken = getTokenByWordIndex(tokens, endWordIdx)
-    if (!startToken || !endToken) return
-
-    const text = verse.Texte.substring(startToken.charStart, endToken.charEnd)
+    if (!getTokenByWordIndex(tokens, startWordIdx) || !getTokenByWordIndex(tokens, endWordIdx)) {
+      return
+    }
 
     ranges.push({
       verseKey,
       startWordIndex: startWordIdx,
       endWordIndex: endWordIdx,
-      text,
     })
   })
 

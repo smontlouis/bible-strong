@@ -35,6 +35,7 @@ import { appLogger } from '~helpers/agentObservability'
 import type { BibleRouteNavigationAdapter } from '~state/bibleRouteNavigation'
 import { isFullScreenBibleAtom } from '~state/app'
 import { savedParallelVersionsAtom, type BibleTab } from '~state/tabs'
+import { INITIAL_ANNOTATION_SESSION_STATE } from '../../hooks/annotationSession'
 import { handleReaderIntent } from '..'
 import type { Reader, ReaderPresentation, ReaderSnapshot, ReaderWorld } from '..'
 
@@ -82,6 +83,7 @@ const setup = ({
   const world: ReaderWorld = {
     platform,
     store,
+    dispatch: jest.fn() as unknown as ReaderWorld['dispatch'],
     routes,
     openVersionSelector: openVersionSelector ?? (request => void versionSelectors.push(request)),
     navigate: jest.fn(),
@@ -96,6 +98,8 @@ const setup = ({
       tabId: 'tab-1',
       tabAtom,
       annotationMode: false,
+      annotationSession: atom(INITIAL_ANNOTATION_SESSION_STATE),
+      versesByVersion: {},
       isFormSheet: false,
       keepControlsVisible: false,
       hasPlanDayStep: false,

@@ -4,11 +4,7 @@ import {
   shouldHideBibleViewerPersonalData,
 } from '../bibleViewerPersonalData'
 import {
-  ANNOTATION_SELECTED,
-  CREATE_ANNOTATION,
-  ENTER_ANNOTATION_MODE,
   DOWNLOAD_CHAPTER_ENTITIES,
-  ERASE_SELECTION,
   FOCUS_STUDY_ACTION,
   NAVIGATE_TO_VERSE_LINKS,
   NAVIGATE_TO_VERSE_STUDY_RELATIONS,
@@ -18,7 +14,6 @@ import {
   OPEN_ANNOTATION_TAGS,
   OPEN_VERSE_TAGS_MODAL,
   RETRY_BIBLE_RESOURCE,
-  SELECTION_CHANGED,
   isPersonalBibleDataAction,
 } from '../BibleDOM/dispatch'
 
@@ -148,11 +143,6 @@ describe('Bible viewer personal data policy', () => {
     OPEN_HIGHLIGHT_TAGS,
     OPEN_ANNOTATION_TAGS,
     OPEN_BOOKMARK_MODAL,
-    ENTER_ANNOTATION_MODE,
-    SELECTION_CHANGED,
-    CREATE_ANNOTATION,
-    ERASE_SELECTION,
-    ANNOTATION_SELECTED,
     OPEN_CROSS_VERSION_MODAL,
     OPEN_VERSE_TAGS_MODAL,
   ])('classifies %s as a personal Bible data action', actionType => {

@@ -98,7 +98,37 @@ export type SelectIntent =
   /** A tap away from the text. */
   | { kind: 'clear-selected-verses' }
 
-export type ReaderIntent = ReadingIntent | OpenIntent | SelectIntent
+/** A word of a verse, by its index among the words of the verse text. */
+export type WordPosition = { verseKey: string; wordIndex: number }
+
+/** The words selected in annotation mode, in one Bible version. */
+export type WordSelection = { start: WordPosition; end: WordPosition; version?: string }
+
+/** The words of one verse a Word annotation marks: the text is the module's to read. */
+export type WordRange = { verseKey: string; startWordIndex: number; endWordIndex: number }
+
+export type WordAnnotationType = 'background' | 'underline' | 'circle'
+
+/** Annotate: Word annotations, in the version of the column the words were touched in. */
+export type AnnotateIntent =
+  /** A double tap on a verse, or a handle of selected verses dragged: the words take over. */
+  | { kind: 'enter-annotation-mode'; version?: string; verseKey?: string }
+  | { kind: 'exit-annotation-mode' }
+  /** The words selected changed, or none is selected any more. */
+  | { kind: 'change-word-selection'; selection: WordSelection | null }
+  | {
+      kind: 'create-word-annotation'
+      ranges: WordRange[]
+      color: string
+      type: WordAnnotationType
+      version?: string
+    }
+  /** The Word annotations over the words from `start` to `end` are erased. */
+  | { kind: 'erase-word-annotations'; start: WordPosition; end: WordPosition; version?: string }
+  /** A Word annotation is picked, or none. */
+  | { kind: 'select-word-annotation'; annotationId: string | null }
+
+export type ReaderIntent = ReadingIntent | OpenIntent | SelectIntent | AnnotateIntent
 
 /** What the page sends: an intent stamped with the Tab the page shows. */
 export type ReaderIntentMessage = { tabId: string; intent: ReaderIntent }
@@ -128,6 +158,11 @@ export type ReaderRule =
   | 'personal-data'
   /** The version named is shown only in interlinear presentations: it holds no personal Bible data. */
   | 'interlinear-column'
+  /**
+   * The words named are not in the verse text the reader holds for that version: no Word
+   * annotation is saved without the words it marks.
+   */
+  | 'words-not-on-screen'
   /** The reader leaves for no source of a passage media but YouTube. */
   | 'unknown-media-source'
 

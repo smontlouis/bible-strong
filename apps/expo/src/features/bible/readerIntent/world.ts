@@ -2,7 +2,8 @@ import * as Haptics from 'expo-haptics'
 import { getDefaultStore, type PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { Linking, Platform } from 'react-native'
-import type { BibleResource } from '~common/types'
+import { useDispatch } from 'react-redux'
+import type { BibleResource, Verse } from '~common/types'
 import type { InlineCommentaryChip } from '~features/commentaries/inlineCommentaryPlacement'
 import type { ReadingIndex } from '~features/resources/commentaryReadingAccess'
 import type { RelationEndpoint } from '~features/studyRelations/domain'
@@ -12,12 +13,14 @@ import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import type { StrongSelection } from '~helpers/strongSelection'
 import { toast } from '~helpers/toast'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import type { AppDispatch } from '~redux/store'
 import {
   useBibleRouteNavigation,
   type BibleRouteNavigationAdapter,
 } from '~state/bibleRouteNavigation'
 import type { BibleTab, VersionCode } from '~state/tabs'
 import { useBookAndVersionSelector } from '../BookSelectorSheet/BookSelectorSheetProvider'
+import type { AnnotationSessionState } from '../hooks/annotationSession'
 
 /** What the reader is when an intent arrives. */
 export type ReaderSnapshot = {
@@ -28,6 +31,10 @@ export type ReaderSnapshot = {
   coverage?: BibleVersionCoverage
   /** Annotation mode, as far as the reader shows personal Bible data. */
   annotationMode: boolean
+  /** The annotation session of the reader: the mode, the words selected, the annotation picked. */
+  annotationSession: PrimitiveAtom<AnnotationSessionState>
+  /** The verses of each version on screen, as the page shows them: Word annotations read them. */
+  versesByVersion: Partial<Record<VersionCode, Verse[]>>
   isFormSheet: boolean
   /** A wide screen keeps the controls visible. */
   keepControlsVisible: boolean
@@ -74,6 +81,8 @@ export type ReaderWorld = {
   platform: typeof Platform.OS
   /** The Jotai store holding the Tab and the state of the application. */
   store: ReturnType<typeof getDefaultStore>
+  /** The Redux store of the user's data: Word annotations are written there. */
+  dispatch: AppDispatch
   /** The routes of a public Bible page, which replace the Tab's own navigation on the web. */
   routes?: BibleRouteNavigationAdapter
   openVersionSelector: ReturnType<typeof useBookAndVersionSelector>['openVersionSelector']
@@ -95,9 +104,11 @@ export const useReaderWorld = (): ReaderWorld => {
   const pushRouteOnce = usePushRouteOnce()
   const openStudyObject = useOpenStudyObject()
   const { t } = useTranslation()
+  const dispatch = useDispatch<AppDispatch>()
   return {
     platform: Platform.OS,
     store: getDefaultStore(),
+    dispatch,
     routes,
     openVersionSelector,
     navigate: route => pushRouteOnce(route as Parameters<typeof pushRouteOnce>[0]),

@@ -33,8 +33,6 @@ import { BibleError } from '~helpers/bibleErrors'
 import { getBibleDOMErrorPresentation } from './bibleDOMErrorPresentation'
 import VersionChip from './VersionChip'
 import {
-  ENTER_ANNOTATION_MODE,
-  EXIT_ANNOTATION_MODE,
   DOWNLOAD_BIBLE_VERSION,
   OPEN_DOWNLOADS,
   RESET_BIBLE_DATABASE,
@@ -935,10 +933,7 @@ const LoadedBibleContent = ({
       setSelection(null)
       const newAnnotationId =
         clickedAnnotationId === selectedAnnotationId ? null : clickedAnnotationId
-      dispatch({
-        type: 'ANNOTATION_SELECTED',
-        payload: { annotationId: newAnnotationId },
-      }).catch(console.error)
+      void sendReaderIntent({ kind: 'select-word-annotation', annotationId: newAnnotationId })
       return
     }
 
@@ -953,7 +948,7 @@ const LoadedBibleContent = ({
 
   const exitAnnotationMode = () => {
     setSelection(null)
-    dispatch({ type: EXIT_ANNOTATION_MODE }).catch(console.error)
+    void sendReaderIntent({ kind: 'exit-annotation-mode' })
   }
 
   // A tap away from the text: annotation mode ends, selected verses are all unselected
@@ -971,10 +966,11 @@ const LoadedBibleContent = ({
   // mode: the verses are let go, and the other blocks with them.
   const handleVerseHandleDragStart = (range: SelectionRange) => {
     verseSelection.showClearedSelection()
-    dispatch({
-      type: ENTER_ANNOTATION_MODE,
-      payload: { version: range.version, verseKey: range.end.verseKey },
-    }).catch(console.error)
+    void sendReaderIntent({
+      kind: 'enter-annotation-mode',
+      version: range.version,
+      verseKey: range.end.verseKey,
+    })
   }
 
   // A tapped verse is selected in the version it was tapped in.
@@ -1089,17 +1085,11 @@ const LoadedBibleContent = ({
       if (clickedId) {
         setSelection(null)
         const newAnnotationId = clickedId === selectedAnnotationId ? null : clickedId
-        dispatch({
-          type: 'ANNOTATION_SELECTED',
-          payload: { annotationId: newAnnotationId },
-        }).catch(console.error)
+        void sendReaderIntent({ kind: 'select-word-annotation', annotationId: newAnnotationId })
       } else if (newSelection) {
         // Clear annotation selection
         if (selectedAnnotationId) {
-          dispatch({
-            type: 'ANNOTATION_SELECTED',
-            payload: { annotationId: null },
-          }).catch(console.error)
+          void sendReaderIntent({ kind: 'select-word-annotation', annotationId: null })
         }
         setSelection(newSelection)
       }
@@ -1110,17 +1100,15 @@ const LoadedBibleContent = ({
     if (Object.keys(decidedSelectedVerses).length > 0) return
 
     // Enter annotation mode, on the version double-tapped
-    dispatch({
-      type: ENTER_ANNOTATION_MODE,
-      payload: { version: target.version, verseKey: target.verseKey },
-    }).catch(console.error)
+    void sendReaderIntent({
+      kind: 'enter-annotation-mode',
+      version: target.version,
+      verseKey: target.verseKey,
+    })
 
     // If double-tap is on an annotation, select it; otherwise create a selection on the word
     if (clickedId) {
-      dispatch({
-        type: 'ANNOTATION_SELECTED',
-        payload: { annotationId: clickedId },
-      }).catch(console.error)
+      void sendReaderIntent({ kind: 'select-word-annotation', annotationId: clickedId })
     } else if (newSelection) {
       setSelection(newSelection)
     }
@@ -1159,7 +1147,7 @@ const LoadedBibleContent = ({
     highlightOriginRef,
     annotationMode,
     versesByVersion,
-    dispatch,
+    sendReaderIntent,
     selection,
     setSelection,
     getTokens,
@@ -1180,10 +1168,11 @@ const LoadedBibleContent = ({
           Object.keys(decidedSelectedVerses).length > 0
         )
           return false
-        dispatch({
-          type: ENTER_ANNOTATION_MODE,
-          payload: { version: target.version, verseKey: target.verseKey },
-        }).catch(console.error)
+        void sendReaderIntent({
+          kind: 'enter-annotation-mode',
+          version: target.version,
+          verseKey: target.verseKey,
+        })
         return true
       },
       onTapVerse: handleTapVerse,

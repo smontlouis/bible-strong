@@ -31,6 +31,7 @@ jest.mock('~i18n', () => ({
 
 import { getBook } from '~helpers/bibleBookCatalog'
 import type { BibleTab } from '~state/tabs'
+import { INITIAL_ANNOTATION_SESSION_STATE } from '../../hooks/annotationSession'
 import { handleReaderIntent } from '..'
 import type { Reader, ReaderPresentation, ReaderSnapshot, ReaderWorld } from '..'
 
@@ -77,6 +78,7 @@ const setup = ({
   const world: ReaderWorld = {
     platform,
     store,
+    dispatch: jest.fn() as unknown as ReaderWorld['dispatch'],
     openVersionSelector: jest.fn(),
     navigate: jest.fn(),
     openStudyObject: jest.fn(),
@@ -90,6 +92,8 @@ const setup = ({
       tabId: 'tab-1',
       tabAtom,
       annotationMode: false,
+      annotationSession: atom(INITIAL_ANNOTATION_SESSION_STATE),
+      versesByVersion: {},
       isFormSheet: false,
       keepControlsVisible: false,
       hasPlanDayStep: false,

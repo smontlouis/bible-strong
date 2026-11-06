@@ -1,4 +1,5 @@
 import { appLogger } from '~helpers/agentObservability'
+import { applyAnnotateIntent, decodeAnnotateIntent, getAnnotateRefusal } from './annotate'
 import { applyOpenIntent, decodeOpenIntent, getOpenRefusal } from './open'
 import { applyReadingIntent, decodeReadingIntent, getReadingRefusal } from './reading'
 import { applySelectIntent, decodeSelectIntent, getSelectRefusal } from './select'
@@ -6,6 +7,7 @@ import type { ReaderIntent, ReaderOutcome, ReaderRule } from './types'
 import type { Reader, ReaderSnapshot, ReaderWorld } from './world'
 
 export type {
+  AnnotateIntent,
   OpenIntent,
   OpenOrigin,
   OpenTarget,
@@ -29,7 +31,10 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null
 
 const decodeIntent = (value: unknown): ReaderIntent | undefined =>
-  decodeReadingIntent(value) ?? decodeOpenIntent(value) ?? decodeSelectIntent(value)
+  decodeReadingIntent(value) ??
+  decodeOpenIntent(value) ??
+  decodeSelectIntent(value) ??
+  decodeAnnotateIntent(value)
 
 const decodeMessage = (message: unknown): { tabId: string; intent: ReaderIntent } | undefined => {
   if (!isRecord(message) || typeof message.tabId !== 'string' || !message.tabId) return undefined
@@ -47,6 +52,13 @@ const getRefusal = (
     case 'toggle-selected-verse':
     case 'clear-selected-verses':
       return getSelectRefusal(intent, context)
+    case 'enter-annotation-mode':
+    case 'exit-annotation-mode':
+    case 'change-word-selection':
+    case 'create-word-annotation':
+    case 'erase-word-annotations':
+    case 'select-word-annotation':
+      return getAnnotateRefusal(intent, context)
     default:
       return getReadingRefusal(intent, context)
   }
@@ -62,6 +74,13 @@ const applyIntent = (
     case 'toggle-selected-verse':
     case 'clear-selected-verses':
       return applySelectIntent(intent, context)
+    case 'enter-annotation-mode':
+    case 'exit-annotation-mode':
+    case 'change-word-selection':
+    case 'create-word-annotation':
+    case 'erase-word-annotations':
+    case 'select-word-annotation':
+      return applyAnnotateIntent(intent, context)
     default:
       return applyReadingIntent(intent, context)
   }
@@ -74,13 +93,16 @@ const getKind = (message: unknown) =>
 
 /**
  * What the logs say of an intent: its kind, for an open what it opens and from where, for a verse
- * selected the version it was tapped in.
+ * selected or words annotated the version they were touched in.
  */
 const describeIntent = (intent: ReaderIntent) => {
   switch (intent.kind) {
     case 'open':
       return { kind: intent.kind, target: intent.target.kind, origin: intent.origin }
     case 'toggle-selected-verse':
+    case 'enter-annotation-mode':
+    case 'create-word-annotation':
+    case 'erase-word-annotations':
       return { kind: intent.kind, version: intent.version }
     default:
       return { kind: intent.kind }
