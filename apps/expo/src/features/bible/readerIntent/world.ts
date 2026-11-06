@@ -82,7 +82,7 @@ export type ReaderSnapshot = {
 /**
  * What only `BibleViewer` holds: the text-mode sheets, the way on through a plan day, the Strong
  * sheet, the resources of a verse, the notes of the version's own text, the bookmark sheet, the
- * Word annotations of a verse in other versions and the tags of a verse.
+ * Word annotations of a verse in other versions, the tags of a verse and the verse a focus studies.
  */
 export type ReaderPresentation =
   | { kind: 'column-text-mode'; mode: 'strong' | 'interlinear'; column: number }
@@ -93,6 +93,7 @@ export type ReaderPresentation =
   | { kind: 'bookmark'; bookmark: Bookmark }
   | { kind: 'cross-version-annotations'; verseKey: string; versions: CrossVersionAnnotation[] }
   | { kind: 'verse-tags'; verseKey: string }
+  | { kind: 'studied-verse'; verse: number }
 
 export type Reader = {
   now(): ReaderSnapshot

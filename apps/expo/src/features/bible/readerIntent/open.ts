@@ -177,6 +177,27 @@ const decodeTarget = (value: unknown): OpenTarget | undefined => {
       return value.resource === 'strong'
         ? { kind: value.kind, resource: value.resource }
         : undefined
+    case 'dictionary-article':
+      return typeof value.word === 'string' &&
+        typeof value.entryId === 'number' &&
+        isText(value.work) &&
+        isText(value.resourceId) &&
+        typeof value.title === 'string' &&
+        typeof value.language === 'string' &&
+        isOptionalString(value.correspondenceId)
+        ? {
+            kind: value.kind,
+            word: value.word,
+            entryId: value.entryId,
+            work: value.work,
+            resourceId: value.resourceId,
+            title: value.title,
+            language: value.language,
+            ...(value.correspondenceId !== undefined && {
+              correspondenceId: value.correspondenceId as string,
+            }),
+          }
+        : undefined
     default:
       return undefined
   }
@@ -271,6 +292,25 @@ const openStrongSheet = (
     getTabData({ snapshot, world }).selectedVersion
   )
   if (selection) reader.surface({ kind: 'strong-selection', selection })
+}
+
+/** A word of the study of a verse in focus leaves the reading for its Strong page. */
+const openStrongWordPage = (
+  context: Omit<OpenContext, 'reader'>,
+  identity: StrongIdentity | undefined
+) => {
+  if (!identity) return
+  const data = getTabData(context)
+  context.world.navigate(
+    createStrongDetailRoute('index', {
+      book: data.selectedBook.Numero,
+      reference: identity.code,
+      identityKind: identity.kind,
+      identityCode: identity.code,
+      bibleVersion: data.selectedVersion,
+      bibleChapter: data.selectedChapter,
+    })
+  )
 }
 
 /** A Strong code of the passage media leaves the reading for the Strong page. */
@@ -377,6 +417,20 @@ const openEndpoint = (
       openNote(context, endpoint.noteId)
       return
     case 'verse':
+      if (intent.origin === 'focus-study') {
+        // A cross reference of the study opens on its verse, in the default version.
+        const { book, chapter, verse } = parseVerseKey(endpoint.verseKeys[0])
+        context.world.navigate({
+          pathname: '/bible-view',
+          params: {
+            contextDisplayMode: 'focused',
+            book: String(book),
+            chapter: String(chapter),
+            verse: String(verse),
+          },
+        })
+        return
+      }
       // A verse opens focused, in the version of the reading unless the endpoint names one.
       context.world.navigate({
         pathname: '/bible-view',
@@ -387,7 +441,9 @@ const openEndpoint = (
       })
       return
     default:
-      openRelatedEndpoint(context, endpoint)
+      // The study opens the page of what it names, even on the web.
+      if (intent.origin === 'focus-study') context.world.openStudyObject(endpoint)
+      else openRelatedEndpoint(context, endpoint)
   }
 }
 
@@ -460,6 +516,10 @@ export const applyOpenIntent = async (intent: OpenIntent, context: OpenContext) 
       openEndpoint(context, intent, target)
       return
     case 'strong-word': {
+      if (intent.origin === 'focus-study') {
+        openStrongWordPage(context, target.identities[0])
+        return
+      }
       const selection = getStrongWordSelection(target, intent)
       if (selection) reader.surface({ kind: 'strong-selection', selection })
       return
@@ -517,6 +577,20 @@ export const applyOpenIntent = async (intent: OpenIntent, context: OpenContext) 
         resource: target.resource,
         verseKey: intent.verseKey!,
         version: getVersionOnScreen(snapshot, data.selectedVersion, intent.version),
+      })
+      return
+    case 'dictionary-article':
+      world.navigate({
+        pathname: '/dictionnary-detail',
+        params: {
+          word: target.word,
+          entryId: String(target.entryId),
+          work: target.work,
+          resourceId: target.resourceId,
+          dictionaryTitle: target.title,
+          language: target.language,
+          ...(target.correspondenceId ? { correspondenceId: target.correspondenceId } : {}),
+        },
       })
       return
   }

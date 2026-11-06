@@ -49,23 +49,6 @@ export type FocusVerseStudy = {
   dictionary?: FocusStudyDictionaryEntry[]
 }
 
-export type FocusStudyResource =
-  | 'compare'
-  | 'strong'
-  | 'reference'
-  | 'commentary'
-  | 'nave'
-  | 'dictionary'
-
-/** A tap in the study, sent from the Bible DOM to the reader. */
-export type FocusStudyAction =
-  | { kind: 'study-verse'; verse: number }
-  | { kind: 'open-resource'; resource: FocusStudyResource }
-  | { kind: 'open-reference'; verseKey: string }
-  | { kind: 'open-word'; identityKind: string; identityCode: string }
-  | { kind: 'open-topic'; name: string; nameLower: string }
-  | { kind: 'open-dictionary'; entry: FocusStudyDictionaryEntry }
-
 export type FocusStudyTranslations = {
   title: string
   versions: string
@@ -81,43 +64,4 @@ export type FocusStudyTranslations = {
   dictionary: string
   entities: string
   studyVerse: string
-}
-
-const FOCUS_STUDY_RESOURCES: readonly string[] = [
-  'compare',
-  'strong',
-  'reference',
-  'commentary',
-  'nave',
-  'dictionary',
-] satisfies FocusStudyResource[]
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null
-
-/** Whether a payload sent by the Bible DOM is a tap of the study the reader can act on. */
-export const isFocusStudyAction = (value: unknown): value is FocusStudyAction => {
-  if (!isRecord(value)) return false
-  switch (value.kind) {
-    case 'study-verse':
-      return Number.isSafeInteger(value.verse)
-    case 'open-resource':
-      return typeof value.resource === 'string' && FOCUS_STUDY_RESOURCES.includes(value.resource)
-    case 'open-reference':
-      return typeof value.verseKey === 'string' && /^\d+-\d+-\d+$/u.test(value.verseKey)
-    case 'open-word':
-      return typeof value.identityKind === 'string' && typeof value.identityCode === 'string'
-    case 'open-topic':
-      return typeof value.name === 'string' && typeof value.nameLower === 'string'
-    case 'open-dictionary':
-      return (
-        isRecord(value.entry) &&
-        typeof value.entry.word === 'string' &&
-        typeof value.entry.entryId === 'number' &&
-        typeof value.entry.work === 'string' &&
-        typeof value.entry.resourceId === 'string'
-      )
-    default:
-      return false
-  }
 }

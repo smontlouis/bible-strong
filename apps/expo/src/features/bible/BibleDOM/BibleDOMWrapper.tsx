@@ -1,13 +1,7 @@
 import { getPassageContextHeaderHeight } from '../passagePreviewPresentation'
 import type { PlanDayStepView } from './PlanDayStepCard'
 import type { LabeledCommentaryChip } from './InlineCommentaryChips'
-import { FOCUS_STUDY_ACTION } from './dispatch'
-import {
-  isFocusStudyAction,
-  type FocusStudyAction,
-  type FocusStudyTranslations,
-  type FocusVerseStudy,
-} from '../focusStudy/focusVerseStudyTypes'
+import type { FocusStudyTranslations, FocusVerseStudy } from '../focusStudy/focusVerseStudyTypes'
 import { getEntityChipListState } from '~common/entityChips'
 import type { TagsObj } from '~common/types'
 import { createVerseEndpoint } from '~features/studyRelations/endpoints'
@@ -65,20 +59,13 @@ import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModu
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import type { AnnotationType } from '../hooks/useAnnotationMode'
 import { BibleDOMTranslations } from './TranslationsContext'
-import { DOM_COMPONENT_MOUNTED, SET_BIBLE_OVERLAY_OPEN, SHOW_TOAST } from './dispatch'
-import {
-  getToastPayload,
-  isRecord,
-  routeBibleDOMBridgeAction,
-  type BibleDOMBridgeAction,
-} from './bibleDomBridgeCommands'
 import AndroidWebViewWarningModal from '../AndroidWebViewWarningModal'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import type { ResolvedPassageMediaChapter } from '../passageMedia'
 import useConnection from '~helpers/useConnection'
 import { getOriginalBookTitle } from '~helpers/originalBookTitles'
 import { getReadingBookName, translateForReading } from '~helpers/readingLanguage'
-import type { ReaderIntentHandler } from '../readerIntent/types'
+import type { ReaderIntentHandler, ReaderPageSignal } from '../readerIntent/types'
 
 export type ParallelVerse = {
   id: VersionCode
@@ -114,7 +101,34 @@ export type RootStyles = {
 
 export type PericopeChapter = Pericope[string][string]
 
-export type Dispatch = (props: BibleDOMBridgeAction) => Promise<void>
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null
+
+/** What the page tells of itself, once the bridge has carried it (ADR-0098). */
+const decodePageSignal = (value: unknown): ReaderPageSignal | undefined => {
+  if (!isRecord(value)) return undefined
+  switch (value.kind) {
+    case 'mounted':
+      return { kind: value.kind }
+    case 'overlay-open':
+      return typeof value.open === 'boolean' ? { kind: value.kind, open: value.open } : undefined
+    case 'toast':
+      if (typeof value.message !== 'string' || !value.message) return undefined
+      if (
+        value.type !== undefined &&
+        !['info', 'warning', 'error'].includes(value.type as string)
+      ) {
+        return undefined
+      }
+      return {
+        kind: value.kind,
+        message: value.message,
+        ...(value.type !== undefined && { type: value.type as 'info' | 'warning' | 'error' }),
+      }
+    default:
+      return undefined
+  }
+}
 
 /**
  * Prevents rapid empty→loaded prop updates on the Expo DOM bridge.
@@ -211,7 +225,6 @@ export type WebViewProps = {
   /** What the reader gathers under the studied verse of a focus (ADR-0088). */
   focusStudy?: FocusVerseStudy
   focusStudyTranslations?: FocusStudyTranslations
-  onFocusStudyAction?: (action: FocusStudyAction) => void
   chapterEntityModuleStatus: StrongLexiconModuleAvailability['status'] | null
   chapterEntityDownloadState: BibleDOMDownloadState
   error?: BibleError | null
@@ -316,7 +329,6 @@ export const BibleDOMWrapper = ({
   chapterEntityPortraits,
   focusStudy,
   focusStudyTranslations,
-  onFocusStudyAction,
   chapterEntityModuleStatus,
   chapterEntityDownloadState,
   isLoading,
@@ -470,71 +482,48 @@ export const BibleDOMWrapper = ({
     downloadFailed: t('bible.chapterEntities.downloadFailed'),
     dismiss: t('bible.chapterEntities.dismissAccessibility'),
   }
-  const handleBridgeAction = async (action: BibleDOMBridgeAction) => {
-    appLogger.debug('webview', 'bible_dom.dispatch', { actionType: action.type })
-    if (__DEV__) console.log('[Bible] DISPATCH:', action.type)
+  // The signals of the page itself: no rule refuses them, and nothing answers them.
+  const handlePageSignal = (value: unknown) => {
+    const signal = decodePageSignal(value)
+    if (!signal) {
+      appLogger.captureError(
+        'webview',
+        'reader_page_signal.rejected',
+        new Error('READER_PAGE_SIGNAL_REJECTED'),
+        { kind: isRecord(value) ? value.kind : undefined }
+      )
+      return
+    }
+    appLogger.debug('webview', 'reader_page_signal', { kind: signal.kind })
 
-    switch (action.type) {
-      case SET_BIBLE_OVERLAY_OPEN: {
-        if (
-          typeof action.payload !== 'boolean' ||
-          action.payload === isBibleOverlayOpenRef.current
-        ) {
-          break
-        }
-
-        if (action.payload) {
+    switch (signal.kind) {
+      case 'overlay-open': {
+        if (signal.open === isBibleOverlayOpenRef.current) return
+        if (signal.open) {
           wasFullScreenBeforeOverlayRef.current = getDefaultStore().get(isFullScreenBibleAtom)
         }
-
-        isBibleOverlayOpenRef.current = action.payload
-        setIsBibleOverlayOpen(action.payload)
-        setIsFullScreenBible(action.payload ? true : wasFullScreenBeforeOverlayRef.current)
-        break
+        isBibleOverlayOpenRef.current = signal.open
+        setIsBibleOverlayOpen(signal.open)
+        setIsFullScreenBible(signal.open ? true : wasFullScreenBeforeOverlayRef.current)
+        return
       }
-      case FOCUS_STUDY_ACTION: {
-        if (isFocusStudyAction(action.payload)) onFocusStudyAction?.(action.payload)
-        break
+      case 'toast': {
+        const message = t(signal.message)
+        if (signal.type === 'warning') toast.warning(message)
+        else if (signal.type === 'error') toast.error(message)
+        else toast.info(message)
+        return
       }
-      case SHOW_TOAST: {
-        const { message, type } = getToastPayload(action.payload)
-        if (!message) break
-        if (type === 'warning') {
-          toast.warning(t(message))
-        } else if (type === 'error') {
-          toast.error(t(message))
-        } else {
-          toast.info(t(message))
-        }
-        break
-      }
-      case DOM_COMPONENT_MOUNTED: {
+      case 'mounted': {
         appLogger.info('webview', 'bible_dom.mounted', {
           version,
           book: book.Numero,
           chapter,
         })
         setIsDOMMounted(true)
-        break
-      }
-
-      default: {
-        break
+        return
       }
     }
-  }
-  const dispatch: Dispatch = async action => {
-    await routeBibleDOMBridgeAction(action, {
-      handle: handleBridgeAction,
-      rejected: value => {
-        appLogger.captureError(
-          'webview',
-          'bible_dom.invalid_action',
-          new Error('BIBLE_DOM_BRIDGE_ACTION_INVALID'),
-          { actionType: isRecord(value) ? value.type : undefined }
-        )
-      },
-    })
   }
 
   // Pre-compute verse metadata on native side (avoids DOM JS thread work)
@@ -650,7 +639,7 @@ export const BibleDOMWrapper = ({
         chapter={chapter}
         isSelectionMode={isSelectionMode}
         selectedCode={selectedCode}
-        dispatch={dispatch}
+        onPageSignal={handlePageSignal}
         translations={translations}
         chapterEntityTranslations={chapterEntityTranslations}
         inPlan={inPlan}

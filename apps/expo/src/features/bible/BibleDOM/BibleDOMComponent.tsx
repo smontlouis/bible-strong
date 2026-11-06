@@ -21,7 +21,6 @@ import React, { useEffect, useEffectEvent, useMemo, useState, useRef } from 'rea
 import { Verse as TVerse } from '~common/types'
 import { floatingShadow, radii } from '~common/ui/surfaces'
 import {
-  Dispatch,
   BibleDOMDownloadState,
   ParallelVerse,
   RootStyles,
@@ -32,9 +31,8 @@ import {
 import { BibleError } from '~helpers/bibleErrors'
 import { getBibleDOMErrorPresentation } from './bibleDOMErrorPresentation'
 import VersionChip from './VersionChip'
-import { FOCUS_STUDY_ACTION, DOM_COMPONENT_MOUNTED } from './dispatch'
-import { DispatchProvider } from './DispatchProvider'
-import { ReaderIntentProvider, useReaderIntent } from './useReaderIntent'
+import type { ReaderPageSignalHandler } from '../readerIntent/types'
+import { ReaderIntentProvider, useReaderIntent, useReaderPageSignal } from './useReaderIntent'
 import { TranslationsProvider, BibleDOMTranslations } from './TranslationsContext'
 import { scaleFontSize } from './scaleFontSize'
 import { useFonts } from 'expo-font'
@@ -196,7 +194,8 @@ type Props = Pick<
 > & {
   focusedMetadataItems?: EntityChip[]
   onFocusedMetadataPress?: (type: EntityChip['type'], id: string) => Promise<void>
-  dispatch: Dispatch
+  /** What the page tells of itself: mounted, an overlay open, a message (ADR-0098). */
+  onPageSignal: ReaderPageSignalHandler
   dom: import('expo/dom').DOMProps
   translations: BibleDOMTranslations
   chapterEntityTranslations: {
@@ -679,7 +678,6 @@ const LoadedBibleContent = ({
   chapter,
   isSelectionMode,
   selectedCode,
-  dispatch,
   translations,
   inlineCommentaries,
   chapterEntities,
@@ -1515,312 +1513,301 @@ const LoadedBibleContent = ({
   return (
     <TranslationsProvider translations={translations}>
       <GlobalStyles />
-      <DispatchProvider dispatch={dispatch}>
-        <div ref={readerSurfaceRef} style={{ width: '100%' }}>
-          <Container
-            ref={containerRef}
-            rtl={isHebreu}
-            settings={settings}
-            isParallelVerse={
-              isParallelVerse && (!keepControlsVisible || parallelDisplayMode === 'horizontal')
-            }
-            headerHeight={headerHeight}
-            $columnsScrollScope={titlesFollowColumnsScroll}
-            $scrollsColumns={isHorizontalParallelMode}
-          >
-            {/* Highlight layer for word annotations and selection */}
-            {!isHorizontalParallelMode && highlightLayer}
-            {isParallelVerse && parallelDisplayMode === 'horizontal' && (
-              <HeaderScrollWrapper
-                ref={headerScrollRef}
+      <div ref={readerSurfaceRef} style={{ width: '100%' }}>
+        <Container
+          ref={containerRef}
+          rtl={isHebreu}
+          settings={settings}
+          isParallelVerse={
+            isParallelVerse && (!keepControlsVisible || parallelDisplayMode === 'horizontal')
+          }
+          headerHeight={headerHeight}
+          $columnsScrollScope={titlesFollowColumnsScroll}
+          $scrollsColumns={isHorizontalParallelMode}
+        >
+          {/* Highlight layer for word annotations and selection */}
+          {!isHorizontalParallelMode && highlightLayer}
+          {isParallelVerse && parallelDisplayMode === 'horizontal' && (
+            <HeaderScrollWrapper
+              ref={headerScrollRef}
+              columnCount={parallelVersionTitles.length}
+              $followsScroll={titlesFollowColumnsScroll}
+            >
+              <VersionsContainer
                 columnCount={parallelVersionTitles.length}
+                columnWidth={parallelColumnWidth}
                 $followsScroll={titlesFollowColumnsScroll}
               >
-                <VersionsContainer
-                  columnCount={parallelVersionTitles.length}
-                  columnWidth={parallelColumnWidth}
-                  $followsScroll={titlesFollowColumnsScroll}
-                >
-                  {parallelVersionTitles?.map((p, i) => (
-                    <VersionTitleColumn
-                      key={i}
-                      columnCount={parallelVersionTitles.length}
-                      columnWidth={parallelColumnWidth}
+                {parallelVersionTitles?.map((p, i) => (
+                  <VersionTitleColumn
+                    key={i}
+                    columnCount={parallelVersionTitles.length}
+                    columnWidth={parallelColumnWidth}
+                  >
+                    <VersionTitleGroup
+                      data-version-title={i}
+                      // Columns after the first open with a gap: each pill keeps to its text
+                      style={{ marginInlineStart: i === 0 ? 0 : PARALLEL_COLUMN_GAP }}
+                      $followsScroll={titlesFollowColumnsScroll}
                     >
-                      <VersionTitleGroup
-                        data-version-title={i}
-                        // Columns after the first open with a gap: each pill keeps to its text
-                        style={{ marginInlineStart: i === 0 ? 0 : PARALLEL_COLUMN_GAP }}
-                        $followsScroll={titlesFollowColumnsScroll}
-                      >
-                        <VersionChip
-                          settings={settings}
-                          version={p.id}
-                          hasError={Boolean(p.error)}
-                          controls={columnTextModeControls?.[i]}
-                          withChevron
-                          onVersionPress={() => chooseColumnVersion(i)}
-                          onTextModePress={kind => openColumnTextMode(kind, i)}
-                        />
-                      </VersionTitleGroup>
-                    </VersionTitleColumn>
-                  ))}
-                </VersionsContainer>
-              </HeaderScrollWrapper>
-            )}
-            {/* The chapter opens above its featured introduction and below secondary media, which
+                      <VersionChip
+                        settings={settings}
+                        version={p.id}
+                        hasError={Boolean(p.error)}
+                        controls={columnTextModeControls?.[i]}
+                        withChevron
+                        onVersionPress={() => chooseColumnVersion(i)}
+                        onTextModePress={kind => openColumnTextMode(kind, i)}
+                      />
+                    </VersionTitleGroup>
+                  </VersionTitleColumn>
+                ))}
+              </VersionsContainer>
+            </HeaderScrollWrapper>
+          )}
+          {/* The chapter opens above its featured introduction and below secondary media, which
               stay at the very top. Both keep their place in the tree and swap by order, so the
               media morph and the opening slides when the chapter changes. */}
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {!isContextFocused && (
-                <div
-                  style={
-                    isHorizontalParallelMode
-                      ? { paddingInline: `${BIBLE_READING_HORIZONTAL_PADDING}px` }
-                      : undefined
-                  }
-                >
-                  <PassageMediaThumbnails
-                    items={passageMedia.introduction}
-                    gallerySections={passageMediaGallerySections}
-                    placement="introduction"
-                    settings={settings}
-                    isDisabled={annotationMode}
-                    isCompact={!passageMedia.isIntroductionStartChapter}
-                  />
-                </div>
-              )}
-              {/* A passage shown for itself (plan, context, focus) opens on its verses */}
-              {!focusVerses?.length && !inPlan && (
-                <m.div
-                  layout="position"
-                  layoutDependency={passageMedia.isIntroductionStartChapter}
-                  transition={{ layout: getOverlayLayoutTransition(shouldReduceMotion) }}
-                  style={{ order: passageMedia.isIntroductionStartChapter ? -1 : 1 }}
-                >
-                  <ChapterOpening
-                    settings={settings}
-                    book={book}
-                    chapter={chapter}
-                    bookName={translations.chapterOpening.bookName}
-                    chapterLabel={translations.chapterOpening.chapter}
-                    psalmLabel={translations.chapterOpening.psalm}
-                    originalTitle={translations.chapterOpening.originalTitle}
-                  />
-                </m.div>
-              )}
-            </div>
-            <HorizontalScrollWrapper
-              ref={contentScrollRef}
-              columnCount={
-                isParallelVerse && parallelDisplayMode === 'horizontal'
-                  ? parallelVersionTitles.length
-                  : 1
-              }
-              $panYOnly={isHorizontalParallelMode && Boolean(annotationMode)}
-              $scrollTimeline={titlesFollowColumnsScroll}
-              $scrollsColumns={isHorizontalParallelMode}
-            >
-              <ColumnsBlock
-                $columnsWidth={
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {!isContextFocused && (
+              <div
+                style={
                   isHorizontalParallelMode
-                    ? getParallelColumnsWidth(parallelVersionTitles.length, parallelColumnWidth)
+                    ? { paddingInline: `${BIBLE_READING_HORIZONTAL_PADDING}px` }
                     : undefined
                 }
               >
-                {isHebreu && (
-                  <RightDirection settings={settings}>Sens de la lecture ←</RightDirection>
-                )}
-                {/* Introduction media sit above the columns, at the original scroll origin */}
-                <EntityChipsDOM
-                  items={focusedMetadataItems}
-                  color={settings.colors[settings.theme].primary}
-                  backgroundColor={settings.colors[settings.theme].lightPrimary}
-                  onPress={(type, id) => {
-                    void onFocusedMetadataPress?.(type, id)
-                  }}
+                <PassageMediaThumbnails
+                  items={passageMedia.introduction}
+                  gallerySections={passageMediaGallerySections}
+                  placement="introduction"
+                  settings={settings}
+                  isDisabled={annotationMode}
+                  isCompact={!passageMedia.isIntroductionStartChapter}
                 />
-                <ReadingPositionKeeper
-                  verses={verses}
-                  version={version}
-                  location={`${book.Numero}-${chapter}`}
-                  isDisabled={isContextFocused}
-                  readingLine={headerHeight}
-                  containerRef={containerRef}
+              </div>
+            )}
+            {/* A passage shown for itself (plan, context, focus) opens on its verses */}
+            {!focusVerses?.length && !inPlan && (
+              <m.div
+                layout="position"
+                layoutDependency={passageMedia.isIntroductionStartChapter}
+                transition={{ layout: getOverlayLayoutTransition(shouldReduceMotion) }}
+                style={{ order: passageMedia.isIntroductionStartChapter ? -1 : 1 }}
+              >
+                <ChapterOpening
+                  settings={settings}
+                  book={book}
+                  chapter={chapter}
+                  bookName={translations.chapterOpening.bookName}
+                  chapterLabel={translations.chapterOpening.chapter}
+                  psalmLabel={translations.chapterOpening.psalm}
+                  originalTitle={translations.chapterOpening.originalTitle}
                 />
-                <m.div
-                  ref={versesContentRef}
-                  style={{ position: 'relative' }}
-                  {...versePositionLayoutProps}
-                >
-                  {/* Highlight layer drawn inside the columns it marks */}
-                  {isHorizontalParallelMode && highlightLayer}
-                  {/* Unified verse rendering for all modes */}
-                  <UnifiedVersesRenderer
-                    isPassagePreview={Boolean(focusVerses?.length)}
-                    inlineCommentaries={inlineCommentaries}
-                    verses={verses}
-                    parallelVerses={parallelVerses}
-                    interlinearReadingVersions={interlinearReadingVersions}
-                    focusVerses={focusVerses}
-                    selectedVerses={shownSelection.selectedVerses}
-                    selectedVersesVersion={shownSelection.selectedVersesVersion}
-                    highlightedVerses={highlightedVerses}
-                    settings={columnSettings}
-                    verseToScroll={verseToScroll}
-                    contextDisplayMode={contextDisplayMode}
-                    version={version}
-                    interlinearMode={interlinearMode}
-                    pericopeChapter={pericopeChapter}
-                    parallelPericopeChapters={parallelPericopeChapters}
-                    isSelectionMode={isSelectionMode}
-                    selectedCode={selectedCode}
-                    isHebreu={isHebreu}
-                    isParallelVerse={
-                      isParallelVerse &&
-                      (!keepControlsVisible || parallelDisplayMode === 'horizontal')
-                    }
-                    wordAnnotations={wordAnnotations}
-                    wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
-                    taggedVerses={taggedVerses}
-                    bookmarkedVerses={bookmarkedVerses}
-                    annotationNotesCountByVerse={annotationNotesCountByVerse}
-                    relationItemsCount={relationItemsCount}
-                    relationItemsText={relationItemsText}
-                    versesWithAnnotationNotes={versesWithAnnotationNotes}
-                    navigateToPericope={navigateToPericope}
-                    annotationMode={annotationMode}
-                    touchedVerse={touchedVerse}
-                    taggedVersesInChapter={taggedVersesInChapter}
-                    versesWithNonHighlightTags={versesWithNonHighlightTags}
-                    columnCount={isParallelVerse ? parallelVersionTitles.length : 1}
-                    columnWidth={parallelColumnWidth}
-                    parallelDisplayMode={parallelDisplayMode}
-                    columnTextModeControls={columnTextModeControls}
-                    redWordsByVersion={redWordsByVersion}
-                    passageMediaAfterVerses={passageMedia.afterVerses}
-                    passageMediaGallerySections={passageMediaGallerySections}
-                  />
-                  <AnnotationInlineItems
-                    wordAnnotations={wordAnnotations}
-                    annotationRelationItems={annotationRelationItems}
-                    versions={annotatedVersions}
-                    settings={columnSettings}
-                    annotationMode={annotationMode}
-                    contentKey={annotationInlineContentKey}
-                  />
-                </m.div>
-              </ColumnsBlock>
-            </HorizontalScrollWrapper>
-            {isContextFocused && focusStudy && focusStudyTranslations && (
-              <FocusVerseStudy
-                study={focusStudy}
-                translations={focusStudyTranslations}
-                entities={chapterEntities}
-                portraits={chapterEntityPortraits}
-                settings={settings}
-                isDisabled={annotationMode}
-                onAction={focusAction => {
-                  void dispatch({ type: FOCUS_STUDY_ACTION, payload: focusAction })
-                }}
-                onOpenEntity={uniqueName => {
-                  void sendReaderIntent({
-                    kind: 'open',
-                    origin: 'focus-study',
-                    target: { kind: 'biblical-entity', entityKey: uniqueName },
-                  })
+              </m.div>
+            )}
+          </div>
+          <HorizontalScrollWrapper
+            ref={contentScrollRef}
+            columnCount={
+              isParallelVerse && parallelDisplayMode === 'horizontal'
+                ? parallelVersionTitles.length
+                : 1
+            }
+            $panYOnly={isHorizontalParallelMode && Boolean(annotationMode)}
+            $scrollTimeline={titlesFollowColumnsScroll}
+            $scrollsColumns={isHorizontalParallelMode}
+          >
+            <ColumnsBlock
+              $columnsWidth={
+                isHorizontalParallelMode
+                  ? getParallelColumnsWidth(parallelVersionTitles.length, parallelColumnWidth)
+                  : undefined
+              }
+            >
+              {isHebreu && (
+                <RightDirection settings={settings}>Sens de la lecture ←</RightDirection>
+              )}
+              {/* Introduction media sit above the columns, at the original scroll origin */}
+              <EntityChipsDOM
+                items={focusedMetadataItems}
+                color={settings.colors[settings.theme].primary}
+                backgroundColor={settings.colors[settings.theme].lightPrimary}
+                onPress={(type, id) => {
+                  void onFocusedMetadataPress?.(type, id)
                 }}
               />
-            )}
-            <ChapterEntities
+              <ReadingPositionKeeper
+                verses={verses}
+                version={version}
+                location={`${book.Numero}-${chapter}`}
+                isDisabled={isContextFocused}
+                readingLine={headerHeight}
+                containerRef={containerRef}
+              />
+              <m.div
+                ref={versesContentRef}
+                style={{ position: 'relative' }}
+                {...versePositionLayoutProps}
+              >
+                {/* Highlight layer drawn inside the columns it marks */}
+                {isHorizontalParallelMode && highlightLayer}
+                {/* Unified verse rendering for all modes */}
+                <UnifiedVersesRenderer
+                  isPassagePreview={Boolean(focusVerses?.length)}
+                  inlineCommentaries={inlineCommentaries}
+                  verses={verses}
+                  parallelVerses={parallelVerses}
+                  interlinearReadingVersions={interlinearReadingVersions}
+                  focusVerses={focusVerses}
+                  selectedVerses={shownSelection.selectedVerses}
+                  selectedVersesVersion={shownSelection.selectedVersesVersion}
+                  highlightedVerses={highlightedVerses}
+                  settings={columnSettings}
+                  verseToScroll={verseToScroll}
+                  contextDisplayMode={contextDisplayMode}
+                  version={version}
+                  interlinearMode={interlinearMode}
+                  pericopeChapter={pericopeChapter}
+                  parallelPericopeChapters={parallelPericopeChapters}
+                  isSelectionMode={isSelectionMode}
+                  selectedCode={selectedCode}
+                  isHebreu={isHebreu}
+                  isParallelVerse={
+                    isParallelVerse &&
+                    (!keepControlsVisible || parallelDisplayMode === 'horizontal')
+                  }
+                  wordAnnotations={wordAnnotations}
+                  wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
+                  taggedVerses={taggedVerses}
+                  bookmarkedVerses={bookmarkedVerses}
+                  annotationNotesCountByVerse={annotationNotesCountByVerse}
+                  relationItemsCount={relationItemsCount}
+                  relationItemsText={relationItemsText}
+                  versesWithAnnotationNotes={versesWithAnnotationNotes}
+                  navigateToPericope={navigateToPericope}
+                  annotationMode={annotationMode}
+                  touchedVerse={touchedVerse}
+                  taggedVersesInChapter={taggedVersesInChapter}
+                  versesWithNonHighlightTags={versesWithNonHighlightTags}
+                  columnCount={isParallelVerse ? parallelVersionTitles.length : 1}
+                  columnWidth={parallelColumnWidth}
+                  parallelDisplayMode={parallelDisplayMode}
+                  columnTextModeControls={columnTextModeControls}
+                  redWordsByVersion={redWordsByVersion}
+                  passageMediaAfterVerses={passageMedia.afterVerses}
+                  passageMediaGallerySections={passageMediaGallerySections}
+                />
+                <AnnotationInlineItems
+                  wordAnnotations={wordAnnotations}
+                  annotationRelationItems={annotationRelationItems}
+                  versions={annotatedVersions}
+                  settings={columnSettings}
+                  annotationMode={annotationMode}
+                  contentKey={annotationInlineContentKey}
+                />
+              </m.div>
+            </ColumnsBlock>
+          </HorizontalScrollWrapper>
+          {isContextFocused && focusStudy && focusStudyTranslations && (
+            <FocusVerseStudy
+              study={focusStudy}
+              translations={focusStudyTranslations}
               entities={chapterEntities}
               portraits={chapterEntityPortraits}
-              loaded={chapterEntitiesLoaded}
-              availabilityStatus={chapterEntityModuleStatus}
-              downloadState={chapterEntityDownloadState}
               settings={settings}
-              translations={chapterEntityTranslations}
-              chapterResources={
-                !isContextFocused && passageMediaGalleryItems.length ? (
-                  <PassageMediaThumbnails
-                    items={passageMediaGalleryItems}
-                    gallerySections={passageMediaGallerySections}
-                    placement="chapter-resources"
-                    settings={settings}
-                    isDisabled={annotationMode}
-                    blockMargin={0}
-                  />
-                ) : null
-              }
-              onOpenEntity={uniqueName => {
-                void sendReaderIntent({
-                  kind: 'open',
-                  origin: 'chapter-entities',
-                  target: { kind: 'biblical-entity', entityKey: uniqueName },
-                })
-              }}
-              onOpenMap={places => {
-                void sendReaderIntent({
-                  kind: 'open',
-                  origin: 'chapter-entities',
-                  target: { kind: 'map', places },
-                })
-              }}
-              onDownload={() => {
-                void sendReaderIntent({ kind: 'install-biblical-entities' })
-              }}
-              onDismiss={() => {
-                void sendReaderIntent({ kind: 'hide-contextual-information' })
+              version={version}
+              isDisabled={annotationMode}
+            />
+          )}
+          <ChapterEntities
+            entities={chapterEntities}
+            portraits={chapterEntityPortraits}
+            loaded={chapterEntitiesLoaded}
+            availabilityStatus={chapterEntityModuleStatus}
+            downloadState={chapterEntityDownloadState}
+            settings={settings}
+            translations={chapterEntityTranslations}
+            chapterResources={
+              !isContextFocused && passageMediaGalleryItems.length ? (
+                <PassageMediaThumbnails
+                  items={passageMediaGalleryItems}
+                  gallerySections={passageMediaGallerySections}
+                  placement="chapter-resources"
+                  settings={settings}
+                  isDisabled={annotationMode}
+                  blockMargin={0}
+                />
+              ) : null
+            }
+            onOpenEntity={uniqueName => {
+              void sendReaderIntent({
+                kind: 'open',
+                origin: 'chapter-entities',
+                target: { kind: 'biblical-entity', entityKey: uniqueName },
+              })
+            }}
+            onOpenMap={places => {
+              void sendReaderIntent({
+                kind: 'open',
+                origin: 'chapter-entities',
+                target: { kind: 'map', places },
+              })
+            }}
+            onDownload={() => {
+              void sendReaderIntent({ kind: 'install-biblical-entities' })
+            }}
+            onDismiss={() => {
+              void sendReaderIntent({ kind: 'hide-contextual-information' })
+            }}
+          />
+          {planDayStep && !annotationMode && (
+            <PlanDayStepCard
+              step={planDayStep}
+              settings={settings}
+              onPress={() => {
+                void sendReaderIntent({ kind: 'plan-day-step' })
               }}
             />
-            {planDayStep && !annotationMode && (
-              <PlanDayStepCard
-                step={planDayStep}
-                settings={settings}
-                onPress={() => {
-                  void sendReaderIntent({ kind: 'plan-day-step' })
-                }}
-              />
-            )}
-            <ReturnToSelectedVerseButton
-              type="button"
-              settings={settings}
-              $position={returnToSelectedVersePosition}
-              onClick={() => scrollSelectedVerseToMiddle()}
-              aria-label="Retourner au verset sélectionné"
-            >
-              <Feather
-                name={returnToSelectedVersePosition === 'top' ? 'chevron-up' : 'chevron-down'}
-                size={24}
-                color={settings.colors[settings.theme].primary}
-              />
-            </ReturnToSelectedVerseButton>
-          </Container>
-        </div>
-        <svg
-          style={{
-            visibility: 'hidden',
-            position: 'absolute',
-          }}
-          width="0"
-          height="0"
-          xmlns="http://www.w3.org/2000/svg"
-          version="1.1"
-        >
-          <defs>
-            <filter id="goo">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
-              <feColorMatrix
-                in="blur"
-                mode="matrix"
-                values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 35 -4"
-                result="goo"
-              />
-              <feComposite in="SourceGraphic" in2="goo" operator="atop" />
-            </filter>
-          </defs>
-        </svg>
-      </DispatchProvider>
+          )}
+          <ReturnToSelectedVerseButton
+            type="button"
+            settings={settings}
+            $position={returnToSelectedVersePosition}
+            onClick={() => scrollSelectedVerseToMiddle()}
+            aria-label="Retourner au verset sélectionné"
+          >
+            <Feather
+              name={returnToSelectedVersePosition === 'top' ? 'chevron-up' : 'chevron-down'}
+              size={24}
+              color={settings.colors[settings.theme].primary}
+            />
+          </ReturnToSelectedVerseButton>
+        </Container>
+      </div>
+      <svg
+        style={{
+          visibility: 'hidden',
+          position: 'absolute',
+        }}
+        width="0"
+        height="0"
+        xmlns="http://www.w3.org/2000/svg"
+        version="1.1"
+      >
+        <defs>
+          <filter id="goo">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+            <feColorMatrix
+              in="blur"
+              mode="matrix"
+              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 35 -4"
+              result="goo"
+            />
+            <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+          </filter>
+        </defs>
+      </svg>
     </TranslationsProvider>
   )
 }
@@ -1831,7 +1818,6 @@ const LoadedBibleContent = ({
 
 const BibleDOMErrorContent = ({
   settings,
-  dispatch,
   translations,
   error,
   errorDownloadState,
@@ -1839,7 +1825,7 @@ const BibleDOMErrorContent = ({
   headerHeight,
   isConnected,
   onlineOnly,
-}: Pick<Props, 'settings' | 'dispatch' | 'translations' | 'error' | 'errorDownloadState'> & {
+}: Pick<Props, 'settings' | 'translations' | 'error' | 'errorDownloadState'> & {
   error: BibleError
   isResettingDatabase?: boolean
   headerHeight: number
@@ -1864,92 +1850,88 @@ const BibleDOMErrorContent = ({
   return (
     <TranslationsProvider translations={translations}>
       <GlobalStyles />
-      <DispatchProvider dispatch={dispatch}>
-        <ErrorContainer settings={settings} headerHeight={headerHeight}>
-          <ErrorContent>
-            <ErrorIcon settings={settings}>
-              <Feather
-                name={failurePresentation.icon}
-                size={26}
-                color={settings.colors[settings.theme].primary}
-              />
-            </ErrorIcon>
-            <ErrorMessage settings={settings}>
-              {translations.resourceFailureDetails[failurePresentation.detailKey]}
-            </ErrorMessage>
-            {(canAcquire || canRepair) &&
-              (isDownloading ? (
-                <>
-                  <ProgressTrack settings={settings}>
-                    <ProgressBar
-                      settings={settings}
-                      $progress={errorDownloadState?.progress ?? 0}
-                    />
-                  </ProgressTrack>
-                  <ErrorMessage settings={settings}>{progressLabel}</ErrorMessage>
-                </>
-              ) : (
-                <ErrorButton
-                  settings={settings}
-                  type="button"
-                  disabled={connectionRequired}
-                  onClick={() =>
-                    connectionRequired
-                      ? undefined
-                      : void sendReaderIntent({
-                          kind: 'install-bible-version',
-                          version: error.version,
-                        })
-                  }
-                >
-                  {connectionRequired
-                    ? translations.connectionRequired
-                    : canRepair
-                      ? translations.repairOfflineCopy
-                      : translations.downloadVersion}
-                </ErrorButton>
-              ))}
-            {canRetry && (
+      <ErrorContainer settings={settings} headerHeight={headerHeight}>
+        <ErrorContent>
+          <ErrorIcon settings={settings}>
+            <Feather
+              name={failurePresentation.icon}
+              size={26}
+              color={settings.colors[settings.theme].primary}
+            />
+          </ErrorIcon>
+          <ErrorMessage settings={settings}>
+            {translations.resourceFailureDetails[failurePresentation.detailKey]}
+          </ErrorMessage>
+          {(canAcquire || canRepair) &&
+            (isDownloading ? (
+              <>
+                <ProgressTrack settings={settings}>
+                  <ProgressBar settings={settings} $progress={errorDownloadState?.progress ?? 0} />
+                </ProgressTrack>
+                <ErrorMessage settings={settings}>{progressLabel}</ErrorMessage>
+              </>
+            ) : (
               <ErrorButton
                 settings={settings}
                 type="button"
-                onClick={() => void sendReaderIntent({ kind: 'retry-bible-resource' })}
+                disabled={connectionRequired}
+                onClick={() =>
+                  connectionRequired
+                    ? undefined
+                    : void sendReaderIntent({
+                        kind: 'install-bible-version',
+                        version: error.version,
+                      })
+                }
               >
-                {translations.retry}
+                {connectionRequired
+                  ? translations.connectionRequired
+                  : canRepair
+                    ? translations.repairOfflineCopy
+                    : translations.downloadVersion}
               </ErrorButton>
-            )}
-            {(canManage || canReset) && (
-              <>
-                {canManage && (
-                  <ErrorButton
-                    settings={settings}
-                    type="button"
-                    onClick={() => void sendReaderIntent({ kind: 'open-downloads' })}
-                  >
-                    {translations.goToDownloads}
-                  </ErrorButton>
-                )}
-                {canReset && (
-                  <ErrorButton
-                    settings={settings}
-                    $secondary
-                    type="button"
-                    disabled={isResettingDatabase}
-                    onClick={() => void sendReaderIntent({ kind: 'repair-bible-database' })}
-                  >
-                    {translations.resetDatabase}
-                  </ErrorButton>
-                )}
-              </>
-            )}
-          </ErrorContent>
-        </ErrorContainer>
-      </DispatchProvider>
+            ))}
+          {canRetry && (
+            <ErrorButton
+              settings={settings}
+              type="button"
+              onClick={() => void sendReaderIntent({ kind: 'retry-bible-resource' })}
+            >
+              {translations.retry}
+            </ErrorButton>
+          )}
+          {(canManage || canReset) && (
+            <>
+              {canManage && (
+                <ErrorButton
+                  settings={settings}
+                  type="button"
+                  onClick={() => void sendReaderIntent({ kind: 'open-downloads' })}
+                >
+                  {translations.goToDownloads}
+                </ErrorButton>
+              )}
+              {canReset && (
+                <ErrorButton
+                  settings={settings}
+                  $secondary
+                  type="button"
+                  disabled={isResettingDatabase}
+                  onClick={() => void sendReaderIntent({ kind: 'repair-bible-database' })}
+                >
+                  {translations.resetDatabase}
+                </ErrorButton>
+              )}
+            </>
+          )}
+        </ErrorContent>
+      </ErrorContainer>
     </TranslationsProvider>
   )
 }
 
-const VersesRendererContent = ({ settings, dispatch, translations, verses, ...rest }: Props) => {
+const VersesRendererContent = ({ settings, translations, verses, ...rest }: Props) => {
+  const sendPageSignal = useReaderPageSignal()
   useFonts({
     'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
   })
@@ -1959,9 +1941,8 @@ const VersesRendererContent = ({ settings, dispatch, translations, verses, ...re
     getPassageContextHeaderHeight(rest.focusVerses, rest.annotationMode, rest.inPlan)
 
   useEffect(() => {
-    dispatch({
-      type: DOM_COMPONENT_MOUNTED,
-    }).catch(console.error)
+    sendPageSignal({ kind: 'mounted' })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -1971,7 +1952,7 @@ const VersesRendererContent = ({ settings, dispatch, translations, verses, ...re
     document.documentElement.style.setProperty('--safe-area-top', `${rest.safeAreaTop ?? 0}px`)
     document.documentElement.style.backgroundColor = reverseColor
     document.body.style.backgroundColor = reverseColor
-  }, [dispatch, headerHeight, rest.safeAreaTop, settings.colors, settings.theme])
+  }, [headerHeight, rest.safeAreaTop, settings.colors, settings.theme])
 
   // Keep the WebView document background in sync when Expo DOM reuses the same page.
   useEffect(() => {
@@ -1986,7 +1967,6 @@ const VersesRendererContent = ({ settings, dispatch, translations, verses, ...re
     return (
       <BibleDOMErrorContent
         settings={settings}
-        dispatch={dispatch}
         translations={translations}
         error={rest.error}
         errorDownloadState={rest.errorDownloadState}
@@ -2002,31 +1982,27 @@ const VersesRendererContent = ({ settings, dispatch, translations, verses, ...re
     return (
       <TranslationsProvider translations={translations}>
         <GlobalStyles />
-        <DispatchProvider dispatch={dispatch}>
-          <Container
-            settings={settings}
-            rtl={false}
-            isParallelVerse={false}
-            headerHeight={headerHeight}
-          />
-        </DispatchProvider>
+        <Container
+          settings={settings}
+          rtl={false}
+          isParallelVerse={false}
+          headerHeight={headerHeight}
+        />
       </TranslationsProvider>
     )
   }
 
   return (
-    <LoadedBibleContent
-      settings={settings}
-      dispatch={dispatch}
-      translations={translations}
-      verses={verses}
-      {...rest}
-    />
+    <LoadedBibleContent settings={settings} translations={translations} verses={verses} {...rest} />
   )
 }
 
 const VersesRenderer = (props: Props) => (
-  <ReaderIntentProvider tabId={props.tabId} onReaderIntent={props.onReaderIntent}>
+  <ReaderIntentProvider
+    tabId={props.tabId}
+    onReaderIntent={props.onReaderIntent}
+    onPageSignal={props.onPageSignal}
+  >
     <LazyMotion features={domMax} strict>
       <VersesRendererContent {...props} />
     </LazyMotion>

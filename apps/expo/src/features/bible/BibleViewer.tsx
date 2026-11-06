@@ -27,7 +27,6 @@ import {
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
 import { useEntityPortraitCatalog } from '~features/lexique/entityPortraitManifest'
 import {
   getEntityChapterPortraitHash,
@@ -37,8 +36,6 @@ import {
   getEntityPortraitLocalUri,
   useEntityPortraitLocalHashes,
 } from '~features/lexique/entityPortraitPack'
-import type { StrongIdentity } from '~helpers/strongIdentities'
-import type { FocusStudyAction } from './focusStudy/focusVerseStudyTypes'
 import { useFocusVerseStudy } from './focusStudy/useFocusVerseStudy'
 import { type SheetRef } from '~common/sheet'
 import type { Bookmark } from '~common/types'
@@ -798,63 +795,6 @@ const BibleViewer = ({
     dictionary: t('bible.focusStudy.dictionary'),
     studyVerse: t('bible.focusStudy.studyVerse'),
   }
-  const handleFocusStudyAction = (action: FocusStudyAction) => {
-    switch (action.kind) {
-      case 'study-verse':
-        setStudiedVerse(action.verse)
-        return
-      case 'open-resource':
-        openResourceForVerse(action.resource, studyVerseKey)
-        return
-      case 'open-reference': {
-        const [referenceBook, referenceChapter, referenceVerse] = action.verseKey.split('-')
-        pushRouteOnce({
-          pathname: '/bible-view',
-          params: {
-            contextDisplayMode: 'focused',
-            book: referenceBook,
-            chapter: referenceChapter,
-            verse: referenceVerse,
-          },
-        })
-        return
-      }
-      case 'open-word':
-        pushRouteOnce(
-          createStrongDetailRoute('index', {
-            book: book.Numero,
-            reference: action.identityCode,
-            identityKind: action.identityKind as StrongIdentity['kind'],
-            identityCode: action.identityCode,
-            bibleVersion: version,
-            bibleChapter: chapter,
-          })
-        )
-        return
-      case 'open-topic':
-        pushRouteOnce({
-          pathname: '/nave-detail',
-          params: { name_lower: action.nameLower, name: action.name },
-        })
-        return
-      case 'open-dictionary': {
-        const { entry } = action
-        pushRouteOnce({
-          pathname: '/dictionnary-detail',
-          params: {
-            word: entry.word,
-            entryId: String(entry.entryId),
-            work: entry.work,
-            resourceId: entry.resourceId,
-            dictionaryTitle: entry.title,
-            language: entry.language,
-            ...(entry.correspondenceId ? { correspondenceId: entry.correspondenceId } : {}),
-          },
-        })
-      }
-    }
-  }
-
   // Shared Bible DOM: detect if this tab is the active Bible tab
   const setSharedProps = useSetAtom(sharedBibleDOMPropsAtom)
   const setBibleDOMHostLayouts = useSetAtom(bibleDOMHostLayoutsAtom)
@@ -1548,6 +1488,9 @@ const BibleViewer = ({
         case 'verse-tags':
           handleOpenVerseTagsModal(presentation.verseKey)
           return
+        case 'studied-verse':
+          setStudiedVerse(presentation.verse)
+          return
       }
     },
   }
@@ -1612,7 +1555,6 @@ const BibleViewer = ({
     chapterEntityPortraits,
     focusStudy,
     focusStudyTranslations,
-    onFocusStudyAction: handleFocusStudyAction,
     chapterEntityModuleStatus,
     chapterEntityDownloadState,
     isFormSheet,
