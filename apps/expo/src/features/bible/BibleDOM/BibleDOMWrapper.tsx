@@ -15,7 +15,6 @@ import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { webFontFamily } from '~helpers/webFontFamily'
 import { useTheme } from '~themes/ThemeProvider'
-import * as Haptics from 'expo-haptics'
 import { useRouter } from 'expo-router'
 import { useSetAtom } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
@@ -73,7 +72,6 @@ import {
   CREATE_ANNOTATION,
   ENTER_ANNOTATION_MODE,
   EXIT_ANNOTATION_MODE,
-  CLEAR_SELECTED_VERSES,
   DOWNLOAD_BIBLE_VERSION,
   ERASE_SELECTION,
   DOWNLOAD_CHAPTER_ENTITIES,
@@ -92,13 +90,11 @@ import {
   SET_BIBLE_OVERLAY_OPEN,
   SELECTION_CHANGED,
   SHOW_TOAST,
-  TOGGLE_SELECTED_VERSE,
 } from './dispatch'
 import {
   getBookmarkPayload,
   getStringPayload,
   getPayloadVersion,
-  getVerseSelectionPayload,
   getStudyRelationsModalTarget,
   getToastPayload,
   getVerseIdsPayload,
@@ -196,9 +192,6 @@ export type WebViewProps = {
   personalBibleDataEnabled?: boolean
   /** Versions shown only in interlinear presentations: they hold no personal Bible data. */
   interlinearReadingVersions?: string[]
-  addSelectedVerse: (id: string, version?: VersionCode) => void
-  removeSelectedVerse: (id: string) => void
-  clearSelectedVerses?: () => void
   setSelectedVerse: (selectedVerse: number) => void
   version: VersionCode
   interlinearMode?: InterlinearMode
@@ -383,9 +376,6 @@ export const BibleDOMWrapper = ({
   taggedVersesInChapter,
   versesWithNonHighlightTags,
   onOpenStudyRelationsModal,
-  removeSelectedVerse,
-  clearSelectedVerses,
-  addSelectedVerse,
   onSelectionChanged,
   onCreateAnnotation,
   onEraseSelection,
@@ -631,24 +621,6 @@ export const BibleDOMWrapper = ({
         if (target) onOpenStudyRelationsModal?.(target)
         break
       }
-      case TOGGLE_SELECTED_VERSE: {
-        if (Platform.OS === 'ios') {
-          Haptics.selectionAsync()
-        }
-        const verseSelection = getVerseSelectionPayload(action.payload)
-        if (!verseSelection) break
-        const { verseKey: verseId } = verseSelection
-        const verseVersion = getDisplayedVersion(verseSelection.version)
-
-        if (selectedVerses[verseId] && verseVersion === (selectedVersesVersion ?? version)) {
-          removeSelectedVerse(verseId)
-        } else {
-          addSelectedVerse(verseId, verseVersion)
-        }
-
-        break
-      }
-
       case SHOW_TOAST: {
         const { message, type } = getToastPayload(action.payload)
         if (!message) break
@@ -693,11 +665,6 @@ export const BibleDOMWrapper = ({
 
       case EXIT_ANNOTATION_MODE: {
         onExitAnnotationMode?.()
-        break
-      }
-
-      case CLEAR_SELECTED_VERSES: {
-        clearSelectedVerses?.()
         break
       }
 

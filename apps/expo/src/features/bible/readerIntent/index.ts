@@ -1,6 +1,7 @@
 import { appLogger } from '~helpers/agentObservability'
 import { applyOpenIntent, decodeOpenIntent, getOpenRefusal } from './open'
 import { applyReadingIntent, decodeReadingIntent, getReadingRefusal } from './reading'
+import { applySelectIntent, decodeSelectIntent, getSelectRefusal } from './select'
 import type { ReaderIntent, ReaderOutcome, ReaderRule } from './types'
 import type { Reader, ReaderSnapshot, ReaderWorld } from './world'
 
@@ -13,6 +14,7 @@ export type {
   ReaderIntentMessage,
   ReaderOutcome,
   ReaderRule,
+  SelectIntent,
 } from './types'
 export type {
   Reader,
@@ -27,7 +29,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null
 
 const decodeIntent = (value: unknown): ReaderIntent | undefined =>
-  decodeReadingIntent(value) ?? decodeOpenIntent(value)
+  decodeReadingIntent(value) ?? decodeOpenIntent(value) ?? decodeSelectIntent(value)
 
 const decodeMessage = (message: unknown): { tabId: string; intent: ReaderIntent } | undefined => {
   if (!isRecord(message) || typeof message.tabId !== 'string' || !message.tabId) return undefined
@@ -38,25 +40,52 @@ const decodeMessage = (message: unknown): { tabId: string; intent: ReaderIntent 
 const getRefusal = (
   intent: ReaderIntent,
   context: { snapshot: ReaderSnapshot; world: ReaderWorld }
-): ReaderRule | undefined =>
-  intent.kind === 'open' ? getOpenRefusal(intent, context) : getReadingRefusal(intent, context)
+): ReaderRule | undefined => {
+  switch (intent.kind) {
+    case 'open':
+      return getOpenRefusal(intent, context)
+    case 'toggle-selected-verse':
+    case 'clear-selected-verses':
+      return getSelectRefusal(intent, context)
+    default:
+      return getReadingRefusal(intent, context)
+  }
+}
 
 const applyIntent = (
   intent: ReaderIntent,
   context: { reader: Reader; snapshot: ReaderSnapshot; world: ReaderWorld }
-) =>
-  intent.kind === 'open' ? applyOpenIntent(intent, context) : applyReadingIntent(intent, context)
+) => {
+  switch (intent.kind) {
+    case 'open':
+      return applyOpenIntent(intent, context)
+    case 'toggle-selected-verse':
+    case 'clear-selected-verses':
+      return applySelectIntent(intent, context)
+    default:
+      return applyReadingIntent(intent, context)
+  }
+}
 
 const getKind = (message: unknown) =>
   isRecord(message) && isRecord(message.intent) && typeof message.intent.kind === 'string'
     ? message.intent.kind
     : undefined
 
-/** What the logs say of an intent: its kind, and for an open what it opens and from where. */
-const describeIntent = (intent: ReaderIntent) =>
-  intent.kind === 'open'
-    ? { kind: intent.kind, target: intent.target.kind, origin: intent.origin }
-    : { kind: intent.kind }
+/**
+ * What the logs say of an intent: its kind, for an open what it opens and from where, for a verse
+ * selected the version it was tapped in.
+ */
+const describeIntent = (intent: ReaderIntent) => {
+  switch (intent.kind) {
+    case 'open':
+      return { kind: intent.kind, target: intent.target.kind, origin: intent.origin }
+    case 'toggle-selected-verse':
+      return { kind: intent.kind, version: intent.version }
+    default:
+      return { kind: intent.kind }
+  }
+}
 
 /**
  * The only way in for what the Bible reader page asks (ADR-0098). It decodes the message once,

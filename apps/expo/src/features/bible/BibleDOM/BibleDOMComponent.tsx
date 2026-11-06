@@ -35,9 +35,7 @@ import VersionChip from './VersionChip'
 import {
   ENTER_ANNOTATION_MODE,
   EXIT_ANNOTATION_MODE,
-  CLEAR_SELECTED_VERSES,
   DOWNLOAD_BIBLE_VERSION,
-  TOGGLE_SELECTED_VERSE,
   OPEN_DOWNLOADS,
   RESET_BIBLE_DATABASE,
   RETRY_BIBLE_RESOURCE,
@@ -966,7 +964,7 @@ const LoadedBibleContent = ({
     }
     if (Object.keys(verseSelection.decidedSelection.selectedVerses).length === 0) return
     verseSelection.showClearedSelection()
-    dispatch({ type: CLEAR_SELECTED_VERSES }).catch(console.error)
+    void sendReaderIntent({ kind: 'clear-selected-verses' })
   }
 
   // Dragging a handle of selected verses turns the block into the words it holds, in annotation
@@ -982,10 +980,11 @@ const LoadedBibleContent = ({
   // A tapped verse is selected in the version it was tapped in.
   const toggleSelectedVerse = (target: VerseTarget) => {
     verseSelection.showSentToggle(target)
-    dispatch({
-      type: TOGGLE_SELECTED_VERSE,
-      payload: target,
-    }).catch(console.error)
+    void sendReaderIntent({
+      kind: 'toggle-selected-verse',
+      verseKey: target.verseKey,
+      version: target.version,
+    })
   }
 
   // The Strong resources of the verse, in the version it was touched in.

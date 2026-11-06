@@ -1552,6 +1552,7 @@ const BibleViewer = ({
       keepControlsVisible,
       hasPlanDayStep: Boolean(planDayStep),
       hidesPersonalData: hidePersonalBibleData,
+      interlinearReadingVersions,
       parallelColumnVersions: displayedParallelVerses.map(parallel => parallel.id),
       inlineCommentaries: {
         chips: [
@@ -1590,9 +1591,6 @@ const BibleViewer = ({
     isLoading,
     personalBibleDataEnabled: !hidePersonalBibleData,
     interlinearReadingVersions,
-    addSelectedVerse: hidePersonalBibleData ? () => undefined : actions.addSelectedVerse,
-    removeSelectedVerse: hidePersonalBibleData ? () => undefined : actions.removeSelectedVerse,
-    clearSelectedVerses: actions.clearSelectedVerses,
     setSelectedVerse: actions.setSelectedVerse,
     version,
     interlinearMode,

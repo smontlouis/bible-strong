@@ -32,11 +32,14 @@ import { migrateLegacyBibleTabData } from '../migrations/legacyBibleVersionMigra
 import { omitSessionTabPreview, withTabPreviewUri, withoutLegacyTabPreview } from './tabPreview'
 import { appLogger } from '~helpers/agentObservability'
 import { useBibleRouteNavigation } from './bibleRouteNavigation'
-import { getSelectedVersesVersion, setSelectedVersesVersion } from './bibleSelectionVersion'
+import { setSelectedVersesVersion } from './bibleSelectionVersion'
 import {
+  clearVerseSelection,
   getAdjacentChapter,
   openAdjacentChapter,
+  selectVerse,
   setParallelColumnVersion,
+  unselectVerse,
 } from './bibleTabRecipes'
 
 // ============================================================================
@@ -1038,13 +1041,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const addSelectedVerse = (id: string, version?: VersionCode) => {
     setBibleTab(
       produce(draft => {
-        // A selection stays in one version: a verse of another version starts a new one.
-        if (version && version !== getSelectedVersesVersion(draft.data)) {
-          draft.data.selectedVerses = {}
-          delete draft.data.selectedVersesVersion
-          setSelectedVersesVersion(draft.data, version)
-        }
-        draft.data.selectedVerses[id] = true
+        selectVerse(draft.data, id, version)
       })
     )
   }
@@ -1052,7 +1049,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const removeSelectedVerse = (id: string) => {
     setBibleTab(
       produce(draft => {
-        delete draft.data.selectedVerses[id]
+        unselectVerse(draft.data, id)
       })
     )
   }
@@ -1079,8 +1076,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
   const clearSelectedVerses = () => {
     setBibleTab(
       produce(draft => {
-        draft.data.selectedVerses = {}
-        delete draft.data.selectedVersesVersion
+        clearVerseSelection(draft.data)
       })
     )
   }

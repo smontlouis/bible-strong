@@ -88,6 +88,7 @@ const setup = ({
     openStudyObject: jest.fn(),
     openUrl: jest.fn(async () => undefined),
     notify: jest.fn(),
+    haptic: jest.fn(),
     t: key => key,
   }
   const reader: Reader = {
@@ -99,6 +100,7 @@ const setup = ({
       keepControlsVisible: false,
       hasPlanDayStep: false,
       hidesPersonalData: false,
+      interlinearReadingVersions: [],
       parallelColumnVersions: [],
       inlineCommentaries: { chips: [], indexes: [] },
       ...snapshot,
