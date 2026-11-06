@@ -37,7 +37,7 @@ import {
   isInterlinearModeEnabled,
   type InterlinearMode,
 } from '~helpers/interlinearDisplayMode'
-import type { InterlinearChapterTokens } from '~helpers/interlinearBibleSidecar'
+import type { InterlinearChapterTokens, InterlinearToken } from '~helpers/interlinearBibleSidecar'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { reconcileReverseInterlinearChapter } from '~helpers/reverseInterlinearBible'
 import { resolveDisplayedStrongIdentities } from '~helpers/strongIdentities'
@@ -406,6 +406,52 @@ const resolveRequestedInterlinearLocale = async (
   return preferredLocale
 }
 
+/**
+ * The BHG tokens a chapter's Strong spans name, by id. A span names its tokens by id, not by
+ * verse: where a Bible numbers its verses or chapters otherwise than BHG, they stand in another
+ * verse of the chapter or in the chapter next to it, never further. The whole chapter is read,
+ * then its two neighbours only while some ids are still missing.
+ */
+const loadAlignedTokensById = async ({
+  required,
+  tokenIds,
+  chapter,
+  loadChapter,
+}: {
+  required: boolean
+  tokenIds: number[]
+  chapter: number
+  loadChapter: (chapter: number) => Promise<InterlinearChapterTokens>
+}): Promise<Map<number, InterlinearToken>> => {
+  const tokensById = new Map<number, InterlinearToken>()
+  const addTokens = (tokensByVerse: InterlinearChapterTokens) => {
+    for (const tokens of Object.values(tokensByVerse)) {
+      for (const token of tokens) {
+        if (token.id != null && !tokensById.has(token.id)) tokensById.set(token.id, token)
+      }
+    }
+  }
+  try {
+    addTokens(await loadChapter(chapter))
+  } catch (error) {
+    // A chapter BHG does not number (Joel 4 of the French Bibles) still has its words next door.
+    const isMissingChapter = error instanceof ResourceAccessError && error.code === 'NOT_FOUND'
+    if (!isMissingChapter) {
+      if (required) throw error
+      return tokensById
+    }
+  }
+  if (tokenIds.every(id => tokensById.has(id))) return tokensById
+  // Neighbours only complete the chapter: one that is missing or fails to load is passed over.
+  const neighbours = await Promise.allSettled(
+    [chapter - 1, chapter + 1].filter(neighbour => neighbour >= 1).map(loadChapter)
+  )
+  for (const neighbour of neighbours) {
+    if (neighbour.status === 'fulfilled') addTokens(neighbour.value)
+  }
+  return tokensById
+}
+
 const loadRegularBibleChapter = async (
   request: BibleChapterRequest,
   dependencies: BibleContentAccessDependencies
@@ -708,41 +754,32 @@ const loadRegularBibleChapter = async (
       spanCount: spanValidation.invalidSpanCount,
     })
   }
-  let alignedTokensByVerse: InterlinearChapterTokens = {}
-  if (showsTransliteration) {
-    // The transliterations are the mode itself: a load failure is the chapter's failure.
-    alignedTokensByVerse = readInterlinearTokens(
-      await dependencies.loadInterlinearChapterTokens!(
-        'BHG',
-        await resolveRequestedInterlinearLocale(request, dependencies),
-        request.book,
-        request.chapter
-      )
-    ).tokensByVerse
-  } else if (dependencies.loadInterlinearChapterTokens) {
-    try {
-      // Tokens are matched to spans by id and bring morphology only: no offset is applied.
-      alignedTokensByVerse = readInterlinearTokens(
-        await dependencies.loadInterlinearChapterTokens(
-          'BHG',
-          request.interlinearLocale ?? 'fr',
-          request.book,
-          request.chapter
-        )
-      ).tokensByVerse
-    } catch {
-      // BHG morphology is optional enrichment; never replace its locale after a load failure.
-    }
-  }
+  const loadInterlinearChapterTokens = dependencies.loadInterlinearChapterTokens
+  const alignedTokensLocale = showsTransliteration
+    ? await resolveRequestedInterlinearLocale(request, dependencies)
+    : (request.interlinearLocale ?? 'fr')
+  const alignedTokensById =
+    showsTransliteration || loadInterlinearChapterTokens
+      ? await loadAlignedTokensById({
+          // The transliterations are the mode itself: a load failure is the chapter's failure.
+          // Otherwise tokens bring morphology only, an optional enrichment whose locale is never
+          // replaced after a load failure.
+          required: showsTransliteration,
+          tokenIds: Object.values(spansByVerse).flatMap(spans =>
+            spans.flatMap(span => span.stepTokenIds ?? [])
+          ),
+          chapter: request.chapter,
+          loadChapter: async chapter =>
+            readInterlinearTokens(
+              await loadInterlinearChapterTokens!('BHG', alignedTokensLocale, request.book, chapter)
+            ).tokensByVerse,
+        })
+      : new Map<number, InterlinearToken>()
   return successResult({
     kind: 'strong',
     ...chapterIdentity,
     verses: verses.map(verse => {
       const verseNumber = Number(verse.Verset)
-      const alignedTokens = alignedTokensByVerse[verseNumber] ?? []
-      const alignedTokensById = new Map(
-        alignedTokens.flatMap(token => (token.id == null ? [] : [[token.id, token] as const]))
-      )
       return {
         ...verse,
         StrongSpans: (spansByVerse[verseNumber] ?? []).map(span => {
