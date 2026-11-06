@@ -24,9 +24,9 @@ Le choix recommandé est donc :
    polie, mais son coût au volume prévu et son offre sémantique enterprise le rendent peu adapté ici.
 
 Cela confirme le principe déjà inscrit dans
-[`docs/online-resources-prd.md`](../../online-resources-prd.md) : mesurer le meilleur PostgreSQL
+[`docs/online-resources-prd.md`](../online-resources-prd.md) : mesurer le meilleur PostgreSQL
 avant d'introduire un second datastore. L'implémentation actuelle de
-[`bibleSearchRepository.ts`](../../../resource-service/src/repositories/bibleSearchRepository.ts)
+[`bibleSearchRepository.ts`](../../packages/resource-service/src/repositories/bibleSearchRepository.ts)
 n'est toutefois pas ce meilleur PostgreSQL : elle fait encore un `ILIKE '%query%'`, classe au
 trigramme et surligne par expression régulière. La migration existante ne crée qu'un index
 `pg_trgm`.

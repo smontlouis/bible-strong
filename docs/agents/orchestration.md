@@ -1,196 +1,45 @@
 # Agent Orchestration
 
-This document defines the first Level 2 harness rules for coordinating agents, pull requests, and remote validation.
+How agent work moves from a request or an issue to `master`.
 
-## Scope
+## Two ways to land a change
 
-Level 2 work begins from the Level 1 harness in `docs/agents/`. Level 1 remains the baseline for every agent task: read the relevant domain docs, use the canonical validation commands, respect sensitive areas, and run or document smoke checks for UI changes.
+- **Work done in the main checkout goes straight to `master`**: commit and push, no feature branch, no pull request, unless the owner asks for one. The main checkout is shared by several sessions: leave other sessions' uncommitted work alone and stage paths only in the command that commits them.
+- **Work started with the `/issue` skill goes through a lane and a pull request** to `master`.
 
-This first Level 2 pass covers:
+GitHub Issues stay the source of truth for tracked work (`docs/agents/issue-tracker.md`, labels in `docs/agents/triage-labels.md`).
 
-- GitHub issue to branch to PR flow.
-- PR validation gates.
-- Multi-agent ownership rules.
-- Mobile-sequential implementation and validation loop.
-- Release and build boundaries.
+## Issue lanes (`/issue`)
 
-It does not automate releases, app store submission, production data operations, or account-backed destructive tests.
-
-## Issue To PR Flow
-
-Use GitHub Issues as the source of truth, as documented in `docs/agents/issue-tracker.md`.
-
-1. Triage the issue with the labels in `docs/agents/triage-labels.md`.
-2. Only start autonomous implementation when the issue is labeled `ready-for-agent` or the user explicitly assigns the task in chat.
-3. Create branches with the `codex/` prefix unless the user asks for another name.
-4. Keep each branch focused on one issue or one coherent patch batch.
-5. Open PRs as ready for review when local validation has run or the change is clearly documented as non-runtime/non-user-facing. Use draft PRs only when validation is blocked or intentionally deferred.
-
-To prepare a single issue for agent work, run:
-
-```bash
-yarn agents:issue:start <issue-number> [--dry-run] [--create-branch] [--run-codex] [--codex-sandbox <mode>]
-```
-
-This writes `.scratch/issues/<issue-number>/issue.json`, `prompt.md`, and `summary.md`. It does not create or switch branches by default.
-
-Options:
-
-- `--dry-run`: fetch the issue and print the planned branch and artifact paths without writing files or changing git state.
-- `--create-branch`: create and check out the recommended branch in the current worktree.
-- `--run-codex`: run `codex exec` non-interactively with the generated prompt and write the final agent message to `.scratch/issues/<issue-number>/codex-final.md`.
-- `--codex-sandbox <mode>`: choose the sandbox passed to `codex exec` when using `--run-codex`. Supported modes are `read-only`, `workspace-write`, and `danger-full-access`; the default is `danger-full-access`.
-
-Do not use `--worktree` for Bible Strong mobile user-facing issue work. This repo currently uses `mobile-sequential`: one issue branch in the current worktree, one local mobile verification loop, then PR readiness.
-
-The default `danger-full-access` is intentional for this mobile-sequential harness because runtime validation needs host-level tools such as iOS Simulator/CoreSimulator. For routine static-only implementation work, pass `--codex-sandbox workspace-write` explicitly.
-
-The generated prompt is suitable for Codex direct work today. Sandcastle is not part of this MVP because mobile runtime validation remains host-only and sequential.
-
-When `--run-codex` handles a UI or runtime issue, the agent should leave PR-ready evidence in stable issue-local paths:
-
-- `.scratch/issues/<issue-number>/evidence/` for screenshots, recordings, and other UI artifacts.
-- `.scratch/issues/<issue-number>/mobile-validation.md` for simulator/device, smoke path, app logs, runtime status, and blockers.
-- `.scratch/issues/<issue-number>/codex-final.md` for the final implementation summary.
-- `.scratch/issues/<issue-number>/commit-message.txt` for the Conventional Commits subject to use if the wrapper commits.
-- `.scratch/issues/<issue-number>/change-summary.md` for the implementation summary used by PR packaging.
-- `.scratch/issues/<issue-number>/pr-notes.md` for PR-specific reviewer notes, evidence notes, risks, or follow-ups.
-
-Use `mobile-validation.md` status values `passed`, `blocked`, or `not-needed`. For visual changes, capture after evidence that shows the implemented result. Do not create duplicate screenshots just to simulate a before/after pair.
-
-To simulate one local orchestration unit manually, run:
-
-```bash
-yarn agents:issue:run <issue-number> [--dry-run] [--no-commit] [--no-pr] [--no-push] [--allow-dirty] [--draft|--ready] [--base <branch>] [--codex-sandbox <mode>]
-```
-
-This wrapper refuses to start from a dirty worktree unless `--allow-dirty` is explicit. It then runs `agents:issue:start <issue-number> --create-branch --run-codex`, commits the resulting tracked repo changes using `commit-message.txt` unless `--no-commit` is passed, then runs `agents:issue:pr --create --push --attach-evidence --ready` by default. Use `--dry-run` to print the start plan without writes, `--no-pr` to stop after the local commit, or `--draft` when runtime evidence is blocked or the repo policy should keep the PR out of review. The wrapper is the local stand-in for a future orchestrator task and should stay policy-driven rather than agent-reasoning-driven.
-
-To package an issue branch into a PR body after local evidence exists, run:
-
-```bash
-yarn agents:issue:pr <issue-number> [--dry-run] [--create] [--push] [--attach-evidence] [--draft|--ready] [--base <branch>]
-```
-
-This reads `.scratch/issues/<issue-number>/issue.json`, `codex-final.md`, `mobile-validation.md`, and `evidence/`, then writes `.scratch/issues/<issue-number>/pr-body.md`. It does not push or create a PR unless `--create` is passed; PRs are ready for review by default unless `--draft` is passed.
-When `--attach-evidence` is passed, the wrapper pushes supported files from `.scratch/issues/<issue-number>/evidence/` to a dedicated GitHub evidence branch such as `codex-evidence-issue-208` and posts a PR comment with inline image links and attachment metadata. This keeps screenshots out of the product branch while making them visible from GitHub.
-
-## Multi-Agent Ownership
-
-When multiple agents work in parallel, split by disjoint ownership boundaries before implementation starts.
-
-Good ownership boundaries:
-
-- one feature directory under `src/features/`;
-- one shared module under `src/common/`, `src/helpers/`, `src/redux/`, or `src/state/`;
-- documentation-only changes under `docs/`;
-- one native/build configuration area such as `app.config.ts`, `eas.json`, or Firebase config paths.
-
-Avoid assigning two agents to the same files or tightly coupled Redux and UI behavior unless one agent is explicitly responsible for integration.
-
-Each agent must state in its PR:
-
-- issue or request covered;
-- owned files or modules;
-- validation commands run;
-- smoke paths run or marked not needed;
-- sensitive areas touched, if any.
-
-## Mobile Orchestration Mode
-
-Bible Strong is a mobile-first Expo/React Native app. Treat runtime validation as host-only unless a future runner explicitly proves simulator or device access.
-
-Selected mode: `mobile-sequential`.
-
-Use this orchestration shape for mobile user-facing or runtime issue work:
-
-1. Branch start.
-   - Create or switch to one dedicated `codex/issue-<number>-<slug>` branch in the current worktree.
-   - Do not create a per-issue worktree for the normal mobile loop.
-2. Implementation loop.
-   - Work on one issue at a time.
-   - Keep the branch focused on the issue or a tightly scoped prerequisite.
-   - Run the smallest relevant static checks, then broaden when touching shared state, navigation, storage, startup, sync, or sensitive areas.
-3. Mobile verification loop.
-   - Start the required local runtime and execute the selected smoke paths in `docs/agents/smoke-tests.md`.
-   - Use Argent or equivalent simulator/device tooling for user-facing changes.
-   - Record screenshots, logs, or a concise evidence note before PR readiness.
-4. Fix loop.
-   - If mobile smoke fails, fix on the same branch and rerun the relevant checks.
-   - Do not open or advance the PR just because static checks passed.
-5. PR readiness.
-   - A mobile PR can be opened or advanced only after required mobile smoke paths pass, or when the change is documented as non-runtime and non-user-facing.
-
-Parallel mobile work is allowed only if every lane has an independent implementation state and a credible independent mobile verification loop before PR readiness. If that cannot be provided, use `mobile-sequential`.
-
-### Parallel issue lanes (`/issue`)
-
-The `/issue` skill (`.claude/skills/issue/`) provides such lanes for Claude Code sessions. Each lane has:
+The `/issue` skill (`.claude/skills/issue/SKILL.md`) carries one issue end to end. Each lane has:
 
 - its own worktree in `.claude/worktrees/<slug>` on branch `issue/<slug>`, created from `origin/master`, with a full `yarn install` and copies of the ignored `.env*` files;
-- its own iOS simulator `bs-<slug>`, cloned with `simslim` from the shut-down template `bs-template` (signed in, slim), with the newest dev client from `~/Builds/bible-strong/` installed over it;
+- its own iOS simulator `bs-<slug>`, cloned from the shut-down template `bs-template` (signed in, slim), with the newest dev client from `~/Builds/bible-strong/` installed over it;
 - its own Metro on a dedicated port (8082 and up; 8081 stays with the main checkout).
 
-`~/Builds/bible-strong/` holds iOS simulator dev clients named `bible-strong-dev-<version>-simulator-<sha>.app`; lanes take the most recently built one and warn when the lane's native code has moved since that commit. Nothing fills the folder automatically: after an iOS dev-client build (`yarn expo run:ios`), `node .claude/skills/issue/scripts/lane.mjs save-build` copies the newest build from Xcode's DerivedData there under that name, with the commit of the checkout that built it, and refuses a checkout with uncommitted native changes.
+Android lanes (`/issue … --android`) use the PC's shared emulator, so only one Android lane runs at a time. `.claude/skills/issue/scripts/lane.mjs` creates, reports and removes lanes, and keeps the simulator builds in `~/Builds/bible-strong/` (`save-build`, `template --refresh`). The skill describes the steps: frame the issue, discuss the approach before coding, implement, test on the device, open the pull request. UI evidence stays with the agent session and is not attached to the pull request.
 
-Android lanes (`/issue … --android`) use the PC's shared emulator, so only one Android lane runs at a time. `.claude/skills/issue/scripts/lane.mjs` creates, reports, and removes lanes. The PR targets `master`. UI evidence stays with the agent session and is not attached to the PR.
+## Parallel work
 
-## PR Gates
+When several agents work at once, split them by disjoint ownership before implementation starts:
 
-The first hosted PR gate is `.github/workflows/pr-checks.yml`.
+- one feature directory under `apps/expo/src/features/`;
+- one shared module under `src/common/`, `src/helpers/`, `src/redux/` or `src/state/`;
+- documentation-only changes under `docs/`;
+- one native or build configuration area such as `app.config.ts`, `eas.json` or the Firebase config paths.
 
-Required checks:
+Avoid giving two agents the same files or tightly coupled Redux and UI behavior unless one of them owns the integration.
 
-- `yarn typecheck`
-- `yarn lint`
-- `yarn test`
-- `yarn format:check`
+## PR gate
 
-These checks are intentionally JavaScript-only. Native EAS builds, simulator smoke checks, Firebase-backed sync tests, and app store release validation are separate gates because they need credentials, installed simulator assets, or expensive external resources.
+`.github/workflows/pr-checks.yml` runs on every pull request to `master`: typecheck, the Resource architecture check, migrations, Resource service and PostgreSQL integration tests, lint, tests, format check and the agent architecture check. Branch protection requires it before merge.
 
-Use `.github/pull_request_template.md` for PR descriptions. Do not delete sections that are not applicable; mark them as not needed and explain why when the change touches user-facing behavior or sensitive areas.
+These checks are JavaScript-only. Native builds, simulator smoke paths, Firebase-backed sync and store releases are separate gates because they need credentials, simulator assets or paid resources. A mobile pull request records its device validation in the mobile validation section of `.github/pull_request_template.md`: device, scenario, result, and what could not be checked. Keep every section of the template and mark the ones that don't apply as not needed.
 
-For mobile changes, the hosted PR gate is not enough to mark the PR ready for review. Use the mobile validation section in the PR template to record whether simulator smoke passed or is not needed because the change is non-runtime and non-user-facing.
+## Sensitive areas
 
-Branch protection is enabled on `master` with the `Typecheck, lint, test, format` check required before merge.
+Read `docs/agents/sensitive-areas.md` before changing authentication, account data, Firestore sync, local migrations, backup/import/export, build identity, native config or external services. For such a change, the pull request or the commit report names the area touched, the environment used for validation, what was not validated against production, staging or a real account, and the rollback or mitigation when user data could be affected.
 
-The canonical GitHub labels from `docs/agents/triage-labels.md` have been verified on the remote repository.
+## Builds and releases
 
-## Sensitive Area Escalation
-
-Use `docs/agents/sensitive-areas.md` before changing authentication, account data, Firestore sync, local migrations, backup/import/export, build identity, native config, or external services.
-
-For sensitive changes, PRs must include:
-
-- exact sensitive area touched;
-- environment used for validation;
-- explicit note when production, staging, or account-backed validation was not run;
-- rollback or mitigation notes when user data could be affected.
-
-## Release And Build Boundaries
-
-Local code checks do not prove release readiness.
-
-Run EAS build checks only when the change affects native config, Expo plugins, Firebase service files, app identity, update channels, audio background modes, native dependencies, or release behavior.
-
-Use the build commands in `docs/agents/validation.md`. Do not run production builds or releases without explicit user intent.
-
-EAS development-simulator validation is intentionally local. Do not add a hosted EAS workflow unless the owner explicitly changes this policy.
-
-## Recurring Automation Candidates
-
-These are candidates, not enabled automations:
-
-- weekly dependency and Expo compatibility review;
-- weekly open issue triage for `needs-triage`;
-- smoke checklist refresh after navigation or Bible WebView changes;
-- monthly harness doc drift check against `package.json` scripts.
-
-Enable recurring automation only after the owner chooses cadence, notification destination, and expected output.
-
-## Level 2 Remaining Work
-
-- Decide whether to add scheduled maintenance automations.
-- Exercise the PR gate on a real pull request and adjust the required check context if GitHub reports a different check-run name.
-- Exercise `agents:issue:run` on a real issue branch and refine the start-to-commit-to-PR handoff from stable `.scratch/issues/<issue>/` evidence.
-- Revisit Sandcastle only if a future workflow provides a real parallel verification loop for the relevant surface.
+Local checks do not prove release readiness. A native build is needed only when the change touches native config, Expo plugins, Firebase service files, app identity, update channels, audio background modes, native dependencies or release behavior. Builds, OTA updates and store releases are the owner's decision: never start one without being asked. Build commands are in `docs/agents/validation.md` and `docs/dev-guide.md`.

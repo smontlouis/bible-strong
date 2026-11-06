@@ -156,7 +156,6 @@ apps/expo/modules/bible-strong-archive/android/src/main/java/expo/modules/bibles
 
 # Agent-generated local reports
 .scratch/architecture/
-.scratch/quality/
 .scratch/logs/
 .scratch/issues/
 .scratch/generated/

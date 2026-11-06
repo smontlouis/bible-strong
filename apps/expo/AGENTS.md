@@ -1,286 +1,44 @@
-# AGENTS.md
+# Expo app (`@bible-strong/expo`)
 
-This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
+The Bible Strong app for iOS, Android and the Web: Expo SDK 58, React Native 0.88, React 19 with the React Compiler, Expo Router (routes in `app/`), Redux Toolkit with Redux Persist on MMKV, Jotai, SQLite, Firebase (Auth, Firestore sync, Remote Config, Storage) and Uniwind for styles. The Bible text is drawn by an Expo DOM component, `src/features/bible/BibleDOM/`.
 
-## Project Overview
+## Read first
 
-Bible Strong is a React Native application for Bible study, primarily targeting French-speaking users but with English support. Key features include:
+- This app's `CONTEXT.md` and the root `CONTEXT-MAP.md`.
+- The ADRs of the area you touch under `../../docs/adr/`, among them 0040 (Uniwind and the Bible DOM boundary), 0044 (class forwarding), 0086 (surfaces) and 0098 (reader intents).
+- `../../docs/architecture.md`, `source-tree.md`, `data-models.md` and `conventions.md` for structure and data.
+- `../../docs/agents/validation.md` for checks, `smoke-tests.md` for device paths, and `sensitive-areas.md` before touching auth, sync, storage, backup, native config or build identity.
+- The chapter « The app » of `../../design-system/project/README.md` before designing or restyling a screen.
 
-- **Multiple Bible translations**: 40+ versions in French, English, Hebrew, and Greek
-- **Strong's concordance**: Hebrew and Greek word studies with interlinear versions
-- **Reading plans**: Yearly and meditation-style plans with progress tracking
-- **Study tools**: Notes, highlights, bookmarks, cross-references, and verse linking
-- **Nave's Topical Bible**: Thematic Bible study reference
-- **Audio Bible**: Streaming playback with background audio support
-- **Timeline**: Biblical history visualization
-- **Offline support**: Core functionality works without internet
+## Commands
 
-**Tech Stack**: Expo SDK 58, React Native 0.88, TypeScript, Redux Toolkit, Jotai, Uniwind, SQLite
+Run them here, or from the root with `yarn workspace @bible-strong/expo <script>`.
 
-## Documentation Reference
+| Task | Command |
+| --- | --- |
+| Metro for the dev client | `yarn start` (root: `yarn dev:expo`) |
+| Web, on port 9090 | `yarn web` |
+| Typecheck, including the generated theme CSS | `yarn typecheck` |
+| Lint | `yarn lint` |
+| Tests | `yarn test`; before saying tests pass, run the whole suite with `node_modules/.bin/jest` (about 80 s) |
+| Theme CSS after a palette edit | `yarn themes:generate`, then `yarn themes:check` |
+| i18n extraction | `yarn i18n` |
+| Style guard for UI changes (root) | `yarn agents:styles:check` |
 
-For detailed documentation, see the root `../../docs/` folder:
+Use `yarn expo …`, never `npx expo …`. A JavaScript change reaches the device through Metro; native builds (dev client, production) and OTA updates are the owner's call.
 
-| Document | Description |
-|----------|-------------|
-| [docs/index.md](../../docs/index.md) | Main documentation index |
-| [docs/architecture.md](../../docs/architecture.md) | System architecture, patterns, data flows |
-| [docs/source-tree.md](../../docs/source-tree.md) | Annotated directory structure |
-| [docs/dev-guide.md](../../docs/dev-guide.md) | Development scripts, environments, deployment |
-| [docs/data-models.md](../../docs/data-models.md) | TypeScript interfaces, SQLite/Firestore schemas |
-| [docs/conventions.md](../../docs/conventions.md) | Coding patterns, best practices, anti-patterns |
+## Code rules
 
-## Essential Commands
+- **React Compiler is on.** Don't write `useMemo`, `useCallback` or `memo()`.
+- **`react-hooks/exhaustive-deps` warnings:** never add the missing dependencies, it changes when effects run. Add `// eslint-disable-next-line react-hooks/exhaustive-deps`.
+- **Keep `==` and `!=`.** Some comparisons mix strings and numbers on purpose (verse numbers, book ids). Add `// eslint-disable-next-line eqeqeq`.
+- **State.** Redux for user data synced with Firestore (`src/redux/firestoreMiddleware.ts` syncs actions when signed in) and for persistent settings; Jotai for tabs and ephemeral UI state (`src/state/tabs.ts`).
+- **Bible text.** The DOM document has its own Web styling boundary and receives serializable props (ADR-0040, ADR-0004). Never move it to nested React Native `<Text>`: it was tried and failed on layout and selection. A native rewrite would go through SwiftUI/UIKit and the Expo Modules API.
+- **i18n.** `useTranslation()` from `react-i18next`, strings in `i18n/locales/{fr,en}/translation.json`, every key in both languages. The app runs i18next 19: plurals are `key` plus `key_plural`; `key_one` and `key_other` are never read.
 
-### Development
+## Layout and styles
 
-```bash
-yarn start              # Start Expo dev server with custom dev client
-yarn android            # Run on Android device/emulator
-yarn ios                # Run on iOS device/simulator
-```
-
-### Building
-
-```bash
-# Android
-yarn build:android:dev       # Development build
-yarn build:android:staging   # Staging APK
-yarn build:android:prod      # Production AAB
-yarn build:android:prod:apk  # Production APK
-
-# iOS
-yarn build:ios:dev           # Development build
-yarn build:ios:dev-sim       # Simulator build
-yarn build:ios:staging       # Staging build
-yarn build:ios:prod          # Production build
-```
-
-### Code Quality
-
-```bash
-yarn lint                # ESLint check
-yarn lint:fix            # ESLint auto-fix
-yarn format              # Prettier format
-yarn format:check        # Prettier check
-yarn typecheck           # TypeScript type checking
-yarn test                # Run Jest tests
-yarn i18n                # Extract i18n strings
-```
-
-### Maintenance
-
-```bash
-yarn clean               # Remove node_modules and caches, reinstall
-```
-
-## Architecture
-
-### Directory Structure
-
-- `src/features/` - Feature-based modules (bible, studies, plans, search, timeline, etc.)
-- `src/common/` - Shared UI components and utilities
-- `src/redux/` - Redux store configuration and modules
-- `src/helpers/` - Utility functions and custom hooks
-- `src/themes/` - Theme definitions and colors
-- `i18n/` - Internationalization files (French/English)
-- `firebase/` - Environment-specific Firebase configurations
-
-### Key Architectural Patterns
-
-1. **Feature-Based Organization**: Each feature is self-contained with its own screens, components, and logic.
-
-2. **State Management**:
-   - **Redux Toolkit + Persist**: Global persistent state (user data, settings, highlights, notes)
-   - **Jotai atoms**: Tab state, local UI state (`src/state/tabs.ts`)
-   - **MMKV**: Fast key-value storage for Redux persist
-
-3. **Multi-Tab Bible System**: Custom tab management allowing multiple Bible instances open simultaneously (`src/features/bible/BibleTabScreen.tsx`).
-
-4. **WebView Integration**: Bible content is rendered in WebViews with custom JavaScript interfaces for interactions (`src/features/bible/bibleWebView/`).
-
-5. **Path Aliases**: Use these imports for cleaner code:
-   - `~features/` instead of relative paths
-   - `~common/`, `~helpers/`, `~redux/`, etc.
-
-### Environment Configuration
-
-The app uses environment-based builds with different Firebase configurations:
-
-- Development: `.env.development`
-- Staging: `.env.staging`
-- Production: `.env.production`
-
-### Data Storage
-
-| Data Type | Storage | Location |
-|-----------|---------|----------|
-| Bible versions | SQLite | `documentDirectory/SQLite/` (downloaded) |
-| Strong's concordance | SQLite | `documentDirectory/SQLite/` |
-| User highlights/notes | Redux + Firestore | MMKV persist + cloud sync |
-| Tab state | Jotai + MMKV | Async storage atoms |
-| App settings | Redux | MMKV persist |
-
-### Firebase Integration
-
-- **Authentication**: Email/password, Google, Apple Sign-In
-- **Firestore**: Cloud sync for user data (highlights, notes, studies, tags)
-- **Remote Config**: Feature flags (e.g., `enable_tts_public`)
-- **Analytics**: Screen tracking, user events
-- **Storage**: Bible audio files, study assets
-
-## Key Files Reference
-
-| File | Purpose |
-|------|---------|
-| `App.tsx` | App entry, font loading, splash screen |
-| `InitApp.tsx` | Provider tree setup (Theme, Redux, Navigation) |
-| `src/state/tabs.ts` | Tab state atoms and Bible tab actions |
-| `src/redux/store.ts` | Redux store configuration with persist |
-| `src/redux/modules/user.ts` | User state slice |
-| `src/navigation/MainStackNavigator.tsx` | All screen routes |
-| `src/helpers/bibleVersions.ts` | Bible version definitions |
-| `src/helpers/databases.ts` | SQLite database helpers |
-| `src/themes/index.ts` | Theme definitions |
-
-## Development Guidelines
-
-### Component Patterns
-
-```typescript
-// Typical screen component
-import { useSelector, useDispatch } from 'react-redux'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-
-const MyScreen = () => {
-  const dispatch = useDispatch()
-  const userData = useSelector(state => state.user)
-
-  return (
-    <Box className="flex-1 bg-light-grey">
-      <Text>{userData.displayName}</Text>
-      {/* content */}
-    </Box>
-  )
-}
-```
-
-### State Management Rules
-
-1. **Use Redux for**:
-   - User data that syncs with Firestore
-   - Persistent settings
-   - Data shared across many screens
-
-2. **Use Jotai for**:
-   - Tab state and navigation state
-   - Ephemeral UI state
-   - Component-local state that needs to be shared
-
-3. **Firestore Sync**: Redux middleware (`firestoreMiddleware.ts`) automatically syncs user actions to Firestore when logged in.
-
-### Bible Data Access
-
-```typescript
-import { getDatabases } from '~helpers/databases'
-import { getSQLTransaction } from '~helpers/getSQLTransaction'
-
-// Get database reference
-const databases = getDatabases()
-const db = databases.BIBLE
-
-// Execute query
-const transaction = await getSQLTransaction(db)
-const result = await transaction.executeSql('SELECT * FROM verses WHERE book = ?', [1])
-```
-
-### Adding a New Screen
-
-1. Create screen component in appropriate `src/features/` directory
-2. Add route to `src/navigation/MainStackNavigator.tsx`
-3. Add type to `src/navigation/type.ts`
-4. Navigate using: `navigation.navigate('ScreenName', { params })`
-
-### i18n Usage
-
-```typescript
-import { useTranslation } from 'react-i18next'
-
-const MyComponent = () => {
-  const { t } = useTranslation()
-  return <Text>{t('key.path')}</Text>
-}
-```
-
-Translation files: `i18n/locales/{fr,en}/translation.json`
-
-## Testing
-
-- Framework: Jest with `jest-expo`
-- Limited test coverage currently
-- Run: `yarn test`
-
-## Environment Configuration
-
-Three environments configured via `.env.*` files:
-
-- **Development** (`.env.development`): Debug builds, dev Firebase
-- **Staging** (`.env.staging`): Internal testing, staging Firebase
-- **Production** (`.env.production`): App store releases, prod Firebase
-
-Environment variables accessed via `process.env.EXPO_PUBLIC_*`
-
-## Common Tasks
-
-### Adding a New Bible Version
-
-1. Add the SQLite database file to `src/assets/bible_versions/`
-2. Update the version list in the appropriate configuration
-3. Test offline functionality
-
-### Modifying Bible Display
-
-- Edit files in `src/features/bible/bibleWebView/src/`
-- Run the development server to see changes
-- Test text selection, highlighting, and note-taking features
-
-### Working with Themes
-
-- Theme definitions are in `src/themes/`
-- User theme preferences are stored in Redux under `user.bible.settings.theme`
-- Use the `useTheme` hook to access current theme colors
-
-## React Compiler
-
-This project uses **React Compiler**. This means memoization is automatic:
-
-```typescript
-// ❌ Don't use - React Compiler handles this automatically
-const memoizedValue = useMemo(() => expensiveCalculation(a, b), [a, b])
-const memoizedCallback = useCallback(() => handleClick(id), [id])
-const MemoizedComponent = memo(MyComponent)
-
-// ✅ Just write code without manual memoization
-const value = expensiveCalculation(a, b)
-const handleClick = () => { /* ... */ }
-const MyComponent = () => { /* ... */ }
-```
-
-**Rules:**
-- **Don't use `useMemo`** - React Compiler optimizes automatically
-- **Don't use `useCallback`** - React Compiler optimizes automatically
-- **Don't use `memo()`** - React Compiler optimizes automatically
-- Write idiomatic React code, the compiler handles optimizations
-
-## Layout Components (Box, HStack, VStack)
-
-Keep these names for React Native layout. Use Uniwind `className` for static styles
-and `style` for calculated values. `HStack` defaults to `flex-row`; `VStack` defaults
-to `flex-col`. Caller classes may override those defaults. Native props and refs
-are forwarded, including through the animated variants. Merge class lists with
-`twMerge` from `~common/ui/classNames`, which understands Uniwind border-curve
-utilities without confusing them with border colors.
+Keep `Box`, `HStack` and `VStack` for React Native layout. Use Uniwind `className` for static styles and `style` for calculated values. `HStack` defaults to `flex-row`, `VStack` to `flex-col`; caller classes may override those defaults. Native props and refs are forwarded, including through the animated variants. Merge class lists with `twMerge` from `~common/ui/classNames`, which understands Uniwind border-curve utilities without confusing them with border colors.
 
 ```tsx
 <Box className="flex-1 bg-reverse p-4">
@@ -290,165 +48,34 @@ utilities without confusing them with border colors.
 </Box>
 ```
 
-Legacy shorthand props (`p`, `bg`, `row`, `fontSize`, etc.) are no longer accepted
-by `Box` or `Text`. Use `className` or native `style`. For computed theme colors,
-use the value helpers in `~themes/colorValues`. Do not add Emotion or `styled` wrappers. Run `yarn agents:styles:check` for UI changes.
+Legacy shorthand props (`p`, `bg`, `row`, `fontSize`, etc.) are no longer accepted by `Box` or `Text`. For computed theme colors, use the value helpers in `~themes/colorValues`, and `useTheme` from `~themes/ThemeProvider` when a consumer needs JavaScript values. Do not add Emotion or `styled` wrappers.
 
-Theme palettes live in `src/themes/`. `global.css` is generated from them: run
-`yarn workspace @bible-strong/expo themes:generate` after palette edits and
-`yarn workspace @bible-strong/expo themes:check` before finishing. Do not manually
-edit generated palette values. Use `useTheme` from `~themes/ThemeProvider` when a
-consumer needs JavaScript values. See ADR-0040 for the Bible DOM boundary.
+When a computed value replaces a class in one state only, put both values in `style` or omit the key: a `style` key set to `undefined` wins over the class and wipes its value.
 
-## Surfaces
+Theme palettes live in `src/themes/`; `global.css` is generated from them. Never edit generated palette values by hand.
 
-Pages, cards, rows, radii and shadows follow the chapter « The app » of
-`../../design-system/project/README.md` (ADR-0086). A hub or settings page sits on
-`bg-canvas`, set on its root `Container`, `SafeAreaBox` or `FormSheetScreen`, with its content
-in `ListSection`, `ListRow` and `Card`; a continuous list
-runs full width on the page ground. A page that scrolls runs to the bottom edge: the shared
-`ScrollView`, `FlatList` and `SectionList` pad their content with `usePageBottomInset()`, a raw
-scroll view does it itself, and only a page with fixed bottom content passes `reserveBottom` to
-its container. On a tablet the sidebar button sits over every page's top left: build a page
-header with `Header` or `FiltersHeader`, or pad a header of its own with
-`useWorkspaceHeaderInset()`. Take radii from `radii` and the one shadow from
-`floatingShadow` in `~common/ui/surfaces`. `yarn agents:styles:check` refuses new
-departures; when a change removes some, lower `scripts/agents-surface-baseline.json`
-with `node scripts/agents-surface-lint.mjs --update-baseline`.
+### Forward classes
 
-## Reanimated 4 Best Practices
+Pass `className` through shared UI wrappers to the underlying React Native component; Uniwind's Metro integration handles native styles and direct Web CSS. Do not call `useResolveClassNames` inside UI components. Use `twMerge` for wrapper defaults, with caller classes last, and keep computed values in `style`. Custom components such as `Link` must forward classes. Use `withUniwind` for third-party style slots (see `src/common/ui/classNameIcons.ts`). See ADR-0044.
 
-This project uses **React Native Reanimated 4.x**. Follow these best practices:
+### Surfaces
 
-### Prefer CSS Transitions
+Pages, cards, rows, radii and shadows follow the chapter « The app » of `../../design-system/project/README.md` (ADR-0086). A hub or settings page sits on `bg-canvas`, set on its root `Container`, `SafeAreaBox` or `FormSheetScreen`, with its content in `ListSection`, `ListRow` and `Card`; a continuous list runs full width on the page ground. A page that scrolls runs to the bottom edge: the shared `ScrollView`, `FlatList` and `SectionList` pad their content with `usePageBottomInset()`, a raw scroll view does it itself, and only a page with fixed bottom content passes `reserveBottom` to its container. On a tablet the sidebar button sits over every page's top left: build a page header with `Header` or `FiltersHeader`, or pad a header of its own with `useWorkspaceHeaderInset()`. Take radii from `radii` and the one shadow from `floatingShadow` in `~common/ui/surfaces`. `yarn agents:styles:check` refuses new departures; when a change removes some, lower `scripts/agents-surface-baseline.json` with `node scripts/agents-surface-lint.mjs --update-baseline`.
 
-Before using `useSharedValue` and `useAnimatedStyle`, prefer Reanimated's CSS transitions API:
+## Animations
 
-```typescript
-// ❌ Avoid for simple state-driven animations
-const opacity = useSharedValue(1)
-const animatedStyle = useAnimatedStyle(() => ({
-  opacity: opacity.get()
-}))
+The app runs Reanimated 4.
 
-useEffect(() => {
-  opacity.set(withTiming(isVisible ? 1 : 0))
-}, [isVisible])
+- Prefer Reanimated CSS transitions (`transitionProperty`, `transitionDuration` and `transitionTimingFunction` in `style`) for changes driven by state. Keep `useSharedValue` and `useAnimatedStyle` for gestures, scroll and multi-step interpolations.
+- Read and write shared values with `.get()` and `.set()`, never `.value`, and never during render.
+- Animate `transform` and `opacity` rather than layout properties, and clamp interpolations with `Extrapolation.CLAMP`.
 
-<Animated.View style={animatedStyle} />
+## Testing on a device
 
-// ✅ Use CSS transitions instead
-<Animated.View
-  style={{
-    opacity: isVisible ? 1 : 0,
-    transitionProperty: 'opacity',
-    transitionDuration: 300,
-  }}
-/>
-```
-
-**CSS Transition Properties:**
-
-| Property | Description | Example |
-|----------|-------------|---------|
-| `transitionProperty` | Properties to animate | `'opacity'` or `['opacity', 'transform']` |
-| `transitionDuration` | Duration in ms or string | `300`, `'300ms'`, `'0.3s'` |
-| `transitionTimingFunction` | Easing function | `'ease-in-out'`, `'linear'`, `'ease'` |
-| `transitionDelay` | Delay before starting | `100`, `'100ms'` |
-
-**Multiple properties example:**
-
-```typescript
-<Animated.View
-  style={{
-    width: isExpanded ? 240 : 120,
-    backgroundColor: isExpanded ? '#fa7f7c' : '#87cce8',
-    transitionProperty: ['width', 'backgroundColor'],
-    transitionDuration: 500,
-    transitionTimingFunction: 'ease-out',
-  }}
-/>
-```
-
-**When to use CSS transitions:**
-- Animations triggered by state changes
-- Simple transitions (opacity, transform, backgroundColor, width, height)
-- Enter/exit animations
-
-**When to use useSharedValue:**
-- Gesture-driven animations
-- Complex animations with multiple interpolations
-- Scroll-based animations
-
-### SharedValue Accessors
-
-For React Compiler compatibility, use `.get()` and `.set()` instead of `.value`:
-
-```typescript
-// ❌ Old API (still supported but not recommended)
-const sv = useSharedValue(0)
-sv.value = 100
-console.log(sv.value)
-
-// ✅ Recommended new API (React Compiler compatible)
-const sv = useSharedValue(0)
-sv.set(100)
-sv.set(v => v + 50)  // with callback
-console.log(sv.get())
-```
-
-### useAnimatedStyle
-
-```typescript
-const animatedStyle = useAnimatedStyle(() => ({
-  opacity: interpolate(scrollX.get(), [0, 100], [0, 1], Extrapolation.CLAMP),
-  transform: [{ translateX: scrollX.get() }],
-}))
-```
-
-### Important Rules
-
-1. **Never read/modify SharedValues during render** - use callbacks (`useAnimatedStyle`, `useEffect`)
-2. **Avoid mutations in `useAnimatedStyle`** - can cause infinite loops
-3. **Animated styles take priority** over static styles
-4. **Use `interpolate` with `Extrapolation.CLAMP`** to limit values
-5. **Prefer non-layout properties** (`transform`, `opacity`) over layout properties (`top`, `width`)
+- Simulators and the Android emulator are driven with argent; issue work runs in `/issue` lanes (`../../docs/agents/orchestration.md`).
+- In the simulator, App Check fails, so the study assistant, dictation and Offline copies can't be exercised for real, and the keyboard is AZERTY.
+- `src/features/entityListQuery/__tests__/highlightsQuery-test.ts` is flaky in the full Jest run. When it is the only failure, rerun it alone and rerun the suite before blaming a change.
 
 ## Agent skills
 
-### Issue tracker
-
-Issues and PRDs are tracked in GitHub Issues for `smontlouis/bible-strong`. See `../../docs/agents/issue-tracker.md`.
-
-### Triage labels
-
-Use the default canonical triage labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `../../docs/agents/triage-labels.md`.
-
-### Domain docs
-
-Read the root `CONTEXT-MAP.md`, this app's `CONTEXT.md`, and relevant root ADRs before domain work. See `../../docs/agents/domain.md`.
-
-## Harness readiness
-
-Level 1 harness docs live in `../../docs/agents/harness-readiness.md`.
-
-Validation:
-- Commands and local checks: `../../docs/agents/validation.md`
-- Smoke tests: `../../docs/agents/smoke-tests.md`
-
-Risk policy:
-- Sensitive areas: `../../docs/agents/sensitive-areas.md`
-- Observability: `../../docs/agents/observability.md`
-
-Domain language:
-- Read root `CONTEXT-MAP.md` and this app's `CONTEXT.md`.
-- Read relevant ADRs under `../../docs/adr/` when present.
-
-### Forward Tailwind classes
-
-Pass `className` through shared UI wrappers to the underlying React Native
-component; Uniwind's Metro integration handles native styles and direct Web CSS.
-Do not call `useResolveClassNames` inside UI components. Use `twMerge` for wrapper
-defaults, with caller classes last, and keep computed values in `style`. Custom
-components such as Link must forward classes. Use `withUniwind` for third-party
-style slots (see `common/ui/classNameIcons.ts`). See ADR-0044.
+Issues and PRDs are tracked in GitHub Issues for `smontlouis/bible-strong` (`../../docs/agents/issue-tracker.md`), with the triage labels of `../../docs/agents/triage-labels.md`. Domain docs: `../../docs/agents/domain.md`.

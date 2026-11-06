@@ -52,7 +52,7 @@ replie dans le verset initial.
 | « Le sang d’Abel et celui de Jésus sont mis en relation » | Explicitement textuel dans Hébreux 12.24 |
 
 La chronologie embarquée attribue actuellement à Abel une barre de -3897 à -3825, marquée
-`isFixed` ([events.txt](../../../src/assets/timeline/events.txt)). Cette durée n’est pas fournie par le
+`isFixed` ([events.txt](../../apps/expo/src/assets/timeline/events.txt)). Cette durée n’est pas fournie par le
 texte biblique. Si la timeline apparaît dans l’onboarding, elle doit montrer une **situation dans
 l’époque des origines**, ou qualifier clairement la date comme reconstruction, et non démontrer
 « combien de temps Abel a vécu ».

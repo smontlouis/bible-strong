@@ -29,7 +29,7 @@ This directory is the repo-level reference set for agents and humans working on 
 | `bible-viewer-swiftui-audit.md` | iOS-specific audit for a SwiftUI/native Bible reader. |
 | `bible-viewer-compose-audit.md` | Android-specific audit for a Jetpack Compose/native Bible reader. |
 | `bible-lausanne-source.md` | Lausanne Bible source provenance, generation, versification mapping, and validation. |
-| `agents/research/clementine-vulgate-source.md` | Clementine Vulgate source provenance, public-domain review, canon, and import recommendations. |
+| `research/clementine-vulgate-source.md` | Clementine Vulgate source provenance, public-domain review, canon, and import recommendations. |
 
 ## Resource Architecture
 
@@ -43,17 +43,16 @@ This directory is the repo-level reference set for agents and humans working on 
 | `adr/0025-use-catalog-sha-for-r2-offline-copy-updates.md` | R2 artifact delivery and catalog SHA-256 update detection. |
 | `adr/0017-own-strong-routes-under-strong.md` | Ownership and navigation of standalone Strong pages. |
 | `adr/0021-package-all-offline-resources-as-zip.md` | ZIP packaging, mobile catalog, validation, and installation strategy. |
-| `agents/research/legacy-bible-strong-upgrade-workflow.md` | Historical migration analysis for legacy Strong Bible installations. |
-| `agents/research/strong-bible-local-storage.md` | Local storage design research for canonical Bibles and Strong sidecars. |
-| `agents/research/step-interlinear-runtime-artifacts.md` | Runtime artifact research for STEP/BHG interlinear data. |
+| `research/legacy-bible-strong-upgrade-workflow.md` | Historical migration analysis for legacy Strong Bible installations. |
+| `research/strong-bible-local-storage.md` | Local storage design research for canonical Bibles and Strong sidecars. |
+| `research/step-interlinear-runtime-artifacts.md` | Runtime artifact research for STEP/BHG interlinear data. |
 
 ## Agent-Specific Docs
 
 | Document | Purpose |
 |---|---|
-| `agents/harness-readiness.md` | Current readiness level and gaps. |
-| `agents/harness-report/index.html` | Self-contained human report hub with dashboard and links to full readiness, validation, quality, risk, observability, commands, Level 2, and decisions pages. |
 | `agents/validation.md` | Canonical checks before finishing work. |
+| `agents/orchestration.md` | How work lands on `master`: directly, or through an `/issue` lane and a pull request. |
 | `agents/smoke-tests.md` | Manual/mobile smoke paths and evidence expectations. |
 | `agents/sensitive-areas.md` | Areas requiring extra care or explicit approval. |
 | `agents/observability.md` | Error reporting and debugging signals. |

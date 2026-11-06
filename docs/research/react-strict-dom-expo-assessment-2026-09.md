@@ -32,9 +32,9 @@ La compatibilité native reste partielle : la documentation signale notamment de
 
 ## Application à ce dépôt
 
-La décision récente est Uniwind/Tailwind v4 pour les primitives partagées, et HeroUI **Web** dans des adaptateurs Web. Ce n'est pas une application entièrement construite avec HeroUI Native. Une adoption RSD ferait changer les primitives et leur système de styles dans les zones migrées ; elle ne remplace pas simplement une dépendance. [ADR-0040](../../adr/0040-use-uniwind-for-expo-styles.md)
+La décision récente est Uniwind/Tailwind v4 pour les primitives partagées, et HeroUI **Web** dans des adaptateurs Web. Ce n'est pas une application entièrement construite avec HeroUI Native. Une adoption RSD ferait changer les primitives et leur système de styles dans les zones migrées ; elle ne remplace pas simplement une dépendance. [ADR-0040](../adr/0040-use-uniwind-for-expo-styles.md)
 
-Le dépôt possède déjà des frontières DOM pour les contenus de lecture et éditoriaux. L'ADR-0042 conserve HTML, CSS et les actions natives asynchrones via Expo DOM. Ces zones ne peuvent pas être considérées comme du surcoût RNW à supprimer par RSD ; conserver ou réécrire leur usage des API DOM constitue une décision distincte. [ADR-0042](../../adr/0042-share-editorial-html-through-expo-dom.md)
+Le dépôt possède déjà des frontières DOM pour les contenus de lecture et éditoriaux. L'ADR-0042 conserve HTML, CSS et les actions natives asynchrones via Expo DOM. Ces zones ne peuvent pas être considérées comme du surcoût RNW à supprimer par RSD ; conserver ou réécrire leur usage des API DOM constitue une décision distincte. [ADR-0042](../adr/0042-share-editorial-html-through-expo-dom.md)
 
 Conserver HeroUI Web dans des composants `.web` est envisageable, mais RSD n'en fournit pas automatiquement une version native. Garder des composants RN et RNW dans l'application signifie aussi qu'une migration partielle ne supprime pas nécessairement RNW du bundle. L'exemple officiel lui-même conserve cette dépendance. [Exemple Expo](https://github.com/react/react-strict-dom/blob/main/apps/expo-app/package.json)
 

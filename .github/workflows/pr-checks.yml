@@ -74,8 +74,5 @@ jobs:
       - name: Format check
         run: yarn format:check
 
-      - name: Agent domain quality check
-        run: yarn agents:quality:check
-
       - name: Agent architecture check
         run: yarn agents:architecture:check

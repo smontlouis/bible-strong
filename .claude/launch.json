@@ -135,7 +135,6 @@
       "runtimeArgs": [
         "CLOUDFLARE_INCLUDE_PROCESS_ENV=true",
         "RESOURCE_API_URL=http://127.0.0.1:8788",
-        "ENTITY_CARD_BASE_URL=http://127.0.0.1:8792/entity-cards",
         "yarn",
         "workspace",
         "@bible-strong/site",
@@ -146,20 +145,6 @@
         "3214"
       ],
       "port": 3214
-    },
-    {
-      "name": "atlas-cards-mirror",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": [
-        "-m",
-        "http.server",
-        "8792",
-        "--bind",
-        "127.0.0.1",
-        "--directory",
-        "/private/tmp/claude-501/-Users-stephane-Projects-bible-strong-bible-strong-app/79ffde6c-666c-4db0-a5aa-c9e3ec120458/scratchpad/cards-mirror"
-      ],
-      "port": 8792
     }
   ]
 }

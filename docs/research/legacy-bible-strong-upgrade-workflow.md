@@ -24,7 +24,7 @@ planifie donc deux téléchargements séquentiels :
 Le changement d’URL de `.json` vers `.json.zip` n’invalide pas à lui seul une installation
 existante. Il n’existe actuellement aucune détection automatique de nouvelle révision biblique :
 `getIfVersionNeedsUpdate` retourne toujours `false`
-([`bibleVersions.ts:22`](../../../src/helpers/bibleVersions.ts#L22)). Un utilisateur qui ne demande
+([`bibleVersions.ts:22`](../../apps/expo/src/helpers/bibleVersions.ts#L22)). Un utilisateur qui ne demande
 jamais Strong et ne relance jamais explicitement le téléchargement peut donc conserver
 indéfiniment son ancien texte.
 
@@ -35,30 +35,30 @@ indéfiniment son ancien texte.
 Au démarrage, la migration historique cherche les fichiers `bible-*.json` à la racine et dans
 `fr/` ou `en/`, transforme le nom en identifiant de version, puis importe le JSON dans
 `bibles.sqlite`
-([`bibleMigration.ts:76`](../../../src/helpers/bibleMigration.ts#L76),
-[`bibleMigration.ts:95`](../../../src/helpers/bibleMigration.ts#L95),
-[`bibleMigration.ts:131`](../../../src/helpers/bibleMigration.ts#L131)). DBY, DBR et LSG ne font
+([`bibleMigration.ts:76`](../../apps/expo/src/helpers/bibleMigration.ts#L76),
+[`bibleMigration.ts:95`](../../apps/expo/src/helpers/bibleMigration.ts#L95),
+[`bibleMigration.ts:131`](../../apps/expo/src/helpers/bibleMigration.ts#L131)). DBY, DBR et LSG ne font
 pas partie des versions exclues : seules INT, INT_EN, LSGS et KJVS sont classées comme anciennes
 « Strong versions »
-([`bibleMigration.ts:104`](../../../src/helpers/bibleMigration.ts#L104),
-[`bibleVersions.ts:765`](../../../src/helpers/bibleVersions.ts#L765)).
+([`bibleMigration.ts:104`](../../apps/expo/src/helpers/bibleMigration.ts#L104),
+[`bibleVersions.ts:765`](../../apps/expo/src/helpers/bibleVersions.ts#L765)).
 
 Le fichier JSON n’est supprimé qu’après une insertion réussie
-([`bibleMigration.ts:138`](../../../src/helpers/bibleMigration.ts#L138)). La migration est suivie
+([`bibleMigration.ts:138`](../../apps/expo/src/helpers/bibleMigration.ts#L138)). La migration est suivie
 par version et peut reprendre après un redémarrage. Elle est tentée au plus trois fois
-([`bibleMigration.ts:7`](../../../src/helpers/bibleMigration.ts#L7),
-[`bibleMigration.ts:171`](../../../src/helpers/bibleMigration.ts#L171)). Le démarrage ouvre d’abord
+([`bibleMigration.ts:7`](../../apps/expo/src/helpers/bibleMigration.ts#L7),
+[`bibleMigration.ts:171`](../../apps/expo/src/helpers/bibleMigration.ts#L171)). Le démarrage ouvre d’abord
 `bibles.sqlite`, exécute cette migration si nécessaire, puis signale aux lecteurs de recharger
 leurs chapitres
-([`InitHooks.tsx:50`](../../../src/common/InitHooks.tsx#L50),
-[`InitHooks.tsx:71`](../../../src/common/InitHooks.tsx#L71),
-[`InitHooks.tsx:100`](../../../src/common/InitHooks.tsx#L100)).
+([`InitHooks.tsx:50`](../../apps/expo/src/common/InitHooks.tsx#L50),
+[`InitHooks.tsx:71`](../../apps/expo/src/common/InitHooks.tsx#L71),
+[`InitHooks.tsx:100`](../../apps/expo/src/common/InitHooks.tsx#L100)).
 
 L’importeur accepte encore explicitement l’ancien format où chaque verset est une simple chaîne.
 Il l’enregistre avec une présentation vide et sans métadonnées de révision
-([`biblesDb.ts:649`](../../../src/helpers/biblesDb.ts#L649),
-[`biblesDb.ts:671`](../../../src/helpers/biblesDb.ts#L671),
-[`biblesDb.ts:732`](../../../src/helpers/biblesDb.ts#L732)).
+([`biblesDb.ts:649`](../../apps/expo/src/helpers/biblesDb.ts#L649),
+[`biblesDb.ts:671`](../../apps/expo/src/helpers/biblesDb.ts#L671),
+[`biblesDb.ts:732`](../../apps/expo/src/helpers/biblesDb.ts#L732)).
 
 ### 2. L’utilisateur avait déjà migré sa Bible vers `bibles.sqlite`
 
@@ -67,14 +67,14 @@ les nouvelles colonnes de présentation et de publication si elles n’existent 
 la Bible. Les anciennes lignes de `versions_meta` restent donc présentes avec
 `text_revision = NULL`, `text_sha256 = NULL`, `source_sha256 = NULL` et
 `schema_version = NULL`
-([`biblesDb.ts:196`](../../../src/helpers/biblesDb.ts#L196),
-[`biblesDb.ts:204`](../../../src/helpers/biblesDb.ts#L204)).
+([`biblesDb.ts:196`](../../apps/expo/src/helpers/biblesDb.ts#L196),
+[`biblesDb.ts:204`](../../apps/expo/src/helpers/biblesDb.ts#L204)).
 
 La Bible reste installée parce que la détection normale vérifie uniquement la présence de son
 identifiant dans `versions_meta`, et non son URL, son checksum ou sa révision
-([`biblesDb.ts:562`](../../../src/helpers/biblesDb.ts#L562)). Le lecteur continue à récupérer les
+([`biblesDb.ts:562`](../../apps/expo/src/helpers/biblesDb.ts#L562)). Le lecteur continue à récupérer les
 versets depuis la table partagée
-([`bibleContentAccess.ts:119`](../../../src/features/resources/bibleContentAccess.ts#L119)).
+([`bibleContentAccess.ts:119`](../../apps/expo/src/features/resources/bibleContentAccess.ts#L119)).
 
 ## Différence entre « installée » et « compatible Strong »
 
@@ -86,14 +86,14 @@ Ces notions sont distinctes :
 
 La disponibilité du sidecar retourne `base-missing` si aucune métadonnée de Bible n’existe, puis
 `base-incompatible` si les deux empreintes ne correspondent pas
-([`strongBibleSidecar.ts:68`](../../../src/helpers/strongBibleSidecar.ts#L68)). Une ancienne Bible
+([`strongBibleSidecar.ts:68`](../../apps/expo/src/helpers/strongBibleSidecar.ts#L68)). Une ancienne Bible
 migrée possède bien une ligne de métadonnées, mais ses deux empreintes sont absentes : elle apparaît
 donc comme Bible installée dans les sélecteurs tout en étant `base-incompatible` pour Strong.
 
 Cette séparation empêche d’appliquer les offsets du nouvel index à un texte ancien. Le contrat de
 publication impose d’ailleurs les mêmes `textRevision` et `textSha256` aux deux archives
-([`strongBiblePublications.ts:83`](../../../src/helpers/strongBiblePublications.ts#L83),
-[`strongBiblePublications.ts:100`](../../../src/helpers/strongBiblePublications.ts#L100)).
+([`strongBiblePublications.ts:83`](../../apps/expo/src/helpers/strongBiblePublications.ts#L83),
+[`strongBiblePublications.ts:100`](../../apps/expo/src/helpers/strongBiblePublications.ts#L100)).
 
 ## Que se passe-t-il quand l’utilisateur télécharge Strong ?
 
@@ -103,30 +103,30 @@ Les appels des surfaces Strong utilisent `createStrongSidecarDownloadPlan`. Pour
 1. `bible:DBY`, pointant vers le nouveau `bible-dby.json.zip` ;
 2. `bible-strong:DBY`, avec `dependsOnId: bible:DBY`.
 
-([`downloadItemFactory.ts:78`](../../../src/helpers/downloadItemFactory.ts#L78),
-[`downloadItemFactory.ts:20`](../../../src/helpers/downloadItemFactory.ts#L20)).
+([`downloadItemFactory.ts:78`](../../apps/expo/src/helpers/downloadItemFactory.ts#L78),
+[`downloadItemFactory.ts:20`](../../apps/expo/src/helpers/downloadItemFactory.ts#L20)).
 
 La file n’autorise le second item à démarrer qu’après l’état `completed` de la Bible. Si la Bible
 échoue ou est annulée, le sidecar est bloqué
-([`downloadQueueScheduling.ts:8`](../../../src/helpers/downloadQueueScheduling.ts#L8)). Ce
+([`downloadQueueScheduling.ts:8`](../../apps/expo/src/helpers/downloadQueueScheduling.ts#L8)). Ce
 comportement est aussi couvert par le test du plan de téléchargement
-([`strongBibleDownloadPlan-test.ts:27`](../../../src/helpers/__tests__/strongBibleDownloadPlan-test.ts#L27)).
+([`strongBibleDownloadPlan-test.ts:27`](../../apps/expo/src/helpers/__tests__/strongBibleDownloadPlan-test.ts#L27)).
 
 Le ZIP canonique est téléchargé dans le cache, vérifié, décompressé, relu et validé avant
 l’insertion
-([`downloadBibleToSqlite.ts:53`](../../../src/helpers/downloadBibleToSqlite.ts#L53),
-[`downloadBibleToSqlite.ts:76`](../../../src/helpers/downloadBibleToSqlite.ts#L76),
-[`downloadBibleToSqlite.ts:125`](../../../src/helpers/downloadBibleToSqlite.ts#L125)).
+([`downloadBibleToSqlite.ts:53`](../../apps/expo/src/helpers/downloadBibleToSqlite.ts#L53),
+[`downloadBibleToSqlite.ts:76`](../../apps/expo/src/helpers/downloadBibleToSqlite.ts#L76),
+[`downloadBibleToSqlite.ts:125`](../../apps/expo/src/helpers/downloadBibleToSqlite.ts#L125)).
 L’insertion remplace la version existante dans une transaction SQLite exclusive et écrit ensuite
 les nouvelles métadonnées
-([`biblesDb.ts:627`](../../../src/helpers/biblesDb.ts#L627),
-[`biblesDb.ts:635`](../../../src/helpers/biblesDb.ts#L635),
-[`biblesDb.ts:732`](../../../src/helpers/biblesDb.ts#L732)). Une erreur avant l’insertion ne touche
+([`biblesDb.ts:627`](../../apps/expo/src/helpers/biblesDb.ts#L627),
+[`biblesDb.ts:635`](../../apps/expo/src/helpers/biblesDb.ts#L635),
+[`biblesDb.ts:732`](../../apps/expo/src/helpers/biblesDb.ts#L732)). Une erreur avant l’insertion ne touche
 pas l’ancienne Bible ; une erreur dans la transaction doit provoquer son rollback.
 
 Le sidecar refuse également de s’installer directement si la Bible canonique compatible n’est pas
 présente
-([`strongBibleSidecar.ts:140`](../../../src/helpers/strongBibleSidecar.ts#L140)). Autrement dit,
+([`strongBibleSidecar.ts:140`](../../apps/expo/src/helpers/strongBibleSidecar.ts#L140)). Autrement dit,
 depuis l’UI normale, « télécharger Strong » retélécharge bien la Bible lorsque sa base est ancienne,
 mais ne la retélécharge pas si elle possède déjà la bonne révision.
 
@@ -137,35 +137,35 @@ mais ne la retélécharge pas si elle possède déjà la bonne révision.
 Le texte normal est toujours lu dans `bibles.sqlite`. Si le mode Strong est activé mais que le
 sidecar manque, est incompatible ou échoue, le lecteur capture l’erreur et renvoie le texte normal
 sans spans Strong
-([`bibleContentAccess.ts:128`](../../../src/features/resources/bibleContentAccess.ts#L128),
-[`bibleContentAccess.ts:136`](../../../src/features/resources/bibleContentAccess.ts#L136)).
+([`bibleContentAccess.ts:128`](../../apps/expo/src/features/resources/bibleContentAccess.ts#L128),
+[`bibleContentAccess.ts:136`](../../apps/expo/src/features/resources/bibleContentAccess.ts#L136)).
 
 ### Pour un JSON historique resté sur disque
 
 Le lecteur régulier n’ouvre plus directement les anciens JSON et interroge uniquement
 `bibles.sqlite`
-([`bibleContentAccess.ts:119`](../../../src/features/resources/bibleContentAccess.ts#L119)).
+([`bibleContentAccess.ts:119`](../../apps/expo/src/features/resources/bibleContentAccess.ts#L119)).
 La disponibilité suit désormais exactement cette capacité de lecture : si l’import SQLite n’a pas
 réussi, la Bible est déclarée absente même si `bible-DBY.json` existe encore
-([`resourceAvailability.ts:131`](../../../src/features/resources/resourceAvailability.ts#L131)).
+([`resourceAvailability.ts:131`](../../apps/expo/src/features/resources/resourceAvailability.ts#L131)).
 
 Ainsi, si l’import échoue trois fois et que la migration globale cesse de réessayer, le fichier
 historique est conservé sur disque, mais il ne crée plus de faux état « disponible ». L’utilisateur
 peut télécharger la publication canonique pour rétablir une copie lisible
-([`bibleMigration.ts:151`](../../../src/helpers/bibleMigration.ts#L151),
-[`bibleMigration.ts:171`](../../../src/helpers/bibleMigration.ts#L171)).
+([`bibleMigration.ts:151`](../../apps/expo/src/helpers/bibleMigration.ts#L151),
+[`bibleMigration.ts:171`](../../apps/expo/src/helpers/bibleMigration.ts#L171)).
 
 ## Effet du passage des URLs JSON aux ZIP
 
 Pour LSG, DBY et DBR, la factory de téléchargement ignore désormais l’ancienne entrée
 `biblesRef` et choisit l’URL ZIP de la publication ainsi que son manifeste de checksums
-([`downloadItemFactory.ts:23`](../../../src/helpers/downloadItemFactory.ts#L23),
-[`strongBiblePublications.ts:45`](../../../src/helpers/strongBiblePublications.ts#L45)).
+([`downloadItemFactory.ts:23`](../../apps/expo/src/helpers/downloadItemFactory.ts#L23),
+[`strongBiblePublications.ts:45`](../../apps/expo/src/helpers/strongBiblePublications.ts#L45)).
 
 Cela ne modifie que les **prochains téléchargements**. L’application ne mémorise pas l’URL d’origine
 dans `versions_meta`, et la détection d’installation ne la compare jamais. De plus, la détection de
 mise à jour des Bibles est actuellement désactivée par son `return false`
-([`bibleVersions.ts:22`](../../../src/helpers/bibleVersions.ts#L22)).
+([`bibleVersions.ts:22`](../../apps/expo/src/helpers/bibleVersions.ts#L22)).
 
 Conséquences :
 

@@ -166,7 +166,7 @@ Executed against local Postgres 17 and the complete LSG publication revision `ls
 - Automated source-orchestration tests additionally cover unsupported publication, malformed remote content, and remote coverage fallback.
 - No hosted database, remote publication upload, Worker deployment, or Cloudflare infrastructure was used.
 
-The exhaustive surface and identity inventory is recorded in [resource-coverage-matrix.md](resource-coverage-matrix.md).
+The exhaustive surface and identity inventory is recorded in [resource-coverage-matrix.md](../research/resource-coverage-matrix.md).
 
 ## BHG And Its Interlinear Indexes Follow The Catalog — before releasing 27.2
 

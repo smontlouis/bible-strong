@@ -73,4 +73,4 @@ Les trois sidecars vivent dans un sous-répertoire du répertoire SQLite partag�
 qu’à la demande.
 
 La décision durable est enregistrée dans
-[ADR-0013](../../adr/0013-pair-canonical-bible-text-with-optional-strong-sidecars.md).
+[ADR-0013](../adr/0013-pair-canonical-bible-text-with-optional-strong-sidecars.md).

@@ -21,7 +21,6 @@ Copy `apps/expo/.env.example` to the appropriate app-local environment file and 
 | Format check                    | `yarn format:check`                                                                                                        | Before finishing docs/code formatting-sensitive changes                             |
 | Agent architecture              | `yarn agents:architecture:check`                                                                                           | Feature boundary, helper, SQLite, Firebase, logging, or shared architecture changes |
 | Primitive styling guard         | `yarn agents:styles:check`                                                                                                 | UI or component changes; rejects new feature-level `styled` usage                   |
-| Agent domain quality            | `yarn agents:quality:check`                                                                                                | Feature/domain changes, PR readiness, or harness changes                            |
 | i18n extraction                 | `yarn workspace @bible-strong/expo i18n`                                                                                 | Mobile user-facing string additions or translation key changes                      |
 | Resource architecture           | `yarn resources:architecture:check`                                                                                        | Resource domain, service, runtime, or UI access changes                             |
 | Resource unit tests             | `yarn resources:test`                                                                                                      | Bundle, importer, API, repository, or runtime changes                               |
@@ -32,9 +31,7 @@ Copy `apps/expo/.env.example` to the appropriate app-local environment file and 
 | Complete BHG interlinear parity | Run the relevant Resource service integration test with `RESOURCE_BHG_BUNDLE_ROOT` and `RESOURCE_INTERLINEAR_BUNDLES_ROOT` | Interlinear publication, importer, API, or sidecar changes                          |
 | Complete Strong lexicon parity  | Run the relevant Resource service integration test with `RESOURCE_STRONG_LEXICON_BUNDLES_ROOT`                             | Strong lexicon publication, importer, API, module, or Offline-copy changes          |
 
-`yarn agents:architecture:check` regenerates `docs/agents/architecture-lint.md` and `.scratch/architecture/architecture.json`, then fails on high-risk boundary errors. Warnings are intentionally non-blocking for the current brownfield baseline.
-
-`yarn agents:quality:check` regenerates `docs/agents/quality-score.md` and `.scratch/quality/quality.json`, then fails if a feature domain drops below the conservative readiness threshold.
+`yarn agents:architecture:check` writes `.scratch/architecture/architecture-lint.md` and `.scratch/architecture/architecture.json`, then fails on high-risk boundary errors. Warnings are intentionally non-blocking for the current brownfield baseline.
 
 `yarn agents:styles:check` compares tracked and untracked TypeScript files with the versioned brownfield baseline in `scripts/agents-style-baseline.json`. Existing Emotion usage is tolerated, but increasing it or adding it to another feature file fails consistently in local clones and CI. Shared primitive implementations under `apps/expo/src/common/ui/` are the normal exception; a rare feature-level exception must include `// harness-allow-styled: <reason>`.
 

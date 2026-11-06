@@ -168,8 +168,8 @@ liste de versets focalisés dans ce chapitre.
 
 Le parseur structuré des notes conserve les attributs XML, sauf `ref@id` dont
 les éventuelles bornes relatives sont normalisées en OSIS complet
-([`canonicalBibleNotes.ts:64`](../../../src/helpers/canonicalBibleNotes.ts#L64),
-[`canonicalBibleNotes.ts:82`](../../../src/helpers/canonicalBibleNotes.ts#L82)).
+([`canonicalBibleNotes.ts:64`](../../apps/expo/src/helpers/canonicalBibleNotes.ts#L64),
+[`canonicalBibleNotes.ts:82`](../../apps/expo/src/helpers/canonicalBibleNotes.ts#L82)).
 
 La bottom sheet :
 
@@ -177,11 +177,11 @@ La bottom sheet :
 - rend le contenu de `<ref>` comme lien ;
 - transmet directement cet identifiant au callback.
 
-([`CanonicalBibleNoteSheet.tsx:73`](../../../src/features/bible/CanonicalBibleNoteSheet.tsx#L73)).
+([`CanonicalBibleNoteSheet.tsx:73`](../../apps/expo/src/features/bible/CanonicalBibleNoteSheet.tsx#L73)).
 
 Le viewer appelle ensuite `osisToBibleReferenceTarget`, ferme la note et pousse
 une route `/bible-view`
-([`BibleViewer.tsx:732`](../../../src/features/bible/BibleViewer.tsx#L732)).
+([`BibleViewer.tsx:732`](../../apps/expo/src/features/bible/BibleViewer.tsx#L732)).
 
 Le convertisseur direct :
 
@@ -192,14 +192,14 @@ Le convertisseur direct :
 - ouvre une référence de chapitre sur son verset 1 ;
 - renvoie `undefined` pour un livre non pris en charge.
 
-([`bcvParser.ts:67`](../../../src/helpers/bcvParser.ts#L67),
-[`bcvParser.ts:89`](../../../src/helpers/bcvParser.ts#L89),
-[`bcvParser.ts:107`](../../../src/helpers/bcvParser.ts#L107),
-[`bcvParser.ts:146`](../../../src/helpers/bcvParser.ts#L146)).
+([`bcvParser.ts:67`](../../apps/expo/src/helpers/bcvParser.ts#L67),
+[`bcvParser.ts:89`](../../apps/expo/src/helpers/bcvParser.ts#L89),
+[`bcvParser.ts:107`](../../apps/expo/src/helpers/bcvParser.ts#L107),
+[`bcvParser.ts:146`](../../apps/expo/src/helpers/bcvParser.ts#L146)).
 
 Les plages interchapitres ouvrent volontairement leur première borne sans
 `focusVerses`, comportement couvert par un test
-([`bcvParser-test.ts:157`](../../../src/helpers/__tests__/bcvParser-test.ts#L157)).
+([`bcvParser-test.ts:157`](../../apps/expo/src/helpers/__tests__/bcvParser-test.ts#L157)).
 
 ## Faut-il utiliser le BCV Parser ?
 
@@ -208,8 +208,8 @@ Les plages interchapitres ouvrent volontairement leur première borne sans
 `parseInlineBibleReferences` et la dépendance
 `bible-passage-reference-parser` servent à reconnaître une référence **dans du
 texte humain** français ou anglais, puis à produire de l’OSIS
-([`bcvParser.ts:42`](../../../src/helpers/bcvParser.ts#L42),
-[`bcvParser.ts:207`](../../../src/helpers/bcvParser.ts#L207)).
+([`bcvParser.ts:42`](../../apps/expo/src/helpers/bcvParser.ts#L42),
+[`bcvParser.ts:207`](../../apps/expo/src/helpers/bcvParser.ts#L207)).
 
 La documentation du projet amont décrit exactement cet usage : repérer une
 chaîne comme `John 3:16`, gérer les ambiguïtés et la convertir en forme machine

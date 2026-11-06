@@ -3,9 +3,8 @@ import path from 'node:path'
 
 const repoRoot = process.cwd()
 const srcDir = path.join(repoRoot, 'apps/expo/src')
-const docsDir = path.join(repoRoot, 'docs/agents')
 const scratchDir = path.join(repoRoot, '.scratch/architecture')
-const markdownPath = path.join(docsDir, 'architecture-lint.md')
+const markdownPath = path.join(scratchDir, 'architecture-lint.md')
 const jsonPath = path.join(scratchDir, 'architecture.json')
 const checkMode = process.argv.includes('--check')
 
@@ -172,7 +171,6 @@ ${
 }
 `
 
-fs.mkdirSync(docsDir, { recursive: true })
 fs.mkdirSync(scratchDir, { recursive: true })
 fs.writeFileSync(markdownPath, markdown)
 fs.writeFileSync(

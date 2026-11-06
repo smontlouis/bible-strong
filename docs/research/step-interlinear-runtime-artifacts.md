@@ -6,7 +6,7 @@ consommateurs actuels de l’application._
 ## Conclusion
 
 La release intégrée est
-[`bible-step-interlinear-runtime-v4`](../../../../bible-lexicon-maker/outputs/releases/bible-step-interlinear-runtime-v4/catalog.json),
+[`bible-step-interlinear-runtime-v4`](../../../bible-lexicon-maker/outputs/releases/bible-step-interlinear-runtime-v4/catalog.json),
 pas le ledger d’authoring. Elle matérialise déjà exactement le modèle envisagé :
 
 - `bible-step.json` est une Bible autonome en langues originales ;
@@ -22,9 +22,9 @@ autonomes et dupliquent le texte original.
 ## Artefacts exacts
 
 Le contrat et les commandes sont documentés par
-[`docs/step-interlinear-release.md`](../../../../bible-lexicon-maker/docs/step-interlinear-release.md)
+[`docs/step-interlinear-release.md`](../../../bible-lexicon-maker/docs/step-interlinear-release.md)
 et générés par
-[`src/stepInterlinearRuntimePublication.ts`](../../../../bible-lexicon-maker/src/stepInterlinearRuntimePublication.ts).
+[`src/stepInterlinearRuntimePublication.ts`](../../../bible-lexicon-maker/src/stepInterlinearRuntimePublication.ts).
 La commande est `npm run strong:release:step-interlinear:runtime`.
 
 | Artefact runtime v4 | Taille | SHA-256 |
@@ -46,8 +46,8 @@ Le générateur V4 crée des archives ZIP déterministes séparées :
 | `bible-step-interlinear-en.sqlite.zip` | 20 176 808 octets |
 
 Les archives séparées correspondent au modèle canonique + sidecar déjà pris en charge dans
-[`downloadBibleToSqlite.ts`](../../../src/helpers/downloadBibleToSqlite.ts) et
-[`strongBibleSidecar.ts`](../../../src/helpers/strongBibleSidecar.ts). Une archive commune des
+[`downloadBibleToSqlite.ts`](../../apps/expo/src/helpers/downloadBibleToSqlite.ts) et
+[`strongBibleSidecar.ts`](../../apps/expo/src/helpers/strongBibleSidecar.ts). Une archive commune des
 trois fichiers ferait 29 605 024 octets, mais obligerait chaque lecteur à télécharger les deux
 langues et empêcherait l’installation indépendante de l’index.
 
@@ -107,7 +107,7 @@ un chapitre par les clés de relation plutôt que de scanner les 607 175 segment
 ## Provenance et licence
 
 Le ledger est construit depuis les quatre fichiers TAHOT et les deux fichiers TAGNT listés dans
-[`stepInterlinearPublication.ts`](../../../../bible-lexicon-maker/src/stepInterlinearPublication.ts).
+[`stepInterlinearPublication.ts`](../../../bible-lexicon-maker/src/stepInterlinearPublication.ts).
 Les en-têtes locaux indiquent « Data created by www.STEPBible.org based on work at Tyndale House
 Cambridge (CC BY 4.0) » et demandent de référer les utilisateurs vers `github.com/STEPBible`.
 La fiche de téléchargement et les mentions légales conservent cette attribution. Le
@@ -116,17 +116,17 @@ La fiche de téléchargement et les mentions légales conservent cette attributi
 ## Ce qui est remplacé dans l’application
 
 Les versions actuelles sont `INT` et `INT_EN` dans
-[`bibleVersions.ts`](../../../src/helpers/bibleVersions.ts). Chacune pointe vers un
+[`bibleVersions.ts`](../../apps/expo/src/helpers/bibleVersions.ts). Chacune pointe vers un
 `interlineaire.sqlite` localisé
-([`firebase.ts`](../../../src/helpers/firebase.ts),
-[`requireBiblePath.ts`](../../../src/helpers/requireBiblePath.ts)) et
-[`loadInterlineaireChapter.ts`](../../../src/helpers/loadInterlineaireChapter.ts) lit une table
+([`firebase.ts`](../../apps/expo/src/helpers/firebase.ts),
+[`requireBiblePath.ts`](../../apps/expo/src/helpers/requireBiblePath.ts)) et
+[`loadInterlineaireChapter.ts`](../../apps/expo/src/helpers/loadInterlineaireChapter.ts) lit une table
 unique `INTERLINEAIRE(Livre, Chapitre, Verset, Texte)`.
 
 Les fichiers CDN historiques font environ 20,96 Mo (français) et 22,03 Mo (anglais). Leur champ
 `Texte` encode chaque mot avec des séparateurs `@` et `#`; le rendu le reparcourt dans
-[`InterlinearVerse.tsx`](../../../src/features/bible/BibleDOM/InterlinearVerse.tsx) et
-[`InterlinearVerseComplete.tsx`](../../../src/features/bible/BibleDOM/InterlinearVerseComplete.tsx).
+[`InterlinearVerse.tsx`](../../apps/expo/src/features/bible/BibleDOM/InterlinearVerse.tsx) et
+[`InterlinearVerseComplete.tsx`](../../apps/expo/src/features/bible/BibleDOM/InterlinearVerseComplete.tsx).
 Ce format ne correspond pas au nouveau schéma relationnel.
 
 Les principaux points de remplacement sont :
@@ -134,13 +134,13 @@ Les principaux points de remplacement sont :
 1. fusionner les deux identités visibles `INT`/`INT_EN` en une seule version biblique originale,
    dont la Bible canonique est importée depuis `bible-step.json`;
 2. remplacer le cas spécial `INTERLINEAIRE` de
-   [`bibleContentAccess.ts`](../../../src/features/resources/bibleContentAccess.ts) par une lecture
+   [`bibleContentAccess.ts`](../../apps/expo/src/features/resources/bibleContentAccess.ts) par une lecture
    normale du JSON, puis un overlay optionnel de tokens/segments;
 3. remplacer la disponibilité, le téléchargement et la suppression spéciaux dans
-   [`resourceAvailability.ts`](../../../src/features/resources/resourceAvailability.ts),
-   [`downloadItemFactory.ts`](../../../src/helpers/downloadItemFactory.ts),
-   [`resourceDatabaseInstallation.ts`](../../../src/helpers/resourceDatabaseInstallation.ts) et
-   [`VersionSelectorItem.tsx`](../../../src/features/bible/VersionSelectorItem.tsx) par le modèle
+   [`resourceAvailability.ts`](../../apps/expo/src/features/resources/resourceAvailability.ts),
+   [`downloadItemFactory.ts`](../../apps/expo/src/helpers/downloadItemFactory.ts),
+   [`resourceDatabaseInstallation.ts`](../../apps/expo/src/helpers/resourceDatabaseInstallation.ts) et
+   [`VersionSelectorItem.tsx`](../../apps/expo/src/features/bible/VersionSelectorItem.tsx) par le modèle
    « Bible de base + index interlinéaire localisé »;
 4. faire consommer aux deux rendus interlinéaires des objets structurés plutôt que la chaîne
    `@/#`, tout en conservant l’ouverture du lexique à partir des identités Strong;

@@ -391,9 +391,9 @@ L’agent spécialisé devrait produire :
 
 ## 13. Références disponibles dans le dépôt
 
-- `docs/agents/research/onboarding-biblical-journey-candidates.md` : storyboard long, variantes bibliques et garde-fous ;
-- `docs/agents/research/onboarding-biblical-narrative-paths.md` : audit biblique du parcours Abel ;
-- `docs/agents/research/mobile-onboarding-best-practices-2026.md` : pratiques d’onboarding, accessibilité, instrumentation et futur premium IA ;
+- `docs/research/onboarding-biblical-journey-candidates.md` : storyboard long, variantes bibliques et garde-fous ;
+- `docs/research/onboarding-biblical-narrative-paths.md` : audit biblique du parcours Abel ;
+- `docs/research/mobile-onboarding-best-practices-2026.md` : pratiques d’onboarding, accessibilité, instrumentation et futur premium IA ;
 - `src/themes/colors.ts` : palette light exacte ;
 - `src/redux/modules/user/tags.ts` et `tagAssignments.ts` : types d’objets taguables ;
 - `src/features/studyRelations/domain.ts` : modèle des relations ;
