@@ -1,6 +1,11 @@
 import { appLogger } from '~helpers/agentObservability'
 import { applyAnnotateIntent, decodeAnnotateIntent, getAnnotateRefusal } from './annotate'
 import { applyOpenIntent, decodeOpenIntent, getOpenRefusal } from './open'
+import {
+  applyPersonalSheetIntent,
+  decodePersonalSheetIntent,
+  getPersonalSheetRefusal,
+} from './personalSheets'
 import { applyReadingIntent, decodeReadingIntent, getReadingRefusal } from './reading'
 import { applySelectIntent, decodeSelectIntent, getSelectRefusal } from './select'
 import type { ReaderIntent, ReaderOutcome, ReaderRule } from './types'
@@ -11,6 +16,7 @@ export type {
   OpenIntent,
   OpenOrigin,
   OpenTarget,
+  PersonalSheetIntent,
   ReaderIntent,
   ReaderIntentHandler,
   ReaderIntentMessage,
@@ -24,6 +30,7 @@ export type {
   ReaderPresentation,
   ReaderRoute,
   ReaderSnapshot,
+  ReaderTagsSheet,
   ReaderWorld,
 } from './world'
 
@@ -34,7 +41,8 @@ const decodeIntent = (value: unknown): ReaderIntent | undefined =>
   decodeReadingIntent(value) ??
   decodeOpenIntent(value) ??
   decodeSelectIntent(value) ??
-  decodeAnnotateIntent(value)
+  decodeAnnotateIntent(value) ??
+  decodePersonalSheetIntent(value)
 
 const decodeMessage = (message: unknown): { tabId: string; intent: ReaderIntent } | undefined => {
   if (!isRecord(message) || typeof message.tabId !== 'string' || !message.tabId) return undefined
@@ -59,6 +67,13 @@ const getRefusal = (
     case 'erase-word-annotations':
     case 'select-word-annotation':
       return getAnnotateRefusal(intent, context)
+    case 'open-highlight-tags':
+    case 'open-annotation-tags':
+    case 'open-verse-tags':
+    case 'open-bookmark':
+    case 'open-cross-version-annotations':
+    case 'open-verse-relations':
+      return getPersonalSheetRefusal(intent, context)
     default:
       return getReadingRefusal(intent, context)
   }
@@ -81,6 +96,13 @@ const applyIntent = (
     case 'erase-word-annotations':
     case 'select-word-annotation':
       return applyAnnotateIntent(intent, context)
+    case 'open-highlight-tags':
+    case 'open-annotation-tags':
+    case 'open-verse-tags':
+    case 'open-bookmark':
+    case 'open-cross-version-annotations':
+    case 'open-verse-relations':
+      return applyPersonalSheetIntent(intent, context)
     default:
       return applyReadingIntent(intent, context)
   }

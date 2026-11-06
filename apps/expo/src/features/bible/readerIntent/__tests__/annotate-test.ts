@@ -117,6 +117,7 @@ const setup = ({
     openStudyObject: jest.fn(),
     openUrl: jest.fn(async () => undefined),
     notify: jest.fn(),
+    openTags: jest.fn(),
     haptic: jest.fn(),
     t: key => key,
   }
@@ -134,6 +135,9 @@ const setup = ({
       interlinearReadingVersions: [],
       parallelColumnVersions: [],
       inlineCommentaries: { chips: [], indexes: [] },
+      bookmarks: {},
+      wordAnnotations: {},
+      wordAnnotationsInOtherVersions: {},
       ...snapshot,
     }),
     surface: jest.fn(),

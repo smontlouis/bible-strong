@@ -84,6 +84,7 @@ const setup = ({
     openStudyObject: jest.fn(),
     openUrl: jest.fn(async () => undefined),
     notify: jest.fn(),
+    openTags: jest.fn(),
     haptic: feedback => void haptics.push(feedback),
     t: key => key,
   }
@@ -101,6 +102,9 @@ const setup = ({
       interlinearReadingVersions: [],
       parallelColumnVersions: [],
       inlineCommentaries: { chips: [], indexes: [] },
+      bookmarks: {},
+      wordAnnotations: {},
+      wordAnnotationsInOtherVersions: {},
       ...snapshot,
     }),
     surface: presentation => void surfaced.push(presentation),

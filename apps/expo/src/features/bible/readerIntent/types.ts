@@ -128,7 +128,26 @@ export type AnnotateIntent =
   /** A Word annotation is picked, or none. */
   | { kind: 'select-word-annotation'; annotationId: string | null }
 
-export type ReaderIntent = ReadingIntent | OpenIntent | SelectIntent | AnnotateIntent
+/** Personal sheets: the sheets of the reader's own data on a verse or a Word annotation. */
+export type PersonalSheetIntent =
+  /** The tags of highlighted verses. */
+  | { kind: 'open-highlight-tags'; verseIds: string[] }
+  /** The tags of a Word annotation. */
+  | { kind: 'open-annotation-tags'; annotationId: string }
+  /** The tags of everything the reader keeps on a verse. */
+  | { kind: 'open-verse-tags'; verseKey: string }
+  | { kind: 'open-bookmark'; bookmarkId: string }
+  /** The Word annotations of a verse in the Bible versions that are not on screen. */
+  | { kind: 'open-cross-version-annotations'; verseKey: string }
+  /** The Relations of a verse. */
+  | { kind: 'open-verse-relations'; verseKey: string }
+
+export type ReaderIntent =
+  | ReadingIntent
+  | OpenIntent
+  | SelectIntent
+  | AnnotateIntent
+  | PersonalSheetIntent
 
 /** What the page sends: an intent stamped with the Tab the page shows. */
 export type ReaderIntentMessage = { tabId: string; intent: ReaderIntent }
@@ -152,8 +171,8 @@ export type ReaderRule =
   /** The passage leads to no next element of a plan day. */
   | 'no-plan-day-step'
   /**
-   * The reader hides personal Bible data (ADR-0030): notes, links, Relations and tags stay shut,
-   * and no verse is selected.
+   * The reader hides personal Bible data (ADR-0030): notes, links, Relations, tags, bookmarks and
+   * Word annotations stay shut, and no verse is selected.
    */
   | 'personal-data'
   /** The version named is shown only in interlinear presentations: it holds no personal Bible data. */

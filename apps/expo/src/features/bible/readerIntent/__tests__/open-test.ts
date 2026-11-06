@@ -110,6 +110,7 @@ const setup = ({
     openStudyObject: endpoint => void studyObjects.push(endpoint),
     openUrl: openUrl ?? (async url => void urls.push(url)),
     notify: notice => void notices.push(notice),
+    openTags: jest.fn(),
     haptic: jest.fn(),
     t: key => key,
   }
@@ -127,6 +128,9 @@ const setup = ({
       interlinearReadingVersions: [],
       parallelColumnVersions: [],
       inlineCommentaries: { chips: [], indexes: [] },
+      bookmarks: {},
+      wordAnnotations: {},
+      wordAnnotationsInOtherVersions: {},
       ...snapshot,
     }),
     surface: presentation => void surfaced.push(presentation),
