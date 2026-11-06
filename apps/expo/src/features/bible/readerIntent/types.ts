@@ -32,7 +32,7 @@ export type OpenOrigin =
   | 'verse'
   /** The entities of the chapter. */
   | 'chapter-entities'
-  /** The study of a verse in focus. */
+  /** The study of a verse in focus: it opens pages, a word its Strong page, never a preview. */
   | 'focus-study'
   /** A commentary shown within the text. */
   | 'inline-commentary'
@@ -79,6 +79,17 @@ export type OpenTarget =
   | { kind: 'media-source'; url: string }
   /** A resource of the verse touched, in its sheet. */
   | { kind: 'verse-resource'; resource: 'strong' }
+  /** An article of one dictionary: the dictionary endpoint names a word, not where it is read. */
+  | {
+      kind: 'dictionary-article'
+      word: string
+      entryId: number
+      work: string
+      resourceId: string
+      title: string
+      language: string
+      correspondenceId?: string
+    }
 
 /** Open: a study object, and where the reader touched it. */
 export type OpenIntent = {
@@ -157,6 +168,25 @@ export type ResourceIntent =
   /** The contextual information under the chapter is hidden, once the reader confirms it. */
   | { kind: 'hide-contextual-information' }
 
+/** The resources of a verse its study opens, in the resource sheet. */
+export type StudyResource =
+  | 'compare'
+  | 'strong'
+  | 'reference'
+  | 'commentary'
+  | 'nave'
+  | 'dictionary'
+
+/**
+ * Study: the study of a verse in focus (ADR-0088). What it opens is an `open` intent of origin
+ * `focus-study`; these are what is left to it.
+ */
+export type StudyIntent =
+  /** A focus of several verses studies one at a time: this one now. */
+  | { kind: 'study-verse'; verse: number }
+  /** A resource of the verse studied, in the resource sheet. */
+  | { kind: 'open-resource'; resource: StudyResource; verseKey: string }
+
 export type ReaderIntent =
   | ReadingIntent
   | OpenIntent
@@ -164,6 +194,7 @@ export type ReaderIntent =
   | AnnotateIntent
   | PersonalSheetIntent
   | ResourceIntent
+  | StudyIntent
 
 /** What the page sends: an intent stamped with the Tab the page shows. */
 export type ReaderIntentMessage = { tabId: string; intent: ReaderIntent }
@@ -212,3 +243,17 @@ export type ReaderOutcome =
   | { status: 'failed' }
 
 export type ReaderIntentHandler = (message: ReaderIntentMessage) => Promise<ReaderOutcome>
+
+/**
+ * What the page tells of itself (ADR-0098), outside Reader intents: the wrapper handles it, and no
+ * rule refuses it.
+ */
+export type ReaderPageSignal =
+  /** The page listens: the wrapper may send it the verses. */
+  | { kind: 'mounted' }
+  /** An overlay of the page opened or closed: the application hides its controls meanwhile. */
+  | { kind: 'overlay-open'; open: boolean }
+  /** A message for the reader, by its translation key. */
+  | { kind: 'toast'; message: string; type?: 'info' | 'warning' | 'error' }
+
+export type ReaderPageSignalHandler = (signal: ReaderPageSignal) => void | Promise<void>

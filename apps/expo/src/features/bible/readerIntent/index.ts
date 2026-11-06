@@ -9,6 +9,7 @@ import {
 import { applyReadingIntent, decodeReadingIntent, getReadingRefusal } from './reading'
 import { applyResourceIntent, decodeResourceIntent, getResourceRefusal } from './resources'
 import { applySelectIntent, decodeSelectIntent, getSelectRefusal } from './select'
+import { applyStudyIntent, decodeStudyIntent } from './study'
 import type { ReaderIntent, ReaderOutcome, ReaderRule } from './types'
 import type { Reader, ReaderSnapshot, ReaderWorld } from './world'
 
@@ -22,9 +23,13 @@ export type {
   ReaderIntentHandler,
   ReaderIntentMessage,
   ReaderOutcome,
+  ReaderPageSignal,
+  ReaderPageSignalHandler,
   ReaderRule,
   ResourceIntent,
   SelectIntent,
+  StudyIntent,
+  StudyResource,
 } from './types'
 export type {
   Reader,
@@ -46,7 +51,8 @@ const decodeIntent = (value: unknown): ReaderIntent | undefined =>
   decodeSelectIntent(value) ??
   decodeAnnotateIntent(value) ??
   decodePersonalSheetIntent(value) ??
-  decodeResourceIntent(value)
+  decodeResourceIntent(value) ??
+  decodeStudyIntent(value)
 
 const decodeMessage = (message: unknown): { tabId: string; intent: ReaderIntent } | undefined => {
   if (!isRecord(message) || typeof message.tabId !== 'string' || !message.tabId) return undefined
@@ -85,6 +91,10 @@ const getRefusal = (
     case 'install-biblical-entities':
     case 'hide-contextual-information':
       return getResourceRefusal(intent, context)
+    case 'study-verse':
+    case 'open-resource':
+      // The study shows the resources of a verse, never personal Bible data (ADR-0088).
+      return undefined
     default:
       return getReadingRefusal(intent, context)
   }
@@ -121,6 +131,9 @@ const applyIntent = (
     case 'install-biblical-entities':
     case 'hide-contextual-information':
       return applyResourceIntent(intent, context)
+    case 'study-verse':
+    case 'open-resource':
+      return applyStudyIntent(intent, context)
     default:
       return applyReadingIntent(intent, context)
   }
@@ -133,7 +146,8 @@ const getKind = (message: unknown) =>
 
 /**
  * What the logs say of an intent: its kind, for an open what it opens and from where, for a verse
- * selected or words annotated the version they were touched in, for an install the version.
+ * selected or words annotated the version they were touched in, for an install the version, for a
+ * resource of the study the resource.
  */
 const describeIntent = (intent: ReaderIntent) => {
   switch (intent.kind) {
@@ -145,6 +159,8 @@ const describeIntent = (intent: ReaderIntent) => {
     case 'erase-word-annotations':
     case 'install-bible-version':
       return { kind: intent.kind, version: intent.version }
+    case 'open-resource':
+      return { kind: intent.kind, resource: intent.resource }
     default:
       return { kind: intent.kind }
   }

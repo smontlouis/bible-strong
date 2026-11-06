@@ -53,7 +53,11 @@ describe('interlinear Strong selection context', () => {
 
     act(() => {
       renderer = create(
-        <ReaderIntentProvider tabId="tab-1" onReaderIntent={onReaderIntent}>
+        <ReaderIntentProvider
+          tabId="tab-1"
+          onReaderIntent={onReaderIntent}
+          onPageSignal={jest.fn()}
+        >
           <ReverseInterlinearVerse
             settings={settings}
             version="LSG"
@@ -106,7 +110,11 @@ describe('interlinear Strong selection context', () => {
 
     act(() => {
       renderer = create(
-        <ReaderIntentProvider tabId="tab-1" onReaderIntent={onReaderIntent}>
+        <ReaderIntentProvider
+          tabId="tab-1"
+          onReaderIntent={onReaderIntent}
+          onPageSignal={jest.fn()}
+        >
           <StructuredInterlinearVerse
             isHebreu
             mode="strong"

@@ -9,17 +9,18 @@ import {
   type EntityPortraitSources,
 } from '~features/lexique/entityPortraits'
 import type { StrongLexiconChapterEntity } from '~features/resources/strongLexiconAccess'
+import type { StrongIdentity } from '~helpers/strongIdentities'
 import { resolveUniverseColors } from '~themes/universeColors'
 import type {
-  FocusStudyAction,
-  FocusStudyResource,
   FocusStudyTranslations,
   FocusVerseStudy as FocusVerseStudyData,
 } from '../focusStudy/focusVerseStudyTypes'
+import type { OpenTarget, ReaderIntent, StudyResource } from '../readerIntent/types'
 import type { RootStyles } from './BibleDOMWrapper'
 import { getChapterEntityAvatar } from './chapterEntityAvatar'
 import { INTERFACE_FONT } from './interfaceFont'
 import { withColorAlpha } from './themeOverlayColor'
+import { useReaderIntent } from './useReaderIntent'
 import { isDarkTheme } from './utils'
 
 const ENTITY_AVATAR_SIZE = 40
@@ -30,8 +31,8 @@ type Props = RootStyles & {
   /** The entities of the chapter, as its end shows them; the study keeps those of its verse. */
   entities: StrongLexiconChapterEntity[]
   portraits: EntityPortraitSources
-  onAction: (action: FocusStudyAction) => void
-  onOpenEntity: (uniqueName: string) => void
+  /** The version of the reading: a word of the study is read in it. */
+  version: string
   /** While annotating, the study stays in view but its links wait. */
   isDisabled?: boolean
 }
@@ -77,10 +78,14 @@ const FocusVerseStudy = ({
   entities,
   portraits,
   settings,
-  onAction,
-  onOpenEntity,
+  version,
   isDisabled,
 }: Props) => {
+  const sendReaderIntent = useReaderIntent()
+  const send = (intent: ReaderIntent) => void sendReaderIntent(intent)
+  // What the study names opens from the verse it studies (ADR-0098).
+  const open = (target: OpenTarget) =>
+    send({ kind: 'open', origin: 'focus-study', target, verseKey: study.verseKey, version })
   const colors = settings.colors[settings.theme]
   const bibleFont = settings.fontFamily
   const hairline = `0.5px solid ${colors.separator}`
@@ -118,10 +123,10 @@ const FocusVerseStudy = ({
       {content}
     </section>
   )
-  const footer = (label: string, resource: FocusStudyResource) => (
+  const footer = (label: string, resource: StudyResource) => (
     <Pressable
       type="button"
-      onClick={() => onAction({ kind: 'open-resource', resource })}
+      onClick={() => send({ kind: 'open-resource', resource, verseKey: study.verseKey })}
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -158,7 +163,7 @@ const FocusVerseStudy = ({
       </div>
     )
   const chips = (
-    items: { key: string; label: string; action: FocusStudyAction }[],
+    items: { key: string; label: string; target: OpenTarget }[],
     kind: 'nave' | 'dictionary'
   ) => (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -166,7 +171,7 @@ const FocusVerseStudy = ({
         <Pressable
           key={item.key}
           type="button"
-          onClick={() => onAction(item.action)}
+          onClick={() => open(item.target)}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -239,7 +244,7 @@ const FocusVerseStudy = ({
                   key={verse}
                   type="button"
                   aria-pressed={selected}
-                  onClick={() => onAction({ kind: 'study-verse', verse })}
+                  onClick={() => send({ kind: 'study-verse', verse })}
                   style={{
                     minWidth: 52,
                     height: 36,
@@ -313,10 +318,14 @@ const FocusVerseStudy = ({
                   key={`${word.identityKind}:${word.identityCode}`}
                   type="button"
                   onClick={() =>
-                    onAction({
-                      kind: 'open-word',
-                      identityKind: word.identityKind,
-                      identityCode: word.identityCode,
+                    open({
+                      kind: 'strong-word',
+                      identities: [
+                        {
+                          kind: word.identityKind as StrongIdentity['kind'],
+                          code: word.identityCode,
+                        },
+                      ],
                     })
                   }
                   style={{
@@ -373,7 +382,7 @@ const FocusVerseStudy = ({
                 <Pressable
                   key={entity.uniqueName}
                   type="button"
-                  onClick={() => onOpenEntity(entity.uniqueName)}
+                  onClick={() => open({ kind: 'biblical-entity', entityKey: entity.uniqueName })}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -421,7 +430,12 @@ const FocusVerseStudy = ({
                 <Pressable
                   key={reference.verseKey}
                   type="button"
-                  onClick={() => onAction({ kind: 'open-reference', verseKey: reference.verseKey })}
+                  onClick={() =>
+                    open({
+                      kind: 'endpoint',
+                      endpoint: { type: 'verse', verseKeys: [reference.verseKey] },
+                    })
+                  }
                   style={rowStyle(index === 0)}
                 >
                   <span
@@ -454,7 +468,13 @@ const FocusVerseStudy = ({
                 <Pressable
                   key={commentary.title}
                   type="button"
-                  onClick={() => onAction({ kind: 'open-resource', resource: 'commentary' })}
+                  onClick={() =>
+                    send({
+                      kind: 'open-resource',
+                      resource: 'commentary',
+                      verseKey: study.verseKey,
+                    })
+                  }
                   style={rowStyle(index === 0)}
                 >
                   <span
@@ -492,7 +512,10 @@ const FocusVerseStudy = ({
               study.topics.map(topic => ({
                 key: topic.nameLower,
                 label: topic.name,
-                action: { kind: 'open-topic', name: topic.name, nameLower: topic.nameLower },
+                target: {
+                  kind: 'endpoint',
+                  endpoint: { type: 'nave', nameLower: topic.nameLower, labelFallback: topic.name },
+                },
               })),
               'nave'
             )
@@ -507,7 +530,16 @@ const FocusVerseStudy = ({
               study.dictionary.map(entry => ({
                 key: `${entry.resourceId}:${entry.entryId}`,
                 label: entry.word,
-                action: { kind: 'open-dictionary', entry },
+                target: {
+                  kind: 'dictionary-article',
+                  word: entry.word,
+                  entryId: entry.entryId,
+                  work: entry.work,
+                  resourceId: entry.resourceId,
+                  title: entry.title,
+                  language: entry.language,
+                  ...(entry.correspondenceId && { correspondenceId: entry.correspondenceId }),
+                },
               })),
               'dictionary'
             )

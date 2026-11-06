@@ -1,7 +1,6 @@
 import { useEffect, useEffectEvent, useRef } from 'react'
 
-import { SET_BIBLE_OVERLAY_OPEN } from './dispatch'
-import { useDispatch } from './DispatchProvider'
+import { useReaderPageSignal } from './useReaderIntent'
 
 type ModalOverlayFocus = {
   selector: string
@@ -16,16 +15,19 @@ type ModalOverlayLifecycleOptions = {
 }
 
 export const useBibleOverlayOpen = (isOpen: boolean) => {
-  const dispatch = useDispatch()
+  const sendPageSignal = useReaderPageSignal()
+  const signalOverlayOpen = useEffectEvent((open: boolean) =>
+    sendPageSignal({ kind: 'overlay-open', open })
+  )
 
   useEffect(() => {
     if (!isOpen) return
 
-    void dispatch({ type: SET_BIBLE_OVERLAY_OPEN, payload: true })
+    signalOverlayOpen(true)
     return () => {
-      void dispatch({ type: SET_BIBLE_OVERLAY_OPEN, payload: false })
+      signalOverlayOpen(false)
     }
-  }, [dispatch, isOpen])
+  }, [isOpen])
 }
 
 export const useModalOverlayLifecycle = ({
