@@ -70,7 +70,7 @@ const ChapterEntities = ({
   const shouldReduceMotion = useReducedMotion()
   const [isOverlayOpen, setIsOverlayOpen] = useState(false)
 
-  useBibleOverlayOpen(isOverlayOpen)
+  useBibleOverlayOpen(isOverlayOpen, () => setIsOverlayOpen(false))
   const viewMode = getChapterEntitiesViewMode(availabilityStatus, loaded, entities.length)
   if (viewMode === 'hidden' && !chapterResources) return null
 

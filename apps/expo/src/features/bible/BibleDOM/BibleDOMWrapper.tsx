@@ -65,6 +65,7 @@ import type { ResolvedPassageMediaChapter } from '../passageMedia'
 import useConnection from '~helpers/useConnection'
 import { getOriginalBookTitle } from '~helpers/originalBookTitles'
 import { getReadingBookName, translateForReading } from '~helpers/readingLanguage'
+import { subscribeToHardwareBackPress } from '~helpers/hardwareBackPress'
 import type { ReaderIntentHandler, ReaderPageSignal } from '../readerIntent/types'
 import type { BibleDOMPaint } from '../sharedBibleDOMPaint'
 
@@ -219,6 +220,8 @@ export type WebViewProps = {
   taggedVersesInChapter?: Record<number, number>
   versesWithNonHighlightTags?: Record<number, boolean>
   isFormSheet?: boolean
+  /** The reader is the screen in front: the Android back button may close an overlay of its page. */
+  isReaderInFront?: boolean
   // Red words data
   redWords?: Record<string, { start: number; end: number }[]> | null
   // Red words of the parallel versions, by version
@@ -330,6 +333,7 @@ export const BibleDOMWrapper = ({
   taggedVersesInChapter,
   versesWithNonHighlightTags,
   isFormSheet,
+  isReaderInFront = false,
   redWords,
   parallelRedWords,
   parallelPericopeChapters,
@@ -355,6 +359,8 @@ export const BibleDOMWrapper = ({
 
   const setIsBibleOverlayOpen = useSetAtom(isBibleOverlayOpenAtom)
   const isBibleOverlayOpenRef = useRef(false)
+  const [isPageOverlayOpen, setIsPageOverlayOpen] = useState(false)
+  const [closeOverlayTrigger, setCloseOverlayTrigger] = useState(0)
   const wasFullScreenBeforeOverlayRef = useRef(false)
   const theme = useTheme()
   const insets = useSafeAreaInsets()
@@ -413,6 +419,16 @@ export const BibleDOMWrapper = ({
     },
     [setIsBibleOverlayOpen, setIsFullScreenBible]
   )
+
+  // Android back closes the overlay of the page, as its close button does, while the reader is in
+  // front: a screen opened from the overlay keeps its own back.
+  useEffect(() => {
+    if (!isPageOverlayOpen || !isReaderInFront) return
+    return subscribeToHardwareBackPress(() => {
+      setCloseOverlayTrigger(count => count + 1)
+      return true
+    })
+  }, [isPageOverlayOpen, isReaderInFront])
 
   // Gate verses delivery: don't send real data until the DOM component
   // has mounted and its bridge message listener is active. This prevents
@@ -513,6 +529,7 @@ export const BibleDOMWrapper = ({
           wasFullScreenBeforeOverlayRef.current = getDefaultStore().get(isFullScreenBibleAtom)
         }
         isBibleOverlayOpenRef.current = signal.open
+        setIsPageOverlayOpen(signal.open)
         setIsBibleOverlayOpen(signal.open)
         setIsFullScreenBible(signal.open ? true : wasFullScreenBeforeOverlayRef.current)
         return
@@ -663,6 +680,7 @@ export const BibleDOMWrapper = ({
         applyAnnotationTrigger={applyAnnotationTrigger}
         eraseSelectionTrigger={eraseSelectionTrigger}
         clearAnnotationSelectionTrigger={clearAnnotationSelectionTrigger}
+        closeOverlayTrigger={closeOverlayTrigger}
         selectedAnnotationId={selectedAnnotationId}
         safeAreaTop={Platform.OS === 'ios' ? TOP_INSET : 0}
         wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}

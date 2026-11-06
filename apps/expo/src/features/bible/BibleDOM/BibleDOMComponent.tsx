@@ -33,6 +33,7 @@ import { getBibleDOMErrorPresentation } from './bibleDOMErrorPresentation'
 import VersionChip from './VersionChip'
 import type { ReaderPageSignalHandler } from '../readerIntent/types'
 import { ReaderIntentProvider, useReaderIntent, useReaderPageSignal } from './useReaderIntent'
+import { OverlayCloseRequestProvider } from './overlayLifecycle'
 import { TranslationsProvider, BibleDOMTranslations } from './TranslationsContext'
 import { scaleFontSize } from './scaleFontSize'
 import { useFonts } from 'expo-font'
@@ -225,6 +226,8 @@ type Props = Pick<
   applyAnnotationTrigger?: { count: number; color: string; type: AnnotationType }
   eraseSelectionTrigger?: number
   clearAnnotationSelectionTrigger?: number
+  /** Bumped by the application to close the overlay open on the page (Android back). */
+  closeOverlayTrigger?: number
   selectedAnnotationId?: string | null
   // Safe area inset from native side (CSS env vars don't work in Expo DOM WebView)
   safeAreaTop?: number
@@ -2024,9 +2027,11 @@ const VersesRenderer = (props: Props) => (
     onReaderIntent={props.onReaderIntent}
     onPageSignal={props.onPageSignal}
   >
-    <LazyMotion features={domMax} strict>
-      <VersesRendererContent {...props} />
-    </LazyMotion>
+    <OverlayCloseRequestProvider value={props.closeOverlayTrigger ?? 0}>
+      <LazyMotion features={domMax} strict>
+        <VersesRendererContent {...props} />
+      </LazyMotion>
+    </OverlayCloseRequestProvider>
   </ReaderIntentProvider>
 )
 

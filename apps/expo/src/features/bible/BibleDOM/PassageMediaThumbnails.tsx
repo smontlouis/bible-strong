@@ -84,7 +84,12 @@ const PassageMediaThumbnails = ({
   const isOverlayOpen = mode !== 'closed'
   const layoutDependency = `${mode}:${isCompact ? 'compact' : 'featured'}`
 
-  useBibleOverlayOpen(isOverlayOpen)
+  const closeOverlay = () => {
+    setMode('closed')
+    setSelectedItem(null)
+  }
+
+  useBibleOverlayOpen(isOverlayOpen, closeOverlay)
 
   useEffect(() => {
     const stackElement = stackRef.current
@@ -236,10 +241,7 @@ const PassageMediaThumbnails = ({
           setSelectedItem(item)
           setMode('playing')
         }}
-        onClose={() => {
-          setMode('closed')
-          setSelectedItem(null)
-        }}
+        onClose={closeOverlay}
       />
     </LayoutGroup>
   )
