@@ -500,7 +500,7 @@
     overflow: visible;
   }
 }
-.ai-pg-gloo {
+.ai-pg-model {
   margin-top: 28px;
   padding: 20px;
   border: 1px solid var(--pg-line);
@@ -508,20 +508,20 @@
   background: var(--pg-bg);
   font-size: 12px;
 }
-.ai-pg-gloo > header {
+.ai-pg-model > header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
-.ai-pg-gloo h3 {
+.ai-pg-model h3 {
   display: flex;
   align-items: center;
   gap: 8px;
   margin: 0;
   font-size: 14px;
 }
-.ai-pg-gloo header button {
+.ai-pg-model header button {
   border: 0;
   background: var(--pg-soft);
   color: var(--pg-accent);
@@ -531,7 +531,7 @@
   place-items: center;
   border-radius: 6px;
 }
-.ai-pg-gloo-meta {
+.ai-pg-model-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 8px 16px;
@@ -539,53 +539,53 @@
   font-size: 10px;
   color: var(--pg-accent);
 }
-.ai-pg-gloo-meta span,
-.ai-pg-gloo > small {
+.ai-pg-model-meta span,
+.ai-pg-model > small {
   color: var(--pg-muted);
 }
-.ai-pg-gloo p {
+.ai-pg-model p {
   color: var(--pg-muted);
 }
-.ai-pg-gloo-trigger {
+.ai-pg-model-trigger {
   padding: 10px;
   border-radius: 7px;
   background: var(--pg-soft);
 }
-.ai-pg-gloo-tools article + article {
+.ai-pg-model-tools article + article {
   border-top: 1px solid var(--pg-line);
   margin-top: 16px;
   padding-top: 16px;
 }
-.ai-pg-gloo-tools article > code {
+.ai-pg-model-tools article > code {
   color: var(--pg-accent);
   font-size: 11px;
 }
-.ai-pg-gloo blockquote {
+.ai-pg-model blockquote {
   margin: 8px 0 12px;
   line-height: 1.8;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-.ai-pg-gloo details {
+.ai-pg-model details {
   color: var(--pg-muted);
   font-size: 11px;
 }
-.ai-pg-gloo summary {
+.ai-pg-model summary {
   cursor: pointer;
 }
-.ai-pg-gloo pre {
+.ai-pg-model pre {
   max-height: 260px;
   overflow: auto;
   padding: 12px;
   background: var(--pg-soft);
   border-radius: 8px;
 }
-.ai-pg-gloo-guidance {
+.ai-pg-model-guidance {
   margin: 18px 0;
   padding-top: 14px;
   border-top: 1px solid var(--pg-line);
 }
-.ai-pg-gloo > small {
+.ai-pg-model > small {
   display: block;
   margin-top: 14px;
   font-size: 10px;

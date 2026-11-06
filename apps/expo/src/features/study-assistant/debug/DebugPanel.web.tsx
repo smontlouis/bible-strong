@@ -5,7 +5,9 @@ import type { DebugEntry, DebugSession } from './trace'
 import './debug.css'
 const record = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' ? (value as Record<string, unknown>) : {}
-const groups = ['all', 'jev', 'gloo', 'tools', 'context'] as const
+const groups = ['all', 'router', 'model', 'tools', 'context'] as const
+// Workers that predate ADR-0099 name the router stages jev_*.
+const isRouterStage = (stage: string) => /^(router|jev)_/.test(stage)
 export default function DebugPanel({
   session,
   entries,
@@ -46,13 +48,16 @@ export default function DebugPanel({
       if (!signal.aborted) setConnecting(false)
     }
   }
-  const decision = record(record(entries.find(e => e.stage === 'jev_decision')?.data).assessment)
+  const decision = record(
+    record(entries.find(e => e.stage === 'router_decision' || e.stage === 'jev_decision')?.data)
+      .assessment
+  )
   const summary = record(entries.findLast(e => e.stage === 'summary')?.data)
   const visible = entries.filter(
     e =>
       group === 'all' ||
-      (group === 'jev' && e.stage.startsWith('jev_')) ||
-      (group === 'gloo' && e.stage.startsWith('model_')) ||
+      (group === 'router' && isRouterStage(e.stage)) ||
+      (group === 'model' && e.stage.startsWith('model_')) ||
       (group === 'tools' && /tool|resource|routing/.test(e.stage)) ||
       (group === 'context' && ['request', 'base_prompt', 'setup'].includes(e.stage))
   )
@@ -100,11 +105,16 @@ export default function DebugPanel({
           <div className="bs-debug-metrics">
             <strong>{String(decision.decision || '—')}</strong>
             <span>
-              JEV{' '}
-              {String(summary.jevCalls ?? entries.filter(e => e.stage === 'jev_request').length)}
+              {t('assistant.debug.router')}{' '}
+              {String(
+                summary.routerCalls ??
+                  summary.jevCalls ??
+                  entries.filter(e => e.stage === 'router_request' || e.stage === 'jev_request')
+                    .length
+              )}
             </span>
             <span>
-              Gloo{' '}
+              {t('assistant.debug.model')}{' '}
               {String(
                 summary.modelCalls ?? entries.filter(e => e.stage === 'model_request').length
               )}

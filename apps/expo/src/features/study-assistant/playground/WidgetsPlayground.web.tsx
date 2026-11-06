@@ -1,4 +1,4 @@
-import GlooDescription from './GlooDescription.web'
+import ModelDescription from './ModelDescription.web'
 import { useRef, useState, type CSSProperties } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
@@ -269,7 +269,7 @@ function PlaygroundContent({ dark, onTheme }: { dark: boolean; onTheme: () => vo
               </ul>
             </section>
           </div>
-          <GlooDescription kind={selected.widget.kind} />
+          <ModelDescription kind={selected.widget.kind} />
           <details className="ai-pg-payload">
             <summary>Voir les données de cet exemple</summary>
             <p>Références publiques du widget. Aucun prompt système ni secret API.</p>

@@ -41,7 +41,7 @@ async function loadCatalog(signal: AbortSignal): Promise<Catalog> {
     throw new Error('INVALID_CATALOG')
   return data
 }
-export default function GlooDescription({ kind }: { kind: string }) {
+export default function ModelDescription({ kind }: { kind: string }) {
   const query = useQuery({
     queryKey: ['private-local-widget-catalog'],
     queryFn: ({ signal }) => loadCatalog(signal),
@@ -53,13 +53,13 @@ export default function GlooDescription({ kind }: { kind: string }) {
     w => w.kind === (kind === 'passage_comparison' ? 'passages' : kind)
   )
   return (
-    <section className="ai-pg-gloo" aria-label="Description envoyée à Gloo">
+    <section className="ai-pg-model" aria-label="Description envoyée au modèle">
       <header>
         <h3>
-          <Code2 size={16} /> Ce que Gloo reçoit
+          <Code2 size={16} /> Ce que le modèle reçoit
         </h3>
         <button
-          aria-label="Actualiser les descriptions Gloo"
+          aria-label="Actualiser les descriptions du modèle"
           onClick={() => void query.refetch()}
           disabled={query.isFetching}
         >
@@ -80,7 +80,7 @@ export default function GlooDescription({ kind }: { kind: string }) {
         <p>Aucune description disponible pour ce widget.</p>
       ) : (
         <>
-          <div className="ai-pg-gloo-meta">
+          <div className="ai-pg-model-meta">
             <strong>
               {entry.mode === 'explicit'
                 ? 'Choix explicite du widget'
@@ -90,37 +90,37 @@ export default function GlooDescription({ kind }: { kind: string }) {
           </div>
           <p>
             {entry.mode === 'explicit'
-              ? 'Gloo choisit le type de présentation dans les arguments de l’outil.'
-              : 'Gloo choisit une ressource à lire. L’application affiche ensuite ce widget lorsque la lecture réussit ; il n’existe pas de description distincte envoyée pour ce widget.'}
+              ? 'Le modèle choisit le type de présentation dans les arguments de l’outil.'
+              : 'Le modèle choisit une ressource à lire. L’application affiche ensuite ce widget lorsque la lecture réussit ; il n’existe pas de description distincte envoyée pour ce widget.'}
           </p>
-          <p className="ai-pg-gloo-trigger">
+          <p className="ai-pg-model-trigger">
             <strong>Déclenchement côté application : </strong>
             {entry.trigger}
           </p>
-          <div className="ai-pg-gloo-tools">
+          <div className="ai-pg-model-tools">
             {entry.tools.map(tool => (
               <article key={tool.name}>
                 <code>{tool.name}</code>
                 <blockquote>{tool.description}</blockquote>
                 <details>
-                  <summary>Arguments disponibles pour Gloo</summary>
+                  <summary>Arguments disponibles pour le modèle</summary>
                   <pre>{JSON.stringify(tool.parameters, null, 2)}</pre>
                 </details>
               </article>
             ))}
           </div>
-          <details className="ai-pg-gloo-guidance">
+          <details className="ai-pg-model-guidance">
             <summary>Consigne générale de sélection des widgets</summary>
             <blockquote>{query.data?.guidance}</blockquote>
           </details>
           {query.data?.biblePreferenceRules && (
-            <details className="ai-pg-gloo-guidance">
+            <details className="ai-pg-model-guidance">
               <summary>Priorité des versions bibliques</summary>
               <blockquote>{query.data.biblePreferenceRules}</blockquote>
             </details>
           )}
           <small>
-            Descriptions exactes du code privé local, transmises quand l’outil est exposé. JEV
+            Descriptions exactes du code privé local, transmises quand l’outil est exposé. Clef
             détermine les outils autorisés pour chaque demande. Ceci n’est pas la trace d’une
             réponse passée.
           </small>

@@ -14,7 +14,7 @@ const debug = {
   type: 'debug',
   sequence: 1,
   elapsedMs: 2,
-  stage: 'jev_decision',
+  stage: 'router_decision',
   data: { assessment: { decision: 'DIRECT_REPLY' } },
 }
 const done = { type: 'done', requestId: 'r', model: '', modelCalls: 0, toolCalls: 0 }
