@@ -18,7 +18,18 @@ export type ReverseInterlinearReconciliationDiagnostics = {
   unresolvedStrongReferences: string[]
 }
 
-type ChapterSourceToken = ReverseInterlinearSourceToken & { verse: number }
+/**
+ * A BHG word of the chapter, or of the chapter next to it where the Bible numbers its chapters
+ * otherwise than BHG. Without a chapter, the word belongs to the chapter being read.
+ */
+type ChapterSourceToken = ReverseInterlinearSourceToken & { chapter?: number; verse: number }
+
+/** BHG text order, across a chapter boundary too (Gn 31:55 BHG comes before Gn 32:1 BHG). */
+const compareSourceTokens = (left: ChapterSourceToken, right: ChapterSourceToken) =>
+  (left.chapter ?? 0) - (right.chapter ?? 0) ||
+  left.verse - right.verse ||
+  left.ordinal - right.ordinal ||
+  (left.id ?? Number.MAX_SAFE_INTEGER) - (right.id ?? Number.MAX_SAFE_INTEGER)
 
 export const buildReverseInterlinearSpans = ({
   targetSpans,
@@ -136,12 +147,7 @@ export const reconcileReverseInterlinearChapter = ({
 
   let inferredAssociationCount = 0
   const unresolvedStrongReferences: string[] = []
-  const orderedSourceTokens = [...sourceTokens].sort(
-    (left, right) =>
-      left.verse - right.verse ||
-      left.ordinal - right.ordinal ||
-      (left.id ?? Number.MAX_SAFE_INTEGER) - (right.id ?? Number.MAX_SAFE_INTEGER)
-  )
+  const orderedSourceTokens = [...sourceTokens].sort(compareSourceTokens)
 
   for (const { verse, span } of orderedTargets) {
     const resolved = resolvedBySpan.get(span) ?? []
@@ -167,10 +173,7 @@ export const reconcileReverseInterlinearChapter = ({
       claimedTokens.add(candidate)
       inferredAssociationCount += 1
     }
-    resolved.sort(
-      (left, right) =>
-        left.verse - right.verse || left.ordinal - right.ordinal || (left.id ?? 0) - (right.id ?? 0)
-    )
+    resolved.sort(compareSourceTokens)
   }
 
   return {

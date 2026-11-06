@@ -407,12 +407,12 @@ const resolveRequestedInterlinearLocale = async (
 }
 
 /**
- * The BHG tokens a chapter's Strong spans name, by id. A span names its tokens by id, not by
- * verse: where a Bible numbers its verses or chapters otherwise than BHG, they stand in another
- * verse of the chapter or in the chapter next to it, never further. The whole chapter is read,
- * then its two neighbours only while some ids are still missing.
+ * The BHG tokens a chapter's Strong spans name. A span names its tokens by id, not by verse:
+ * where a Bible numbers its verses or chapters otherwise than BHG, they stand in another verse
+ * of the chapter or in the chapter next to it, never further. The whole chapter is read, then
+ * its two neighbours only while some ids are still missing.
  */
-const loadAlignedTokensById = async ({
+const loadAlignedTokens = async <Token extends { id?: number }>({
   required,
   tokenIds,
   chapter,
@@ -421,33 +421,37 @@ const loadAlignedTokensById = async ({
   required: boolean
   tokenIds: number[]
   chapter: number
-  loadChapter: (chapter: number) => Promise<InterlinearChapterTokens>
-}): Promise<Map<number, InterlinearToken>> => {
-  const tokensById = new Map<number, InterlinearToken>()
-  const addTokens = (tokensByVerse: InterlinearChapterTokens) => {
-    for (const tokens of Object.values(tokensByVerse)) {
-      for (const token of tokens) {
-        if (token.id != null && !tokensById.has(token.id)) tokensById.set(token.id, token)
-      }
-    }
-  }
+  loadChapter: (chapter: number) => Promise<Token[]>
+}): Promise<{ chapterTokens: Token[]; neighbourTokens: Token[] }> => {
+  let chapterTokens: Token[] = []
   try {
-    addTokens(await loadChapter(chapter))
+    chapterTokens = await loadChapter(chapter)
   } catch (error) {
     // A chapter BHG does not number (Joel 4 of the French Bibles) still has its words next door.
     const isMissingChapter = error instanceof ResourceAccessError && error.code === 'NOT_FOUND'
     if (!isMissingChapter) {
       if (required) throw error
-      return tokensById
+      return { chapterTokens, neighbourTokens: [] }
     }
   }
-  if (tokenIds.every(id => tokensById.has(id))) return tokensById
+  const chapterTokenIds = new Set(chapterTokens.map(token => token.id))
+  if (tokenIds.every(id => chapterTokenIds.has(id))) return { chapterTokens, neighbourTokens: [] }
   // Neighbours only complete the chapter: one that is missing or fails to load is passed over.
   const neighbours = await Promise.allSettled(
     [chapter - 1, chapter + 1].filter(neighbour => neighbour >= 1).map(loadChapter)
   )
-  for (const neighbour of neighbours) {
-    if (neighbour.status === 'fulfilled') addTokens(neighbour.value)
+  return {
+    chapterTokens,
+    neighbourTokens: neighbours.flatMap(neighbour =>
+      neighbour.status === 'fulfilled' ? neighbour.value : []
+    ),
+  }
+}
+
+const indexTokensById = <Token extends { id?: number }>(tokens: Token[]): Map<number, Token> => {
+  const tokensById = new Map<number, Token>()
+  for (const token of tokens) {
+    if (token.id != null && !tokensById.has(token.id)) tokensById.set(token.id, token)
   }
   return tokensById
 }
@@ -597,13 +601,14 @@ const loadRegularBibleChapter = async (
     dependencies.loadReverseInterlinearChapterSpans &&
     dependencies.loadInterlinearChapterTokens
   ) {
-    const [strongChapter, originalVerses] = await Promise.all([
+    const loadInterlinearChapterTokens = dependencies.loadInterlinearChapterTokens
+    const [strongChapter, locale] = await Promise.all([
       dependencies.loadReverseInterlinearChapterSpans(
         request.version as StrongBibleVersionId,
         request.book,
         request.chapter
       ),
-      dependencies.chapterAdapter.loadChapter('BHG', request.book, request.chapter),
+      resolveRequestedInterlinearLocale(request, dependencies),
     ])
     const unvalidatedTargetSpansByVerse =
       'spansByVerse' in strongChapter ? strongChapter.spansByVerse : strongChapter
@@ -623,13 +628,6 @@ const loadRegularBibleChapter = async (
         strongTextSha256: strongChapter.textSha256,
       })
     }
-    if (originalVerses.status === 'unavailable') {
-      throw resourceAccessErrorFromBibleChapterUnavailable(
-        originalVerses.reason,
-        originalVerses.recoveries,
-        originalVerses.diagnostics
-      )
-    }
     const targetSpanValidation = filterValidStrongSpans(unvalidatedTargetSpansByVerse, verses)
     const targetSpansByVerse = targetSpanValidation.spansByVerse
     if (targetSpanValidation.invalidSpanCount > 0) {
@@ -640,44 +638,73 @@ const loadRegularBibleChapter = async (
         spanCount: targetSpanValidation.invalidSpanCount,
       })
     }
-    const locale = await resolveRequestedInterlinearLocale(request, dependencies)
-    const { tokensByVerse: sourceTokensByVerse, payload: sourceTokensPayload } =
-      readInterlinearTokens(
-        await dependencies.loadInterlinearChapterTokens(
-          'BHG',
-          locale,
-          request.book,
-          request.chapter
-        )
-      )
-    // Original words are cut out of the text their tokens were built for, never another one.
-    const originalText = sourceTokensPayload
-      ? await resolveInterlinearBaseText({
-          held: originalVerses,
-          tokens: sourceTokensPayload,
-          request,
-          locale,
-          loadBaseChapter: dependencies.loadInterlinearBaseChapter,
-        })
-      : originalVerses
-    const originalTextByVerse = new Map(
-      originalText.verses.map(verse => [Number(verse.Verset), verse.Texte] as const)
-    )
     let invalidSourceTokenCount = 0
-    const sourceTokens = Object.entries(sourceTokensByVerse).flatMap(([verse, tokens]) => {
-      const originalText = originalTextByVerse.get(Number(verse))
-      if (originalText === undefined) {
-        invalidSourceTokenCount += tokens.length
-        return []
+    // The original words of one BHG chapter, each cut out of the text its tokens were built for.
+    const loadSourceChapter = async (sourceChapter: number) => {
+      const [originalVerses, tokensResult] = await Promise.all([
+        dependencies.chapterAdapter.loadChapter('BHG', request.book, sourceChapter),
+        loadInterlinearChapterTokens('BHG', locale, request.book, sourceChapter),
+      ])
+      if (originalVerses.status === 'unavailable') {
+        throw resourceAccessErrorFromBibleChapterUnavailable(
+          originalVerses.reason,
+          originalVerses.recoveries,
+          originalVerses.diagnostics
+        )
       }
-      const layout = buildTokenizedVerseLayout(originalText, tokens)
-      invalidSourceTokenCount += tokens.length - layout.pieces.length
-      return layout.pieces.map(piece => ({
-        ...piece.token,
-        verse: Number(verse),
-        surface: piece.surface,
-      }))
+      const { tokensByVerse, payload } = readInterlinearTokens(tokensResult)
+      // Original words are cut out of the text their tokens were built for, never another one.
+      const originalText = payload
+        ? await resolveInterlinearBaseText({
+            held: originalVerses,
+            tokens: payload,
+            request: { book: request.book, chapter: sourceChapter },
+            locale,
+            loadBaseChapter: dependencies.loadInterlinearBaseChapter,
+          })
+        : originalVerses
+      const originalTextByVerse = new Map(
+        originalText.verses.map(verse => [Number(verse.Verset), verse.Texte] as const)
+      )
+      let invalidTokenCount = 0
+      const tokens = Object.entries(tokensByVerse).flatMap(([verse, verseTokens]) => {
+        const verseText = originalTextByVerse.get(Number(verse))
+        if (verseText === undefined) {
+          invalidTokenCount += verseTokens.length
+          return []
+        }
+        const layout = buildTokenizedVerseLayout(verseText, verseTokens)
+        invalidTokenCount += verseTokens.length - layout.pieces.length
+        return layout.pieces.map(piece => ({
+          ...piece.token,
+          chapter: sourceChapter,
+          verse: Number(verse),
+          surface: piece.surface,
+        }))
+      })
+      // Counted once the chapter is whole, so a neighbour passed over adds nothing.
+      invalidSourceTokenCount += invalidTokenCount
+      return tokens
+    }
+    const namedTokenIds = Object.values(targetSpansByVerse).flatMap(spans =>
+      spans.flatMap(span => span.stepTokenIds ?? [])
+    )
+    const { chapterTokens, neighbourTokens } = await loadAlignedTokens({
+      // The original words are the mode itself: a load failure is the chapter's failure.
+      required: true,
+      tokenIds: namedTokenIds,
+      chapter: request.chapter,
+      loadChapter: loadSourceChapter,
     })
+    // A neighbour lends only the words a span names, never candidates for an inferred link.
+    const chapterTokenIds = new Set(chapterTokens.map(token => token.id))
+    const namedTokenIdSet = new Set(namedTokenIds)
+    const sourceTokens = [
+      ...chapterTokens,
+      ...neighbourTokens.filter(
+        token => token.id != null && namedTokenIdSet.has(token.id) && !chapterTokenIds.has(token.id)
+      ),
+    ]
     if (invalidSourceTokenCount > 0) {
       warnAboutRecoverableIntegrity(dependencies, 'invalid-interlinear-source-token-offsets', {
         version: request.version,
@@ -758,9 +785,9 @@ const loadRegularBibleChapter = async (
   const alignedTokensLocale = showsTransliteration
     ? await resolveRequestedInterlinearLocale(request, dependencies)
     : (request.interlinearLocale ?? 'fr')
-  const alignedTokensById =
+  const alignedTokens =
     showsTransliteration || loadInterlinearChapterTokens
-      ? await loadAlignedTokensById({
+      ? await loadAlignedTokens({
           // The transliterations are the mode itself: a load failure is the chapter's failure.
           // Otherwise tokens bring morphology only, an optional enrichment whose locale is never
           // replaced after a load failure.
@@ -770,11 +797,22 @@ const loadRegularBibleChapter = async (
           ),
           chapter: request.chapter,
           loadChapter: async chapter =>
-            readInterlinearTokens(
-              await loadInterlinearChapterTokens!('BHG', alignedTokensLocale, request.book, chapter)
-            ).tokensByVerse,
+            Object.values(
+              readInterlinearTokens(
+                await loadInterlinearChapterTokens!(
+                  'BHG',
+                  alignedTokensLocale,
+                  request.book,
+                  chapter
+                )
+              ).tokensByVerse
+            ).flat(),
         })
-      : new Map<number, InterlinearToken>()
+      : { chapterTokens: [], neighbourTokens: [] }
+  const alignedTokensById = indexTokensById<InterlinearToken>([
+    ...alignedTokens.chapterTokens,
+    ...alignedTokens.neighbourTokens,
+  ])
   return successResult({
     kind: 'strong',
     ...chapterIdentity,
