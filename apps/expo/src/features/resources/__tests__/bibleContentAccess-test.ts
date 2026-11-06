@@ -1114,6 +1114,202 @@ describe('BibleContentAccess', () => {
     )
   })
 
+  describe('reverse interlinear of a Bible numbered otherwise than BHG', () => {
+    const sourceToken = (id: number, startOffset: number, length: number, code: string) => ({
+      id,
+      ordinal: startOffset,
+      startOffset,
+      length,
+      segments: [
+        {
+          ordinal: 0,
+          startOffset: 0,
+          length,
+          transliteration: '',
+          lemma: '',
+          morphology: '',
+          gloss: '',
+          identities: [{ kind: 'strong' as const, code }],
+        },
+      ],
+    })
+    const targetSpan = (ordinal: number, stepTokenIds: number[] | undefined, codes: string[]) => ({
+      ordinal,
+      startOffset: ordinal * 6,
+      length: 5,
+      identities: codes.map(code => ({ kind: 'strong', code })),
+      ...(stepTokenIds ? { stepTokenIds } : {}),
+    })
+    // Gn 32:1 LSG is Gn 31:55 BHG; Gn 32:2 LSG is Gn 32:1 BHG.
+    const createShiftedReverseDependencies = ({
+      bhgVerses,
+      tokensByChapter,
+      spansByVerse,
+    }: {
+      bhgVerses: Record<number, { Verset: number; Texte: string }[]>
+      tokensByChapter: Record<number, Record<number, ReturnType<typeof sourceToken>[]>>
+      spansByVerse: Record<number, ReturnType<typeof targetSpan>[]>
+    }) => {
+      const dependencies = createDependencies()
+      dependencies.getChapterVerses.mockImplementation(
+        async (version: string, book: number, chapter: number) =>
+          version === 'BHG'
+            ? (bhgVerses[chapter] ?? []).map(verse => ({
+                Livre: book,
+                Chapitre: chapter,
+                ...verse,
+              }))
+            : [
+                { Livre: 1, Chapitre: 32, Verset: 1, Texte: 'Jacob alla' },
+                { Livre: 1, Chapitre: 32, Verset: 2, Texte: 'Jacob dit aussi' },
+              ]
+      )
+      const loadInterlinearChapterTokens = jest.fn(
+        async (_version: 'BHG', _locale: string, _book: number, chapter: number) => {
+          const tokens = tokensByChapter[chapter]
+          if (!tokens) throw new ResourceAccessError('NOT_FOUND')
+          return tokens
+        }
+      )
+      return {
+        ...dependencies,
+        loadReverseInterlinearChapterSpans: jest.fn().mockResolvedValue(spansByVerse),
+        loadInterlinearChapterTokens,
+      }
+    }
+    const loadShiftedChapter = (
+      dependencies: ReturnType<typeof createShiftedReverseDependencies>
+    ) =>
+      loadBibleContentChapter(
+        {
+          book: 1,
+          chapter: 32,
+          version: 'LSG',
+          strongMode: 'reverse-interlinear',
+          interlinearLocale: 'fr',
+        },
+        dependencies
+      )
+    const sourceWords = (result: Awaited<ReturnType<typeof loadBibleContentChapter>>) =>
+      result.success
+        ? result.data.verses.map(
+            verse =>
+              verse.ReverseInterlinearSpans?.map(span =>
+                span.sourceTokens.map(token => `${token.id}:${token.surface}`)
+              ) ?? []
+          )
+        : undefined
+
+    it('cuts a word named in the chapter before out of that chapter text', async () => {
+      const dependencies = createShiftedReverseDependencies({
+        bhgVerses: {
+          31: [{ Verset: 55, Texte: 'yaaqov halakh' }],
+          32: [{ Verset: 1, Texte: 'vayomer' }],
+          33: [{ Verset: 1, Texte: 'vayissa' }],
+        },
+        tokensByChapter: {
+          31: { 55: [sourceToken(100, 0, 6, 'H3290'), sourceToken(101, 7, 6, 'H1980')] },
+          32: { 1: [sourceToken(200, 0, 7, 'H559')] },
+          33: { 1: [sourceToken(300, 0, 7, 'H5375')] },
+        },
+        spansByVerse: {
+          1: [targetSpan(0, [100], ['H3290'])],
+          2: [targetSpan(0, [200], ['H559']), targetSpan(1, undefined, ['H1980'])],
+        },
+      })
+
+      const result = await loadShiftedChapter(dependencies)
+
+      expect(sourceWords(result)).toEqual([[['100:yaaqov']], [['200:vayomer'], []]])
+      expect(
+        dependencies.loadInterlinearChapterTokens.mock.calls.map(([, , , chapter]) => chapter)
+      ).toEqual([32, 31, 33])
+      expect(dependencies.getChapterVerses).toHaveBeenCalledWith('BHG', 1, 31)
+      // A word of the neighbour no span names is never paired by inference.
+      expect(dependencies.logWarning).toHaveBeenCalledWith(
+        '[BibleContentAccess] Recoverable integrity warning: reverse-interlinear-reconciliation',
+        expect.objectContaining({
+          missingExplicitTokenIds: [],
+          inferredAssociationCount: 0,
+          unresolvedStrongReferences: ['2:1:1980'],
+        })
+      )
+    })
+
+    it('keeps the BHG word order across the chapter boundary', async () => {
+      const dependencies = createShiftedReverseDependencies({
+        bhgVerses: {
+          31: [{ Verset: 55, Texte: 'yaaqov' }],
+          32: [{ Verset: 1, Texte: 'vayomer' }],
+        },
+        tokensByChapter: {
+          31: { 55: [sourceToken(100, 0, 6, 'H3290')] },
+          32: { 1: [sourceToken(200, 0, 7, 'H559')] },
+        },
+        spansByVerse: {
+          1: [targetSpan(0, [200, 100], ['H559', 'H3290'])],
+        },
+      })
+
+      const result = await loadShiftedChapter(dependencies)
+
+      expect(sourceWords(result)).toEqual([[['100:yaaqov', '200:vayomer']], []])
+    })
+
+    it('reads a chapter BHG does not number from the chapter next to it', async () => {
+      const dependencies = createShiftedReverseDependencies({
+        bhgVerses: { 31: [{ Verset: 55, Texte: 'yaaqov vayomer' }] },
+        tokensByChapter: {
+          31: { 55: [sourceToken(100, 0, 6, 'H3290'), sourceToken(200, 7, 7, 'H559')] },
+        },
+        spansByVerse: {
+          1: [targetSpan(0, [100], ['H3290'])],
+          2: [targetSpan(0, [200], ['H559'])],
+        },
+      })
+
+      const result = await loadShiftedChapter(dependencies)
+
+      expect(result.success).toBe(true)
+      expect(sourceWords(result)).toEqual([[['100:yaaqov']], [['200:vayomer']]])
+    })
+
+    it('reads no neighbour when the chapter holds every named word', async () => {
+      const dependencies = createShiftedReverseDependencies({
+        bhgVerses: { 32: [{ Verset: 1, Texte: 'yaaqov vayomer' }] },
+        tokensByChapter: {
+          32: { 1: [sourceToken(100, 0, 6, 'H3290'), sourceToken(200, 7, 7, 'H559')] },
+        },
+        spansByVerse: {
+          1: [targetSpan(0, [100], ['H3290'])],
+          2: [targetSpan(0, [200], ['H559'])],
+        },
+      })
+
+      const result = await loadShiftedChapter(dependencies)
+
+      expect(sourceWords(result)).toEqual([[['100:yaaqov']], [['200:vayomer']]])
+      expect(dependencies.loadInterlinearChapterTokens).toHaveBeenCalledTimes(1)
+      expect(dependencies.getChapterVerses).not.toHaveBeenCalledWith('BHG', 1, 31)
+    })
+
+    it('still fails when the chapter itself cannot be read', async () => {
+      const dependencies = createShiftedReverseDependencies({
+        bhgVerses: { 31: [{ Verset: 55, Texte: 'yaaqov' }] },
+        tokensByChapter: { 31: { 55: [sourceToken(100, 0, 6, 'H3290')] } },
+        spansByVerse: { 1: [targetSpan(0, [100], ['H3290'])] },
+      })
+      dependencies.loadInterlinearChapterTokens.mockRejectedValueOnce(
+        new ResourceAccessError('NETWORK_OFFLINE')
+      )
+
+      const result = await loadShiftedChapter(dependencies)
+
+      expect(result.success).toBe(false)
+      expect(dependencies.loadInterlinearChapterTokens).toHaveBeenCalledTimes(1)
+    })
+  })
+
   it('fails the requested reverse interlinear mode without another locale or lexical reconstruction', async () => {
     const dependencies = createDependencies()
     dependencies.getChapterVerses.mockImplementation(async version =>
