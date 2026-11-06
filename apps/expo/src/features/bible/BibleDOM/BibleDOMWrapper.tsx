@@ -72,7 +72,6 @@ import {
   DOWNLOAD_CHAPTER_ENTITIES,
   DISMISS_CONTEXTUAL_INFORMATION,
   DOM_COMPONENT_MOUNTED,
-  NAVIGATE_TO_VERSE_LINKS,
   NAVIGATE_TO_VERSE_STUDY_RELATIONS,
   OPEN_BOOKMARK_MODAL,
   OPEN_CROSS_VERSION_MODAL,
@@ -566,18 +565,6 @@ export const BibleDOMWrapper = ({
           confirmLabel: t('bible.chapterEntities.dismissConfirm'),
         }).then(confirmed => {
           if (confirmed) onDisableContextualInformation?.()
-        })
-        break
-      }
-      case NAVIGATE_TO_VERSE_LINKS: {
-        const verseKey = getStringPayload(action.payload)
-        if (!verseKey) break
-        router.push({
-          pathname: '/bible-verse-links',
-          params: {
-            verse: verseKey,
-            withBack: 'true',
-          },
         })
         break
       }
