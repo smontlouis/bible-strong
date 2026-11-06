@@ -225,7 +225,7 @@ index 02f713b7592c68e3cb6db2013b2aee0600a602a8..9ab6b1d3a26cc95cfd74183a66cc891d
              // Simulate iOS `onContentProcessDidTerminate` behavior to reload when the app is in foreground or back to foreground.
              if (AppState.currentState === 'active') {
                  webviewRef.current?.reload();
-@@ -119,12 +175,21 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
+@@ -119,12 +175,22 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
              dom?.containerStyle
          ],
          onLayout: __DEV__ ? debugOnLayout : dom?.onLayout,
@@ -236,8 +236,11 @@ index 02f713b7592c68e3cb6db2013b2aee0600a602a8..9ab6b1d3a26cc95cfd74183a66cc891d
          injectedJavaScriptObject: {
              // Inject the top-most OS for the DOM component to read.
              EXPO_DOM_HOST_OS: process.env.EXPO_OS,
-             // Inject the initial props
-             initialProps: initialPropsRef.current
+-            // Inject the initial props
+-            initialProps: initialPropsRef.current
++            // No initial props here: react-native-webview pastes this object into a template literal,
++            // which `${`, a backtick, `\"` or `\n` in a prop breaks. They arrive through
++            // `injectedJavaScriptBeforeContentLoaded` and the DOM_READY handshake instead.
          },
 +        injectedJavaScriptBeforeContentLoaded: [
 +            initialDomGlobalsScript,
@@ -247,7 +250,7 @@ index 02f713b7592c68e3cb6db2013b2aee0600a602a8..9ab6b1d3a26cc95cfd74183a66cc891d
          injectedJavaScript: [
              dom?.matchContents ? getInjectBodySizeObserverScript() : null,
              dom?.injectedJavaScript,
-@@ -155,10 +220,7 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
+@@ -155,10 +221,7 @@ const RawWebView = /*#__PURE__*/ React.forwardRef((props, ref)=>{
              }
              if (type === DOM_READY) {
                  // Re-send the props the DOM side missed while the WebView was loading.
@@ -485,7 +488,7 @@ index c9d79a41e43da2e7e5f668bf0e2ab665bdbf5182..e89ac65fdbc96235f303c6a3e29159db
        // Simulate iOS `onContentProcessDidTerminate` behavior to reload when the app is in foreground or back to foreground.
        if (AppState.currentState === 'active') {
          webviewRef.current?.reload();
-@@ -145,12 +208,23 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+@@ -145,12 +208,24 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
      ...(useExpoDOMWebView ? { useExpoModulesBridge } : null),
      containerStyle: [containerStyle, debugZeroHeightStyle, dom?.containerStyle],
      onLayout: (__DEV__ ? debugOnLayout : dom?.onLayout) as RawWebViewProps['onLayout'],
@@ -496,8 +499,11 @@ index c9d79a41e43da2e7e5f668bf0e2ab665bdbf5182..e89ac65fdbc96235f303c6a3e29159db
      injectedJavaScriptObject: {
        // Inject the top-most OS for the DOM component to read.
        EXPO_DOM_HOST_OS: process.env.EXPO_OS,
-       // Inject the initial props
-       initialProps: initialPropsRef.current,
+-      // Inject the initial props
+-      initialProps: initialPropsRef.current,
++      // No initial props here: react-native-webview pastes this object into a template literal,
++      // which `${`, a backtick, `\"` or `\n` in a prop breaks. They arrive through
++      // `injectedJavaScriptBeforeContentLoaded` and the DOM_READY handshake instead.
      },
 +    injectedJavaScriptBeforeContentLoaded: [
 +      initialDomGlobalsScript,
@@ -509,7 +515,7 @@ index c9d79a41e43da2e7e5f668bf0e2ab665bdbf5182..e89ac65fdbc96235f303c6a3e29159db
      injectedJavaScript: [
        dom?.matchContents ? getInjectBodySizeObserverScript() : null,
        dom?.injectedJavaScript,
-@@ -180,7 +254,7 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+@@ -180,7 +255,7 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
  
        if (type === DOM_READY) {
          // Re-send the props the DOM side missed while the WebView was loading.

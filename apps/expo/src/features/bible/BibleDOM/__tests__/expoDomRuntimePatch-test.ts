@@ -125,6 +125,24 @@ describe('Expo DOM runtime patch', () => {
     expect(domReadySource.slice(0, 160)).toContain('emitProps(true)')
   })
 
+  // react-native-webview hands `injectedJavaScriptObject` to the page inside a JS template literal,
+  // so `${`, a backtick, `\"` or `\n` in a prop made that script fail to compile or its JSON fail
+  // to parse. The initial props go only through the script injected before the page loads, and the
+  // DOM_READY handshake re-sends them if that script ran too late.
+  it('keeps the initial props out of the object react-native-webview injects', () => {
+    const wrapperSource = readFileSync(getExpoBuildPath('webview-wrapper.js'), 'utf8')
+    const objectStart = wrapperSource.indexOf('injectedJavaScriptObject: {')
+    const objectSource = wrapperSource.slice(
+      objectStart,
+      wrapperSource.indexOf('},', objectStart) + 2
+    )
+
+    expect(objectStart).toBeGreaterThan(-1)
+    expect(objectSource).toContain('EXPO_DOM_HOST_OS: process.env.EXPO_OS')
+    expect(objectSource).not.toMatch(/^\s*initialProps:/m)
+    expect(wrapperSource).toContain('window.$$EXPO_INITIAL_PROPS = ${initialProps};')
+  })
+
   it('merges partial props into the ones the DOM side already has', () => {
     const entrySource = readFileSync(getExpoBuildPath('dom-entry.js'), 'utf8')
 
