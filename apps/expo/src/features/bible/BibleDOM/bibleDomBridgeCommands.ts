@@ -61,17 +61,6 @@ export const isRecord = (value: unknown): value is Record<string, unknown> =>
 export const getStringPayload = (payload: unknown): string | undefined =>
   typeof payload === 'string' ? payload : undefined
 
-/** A verse tapped in the reader, with the version it was tapped in when parallel reading. */
-export const getVerseSelectionPayload = (
-  payload: unknown
-): { verseKey: string; version?: string } | undefined => {
-  if (typeof payload === 'string') return { verseKey: payload }
-  if (!isRecord(payload)) return undefined
-  const verseKey = getStringPayload(payload.verseKey)
-  if (!verseKey) return undefined
-  return { verseKey, version: getStringPayload(payload.version) }
-}
-
 /** The version an annotation-mode payload refers to, when the reader names one. */
 export const getPayloadVersion = (payload: unknown): string | undefined =>
   isRecord(payload) ? getStringPayload(payload.version) : undefined

@@ -91,7 +91,14 @@ export type OpenIntent = {
   version?: string
 }
 
-export type ReaderIntent = ReadingIntent | OpenIntent
+/** Select: the Selected verses of the reader, in one Bible version. */
+export type SelectIntent =
+  /** A verse tapped is selected, or unselected, in the version of the column it was tapped in. */
+  | { kind: 'toggle-selected-verse'; verseKey: string; version?: string }
+  /** A tap away from the text. */
+  | { kind: 'clear-selected-verses' }
+
+export type ReaderIntent = ReadingIntent | OpenIntent | SelectIntent
 
 /** What the page sends: an intent stamped with the Tab the page shows. */
 export type ReaderIntentMessage = { tabId: string; intent: ReaderIntent }
@@ -114,8 +121,13 @@ export type ReaderRule =
   | 'controls-kept-visible'
   /** The passage leads to no next element of a plan day. */
   | 'no-plan-day-step'
-  /** The reader hides personal Bible data (ADR-0030): notes, links, Relations and tags stay shut. */
+  /**
+   * The reader hides personal Bible data (ADR-0030): notes, links, Relations and tags stay shut,
+   * and no verse is selected.
+   */
   | 'personal-data'
+  /** The version named is shown only in interlinear presentations: it holds no personal Bible data. */
+  | 'interlinear-column'
   /** The reader leaves for no source of a passage media but YouTube. */
   | 'unknown-media-source'
 

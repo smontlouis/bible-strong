@@ -20,6 +20,7 @@ import {
   type StrongSelectionMorphology,
 } from '~helpers/strongSelection'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
+import { getVersionOnScreen } from './columns'
 import type { OpenedRelation, OpenIntent, OpenOrigin, OpenTarget, ReaderRule } from './types'
 import type { Reader, ReaderSnapshot, ReaderWorld } from './world'
 
@@ -515,10 +516,7 @@ export const applyOpenIntent = async (intent: OpenIntent, context: OpenContext) 
         kind: 'verse-resource',
         resource: target.resource,
         verseKey: intent.verseKey!,
-        // A version named by the reader, kept only when it is on screen: the main one otherwise.
-        version:
-          snapshot.parallelColumnVersions.find(version => version === intent.version) ??
-          data.selectedVersion,
+        version: getVersionOnScreen(snapshot, data.selectedVersion, intent.version),
       })
       return
   }

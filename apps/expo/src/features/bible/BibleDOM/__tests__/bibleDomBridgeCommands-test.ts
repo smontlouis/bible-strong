@@ -1,4 +1,4 @@
-import { OPEN_BOOKMARK_MODAL, RETRY_BIBLE_RESOURCE, TOGGLE_SELECTED_VERSE } from '../dispatch'
+import { ENTER_ANNOTATION_MODE, OPEN_BOOKMARK_MODAL, RETRY_BIBLE_RESOURCE } from '../dispatch'
 import {
   decodeBibleDOMBridgeAction,
   getStringPayload,
@@ -6,18 +6,11 @@ import {
   getToastPayload,
   getPayloadVersion,
   getVerseIdsPayload,
-  getVerseSelectionPayload,
   routeBibleDOMBridgeAction,
 } from '../bibleDomBridgeCommands'
 
 describe('Bible DOM bridge', () => {
-  it('reads the verse a reader tapped, with its version in parallel reading', () => {
-    expect(getVerseSelectionPayload('1-1-1')).toEqual({ verseKey: '1-1-1' })
-    expect(getVerseSelectionPayload({ verseKey: '1-1-1', version: 'KJV' })).toEqual({
-      verseKey: '1-1-1',
-      version: 'KJV',
-    })
-    expect(getVerseSelectionPayload({ version: 'KJV' })).toBeUndefined()
+  it('reads the version a payload names in parallel reading', () => {
     expect(getPayloadVersion({ version: 'KJV' })).toBe('KJV')
     expect(getPayloadVersion({})).toBeUndefined()
   })
@@ -88,14 +81,14 @@ describe('Bible DOM bridge', () => {
 
     await expect(
       routeBibleDOMBridgeAction(
-        { type: TOGGLE_SELECTED_VERSE, payload: { verseKey: '1-2-2', version: 'DBY' } },
+        { type: ENTER_ANNOTATION_MODE, payload: { verseKey: '1-2-2', version: 'DBY' } },
         options
       )
     ).resolves.toBe('blocked')
     expect(handle).not.toHaveBeenCalled()
 
     const textColumnAction = {
-      type: TOGGLE_SELECTED_VERSE,
+      type: ENTER_ANNOTATION_MODE,
       payload: { verseKey: '1-2-2', version: 'LSG' },
     }
     await expect(routeBibleDOMBridgeAction(textColumnAction, options)).resolves.toBe('handled')

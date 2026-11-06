@@ -3,9 +3,6 @@ export const DISMISS_CONTEXTUAL_INFORMATION = 'DISMISS_CONTEXTUAL_INFORMATION'
 export const SHOW_TOAST = 'SHOW_TOAST'
 export const NAVIGATE_TO_VERSE_LINKS = 'NAVIGATE_TO_VERSE_LINKS'
 export const NAVIGATE_TO_VERSE_STUDY_RELATIONS = 'NAVIGATE_TO_VERSE_STUDY_RELATIONS'
-export const TOGGLE_SELECTED_VERSE = 'TOGGLE_SELECTED_VERSE'
-// A tap away from the text unselects every verse
-export const CLEAR_SELECTED_VERSES = 'CLEAR_SELECTED_VERSES'
 export const OPEN_HIGHLIGHT_TAGS = 'OPEN_HIGHLIGHT_TAGS'
 export const OPEN_BOOKMARK_MODAL = 'OPEN_BOOKMARK_MODAL'
 export const SET_BIBLE_OVERLAY_OPEN = 'SET_BIBLE_OVERLAY_OPEN'
@@ -34,12 +31,11 @@ export const RESET_BIBLE_DATABASE = 'RESET_BIBLE_DATABASE'
 export const RETRY_BIBLE_RESOURCE = 'RETRY_BIBLE_RESOURCE'
 export const DOM_COMPONENT_MOUNTED = 'DOM_COMPONENT_MOUNTED'
 
-// Opening a Note, a link, a Relation or a tag is a Reader intent, refused by its own rule.
+// Opening a Note, a link, a Relation or a tag, and selecting verses, are Reader intents refused by
+// their own rules.
 const PERSONAL_BIBLE_DATA_ACTIONS = new Set<string>([
   NAVIGATE_TO_VERSE_LINKS,
   NAVIGATE_TO_VERSE_STUDY_RELATIONS,
-  TOGGLE_SELECTED_VERSE,
-  CLEAR_SELECTED_VERSES,
   OPEN_HIGHLIGHT_TAGS,
   OPEN_BOOKMARK_MODAL,
   ENTER_ANNOTATION_MODE,

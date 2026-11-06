@@ -19,7 +19,6 @@ import {
   OPEN_VERSE_TAGS_MODAL,
   RETRY_BIBLE_RESOURCE,
   SELECTION_CHANGED,
-  TOGGLE_SELECTED_VERSE,
   isPersonalBibleDataAction,
 } from '../BibleDOM/dispatch'
 
@@ -146,7 +145,6 @@ describe('Bible viewer personal data policy', () => {
   it.each([
     NAVIGATE_TO_VERSE_LINKS,
     NAVIGATE_TO_VERSE_STUDY_RELATIONS,
-    TOGGLE_SELECTED_VERSE,
     OPEN_HIGHLIGHT_TAGS,
     OPEN_ANNOTATION_TAGS,
     OPEN_BOOKMARK_MODAL,

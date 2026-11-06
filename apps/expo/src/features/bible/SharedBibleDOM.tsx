@@ -73,8 +73,6 @@ const SharedBibleDOM = () => {
     book: defaultBibleTab.data.selectedBook,
     chapter: defaultBibleTab.data.selectedChapter,
     isLoading: true,
-    addSelectedVerse: noop,
-    removeSelectedVerse: noop,
     setSelectedVerse: noop,
     version: defaultBibleTab.data.selectedVersion,
     contextDisplayMode: 'fullChapter',

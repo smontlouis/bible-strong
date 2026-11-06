@@ -1,3 +1,4 @@
+import * as Haptics from 'expo-haptics'
 import { getDefaultStore, type PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { Linking, Platform } from 'react-native'
@@ -34,6 +35,11 @@ export type ReaderSnapshot = {
   hasPlanDayStep: boolean
   /** Every column shows an interlinear presentation: the reader holds no personal Bible data. */
   hidesPersonalData: boolean
+  /**
+   * The versions whose every column shows an interlinear presentation (ADR-0030). A version shown
+   * twice keeps its personal data while one of its columns shows its text.
+   */
+  interlinearReadingVersions: VersionCode[]
   /** The versions of the parallel columns on screen, after the main one. */
   parallelColumnVersions: VersionCode[]
   /** The commentaries shown within the text, and the indexes of the chapter they come from. */
@@ -78,6 +84,8 @@ export type ReaderWorld = {
   /** Opens an address outside the application. */
   openUrl(url: string): Promise<void>
   notify(notice: ReaderNotice): void
+  /** The feedback of the device under the finger. */
+  haptic(feedback: 'selection'): void
   t(key: string, options?: Record<string, unknown>): string
 }
 
@@ -101,6 +109,9 @@ export const useReaderWorld = (): ReaderWorld => {
       if (type === 'warning') toast.warning(message)
       else if (type === 'error') toast.error(message)
       else toast.info(message)
+    },
+    haptic: () => {
+      void Haptics.selectionAsync()
     },
     t: (key, options) => t(key, options),
   }
