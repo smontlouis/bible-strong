@@ -37,6 +37,7 @@ import { loadMobileResourceCatalog } from '~helpers/mobileResourceCatalog'
 import { useAutomaticUpdates } from '~helpers/useAutomaticUpdates'
 import { offlineResourceRegistry } from '~features/resources/resourceAvailability'
 import DeferredVerseOfTheDayPrefetch from '~features/home/DeferredVerseOfTheDayPrefetch'
+import AgentTools from '~devtools/AgentTools'
 
 const PostMigrationStartup = ({ children }: { children: ReactNode }) => {
   const [resourcesReady, setResourcesReady] = useState(false)
@@ -156,6 +157,7 @@ const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
                 <BookSelectorSheetProvider>
                   <StrongAudioProvider>
                     <InitHooks />
+                    {__DEV__ && <AgentTools />}
                     <NavigationTracking />
                     <WorkspaceLayout>
                       <Stack screenOptions={{ headerShown: false }}>

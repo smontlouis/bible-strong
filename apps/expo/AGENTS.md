@@ -73,6 +73,7 @@ The app runs Reanimated 4.
 ## Testing on a device
 
 - Simulators and the Android emulator are driven with argent; issue work runs in `/issue` lanes (`../../docs/agents/orchestration.md`).
+- In development the app answers agents on `globalThis.__BIBLE_STRONG_AGENT__` (`src/devtools/`), called with argent's `debugger-evaluate`: `help()` lists the tools; `openPassage({ reference: 'Jean 3:16' })` opens a passage in a new tab, and `syncState()`, `userDataCounts()` and `offlineResources()` read the state without changing it. Prefer them to taps for setting up or checking a test. A new tool goes in `agentToolActions.ts`, with its test.
 - In the simulator, App Check fails, so the study assistant, dictation and Offline copies can't be exercised for real, and the keyboard is AZERTY.
 - `src/features/entityListQuery/__tests__/highlightsQuery-test.ts` is flaky in the full Jest run. When it is the only failure, rerun it alone and rerun the suite before blaming a change.
 
