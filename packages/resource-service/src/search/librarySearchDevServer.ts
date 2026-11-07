@@ -7,12 +7,12 @@
 // With CLOUDFLARE_ACCOUNT_ID, queries are embedded through the Workers AI REST API instead
 // (0.2 to 0.7 s, against several seconds through `wrangler dev`), with CLOUDFLARE_API_TOKEN or
 // the logged-in Wrangler session; terminal 1 is then not needed.
-import { execFileSync } from 'node:child_process'
 import { createServer } from 'node:http'
 
 import { makeLocalDatabase } from '../database/localDatabase'
 import { searchLibrary } from '../repositories/librarySearchRepository'
-import { makeHttpLibraryEmbeddingProvider, makeLibraryEmbeddingProvider } from './libraryEmbedding'
+import { makeHttpLibraryEmbeddingProvider } from './libraryEmbedding'
+import { makeRestLibraryEmbeddingProvider } from './libraryEmbeddingRest'
 import { parseLibrarySearchInput } from './librarySearchInput'
 
 const port = Number(process.env.RESOURCE_LIBRARY_SEARCH_PORT ?? 8792)
@@ -22,43 +22,8 @@ const database = makeLocalDatabase({
     'postgresql://bible_strong:bible_strong@127.0.0.1:54329/bible_strong',
   maxConnections: 4,
 })
-const wranglerToken = () =>
-  execFileSync('npx', ['wrangler', 'auth', 'token'], {
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'ignore'],
-  })
-    .trim()
-    .split('\n')
-    .at(-1) ?? ''
-
-const restProvider = (account: string) => {
-  let bearer = process.env.CLOUDFLARE_API_TOKEN ?? wranglerToken()
-  return makeLibraryEmbeddingProvider({
-    async run(model, input) {
-      for (let attempt = 0; attempt < 3; attempt += 1) {
-        const response = await fetch(
-          `https://api.cloudflare.com/client/v4/accounts/${account}/ai/run/${model}`,
-          {
-            method: 'POST',
-            headers: { authorization: `Bearer ${bearer}`, 'content-type': 'application/json' },
-            body: JSON.stringify(input),
-          }
-        )
-        // The Wrangler session token expires within the hour.
-        if (response.status === 401 && !process.env.CLOUDFLARE_API_TOKEN) {
-          bearer = wranglerToken()
-          continue
-        }
-        if (!response.ok) throw new Error(`LIBRARY_EMBEDDING_HTTP_${response.status}`)
-        return ((await response.json()) as { result: unknown }).result
-      }
-      throw new Error('LIBRARY_EMBEDDING_UNAUTHORIZED')
-    },
-  })
-}
-
 const provider = process.env.CLOUDFLARE_ACCOUNT_ID
-  ? restProvider(process.env.CLOUDFLARE_ACCOUNT_ID)
+  ? makeRestLibraryEmbeddingProvider(process.env.CLOUDFLARE_ACCOUNT_ID)
   : makeHttpLibraryEmbeddingProvider(
       process.env.RESOURCE_LIBRARY_EMBEDDING_URL ?? 'http://127.0.0.1:8791',
       { maxAttempts: 3 }

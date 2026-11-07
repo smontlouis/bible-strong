@@ -1,5 +1,6 @@
 import { WorkerEntrypoint } from 'cloudflare:workers'
 
+import type { LibraryDocumentResult } from '../repositories/libraryDocumentRepository'
 import type { LibrarySearchResult } from '../repositories/librarySearchRepository'
 
 /**
@@ -11,5 +12,11 @@ export class LibrarySearch extends WorkerEntrypoint<Env> {
   async search(input: unknown): Promise<LibrarySearchResult> {
     const { runLibrarySearch } = await import('./librarySearchOrigin')
     return runLibrarySearch(this.env, input)
+  }
+
+  /** The whole text of a document of a library collection (ADR-0106), or null. */
+  async read(input: unknown): Promise<LibraryDocumentResult> {
+    const { runLibraryRead } = await import('./librarySearchOrigin')
+    return runLibraryRead(this.env, input)
   }
 }

@@ -88,8 +88,22 @@ forces it). `library:search:dev` serves the same search on `http://127.0.0.1:879
 the entrypoint, `POST` JSON) over `RESOURCE_DATABASE_URL` and the embedding Worker, for the
 assistant's bench and manual checks.
 
+Document collections that the app does not publish (ADR-0106: the Biblical Research Institute
+articles, the adult Sabbath School Bible Study Guide) are imported from prepared JSON lines, which
+the private assistant repository builds:
+
+```bash
+CLOUDFLARE_ACCOUNT_ID=<account> yarn workspace @bible-strong/resource-service library:collection \
+  --collection bri --language en --file /path/to/articles.jsonl
+```
+
+A new file replaces the collection once all its passages are written; unchanged passages keep
+their vectors and an unchanged file changes nothing. A search may ask for `perspectives`: the
+best passage of each tradition first, then one more per work.
+
 The search is not a public route. The Worker's main module, `src/runtime/entry.ts`, exports the
-`LibrarySearch` RPC entrypoint next to the public Worker; the assistant binds to it with
+`LibrarySearch` RPC entrypoint (`search`, and `read` for a document of a collection) next to the
+public Worker; the assistant binds to it with
 `"entrypoint": "LibrarySearch"`.
 
 ## Resource Studio handoff

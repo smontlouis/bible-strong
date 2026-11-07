@@ -181,6 +181,7 @@ describe('library embedding and search input', () => {
         book: 66,
         chapter: undefined,
         limit: 5,
+        perspectives: undefined,
       }
     )
     for (const invalid of [
@@ -208,5 +209,82 @@ describe('library search by words', () => {
     )
     assert.equal(rareLexemeQuery(['test', 'testament'], { test: 11700, testament: 12900 }), null)
     assert.equal(rareLexemeQuery(["l'ami"], {}), "'l''ami'")
+  })
+})
+
+describe('library collections', () => {
+  it('reads a BRI article and an English Sabbath School day into attributed passages', async () => {
+    const { LIBRARY_COLLECTIONS, documentPassages, verseRange } = await import('../libraryCollections')
+    const bri = LIBRARY_COLLECTIONS.bri
+    const article = bri.parse(
+      {
+        url: 'https://adventistbiblicalresearch.org/articles/the-millennium',
+        slug: 'the-millennium',
+        title: 'The Millennium',
+        authors: [{ name: 'Ekkehardt Mueller', bio: null }],
+        date: '2026-09-10T21:33:42.949Z',
+        text: 'The millennium follows the second coming.\n\n' + 'Revelation 20 describes it. '.repeat(120),
+      },
+      'en'
+    )
+    assert.ok(article)
+    const passages = documentPassages(bri, 'en', article)
+    assert.ok(passages.length >= 2)
+    assert.equal(passages[0].passageKey, 'the-millennium#0')
+    assert.equal(passages[0].corpus, 'document')
+    assert.equal(passages[0].heading, 'Biblical Research Institute (Protestantisme, Adventiste), Ekkehardt Mueller, « The Millennium » (2026)')
+    assert.deepEqual(passages[1].target, {
+      kind: 'document',
+      collection: 'bri',
+      language: 'en',
+      documentKey: 'the-millennium',
+      part: 1,
+      url: 'https://adventistbiblicalresearch.org/articles/the-millennium',
+    })
+    assert.equal(bri.parse({ slug: '../x', title: 'T', text: 'x' }, 'en'), undefined)
+    assert.equal(bri.parse({ slug: 'a', title: 'T', text: 'x', url: 'https://example.com/a' }, 'en')?.url, null)
+
+    const school = LIBRARY_COLLECTIONS['sabbath-school']
+    const day = school.parse(
+      {
+        id: 'sabbath-school/en/2016-04/01/1',
+        kind: 'day',
+        quarter: '2016-04',
+        quarterTitle: 'The Book of Job',
+        lesson: 1,
+        lessonTitle: 'The End',
+        day: 1,
+        date: '2016-09-24',
+        title: 'The End',
+        references: [{ book: 18, chapter: 42, verses: '10-17' }],
+        text: 'In writing classes, students are taught the importance of endings.',
+      },
+      'en'
+    )
+    assert.ok(day)
+    const [lesson] = documentPassages(school, 'en', day)
+    assert.equal(lesson.passageKey, '2016-04/01/1#0')
+    assert.equal(lesson.heading, 'Adult Sabbath School Bible Study Guide (Protestantisme, Adventiste), The Book of Job (2016-04), lesson 1 « The End », « The End », Job 42:10-17')
+    assert.deepEqual([lesson.book, lesson.chapter, lesson.verseStart, lesson.verseEnd], [18, 42, 10, 17])
+    assert.equal(school.parse({ id: 'sabbath-school/fr/2016-04/01/1', text: 'x' }, 'en'), undefined, 'the language must match the file')
+    assert.deepEqual(verseRange('14,15'), [14, 15])
+    assert.deepEqual(verseRange(''), [null, null])
+  })
+
+  it('sorts works into perspectives and checks the new arguments', async () => {
+    const { perspectiveOf } = await import('../../repositories/librarySearchRepository')
+    assert.equal(perspectiveOf('Protestantisme', ['Adventiste']), 'adventist')
+    assert.equal(perspectiveOf('Protestantisme', ['Réformé', 'Calviniste']), 'protestant')
+    assert.equal(perspectiveOf('Protestantisme', ['Évangélique', 'Dispensationaliste']), 'evangelical')
+    assert.equal(perspectiveOf('Catholicisme', ['Patristique', 'Scolastique']), 'catholic')
+    assert.equal(perspectiveOf('Christianisme ancien', ['Patristique']), 'patristic')
+    assert.equal(perspectiveOf('Judaïsme', ['Rabbinique']), 'jewish')
+    assert.equal(perspectiveOf(null, []), 'reference')
+    assert.equal(parseLibrarySearchInput({ query: 'les langues', perspectives: true }).perspectives, true)
+    assert.throws(() => parseLibrarySearchInput({ query: 'les langues', perspectives: 'yes' }))
+    const { parseLibraryDocumentInput } = await import('../librarySearchInput')
+    assert.deepEqual(parseLibraryDocumentInput({ collection: 'sabbath-school', language: 'en', documentKey: '2016-04/01/1' }), { collection: 'sabbath-school', language: 'en', documentKey: '2016-04/01/1' })
+    for (const bad of [{ collection: 'bri', language: 'de', documentKey: 'a' }, { collection: 'bri', language: 'en', documentKey: '../a' }, { collection: 'bri', language: 'en', documentKey: 'a', extra: 1 }])
+      assert.throws(() => parseLibraryDocumentInput(bad))
   })
 })

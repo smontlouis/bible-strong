@@ -109,8 +109,9 @@ describe('Resource Worker start-up', () => {
 
   it('loads the HTTP application and the database client only on demand', () => {
     assert.deepEqual(importsOf(worker).dynamic, ['./resourceOrigin'])
+    // search and read both load the same module on their first call.
     assert.deepEqual(
-      importsOf(path.join(packageRoot, 'src/runtime/librarySearchEntrypoint.ts')).dynamic,
+      [...new Set(importsOf(path.join(packageRoot, 'src/runtime/librarySearchEntrypoint.ts')).dynamic)],
       ['./librarySearchOrigin']
     )
     const origin = importsOf(path.join(packageRoot, 'src/runtime/resourceOrigin.ts')).static

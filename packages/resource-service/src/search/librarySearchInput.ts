@@ -4,6 +4,7 @@ import {
   LIBRARY_SEARCH_MAX_LIMIT,
   type LibrarySearchInput,
 } from '../repositories/librarySearchRepository'
+import type { LibraryDocumentInput } from '../repositories/libraryDocumentRepository'
 import { LIBRARY_CORPORA, type LibraryCorpus, type LibraryLanguage } from './libraryDocuments'
 
 const strings = (value: unknown, check: (item: string) => boolean, max: number) => {
@@ -23,11 +24,27 @@ const integer = (value: unknown, min: number, max: number) => {
   return value as number
 }
 
+const boolean = (value: unknown) => {
+  if (value === undefined) return undefined
+  if (typeof value !== 'boolean') throw new Error('LIBRARY_SEARCH_INVALID_INPUT')
+  return value
+}
+
 export const parseLibrarySearchInput = (value: unknown): LibrarySearchInput => {
   if (!value || typeof value !== 'object' || Array.isArray(value))
     throw new Error('LIBRARY_SEARCH_INVALID_INPUT')
   const input = value as Record<string, unknown>
-  const known = ['query', 'languages', 'corpora', 'traditions', 'works', 'book', 'chapter', 'limit']
+  const known = [
+    'query',
+    'languages',
+    'corpora',
+    'traditions',
+    'works',
+    'book',
+    'chapter',
+    'limit',
+    'perspectives',
+  ]
   if (Object.keys(input).some(key => !known.includes(key)))
     throw new Error('LIBRARY_SEARCH_INVALID_INPUT')
   if (typeof input.query !== 'string' || input.query.trim().length < 2 || input.query.length > 500)
@@ -45,5 +62,27 @@ export const parseLibrarySearchInput = (value: unknown): LibrarySearchInput => {
     book: integer(input.book, 1, 66),
     chapter: integer(input.chapter, 1, 150),
     limit: integer(input.limit, 1, LIBRARY_SEARCH_MAX_LIMIT),
+    perspectives: boolean(input.perspectives),
+  }
+}
+
+/** Arguments of a document read (ADR-0106): a collection, its language and a document key. */
+export const parseLibraryDocumentInput = (value: unknown): LibraryDocumentInput => {
+  if (!value || typeof value !== 'object' || Array.isArray(value))
+    throw new Error('LIBRARY_DOCUMENT_INVALID_INPUT')
+  const input = value as Record<string, unknown>
+  if (
+    Object.keys(input).some(key => !['collection', 'language', 'documentKey'].includes(key)) ||
+    typeof input.collection !== 'string' ||
+    !/^[a-z0-9][a-z0-9-]{0,39}$/u.test(input.collection) ||
+    (input.language !== 'fr' && input.language !== 'en') ||
+    typeof input.documentKey !== 'string' ||
+    !/^[A-Za-z0-9][A-Za-z0-9._/-]{0,199}$/u.test(input.documentKey)
+  )
+    throw new Error('LIBRARY_DOCUMENT_INVALID_INPUT')
+  return {
+    collection: input.collection,
+    language: input.language,
+    documentKey: input.documentKey,
   }
 }

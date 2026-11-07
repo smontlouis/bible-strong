@@ -23,6 +23,42 @@ export type LibrarySearchInput = {
   book?: number
   chapter?: number
   limit?: number
+  /**
+   * One hit per perspective first (ADR-0106): on a debated point the best passage of each
+   * tradition, then one more per work, rather than the nearest passages of the largest one.
+   */
+  perspectives?: boolean
+}
+
+/** The broad family a passage speaks for; works without a tradition are reference works. */
+export const LIBRARY_PERSPECTIVES = [
+  'adventist',
+  'catholic',
+  'patristic',
+  'jewish',
+  'evangelical',
+  'protestant',
+  'reference',
+] as const
+export type LibraryPerspective = (typeof LIBRARY_PERSPECTIVES)[number]
+
+export function perspectiveOf(
+  tradition: string | null,
+  tags: readonly string[]
+): LibraryPerspective {
+  if (!tradition && !tags.length) return 'reference'
+  const words = [tradition ?? '', ...tags]
+    .join(' ')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/gu, '')
+    .toLowerCase()
+  if (words.includes('adventiste')) return 'adventist'
+  if (/catholi|thomiste|scolastique/u.test(words)) return 'catholic'
+  if (/christianisme ancien|patristique/u.test(words)) return 'patristic'
+  if (/judaisme|rabbinique/u.test(words)) return 'jewish'
+  if (/dispensational|freres|evangelique|baptiste|restaurationniste|pentecot/u.test(words))
+    return 'evangelical'
+  return 'protestant'
 }
 
 export type LibrarySearchHit = {
@@ -43,6 +79,7 @@ export type LibrarySearchHit = {
   target: Record<string, string | number>
   score: number
   matched: 'semantic' | 'lexical' | 'both'
+  perspective: LibraryPerspective
 }
 
 export type LibrarySearchResult = {
@@ -52,6 +89,8 @@ export type LibrarySearchResult = {
 }
 
 const CANDIDATES = 40
+/** A search by perspective looks further, so that smaller traditions reach the selection. */
+const PERSPECTIVE_CANDIDATES = 150
 const RRF_K = 60
 const SNIPPET_CHARACTERS = 700
 export const LIBRARY_SEARCH_MAX_LIMIT = 10
@@ -143,7 +182,8 @@ async function searchByWords(
   database: Kysely<ResourceDatabase>,
   query: string,
   languages: readonly LibraryLanguage[],
-  scope: ReturnType<typeof scopeFilter>
+  scope: ReturnType<typeof scopeFilter>,
+  candidates: number
 ): Promise<Candidate[]> {
   const keywords = lexicalKeywords(query)
   if (!keywords.length) return []
@@ -174,7 +214,7 @@ async function searchByWords(
     from library_passages
     where ${scope} and (${sql.join(branches, sql` or `)})
     order by ${rank} desc
-    limit ${CANDIDATES}`.execute(database)
+    limit ${candidates}`.execute(database)
   return result.rows
 }
 
@@ -185,6 +225,7 @@ const identityOf = (row: PassageRow) => {
   if (row.corpus === 'dictionary') return `dictionary:${row.work}:${target.entryId}`
   if (row.corpus === 'nave') return `nave:${target.normalizedName}`
   if (row.corpus === 'timeline') return `timeline:${target.slug}`
+  if (row.corpus === 'document') return `document:${row.work}:${target.documentKey}`
   return `entity:${target.uniqueName}`
 }
 
@@ -200,11 +241,12 @@ export async function searchLibrary(
     : (['fr', 'en'] as LibraryLanguage[])
   const timings = { embeddingMs: 0, vectorMs: 0, lexicalMs: 0 }
   const scope = scopeFilter(input)
+  const candidates = input.perspectives ? PERSPECTIVE_CANDIDATES : CANDIDATES
 
   let embedding: number[] | undefined
   // The search by words does not wait for the query embedding.
   const lexicalStarted = Date.now()
-  const lexical = searchByWords(database, query, languages, scope).then(rows => {
+  const lexical = searchByWords(database, query, languages, scope, candidates).then(rows => {
     timings.lexicalMs = Date.now() - lexicalStarted
     return rows
   })
@@ -222,14 +264,14 @@ export async function searchLibrary(
   const vectorRows: Candidate[] = embedding
     ? await database.transaction().execute(async transaction => {
         // Filters apply after the graph walk: iterative scans keep walking until enough rows pass.
-        await sql`set local hnsw.ef_search = 100`.execute(transaction)
+        await sql`set local hnsw.ef_search = ${sql.lit(Math.max(100, candidates))}`.execute(transaction)
         await sql`set local hnsw.iterative_scan = relaxed_order`.execute(transaction)
         const result = await sql<Candidate & { distance: number }>`
           select publication_id, passage_key, embedding <=> ${vectorLiteral(embedding!)}::halfvec as distance
           from library_passages
           where language in (${sql.join(languages)}) and ${scope}
           order by embedding <=> ${vectorLiteral(embedding!)}::halfvec
-          limit ${CANDIDATES}`.execute(transaction)
+          limit ${candidates}`.execute(transaction)
         // Relaxed order may return neighbours slightly out of order.
         return [...result.rows].sort((a, b) => a.distance - b.distance)
       })
@@ -255,7 +297,9 @@ export async function searchLibrary(
   if (!fused.size) return { hits: [], semantic: Boolean(embedding), timings }
 
   type Ranked = { candidate: Candidate; score: number; semantic: boolean; lexical: boolean }
-  const ranked: Ranked[] = [...fused.values()].sort((a, b) => b.score - a.score).slice(0, limit * 5)
+  const ranked: Ranked[] = [...fused.values()]
+    .sort((a, b) => b.score - a.score)
+    .slice(0, input.perspectives ? candidates : limit * 5)
   const passages = (await database
     .selectFrom('library_passages')
     .select([
@@ -303,9 +347,29 @@ export async function searchLibrary(
       })
   }
 
-  const hits = [...chosen.values()]
-    .sort((a, b) => b.entry.score - a.entry.score)
-    .slice(0, limit)
+  const ordered = [...chosen.values()].sort((a, b) => b.entry.score - a.entry.score)
+  let selected = ordered.slice(0, limit)
+  if (input.perspectives) {
+    // The best passage of each perspective, then the next best ones, one per work.
+    const perspectives = new Set<LibraryPerspective>()
+    const works = new Set<string>()
+    selected = []
+    for (const item of ordered) {
+      const perspective = perspectiveOf(item.row.tradition, item.row.tags)
+      if (selected.length >= limit || perspectives.has(perspective)) continue
+      perspectives.add(perspective)
+      works.add(item.row.work)
+      selected.push(item)
+    }
+    for (const item of ordered) {
+      if (selected.length >= limit) break
+      if (selected.includes(item) || works.has(item.row.work)) continue
+      works.add(item.row.work)
+      selected.push(item)
+    }
+    selected.sort((a, b) => b.entry.score - a.entry.score)
+  }
+  const hits = selected
     .map(
       ({ row, entry }): LibrarySearchHit => ({
         corpus: row.corpus,
@@ -331,6 +395,7 @@ export async function searchLibrary(
         target: row.target,
         score: Math.round(entry.score * 10_000) / 10_000,
         matched: entry.semantic && entry.lexical ? 'both' : entry.semantic ? 'semantic' : 'lexical',
+        perspective: perspectiveOf(row.tradition, row.tags),
       })
     )
   return { hits, semantic: Boolean(embedding), timings }

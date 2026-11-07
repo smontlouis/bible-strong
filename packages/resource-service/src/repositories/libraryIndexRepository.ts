@@ -72,7 +72,7 @@ const corpusOf = (identity: string): LibraryCorpus | undefined => {
   return undefined
 }
 
-const sha256 = (value: string) => createHash('sha256').update(value).digest('hex')
+export const sha256 = (value: string) => createHash('sha256').update(value).digest('hex')
 
 async function activePublications(client: PoolClient, options: LibraryIndexOptions) {
   const { rows } = await client.query<{
@@ -184,7 +184,7 @@ async function* publicationPassages(
   )
 }
 
-async function mapConcurrently<T, R>(
+export async function mapConcurrently<T, R>(
   items: readonly T[],
   concurrency: number,
   run: (item: T) => Promise<R>
@@ -201,6 +201,36 @@ async function mapConcurrently<T, R>(
   )
   return results
 }
+
+/** The row written for a passage; `embedding` is a vector literal. */
+export const passageRow = (
+  publicationId: number,
+  draft: LibraryPassageDraft & { inputSha256: string },
+  provider: Pick<LibraryEmbeddingProvider, 'model' | 'contract'>,
+  embedding: string
+) => ({
+  publication_id: publicationId,
+  passage_key: draft.passageKey,
+  corpus: draft.corpus,
+  language: draft.language,
+  work: draft.work,
+  work_title: draft.workTitle,
+  tradition: draft.tradition,
+  tags: draft.tags,
+  title: draft.title,
+  heading: draft.heading,
+  book: draft.book,
+  chapter: draft.chapter,
+  verse_start: draft.verseStart,
+  verse_end: draft.verseEnd,
+  part: draft.part,
+  content: draft.content,
+  target: draft.target,
+  model: provider.model,
+  contract: provider.contract,
+  input_sha256: draft.inputSha256,
+  embedding,
+})
 
 const INSERT = `
   insert into library_passages (
@@ -231,7 +261,7 @@ const INSERT = `
  * 2026-11-07) is cut in two until the passage it refuses is found; that passage is left out and
  * reported instead of ending the run.
  */
-async function embedSplitting<T extends { document: string; passageKey: string }>(
+export async function embedSplitting<T extends { document: string; passageKey: string }>(
   provider: LibraryEmbeddingProvider,
   batch: T[],
   failed: string[]
@@ -262,7 +292,7 @@ const isTransient = (error: unknown) => {
  * Writes one batch, again after a dropped connection (a TLS error ended a production run on
  * 2026-11-07): the insert is an upsert, so a batch written twice is written once.
  */
-async function writeBatch(writers: Pool, rows: string) {
+export async function writeBatch(writers: Pool, rows: string) {
   for (let attempt = 1; ; attempt += 1) {
     try {
       return await writers.query(INSERT, [rows])
@@ -333,29 +363,9 @@ async function indexPublication(
     await mapConcurrently(batches, concurrency, async batch => {
       const embedded = await embedSplitting(provider, batch, report.failed)
       if (!embedded.length) return
-      const rows = embedded.map(({ draft, vector }) => ({
-        publication_id: publication.id,
-        passage_key: draft.passageKey,
-        corpus: draft.corpus,
-        language: draft.language,
-        work: draft.work,
-        work_title: draft.workTitle,
-        tradition: draft.tradition,
-        tags: draft.tags,
-        title: draft.title,
-        heading: draft.heading,
-        book: draft.book,
-        chapter: draft.chapter,
-        verse_start: draft.verseStart,
-        verse_end: draft.verseEnd,
-        part: draft.part,
-        content: draft.content,
-        target: draft.target,
-        model: provider.model,
-        contract: provider.contract,
-        input_sha256: draft.inputSha256,
-        embedding: vectorLiteral(vector),
-      }))
+      const rows = embedded.map(({ draft, vector }) =>
+        passageRow(publication.id, draft, provider, vectorLiteral(vector))
+      )
       // A connection runs one query at a time: batches are written on several connections.
       await writeBatch(writers, JSON.stringify(rows))
     })
@@ -379,7 +389,7 @@ async function indexPublication(
 }
 
 /** The lexemes the search by words leaves to the search by meaning (about 2 min in full). */
-async function refreshLexemes(client: PoolClient) {
+export async function refreshLexemes(client: PoolClient) {
   await client.query('begin')
   try {
     await client.query('delete from library_lexemes')

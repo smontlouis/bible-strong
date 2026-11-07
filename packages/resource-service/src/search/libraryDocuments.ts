@@ -5,7 +5,14 @@ import { COMMENTARY_CATALOG } from '@bible-strong/resource-catalog/commentaries'
 
 import { htmlToPlainText, splitIntoPassages } from './libraryText'
 
-export const LIBRARY_CORPORA = ['commentary', 'dictionary', 'nave', 'timeline', 'entity'] as const
+export const LIBRARY_CORPORA = [
+  'commentary',
+  'dictionary',
+  'nave',
+  'timeline',
+  'entity',
+  'document',
+] as const
 export type LibraryCorpus = (typeof LIBRARY_CORPORA)[number]
 export type LibraryLanguage = 'fr' | 'en'
 
@@ -23,6 +30,15 @@ export type LibraryTarget =
   | { kind: 'nave'; language: LibraryLanguage; normalizedName: string }
   | { kind: 'timeline'; language: LibraryLanguage; slug: string }
   | { kind: 'entity'; language: LibraryLanguage; uniqueName: string }
+  // A document of a collection (ADR-0106): its passages, in order, are its whole text.
+  | {
+      kind: 'document'
+      collection: string
+      language: LibraryLanguage
+      documentKey: string
+      part: number
+      url?: string
+    }
 
 export type LibraryPassageDraft = {
   passageKey: string

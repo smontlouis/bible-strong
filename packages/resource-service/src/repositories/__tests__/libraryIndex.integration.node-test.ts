@@ -8,6 +8,8 @@ import {
   LIBRARY_EMBEDDING_MODEL,
   type LibraryEmbeddingProvider,
 } from '../../search/libraryEmbedding'
+import { importLibraryCollection } from '../libraryCollectionRepository'
+import { readLibraryDocument } from '../libraryDocumentRepository'
 import { indexLibrary } from '../libraryIndexRepository'
 import { searchLibrary } from '../librarySearchRepository'
 
@@ -293,6 +295,116 @@ describe('Library search index', { skip: !runIntegration }, () => {
       assert.ok(calls >= 3, 'the batch was cut until the refused passage was alone')
       const rows = await database.selectFrom('library_passages').select('title').execute()
       assert.deepEqual(rows.map(row => row.title).sort(), ['Alliance', 'Patience'])
+    } finally {
+      await isolated.dispose()
+    }
+  })
+
+  it('imports a document collection, reads a document back and searches by perspective', async () => {
+    const isolated = await createIsolatedPostgres(connectionString, 'library_collection')
+    const { database } = isolated
+    try {
+      const [{ id: barnes }] = await database
+        .insertInto('resource_publications')
+        .values({
+          resource_identity: 'commentary:barnes:fr',
+          resource_kind: 'commentary',
+          revision: 'barnes-fr-r1',
+          language: 'fr',
+          status: 'active',
+          canonical_sha256: '9'.repeat(64),
+          offline_artifact_sha256: '9'.repeat(64),
+          provenance: { source: 'integration-test', imported_at: new Date(0).toISOString() },
+          rights: { holder: 'integration-test', online: true, offline: true },
+          metadata: {},
+          activated_at: new Date(0),
+        })
+        .returning('id')
+        .execute()
+      await database
+        .insertInto('commentary_reading_sections')
+        .values({
+          publication_id: barnes,
+          id: 'barnes-fr-66-20-1',
+          book: 66,
+          chapter: 20,
+          range_start_verse: 1,
+          range_end_verse: 6,
+          excerpt: 'Le règne de mille ans',
+          content: '<p>Le règne de mille ans selon les millénaristes.</p>',
+        })
+        .execute()
+      await indexLibrary({ connectionString: isolated.connectionString, provider })
+      const article = (slug: string, title: string, body: string) => ({
+        url: `https://adventistbiblicalresearch.org/articles/${slug}`,
+        slug,
+        title,
+        authors: [{ name: 'BRI author' }],
+        date: '2026-01-01T00:00:00.000Z',
+        text: body,
+      })
+      const records = [
+        article('millennium-1', 'The Millennium', 'The millennium begins at the second coming.\n\n' + 'Satan is bound on a desolate earth. '.repeat(80)),
+        article('millennium-2', 'Millennial Views', 'The millennium is spent in heaven with Christ.'),
+        article('covenant', 'The Covenant', 'The covenant of grace runs through Scripture.'),
+      ]
+      const imported = await importLibraryCollection({
+        connectionString: isolated.connectionString,
+        provider,
+        collection: 'bri',
+        language: 'en',
+        records,
+        source: 'articles.jsonl',
+      })
+      assert.equal(imported.status, 'activated')
+      assert.equal(imported.documents, 3)
+      assert.ok(imported.passages > 3, 'the long article is cut')
+      assert.equal(imported.embedded, imported.passages)
+
+      const again = await importLibraryCollection({
+        connectionString: isolated.connectionString,
+        provider,
+        collection: 'bri',
+        language: 'en',
+        records,
+        source: 'articles.jsonl',
+      })
+      assert.equal(again.status, 'unchanged')
+      const changed = await importLibraryCollection({
+        connectionString: isolated.connectionString,
+        provider,
+        collection: 'bri',
+        language: 'en',
+        records: [...records.slice(0, 2), article('covenant', 'The Covenant', 'The covenant of grace, revised.')],
+        source: 'articles.jsonl',
+      })
+      assert.equal(changed.status, 'activated')
+      assert.equal(changed.embedded, 1, 'only the changed document is embedded again')
+      assert.equal(changed.reused, changed.passages - 1)
+      const publications = await database
+        .selectFrom('resource_publications')
+        .select(['revision', 'status'])
+        .where('resource_identity', '=', 'library:bri:en')
+        .execute()
+      assert.deepEqual(publications.map(row => row.status), ['active'], 'the previous revision is gone')
+
+      const document = await readLibraryDocument(database, { collection: 'bri', language: 'en', documentKey: 'millennium-1' })
+      assert.ok(document)
+      assert.equal(document.title, 'The Millennium')
+      assert.equal(document.url, 'https://adventistbiblicalresearch.org/articles/millennium-1')
+      assert.match(document.text, /^The millennium begins at the second coming\./u)
+      assert.match(document.text, /desolate earth\.$/u)
+      assert.equal(await readLibraryDocument(database, { collection: 'bri', language: 'en', documentKey: 'millennium' }), null)
+
+      // Two Adventist articles and one Reformed section are equally near: by perspective, both
+      // traditions come first.
+      const plain = await searchLibrary(database, provider, { query: 'the millennium', limit: 2 })
+      assert.equal(plain.hits.length, 2)
+      const diverse = await searchLibrary(database, provider, { query: 'the millennium', limit: 2, perspectives: true })
+      assert.deepEqual(diverse.hits.map(hit => hit.perspective).sort(), ['adventist', 'protestant'])
+      const bri = diverse.hits.find(hit => hit.corpus === 'document')
+      assert.equal(bri?.workTitle, 'Biblical Research Institute')
+      assert.equal(new Set(plain.hits.map(hit => `${hit.work}:${hit.title}`)).size, plain.hits.length, 'one hit per document')
     } finally {
       await isolated.dispose()
     }

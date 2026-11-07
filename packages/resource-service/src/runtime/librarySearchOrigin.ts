@@ -1,12 +1,13 @@
 // What the LibrarySearch entrypoint runs (ADR-0103), loaded on its first call so that the
 // Worker starts without the database client and the search modules.
 import { makeHyperdriveDatabase } from '../database/hyperdriveDatabase'
+import { readLibraryDocument } from '../repositories/libraryDocumentRepository'
 import { searchLibrary } from '../repositories/librarySearchRepository'
 import {
   LIBRARY_EMBEDDING_CONTRACT,
   makeLibraryEmbeddingProvider,
 } from '../search/libraryEmbedding'
-import { parseLibrarySearchInput } from '../search/librarySearchInput'
+import { parseLibraryDocumentInput, parseLibrarySearchInput } from '../search/librarySearchInput'
 import { makeMetadataOnlyAiGatewayOptions } from './searchRuntimeAnalytics'
 
 export async function runLibrarySearch(bindings: Env, value: unknown) {
@@ -36,6 +37,26 @@ export async function runLibrarySearch(bindings: Env, value: unknown) {
         semantic: result.semantic,
         durationMs: Date.now() - started,
         ...result.timings,
+      })
+    )
+    return result
+  } finally {
+    await database.destroy()
+  }
+}
+
+export async function runLibraryRead(bindings: Env, value: unknown) {
+  const input = parseLibraryDocumentInput(value)
+  const database = makeHyperdriveDatabase(bindings.HYPERDRIVE.connectionString)
+  try {
+    const started = Date.now()
+    const result = await readLibraryDocument(database, input)
+    console.log(
+      JSON.stringify({
+        message: 'library read',
+        collection: input.collection,
+        found: Boolean(result),
+        durationMs: Date.now() - started,
       })
     )
     return result
