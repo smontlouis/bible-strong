@@ -9,7 +9,6 @@ import { Pool, type PoolClient } from 'pg'
 
 import {
   LIBRARY_CORPORA,
-  LIBRARY_EXCLUDED_WORKS,
   commentaryPassages,
   dictionaryPassages,
   dictionaryWorkFromIdentity,
@@ -88,8 +87,6 @@ async function activePublications(client: PoolClient, options: LibraryIndexOptio
   return rows.flatMap((row): Publication[] => {
     const corpus = corpusOf(row.resource_identity)
     if (!corpus || !corpora.has(corpus)) return []
-    if (corpus === 'commentary' && LIBRARY_EXCLUDED_WORKS.includes(row.resource_identity.split(':')[1]))
-      return []
     if (options.identities?.length && !options.identities.includes(row.resource_identity)) return []
     return [{ id: row.id, identity: row.resource_identity, language: row.language, corpus }]
   })
@@ -436,14 +433,6 @@ export async function indexLibrary(options: LibraryIndexOptions) {
           await client.query(
             `delete from library_passages p using resource_publications r
              where r.id = p.publication_id and r.status <> 'active'`
-          )
-        ).rowCount ?? 0
-      // Works left out of the search lose their passages (the Ellen G. White writings).
-      removedInactive +=
-        (
-          await client.query(
-            `delete from library_passages where corpus = 'commentary' and work = any($1::text[])`,
-            [LIBRARY_EXCLUDED_WORKS]
           )
         ).rowCount ?? 0
       if (options.rebuildVectorIndex)

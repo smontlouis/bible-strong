@@ -7,6 +7,7 @@ import { sql, type Kysely } from 'kysely'
 import type { ResourceDatabase } from '../database/types'
 import {
   LIBRARY_CORPORA,
+  LIBRARY_ON_REQUEST_WORKS,
   type LibraryCorpus,
   type LibraryLanguage,
 } from '../search/libraryDocuments'
@@ -122,6 +123,9 @@ const scopeFilter = (input: LibrarySearchInput) => {
   const corpora = input.corpora?.filter(corpus => LIBRARY_CORPORA.includes(corpus))
   if (corpora?.length) conditions.push(sql`corpus in (${sql.join(corpora)})`)
   if (input.works?.length) conditions.push(sql`work in (${sql.join([...input.works])})`)
+  // Works returned only when the search names them (the Ellen G. White writings).
+  const unnamed = LIBRARY_ON_REQUEST_WORKS.filter(work => !input.works?.includes(work))
+  if (unnamed.length) conditions.push(sql`work not in (${sql.join(unnamed)})`)
   if (input.traditions?.length) {
     const patterns = input.traditions.map(tradition => `%${tradition.replace(/[%_\\]/gu, '')}%`)
     conditions.push(

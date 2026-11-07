@@ -260,10 +260,11 @@ export const commentaryWork = (collection: string) => {
 }
 
 /**
- * Works left out of the library search (ADR-0106): the Ellen G. White writings. Adventist
- * understandings come from the Bible texts, the Adventist commentary and studies.
+ * Works a search returns only when it names them (ADR-0106): the Ellen G. White writings, which
+ * the assistant reads only when the reader asks what she wrote. Adventist understandings otherwise
+ * come from the Bible texts, the Adventist commentary and studies.
  */
-export const LIBRARY_EXCLUDED_WORKS: readonly string[] = ['egw-writings']
+export const LIBRARY_ON_REQUEST_WORKS: readonly string[] = ['egw-writings']
 
 /**
  * Parts of a section left out of the index: the « Ellen G. White Comments » that close the

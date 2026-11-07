@@ -296,11 +296,11 @@ describe('library collections', () => {
 
 describe('Ellen G. White in the library', () => {
   it('cuts the Ellen G. White comments that close a section of the Adventist commentary', async () => {
-    const { indexedSectionContent, LIBRARY_EXCLUDED_WORKS } = await import('../libraryDocuments')
+    const { indexedSectionContent, LIBRARY_ON_REQUEST_WORKS } = await import('../libraryDocuments')
     const section = '<p>1. In the beginning. The Hebrew is bereshith.</p><br><br><h3>Ellen G. White</h3><br><span>A Reservoir of Means (Letter 131, 1897).</span>'
     assert.equal(htmlToPlainText(indexedSectionContent('sdabc', section)), '1. In the beginning. The Hebrew is bereshith.')
     assert.equal(htmlToPlainText(indexedSectionContent('sdabc', '<br><br><h3>Ellen G. White</h3><p>Only her.</p>')), '')
     assert.equal(indexedSectionContent('barnes', section), section, 'other works keep their text')
-    assert.ok(LIBRARY_EXCLUDED_WORKS.includes('egw-writings'))
+    assert.ok(LIBRARY_ON_REQUEST_WORKS.includes('egw-writings'))
   })
 })

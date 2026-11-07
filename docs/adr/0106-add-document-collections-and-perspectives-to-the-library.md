@@ -33,12 +33,11 @@ the Adventist reading as one of several.
   records, their attribution and their rights. A source slug with other characters than letters,
   digits, dots and hyphens (Greek, « — ») is spelled without them and tagged with a hash. A
   document keeps the address of its source page when the collection has one (BRI).
-- The Ellen G. White writings are left out of the library search (`LIBRARY_EXCLUDED_WORKS`): their
-  passages are deleted by the next index run. The « Ellen G. White Comments » that close the sections
-  of the Seventh-day Adventist Bible Commentary, under their own heading, are cut before indexing
-  (3,809 passages on 2026-11-07). Adventist understandings come from the Bible texts, the commentary
-  and the studies. Leaving the writings out at search time instead would have kept them restorable
-  without an index run; bringing them back now takes one (about 20 minutes).
+- The Ellen G. White writings are indexed but returned only to a search that names them
+  (`LIBRARY_ON_REQUEST_WORKS`): the assistant reads them only when the reader asks what she wrote.
+  The « Ellen G. White Comments » that close the sections of the Seventh-day Adventist Bible
+  Commentary, under their own heading, are cut before indexing (3,809 passages on 2026-11-07).
+  Adventist understandings otherwise come from the Bible texts, the commentary and the studies.
 - The `LibrarySearch` entrypoint gains `read`, which joins the passages of a document back into its
   text (at most 12,000 characters, cut text reported).
 - Every search ranks each language on its own list before fusing them, the other language at

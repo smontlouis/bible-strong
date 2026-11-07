@@ -334,7 +334,7 @@ describe('Library search index', { skip: !runIntegration }, () => {
           content: '<p>Le règne de mille ans selon les millénaristes.</p>',
         })
         .execute()
-      // The Ellen G. White writings stay out of the search.
+      // The Ellen G. White writings are indexed, and returned only to a search that names them.
       const [{ id: egw }] = await database
         .insertInto('resource_publications')
         .values({
@@ -368,8 +368,12 @@ describe('Library search index', { skip: !runIntegration }, () => {
       await indexLibrary({ connectionString: isolated.connectionString, provider })
       assert.equal(
         (await database.selectFrom('library_passages').select('work').where('work', '=', 'egw-writings').execute()).length,
-        0
+        1
       )
+      const unnamed = await searchLibrary(database, provider, { query: 'le millénium', limit: 5 })
+      assert.ok(!unnamed.hits.some(hit => hit.work === 'egw-writings'))
+      const named = await searchLibrary(database, provider, { query: 'le millénium', works: ['egw-writings'] })
+      assert.deepEqual(named.hits.map(hit => hit.work), ['egw-writings'])
       const article = (slug: string, title: string, body: string) => ({
         url: `https://adventistbiblicalresearch.org/articles/${slug}`,
         slug,
