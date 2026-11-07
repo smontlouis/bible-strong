@@ -7,7 +7,6 @@ import { sql, type Kysely } from 'kysely'
 import type { ResourceDatabase } from '../database/types'
 import {
   LIBRARY_CORPORA,
-  LIBRARY_ON_REQUEST_WORKS,
   type LibraryCorpus,
   type LibraryLanguage,
 } from '../search/libraryDocuments'
@@ -18,9 +17,11 @@ export type LibrarySearchInput = {
   /** Preferred source languages, first one first; both are searched. */
   languages?: readonly LibraryLanguage[]
   corpora?: readonly LibraryCorpus[]
-  /** Matched against the tradition and the tags of a work, such as "Adventiste" or "Réformé". */
+  /** Matched against the tradition and the tags of a work, such as "Catholicisme" or "Réformé". */
   traditions?: readonly string[]
   works?: readonly string[]
+  /** Works left out of the search unless `works` names them (ADR-0106). */
+  excludeWorks?: readonly string[]
   book?: number
   chapter?: number
   limit?: number
@@ -123,8 +124,8 @@ const scopeFilter = (input: LibrarySearchInput) => {
   const corpora = input.corpora?.filter(corpus => LIBRARY_CORPORA.includes(corpus))
   if (corpora?.length) conditions.push(sql`corpus in (${sql.join(corpora)})`)
   if (input.works?.length) conditions.push(sql`work in (${sql.join([...input.works])})`)
-  // Works returned only when the search names them (the Ellen G. White writings).
-  const unnamed = LIBRARY_ON_REQUEST_WORKS.filter(work => !input.works?.includes(work))
+  // Works the caller leaves out, unless it also names them.
+  const unnamed = (input.excludeWorks ?? []).filter(work => !input.works?.includes(work))
   if (unnamed.length) conditions.push(sql`work not in (${sql.join(unnamed)})`)
   if (input.traditions?.length) {
     const patterns = input.traditions.map(tradition => `%${tradition.replace(/[%_\\]/gu, '')}%`)
@@ -367,7 +368,7 @@ export async function searchLibrary(
   }
 
   const ordered = [...chosen.values()].sort((a, b) => b.entry.score - a.entry.score)
-  // At most two hits a work: a large work (70,000 passages of Ellen G. White's writings) does
+  // At most two hits a work: a large work (tens of thousands of passages) does
   // not fill the answer, and the other works of its tradition get their turn.
   const perWork = new Map<string, number>()
   let selected = ordered

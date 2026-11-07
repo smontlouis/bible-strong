@@ -1,9 +1,19 @@
-// Document collections of the library (ADR-0106): articles and lessons that are not resources of
-// the app. A prepared file of JSON lines is imported as passages of one collection publication,
-// library:<collection>:<language>; the passages of a document, in order, are its whole text.
+// Document collections of the library (ADR-0106): texts that are not resources of the app,
+// imported from a prepared file of JSON lines. The first line describes the collection, every
+// other line is one document; the passages of a document, in order, are its whole text. Which
+// collections exist and how their files are prepared is decided where the files are prepared.
 import type { LibraryLanguage, LibraryPassageDraft } from './libraryDocuments'
 import { passageReference } from './libraryDocuments'
 import { splitIntoPassages } from './libraryText'
+
+export type LibraryCollection = {
+  id: string
+  title: string
+  tradition: string | null
+  tags: string[]
+  language: LibraryLanguage
+  rights: { holder: string; terms_reference: string }
+}
 
 export type LibraryDocument = {
   key: string
@@ -18,192 +28,77 @@ export type LibraryDocument = {
   verseStart: number | null
   verseEnd: number | null
   text: string
-  /** Points where the document departs from the Seventh-day Adventist reading, named in English. */
-  divergence: string[]
+  /** Short labels the prepared file gives the document, returned with each of its hits. */
+  labels: string[]
 }
 
-export type LibraryCollection = {
-  id: string
-  title: string
-  tradition: string
-  tags: string[]
-  languages: readonly LibraryLanguage[]
-  rights: { holder: string; terms_reference: string }
-  /** One prepared record, or undefined for a record to leave out. */
-  parse: (record: Record<string, unknown>, language: LibraryLanguage) => LibraryDocument | undefined
-}
-
-const text = (value: unknown) => (typeof value === 'string' ? value.trim() : '')
+const text = (value: unknown, max = 100_000) =>
+  typeof value === 'string' && value.trim().length <= max ? value.trim() : ''
 const integer = (value: unknown, min: number, max: number) =>
   Number.isInteger(value) && (value as number) >= min && (value as number) <= max
     ? (value as number)
     : null
-
-/** FNV-1a, 32 bits: a short stable tag for a key that had to be rewritten. */
-const fnv = (value: string) => {
-  let hash = 0x811c9dc5
-  for (const character of value) {
-    hash ^= character.codePointAt(0)!
-    hash = Math.imul(hash, 0x01000193) >>> 0
-  }
-  return hash.toString(16).padStart(8, '0')
-}
-
-/**
- * A document key of letters, digits, dots and hyphens. A slug with other characters (« — »,
- * Greek, accents) is spelled without them and tagged, so that two slugs never meet.
- */
-export const documentKeyOf = (slug: string) => {
-  const safe = slug
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/gu, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9.]+/gu, '-')
-    .replace(/^[-.]+|-+$/gu, '')
-    .slice(0, 150)
-  return safe === slug ? slug : `${safe || 'document'}-${fnv(slug)}`
-}
-
-/** « 10-17 », « 8 » or « 14,15 » to a first and last verse. */
-export const verseRange = (verses: unknown): [number | null, number | null] => {
-  const numbers = text(verses)
-    .split(/[^0-9]+/u)
-    .filter(Boolean)
-    .map(Number)
-    .filter(value => value >= 1 && value <= 176)
-  return numbers.length ? [numbers[0], numbers.at(-1) ?? numbers[0]] : [null, null]
-}
-
-const bri: LibraryCollection = {
-  id: 'bri',
-  title: 'Biblical Research Institute',
-  tradition: 'Protestantisme',
-  tags: ['Adventiste'],
-  languages: ['en'],
-  rights: {
-    holder: 'General Conference of Seventh-day Adventists, Biblical Research Institute',
-    terms_reference: 'Use granted to Bible Strong by the General Conference',
-  },
-  parse(record) {
-    const slug = text(record.slug)
-    const body = text(record.text)
-    if (!slug || /[\\/#?\u0000-\u001f]/u.test(slug) || !body || !text(record.title)) return
-    const url = text(record.url)
-    return {
-      key: documentKeyOf(slug),
-      title: text(record.title),
-      authors: Array.isArray(record.authors)
-        ? record.authors.flatMap(author => {
-            const name = text((author as { name?: unknown } | null)?.name)
-            return name ? [name] : []
-          })
-        : [],
-      date: text(record.date).slice(0, 10) || null,
-      url: url.startsWith('https://adventistbiblicalresearch.org/') ? url : null,
-      context: null,
-      book: null,
-      chapter: null,
-      verseStart: null,
-      verseEnd: null,
-      text: body,
-      divergence: [],
-    }
-  },
-}
-
-const LESSON_LABELS: Record<LibraryLanguage, { lesson: string; teacher: string }> = {
-  en: { lesson: 'lesson', teacher: 'teacher comments' },
-  fr: { lesson: 'leçon', teacher: 'commentaire du moniteur' },
-}
-
-const sabbathSchool: LibraryCollection = {
-  id: 'sabbath-school',
-  title: 'Adult Sabbath School Bible Study Guide',
-  tradition: 'Protestantisme',
-  tags: ['Adventiste'],
-  languages: ['en', 'fr'],
-  rights: {
-    holder: 'General Conference of Seventh-day Adventists, Sabbath School and Personal Ministries',
-    terms_reference: 'Used with permission',
-  },
-  parse(record, language) {
-    const id = text(record.id)
-    const prefix = `sabbath-school/${language}/`
-    const key = id.startsWith(prefix) ? id.slice(prefix.length) : ''
-    const body = text(record.text)
-    if (!/^\d{4}-\d{2}\/\d{2}\/[a-z0-9-]{1,40}$/u.test(key) || !body) return
-    const labels = LESSON_LABELS[language]
-    const lesson = integer(record.lesson, 1, 20)
-    const teacher = record.kind === 'teacher-comments'
-    const title = text(record.title) || text(record.lessonTitle)
-    const first = Array.isArray(record.references)
-      ? (record.references[0] as Record<string, unknown> | undefined)
-      : undefined
-    const [verseStart, verseEnd] = verseRange(first?.verses)
-    return {
-      key,
-      title: teacher ? `${text(record.lessonTitle)} (${labels.teacher})` : title,
-      authors: [],
-      date: text(record.date) || null,
-      url: null,
-      context: [
-        `${text(record.quarterTitle)} (${text(record.quarter)})`,
-        lesson ? `${labels.lesson} ${lesson} « ${text(record.lessonTitle)} »` : null,
-      ]
-        .filter(Boolean)
-        .join(', '),
-      book: integer(first?.book, 1, 66),
-      chapter: integer(first?.chapter, 1, 150),
-      verseStart,
-      verseEnd,
-      text: body,
-      divergence: [],
-    }
-  },
-}
-
-/** Short English names of the points where an article departs from the Adventist reading. */
-const divergenceOf = (value: unknown) =>
+const strings = (value: unknown, check: (item: string) => boolean, max: number) =>
   Array.isArray(value)
-    ? [...new Set(value.map(text).filter(point => /^[A-Za-z][A-Za-z ,'-]{1,59}$/u.test(point)))].slice(0, 6)
+    ? [...new Set(value.map(item => text(item)).filter(item => item && check(item)))].slice(0, max)
     : []
 
-const gotQuestions: LibraryCollection = {
-  id: 'gotquestions',
-  title: 'Got Questions',
-  tradition: 'Protestantisme',
-  tags: ['Évangélique'],
-  languages: ['en'],
-  rights: {
-    holder: 'Got Questions Ministries',
-    terms_reference: 'Quoted with attribution and a link, under the gotquestions.org copyright policy',
-  },
-  parse(record) {
-    const slug = text(record.slug)
-    const body = text(record.text)
-    if (!slug || /[\\/#?\u0000-\u001f]/u.test(slug) || !body || !text(record.title)) return
-    const url = text(record.url)
-    return {
-      key: documentKeyOf(slug),
-      title: text(record.title),
-      authors: [],
-      date: text(record.date).slice(0, 10) || null,
-      url: url.startsWith('https://www.gotquestions.org/') ? url : null,
-      context: null,
-      book: null,
-      chapter: null,
-      verseStart: null,
-      verseEnd: null,
-      text: body,
-      divergence: divergenceOf(record.divergence),
-    }
-  },
+const COLLECTION_ID = /^[a-z0-9][a-z0-9-]{0,39}$/u
+/** A document key: letters, digits, dots, hyphens and slashes; no « . » or « .. » segment. */
+const DOCUMENT_KEY = /^[A-Za-z0-9][A-Za-z0-9._/-]{0,199}$/u
+const LABEL = /^[A-Za-z][A-Za-z ,'-]{1,59}$/u
+
+/** The first line of a prepared file: { "collection": { id, title, tradition, tags, language, rights } }. */
+export function parseCollectionHeader(record: Record<string, unknown>): LibraryCollection {
+  const value = (record.collection ?? {}) as Record<string, unknown>
+  const rights = (value.rights ?? {}) as Record<string, unknown>
+  const collection = {
+    id: text(value.id),
+    title: text(value.title, 200),
+    tradition: text(value.tradition, 60) || null,
+    tags: strings(value.tags, tag => tag.length <= 40, 8),
+    language: value.language as LibraryLanguage,
+    rights: { holder: text(rights.holder, 300), terms_reference: text(rights.terms_reference, 300) },
+  }
+  if (
+    !COLLECTION_ID.test(collection.id) ||
+    !collection.title ||
+    (collection.language !== 'fr' && collection.language !== 'en') ||
+    !collection.rights.holder ||
+    !collection.rights.terms_reference
+  )
+    throw new Error('LIBRARY_COLLECTION_HEADER_INVALID')
+  return collection
 }
 
-export const LIBRARY_COLLECTIONS: Record<string, LibraryCollection> = {
-  bri,
-  'sabbath-school': sabbathSchool,
-  gotquestions: gotQuestions,
+/** One document line, or undefined for a line the import leaves out. */
+export function parseCollectionDocument(
+  record: Record<string, unknown>
+): LibraryDocument | undefined {
+  const key = text(record.key)
+  const title = text(record.title, 300)
+  const body = text(record.text, 5_000_000)
+  if (!DOCUMENT_KEY.test(key) || /\/\.\.?(?:\/|$)/u.test(key) || !title || !body) return
+  const url = text(record.url, 500)
+  let source: URL | undefined
+  try {
+    source = url ? new URL(url) : undefined
+  } catch {}
+  const date = text(record.date, 10)
+  return {
+    key,
+    title,
+    authors: strings(record.authors, author => author.length <= 120, 12),
+    date: /^\d{4}(?:-\d{2}){0,2}$/u.test(date) ? date : null,
+    url: source?.protocol === 'https:' ? url : null,
+    context: text(record.context, 300) || null,
+    book: integer(record.book, 1, 66),
+    chapter: integer(record.chapter, 1, 150),
+    verseStart: integer(record.verseStart, 1, 176),
+    verseEnd: integer(record.verseEnd, 1, 176),
+    text: body,
+    labels: strings(record.labels, label => LABEL.test(label), 6),
+  }
 }
 
 export const collectionIdentity = (collection: string, language: LibraryLanguage) =>
@@ -212,10 +107,10 @@ export const collectionIdentity = (collection: string, language: LibraryLanguage
 /** The passages of a document: the heading names the collection, its tradition and the document. */
 export function documentPassages(
   collection: LibraryCollection,
-  language: LibraryLanguage,
   document: LibraryDocument
 ): LibraryPassageDraft[] {
-  const tradition = [collection.tradition, ...collection.tags].join(', ')
+  const { language } = collection
+  const tradition = [collection.tradition, ...collection.tags].filter(Boolean).join(', ')
   const year = document.date?.slice(0, 4)
   const reference =
     document.book && document.chapter
@@ -228,7 +123,7 @@ export function documentPassages(
         )
       : null
   const heading = [
-    `${collection.title} (${tradition})`,
+    tradition ? `${collection.title} (${tradition})` : collection.title,
     document.context,
     document.authors.length ? document.authors.join(', ') : null,
     `« ${document.title} »${year && !document.context ? ` (${year})` : ''}`,
@@ -259,7 +154,7 @@ export function documentPassages(
       documentKey: document.key,
       part,
       ...(document.url ? { url: document.url } : {}),
-      ...(document.divergence.length ? { divergence: [...document.divergence] } : {}),
+      ...(document.labels.length ? { labels: [...document.labels] } : {}),
     },
   }))
 }

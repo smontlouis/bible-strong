@@ -1,16 +1,15 @@
-// Imports a document collection of the library (ADR-0106) from prepared JSON lines:
-//   yarn workspace @bible-strong/resource-service library:collection \
-//     --collection bri --language en --file /path/to/articles.jsonl
-// Collections: bri (en), sabbath-school (en, fr), gotquestions (en). RESOURCE_DATABASE_URL picks the database
-// (local by default). With CLOUDFLARE_ACCOUNT_ID passages are embedded through the Workers AI
-// REST API, otherwise through the development embedding Worker (RESOURCE_LIBRARY_EMBEDDING_URL).
-// Options: --concurrency 8, --batch 50, --writers 4. A file whose documents did not change
-// leaves the collection as it is.
+// Imports a document collection of the library (ADR-0106) from a prepared file of JSON lines,
+// whose first line describes the collection:
+//   yarn workspace @bible-strong/resource-service library:collection --file /path/to/prepared.jsonl
+// RESOURCE_DATABASE_URL picks the database (local by default). With CLOUDFLARE_ACCOUNT_ID passages
+// are embedded through the Workers AI REST API, otherwise through the development embedding Worker
+// (RESOURCE_LIBRARY_EMBEDDING_URL). Options: --concurrency 8, --batch 50, --writers 4. A file whose
+// documents did not change leaves the collection as it is.
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { importLibraryCollection } from '../repositories/libraryCollectionRepository'
-import { LIBRARY_COLLECTIONS } from './libraryCollections'
+import { parseCollectionHeader } from './libraryCollections'
 import { makeHttpLibraryEmbeddingProvider } from './libraryEmbedding'
 import { makeRestLibraryEmbeddingProvider } from './libraryEmbeddingRest'
 
@@ -20,17 +19,13 @@ const option = (name: string) => {
 }
 
 const main = async () => {
-  const collection = option('collection') ?? ''
-  const language = option('language')
   const file = option('file')
-  if (!LIBRARY_COLLECTIONS[collection])
-    throw new Error(`--collection ${Object.keys(LIBRARY_COLLECTIONS).join('|')}`)
-  if (language !== 'fr' && language !== 'en') throw new Error('--language fr|en')
   if (!file) throw new Error('--file <prepared JSON lines>')
-  const records = (await readFile(file, 'utf8'))
+  const [header, ...records] = (await readFile(file, 'utf8'))
     .split('\n')
     .filter(line => line.trim())
     .map(line => JSON.parse(line) as Record<string, unknown>)
+  const collection = parseCollectionHeader(header ?? {})
   const started = Date.now()
   const report = await importLibraryCollection({
     provider: process.env.CLOUDFLARE_ACCOUNT_ID
@@ -40,7 +35,6 @@ const main = async () => {
           { maxAttempts: 10, maxStatusAttempts: 3 }
         ),
     collection,
-    language,
     records,
     source: path.basename(file),
     concurrency: Number(option('concurrency') ?? 8),

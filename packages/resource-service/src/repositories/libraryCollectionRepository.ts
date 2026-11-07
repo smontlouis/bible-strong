@@ -4,12 +4,12 @@
 import { Pool } from 'pg'
 
 import {
-  LIBRARY_COLLECTIONS,
   collectionIdentity,
   documentPassages,
+  parseCollectionDocument,
+  type LibraryCollection,
   type LibraryDocument,
 } from '../search/libraryCollections'
-import type { LibraryLanguage } from '../search/libraryDocuments'
 import {
   libraryEmbeddingDocument,
   vectorLiteral,
@@ -30,9 +30,9 @@ export const LIBRARY_COLLECTION_KIND = 'library-collection'
 export type LibraryCollectionImportOptions = {
   connectionString?: string
   provider: LibraryEmbeddingProvider
-  collection: string
-  language: LibraryLanguage
-  /** The prepared records, one per document. */
+  /** The collection the first line of the prepared file describes. */
+  collection: LibraryCollection
+  /** The other lines of the prepared file, one per document. */
   records: readonly Record<string, unknown>[]
   /** Where the records come from, recorded in the provenance. */
   source: string
@@ -57,14 +57,10 @@ export type LibraryCollectionImportReport = {
 export async function importLibraryCollection(
   options: LibraryCollectionImportOptions
 ): Promise<LibraryCollectionImportReport> {
-  const collection = LIBRARY_COLLECTIONS[options.collection]
-  if (!collection) throw new Error(`LIBRARY_COLLECTION_UNKNOWN ${options.collection}`)
-  if (!collection.languages.includes(options.language))
-    throw new Error(`LIBRARY_COLLECTION_LANGUAGE ${options.collection}:${options.language}`)
-  const { provider } = options
+  const { provider, collection } = options
   const documents: LibraryDocument[] = []
   for (const record of options.records) {
-    const document = collection.parse(record, options.language)
+    const document = parseCollectionDocument(record)
     if (document) documents.push(document)
   }
   const keys = new Set<string>()
@@ -73,7 +69,7 @@ export async function importLibraryCollection(
     keys.add(document.key)
   }
   const drafts = documents
-    .flatMap(document => documentPassages(collection, options.language, document))
+    .flatMap(document => documentPassages(collection, document))
     .map(draft => {
       const document = libraryEmbeddingDocument(draft.heading, draft.content)
       return {
@@ -82,9 +78,9 @@ export async function importLibraryCollection(
         inputSha256: sha256(`${provider.model}\n${provider.contract}\n${document}`),
       }
     })
-  const identity = collectionIdentity(collection.id, options.language)
+  const identity = collectionIdentity(collection.id, collection.language)
   const canonical = sha256(JSON.stringify(documents))
-  const revision = `${collection.id}-${options.language}-${canonical.slice(0, 20)}`
+  const revision = `${collection.id}-${collection.language}-${canonical.slice(0, 20)}`
   const report: LibraryCollectionImportReport = {
     identity,
     revision,
@@ -146,7 +142,7 @@ export async function importLibraryCollection(
         identity,
         LIBRARY_COLLECTION_KIND,
         revision,
-        options.language,
+        collection.language,
         canonical,
         JSON.stringify({
           generator: 'library:collection',

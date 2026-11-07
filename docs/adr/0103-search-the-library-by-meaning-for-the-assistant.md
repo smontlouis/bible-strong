@@ -11,7 +11,7 @@ profile and timeline searches compare the words of the question with article tit
 commentary is reached only from the verse it comments. A 150-question bench (private repository,
 2026-11-06) showed what this costs: the model spends its six reads guessing titles (six searches
 for « l’exil à Babylone »), and some answers exist in the library without any way to reach them,
-such as the Adventist commentary on Revelation 20 for « the Adventist position on the millennium ».
+such as the commentaries on Revelation 20 for « the views of the millennium ».
 
 The thematic search already embeds Bible topics with `@cf/qwen/qwen3-embedding-0.6b` in
 PostgreSQL with pgvector (issue 325). The assistant reaches this service through a service

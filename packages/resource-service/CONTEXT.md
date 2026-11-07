@@ -33,5 +33,5 @@ A short piece of an active commentary, dictionary article, Nave topic, timeline 
 _Avoid_: Chunk, embedding
 
 **Library collection**:
-Documents the app does not publish, such as the Biblical Research Institute articles, imported into the library index as one publication per language so the study assistant can find and quote them.
+Documents the app does not publish, such as study articles, imported from a prepared file into the library index as one publication per language so the study assistant can find and quote them.
 _Avoid_: Corpus, dataset

@@ -6,14 +6,15 @@
 // --rebuild-vector-index (drop the HNSW index during a first load and build it at the end),
 // --concurrency 4, --batch 50, --writers 4 (database connections that write batches),
 // --refresh-lexemes (count the lexemes even when no passage changed; a run that changes
-// passages always does). RESOURCE_DATABASE_URL picks the database (local by default);
+// passages always does), --policy <file> (the index policy, also RESOURCE_LIBRARY_POLICY: what
+// to cut from the sections of a commentary). RESOURCE_DATABASE_URL picks the database (local by default);
 // RESOURCE_LIBRARY_EMBEDDING_URL the embedding endpoint (the development Worker by default);
 // with CLOUDFLARE_ACCOUNT_ID passages are embedded through the Workers AI REST API instead.
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { indexLibrary } from '../repositories/libraryIndexRepository'
-import { LIBRARY_CORPORA, type LibraryCorpus } from './libraryDocuments'
+import { LIBRARY_CORPORA, librarySectionCuts, type LibraryCorpus } from './libraryDocuments'
 import { makeHttpLibraryEmbeddingProvider } from './libraryEmbedding'
 import { makeRestLibraryEmbeddingProvider } from './libraryEmbeddingRest'
 
@@ -28,6 +29,12 @@ const list = (value: string | undefined) =>
     .filter(Boolean)
 
 const main = async () => {
+  // The index policy (ADR-0106) lives with the assistant: --policy, or RESOURCE_LIBRARY_POLICY.
+  const policyFile = option('policy') ?? process.env.RESOURCE_LIBRARY_POLICY
+  const sectionCuts = policyFile
+    ? librarySectionCuts(JSON.parse(await readFile(policyFile, 'utf8')))
+    : undefined
+  if (!sectionCuts) console.warn('No index policy (--policy or RESOURCE_LIBRARY_POLICY): nothing is cut.')
   const corpora = list(option('corpus'))
   if (corpora?.some(corpus => !LIBRARY_CORPORA.includes(corpus as LibraryCorpus)))
     throw new Error(`Unknown corpus; expected ${LIBRARY_CORPORA.join(', ')}`)
@@ -48,6 +55,7 @@ const main = async () => {
     batchSize: Number(option('batch') ?? 50),
     writers: Number(option('writers') ?? 4),
     refreshLexemes: process.argv.includes('--refresh-lexemes'),
+    sectionCuts,
     onProgress: line => console.log(line),
   })
   const total = reports.reduce(

@@ -38,8 +38,8 @@ export type LibraryTarget =
       documentKey: string
       part: number
       url?: string
-      /** Points where the document departs from the Seventh-day Adventist reading. */
-      divergence?: string[]
+      /** Short labels its prepared file gives the document (ADR-0106). */
+      labels?: string[]
     }
 
 export type LibraryPassageDraft = {
@@ -262,27 +262,36 @@ export const commentaryWork = (collection: string) => {
 }
 
 /**
- * Works a search returns only when it names them (ADR-0106): the Ellen G. White writings, which
- * the assistant reads only when the reader asks what she wrote. Adventist understandings otherwise
- * come from the Bible texts, the Adventist commentary and studies.
+ * What the index leaves out of a commentary (ADR-0106): by collection, the pattern of the part of
+ * each section to cut, from the index policy file. The pattern runs case-insensitively.
  */
-export const LIBRARY_ON_REQUEST_WORKS: readonly string[] = ['egw-writings']
+export type LibrarySectionCuts = Readonly<Record<string, RegExp>>
 
-/**
- * Parts of a section left out of the index: the « Ellen G. White Comments » that close the
- * sections of the Seventh-day Adventist Bible Commentary, under their own heading.
- */
-const SECTION_CUTS: Record<string, RegExp> = {
-  sdabc: /<h[1-6][^>]*>\s*Ellen G\. White(?:\s+Comments)?\s*<\/h[1-6]>[\s\S]*$/iu,
+/** Reads the `sectionCuts` of an index policy: { "sectionCuts": { "<collection>": "<pattern>" } }. */
+export const librarySectionCuts = (policy: unknown): LibrarySectionCuts => {
+  const cuts = (policy as { sectionCuts?: unknown } | null)?.sectionCuts ?? {}
+  if (!cuts || typeof cuts !== 'object' || Array.isArray(cuts))
+    throw new Error('LIBRARY_POLICY_INVALID')
+  return Object.fromEntries(
+    Object.entries(cuts).map(([collection, pattern]) => {
+      if (!/^[a-z0-9-]{1,64}$/u.test(collection) || typeof pattern !== 'string' || !pattern)
+        throw new Error('LIBRARY_POLICY_INVALID')
+      return [collection, new RegExp(pattern, 'iu')]
+    })
+  )
 }
 
 /** The HTML of a section as the index reads it. */
-export const indexedSectionContent = (collection: string, content: string) =>
-  SECTION_CUTS[collection] ? content.replace(SECTION_CUTS[collection], '') : content
+export const indexedSectionContent = (
+  collection: string,
+  content: string,
+  cuts: LibrarySectionCuts = {}
+) => (cuts[collection] ? content.replace(cuts[collection], '') : content)
 
 export const commentaryPassages = (
   publication: CommentaryPublication,
-  section: CommentarySectionRow
+  section: CommentarySectionRow,
+  cuts: LibrarySectionCuts = {}
 ): LibraryPassageDraft[] => {
   if (!isLanguage(publication.language)) return []
   const language = publication.language
@@ -296,7 +305,7 @@ export const commentaryPassages = (
   )
   const tradition = [work.tradition, ...work.tags].filter(Boolean).join(', ')
   const heading = `${work.shortName}${tradition ? ` (${tradition})` : ''}, ${LABELS[language].commentary} ${title}`
-  return pieces(htmlToPlainText(indexedSectionContent(publication.collection, section.content))).map((content, part) => ({
+  return pieces(htmlToPlainText(indexedSectionContent(publication.collection, section.content, cuts))).map((content, part) => ({
     passageKey: `${section.id}#${part}`,
     corpus: 'commentary',
     language,

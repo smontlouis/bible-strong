@@ -75,6 +75,8 @@ narrow a run. A first load of the full library is faster with `--rebuild-vector-
 drops the HNSW index during the load and builds it at the end. A run embeds only passages whose
 text changed and deletes those that disappeared; it writes `.local/library-index-report.json`.
 Point `RESOURCE_DATABASE_URL` at Neon (see "Apply a schema migration") to index production.
+The index policy (`--policy <file>` or `RESOURCE_LIBRARY_POLICY`), kept with the assistant, says
+what to cut from the sections of a commentary; without it nothing is cut, and the command says so.
 
 The embedding Worker answers a batch of 50 passages in about 5 s, and Workers AI accepts 3,000
 embedding requests a minute: `--concurrency 24 --writers 6` (batches in flight, database
@@ -88,18 +90,19 @@ forces it). `library:search:dev` serves the same search on `http://127.0.0.1:879
 the entrypoint, `POST` JSON) over `RESOURCE_DATABASE_URL` and the embedding Worker, for the
 assistant's bench and manual checks.
 
-Document collections that the app does not publish (ADR-0106: the Biblical Research Institute
-articles, the adult Sabbath School Bible Study Guide) are imported from prepared JSON lines, which
-the private assistant repository builds:
+Document collections that the app does not publish (ADR-0106) are imported from prepared JSON
+lines, which the assistant repository builds. The first line describes the collection, every
+other line is one document:
 
 ```bash
 CLOUDFLARE_ACCOUNT_ID=<account> yarn workspace @bible-strong/resource-service library:collection \
-  --collection bri --language en --file /path/to/articles.jsonl
+  --file /path/to/prepared.jsonl
 ```
 
 A new file replaces the collection once all its passages are written; unchanged passages keep
 their vectors and an unchanged file changes nothing. A search may ask for `perspectives`: the
-best passage of each tradition first, then one more per work.
+best passage of each tradition first, then one more per work. It may also name works to leave
+out (`excludeWorks`) unless it names them in `works` too.
 
 The search is not a public route. The Worker's main module, `src/runtime/entry.ts`, exports the
 `LibrarySearch` RPC entrypoint (`search`, and `read` for a document of a collection) next to the

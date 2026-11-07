@@ -168,7 +168,7 @@ describe('library embedding and search input', () => {
       parseLibrarySearchInput({
         query: 'millénium',
         corpora: ['commentary'],
-        traditions: ['Adventiste'],
+        traditions: ['Réformé'],
         book: 66,
         limit: 5,
       }),
@@ -176,8 +176,9 @@ describe('library embedding and search input', () => {
         query: 'millénium',
         languages: undefined,
         corpora: ['commentary'],
-        traditions: ['Adventiste'],
+        traditions: ['Réformé'],
         works: undefined,
+        excludeWorks: undefined,
         book: 66,
         chapter: undefined,
         limit: 5,
@@ -213,96 +214,68 @@ describe('library search by words', () => {
 })
 
 describe('library collections', () => {
-  it('reads a BRI article and an English Sabbath School day into attributed passages', async () => {
-    const { LIBRARY_COLLECTIONS, documentPassages, verseRange } = await import('../libraryCollections')
-    const bri = LIBRARY_COLLECTIONS.bri
-    const article = bri.parse(
-      {
-        url: 'https://adventistbiblicalresearch.org/articles/the-millennium',
-        slug: 'the-millennium',
-        title: 'The Millennium',
-        authors: [{ name: 'Ekkehardt Mueller', bio: null }],
-        date: '2026-09-10T21:33:42.949Z',
-        text: 'The millennium follows the second coming.\n\n' + 'Revelation 20 describes it. '.repeat(120),
+  it('reads a prepared file into attributed passages', async () => {
+    const { parseCollectionHeader, parseCollectionDocument, documentPassages } = await import('../libraryCollections')
+    const collection = parseCollectionHeader({
+      collection: {
+        id: 'studies',
+        title: 'Bible Studies',
+        tradition: 'Protestantisme',
+        tags: ['Réformé'],
+        language: 'en',
+        rights: { holder: 'A publisher', terms_reference: 'Used with permission' },
       },
-      'en'
-    )
+    })
+    const article = parseCollectionDocument({
+      key: 'the-millennium',
+      title: 'The Millennium',
+      authors: ['A. Writer', 7],
+      date: '2026-09-10',
+      url: 'https://studies.example/the-millennium',
+      text: 'The millennium follows the second coming.\n\n' + 'Revelation 20 describes it. '.repeat(120),
+      labels: ['the millennium', 'the millennium', '<b>', 7],
+    })
     assert.ok(article)
-    const passages = documentPassages(bri, 'en', article)
+    const passages = documentPassages(collection, article)
     assert.ok(passages.length >= 2)
     assert.equal(passages[0].passageKey, 'the-millennium#0')
     assert.equal(passages[0].corpus, 'document')
-    assert.equal(passages[0].heading, 'Biblical Research Institute (Protestantisme, Adventiste), Ekkehardt Mueller, « The Millennium » (2026)')
+    assert.equal(passages[0].heading, 'Bible Studies (Protestantisme, Réformé), A. Writer, « The Millennium » (2026)')
     assert.deepEqual(passages[1].target, {
       kind: 'document',
-      collection: 'bri',
+      collection: 'studies',
       language: 'en',
       documentKey: 'the-millennium',
       part: 1,
-      url: 'https://adventistbiblicalresearch.org/articles/the-millennium',
+      url: 'https://studies.example/the-millennium',
+      labels: ['the millennium'],
     })
-    assert.equal(bri.parse({ slug: '../x', title: 'T', text: 'x' }, 'en'), undefined)
-    const { documentKeyOf } = await import('../libraryCollections')
-    assert.equal(documentKeyOf('the-millennium'), 'the-millennium')
-    assert.match(documentKeyOf('the-taken-and-the-left-παραλαμβάνεται-καὶ-ἀφίεται-what-do-they-really-mean'), /^the-taken-and-the-left-what-do-they-really-mean-[0-9a-f]{8}$/u)
-    assert.equal(documentKeyOf('george-w.-reid-passes-to-his-rest'), 'george-w.-reid-passes-to-his-rest')
-    assert.notEqual(documentKeyOf('église'), documentKeyOf('eglise-x'))
-    assert.equal(bri.parse({ slug: 'a', title: 'T', text: 'x', url: 'https://example.com/a' }, 'en')?.url, null)
 
-    const school = LIBRARY_COLLECTIONS['sabbath-school']
-    const day = school.parse(
-      {
-        id: 'sabbath-school/en/2016-04/01/1',
-        kind: 'day',
-        quarter: '2016-04',
-        quarterTitle: 'The Book of Job',
-        lesson: 1,
-        lessonTitle: 'The End',
-        day: 1,
-        date: '2016-09-24',
-        title: 'The End',
-        references: [{ book: 18, chapter: 42, verses: '10-17' }],
-        text: 'In writing classes, students are taught the importance of endings.',
-      },
-      'en'
-    )
-    assert.ok(day)
-    const [lesson] = documentPassages(school, 'en', day)
-    assert.equal(lesson.passageKey, '2016-04/01/1#0')
-    assert.equal(lesson.heading, 'Adult Sabbath School Bible Study Guide (Protestantisme, Adventiste), The Book of Job (2016-04), lesson 1 « The End », « The End », Job 42:10-17')
-    assert.deepEqual([lesson.book, lesson.chapter, lesson.verseStart, lesson.verseEnd], [18, 42, 10, 17])
-    assert.equal(school.parse({ id: 'sabbath-school/fr/2016-04/01/1', text: 'x' }, 'en'), undefined, 'the language must match the file')
-    assert.deepEqual(verseRange('14,15'), [14, 15])
-    assert.deepEqual(verseRange(''), [null, null])
-
-    const gotQuestions = LIBRARY_COLLECTIONS.gotquestions
-    const answer = gotQuestions.parse(
-      {
-        slug: 'eternal-security',
-        url: 'https://www.gotquestions.org/eternal-security.html',
-        title: 'Is eternal security biblical?',
-        date: '2002-01-01',
-        text: 'When people come to know Christ as their Savior, they are brought into a relationship with God.',
-        divergence: ['eternal security', 'eternal security', '<b>', 7],
-      },
-      'en'
-    )
-    assert.ok(answer)
-    const [question] = documentPassages(gotQuestions, 'en', answer)
-    assert.equal(question.heading, 'Got Questions (Protestantisme, Évangélique), « Is eternal security biblical? » (2002)')
-    assert.deepEqual(question.target, {
-      kind: 'document',
-      collection: 'gotquestions',
-      language: 'en',
-      documentKey: 'eternal-security',
-      part: 0,
-      url: 'https://www.gotquestions.org/eternal-security.html',
-      divergence: ['eternal security'],
+    const lesson = parseCollectionDocument({
+      key: '2016-04/01/1',
+      title: 'The End',
+      date: '2016-09-24',
+      context: 'The Book of Job (2016-04), lesson 1 « The End »',
+      book: 18,
+      chapter: 42,
+      verseStart: 10,
+      verseEnd: 17,
+      text: 'In writing classes, students are taught the importance of endings.',
     })
-    const plain = gotQuestions.parse({ slug: 'trust', title: 'T', text: 'x', url: 'https://example.com/trust' }, 'en')
-    assert.ok(plain)
-    assert.equal(plain.url, null)
-    assert.ok(!('divergence' in documentPassages(gotQuestions, 'en', plain)[0].target), 'no divergence, no field')
+    assert.ok(lesson)
+    const [day] = documentPassages(collection, lesson)
+    assert.equal(day.heading, 'Bible Studies (Protestantisme, Réformé), The Book of Job (2016-04), lesson 1 « The End », « The End », Job 42:10-17')
+    assert.deepEqual([day.book, day.chapter, day.verseStart, day.verseEnd], [18, 42, 10, 17])
+    assert.ok(!('labels' in day.target), 'no labels, no field')
+
+    assert.equal(parseCollectionDocument({ key: 'a', title: 'T', text: 'x', url: 'http://studies.example/a' })?.url, null, 'https only')
+    for (const key of ['../a', 'a/../b', 'a/.', '/a', 'a b'])
+      assert.equal(parseCollectionDocument({ key, title: 'T', text: 'x' }), undefined, key)
+    assert.equal(parseCollectionDocument({ key: 'a', title: 'T', text: ' ' }), undefined)
+    for (const bad of [{}, { collection: { id: 'Bad id', title: 'T', language: 'en', rights: { holder: 'h', terms_reference: 't' } } }, { collection: { id: 'a', title: 'T', language: 'de', rights: { holder: 'h', terms_reference: 't' } } }, { collection: { id: 'a', title: 'T', language: 'en', rights: {} } }])
+      assert.throws(() => parseCollectionHeader(bad))
+    const plain = parseCollectionHeader({ collection: { id: 'notes', title: 'Notes', language: 'fr', rights: { holder: 'h', terms_reference: 't' } } })
+    assert.equal(documentPassages(plain, lesson)[0].heading, 'Notes, The Book of Job (2016-04), lesson 1 « The End », « The End », Job 42:10-17')
   })
 
   it('sorts works into perspectives and checks the new arguments', async () => {
@@ -317,20 +290,25 @@ describe('library collections', () => {
     assert.equal(perspectiveOf(null, []), 'reference')
     assert.equal(parseLibrarySearchInput({ query: 'les langues', perspectives: true }).perspectives, true)
     assert.throws(() => parseLibrarySearchInput({ query: 'les langues', perspectives: 'yes' }))
+    assert.deepEqual(parseLibrarySearchInput({ query: 'les langues', excludeWorks: ['a-work'] }).excludeWorks, ['a-work'])
+    assert.throws(() => parseLibrarySearchInput({ query: 'les langues', excludeWorks: ['a work'] }))
     const { parseLibraryDocumentInput } = await import('../librarySearchInput')
-    assert.deepEqual(parseLibraryDocumentInput({ collection: 'sabbath-school', language: 'en', documentKey: '2016-04/01/1' }), { collection: 'sabbath-school', language: 'en', documentKey: '2016-04/01/1' })
-    for (const bad of [{ collection: 'bri', language: 'de', documentKey: 'a' }, { collection: 'bri', language: 'en', documentKey: '../a' }, { collection: 'bri', language: 'en', documentKey: 'a', extra: 1 }])
+    assert.deepEqual(parseLibraryDocumentInput({ collection: 'studies', language: 'en', documentKey: '2016-04/01/1' }), { collection: 'studies', language: 'en', documentKey: '2016-04/01/1' })
+    for (const bad of [{ collection: 'studies', language: 'de', documentKey: 'a' }, { collection: 'studies', language: 'en', documentKey: '../a' }, { collection: 'studies', language: 'en', documentKey: 'a', extra: 1 }])
       assert.throws(() => parseLibraryDocumentInput(bad))
   })
 })
 
-describe('Ellen G. White in the library', () => {
-  it('cuts the Ellen G. White comments that close a section of the Adventist commentary', async () => {
-    const { indexedSectionContent, LIBRARY_ON_REQUEST_WORKS } = await import('../libraryDocuments')
-    const section = '<p>1. In the beginning. The Hebrew is bereshith.</p><br><br><h3>Ellen G. White</h3><br><span>A Reservoir of Means (Letter 131, 1897).</span>'
-    assert.equal(htmlToPlainText(indexedSectionContent('sdabc', section)), '1. In the beginning. The Hebrew is bereshith.')
-    assert.equal(htmlToPlainText(indexedSectionContent('sdabc', '<br><br><h3>Ellen G. White</h3><p>Only her.</p>')), '')
-    assert.equal(indexedSectionContent('barnes', section), section, 'other works keep their text')
-    assert.ok(LIBRARY_ON_REQUEST_WORKS.includes('egw-writings'))
+describe('library index policy', () => {
+  it('cuts from the sections of a commentary what the policy names', async () => {
+    const { indexedSectionContent, librarySectionCuts } = await import('../libraryDocuments')
+    const cuts = librarySectionCuts({ sectionCuts: { notes: '<h[1-6][^>]*>\\s*Appendix\\s*</h[1-6]>[\\s\\S]*$' } })
+    const section = '<p>1. In the beginning. The Hebrew is bereshith.</p><br><br><h3>Appendix</h3><br><span>Later notes.</span>'
+    assert.equal(htmlToPlainText(indexedSectionContent('notes', section, cuts)), '1. In the beginning. The Hebrew is bereshith.')
+    assert.equal(htmlToPlainText(indexedSectionContent('notes', '<br><br><h3>APPENDIX</h3><p>Only notes.</p>', cuts)), '')
+    assert.equal(indexedSectionContent('barnes', section, cuts), section, 'other works keep their text')
+    assert.equal(indexedSectionContent('notes', section), section, 'no policy, no cut')
+    for (const bad of [{ sectionCuts: [] }, { sectionCuts: { notes: 3 } }, { sectionCuts: { 'Bad id': 'x' } }])
+      assert.throws(() => librarySectionCuts(bad))
   })
 })

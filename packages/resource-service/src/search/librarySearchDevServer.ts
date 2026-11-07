@@ -3,8 +3,8 @@
 // RESOURCE_DATABASE_URL (local by default) and the development embedding Worker.
 //   yarn workspace @bible-strong/resource-service topics:embeddings:dev   # terminal 1
 //   yarn workspace @bible-strong/resource-service library:search:dev      # terminal 2
-//   curl -s localhost:8792/search -d '{"query":"le millénium","traditions":["Adventiste"]}'
-//   curl -s localhost:8792/read -d '{"collection":"bri","language":"en","documentKey":"<slug>"}'
+//   curl -s localhost:8792/search -d '{"query":"le millénium","traditions":["Réformé"]}'
+//   curl -s localhost:8792/read -d '{"collection":"<collection>","language":"en","documentKey":"<key>"}'
 // With CLOUDFLARE_ACCOUNT_ID, queries are embedded through the Workers AI REST API instead
 // (0.2 to 0.7 s, against several seconds through `wrangler dev`), with CLOUDFLARE_API_TOKEN or
 // the logged-in Wrangler session; terminal 1 is then not needed.

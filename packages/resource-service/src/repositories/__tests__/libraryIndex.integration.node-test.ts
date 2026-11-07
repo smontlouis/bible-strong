@@ -334,13 +334,13 @@ describe('Library search index', { skip: !runIntegration }, () => {
           content: '<p>Le règne de mille ans selon les millénaristes.</p>',
         })
         .execute()
-      // The Ellen G. White writings are indexed, and returned only to a search that names them.
-      const [{ id: egw }] = await database
+      // A work the caller leaves out is still indexed, and returned when the search also names it.
+      const [{ id: withheld }] = await database
         .insertInto('resource_publications')
         .values({
-          resource_identity: 'commentary:egw-writings:fr',
+          resource_identity: 'commentary:notes:fr',
           resource_kind: 'commentary',
-          revision: 'egw-fr-r1',
+          revision: 'notes-fr-r1',
           language: 'fr',
           status: 'active',
           canonical_sha256: 'a'.repeat(64),
@@ -355,8 +355,8 @@ describe('Library search index', { skip: !runIntegration }, () => {
       await database
         .insertInto('commentary_reading_sections')
         .values({
-          publication_id: egw,
-          id: 'egw-writings-fr-66-20-1',
+          publication_id: withheld,
+          id: 'notes-fr-66-20-1',
           book: 66,
           chapter: 20,
           range_start_verse: 1,
@@ -367,19 +367,27 @@ describe('Library search index', { skip: !runIntegration }, () => {
         .execute()
       await indexLibrary({ connectionString: isolated.connectionString, provider })
       assert.equal(
-        (await database.selectFrom('library_passages').select('work').where('work', '=', 'egw-writings').execute()).length,
+        (await database.selectFrom('library_passages').select('work').where('work', '=', 'notes').execute()).length,
         1
       )
-      const unnamed = await searchLibrary(database, provider, { query: 'le millénium', limit: 5 })
-      assert.ok(!unnamed.hits.some(hit => hit.work === 'egw-writings'))
-      const named = await searchLibrary(database, provider, { query: 'le millénium', works: ['egw-writings'] })
-      assert.deepEqual(named.hits.map(hit => hit.work), ['egw-writings'])
-      const article = (slug: string, title: string, body: string) => ({
-        url: `https://adventistbiblicalresearch.org/articles/${slug}`,
-        slug,
+      const unnamed = await searchLibrary(database, provider, { query: 'le millénium', limit: 5, excludeWorks: ['notes'] })
+      assert.ok(!unnamed.hits.some(hit => hit.work === 'notes'))
+      const named = await searchLibrary(database, provider, { query: 'le millénium', works: ['notes'], excludeWorks: ['notes'] })
+      assert.deepEqual(named.hits.map(hit => hit.work), ['notes'])
+      const studies = {
+        id: 'studies',
+        title: 'Bible Studies',
+        tradition: 'Catholicisme',
+        tags: [],
+        language: 'en' as const,
+        rights: { holder: 'integration-test', terms_reference: 'integration-test' },
+      }
+      const article = (key: string, title: string, body: string) => ({
+        url: `https://studies.example/${key}`,
+        key,
         title,
-        authors: [{ name: 'BRI author' }],
-        date: '2026-01-01T00:00:00.000Z',
+        authors: ['A. Writer'],
+        date: '2026-01-01',
         text: body,
       })
       const records = [
@@ -390,8 +398,7 @@ describe('Library search index', { skip: !runIntegration }, () => {
       const imported = await importLibraryCollection({
         connectionString: isolated.connectionString,
         provider,
-        collection: 'bri',
-        language: 'en',
+        collection: studies,
         records,
         source: 'articles.jsonl',
       })
@@ -403,8 +410,7 @@ describe('Library search index', { skip: !runIntegration }, () => {
       const again = await importLibraryCollection({
         connectionString: isolated.connectionString,
         provider,
-        collection: 'bri',
-        language: 'en',
+        collection: studies,
         records,
         source: 'articles.jsonl',
       })
@@ -412,8 +418,7 @@ describe('Library search index', { skip: !runIntegration }, () => {
       const changed = await importLibraryCollection({
         connectionString: isolated.connectionString,
         provider,
-        collection: 'bri',
-        language: 'en',
+        collection: studies,
         records: [...records.slice(0, 2), article('covenant', 'The Covenant', 'The covenant of grace, revised.')],
         source: 'articles.jsonl',
       })
@@ -423,26 +428,26 @@ describe('Library search index', { skip: !runIntegration }, () => {
       const publications = await database
         .selectFrom('resource_publications')
         .select(['revision', 'status'])
-        .where('resource_identity', '=', 'library:bri:en')
+        .where('resource_identity', '=', 'library:studies:en')
         .execute()
       assert.deepEqual(publications.map(row => row.status), ['active'], 'the previous revision is gone')
 
-      const document = await readLibraryDocument(database, { collection: 'bri', language: 'en', documentKey: 'millennium-1' })
+      const document = await readLibraryDocument(database, { collection: 'studies', language: 'en', documentKey: 'millennium-1' })
       assert.ok(document)
       assert.equal(document.title, 'The Millennium')
-      assert.equal(document.url, 'https://adventistbiblicalresearch.org/articles/millennium-1')
+      assert.equal(document.url, 'https://studies.example/millennium-1')
       assert.match(document.text, /^The millennium begins at the second coming\./u)
       assert.match(document.text, /desolate earth\.$/u)
-      assert.equal(await readLibraryDocument(database, { collection: 'bri', language: 'en', documentKey: 'millennium' }), null)
+      assert.equal(await readLibraryDocument(database, { collection: 'studies', language: 'en', documentKey: 'millennium' }), null)
 
-      // Two Adventist articles and one Reformed section are equally near: by perspective, both
-      // traditions come first.
+      // Two articles of one tradition and one Reformed section are equally near: by perspective,
+      // both traditions come first.
       const plain = await searchLibrary(database, provider, { query: 'the millennium', limit: 2 })
       assert.equal(plain.hits.length, 2)
       const diverse = await searchLibrary(database, provider, { query: 'the millennium', limit: 2, perspectives: true })
-      assert.deepEqual(diverse.hits.map(hit => hit.perspective).sort(), ['adventist', 'protestant'])
-      const bri = diverse.hits.find(hit => hit.corpus === 'document')
-      assert.equal(bri?.workTitle, 'Biblical Research Institute')
+      assert.deepEqual(diverse.hits.map(hit => hit.perspective).sort(), ['catholic', 'protestant'])
+      const study = diverse.hits.find(hit => hit.corpus === 'document')
+      assert.equal(study?.workTitle, 'Bible Studies')
       assert.equal(new Set(plain.hits.map(hit => `${hit.work}:${hit.title}`)).size, plain.hits.length, 'one hit per document')
     } finally {
       await isolated.dispose()

@@ -17,6 +17,7 @@ import {
   timelinePassages,
   type LibraryCorpus,
   type LibraryPassageDraft,
+  type LibrarySectionCuts,
 } from '../search/libraryDocuments'
 import {
   libraryEmbeddingDocument,
@@ -41,6 +42,8 @@ export type LibraryIndexOptions = {
   writers?: number
   /** Count the lexemes again even when no passage changed. */
   refreshLexemes?: boolean
+  /** What the index policy cuts from the sections of a commentary (ADR-0106). */
+  sectionCuts?: LibrarySectionCuts
   onProgress?: (line: string) => void
 }
 
@@ -95,7 +98,8 @@ async function activePublications(client: PoolClient, options: LibraryIndexOptio
 /** The passages of one publication, page by page so that a large commentary stays in memory bounds. */
 async function* publicationPassages(
   client: PoolClient,
-  publication: Publication
+  publication: Publication,
+  sectionCuts: LibrarySectionCuts = {}
 ): AsyncGenerator<LibraryPassageDraft[]> {
   const language = publication.language ?? ''
   if (publication.corpus === 'commentary') {
@@ -118,7 +122,7 @@ async function* publicationPassages(
       )
       if (!rows.length) return
       yield rows.flatMap(row =>
-        commentaryPassages({ collection, language: commentaryLanguage }, row)
+        commentaryPassages({ collection, language: commentaryLanguage }, row, sectionCuts)
       )
       const last = rows.at(-1)!
       after = [last.book, last.chapter, last.id]
@@ -341,7 +345,7 @@ async function indexPublication(
     failed: [],
     durationMs: 0,
   }
-  for await (const drafts of publicationPassages(client, publication)) {
+  for await (const drafts of publicationPassages(client, publication, options.sectionCuts)) {
     const pending: (LibraryPassageDraft & { document: string; inputSha256: string })[] = []
     for (const draft of drafts) {
       if (seen.has(draft.passageKey))
