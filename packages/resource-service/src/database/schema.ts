@@ -399,6 +399,16 @@ export const libraryPassages = pgTable(
   ]
 )
 
+/**
+ * How many library passages hold each lexeme found in more than 300 of them (ADR-0103):
+ * the search by words leaves the frequent ones to the search by meaning. Rebuilt by
+ * `library:index` after a run that changed passages; a lexeme missing here is rarer.
+ */
+export const libraryLexemes = pgTable('library_lexemes', {
+  lexeme: text('lexeme').primaryKey(),
+  passages: integer('passages').notNull(),
+})
+
 export const commentaryVerses = pgTable(
   'commentary_verses',
   {

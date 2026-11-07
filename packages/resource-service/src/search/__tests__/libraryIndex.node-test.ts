@@ -196,3 +196,17 @@ describe('library embedding and search input', () => {
       assert.throws(() => parseLibrarySearchInput(invalid), /LIBRARY_SEARCH_INVALID_INPUT/)
   })
 })
+
+describe('library search by words', () => {
+  it('keeps the rarest lexemes within the budget and leaves the frequent ones to meaning', async () => {
+    const { rareLexemeQuery, lexicalKeywords } = await import('../../repositories/librarySearchRepository')
+    assert.deepEqual(lexicalKeywords('Que dit la Bible à quelqu’un rongé par l’anxiété ?'), ['quelqu', 'ronge', 'anxiete'])
+    // « esper » and « fac » hold thousands of passages; « macchabe » is missing, so rarer than 300.
+    assert.equal(
+      rareLexemeQuery(['esper', 'fac', 'macchabe', 'proch'], { esper: 9053, fac: 6131, proch: 2318 }),
+      "'macchabe' | 'proch'"
+    )
+    assert.equal(rareLexemeQuery(['test', 'testament'], { test: 11700, testament: 12900 }), null)
+    assert.equal(rareLexemeQuery(["l'ami"], {}), "'l''ami'")
+  })
+})

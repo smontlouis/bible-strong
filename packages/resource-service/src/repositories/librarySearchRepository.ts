@@ -115,40 +115,18 @@ export const lexicalKeywords = (query: string) =>
   ].slice(0, 12)
 
 /**
- * Frequent words are left to the search by meaning: ranking the 77,000 passages that hold
- * « testament » or « ancien » took 3 s on 2026-11-07, 20,000 passages 0.27 s. The words kept,
- * rarest first, may match about 15,000 passages in all (2 % of the full library).
+ * Frequent words are left to the search by meaning: ranking reads every matching passage, and
+ * on 2026-11-07 the 77,000 passages holding « testament » took 3 s, and 15,000 passages up to
+ * 6.5 s on a cold Neon cache. The words kept, rarest first, may match about 3,000 passages.
  */
-const LEXICAL_MATCH_BUDGET = 15_000
-const LEXEME_STATISTICS_TTL_MS = 3_600_000
-type LexemeStatistics = { at: number; counts: Map<string, number>; cutoff: number }
-let lexemeStatistics: LexemeStatistics | undefined
-
-/** How many passages hold each frequent lexeme, from PostgreSQL's own statistics. */
-async function frequentLexemes(database: Kysely<ResourceDatabase>) {
-  if (lexemeStatistics && Date.now() - lexemeStatistics.at < LEXEME_STATISTICS_TTL_MS)
-    return lexemeStatistics
-  const { rows } = await sql<{ lexeme: string; passages: number }>`
-    select x.lexeme, x.share * greatest(c.reltuples, 0) as passages
-    from pg_stats s
-      join pg_class c on c.oid = 'public.library_passages'::regclass,
-      unnest(s.most_common_elems::text::text[], s.most_common_elem_freqs) as x(lexeme, share)
-    where s.schemaname = 'public' and s.tablename = 'library_passages'
-      and s.attname = 'search_vector' and x.lexeme is not null`.execute(database)
-  const counts = new Map(rows.map(row => [row.lexeme, Number(row.passages)]))
-  // A lexeme missing from the statistics is rarer than the rarest one listed.
-  const cutoff = rows.length ? Math.min(...counts.values()) : 0
-  lexemeStatistics = { at: Date.now(), counts, cutoff }
-  return lexemeStatistics
-}
+const LEXICAL_MATCH_BUDGET = 3_000
+/** library_lexemes holds the lexemes of more passages than this; the others are rarer. */
+export const LIBRARY_LEXEME_MINIMUM_PASSAGES = 300
 
 /** The rarest lexemes of a language within the budget, as an OR tsquery, or null. */
-export const rareLexemeQuery = (
-  lexemes: readonly string[],
-  statistics: Pick<LexemeStatistics, 'counts' | 'cutoff'>
-) => {
+export const rareLexemeQuery = (lexemes: readonly string[], counts: Record<string, number>) => {
   const ranked = [...new Set(lexemes)]
-    .map(lexeme => ({ lexeme, passages: statistics.counts.get(lexeme) ?? statistics.cutoff / 2 }))
+    .map(lexeme => ({ lexeme, passages: counts[lexeme] ?? LIBRARY_LEXEME_MINIMUM_PASSAGES / 2 }))
     .sort((a, b) => a.passages - b.passages)
   const kept: string[] = []
   let total = 0
@@ -169,15 +147,21 @@ async function searchByWords(
 ): Promise<Candidate[]> {
   const keywords = lexicalKeywords(query)
   if (!keywords.length) return []
-  const [statistics, stems] = await Promise.all([
-    frequentLexemes(database),
-    sql<{ fr: string[]; en: string[] }>`
+  // The lexemes of each language, and how many passages hold the frequent ones, in one call.
+  const { rows } = await sql<{ fr: string[]; en: string[]; counts: Record<string, number> }>`
+    with stems as (
       select tsvector_to_array(to_tsvector('french', ${keywords.join(' ')})) as fr,
-        tsvector_to_array(to_tsvector('english', ${keywords.join(' ')})) as en`.execute(database),
-  ])
+        tsvector_to_array(to_tsvector('english', ${keywords.join(' ')})) as en
+    )
+    select stems.fr, stems.en, coalesce((
+      select json_object_agg(lexeme, passages) from library_lexemes
+      where lexeme = any(stems.fr || stems.en)), '{}') as counts
+    from stems`.execute(database)
+  const stems = rows[0]
+  if (!stems) return []
   const queries = {
-    fr: languages.includes('fr') ? rareLexemeQuery(stems.rows[0]?.fr ?? [], statistics) : null,
-    en: languages.includes('en') ? rareLexemeQuery(stems.rows[0]?.en ?? [], statistics) : null,
+    fr: languages.includes('fr') ? rareLexemeQuery(stems.fr, stems.counts) : null,
+    en: languages.includes('en') ? rareLexemeQuery(stems.en, stems.counts) : null,
   }
   const branches = (['fr', 'en'] as const)
     .filter(language => queries[language])
@@ -185,13 +169,13 @@ async function searchByWords(
   if (!branches.length) return []
   // The terms are bound values, so the planner sees them and walks the GIN index.
   const rank = sql`ts_rank_cd(search_vector, case when language = 'fr' then ${queries.fr ?? ''}::tsquery else ${queries.en ?? ''}::tsquery end, 32)`
-  const { rows } = await sql<Candidate>`
+  const result = await sql<Candidate>`
     select publication_id, passage_key
     from library_passages
     where ${scope} and (${sql.join(branches, sql` or `)})
     order by ${rank} desc
     limit ${CANDIDATES}`.execute(database)
-  return rows
+  return result.rows
 }
 
 const identityOf = (row: PassageRow) => {

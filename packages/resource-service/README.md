@@ -82,7 +82,9 @@ connections that write them) indexed about 110 passages a second on 2026-11-07, 
 about 1 h 30. `wrangler dev` can stop on a run of Workers AI errors: run it in a loop that
 restarts it, the index command retries while it comes back.
 
-`library:search:dev` serves the same search on `http://127.0.0.1:8792/search` (same input as
+A run that changed passages also rebuilds `library_lexemes`, the number of passages of every
+frequent lexeme, which the search by words reads to keep only rare words (`--refresh-lexemes`
+forces it). `library:search:dev` serves the same search on `http://127.0.0.1:8792/search` (same input as
 the entrypoint, `POST` JSON) over `RESOURCE_DATABASE_URL` and the embedding Worker, for the
 assistant's bench and manual checks.
 

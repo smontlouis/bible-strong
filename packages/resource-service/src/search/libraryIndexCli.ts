@@ -4,7 +4,9 @@
 // Options: --dry-run (count passages and characters, no embedding, no write),
 // --corpus commentary,dictionary,nave,timeline,entity, --identity commentary:calvin:en,...,
 // --rebuild-vector-index (drop the HNSW index during a first load and build it at the end),
-// --concurrency 4, --batch 50, --writers 4 (database connections that write batches). RESOURCE_DATABASE_URL picks the database (local by default);
+// --concurrency 4, --batch 50, --writers 4 (database connections that write batches),
+// --refresh-lexemes (count the lexemes even when no passage changed; a run that changes
+// passages always does). RESOURCE_DATABASE_URL picks the database (local by default);
 // RESOURCE_LIBRARY_EMBEDDING_URL the embedding endpoint (the development Worker by default).
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
@@ -41,6 +43,7 @@ const main = async () => {
     concurrency: Number(option('concurrency') ?? 4),
     batchSize: Number(option('batch') ?? 50),
     writers: Number(option('writers') ?? 4),
+    refreshLexemes: process.argv.includes('--refresh-lexemes'),
     onProgress: line => console.log(line),
   })
   const total = reports.reduce(

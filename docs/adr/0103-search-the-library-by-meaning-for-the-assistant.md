@@ -31,10 +31,13 @@ binding, whose requests carry no client address and so share one rate-limit buck
   indexes serve them; half precision halves the storage of the 650,000 passages.
 - A search fuses the nearest passages by meaning and by words with reciprocal rank fusion
   (k = 60). Words exclude function words in French, English and Spanish; of the remaining
-  lexemes, the rarest ones are kept while they match about 15,000 passages in all, after
-  PostgreSQL's statistics of the column, and any of them may match. The frequent ones are left
-  to the search by meaning: ranking the 77,000 passages holding « testament » took 3 s. Both
-  searches run at the same time. Filters (corpus, language, tradition and tags, work, book and chapter) apply
+  lexemes, the rarest ones are kept while they match about 3,000 passages in all, and any of
+  them may match. `library_lexemes` counts the passages of every lexeme found in more than 300
+  of them (10,026 lexemes, rebuilt with `ts_stat` in about 2 min after an index run that changed
+  passages); PostgreSQL's own column statistics list only the 1,000 most frequent ones. The frequent ones are left
+  to the search by meaning: ranking reads every matching passage, and the 77,000 passages
+  holding « testament » took 3 s, 15,000 passages up to 6.5 s on a cold cache. Both searches
+  run at the same time. Filters (corpus, language, tradition and tags, work, book and chapter) apply
   inside the HNSW walk with pgvector's iterative scan. One hit per resource is returned, in the
   first requested language when a commentary exists in both.
 - Rows belong to their publication and are deleted with it. `library:index` indexes every active

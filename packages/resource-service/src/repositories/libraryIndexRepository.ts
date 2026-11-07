@@ -23,6 +23,7 @@ import {
   vectorLiteral,
   type LibraryEmbeddingProvider,
 } from '../search/libraryEmbedding'
+import { LIBRARY_LEXEME_MINIMUM_PASSAGES } from './librarySearchRepository'
 
 export type LibraryIndexOptions = {
   connectionString?: string
@@ -38,6 +39,8 @@ export type LibraryIndexOptions = {
   concurrency?: number
   /** Connections that write embedded batches; one connection writes one batch at a time. */
   writers?: number
+  /** Count the lexemes again even when no passage changed. */
+  refreshLexemes?: boolean
   onProgress?: (line: string) => void
 }
 
@@ -375,6 +378,24 @@ async function indexPublication(
   return report
 }
 
+/** The lexemes the search by words leaves to the search by meaning (about 2 min in full). */
+async function refreshLexemes(client: PoolClient) {
+  await client.query('begin')
+  try {
+    await client.query('delete from library_lexemes')
+    await client.query(
+      `insert into library_lexemes (lexeme, passages)
+       select word, ndoc from ts_stat('select search_vector from library_passages')
+       where ndoc > $1`,
+      [LIBRARY_LEXEME_MINIMUM_PASSAGES]
+    )
+    await client.query('commit')
+  } catch (error) {
+    await client.query('rollback')
+    throw error
+  }
+}
+
 const HNSW_INDEX = `create index if not exists library_passages_cosine_hnsw on library_passages
   using hnsw (embedding halfvec_cosine_ops) with (m = 16, ef_construction = 64)`
 
@@ -387,6 +408,7 @@ export async function indexLibrary(options: LibraryIndexOptions) {
   writers.on('error', () => undefined)
   const client = await pool.connect()
   const reports: LibraryPublicationReport[] = []
+  let removedInactive = 0
   try {
     // One index run at a time; publications stay readable meanwhile.
     const { rows } = await client.query<{ locked: boolean }>(
@@ -396,10 +418,13 @@ export async function indexLibrary(options: LibraryIndexOptions) {
     const publications = await activePublications(client, options)
     if (!options.dryRun) {
       // Rows of publications that are no longer active go with them by cascade; none should remain.
-      await client.query(
-        `delete from library_passages p using resource_publications r
-         where r.id = p.publication_id and r.status <> 'active'`
-      )
+      removedInactive =
+        (
+          await client.query(
+            `delete from library_passages p using resource_publications r
+             where r.id = p.publication_id and r.status <> 'active'`
+          )
+        ).rowCount ?? 0
       if (options.rebuildVectorIndex)
         await client.query('drop index if exists library_passages_cosine_hnsw')
     }
@@ -414,6 +439,11 @@ export async function indexLibrary(options: LibraryIndexOptions) {
       options.onProgress?.('building the HNSW index')
       await client.query(`set maintenance_work_mem = '1GB'`)
       await client.query(HNSW_INDEX)
+    }
+    const changed = removedInactive > 0 || reports.some(report => report.embedded || report.deleted)
+    if (!options.dryRun && (changed || options.refreshLexemes)) {
+      options.onProgress?.('counting lexemes')
+      await refreshLexemes(client)
     }
     if (!options.dryRun) await client.query('analyze library_passages')
     return reports

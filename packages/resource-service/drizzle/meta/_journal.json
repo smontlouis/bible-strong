@@ -260,6 +260,13 @@
       "when": 1793999204437,
       "tag": "0039_library_passages",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1794032688073,
+      "tag": "0040_library_lexemes",
+      "breakpoints": true
     }
   ]
 }
