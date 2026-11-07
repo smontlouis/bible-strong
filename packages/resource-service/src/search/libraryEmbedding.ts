@@ -72,14 +72,20 @@ export const vectorLiteral = (vector: readonly number[]) => `[${vector.join(',')
  */
 export const makeHttpLibraryEmbeddingProvider = (
   endpoint: string,
-  options: { maxAttempts?: number } = {}
+  /**
+   * maxAttempts bounds retries of an unreachable endpoint (a restarting `wrangler dev`);
+   * maxStatusAttempts those of a 429 or 5xx answer, which may come from the content itself.
+   */
+  options: { maxAttempts?: number; maxStatusAttempts?: number } = {}
 ): LibraryEmbeddingProvider =>
   makeLibraryEmbeddingProvider({
     async run(model, input) {
       const body = JSON.stringify({ ...input, model })
       const maxAttempts = Math.max(1, options.maxAttempts ?? 1)
-      for (let attempt = 0; ; attempt += 1) {
-        const last = attempt === maxAttempts - 1
+      const maxStatusAttempts = Math.max(1, options.maxStatusAttempts ?? maxAttempts)
+      const wait = (attempt: number) =>
+        new Promise(resolve => setTimeout(resolve, Math.min(8_000, 250 * 2 ** attempt)))
+      for (let attempt = 0, statusAttempt = 0; ; ) {
         let response: Response
         try {
           response = await fetch(endpoint, {
@@ -88,15 +94,18 @@ export const makeHttpLibraryEmbeddingProvider = (
             body,
           })
         } catch (error) {
-          if (last) throw error
-          await new Promise(resolve => setTimeout(resolve, Math.min(8_000, 250 * 2 ** attempt)))
+          attempt += 1
+          if (attempt >= maxAttempts) throw error
+          await wait(attempt)
           continue
         }
         if (response.ok) return response.json()
-        if (![429, 500, 502, 503, 504].includes(response.status) || last)
+        statusAttempt += 1
+        if (![429, 500, 502, 503, 504].includes(response.status) || statusAttempt >= maxStatusAttempts)
           throw new Error(`LIBRARY_EMBEDDING_HTTP_${response.status}`)
         await response.body?.cancel()
-        await new Promise(resolve => setTimeout(resolve, Math.min(8_000, 250 * 2 ** attempt)))
+        await wait(statusAttempt)
       }
     },
   })
+

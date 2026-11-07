@@ -243,4 +243,58 @@ describe('Library search index', { skip: !runIntegration }, () => {
       await isolated.dispose()
     }
   })
+
+  it('leaves out a passage the embedding model keeps refusing, and indexes the rest', async () => {
+    const isolated = await createIsolatedPostgres(connectionString, 'library_index_refusal')
+    const { database } = isolated
+    try {
+      const [{ id }] = await database
+        .insertInto('resource_publications')
+        .values({
+          resource_identity: 'dictionary:westphal:fr',
+          resource_kind: 'dictionary',
+          revision: 'westphal-r1',
+          language: 'fr',
+          status: 'active',
+          canonical_sha256: '7'.repeat(64),
+          offline_artifact_sha256: '8'.repeat(64),
+          provenance: { source: 'integration-test', imported_at: new Date(0).toISOString() },
+          rights: { holder: 'integration-test', online: true, offline: true },
+          metadata: {},
+          activated_at: new Date(0),
+        })
+        .returning('id')
+        .execute()
+      await database
+        .insertInto('dictionary_entries')
+        .values(
+          ['Alliance', 'Refus', 'Patience'].map((word, index) => ({
+            publication_id: id,
+            entry_id: index + 1,
+            word,
+            normalized_word: word.toLowerCase(),
+            definition: `<p>Article ${word}.</p>`,
+            payload: {},
+          }))
+        )
+        .execute()
+      let calls = 0
+      const refusing: LibraryEmbeddingProvider = {
+        ...provider,
+        embedDocuments: async texts => {
+          calls++
+          if (texts.some(text => text.includes('Refus'))) throw new Error('LIBRARY_EMBEDDING_HTTP_500')
+          return texts.map(text => axis(ideaOf(text)))
+        },
+      }
+      const [report] = await indexLibrary({ connectionString: isolated.connectionString, provider: refusing })
+      assert.equal(report.failed.length, 1)
+      assert.equal(report.embedded, 2)
+      assert.ok(calls >= 3, 'the batch was cut until the refused passage was alone')
+      const rows = await database.selectFrom('library_passages').select('title').execute()
+      assert.deepEqual(rows.map(row => row.title).sort(), ['Alliance', 'Patience'])
+    } finally {
+      await isolated.dispose()
+    }
+  })
 })

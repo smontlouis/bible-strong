@@ -32,7 +32,7 @@ const main = async () => {
   const reports = await indexLibrary({
     provider: makeHttpLibraryEmbeddingProvider(
       process.env.RESOURCE_LIBRARY_EMBEDDING_URL ?? 'http://127.0.0.1:8791',
-      { maxAttempts: 10 }
+      { maxAttempts: 10, maxStatusAttempts: 3 }
     ),
     corpora: corpora as LibraryCorpus[] | undefined,
     identities: list(option('identity')),
@@ -54,12 +54,14 @@ const main = async () => {
     }),
     { passages: 0, embedded: 0, kept: 0, deleted: 0, characters: 0, embeddedCharacters: 0 }
   )
+  const refused = reports.flatMap(report => report.failed.map(key => `${report.identity} ${key}`))
   const summary = {
     dryRun,
     completedAt: new Date().toISOString(),
     durationMs: Date.now() - started,
     publications: reports.length,
     ...total,
+    refused,
     // About four characters a token for French and English prose.
     estimatedEmbeddedTokens: Math.round(total.embeddedCharacters / 4),
     reports,

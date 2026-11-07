@@ -50,6 +50,16 @@ export const createIsolatedPostgres = async (
     connectionString: databaseUrl.toString(),
     dispose: async () => {
       await database.destroy()
+      // pg-pool's end() resolves before its sockets close: a forced drop would terminate those
+      // sessions, and their clients would throw after the test. Let them leave first.
+      for (let attempt = 0; attempt < 100; attempt += 1) {
+        const { rows } = await admin.query<{ sessions: number }>(
+          'select count(*)::int as sessions from pg_stat_activity where datname = $1',
+          [databaseName]
+        )
+        if (!rows[0]?.sessions) break
+        await new Promise(resolve => setTimeout(resolve, 20))
+      }
       await admin.query(`DROP DATABASE "${databaseName}" WITH (FORCE)`)
       await admin.end()
     },

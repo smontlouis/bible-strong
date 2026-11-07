@@ -30,8 +30,11 @@ binding, whose requests carry no client address and so share one rate-limit buck
   (`library-qwen3-v1`) and a `tsvector` in the configuration of its language. HNSW and GIN
   indexes serve them; half precision halves the storage of the 650,000 passages.
 - A search fuses the nearest passages by meaning and by words with reciprocal rank fusion
-  (k = 60). Words exclude function words in French, English and Spanish and match any of the
-  remaining ones. Filters (corpus, language, tradition and tags, work, book and chapter) apply
+  (k = 60). Words exclude function words in French, English and Spanish; of the remaining
+  lexemes, the rarest ones are kept while they match about 15,000 passages in all, after
+  PostgreSQL's statistics of the column, and any of them may match. The frequent ones are left
+  to the search by meaning: ranking the 77,000 passages holding « testament » took 3 s. Both
+  searches run at the same time. Filters (corpus, language, tradition and tags, work, book and chapter) apply
   inside the HNSW walk with pgvector's iterative scan. One hit per resource is returned, in the
   first requested language when a commentary exists in both.
 - Rows belong to their publication and are deleted with it. `library:index` indexes every active
@@ -47,6 +50,9 @@ binding, whose requests carry no client address and so share one rate-limit buck
 - About 650,000 passages and 185 million embedded tokens for a full build, about $2 of Workers AI
   at $0.012 per million tokens, and roughly 5 GB in Neon with the indexes.
 - A republished commentary or dictionary is unsearchable until the next `library:index` run.
+- A first build of 674,693 passages took 1 h 25 from a Mac (2026-11-07), 5.2 GB with the indexes,
+  of which 1.76 GB for HNSW. Workers AI refused some batches with internal errors; the import
+  splits a refused batch until the refused passage is left out and reported.
 - The vector floor is not set: the nearest passages are always returned. It is to be calibrated
   on the real index with the assistant bench.
 - A public library search for the app or the site would be a route over the same repository,

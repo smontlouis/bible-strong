@@ -50,6 +50,8 @@ export type LibraryPublicationReport = {
   deleted: number
   characters: number
   embeddedCharacters: number
+  /** Passages Workers AI kept refusing: left out of this run, tried again by the next one. */
+  failed: string[]
   durationMs: number
 }
 
@@ -221,6 +223,53 @@ const INSERT = `
     model = excluded.model, contract = excluded.contract, input_sha256 = excluded.input_sha256,
     embedding = excluded.embedding, search_vector = excluded.search_vector`
 
+/**
+ * Embeds a batch. A batch Workers AI keeps refusing (an internal error on some content, seen on
+ * 2026-11-07) is cut in two until the passage it refuses is found; that passage is left out and
+ * reported instead of ending the run.
+ */
+async function embedSplitting<T extends { document: string; passageKey: string }>(
+  provider: LibraryEmbeddingProvider,
+  batch: T[],
+  failed: string[]
+): Promise<{ draft: T; vector: number[] }[]> {
+  try {
+    const vectors = await provider.embedDocuments(batch.map(draft => draft.document))
+    return batch.map((draft, index) => ({ draft, vector: vectors[index] }))
+  } catch (error) {
+    if (batch.length === 1) {
+      failed.push(batch[0].passageKey)
+      return []
+    }
+    const middle = Math.ceil(batch.length / 2)
+    return [
+      ...(await embedSplitting(provider, batch.slice(0, middle), failed)),
+      ...(await embedSplitting(provider, batch.slice(middle), failed)),
+    ]
+  }
+}
+
+/** PostgreSQL errors carry a five-character SQLSTATE; network and TLS failures do not. */
+const isTransient = (error: unknown) => {
+  const code = (error as { code?: unknown } | null)?.code
+  return !(typeof code === 'string' && /^[0-9A-Z]{5}$/u.test(code))
+}
+
+/**
+ * Writes one batch, again after a dropped connection (a TLS error ended a production run on
+ * 2026-11-07): the insert is an upsert, so a batch written twice is written once.
+ */
+async function writeBatch(writers: Pool, rows: string) {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await writers.query(INSERT, [rows])
+    } catch (error) {
+      if (attempt >= 4 || !isTransient(error)) throw error
+      await new Promise(resolve => setTimeout(resolve, 1_000 * attempt))
+    }
+  }
+}
+
 async function indexPublication(
   client: PoolClient,
   writers: Pool,
@@ -256,6 +305,7 @@ async function indexPublication(
     deleted: 0,
     characters: 0,
     embeddedCharacters: 0,
+    failed: [],
     durationMs: 0,
   }
   for await (const drafts of publicationPassages(client, publication)) {
@@ -278,8 +328,9 @@ async function indexPublication(
     for (let start = 0; start < pending.length; start += batchSize)
       batches.push(pending.slice(start, start + batchSize))
     await mapConcurrently(batches, concurrency, async batch => {
-      const vectors = await provider.embedDocuments(batch.map(draft => draft.document))
-      const rows = batch.map((draft, index) => ({
+      const embedded = await embedSplitting(provider, batch, report.failed)
+      if (!embedded.length) return
+      const rows = embedded.map(({ draft, vector }) => ({
         publication_id: publication.id,
         passage_key: draft.passageKey,
         corpus: draft.corpus,
@@ -300,10 +351,10 @@ async function indexPublication(
         model: provider.model,
         contract: provider.contract,
         input_sha256: draft.inputSha256,
-        embedding: vectorLiteral(vectors[index]),
+        embedding: vectorLiteral(vector),
       }))
       // A connection runs one query at a time: batches are written on several connections.
-      await writers.query(INSERT, [JSON.stringify(rows)])
+      await writeBatch(writers, JSON.stringify(rows))
     })
     options.onProgress?.(
       `${publication.identity}: ${report.passages} passages, ${report.embedded} embedded`
@@ -319,6 +370,7 @@ async function indexPublication(
       report.deleted += result.rowCount ?? 0
     }
   }
+  report.embedded -= report.failed.length
   report.durationMs = Date.now() - started
   return report
 }
@@ -331,6 +383,8 @@ export async function indexLibrary(options: LibraryIndexOptions) {
     options.connectionString ?? process.env.RESOURCE_DATABASE_URL ?? LOCAL_DATABASE
   const pool = new Pool({ connectionString, max: 1 })
   const writers = new Pool({ connectionString, max: options.writers ?? 4 })
+  // An idle writer whose connection drops is discarded by the pool; its next batch reconnects.
+  writers.on('error', () => undefined)
   const client = await pool.connect()
   const reports: LibraryPublicationReport[] = []
   try {
@@ -353,7 +407,7 @@ export async function indexLibrary(options: LibraryIndexOptions) {
       const report = await indexPublication(client, writers, publication, options)
       reports.push(report)
       options.onProgress?.(
-        `${report.identity}: ${report.passages} passages, ${report.embedded} embedded, ${report.kept} kept, ${report.deleted} deleted in ${Math.round(report.durationMs / 1000)} s`
+        `${report.identity}: ${report.passages} passages, ${report.embedded} embedded, ${report.kept} kept, ${report.deleted} deleted${report.failed.length ? `, ${report.failed.length} refused` : ''} in ${Math.round(report.durationMs / 1000)} s`
       )
     }
     if (!options.dryRun && options.rebuildVectorIndex) {

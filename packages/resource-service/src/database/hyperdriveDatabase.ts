@@ -32,9 +32,11 @@ export const reportFirstConnection = (
 // between two requests of a Worker, and Hyperdrive keeps the pool of connections to Neon.
 export const makeHyperdriveDatabase = (
   connectionString: string,
-  onFirstConnection?: (durationMs: number) => void
+  onFirstConnection?: (durationMs: number) => void,
+  /** Queries a request runs at the same time; the library search runs two. */
+  maxConnections = 1
 ): Kysely<ResourceDatabase> => {
-  const pool = new Pool({ connectionString, max: 1 })
+  const pool = new Pool({ connectionString, max: maxConnections })
   return new Kysely<ResourceDatabase>({
     dialect: new PostgresDialect({
       pool: onFirstConnection ? reportFirstConnection(pool, onFirstConnection) : pool,

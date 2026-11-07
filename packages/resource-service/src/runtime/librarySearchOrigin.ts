@@ -11,7 +11,8 @@ import { makeMetadataOnlyAiGatewayOptions } from './searchRuntimeAnalytics'
 
 export async function runLibrarySearch(bindings: Env, value: unknown) {
   const input = parseLibrarySearchInput(value)
-  const database = makeHyperdriveDatabase(bindings.HYPERDRIVE.connectionString)
+  // Two connections: the search by words runs beside the search by meaning.
+  const database = makeHyperdriveDatabase(bindings.HYPERDRIVE.connectionString, undefined, 2)
   try {
     const provider = makeLibraryEmbeddingProvider({
       run: (model, payload) =>
