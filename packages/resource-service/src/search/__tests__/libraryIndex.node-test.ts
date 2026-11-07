@@ -26,6 +26,15 @@ describe('library text', () => {
       '1. Though Paul «has» proved'
     )
     assert.equal(htmlToPlainText('<script>alert(1)</script>Texte &unknown;'), 'Texte &unknown;')
+    // Henry (CLÉ) encodes twice; Clarke writes Greek with named entities.
+    assert.equal(
+      htmlToPlainText('Dieu dit&amp;nbsp;: &#xAB;&amp;nbsp;Que la lumi&#xE8;re'),
+      'Dieu dit : « Que la lumière'
+    )
+    assert.equal(
+      htmlToPlainText('&Pi;&epsilon;&rho;&iota; &sigma;&omega;&sigmaf; &Omega; &oacute;&Ntilde;'),
+      'Περι σως Ω óÑ'
+    )
   })
 
   it('cuts long text at paragraphs, then sentences, never above the maximum', () => {

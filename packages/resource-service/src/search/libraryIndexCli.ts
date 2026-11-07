@@ -4,7 +4,7 @@
 // Options: --dry-run (count passages and characters, no embedding, no write),
 // --corpus commentary,dictionary,nave,timeline,entity, --identity commentary:calvin:en,...,
 // --rebuild-vector-index (drop the HNSW index during a first load and build it at the end),
-// --concurrency 4, --batch 50. RESOURCE_DATABASE_URL picks the database (local by default);
+// --concurrency 4, --batch 50, --writers 4 (database connections that write batches). RESOURCE_DATABASE_URL picks the database (local by default);
 // RESOURCE_LIBRARY_EMBEDDING_URL the embedding endpoint (the development Worker by default).
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
@@ -32,7 +32,7 @@ const main = async () => {
   const reports = await indexLibrary({
     provider: makeHttpLibraryEmbeddingProvider(
       process.env.RESOURCE_LIBRARY_EMBEDDING_URL ?? 'http://127.0.0.1:8791',
-      { maxAttempts: 7 }
+      { maxAttempts: 10 }
     ),
     corpora: corpora as LibraryCorpus[] | undefined,
     identities: list(option('identity')),
@@ -40,6 +40,7 @@ const main = async () => {
     rebuildVectorIndex: process.argv.includes('--rebuild-vector-index'),
     concurrency: Number(option('concurrency') ?? 4),
     batchSize: Number(option('batch') ?? 50),
+    writers: Number(option('writers') ?? 4),
     onProgress: line => console.log(line),
   })
   const total = reports.reduce(

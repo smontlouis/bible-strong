@@ -49,18 +49,46 @@ const NAMED_ENTITIES: Record<string, string> = {
   OElig: 'Œ',
 }
 
+// Greek letters: commentaries such as Clarke write Greek words with named entities (&Pi;&epsilon;).
+const GREEK = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa', 'Lambda', 'Mu', 'Nu', 'Xi', 'Omicron', 'Pi', 'Rho', 'Sigma', 'Tau', 'Upsilon', 'Phi', 'Chi', 'Psi', 'Omega']
+for (const [index, name] of GREEK.entries()) {
+  // U+03A2 is unassigned and U+03C2 is the final sigma: the letters after rho move by one.
+  const offset = index >= 17 ? index + 1 : index
+  NAMED_ENTITIES[name] = String.fromCodePoint(0x391 + offset)
+  NAMED_ENTITIES[name.toLowerCase()] = String.fromCodePoint(0x3b1 + offset)
+}
+Object.assign(NAMED_ENTITIES, {
+  sigmaf: 'ς', thetasym: 'ϑ', upsih: 'ϒ', piv: 'ϖ', middot: '·', times: '×', divide: '÷',
+  deg: '°', sect: '§', para: '¶', dagger: '†', Dagger: '‡', bull: '•', prime: '′', Prime: '″',
+  frac12: '½', frac14: '¼', frac34: '¾', copy: '©', reg: '®', iquest: '¿', iexcl: '¡',
+  ordm: 'º', ordf: 'ª', sup1: '¹', sup2: '²', sup3: '³', szlig: 'ß', oslash: 'ø', Oslash: 'Ø',
+  aring: 'å', Aring: 'Å', macr: '¯', acute: '´', uml: '¨', cedil: '¸', zwnj: '', zwj: '', lrm: '', rlm: '',
+})
+// Accented Latin letters of any kind (&oacute;, &ntilde;, &Uuml;): the letter and its mark.
+const MARKS: Record<string, string> = { acute: '\u0301', grave: '\u0300', circ: '\u0302', uml: '\u0308', tilde: '\u0303', cedil: '\u0327', ring: '\u030a' }
+
 const codePoint = (value: number) =>
   Number.isInteger(value) && value > 0 && value <= 0x10ffff ? String.fromCodePoint(value) : ''
 
-/** Decodes numeric and common named entities in a single pass. */
-export const decodeHtmlEntities = (value: string) =>
-  value.replace(/&(#x[0-9a-f]+|#[0-9]+|[a-z]+);/giu, (whole, name: string) => {
+const decodeOnce = (value: string) =>
+  value.replace(/&(#x[0-9a-f]+|#[0-9]+|[a-z]+[0-9]*);/giu, (whole, name: string) => {
     if (name[0] === '#')
       return codePoint(
         name[1] === 'x' || name[1] === 'X' ? parseInt(name.slice(2), 16) : Number(name.slice(1))
       )
-    return NAMED_ENTITIES[name] ?? whole
+    if (NAMED_ENTITIES[name] !== undefined) return NAMED_ENTITIES[name]
+    const accented = /^([A-Za-z])(acute|grave|circ|uml|tilde|cedil|ring)$/u.exec(name)
+    return accented ? `${accented[1]}${MARKS[accented[2]]}`.normalize('NFC') : whole
   })
+
+/**
+ * Decodes numeric and named entities. Some sources encode twice (&amp;nbsp;): a second pass
+ * decodes what the first one revealed.
+ */
+export const decodeHtmlEntities = (value: string) => {
+  const once = decodeOnce(value)
+  return once === value || !/&(#x?[0-9a-f]+|[a-z]+[0-9]*);/iu.test(once) ? once : decodeOnce(once)
+}
 
 const BLOCK_TAGS = /<\/?(?:p|div|br|h[1-6]|li|ul|ol|blockquote|tr|table|section|article)\b[^>]*>/giu
 

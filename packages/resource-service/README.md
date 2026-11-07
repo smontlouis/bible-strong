@@ -76,6 +76,16 @@ drops the HNSW index during the load and builds it at the end. A run embeds only
 text changed and deletes those that disappeared; it writes `.local/library-index-report.json`.
 Point `RESOURCE_DATABASE_URL` at Neon (see "Apply a schema migration") to index production.
 
+The embedding Worker answers a batch of 50 passages in about 5 s, and Workers AI accepts 3,000
+embedding requests a minute: `--concurrency 24 --writers 6` (batches in flight, database
+connections that write them) indexed about 110 passages a second on 2026-11-07, a full build in
+about 1 h 30. `wrangler dev` can stop on a run of Workers AI errors: run it in a loop that
+restarts it, the index command retries while it comes back.
+
+`library:search:dev` serves the same search on `http://127.0.0.1:8792/search` (same input as
+the entrypoint, `POST` JSON) over `RESOURCE_DATABASE_URL` and the embedding Worker, for the
+assistant's bench and manual checks.
+
 The search is not a public route. The Worker's main module, `src/runtime/entry.ts`, exports the
 `LibrarySearch` RPC entrypoint next to the public Worker; the assistant binds to it with
 `"entrypoint": "LibrarySearch"`.

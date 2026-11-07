@@ -36,6 +36,8 @@ export type LibraryIndexOptions = {
   rebuildVectorIndex?: boolean
   batchSize?: number
   concurrency?: number
+  /** Connections that write embedded batches; one connection writes one batch at a time. */
+  writers?: number
   onProgress?: (line: string) => void
 }
 
@@ -221,6 +223,7 @@ const INSERT = `
 
 async function indexPublication(
   client: PoolClient,
+  writers: Pool,
   publication: Publication,
   options: LibraryIndexOptions
 ): Promise<LibraryPublicationReport> {
@@ -299,8 +302,8 @@ async function indexPublication(
         input_sha256: draft.inputSha256,
         embedding: vectorLiteral(vectors[index]),
       }))
-      // pg runs one query at a time per client: concurrent batches queue on it, embeddings do not.
-      await client.query(INSERT, [JSON.stringify(rows)])
+      // A connection runs one query at a time: batches are written on several connections.
+      await writers.query(INSERT, [JSON.stringify(rows)])
     })
     options.onProgress?.(
       `${publication.identity}: ${report.passages} passages, ${report.embedded} embedded`
@@ -324,11 +327,10 @@ const HNSW_INDEX = `create index if not exists library_passages_cosine_hnsw on l
   using hnsw (embedding halfvec_cosine_ops) with (m = 16, ef_construction = 64)`
 
 export async function indexLibrary(options: LibraryIndexOptions) {
-  const pool = new Pool({
-    connectionString:
-      options.connectionString ?? process.env.RESOURCE_DATABASE_URL ?? LOCAL_DATABASE,
-    max: 1,
-  })
+  const connectionString =
+    options.connectionString ?? process.env.RESOURCE_DATABASE_URL ?? LOCAL_DATABASE
+  const pool = new Pool({ connectionString, max: 1 })
+  const writers = new Pool({ connectionString, max: options.writers ?? 4 })
   const client = await pool.connect()
   const reports: LibraryPublicationReport[] = []
   try {
@@ -348,7 +350,7 @@ export async function indexLibrary(options: LibraryIndexOptions) {
         await client.query('drop index if exists library_passages_cosine_hnsw')
     }
     for (const publication of publications) {
-      const report = await indexPublication(client, publication, options)
+      const report = await indexPublication(client, writers, publication, options)
       reports.push(report)
       options.onProgress?.(
         `${report.identity}: ${report.passages} passages, ${report.embedded} embedded, ${report.kept} kept, ${report.deleted} deleted in ${Math.round(report.durationMs / 1000)} s`
@@ -364,6 +366,6 @@ export async function indexLibrary(options: LibraryIndexOptions) {
   } finally {
     await client.query('select pg_advisory_unlock(3252027)').catch(() => undefined)
     client.release()
-    await pool.end()
+    await Promise.all([pool.end(), writers.end()])
   }
 }
