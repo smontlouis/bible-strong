@@ -1,7 +1,7 @@
 // Imports a document collection of the library (ADR-0106) from prepared JSON lines:
 //   yarn workspace @bible-strong/resource-service library:collection \
 //     --collection bri --language en --file /path/to/articles.jsonl
-// Collections: bri (en), sabbath-school (en, fr). RESOURCE_DATABASE_URL picks the database
+// Collections: bri (en), sabbath-school (en, fr), gotquestions (en). RESOURCE_DATABASE_URL picks the database
 // (local by default). With CLOUDFLARE_ACCOUNT_ID passages are embedded through the Workers AI
 // REST API, otherwise through the development embedding Worker (RESOURCE_LIBRARY_EMBEDDING_URL).
 // Options: --concurrency 8, --batch 50, --writers 4. A file whose documents did not change

@@ -38,6 +38,8 @@ export type LibraryTarget =
       documentKey: string
       part: number
       url?: string
+      /** Points where the document departs from the Seventh-day Adventist reading. */
+      divergence?: string[]
     }
 
 export type LibraryPassageDraft = {

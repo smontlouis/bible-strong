@@ -18,6 +18,8 @@ export type LibraryDocument = {
   verseStart: number | null
   verseEnd: number | null
   text: string
+  /** Points where the document departs from the Seventh-day Adventist reading, named in English. */
+  divergence: string[]
 }
 
 export type LibraryCollection = {
@@ -104,6 +106,7 @@ const bri: LibraryCollection = {
       verseStart: null,
       verseEnd: null,
       text: body,
+      divergence: [],
     }
   },
 }
@@ -154,6 +157,45 @@ const sabbathSchool: LibraryCollection = {
       verseStart,
       verseEnd,
       text: body,
+      divergence: [],
+    }
+  },
+}
+
+/** Short English names of the points where an article departs from the Adventist reading. */
+const divergenceOf = (value: unknown) =>
+  Array.isArray(value)
+    ? [...new Set(value.map(text).filter(point => /^[A-Za-z][A-Za-z ,'-]{1,59}$/u.test(point)))].slice(0, 6)
+    : []
+
+const gotQuestions: LibraryCollection = {
+  id: 'gotquestions',
+  title: 'Got Questions',
+  tradition: 'Protestantisme',
+  tags: ['Évangélique'],
+  languages: ['en'],
+  rights: {
+    holder: 'Got Questions Ministries',
+    terms_reference: 'Quoted with attribution and a link, under the gotquestions.org copyright policy',
+  },
+  parse(record) {
+    const slug = text(record.slug)
+    const body = text(record.text)
+    if (!slug || /[\\/#?\u0000-\u001f]/u.test(slug) || !body || !text(record.title)) return
+    const url = text(record.url)
+    return {
+      key: documentKeyOf(slug),
+      title: text(record.title),
+      authors: [],
+      date: text(record.date).slice(0, 10) || null,
+      url: url.startsWith('https://www.gotquestions.org/') ? url : null,
+      context: null,
+      book: null,
+      chapter: null,
+      verseStart: null,
+      verseEnd: null,
+      text: body,
+      divergence: divergenceOf(record.divergence),
     }
   },
 }
@@ -161,6 +203,7 @@ const sabbathSchool: LibraryCollection = {
 export const LIBRARY_COLLECTIONS: Record<string, LibraryCollection> = {
   bri,
   'sabbath-school': sabbathSchool,
+  gotquestions: gotQuestions,
 }
 
 export const collectionIdentity = (collection: string, language: LibraryLanguage) =>
@@ -216,6 +259,7 @@ export function documentPassages(
       documentKey: document.key,
       part,
       ...(document.url ? { url: document.url } : {}),
+      ...(document.divergence.length ? { divergence: [...document.divergence] } : {}),
     },
   }))
 }

@@ -274,6 +274,35 @@ describe('library collections', () => {
     assert.equal(school.parse({ id: 'sabbath-school/fr/2016-04/01/1', text: 'x' }, 'en'), undefined, 'the language must match the file')
     assert.deepEqual(verseRange('14,15'), [14, 15])
     assert.deepEqual(verseRange(''), [null, null])
+
+    const gotQuestions = LIBRARY_COLLECTIONS.gotquestions
+    const answer = gotQuestions.parse(
+      {
+        slug: 'eternal-security',
+        url: 'https://www.gotquestions.org/eternal-security.html',
+        title: 'Is eternal security biblical?',
+        date: '2002-01-01',
+        text: 'When people come to know Christ as their Savior, they are brought into a relationship with God.',
+        divergence: ['eternal security', 'eternal security', '<b>', 7],
+      },
+      'en'
+    )
+    assert.ok(answer)
+    const [question] = documentPassages(gotQuestions, 'en', answer)
+    assert.equal(question.heading, 'Got Questions (Protestantisme, Évangélique), « Is eternal security biblical? » (2002)')
+    assert.deepEqual(question.target, {
+      kind: 'document',
+      collection: 'gotquestions',
+      language: 'en',
+      documentKey: 'eternal-security',
+      part: 0,
+      url: 'https://www.gotquestions.org/eternal-security.html',
+      divergence: ['eternal security'],
+    })
+    const plain = gotQuestions.parse({ slug: 'trust', title: 'T', text: 'x', url: 'https://example.com/trust' }, 'en')
+    assert.ok(plain)
+    assert.equal(plain.url, null)
+    assert.ok(!('divergence' in documentPassages(gotQuestions, 'en', plain)[0].target), 'no divergence, no field')
   })
 
   it('sorts works into perspectives and checks the new arguments', async () => {
@@ -281,6 +310,7 @@ describe('library collections', () => {
     assert.equal(perspectiveOf('Protestantisme', ['Adventiste']), 'adventist')
     assert.equal(perspectiveOf('Protestantisme', ['Réformé', 'Calviniste']), 'protestant')
     assert.equal(perspectiveOf('Protestantisme', ['Évangélique', 'Dispensationaliste']), 'evangelical')
+    assert.equal(perspectiveOf('Protestantisme', ['Évangélique']), 'evangelical')
     assert.equal(perspectiveOf('Catholicisme', ['Patristique', 'Scolastique']), 'catholic')
     assert.equal(perspectiveOf('Christianisme ancien', ['Patristique']), 'patristic')
     assert.equal(perspectiveOf('Judaïsme', ['Rabbinique']), 'jewish')

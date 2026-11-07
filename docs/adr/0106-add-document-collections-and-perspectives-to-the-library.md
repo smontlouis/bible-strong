@@ -38,6 +38,12 @@ the Adventist reading as one of several.
   The « Ellen G. White Comments » that close the sections of the Seventh-day Adventist Bible
   Commentary, under their own heading, are cut before indexing (3,809 passages on 2026-11-07).
   Adventist understandings otherwise come from the Bible texts, the commentary and the studies.
+- A document may name, in English, the points where it departs from the Seventh-day Adventist
+  reading: its target then carries them as `divergence`, which the search returns with every hit.
+  They stay out of the heading, which feeds both the search by meaning and the search by words. The
+  articles of Got Questions (`library:gotquestions:en`, evangelical), sorted and labelled in the
+  private assistant repository, carry them, so that the assistant presents such an article there as
+  one understanding among others.
 - The `LibrarySearch` entrypoint gains `read`, which joins the passages of a document back into its
   text (at most 12,000 characters, cut text reported).
 - Every search ranks each language on its own list before fusing them, the other language at
