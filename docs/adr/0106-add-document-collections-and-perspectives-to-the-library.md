@@ -30,10 +30,16 @@ the Adventist reading as one of several.
   passage whose embedded text did not change keeps its vector. A file whose documents did not change
   leaves the collection as it is. `library:index` does not touch collections.
 - The collections known to the code (`search/libraryCollections.ts`) say how to read their
-  records, their attribution and their rights. A document keeps the address of its source page when
-  the collection has one (BRI).
+  records, their attribution and their rights. A source slug with other characters than letters,
+  digits, dots and hyphens (Greek, « — ») is spelled without them and tagged with a hash. A
+  document keeps the address of its source page when the collection has one (BRI).
 - The `LibrarySearch` entrypoint gains `read`, which joins the passages of a document back into its
   text (at most 12,000 characters, cut text reported).
+- Every search ranks each language on its own list before fusing them, the other language at
+  0.85 of the weight: a question is nearer to passages in its own language, and works published in
+  one language only (the BRI articles, Calvin) never reached the candidates of a French question.
+  It keeps 100 candidates by meaning and by words, and at most two hits a work, so that a large
+  work (70,000 passages of the Ellen G. White writings) does not fill the answer.
 - A search may ask for **perspectives**: it then gathers 150 candidates by meaning and by words,
   takes the best passage of each perspective (Adventist, Catholic, patristic, Jewish, evangelical,
   other Protestant, reference works), then the next best ones, one per work. Each hit names its

@@ -88,9 +88,12 @@ export type LibrarySearchResult = {
   timings: { embeddingMs: number; vectorMs: number; lexicalMs: number }
 }
 
-const CANDIDATES = 40
+/** Deep enough that a large work leaves room for the others once capped (two hits a work). */
+const CANDIDATES = 100
 /** A search by perspective looks further, so that smaller traditions reach the selection. */
 const PERSPECTIVE_CANDIDATES = 150
+const MAX_HITS_PER_WORK = 2
+const OTHER_LANGUAGE_WEIGHT = 0.85
 const RRF_K = 60
 const SNIPPET_CHARACTERS = 700
 export const LIBRARY_SEARCH_MAX_LIMIT = 10
@@ -261,19 +264,32 @@ export async function searchLibrary(
   timings.embeddingMs = Date.now() - embeddingStarted
 
   const vectorStarted = Date.now()
-  const vectorRows: Candidate[] = embedding
+  // One list per language: a question is nearer to passages in its own language, and the works
+  // published in the other language only (the BRI articles, Calvin) would never reach the pool.
+  const vectorLists: Candidate[][] = embedding
     ? await database.transaction().execute(async transaction => {
         // Filters apply after the graph walk: iterative scans keep walking until enough rows pass.
         await sql`set local hnsw.ef_search = ${sql.lit(Math.max(100, candidates))}`.execute(transaction)
         await sql`set local hnsw.iterative_scan = relaxed_order`.execute(transaction)
-        const result = await sql<Candidate & { distance: number }>`
-          select publication_id, passage_key, embedding <=> ${vectorLiteral(embedding!)}::halfvec as distance
-          from library_passages
-          where language in (${sql.join(languages)}) and ${scope}
-          order by embedding <=> ${vectorLiteral(embedding!)}::halfvec
-          limit ${candidates}`.execute(transaction)
+        const vector = vectorLiteral(embedding!)
+        const result = await sql<Candidate & { distance: number; language: LibraryLanguage }>`
+          ${sql.join(
+            languages.map(
+              language => sql`(select publication_id, passage_key, language,
+                  embedding <=> ${vector}::halfvec as distance
+                from library_passages
+                where language = ${language} and ${scope}
+                order by embedding <=> ${vector}::halfvec
+                limit ${candidates})`
+            ),
+            sql` union all `
+          )}`.execute(transaction)
         // Relaxed order may return neighbours slightly out of order.
-        return [...result.rows].sort((a, b) => a.distance - b.distance)
+        return languages.map(language =>
+          result.rows
+            .filter(row => row.language === language)
+            .sort((a, b) => a.distance - b.distance)
+        )
       })
     : []
   timings.vectorMs = Date.now() - vectorStarted
@@ -284,22 +300,21 @@ export async function searchLibrary(
     string,
     { candidate: Candidate; score: number; semantic: boolean; lexical: boolean }
   >()
-  const add = (rows: Candidate[], kind: 'semantic' | 'lexical') =>
+  const add = (rows: Candidate[], kind: 'semantic' | 'lexical', weight = 1) =>
     rows.forEach((candidate, rank) => {
       const key = `${candidate.publication_id}:${candidate.passage_key}`
       const entry = fused.get(key) ?? { candidate, score: 0, semantic: false, lexical: false }
-      entry.score += 1 / (RRF_K + rank + 1)
+      entry.score += weight / (RRF_K + rank + 1)
       entry[kind] = true
       fused.set(key, entry)
     })
-  add(vectorRows, 'semantic')
+  // The reader's language keeps an edge over the other one.
+  vectorLists.forEach((rows, index) => add(rows, 'semantic', index === 0 ? 1 : OTHER_LANGUAGE_WEIGHT))
   add(lexicalRows, 'lexical')
   if (!fused.size) return { hits: [], semantic: Boolean(embedding), timings }
 
   type Ranked = { candidate: Candidate; score: number; semantic: boolean; lexical: boolean }
-  const ranked: Ranked[] = [...fused.values()]
-    .sort((a, b) => b.score - a.score)
-    .slice(0, input.perspectives ? candidates : limit * 5)
+  const ranked: Ranked[] = [...fused.values()].sort((a, b) => b.score - a.score)
   const passages = (await database
     .selectFrom('library_passages')
     .select([
@@ -348,7 +363,16 @@ export async function searchLibrary(
   }
 
   const ordered = [...chosen.values()].sort((a, b) => b.entry.score - a.entry.score)
-  let selected = ordered.slice(0, limit)
+  // At most two hits a work: a large work (70,000 passages of Ellen G. White's writings) does
+  // not fill the answer, and the other works of its tradition get their turn.
+  const perWork = new Map<string, number>()
+  let selected = ordered
+    .filter(item => {
+      const count = perWork.get(item.row.work) ?? 0
+      perWork.set(item.row.work, count + 1)
+      return count < MAX_HITS_PER_WORK
+    })
+    .slice(0, limit)
   if (input.perspectives) {
     // The best passage of each perspective, then the next best ones, one per work.
     const perspectives = new Set<LibraryPerspective>()

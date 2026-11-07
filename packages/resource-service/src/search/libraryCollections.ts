@@ -37,6 +37,31 @@ const integer = (value: unknown, min: number, max: number) =>
     ? (value as number)
     : null
 
+/** FNV-1a, 32 bits: a short stable tag for a key that had to be rewritten. */
+const fnv = (value: string) => {
+  let hash = 0x811c9dc5
+  for (const character of value) {
+    hash ^= character.codePointAt(0)!
+    hash = Math.imul(hash, 0x01000193) >>> 0
+  }
+  return hash.toString(16).padStart(8, '0')
+}
+
+/**
+ * A document key of letters, digits, dots and hyphens. A slug with other characters (« — »,
+ * Greek, accents) is spelled without them and tagged, so that two slugs never meet.
+ */
+export const documentKeyOf = (slug: string) => {
+  const safe = slug
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9.]+/gu, '-')
+    .replace(/^[-.]+|-+$/gu, '')
+    .slice(0, 150)
+  return safe === slug ? slug : `${safe || 'document'}-${fnv(slug)}`
+}
+
 /** « 10-17 », « 8 » or « 14,15 » to a first and last verse. */
 export const verseRange = (verses: unknown): [number | null, number | null] => {
   const numbers = text(verses)
@@ -60,10 +85,10 @@ const bri: LibraryCollection = {
   parse(record) {
     const slug = text(record.slug)
     const body = text(record.text)
-    if (!/^[a-z0-9][a-z0-9-]{0,199}$/u.test(slug) || !body || !text(record.title)) return
+    if (!slug || /[\\/#?\u0000-\u001f]/u.test(slug) || !body || !text(record.title)) return
     const url = text(record.url)
     return {
-      key: slug,
+      key: documentKeyOf(slug),
       title: text(record.title),
       authors: Array.isArray(record.authors)
         ? record.authors.flatMap(author => {

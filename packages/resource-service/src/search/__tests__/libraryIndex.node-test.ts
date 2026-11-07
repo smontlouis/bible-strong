@@ -242,6 +242,11 @@ describe('library collections', () => {
       url: 'https://adventistbiblicalresearch.org/articles/the-millennium',
     })
     assert.equal(bri.parse({ slug: '../x', title: 'T', text: 'x' }, 'en'), undefined)
+    const { documentKeyOf } = await import('../libraryCollections')
+    assert.equal(documentKeyOf('the-millennium'), 'the-millennium')
+    assert.match(documentKeyOf('the-taken-and-the-left-παραλαμβάνεται-καὶ-ἀφίεται-what-do-they-really-mean'), /^the-taken-and-the-left-what-do-they-really-mean-[0-9a-f]{8}$/u)
+    assert.equal(documentKeyOf('george-w.-reid-passes-to-his-rest'), 'george-w.-reid-passes-to-his-rest')
+    assert.notEqual(documentKeyOf('église'), documentKeyOf('eglise-x'))
     assert.equal(bri.parse({ slug: 'a', title: 'T', text: 'x', url: 'https://example.com/a' }, 'en')?.url, null)
 
     const school = LIBRARY_COLLECTIONS['sabbath-school']
