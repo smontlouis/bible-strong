@@ -47,6 +47,7 @@ export const createIsolatedPostgres = async (
   })
   return {
     database,
+    connectionString: databaseUrl.toString(),
     dispose: async () => {
       await database.destroy()
       await admin.query(`DROP DATABASE "${databaseName}" WITH (FORCE)`)

@@ -253,6 +253,13 @@
       "when": 1793782421603,
       "tag": "0038_strong_lexicon_normalized_search",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1793999204437,
+      "tag": "0039_library_passages",
+      "breakpoints": true
     }
   ]
 }

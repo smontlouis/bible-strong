@@ -27,3 +27,7 @@ _Avoid_: Cache, downloaded cache
 **Online access**:
 Remote reading of a Resource revision through the Resource API.
 _Avoid_: Cloud fallback
+
+**Library passage**:
+A short piece of an active commentary, dictionary article, Nave topic, timeline event or profile, indexed by meaning and by words so the study assistant can find it and open the resource it comes from.
+_Avoid_: Chunk, embedding

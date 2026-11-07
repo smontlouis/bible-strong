@@ -37,6 +37,7 @@
     "dev": "tsx src/runtime/dev.ts",
     "dev:local": "RESOURCE_SKIP_IMPORT=1 RESOURCE_API_PORT=8787 yarn dev",
     "topics:import": "tsx src/search/topicIngestionCli.ts",
+    "library:index": "tsx src/search/libraryIndexCli.ts",
     "topics:benchmark": "tsx src/search/topicSearchBenchmarkCli.ts",
     "analytics:search": "tsx src/analytics/searchAnalyticsReportCli.ts",
     "topics:embeddings:dev": "wrangler dev --config wrangler.embedding.jsonc --port 8791"

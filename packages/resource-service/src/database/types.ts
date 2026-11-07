@@ -14,6 +14,7 @@ import type {
   naveTopics,
   naveVerseLinks,
   thematicImportRuns,
+  libraryPassages,
   thematicTopicAliases,
   thematicTopicEmbeddings,
   thematicTopicPassages,
@@ -64,6 +65,7 @@ export type ThematicTopicPassageRow = Kyselify<typeof thematicTopicPassages>
 export type ThematicTopicRelationRow = Kyselify<typeof thematicTopicRelations>
 export type ThematicTopicEmbeddingRow = Kyselify<typeof thematicTopicEmbeddings>
 export type ThematicImportRunRow = Kyselify<typeof thematicImportRuns>
+export type LibraryPassageRow = Kyselify<typeof libraryPassages>
 export type DictionaryEntryRow = Kyselify<typeof dictionaryEntries>
 export type DictionaryDirectoryVersePresenceRow = Kyselify<typeof dictionaryDirectoryVersePresences>
 export type DictionaryVerseLinkRow = Kyselify<typeof dictionaryVerseLinks>
@@ -113,6 +115,7 @@ export type ResourceDatabase = {
   thematic_topic_relations: ThematicTopicRelationRow
   thematic_topic_embeddings: ThematicTopicEmbeddingRow
   thematic_import_runs: ThematicImportRunRow
+  library_passages: LibraryPassageRow
   dictionary_entries: DictionaryEntryRow
   dictionary_directory_verse_presences: DictionaryDirectoryVersePresenceRow
   dictionary_verse_links: DictionaryVerseLinkRow

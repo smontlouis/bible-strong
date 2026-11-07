@@ -57,6 +57,29 @@ RESOURCE_PUBLICATION_ROOTS="/path/to/ordinary:/path/to/strong:/path/to/interline
   RESOURCE_API_PORT=8787 yarn resources:dev
 ```
 
+### Build the library search index
+
+The study assistant searches commentaries, dictionaries, Nave, the timeline and the people and
+places profiles by meaning and by words ([ADR-0103](../../docs/adr/0103-search-the-library-by-meaning-for-the-assistant.md)).
+The index lives in `library_passages` and follows the active publications. Build or refresh it
+after migrating, and after every republication of one of these resources:
+
+```bash
+yarn workspace @bible-strong/resource-service topics:embeddings:dev   # terminal 1, remote Workers AI
+yarn workspace @bible-strong/resource-service library:index --dry-run # passages and characters only
+yarn workspace @bible-strong/resource-service library:index           # embeds what changed
+```
+
+`--corpus commentary,dictionary,nave,timeline,entity` and `--identity commentary:calvin:en`
+narrow a run. A first load of the full library is faster with `--rebuild-vector-index`, which
+drops the HNSW index during the load and builds it at the end. A run embeds only passages whose
+text changed and deletes those that disappeared; it writes `.local/library-index-report.json`.
+Point `RESOURCE_DATABASE_URL` at Neon (see "Apply a schema migration") to index production.
+
+The search is not a public route. The Worker's main module, `src/runtime/entry.ts`, exports the
+`LibrarySearch` RPC entrypoint next to the public Worker; the assistant binds to it with
+`"entrypoint": "LibrarySearch"`.
+
 ## Resource Studio handoff
 
 The Resource service never scans Resource Studio's working files. The handoff input is
@@ -342,7 +365,8 @@ HTTP application loads and that Hyperdrive reaches Neon.
 ### Worker start-up
 
 Cloudflare starts more isolates of the Worker when requests arrive together, and each new
-isolate evaluates the entry module `src/runtime/worker.ts` with everything it imports
+isolate evaluates the main module `src/runtime/entry.ts` (the public Worker of
+`src/runtime/worker.ts` and the `LibrarySearch` entrypoint) with everything it imports
 statically before it answers its first request, a preflight or a cached read included. The
 entry therefore imports only what a cached answer needs: CORS, the limiters, the edge cache,
 artifact delivery and the catalog. Effect, the HTTP application, Kysely, pg and the search

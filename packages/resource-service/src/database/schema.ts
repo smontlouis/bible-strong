@@ -23,6 +23,18 @@ const vector = customType<{ data: number[]; driverData: string; config: { dimens
   fromDriver: value => value.slice(1, -1).split(',').filter(Boolean).map(Number),
 })
 
+// Half-precision vectors halve the storage and the HNSW index of the library search (ADR-0103).
+const halfvec = customType<{ data: number[]; driverData: string; config: { dimensions: number } }>({
+  dataType: config => `halfvec(${config!.dimensions})`,
+  toDriver: value => `[${value.join(',')}]`,
+  fromDriver: value => value.slice(1, -1).split(',').filter(Boolean).map(Number),
+})
+
+// Written at index time with the text search configuration of the passage language.
+const tsvector = customType<{ data: string; driverData: string }>({
+  dataType: () => 'tsvector',
+})
+
 export type ResourceProvenance = {
   generator?: string
   source: string
@@ -337,6 +349,54 @@ export const thematicImportRuns = pgTable(
     report: jsonb('report').$type<Record<string, unknown>>().notNull(),
   },
   table => [index('thematic_import_runs_completed').on(table.completed_at)]
+)
+
+/**
+ * The library search index (ADR-0103): passages of the active commentaries, dictionaries,
+ * Nave, timeline and people profiles, with a half-precision vector and the lexical vector of
+ * their language. Rows follow their publication: a republication deletes them by cascade and
+ * the next index run writes the new ones, reusing a vector whose input did not change.
+ */
+export const libraryPassages = pgTable(
+  'library_passages',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    passage_key: text('passage_key').notNull(),
+    corpus: text('corpus').notNull(),
+    language: text('language').notNull(),
+    work: text('work').notNull(),
+    work_title: text('work_title').notNull(),
+    tradition: text('tradition'),
+    tags: jsonb('tags').$type<string[]>().notNull(),
+    title: text('title').notNull(),
+    heading: text('heading').notNull(),
+    book: integer('book'),
+    chapter: integer('chapter'),
+    verse_start: integer('verse_start'),
+    verse_end: integer('verse_end'),
+    part: integer('part').notNull(),
+    content: text('content').notNull(),
+    target: jsonb('target').$type<Record<string, string | number>>().notNull(),
+    model: text('model').notNull(),
+    contract: text('contract').notNull(),
+    input_sha256: text('input_sha256').notNull(),
+    embedding: halfvec('embedding', { dimensions: 1024 }).notNull(),
+    search_vector: tsvector('search_vector').notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'library_passages_primary',
+      columns: [table.publication_id, table.passage_key],
+    }),
+    index('library_passages_cosine_hnsw')
+      .using('hnsw', table.embedding.op('halfvec_cosine_ops'))
+      .with({ m: 16, ef_construction: 64 }),
+    index('library_passages_search_vector').using('gin', table.search_vector),
+    index('library_passages_scope').on(table.corpus, table.language, table.work),
+    index('library_passages_chapter').on(table.book, table.chapter),
+  ]
 )
 
 export const commentaryVerses = pgTable(

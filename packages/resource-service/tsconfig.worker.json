@@ -5,7 +5,8 @@
   },
   "include": [
     "worker-configuration.d.ts",
-    "src/runtime/worker.ts"
+    "src/runtime/worker.ts",
+    "src/runtime/entry.ts"
   ],
   "exclude": ["node_modules"]
 }

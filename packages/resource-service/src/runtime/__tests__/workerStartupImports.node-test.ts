@@ -6,7 +6,9 @@ import { describe, it } from 'node:test'
 import ts from 'typescript'
 
 const packageRoot = path.resolve(__dirname, '../../..')
-const entry = path.join(packageRoot, 'src/runtime/worker.ts')
+// The module Cloudflare loads (`main` in wrangler.jsonc): the public Worker and its entrypoints.
+const entry = path.join(packageRoot, 'src/runtime/entry.ts')
+const worker = path.join(packageRoot, 'src/runtime/worker.ts')
 
 type ModuleImports = { static: string[]; dynamic: string[] }
 
@@ -93,19 +95,24 @@ describe('Resource Worker start-up', () => {
   it('starts without Effect, the HTTP application, the database client and search', () => {
     const { files, packages } = startupGraph()
 
-    // `jose` verifies the attestation of plain Offline copies and costs nothing measurable.
-    assert.deepEqual(packages, ['jose'])
+    // `jose` verifies the attestation of plain Offline copies and costs nothing measurable;
+    // `cloudflare:workers` is the runtime's own module for the LibrarySearch entrypoint.
+    assert.deepEqual(packages, ['cloudflare:workers', 'jose'])
     for (const file of files) {
       assert.doesNotMatch(
         file,
-        /^src\/(?:domain|repositories|database|analytics)\/|^src\/http\/(?:app|api|problems)\.ts$|^src\/runtime\/(?:resourceOrigin|searchAnalyticsEngine)\.ts$/,
+        /^src\/(?:domain|repositories|database|analytics)\/|^src\/http\/(?:app|api|problems)\.ts$|^src\/runtime\/(?:resourceOrigin|librarySearchOrigin|searchAnalyticsEngine)\.ts$/,
         `${file} is loaded when the Worker starts`
       )
     }
   })
 
   it('loads the HTTP application and the database client only on demand', () => {
-    assert.deepEqual(importsOf(entry).dynamic, ['./resourceOrigin'])
+    assert.deepEqual(importsOf(worker).dynamic, ['./resourceOrigin'])
+    assert.deepEqual(
+      importsOf(path.join(packageRoot, 'src/runtime/librarySearchEntrypoint.ts')).dynamic,
+      ['./librarySearchOrigin']
+    )
     const origin = importsOf(path.join(packageRoot, 'src/runtime/resourceOrigin.ts')).static
     assert.equal(origin.includes('../http/app'), true)
     assert.equal(origin.includes('../database/hyperdriveDatabase'), true)
