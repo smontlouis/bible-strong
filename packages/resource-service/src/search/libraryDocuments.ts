@@ -259,6 +259,24 @@ export const commentaryWork = (collection: string) => {
   }
 }
 
+/**
+ * Works left out of the library search (ADR-0106): the Ellen G. White writings. Adventist
+ * understandings come from the Bible texts, the Adventist commentary and studies.
+ */
+export const LIBRARY_EXCLUDED_WORKS: readonly string[] = ['egw-writings']
+
+/**
+ * Parts of a section left out of the index: the « Ellen G. White Comments » that close the
+ * sections of the Seventh-day Adventist Bible Commentary, under their own heading.
+ */
+const SECTION_CUTS: Record<string, RegExp> = {
+  sdabc: /<h[1-6][^>]*>\s*Ellen G\. White(?:\s+Comments)?\s*<\/h[1-6]>[\s\S]*$/iu,
+}
+
+/** The HTML of a section as the index reads it. */
+export const indexedSectionContent = (collection: string, content: string) =>
+  SECTION_CUTS[collection] ? content.replace(SECTION_CUTS[collection], '') : content
+
 export const commentaryPassages = (
   publication: CommentaryPublication,
   section: CommentarySectionRow
@@ -275,7 +293,7 @@ export const commentaryPassages = (
   )
   const tradition = [work.tradition, ...work.tags].filter(Boolean).join(', ')
   const heading = `${work.shortName}${tradition ? ` (${tradition})` : ''}, ${LABELS[language].commentary} ${title}`
-  return pieces(htmlToPlainText(section.content)).map((content, part) => ({
+  return pieces(htmlToPlainText(indexedSectionContent(publication.collection, section.content))).map((content, part) => ({
     passageKey: `${section.id}#${part}`,
     corpus: 'commentary',
     language,

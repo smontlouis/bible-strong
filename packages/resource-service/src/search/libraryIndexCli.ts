@@ -7,13 +7,15 @@
 // --concurrency 4, --batch 50, --writers 4 (database connections that write batches),
 // --refresh-lexemes (count the lexemes even when no passage changed; a run that changes
 // passages always does). RESOURCE_DATABASE_URL picks the database (local by default);
-// RESOURCE_LIBRARY_EMBEDDING_URL the embedding endpoint (the development Worker by default).
+// RESOURCE_LIBRARY_EMBEDDING_URL the embedding endpoint (the development Worker by default);
+// with CLOUDFLARE_ACCOUNT_ID passages are embedded through the Workers AI REST API instead.
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { indexLibrary } from '../repositories/libraryIndexRepository'
 import { LIBRARY_CORPORA, type LibraryCorpus } from './libraryDocuments'
 import { makeHttpLibraryEmbeddingProvider } from './libraryEmbedding'
+import { makeRestLibraryEmbeddingProvider } from './libraryEmbeddingRest'
 
 const option = (name: string) => {
   const index = process.argv.indexOf(`--${name}`)
@@ -32,10 +34,12 @@ const main = async () => {
   const dryRun = process.argv.includes('--dry-run')
   const started = Date.now()
   const reports = await indexLibrary({
-    provider: makeHttpLibraryEmbeddingProvider(
-      process.env.RESOURCE_LIBRARY_EMBEDDING_URL ?? 'http://127.0.0.1:8791',
-      { maxAttempts: 10, maxStatusAttempts: 3 }
-    ),
+    provider: process.env.CLOUDFLARE_ACCOUNT_ID
+      ? makeRestLibraryEmbeddingProvider(process.env.CLOUDFLARE_ACCOUNT_ID, { maxAttempts: 4 })
+      : makeHttpLibraryEmbeddingProvider(
+          process.env.RESOURCE_LIBRARY_EMBEDDING_URL ?? 'http://127.0.0.1:8791',
+          { maxAttempts: 10, maxStatusAttempts: 3 }
+        ),
     corpora: corpora as LibraryCorpus[] | undefined,
     identities: list(option('identity')),
     dryRun,

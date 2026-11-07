@@ -334,7 +334,42 @@ describe('Library search index', { skip: !runIntegration }, () => {
           content: '<p>Le règne de mille ans selon les millénaristes.</p>',
         })
         .execute()
+      // The Ellen G. White writings stay out of the search.
+      const [{ id: egw }] = await database
+        .insertInto('resource_publications')
+        .values({
+          resource_identity: 'commentary:egw-writings:fr',
+          resource_kind: 'commentary',
+          revision: 'egw-fr-r1',
+          language: 'fr',
+          status: 'active',
+          canonical_sha256: 'a'.repeat(64),
+          offline_artifact_sha256: 'a'.repeat(64),
+          provenance: { source: 'integration-test', imported_at: new Date(0).toISOString() },
+          rights: { holder: 'integration-test', online: true, offline: true },
+          metadata: {},
+          activated_at: new Date(0),
+        })
+        .returning('id')
+        .execute()
+      await database
+        .insertInto('commentary_reading_sections')
+        .values({
+          publication_id: egw,
+          id: 'egw-writings-fr-66-20-1',
+          book: 66,
+          chapter: 20,
+          range_start_verse: 1,
+          range_end_verse: 6,
+          excerpt: 'Le millénium',
+          content: '<p>Le millénium selon une vision.</p>',
+        })
+        .execute()
       await indexLibrary({ connectionString: isolated.connectionString, provider })
+      assert.equal(
+        (await database.selectFrom('library_passages').select('work').where('work', '=', 'egw-writings').execute()).length,
+        0
+      )
       const article = (slug: string, title: string, body: string) => ({
         url: `https://adventistbiblicalresearch.org/articles/${slug}`,
         slug,
