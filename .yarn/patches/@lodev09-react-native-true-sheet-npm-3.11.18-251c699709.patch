@@ -1,5 +1,5 @@
 diff --git a/ios/TrueSheetView.mm b/ios/TrueSheetView.mm
-index cfd1c37..946b51e 100644
+index 948a662..a719512 100644
 --- a/ios/TrueSheetView.mm
 +++ b/ios/TrueSheetView.mm
 @@ -157,6 +157,15 @@ using namespace facebook::react;
@@ -19,7 +19,7 @@ index cfd1c37..946b51e 100644
    [super updateProps:props oldProps:oldProps];
  
 diff --git a/ios/core/TrueSheetKeyboardObserver.mm b/ios/core/TrueSheetKeyboardObserver.mm
-index 6aed44b1fe7b837e3bac9355b4abd8c9a87e139e..af15da92021b842595c4fff92282992cbe9bc9f7 100644
+index 6ba607e..ca764c1 100644
 --- a/ios/core/TrueSheetKeyboardObserver.mm
 +++ b/ios/core/TrueSheetKeyboardObserver.mm
 @@ -81,6 +81,14 @@
@@ -36,4 +36,4 @@ index 6aed44b1fe7b837e3bac9355b4abd8c9a87e139e..af15da92021b842595c4fff92282992c
 +
    _currentHeight = keyboardHeight;
  
-   for (id<TrueSheetKeyboardObserverDelegate> delegate in _delegates) {
+   if (keyboardHeight > 0) {

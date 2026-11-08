@@ -26,7 +26,8 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text, { type TextProps } from '~common/ui/Text'
 import { useTheme } from '~themes/ThemeProvider'
 import { WithoutWorkspaceHeaderInset } from '~features/app-switcher/workspaceHeaderInset'
-export type SheetSnapPoint = NonNullable<TrueSheetProps['detents']>[number]
+// The app sizes its sheets by content or by fraction; TrueSheet's `peek` detent is left out.
+export type SheetSnapPoint = Exclude<NonNullable<TrueSheetProps['detents']>[number], 'peek'>
 export type SheetScrollableOptions = NonNullable<TrueSheetProps['scrollableOptions']>
 
 type SheetContextValue = {

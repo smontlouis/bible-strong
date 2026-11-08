@@ -2549,7 +2549,7 @@ __metadata:
     "@internationalized/date": "npm:^3.12.4"
     "@invertase/react-native-apple-authentication": "npm:^2.3.0"
     "@legendapp/list": "npm:^2.0.19"
-    "@lodev09/react-native-true-sheet": "patch:@lodev09/react-native-true-sheet@npm%3A3.10.1#~/.yarn/patches/@lodev09-react-native-true-sheet-npm-3.10.1-b130d06fd7.patch"
+    "@lodev09/react-native-true-sheet": "patch:@lodev09/react-native-true-sheet@npm%3A3.11.18#~/.yarn/patches/@lodev09-react-native-true-sheet-npm-3.11.18-251c699709.patch"
     "@lottiefiles/dotlottie-react": "npm:^0.13.5"
     "@native-html/render": "npm:^1.0.3"
     "@notifee/react-native": "npm:^7.8.2"
@@ -8374,49 +8374,55 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lodev09/react-native-true-sheet@npm:3.10.1":
-  version: 3.10.1
-  resolution: "@lodev09/react-native-true-sheet@npm:3.10.1"
+"@lodev09/react-native-true-sheet@npm:3.11.18":
+  version: 3.11.18
+  resolution: "@lodev09/react-native-true-sheet@npm:3.11.18"
   peerDependencies:
-    "@gorhom/bottom-sheet": ">=5"
-    "@react-navigation/native": ">=7"
+    "@radix-ui/react-dialog": ">=1"
+    "@radix-ui/react-presence": ">=1"
+    "@react-navigation/core": ">=7"
     react: "*"
     react-native: "*"
     react-native-reanimated: ">=4"
     react-native-worklets: "*"
   peerDependenciesMeta:
-    "@gorhom/bottom-sheet":
+    "@radix-ui/react-dialog":
       optional: true
-    "@react-navigation/native":
+    "@radix-ui/react-presence":
+      optional: true
+    "@react-navigation/core":
       optional: true
     react-native-reanimated:
       optional: true
     react-native-worklets:
       optional: true
-  checksum: 10c0/73716d01b0b7a703f30ef2aaf751dc7fa703cf918026e814c24f85e03ea09e6fdf9eafd57f5373a322772dbb3517194eebf058ff1f8f82a5506f3d048ed4520c
+  checksum: 10c0/e42d284e9c3d2d2a129acbd81bba8375ca3329d12b81902962f6812829195c38401111dc8a116e07ca0a76173aca01f6c565f45775e72658d7fbfca6116f8546
   languageName: node
   linkType: hard
 
-"@lodev09/react-native-true-sheet@patch:@lodev09/react-native-true-sheet@npm%3A3.10.1#~/.yarn/patches/@lodev09-react-native-true-sheet-npm-3.10.1-b130d06fd7.patch":
-  version: 3.10.1
-  resolution: "@lodev09/react-native-true-sheet@patch:@lodev09/react-native-true-sheet@npm%3A3.10.1#~/.yarn/patches/@lodev09-react-native-true-sheet-npm-3.10.1-b130d06fd7.patch::version=3.10.1&hash=c20942"
+"@lodev09/react-native-true-sheet@patch:@lodev09/react-native-true-sheet@npm%3A3.11.18#~/.yarn/patches/@lodev09-react-native-true-sheet-npm-3.11.18-251c699709.patch":
+  version: 3.11.18
+  resolution: "@lodev09/react-native-true-sheet@patch:@lodev09/react-native-true-sheet@npm%3A3.11.18#~/.yarn/patches/@lodev09-react-native-true-sheet-npm-3.11.18-251c699709.patch::version=3.11.18&hash=61a40a"
   peerDependencies:
-    "@gorhom/bottom-sheet": ">=5"
-    "@react-navigation/native": ">=7"
+    "@radix-ui/react-dialog": ">=1"
+    "@radix-ui/react-presence": ">=1"
+    "@react-navigation/core": ">=7"
     react: "*"
     react-native: "*"
     react-native-reanimated: ">=4"
     react-native-worklets: "*"
   peerDependenciesMeta:
-    "@gorhom/bottom-sheet":
+    "@radix-ui/react-dialog":
       optional: true
-    "@react-navigation/native":
+    "@radix-ui/react-presence":
+      optional: true
+    "@react-navigation/core":
       optional: true
     react-native-reanimated:
       optional: true
     react-native-worklets:
       optional: true
-  checksum: 10c0/c4284e9e860a6361edc52ab3ae662bf0d8f93fdc134ce372eb2100a91e969862e10d423a03c11cf04bcfa9ce8be7931e6909b3ab79ccb1aa622595991511434f
+  checksum: 10c0/213015657a5bd99df7805f297d088debe40bfb31d3c01e936057e2b07a1aef4583420b2d1de88275419f158e9435c4d935b35d564498646dea1299529feedc14
   languageName: node
   linkType: hard
 
