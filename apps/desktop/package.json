@@ -5,7 +5,7 @@
   "description": "Bible Strong for macOS, Windows and Linux: the Expo web export in a Tauri shell, with Offline copies.",
   "scripts": {
     "web": "node scripts/export-web.mjs",
-    "web:dev": "cd ../expo && BIBLE_STRONG_DESKTOP=1 EXPO_PUBLIC_DESKTOP=1 EXPO_PUBLIC_DESKTOP_SIGN_IN_URL=http://localhost:9090/desktop-sign-in/ yarn expo start --web --port 9090",
+    "web:dev": "cd ../expo && BIBLE_STRONG_DESKTOP=1 EXPO_PUBLIC_DESKTOP=1 yarn expo start --web --port 9090",
     "dev": "node scripts/dev.mjs",
     "build": "node scripts/build.mjs",
     "build:appstore": "node scripts/build.mjs --appstore",
