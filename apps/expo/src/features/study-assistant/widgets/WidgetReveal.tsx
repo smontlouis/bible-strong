@@ -3,9 +3,7 @@ import { StyleSheet } from 'react-native'
 import Animated, { cubicBezier, useReducedMotion } from 'react-native-reanimated'
 import Box from '~common/ui/Box'
 import { useTheme } from '~themes/ThemeProvider'
-
-/** Time a card takes to come in; the answer waits `answerPace.widgetPauseMs` for it. */
-const REVEAL_MS = 700
+import { widgetRevealMs } from '../answerReveal'
 
 /**
  * A card placed in an answer being written comes in as the text does, from the top down: a
@@ -23,6 +21,8 @@ export default function WidgetReveal({
   const reducedMotion = useReducedMotion()
   // Decided once: a card keeps its place in the tree whatever happens next.
   const [covered] = useState(animate && !reducedMotion)
+  // Shorter once the answer is written fast (`answerPace.widgetRevealMs`).
+  const [duration] = useState(widgetRevealMs)
   return (
     <Box>
       {children}
@@ -38,7 +38,7 @@ export default function WidgetReveal({
                 from: { transform: [{ scaleY: 1 }] },
                 to: { transform: [{ scaleY: 0 }] },
               },
-              animationDuration: REVEAL_MS,
+              animationDuration: duration,
               // Even, like lines being written, rather than a quick ease-out.
               animationTimingFunction: cubicBezier(0.45, 0, 0.55, 1),
               animationFillMode: 'forwards',

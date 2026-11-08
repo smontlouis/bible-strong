@@ -21,7 +21,7 @@ if (__DEV__) {
 
 let played = 0
 
-/** Streams the next answer about as the model does: a pause to search, then fast, uneven chunks. */
+/** Streams the next answer about as the model does: two resources read, then fast, uneven chunks. */
 export const scriptedRequest =
   (answers: ScriptedAnswer[]): ConversationRequest =>
   async (_request, signal, emit) => {
@@ -40,7 +40,16 @@ export const scriptedRequest =
         )
       })
     emit({ type: 'status', message: 'resources' })
-    await wait(800)
+    // The resources it reads first, as the tool list shows them.
+    for (const [name, target] of [
+      ['search_library', { query: 'réponse scriptée' }],
+      ['read_passage', { reference: 'Philippiens 4:6-7' }],
+    ] as const) {
+      const tool = { callId: `scripted-${name}`, name, request: JSON.stringify(target) }
+      emit({ type: 'tool', ...tool, result: '', state: 'running' })
+      await wait(500)
+      emit({ type: 'tool', ...tool, result: 'ok', state: 'complete' })
+    }
     widgets.forEach(widget => emit({ type: 'widget', widget }))
     for (let index = 0; index < answer.length; ) {
       const size = 6 + Math.floor(Math.random() * 30)

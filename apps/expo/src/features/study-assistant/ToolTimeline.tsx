@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ActivityIndicator } from 'react-native'
+import Animated from 'react-native-reanimated'
 import { useTranslation } from 'react-i18next'
 import type { ToolActivity } from '@bible-strong/ai-contract/contract'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
@@ -24,25 +25,35 @@ const iconFor = (tool: ToolActivity) => {
   return 'tool' as const
 }
 
-/** Resources the assistant consulted: open while it works, folded once it has answered. */
+/**
+ * Resources the assistant consulted: open while it searches, folded as soon as its answer
+ * starts (2026-11-08), and open again on a tap.
+ */
 export default function ToolTimeline({
   tools,
   running,
+  writing,
 }: {
   tools: ToolActivity[]
+  /** The run is going: a resource still being read shows its activity. */
   running: boolean
+  /** The answer has started to show. */
+  writing: boolean
 }) {
   const { t } = useTranslation()
   const { colors } = useTheme()
   const [expanded, setExpanded] = useState(false)
+  // Measured once laid out, so the list folds and unfolds instead of jumping.
+  const [listHeight, setListHeight] = useState<number>()
   const active = running && tools.some(tool => tool.state === 'running')
-  const open = running || expanded
+  const searching = running && !writing
+  const open = searching || expanded
   return (
     <Box className="mb-3">
       <TouchableBox
         accessibilityRole="button"
         accessibilityState={{ expanded: open }}
-        disabled={running}
+        disabled={searching}
         onPress={() => setExpanded(value => !value)}
         className="flex-row items-center gap-2 py-1"
       >
@@ -54,12 +65,25 @@ export default function ToolTimeline({
         <Text className="text-grey text-[13px]">
           {active ? t('assistant.searching') : t('assistant.tools.title', { count: tools.length })}
         </Text>
-        {!running && (
+        {!searching && (
           <FeatherIcon name={open ? 'chevron-up' : 'chevron-down'} size={14} color="grey" />
         )}
       </TouchableBox>
-      {open && (
-        <Box className="ml-[6px] mt-1 gap-2 border-l border-border pl-3">
+      <Animated.View
+        accessibilityElementsHidden={!open}
+        importantForAccessibility={open ? 'auto' : 'no-hide-descendants'}
+        style={{
+          overflow: 'hidden',
+          height: open ? listHeight : 0,
+          transitionProperty: 'height',
+          transitionDuration: 220,
+          transitionTimingFunction: 'ease-out',
+        }}
+      >
+        <Box
+          onLayout={event => setListHeight(event.nativeEvent.layout.height)}
+          className="ml-[6px] mt-1 gap-2 border-l border-border pl-3"
+        >
           {tools.map(tool => {
             const failed = toolActivityFailed(tool)
             return (
@@ -78,7 +102,7 @@ export default function ToolTimeline({
             )
           })}
         </Box>
-      )}
+      </Animated.View>
     </Box>
   )
 }

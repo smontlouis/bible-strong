@@ -172,7 +172,9 @@ export default function AssistantThread() {
   const [reserve, setReserve] = useState(0)
   const [jumpVisible, setJumpVisible] = useState(false)
   // A reader at the end stays there when the keyboard (or a longer input) pushes it up.
-  const atEnd = useRef(true)
+  // Unknown until the first scroll or layout: the composer measuring itself on opening is not a
+  // keyboard pushing a reader at the end.
+  const atEnd = useRef(false)
   const stickUntil = useRef(0)
   const previousPadding = useRef(paddingBottom)
   const cellLayout = useRef((_id: string, _layout: CellLayout) => {})
@@ -215,6 +217,8 @@ export default function AssistantThread() {
   }
   const tryAnchor = () => {
     const target = anchor.current
+    // An opened conversation is settled for a moment only, whatever happens later.
+    if (target?.pending && !target.run && Date.now() > target.settleUntil) target.pending = false
     const { viewport, content, scrollY } = metrics.current
     if (!target || (!target.pending && target.holdFrom === undefined) || !viewport || !content)
       return
@@ -233,7 +237,7 @@ export default function AssistantThread() {
       if (target.run) {
         target.pending = false
         target.holdFrom = Date.now() + (target.animated ? 450 : 0)
-      } else if (Date.now() > target.settleUntil) target.pending = false
+      }
       return
     }
     // Only ever back up to the question, never down after the text.
@@ -241,6 +245,9 @@ export default function AssistantThread() {
       scrollTo({ offset, animated: false })
   }
   const stickToEnd = () => {
+    // A question being settled on, or held at the top, keeps its place.
+    const target = anchor.current
+    if (target?.pending || target?.holdFrom !== undefined) return
     if (Date.now() > stickUntil.current) return
     const end = contentEnd()
     const { viewport, content, scrollY } = metrics.current

@@ -106,7 +106,7 @@ export function AssistantMessage({
   const placed = placedWidgetIds(text, widgetIds)
   return (
     <MessagePrimitive.Root className="mb-6">
-      {!!tools.length && <ToolTimeline tools={tools} running={streaming} />}
+      {!!tools.length && <ToolTimeline tools={tools} running={streaming} writing={!!text.trim()} />}
       <MessagePrimitive.Parts>
         {({ part }) => {
           if (part.type === 'text')

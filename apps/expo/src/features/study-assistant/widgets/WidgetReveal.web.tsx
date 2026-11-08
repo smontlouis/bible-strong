@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import { widgetRevealMs } from '../answerReveal'
 import './widgets.css'
 
 /**
@@ -15,9 +16,12 @@ export default function WidgetReveal({
 }) {
   // Decided once: the card keeps its place in the tree when the animation ends.
   const [running, setRunning] = useState(animate)
+  // Shorter once the answer is written fast (`answerPace.widgetRevealMs`).
+  const [duration] = useState(widgetRevealMs)
   return (
     <div
       className={running ? 'bs-widget-reveal' : undefined}
+      style={running ? { animationDuration: `${duration}ms` } : undefined}
       onAnimationEnd={event => {
         if (event.target === event.currentTarget) setRunning(false)
       }}

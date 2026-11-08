@@ -18,12 +18,20 @@ import {
   toolActivityTarget,
 } from './toolActivity'
 
+/**
+ * Resources the assistant consulted: open while it searches, folded as soon as its answer
+ * starts (2026-11-08), and open again on a click.
+ */
 export default function ToolTimeline({
   tools,
   running,
+  writing,
 }: {
   tools: ToolActivity[]
+  /** The run is going: a resource still being read shows its activity. */
   running: boolean
+  /** The answer has started to show. */
+  writing: boolean
 }) {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
@@ -55,7 +63,7 @@ export default function ToolTimeline({
       steps={steps}
       visibleSteps={steps.length}
       streaming={running && tools.some(tool => tool.state === 'running')}
-      open={running || expanded}
+      open={(running && !writing) || expanded}
       onOpenChange={setExpanded}
       restingLabel={t('assistant.tools.title', { count: tools.length })}
       activeLabel={t('assistant.searching')}

@@ -1,8 +1,8 @@
-import { AnswerReveal, advanceReveal, answerPace, startCursor } from '../answerReveal'
+import { AnswerReveal, advanceReveal, answerPace, paceAt, startCursor } from '../answerReveal'
 import type { Conversation, LocalMessage } from '../conversations'
 import { WIDGET_LINK_PREFIX } from '../widgetSegments'
 
-const pace = { ...answerPace, charactersPerSecond: 10, backlogSpeedup: 0 }
+const pace = { ...answerPace, slowCharactersPerSecond: 10, fastCharactersPerSecond: 10 }
 const card = (title: string, id: string) => `[${title}](${WIDGET_LINK_PREFIX}${id})`
 const none = new Set<string>()
 
@@ -15,6 +15,29 @@ it('shows whole words at the pace, never part of one', () => {
   expect(answer.text.slice(0, cursor.index)).toBe('Un deux')
   cursor = advanceReveal(cursor, answer, 800, 5000, pace)
   expect(cursor.index).toBe(answer.text.length)
+})
+
+it('writes the start slowly, then speeds up without a jolt', () => {
+  const { slowStartMs, rampMs, slowCharactersPerSecond, fastCharactersPerSecond } = answerPace
+  expect(paceAt(0)).toBe(slowCharactersPerSecond)
+  expect(paceAt(slowStartMs)).toBe(slowCharactersPerSecond)
+  const middle = paceAt(slowStartMs + rampMs / 2)
+  expect(middle).toBeGreaterThan(slowCharactersPerSecond)
+  expect(middle).toBeLessThan(fastCharactersPerSecond)
+  expect(paceAt(slowStartMs + rampMs)).toBe(fastCharactersPerSecond)
+  expect(paceAt(60000)).toBe(fastCharactersPerSecond)
+})
+
+it('counts the slow start from the first word, and keeps cards short once fast', () => {
+  const text = `Début.\n\n${card('Jean 3:16', 'w1')}\n\nSuite.`
+  const answer = { text, widgetIds: new Set(['w1']), streaming: false }
+  // Nothing written yet: the time before the first word does not count.
+  expect(advanceReveal(startCursor, answer, 0, 1000).writtenMs).toBe(0)
+  const started = { ...startCursor, index: 6 }
+  const slow = advanceReveal(started, answer, 0, 100)
+  expect(slow.pausedUntil).toBe(answerPace.widgetPauseMs.slow)
+  const fast = advanceReveal({ ...started, writtenMs: answerPace.slowStartMs }, answer, 0, 100)
+  expect(fast.pausedUntil).toBe(answerPace.widgetPauseMs.fast)
 })
 
 it('reads a link by its words, not by its address', () => {
@@ -34,10 +57,10 @@ it('shows a card link at once, then waits for the card to come in', () => {
   const answer = { text, widgetIds: new Set(['w4']), streaming: false }
   let cursor = advanceReveal(startCursor, answer, 0, 2000, pace)
   expect(text.slice(0, cursor.index)).toBe(`Paul écrit :\n\n${card('Philippiens 4:6', 'w4')}`)
-  expect(cursor.pausedUntil).toBe(answerPace.widgetPauseMs)
+  expect(cursor.pausedUntil).toBe(answerPace.widgetPauseMs.slow)
   // Nothing moves during the pause, whatever time is allowed.
   expect(advanceReveal(cursor, answer, 100, 5000, pace)).toBe(cursor)
-  cursor = advanceReveal(cursor, answer, answerPace.widgetPauseMs, 2000, pace)
+  cursor = advanceReveal(cursor, answer, answerPace.widgetPauseMs.slow, 2000, pace)
   expect(cursor.index).toBe(text.length)
 })
 

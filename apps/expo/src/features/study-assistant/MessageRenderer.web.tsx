@@ -99,7 +99,9 @@ export function AssistantMessage({
   return (
     <MessagePrimitive.Root asChild>
       <article className="bs-assistant-message bs-assistant-message-assistant">
-        {!!tools.length && <ToolTimeline tools={tools} running={streaming} />}
+        {!!tools.length && (
+          <ToolTimeline tools={tools} running={streaming} writing={!!text.trim()} />
+        )}
         <MessagePrimitive.Parts>
           {({ part }) => {
             if (part.type === 'text')

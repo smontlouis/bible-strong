@@ -44,16 +44,19 @@ Bible references as links in the source itself (code, existing links and a link 
 streamed are left alone).
 
 Reading pace (2026-11-08, both presentations). The model writes far faster than anyone reads, so
-`answerReveal.ts` sits between the run and the screen: the answer is shown word by word at
-`answerPace.charactersPerSecond` (50, a little faster than silent reading), speeding up gently
-when a long answer piles up (`backlogSpeedup`). The received text is never held back: it is
-saved as soon as it is complete, only the screen waits, and the session counts as busy until the
-answer is fully shown. A card link is shown at once and the text then waits `widgetPauseMs` while
-the card comes in from the top down (`widgets/WidgetReveal`: a cover sliding off on native, a
-`clip-path` on the web); a link that may still become a card is never shown in halves, and a card
-waits for its place in the text instead of showing at the end of the message. Stop shows at once
-everything received, and so does a new question; an error or an interruption shows what was
-received without waiting; reduced motion turns the pace off. Tune the pace in `answerPace` only.
+`answerReveal.ts` sits between the run and the screen and shows the answer word by word: slowly
+for its first seconds (`answerPace.slowCharactersPerSecond` for `slowStartMs`, counted from the
+first word, card pauses left out), then fast after a smooth ramp (`fastCharactersPerSecond`), so a
+long answer takes about ten seconds rather than a minute. The received text is never held back: it
+is saved as soon as it is complete, only the screen waits, and the session counts as busy until the
+answer is fully shown. A card link is shown at once and the text then waits while the card comes
+in from the top down (`widgets/WidgetReveal`: a cover sliding off on native, a `clip-path` on the
+web), longer at the slow pace than at the fast one (`widgetPauseMs`, `widgetRevealMs`); a link that
+may still become a card is never shown in halves, and a card waits for its place in the text
+instead of showing at the end of the message. Stop shows at once everything received, and so does
+a new question; an error or an interruption shows what was received without waiting; reduced
+motion turns the pace off. Tune it in `answerPace` only. The tool activity is open while the
+assistant searches and folds as soon as the first word shows; a tap opens it again.
 
 Scrolling (2026-11-08, both presentations). The page never follows the text being written. A
 question just asked rises to the top of the page and its answer is written below it: on the web

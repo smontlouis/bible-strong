@@ -3,24 +3,49 @@ import { mayBecomeWidgetLink, widgetLinkAt } from './widgetSegments'
 
 /**
  * How fast an answer is shown (2026-11-08). The model writes far faster than anyone reads, so
- * the answer is revealed word by word at a steady pace, whatever the network does. The
- * received text stays whole: it is saved as soon as it is complete and only the screen waits.
+ * the answer is revealed word by word, whatever the network does: slowly while the reader
+ * takes in its opening, then fast, since a long answer at reading pace kept them waiting a
+ * minute. The received text stays whole: it is saved as soon as it is complete and only the
+ * screen waits.
  */
 export const answerPace = {
-  /** Visible characters shown per second. Silent reading runs at about 20–25. */
-  charactersPerSecond: 50,
-  /**
-   * Extra speed for each character still waiting, so a long answer does not keep the reader
-   * waiting minutes: 0.02 adds 20 characters per second for 1 000 waiting.
-   */
-  backlogSpeedup: 0.02,
-  /** Time a card is given to come in before the text goes on. */
-  widgetPauseMs: 750,
+  /** Visible characters per second at the start. Silent reading runs at about 20–25. */
+  slowCharactersPerSecond: 50,
+  /** How long the start is written slowly, from its first word, card pauses left out. */
+  slowStartMs: 3000,
+  /** Time taken to go from the slow pace to the fast one. */
+  rampMs: 1000,
+  /** Visible characters per second afterwards: a long answer in about ten seconds. */
+  fastCharactersPerSecond: 400,
+  /** Time a card is given to come in before the text goes on, at each pace. */
+  widgetPauseMs: { slow: 750, fast: 300 },
+  /** Time a card takes to come in (`widgets/WidgetReveal`), at each pace. */
+  widgetRevealMs: { slow: 700, fast: 350 },
   /** Interval of the reveal clock. */
   tickMs: 40,
 }
 
 export type AnswerPace = typeof answerPace
+
+/** Characters per second once `writtenMs` of the answer have been written. */
+export function paceAt(writtenMs: number, pace: AnswerPace = answerPace) {
+  const ramp = Math.min(1, Math.max(0, (writtenMs - pace.slowStartMs) / pace.rampMs))
+  const eased = ramp * ramp * (3 - 2 * ramp)
+  return (
+    pace.slowCharactersPerSecond +
+    (pace.fastCharactersPerSecond - pace.slowCharactersPerSecond) * eased
+  )
+}
+
+const isFast = (writtenMs: number, pace: AnswerPace) => writtenMs >= pace.slowStartMs
+
+// The pace of the answer being revealed, for the card that comes in now. One answer is
+// revealed at a time.
+let revealingFast = false
+
+/** How long a card placed now takes to come in. */
+export const widgetRevealMs = () =>
+  revealingFast ? answerPace.widgetRevealMs.fast : answerPace.widgetRevealMs.slow
 
 export type RevealCursor = {
   /** Length of the text already shown. */
@@ -29,9 +54,11 @@ export type RevealCursor = {
   budget: number
   /** Nothing moves before this time: a card is coming in. */
   pausedUntil: number
+  /** Time spent writing since the first word, card pauses left out. */
+  writtenMs: number
 }
 
-export const startCursor: RevealCursor = { index: 0, budget: 0, pausedUntil: 0 }
+export const startCursor: RevealCursor = { index: 0, budget: 0, pausedUntil: 0, writtenMs: 0 }
 
 const WORD = /\s*\S+/y
 
@@ -53,9 +80,11 @@ export function advanceReveal(
   if (now < cursor.pausedUntil) return cursor
   const { text, widgetIds, streaming } = answer
   let { index, budget } = cursor
-  const waiting = text.length - index
-  if (waiting <= 0) return { index: Math.min(index, text.length), budget: 0, pausedUntil: 0 }
-  budget += (elapsedMs / 1000) * (pace.charactersPerSecond + waiting * pace.backlogSpeedup)
+  const writtenMs = index > 0 ? cursor.writtenMs + elapsedMs : 0
+  const rate = paceAt(writtenMs, pace)
+  if (index >= text.length)
+    return { index: Math.min(index, text.length), budget: 0, pausedUntil: 0, writtenMs }
+  budget += (elapsedMs / 1000) * rate
   let held = false
   while (index < text.length) {
     WORD.lastIndex = index
@@ -71,7 +100,8 @@ export function advanceReveal(
     if (text[start] === '[') {
       const link = widgetLinkAt(text, start)
       if (link && widgetIds.has(link.id)) {
-        return { index: link.end, budget: 0, pausedUntil: now + pace.widgetPauseMs }
+        const pause = isFast(writtenMs, pace) ? pace.widgetPauseMs.fast : pace.widgetPauseMs.slow
+        return { index: link.end, budget: 0, pausedUntil: now + pause, writtenMs }
       }
       if (!link && streaming && mayBecomeWidgetLink(text.slice(start))) {
         held = true
@@ -92,8 +122,8 @@ export function advanceReveal(
     index += word.length
   }
   // Time spent waiting for the stream is not saved up: the next words would burst out.
-  if (held || index >= text.length) budget = Math.min(budget, pace.charactersPerSecond * 0.1)
-  return { index, budget, pausedUntil: 0 }
+  if (held || index >= text.length) budget = Math.min(budget, rate * 0.1)
+  return { index, budget, pausedUntil: 0, writtenMs }
 }
 
 const commonPrefixLength = (a: string, b: string) => {
@@ -168,6 +198,7 @@ export class AnswerReveal {
       this.cursor = startCursor
       this.shownText = ''
       this.flushed = false
+      revealingFast = false
     }
     // An error or an interruption shows what was received, without making the reader wait.
     if (this.instant || this.flushed || !['streaming', 'complete'].includes(answer.state))
@@ -225,6 +256,7 @@ export class AnswerReveal {
       elapsed,
       this.pace
     )
+    revealingFast = isFast(this.cursor.writtenMs, this.pace)
     if (answer.state !== 'streaming' && this.cursor.index >= answer.text.length)
       return this.finish()
     if (this.cursor.index !== before) this.render(answer)
