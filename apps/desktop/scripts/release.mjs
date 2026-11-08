@@ -57,15 +57,12 @@ if (publish) {
   if (existing && !existing.isDraft) {
     throw new Error(`${tag} is already published: raise version in apps/desktop/package.json`)
   }
-  if (existing) {
-    throw new Error(
-      `A draft ${tag} already exists: publish it with --publish, or delete it on GitHub to rebuild`
-    )
-  }
+  // A draft left by a failed run is reused: the build replaces its installers.
+  const into = existing ? `the existing draft ${tag}` : `a draft release ${tag}`
   console.log(
     draft
-      ? `Building ${tag} into a draft release (about 20 minutes).`
-      : `Building ${tag}, then publishing it to the readers (about 20 minutes).`
+      ? `Building into ${into} (about 20 minutes).`
+      : `Building into ${into}, then publishing it to the readers (about 20 minutes).`
   )
   run('desktop-release.yml', '-f', `draft=${draft}`)
 }

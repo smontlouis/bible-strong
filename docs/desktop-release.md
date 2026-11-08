@@ -46,7 +46,9 @@ password manager.
    `yarn desktop:release --publish` publishes that draft (**Desktop promote**), without
    rebuilding.
 
-The updater never goes back to an older version: a bad release is fixed by a newer one.
+When a system fails to build, nothing is published: fix it and run the same command again. The
+draft the failed run left is reused and its installers are replaced. The updater never goes back
+to an older version: a bad release is fixed by a newer one.
 
 ## Local builds
 

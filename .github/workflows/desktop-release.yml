@@ -68,6 +68,12 @@ jobs:
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     steps:
+      # Git on the Windows runners turns line endings into CRLF, which changes the archive Yarn
+      # makes of a Git dependency and fails its checksum (YN0018).
+      - name: Keep line endings as committed
+        if: runner.os == 'Windows'
+        run: git config --global core.autocrlf false
+
       - name: Check out the source
         uses: actions/checkout@v5
 
