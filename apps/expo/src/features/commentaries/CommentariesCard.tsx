@@ -3,6 +3,7 @@ import React, { useEffect, useEffectEvent, useState } from 'react'
 import { atom } from 'jotai/vanilla'
 import type { SheetRef } from '~common/sheet'
 import generateUUID from '~helpers/generateUUID'
+import i18n from '~i18n'
 import { CommentaryTab } from '../../state/tabs'
 import CommentariesTabScreen from './CommentariesTabScreen'
 import { useAtom } from 'jotai/react'
@@ -21,7 +22,7 @@ const CommentariesCard = ({
   const [onTheFlyAtom] = useState(() =>
     atom<CommentaryTab>({
       id: `commentary-${generateUUID()}`,
-      title: 'Commentaire',
+      title: i18n.t('Commentaire'),
       isRemovable: true,
       hasBackButton: true,
       type: 'commentary',

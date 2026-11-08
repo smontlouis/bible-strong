@@ -128,7 +128,7 @@ const WorkspaceSidebar = ({
               className="flex-1 flex-row items-center min-h-[40px]"
               onPress={openHome}
               accessibilityRole="button"
-              accessibilityLabel={`Bible Strong — ${t('Accueil')}`}
+              accessibilityLabel={`Bible Strong — ${t('accessibility.home')}`}
             >
               <Image
                 source={require('~assets/images/icon.png')}
@@ -278,7 +278,7 @@ const WorkspaceSidebar = ({
                                   className="overflow-hidden border-continuous flex-[1] flex-row items-center px-[8px]"
                                   onPress={openHome}
                                   accessibilityRole="button"
-                                  accessibilityLabel={t('Accueil')}
+                                  accessibilityLabel={t('accessibility.home')}
                                   accessibilityState={{ selected: activePage === 'home' }}
                                   style={{ minHeight: rowHeight }}
                                 >
@@ -295,7 +295,7 @@ const WorkspaceSidebar = ({
                                     style={labelStyle}
                                     numberOfLines={1}
                                   >
-                                    {t('Accueil')}
+                                    {t('accessibility.home')}
                                   </Text>
                                 </TouchableBox>
                               </HStack>
