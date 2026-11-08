@@ -30,9 +30,14 @@ const { version } = JSON.parse(
 )
 const tag = `desktop-v${version}`
 
+// No release of that version yet is the usual case: gh's "release not found" stays quiet.
 const existing = (() => {
   try {
-    return JSON.parse(gh('release', 'view', tag, '--repo', REPO, '--json', 'isDraft'))
+    const json = execFileSync('gh', ['release', 'view', tag, '--repo', REPO, '--json', 'isDraft'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+    return JSON.parse(json)
   } catch {
     return undefined
   }
