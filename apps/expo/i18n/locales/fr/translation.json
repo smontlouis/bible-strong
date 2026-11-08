@@ -2480,6 +2480,8 @@
   "assistant.modal.incomplete": "Réponse interrompue ou incomplète.",
   "assistant.modal.toEnd": "Aller à la fin de la réponse",
   "assistant.modal.attachContext": "Joindre {{context}} à la question",
+  "assistant.modal.followUps": "Pour aller plus loin",
+  "assistant.modal.followUpHint": "Met la question dans le champ, prête à être envoyée",
   "assistant.modal.detachContext": "Retirer {{context}} de la question",
   "assistant.modal.free": "Conversation libre",
   "assistant.modal.useContext": "Utiliser ma lecture",

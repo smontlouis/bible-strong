@@ -72,6 +72,10 @@ export function useAssistantSession({
     [progress, setProgress] = useState('')
   // The context a reader took off their question; another context comes joined again.
   const [detachedKey, setDetachedKey] = useState<string | null>(null)
+  // What the server suggests asking after the answer it names.
+  const [followUps, setFollowUps] = useState<{ messageId: string; questions: string[] } | null>(
+    null
+  )
   const active = useRef<AbortController | null>(null)
   // The screen shows the answer at a reading pace while the run goes as fast as it can.
   const [reveal] = useState(() => new AnswerReveal(setCurrent, setRevealing))
@@ -194,6 +198,7 @@ export function useAssistantSession({
     active.current = controller
     setBusy(true)
     setError('')
+    setFollowUps(null)
     onRunStart?.()
     return runConversation({
       conversation: base,
@@ -210,6 +215,7 @@ export function useAssistantSession({
       onProgress: key => setProgress(t(key)),
       onError: key => setError(key),
       onAction,
+      onFollowUps: (messageId, questions) => setFollowUps({ messageId, questions }),
     }).finally(() => {
       if (active.current === controller) {
         active.current = null
@@ -282,6 +288,17 @@ export function useAssistantSession({
     setStorageError,
     /** A run is going, or its answer is still being revealed. */
     busy: working,
+    /**
+     * Questions the reader may ask next, offered under the last answer once it is complete and
+     * fully shown. Kept in memory only: a saved conversation reopens without them.
+     */
+    followUps:
+      !working &&
+      followUps &&
+      current.messages.at(-1)?.id === followUps.messageId &&
+      current.messages.at(-1)?.state === 'complete'
+        ? followUps.questions
+        : [],
     error,
     retrying,
     progress,

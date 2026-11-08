@@ -27,7 +27,7 @@ const passage = (book: number, chapter: number, start: number, end = start, vers
 })
 const card = (id: string) => `https://bible-strong.app/assistant-widget/${id}`
 
-type Demo = { question: string; answer: string; widgets: Descriptor[] }
+type Demo = { question: string; answer: string; widgets: Descriptor[]; followUps?: string[] }
 
 /** Answers as the assistant writes them, with their cards placed in the text (ADR-0101, ADR-0108). */
 const DEMOS: Demo[] = [
@@ -51,6 +51,11 @@ Si l’angoisse persiste, ce n’est pas un manque de foi : en parler à un méd
       { id: 'w5', kind: 'passages', title: '1 Pierre 5:7', passages: [passage(60, 5, 7)] },
       { id: 'w6', kind: 'passages', title: 'Matthieu 6:25-34', passages: [passage(40, 6, 25, 34)] },
     ],
+    followUps: [
+      'Que signifie « gardera » dans Philippiens 4:7 ?',
+      'Quels autres passages parlent de déposer ses fardeaux sur Dieu ?',
+      'Comment prier quand l’angoisse revient sans cesse ?',
+    ],
   },
   {
     question: 'Montre-moi des versets sur la patience.',
@@ -72,6 +77,11 @@ La patience y est d’abord celle de Dieu envers nous, puis un fruit de l’Espr
           passage(21, 7, 8),
         ],
       },
+    ],
+    followUps: [
+      'Quel mot grec Paul emploie-t-il pour la patience ?',
+      'Comment la patience de Dieu apparaît-elle dans l’Ancien Testament ?',
+      'Comment grandir en patience au quotidien ?',
     ],
   },
 ]

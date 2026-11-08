@@ -219,6 +219,10 @@ Validation: 26 frontend tests, 20 server tests (one optional resource integratio
 
 Error banners use the installed assistant-ui Elements ErrorState with translated text. Quota errors explain the UTC reset without an immediate retry button. Transient failures can be retried explicitly with the original question and reading-context snapshot; the failed final pair is replaced instead of duplicating the user message. The retried question keeps its message identity, which is also the identity of its stored turn: the retry overwrites the failed turn in Firestore and the message count does not grow. Storage failures use the same banner. Retry progress is announced with role=status; errors use role=alert.
 
+### Questions to ask next
+
+The app declares the `follow_ups` capability; the service then sends up to four questions the reader may ask after a finished answer, written while it checks that answer (no extra wait, nothing after a refusal or a replaced answer). They show under the last answer once it is fully revealed (`FollowUpQuestions.tsx` on native, `.bs-assistant-follow-ups` on web). A question picked goes into the composer and focuses it: nothing is sent on the reader's behalf. They live in the session's memory only, keyed by the answer they follow: Firestore rules accept a fixed set of message fields, and a reopened conversation shows none. Older apps never declare the capability, so they never receive an event they would reject.
+
 ### Official component installation
 
 Run from the monorepo root:

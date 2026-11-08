@@ -18,6 +18,7 @@ import { useTheme } from '~themes/ThemeProvider'
 import { ComposerInsetContext, useAssistantSheet } from './assistantSheetContext'
 import type { ReadingContext } from './conversations'
 import ErrorState from './ErrorState'
+import FollowUpQuestions from './FollowUpQuestions'
 import { AssistantMessage, UserMessage } from './MessageRenderer'
 
 /** Starting points offered on an empty conversation, chosen from what the reader has open. */
@@ -40,7 +41,8 @@ function ThreadStatus() {
   const { t } = useTranslation()
   const { colors } = useTheme()
   const { session } = useAssistantSheet()
-  const { current, busy, ready, error, retrying, progress, storageError, context } = session
+  const { current, busy, ready, error, retrying, progress, storageError, context, followUps } =
+    session
   return (
     <Box>
       {!!progress && (
@@ -69,6 +71,7 @@ function ThreadStatus() {
           detail={t('assistant.modal.storageError')}
         />
       )}
+      {!!followUps.length && !error && <FollowUpQuestions questions={followUps} />}
       {!current.messages.length && (
         <Box className="mt-2 gap-2">
           {shortcutsFor(context).map(key => (

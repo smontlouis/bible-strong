@@ -10,7 +10,11 @@ import Text from '~common/ui/Text'
 import { useTheme } from '~themes/ThemeProvider'
 import { assistantAvailable } from './assistantConfig'
 import AssistantComposerInput from './AssistantComposerInput'
-import { ComposerInsetContext, useAssistantSheet } from './assistantSheetContext'
+import {
+  ComposerInputContext,
+  ComposerInsetContext,
+  useAssistantSheet,
+} from './assistantSheetContext'
 import { contextCaption } from './contextDisplay'
 import ContextMarkIcon from './ContextMarkIcon'
 
@@ -126,6 +130,7 @@ export default function AssistantComposer() {
   const insets = useSafeAreaInsets()
   const keyboardVisible = useKeyboardState(state => state.isVisible)
   const inset = use(ComposerInsetContext)
+  const input = use(ComposerInputContext)
   return (
     <Box
       className="bg-reverse px-3 pt-1"
@@ -136,6 +141,7 @@ export default function AssistantComposer() {
     >
       <ComposerPrimitive.Root className="border-border bg-reverse rounded-[24px] border px-2 pb-2 pt-1">
         <AssistantComposerInput
+          ref={input}
           multiline
           maxLength={4000}
           placeholder={t('assistant.modal.placeholder')}

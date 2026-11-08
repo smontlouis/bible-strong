@@ -2,7 +2,7 @@ import { atom, getDefaultStore } from 'jotai'
 import type { StudyWidget } from '@bible-strong/ai-contract/contract'
 import type { ConversationRequest } from '../conversationRun'
 
-export type ScriptedAnswer = { answer: string; widgets: StudyWidget[] }
+export type ScriptedAnswer = { answer: string; widgets: StudyWidget[]; followUps?: string[] }
 
 /**
  * Development only: answers played through the real conversation path in place of the
@@ -25,7 +25,7 @@ let played = 0
 export const scriptedRequest =
   (answers: ScriptedAnswer[]): ConversationRequest =>
   async (_request, signal, emit) => {
-    const { answer, widgets } = answers[played++ % answers.length]
+    const { answer, widgets, followUps } = answers[played++ % answers.length]
     const wait = (ms: number) =>
       new Promise<void>((resolve, reject) => {
         if (signal.aborted) return reject(new Error('INTERRUPTED'))
@@ -56,6 +56,11 @@ export const scriptedRequest =
       emit({ type: 'delta', text: answer.slice(index, index + size) })
       index += size
       await wait(30)
+    }
+    // The service suggests what to ask next while it checks the answer, just before the end.
+    if (followUps?.length) {
+      await wait(400)
+      emit({ type: 'follow_ups', questions: followUps })
     }
     emit({ type: 'done', requestId: 'scripted', model: 'scripted', modelCalls: 0, toolCalls: 0 })
   }

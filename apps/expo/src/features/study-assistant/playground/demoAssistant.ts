@@ -10,7 +10,12 @@ import type { Conversation } from '../conversations'
 import { convertMessage } from '../messageRuntime'
 import type { AssistantSession } from '../useAssistantSession'
 
-export type DemoExchange = { question: string; answer: string; widgets: StudyWidget[] }
+export type DemoExchange = {
+  question: string
+  answer: string
+  widgets: StudyWidget[]
+  followUps?: string[]
+}
 
 const conversationOf = (exchanges: DemoExchange[]): Conversation => ({
   id: 'demo',
@@ -58,6 +63,7 @@ export function useDemoAssistant(exchanges: DemoExchange[]) {
     storageError: false,
     setStorageError: noop,
     busy: false,
+    followUps: exchanges.at(-1)?.followUps ?? [],
     error: '',
     retrying: false,
     progress: '',

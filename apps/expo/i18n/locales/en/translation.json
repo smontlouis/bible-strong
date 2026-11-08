@@ -2452,6 +2452,8 @@
   "assistant.modal.incomplete": "Interrupted or incomplete response.",
   "assistant.modal.toEnd": "Go to the end of the answer",
   "assistant.modal.attachContext": "Attach {{context}} to the question",
+  "assistant.modal.followUps": "Keep exploring",
+  "assistant.modal.followUpHint": "Puts the question in the field, ready to send",
   "assistant.modal.detachContext": "Remove {{context}} from the question",
   "assistant.modal.free": "Free conversation",
   "assistant.modal.useContext": "Use my reading",

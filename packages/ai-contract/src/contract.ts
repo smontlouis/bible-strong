@@ -26,7 +26,12 @@ import { parseStudySource, type StudySource } from './sources'
 export { parseStudySource, sourceLink, sourceIdFromLink, type StudySource } from './sources'
 export const STREAM_VERSION = 1
 export type HistoryMessage = { role: 'user' | 'assistant'; content: string }
-export const CLIENT_CAPABILITIES = ['open_tab', 'open_public_tab', 'inline_widgets'] as const
+export const CLIENT_CAPABILITIES = [
+  'open_tab',
+  'open_public_tab',
+  'inline_widgets',
+  'follow_ups',
+] as const
 export type ClientCapability = (typeof CLIENT_CAPABILITIES)[number]
 export const STUDY_SURFACE_KINDS = [
   'passage',
@@ -109,6 +114,8 @@ export type StudyEvent =
   | { type: 'status'; message: string }
   | { type: 'delta'; text: string }
   | { type: 'reset' }
+  /** Questions the reader may ask next, sent only to clients that declare follow_ups. */
+  | { type: 'follow_ups'; questions: string[] }
   | { type: 'done'; requestId: string; model: string; modelCalls: number; toolCalls: number }
   | { type: 'error'; code: string }
 
@@ -288,6 +295,8 @@ export function parseStudyEvent(value: unknown): StudyEvent {
   if (event.type === 'widget') return { type: 'widget', widget: parseStudyWidget(event.widget) }
   if (event.type === 'action') return { type: 'action', action: parseAssistantAction(event.action) }
   if (event.type === 'reset') return { type: 'reset' }
+  if (event.type === 'follow_ups')
+    return { type: 'follow_ups', questions: parseFollowUps(event.questions) }
   if (event.type === 'delta' && typeof event.text === 'string')
     return { type: 'delta', text: event.text }
   if (event.type === 'status' && typeof event.message === 'string')
@@ -309,6 +318,28 @@ export function parseStudyEvent(value: unknown): StudyEvent {
       toolCalls: event.toolCalls,
     }
   throw new Error('INVALID_STREAM')
+}
+
+export const MAX_FOLLOW_UPS = 4
+export const MAX_FOLLOW_UP_CHARACTERS = 120
+/** One to four distinct single-line questions, each short enough for a chip. */
+export function parseFollowUps(value: unknown): string[] {
+  if (
+    !Array.isArray(value) ||
+    !value.length ||
+    value.length > MAX_FOLLOW_UPS ||
+    new Set(value).size !== value.length ||
+    value.some(
+      item =>
+        typeof item !== 'string' ||
+        !item.trim() ||
+        item !== item.trim() ||
+        item.length > MAX_FOLLOW_UP_CHARACTERS ||
+        /[\r\n]/.test(item)
+    )
+  )
+    throw new Error('INVALID_FOLLOW_UPS')
+  return value as string[]
 }
 
 export function parseAssistantAction(value: unknown): AssistantAction {

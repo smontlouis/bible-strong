@@ -64,6 +64,7 @@ function Icon({
     | 'pending'
     | 'error'
     | 'down'
+    | 'followUp'
 }) {
   const paths = {
     error: 'M12 8v5m0 3.5v.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z',
@@ -79,6 +80,7 @@ function Icon({
     back: 'm14 5-7 7 7 7',
     trash: 'M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 10v7M14 10v7',
     down: 'M12 5v14m7-7-7 7-7-7',
+    followUp: 'm15 10 5 5-5 5M4 4v7a4 4 0 0 0 4 4h12',
   }
   return (
     <svg
@@ -226,6 +228,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     detachContext,
     attachContext,
     send,
+    followUps,
   } = session
   // Opening a conversation shows its last question at the top, not the end of its last
   // answer (2026-11-08). A question asked here rises on its own (`turnAnchor` below).
@@ -509,6 +512,30 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                     detail={t(error === 'assistant.limit' ? 'assistant.errors.limitDetail' : error)}
                     onRetry={session.retry}
                   />
+                )}
+                {!!followUps.length && !error && (
+                  // A question picked goes into the composer, to be changed or sent.
+                  <div
+                    className="bs-assistant-follow-ups"
+                    role="group"
+                    aria-labelledby="bs-follow-ups"
+                  >
+                    <p id="bs-follow-ups">{t('assistant.modal.followUps')}</p>
+                    {followUps.map(question => (
+                      <button
+                        key={question}
+                        type="button"
+                        title={t('assistant.modal.followUpHint')}
+                        onClick={() => {
+                          runtime.thread.composer.setText(question)
+                          inputRef.current?.focus()
+                        }}
+                      >
+                        <Icon name="followUp" />
+                        <span>{question}</span>
+                      </button>
+                    ))}
+                  </div>
                 )}
                 <ThreadPrimitive.ViewportFooter className="bs-assistant-compose-area">
                   {hasMessages && (

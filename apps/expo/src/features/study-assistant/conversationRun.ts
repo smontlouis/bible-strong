@@ -37,6 +37,7 @@ export async function runConversation({
   onProgress,
   onError,
   onAction,
+  onFollowUps,
 }: {
   conversation: Conversation
   preferences?: Pick<
@@ -55,6 +56,8 @@ export async function runConversation({
   onProgress: (key: string) => void
   onError: (key: string) => void
   onAction?: (action: AssistantAction) => void
+  /** Questions the reader may ask after this answer, received before it completes. */
+  onFollowUps?: (answerId: string, questions: string[]) => void
 }) {
   const preferenceSnapshot = { ...preferences }
   const timestamp = Date.now(),
@@ -139,7 +142,7 @@ export async function runConversation({
       {
         ...preferenceSnapshot,
         question,
-        clientCapabilities: ['open_tab', 'open_public_tab', 'inline_widgets'],
+        clientCapabilities: ['open_tab', 'open_public_tab', 'inline_widgets', 'follow_ups'],
         ...(snapshot?.bibleVersion ? { readingBibleVersion: snapshot.bibleVersion } : {}),
         history: memory.history,
         memorySummary: memory.memorySummary,
@@ -192,6 +195,7 @@ export async function runConversation({
           handledActionIds.add(event.action.id)
           onAction?.(event.action)
         }
+        if (event.type === 'follow_ups') onFollowUps?.(answer.id, event.questions)
         if (event.type === 'status') onProgress('assistant.searching')
         if (event.type === 'reset') {
           output = ''
