@@ -1,16 +1,16 @@
+import { use } from 'react'
 import { ActivityIndicator } from 'react-native'
 import { ComposerPrimitive, useAui } from '@assistant-ui/react-native'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useKeyboardState } from '~common/KeyboardAwareScrollView'
-import { SheetFooter } from '~common/sheet'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useTheme } from '~themes/ThemeProvider'
 import { assistantAvailable } from './assistantConfig'
 import AssistantComposerInput from './AssistantComposerInput'
-import { useAssistantSheet } from './assistantSheetContext'
+import { ComposerInsetContext, useAssistantSheet } from './assistantSheetContext'
 import { contextCaption } from './MessageRenderer'
 
 const ROUND_BUTTON = 'h-[34px] w-[34px] items-center justify-center rounded-full'
@@ -116,7 +116,7 @@ function DictationButton() {
   )
 }
 
-/** The sheet footer: it stays above the keyboard while the conversation scrolls behind it. */
+/** The page footer: it stays above the keyboard while the conversation scrolls behind it. */
 export default function AssistantComposer() {
   const { t } = useTranslation()
   const { colors } = useTheme()
@@ -125,12 +125,14 @@ export default function AssistantComposer() {
   const dictationActive = ['starting', 'listening', 'stopping'].includes(dictationState)
   const insets = useSafeAreaInsets()
   const keyboardVisible = useKeyboardState(state => state.isVisible)
+  const inset = use(ComposerInsetContext)
   return (
-    <SheetFooter
+    <Box
       className="bg-reverse px-3 pt-1"
+      onLayout={event => inset.setHeight(Math.ceil(event.nativeEvent.layout.height))}
       // Padding rather than margin, so the surface hides the conversation down to the edge.
       // Above the keyboard there is no home indicator to clear.
-      style={{ marginBottom: 0, paddingBottom: keyboardVisible ? 8 : insets.bottom + 4 }}
+      style={{ paddingBottom: keyboardVisible ? 8 : insets.bottom + 4 }}
     >
       <ComposerPrimitive.Root className="border-border bg-reverse rounded-[24px] border px-2 pb-2 pt-1">
         <AssistantComposerInput
@@ -174,6 +176,6 @@ export default function AssistantComposer() {
           </HStack>
         </HStack>
       </ComposerPrimitive.Root>
-    </SheetFooter>
+    </Box>
   )
 }

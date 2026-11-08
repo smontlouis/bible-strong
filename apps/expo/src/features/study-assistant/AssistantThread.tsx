@@ -1,13 +1,12 @@
+import { use } from 'react'
 import { ActivityIndicator } from 'react-native'
 import { ThreadPrimitive } from '@assistant-ui/react-native'
 import { useTranslation } from 'react-i18next'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useKeyboardState } from '~common/KeyboardAwareScrollView'
-import { useSheetFooterInset } from '~common/sheet'
 import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useTheme } from '~themes/ThemeProvider'
-import { useAssistantSheet } from './assistantSheetContext'
+import { ComposerInsetContext, useAssistantSheet } from './assistantSheetContext'
 import type { ReadingContext } from './conversations'
 import ErrorState from './ErrorState'
 import { AssistantMessage, UserMessage } from './MessageRenderer'
@@ -97,9 +96,8 @@ function Welcome() {
 export default function AssistantThread() {
   const { session } = useAssistantSheet()
   const { current, busy, error } = session
-  const insets = useSafeAreaInsets()
-  const footerInset = useSheetFooterInset()
-  // The footer rides the keyboard without resizing the list: the list makes room itself.
+  const composer = use(ComposerInsetContext)
+  // The composer rides the keyboard without resizing the list: the list makes room itself.
   const keyboardHeight = useKeyboardState(state => (state.isVisible ? state.height : 0))
   return (
     <ThreadPrimitive.MessagesFlatList
@@ -108,8 +106,8 @@ export default function AssistantThread() {
       contentContainerStyle={{
         paddingHorizontal: 20,
         paddingTop: 12,
-        // The footer already clears the home indicator within its own height.
-        paddingBottom: footerInset - insets.bottom + keyboardHeight + 12,
+        // The composer already clears the home indicator within its own height.
+        paddingBottom: composer.height + keyboardHeight + 12,
       }}
       ListHeaderComponent={current.messages.length ? null : Welcome}
       ListFooterComponent={ThreadStatus}

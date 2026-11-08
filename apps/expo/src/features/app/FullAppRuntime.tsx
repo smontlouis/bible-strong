@@ -8,7 +8,6 @@ import * as Sentry from '@sentry/react-native'
 import { Stack, useLocalSearchParams, usePathname, useSegments } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Platform } from 'react-native'
 import { runAfterInteractions } from '~helpers/runAfterInteractions'
 import { RootSiblingParent } from 'react-native-root-siblings'
 import { useKeepAwake } from 'expo-keep-awake'
@@ -174,8 +173,8 @@ const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
                           name="(explore)"
                           options={createFormSheetOptions(theme, {
                             contentStyle: { bottom: 0 },
-                            sheetAllowedDetents:
-                              Platform.OS === 'ios' && Platform.isPad ? [1] : [0.45, 1],
+                            // Full height only, as a trial of life without the half-height sheet (2026-11-08).
+                            sheetAllowedDetents: [1],
                             sheetLargestUndimmedDetentIndex: 0,
                           })}
                         />
@@ -188,6 +187,14 @@ const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
                           })}
                         />
                         <Stack.Screen name="(library)" options={{ contentStyle: { bottom: 0 } }} />
+                        <Stack.Screen
+                          name="study-assistant"
+                          // A full-height form sheet on iOS; Android gets a page (createFormSheetOptions).
+                          options={createFormSheetOptions(theme, {
+                            contentStyle: { bottom: 0 },
+                            sheetAllowedDetents: [1],
+                          })}
+                        />
                         <Stack.Screen
                           name="strong"
                           options={createFormSheetOptions(theme, {

@@ -10,6 +10,7 @@ import SourceGroupWidget from './SourceGroupWidget'
 import StrongWidget from './StrongWidget'
 import TimelineWidget from './TimelineWidget'
 import VerseAnalysisWidget from './VerseAnalysisWidget'
+import VerseQuoteWidget from './VerseQuoteWidget'
 
 export default function StudyWidget({ widget }: { widget: Descriptor }) {
   if (widget.kind === 'book_overview') return <BookWidget widget={widget} />
@@ -24,5 +25,11 @@ export default function StudyWidget({ widget }: { widget: Descriptor }) {
   if (widget.kind === 'verse_analysis') return <VerseAnalysisWidget widget={widget} />
   if (widget.kind === 'concordance') return <ConcordanceWidget widget={widget} />
   if (widget.kind === 'strong_entry') return <StrongWidget widget={widget} />
-  return 'passages' in widget ? <PassageWidget widget={widget} /> : null
+  if (!('passages' in widget)) return null
+  // A translation comparison keeps its card; other passages are quotes in the text.
+  return widget.kind === 'translation_comparison' ? (
+    <PassageWidget widget={widget} />
+  ) : (
+    <VerseQuoteWidget widget={widget} />
+  )
 }

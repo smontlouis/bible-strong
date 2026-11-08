@@ -1,63 +1,34 @@
-import { StyleSheet } from 'react-native'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import Animated, { FadeOut, withSpring, withTiming } from 'react-native-reanimated'
-import {
-  AssistantRuntimeProvider,
-  ThreadListPrimitive,
-  useExternalStoreRuntime,
-  type AppendMessage,
-} from '@assistant-ui/react-native'
+import { useSetAtom } from 'jotai'
+import { usePathname, useRouter } from 'expo-router'
+import { useExternalStoreRuntime, type AppendMessage } from '@assistant-ui/react-native'
 import type { StudySource } from '@bible-strong/ai-contract/contract'
-import Sheet from '~common/ModalSheet'
-import { type SheetRef } from '~common/sheet'
-import Box, { HStack, TouchableBox } from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
-import Text from '~common/ui/Text'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { storage } from '~helpers/storage'
 import { toast } from '~helpers/toast'
 import i18n from '~i18n'
-import { PushRouteGateContext } from '~navigation/pushRouteGate'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { selectUserLoginInfo } from '~redux/selectors/user'
-import { useTheme } from '~themes/ThemeProvider'
 import { createTabForAssistantAction } from './assistantActions'
 import { assistantAccessible } from './assistantConfig'
-import AssistantComposer from './AssistantComposer'
-import AssistantHistory from './AssistantHistory'
 import AssistantLauncherButton from './AssistantLauncherButton'
 import {
-  AssistantSheetContext,
-  useAssistantSheet,
+  ASSISTANT_PATH,
+  assistantPageAtom,
   type AssistantSheet,
   type DictationState,
 } from './assistantSheetContext'
-import AssistantThread from './AssistantThread'
 import { connectAssistantDictation } from './client'
 import { LiveDictationAdapter } from './dictationAdapter'
 import { captureDictationAudio } from './dictationAudio'
 import { convertMessage } from './messageRuntime'
-import SourceExcerptSheet from './SourceExcerptSheet'
-import StrobiAvatar, { type StrobiAnimation } from './StrobiAvatar'
-import { useAssistantOpenRequest } from './useAssistantOpenRequest'
+import type { StrobiAnimation } from './StrobiAvatar'
 import { useAssistantSession } from './useAssistantSession'
 import { useReadingContext } from './useReadingContext'
 
 // The same per-account key as the web modal; MMKV plays the part of localStorage.
-// Strobi lands in the sheet's header: it grows in with the bounce its button comes back with.
-const strobiLanding = () => {
-  'worklet'
-  return {
-    initialValues: { opacity: 0, transform: [{ scale: 0.5 }] },
-    animations: {
-      opacity: withTiming(1, { duration: 200 }),
-      transform: [{ scale: withSpring(1, { duration: 500, dampingRatio: 0.6 }) }],
-    },
-  }
-}
-
 const preferences = {
   getItem: (key: string) => storage.getString(key) ?? null,
   setItem: (key: string, value: string) => storage.set(key, value),
@@ -69,78 +40,26 @@ export default function AssistantLauncher() {
   return <AccountAssistant key={id} account={id} />
 }
 
-function SheetHeader() {
-  const { t } = useTranslation()
-  const { session, open, historyOpen, setHistoryOpen } = useAssistantSheet()
-  const { current, busy } = session
-  return (
-    <HStack
-      className="border-separator min-h-[50px] items-center pl-3 pr-2"
-      style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
-    >
-      {historyOpen ? (
-        <TouchableBox
-          accessibilityRole="button"
-          accessibilityLabel={t('assistant.modal.back')}
-          onPress={() => setHistoryOpen(false)}
-          className="h-[44px] w-[40px] items-center justify-center"
-        >
-          <FeatherIcon name="arrow-left" size={20} />
-        </TouchableBox>
-      ) : (
-        <Box className="h-[44px] w-[40px] items-center justify-center">
-          {open && (
-            <Animated.View entering={strobiLanding} exiting={FadeOut.duration(150)}>
-              <StrobiAvatar animation={busy ? 'thinking' : 'excited'} size={34} />
-            </Animated.View>
-          )}
-        </Box>
-      )}
-      <Text
-        accessibilityRole="header"
-        className="flex-1 pl-1 text-[16px] font-bold"
-        numberOfLines={1}
-      >
-        {historyOpen ? t('assistant.modal.history') : current.title || t('assistant.modal.newChat')}
-      </Text>
-      {!historyOpen && (
-        <TouchableBox
-          accessibilityRole="button"
-          accessibilityLabel={t('assistant.modal.history')}
-          disabled={busy}
-          onPress={() => setHistoryOpen(true)}
-          className="h-[44px] w-[44px] items-center justify-center"
-        >
-          <FeatherIcon name="clock" size={19} color={busy ? 'border' : 'default'} />
-        </TouchableBox>
-      )}
-      <ThreadListPrimitive.New
-        accessibilityLabel={t('assistant.new')}
-        disabled={busy}
-        className="h-[44px] w-[44px] items-center justify-center"
-      >
-        <FeatherIcon name="plus" size={21} color={busy ? 'border' : 'default'} />
-      </ThreadListPrimitive.New>
-    </HStack>
-  )
-}
-
+/**
+ * Holds the conversation at the root of the app and the floating button that opens it. The
+ * conversation itself is a route (`study-assistant`): a form sheet on iOS, a page on Android,
+ * which reads this state through `assistantPageAtom`, so an answer keeps streaming when the
+ * page closes and a resource it opens is pushed above it.
+ */
 function AccountAssistant({ account }: { account: string }) {
   const { t } = useTranslation()
-  const theme = useTheme()
+  const router = useRouter()
+  const pathname = usePathname()
+  const open = pathname === ASSISTANT_PATH
   const liveContext = useReadingContext()
   const openInNewTab = useOpenInNewTab()
   const pushRoute = usePushRouteOnce()
-  const sheet = useRef<SheetRef>(null)
-  const afterClose = useRef<(() => void) | null>(null)
-  const [open, setOpen] = useState(false),
-    [historyOpen, setHistoryOpen] = useState(false)
+  const publish = useSetAtom(assistantPageAtom)
+  const [historyOpen, setHistoryOpen] = useState(false)
   const [source, setSource] = useState<StudySource | null>(null)
   // Strobi falls asleep when its button goes idle, and wakes up with it.
   const [avatarSleeping, setAvatarSleeping] = useState(false)
   const [avatarDragged, setAvatarDragged] = useState(false)
-  // The floating button leaves as the sheet starts rising and comes back as it starts closing.
-  const [launcherHidden, setLauncherHidden] = useState(false)
   const [dictationState, setDictationState] = useState<DictationState>('idle')
   const [dictation] = useState(
     () =>
@@ -164,14 +83,6 @@ function AccountAssistant({ account }: { account: string }) {
   useEffect(() => {
     if (!open || historyOpen) dictation.cancel()
   }, [open, historyOpen, dictation])
-  const closeThen = (action: () => void) => {
-    if (!open) {
-      action()
-      return
-    }
-    afterClose.current = action
-    sheet.current?.dismiss()
-  }
   const session = useAssistantSession({
     account,
     signedIn: true,
@@ -183,7 +94,8 @@ function AccountAssistant({ account }: { account: string }) {
         toast.error(t('assistant.unavailable'))
         return
       }
-      closeThen(() => openInNewTab(tab, { autoRedirect: true }))
+      // Going to the new tab dismisses every sheet, the assistant's included.
+      openInNewTab(tab, { autoRedirect: true })
     },
     onRunStart: () => setHistoryOpen(false),
     onThreadSwitch: () => {
@@ -206,7 +118,6 @@ function AccountAssistant({ account }: { account: string }) {
       session.cancel()
     },
   })
-  useAssistantOpenRequest(sheet)
   const avatarAnimation: StrobiAnimation = busy
     ? 'thinking'
     : avatarDragged
@@ -214,61 +125,41 @@ function AccountAssistant({ account }: { account: string }) {
       : avatarSleeping
         ? 'sleeping'
         : 'idle'
-  const value: AssistantSheet = {
+  const sheet: AssistantSheet = {
     session,
     liveContext,
     open,
     historyOpen,
     setHistoryOpen,
-    close: () => sheet.current?.dismiss(),
-    navigate: route => closeThen(() => pushRoute(route)),
+    close: () => {
+      if (open) router.back()
+    },
+    navigate: route => pushRoute(route),
     showSource: setSource,
+    source,
     dictation,
     dictationState,
   }
+  // Published after every render: the page re-renders with the stream, the rest of the app does not.
+  useEffect(() => {
+    publish({ sheet, runtime })
+  })
+  useEffect(() => () => publish(null), [publish])
+  useEffect(() => {
+    if (!open) setSource(null)
+  }, [open])
+  if (!ready) return null
   return (
-    <AssistantRuntimeProvider runtime={runtime}>
-      <AssistantSheetContext.Provider value={value}>
-        {ready && (
-          <AssistantLauncherButton
-            animation={avatarAnimation}
-            accessibilityLabel={t('assistant.modal.open')}
-            hidden={launcherHidden}
-            onPress={() => {
-              setLauncherHidden(true)
-              sheet.current?.present()
-            }}
-            onIdleChange={setAvatarSleeping}
-            onDragStart={() => setAvatarDragged(true)}
-            onDragEnd={() => setAvatarDragged(false)}
-          />
-        )}
-        {/* Anything inside the sheet that pushes a route lets the sheet close first. */}
-        <PushRouteGateContext.Provider value={closeThen}>
-          <Sheet
-            ref={sheet}
-            // Expo's developer menu: 60% of the screen, then all of it.
-            snapPoints={[0.6, 1]}
-            // Opaque: at 60% the reading behind must not show through a blur.
-            backgroundColor={theme.colors.reverse}
-            header={<SheetHeader />}
-            footer={historyOpen ? undefined : AssistantComposer}
-            onOpenChange={setOpen}
-            onPresentStart={() => setLauncherHidden(true)}
-            onDismissStart={() => setLauncherHidden(false)}
-            onDismiss={() => {
-              setLauncherHidden(false)
-              setSource(null)
-              const action = afterClose.current
-              afterClose.current = null
-              action?.()
-            }}
-          >
-            {historyOpen ? <AssistantHistory /> : <AssistantThread />}
-            <SourceExcerptSheet source={source} onClose={() => setSource(null)} />
-          </Sheet>
-        </PushRouteGateContext.Provider>
-      </AssistantSheetContext.Provider>
-    </AssistantRuntimeProvider>
+    <AssistantLauncherButton
+      animation={avatarAnimation}
+      accessibilityLabel={t('assistant.modal.open')}
+      hidden={open}
+      onPress={() => {
+        if (!open) router.push(ASSISTANT_PATH)
+      }}
+      onIdleChange={setAvatarSleeping}
+      onDragStart={() => setAvatarDragged(true)}
+      onDragEnd={() => setAvatarDragged(false)}
+    />
   )
 }
