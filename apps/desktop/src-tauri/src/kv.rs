@@ -4,7 +4,7 @@
 //! its writes here in order. Unlike `localStorage`, nothing caps the size of the persisted
 //! account data.
 
-use rusqlite::{params, Connection};
+use rusqlite::{params, Connection, OptionalExtension};
 use serde::Deserialize;
 use std::{collections::BTreeMap, path::Path, sync::Mutex};
 
@@ -49,6 +49,16 @@ impl KvStore {
             })
             .map_err(|error| error.to_string())?;
         rows.collect::<Result<_, _>>()
+            .map_err(|error| error.to_string())
+    }
+
+    pub fn get(&self, key: &str) -> Result<Option<String>, String> {
+        let connection = self.connection.lock().map_err(|error| error.to_string())?;
+        connection
+            .query_row("SELECT value FROM kv WHERE key = ?1", params![key], |row| {
+                row.get(0)
+            })
+            .optional()
             .map_err(|error| error.to_string())
     }
 
@@ -113,6 +123,8 @@ mod tests {
         let snapshot = reopened.snapshot().unwrap();
         assert_eq!(snapshot.get("root").map(String::as_str), Some("{\"a\":2}"));
         assert!(!snapshot.contains_key("flag"));
+        assert_eq!(reopened.get("root").unwrap().as_deref(), Some("{\"a\":2}"));
+        assert_eq!(reopened.get("flag").unwrap(), None);
 
         reopened.apply(&[KvOp::Clear]).unwrap();
         assert!(reopened.snapshot().unwrap().is_empty());

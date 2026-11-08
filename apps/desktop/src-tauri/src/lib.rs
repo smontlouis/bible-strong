@@ -3,6 +3,7 @@
 //! The window shows the Expo web export. Native commands stand in for the mobile modules the
 //! Offline-copy pipeline needs, so that pipeline runs unchanged in the webview.
 
+mod appearance;
 mod archive;
 mod bootstrap;
 mod devtools;
@@ -33,7 +34,17 @@ fn release_page_resources(app: &tauri::AppHandle) {
 }
 
 fn create_main_window(app: &tauri::AppHandle) -> tauri::Result<()> {
-    WebviewWindowBuilder::new(app, "main", WebviewUrl::App("index.html".into()))
+    let mut builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::App("index.html".into()));
+    // The last theme's ground, so that the window is not white before the first paint.
+    let stored = app.state::<kv::KvStore>().get(appearance::KV_KEY);
+    if let Some(stored) = stored
+        .ok()
+        .flatten()
+        .and_then(|value| appearance::parse_stored(&value))
+    {
+        builder = builder.background_color(stored.background);
+    }
+    builder
         .title("Bible Strong")
         .inner_size(1280.0, 840.0)
         .min_inner_size(760.0, 540.0)
@@ -84,6 +95,7 @@ pub fn run() {
         .register_uri_scheme_protocol(bootstrap::SCHEME, bootstrap::handle)
         .invoke_handler(tauri::generate_handler![
             app_exit,
+            appearance::window_set_background,
             archive::archive_unzip,
             archive::archive_extract_encrypted,
             devtools::dev_snapshot,

@@ -14,6 +14,7 @@ import { isQueueProcessingAtom } from '~state/downloadQueue'
 import { desktopBootstrap, invoke } from './bridge'
 import { isMenuShortcut, shortcutKeyboardEvent } from './desktopMenuShortcuts'
 import { checkDesktopUpdate } from './desktopUpdates'
+import { useDesktopAppearance } from './useDesktopAppearance'
 
 const APP_SCHEME = 'biblestrong://'
 const UPDATE_CHECK_DELAY_MS = 15_000
@@ -36,6 +37,7 @@ const DesktopShell = () => {
   const router = useRouter()
   const { i18n } = useTranslation()
   const downloading = useAtomValue(isQueueProcessingAtom)
+  useDesktopAppearance()
 
   // A hidden page must not freeze halfway through an installation. The shell turns WebKit's
   // throttling off on macOS 14+; Chromium (Windows) does not freeze a page holding a Web Lock.

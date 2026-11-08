@@ -21,6 +21,7 @@ import { filterSentryEvent } from '~helpers/sentryEventFilter'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import type { RootState } from '~redux/modules/reducer'
 import { persistor, startPersistence, store } from '~redux/store'
+import { isDarkThemeName } from '~themes/darkThemes'
 import getTheme, { baseTheme } from '~themes/index'
 import { setI18n } from '../../../i18n'
 setAutoFreeze(false)
@@ -47,6 +48,14 @@ const InnerApp = () => {
       document.documentElement.style.removeProperty('--bs-focus-color')
     }
   }, [selected.colors.primary])
+
+  // A route loads its code on first visit: until it renders, the page itself shows, so it takes
+  // the theme's ground rather than the browser's white.
+  useEffect(() => {
+    const { style } = document.documentElement
+    style.backgroundColor = selected.colors.reverse
+    style.colorScheme = isDarkThemeName(selectedTheme) ? 'dark' : 'light'
+  }, [selected.colors.reverse, selectedTheme])
 
   return (
     <ThemeProvider theme={theme}>

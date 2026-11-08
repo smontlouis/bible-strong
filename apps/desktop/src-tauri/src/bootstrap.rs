@@ -9,7 +9,7 @@ use serde::Serialize;
 use std::{borrow::Cow, collections::BTreeMap, path::PathBuf};
 use tauri::{http, Manager, Runtime, UriSchemeContext};
 
-use crate::{archive, kv::KvStore, paths::to_uri};
+use crate::{appearance, archive, kv::KvStore, paths::to_uri};
 
 pub const SCHEME: &str = "bsboot";
 
@@ -69,7 +69,12 @@ fn script<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<String, String> {
         kv: &kv,
     };
     let json = serde_json::to_string(&bootstrap).map_err(|error| error.to_string())?;
-    Ok(format!("window.__BIBLE_STRONG_DESKTOP__ = {json};"))
+    let ground = kv
+        .get(appearance::KV_KEY)
+        .and_then(|value| appearance::parse_stored(value))
+        .map(|stored| appearance::page_script(&stored))
+        .unwrap_or_default();
+    Ok(format!("window.__BIBLE_STRONG_DESKTOP__ = {json};{ground}"))
 }
 
 pub fn handle<R: Runtime>(
