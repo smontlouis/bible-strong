@@ -45,9 +45,47 @@ jobs:
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
+  # Yarn builds each Git dependency into an archive whose checksum the lockfile pins. Windows packs
+  # it differently (file modes, compiler output) and fails that checksum (YN0018), so the Windows
+  # build takes the archives packed here on Linux, which match.
+  git-dependencies:
+    name: Pack the Git dependencies
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the source
+        uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Fetch the dependencies
+        run: yarn install --immutable --mode=skip-build
+
+      # With the patched packages: react-native-track-player is patched, and its patched archive
+      # has its own checksum.
+      - name: Keep the archives of the Git dependencies
+        run: |
+          cache="$(yarn config get cacheFolder)"
+          mkdir git-dependencies
+          cp "$cache"/*-https-*.zip "$cache"/*-patch-*.zip git-dependencies/
+          ls git-dependencies
+
+      - name: Hand them to the Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: git-dependencies
+          path: git-dependencies
+          retention-days: 1
+
   build:
     name: Build ${{ matrix.name }}
-    needs: prepare
+    needs: [prepare, git-dependencies]
     environment: desktop-release
     strategy:
       fail-fast: false
@@ -68,12 +106,6 @@ jobs:
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     steps:
-      # Git on the Windows runners turns line endings into CRLF, which changes the archive Yarn
-      # makes of a Git dependency and fails its checksum (YN0018).
-      - name: Keep line endings as committed
-        if: runner.os == 'Windows'
-        run: git config --global core.autocrlf false
-
       - name: Check out the source
         uses: actions/checkout@v5
 
@@ -116,6 +148,21 @@ jobs:
         uses: swatinem/rust-cache@v2
         with:
           workspaces: apps/desktop/src-tauri -> target
+
+      - name: Take the Git dependencies packed on Linux
+        if: runner.os == 'Windows'
+        uses: actions/download-artifact@v4
+        with:
+          name: git-dependencies
+          path: git-dependencies
+
+      - name: Put them in the Yarn cache
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          cache="$(yarn config get cacheFolder)"
+          mkdir -p "$cache"
+          cp git-dependencies/*.zip "$cache/"
 
       - name: Install dependencies
         run: yarn install --immutable
