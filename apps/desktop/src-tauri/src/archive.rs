@@ -91,9 +91,13 @@ fn extract(source: &Path, destination: &Path, password: Option<&[u8]>) -> Result
         }
         .map_err(|error| error.to_string())?;
         // `enclosed_name` refuses entries that would escape the destination ("zip slip").
-        let name = entry
-            .enclosed_name()
-            .ok_or_else(|| format!("Unsafe archive entry: {}", entry.name()))?;
+        let name = entry.enclosed_name().ok_or_else(|| {
+            let raw = entry
+                .name()
+                .map(|name| name.into_owned())
+                .unwrap_or_default();
+            format!("Unsafe archive entry: {raw}")
+        })?;
         if entry.is_dir() {
             fs::create_dir_all(destination.join(name)).map_err(|error| error.to_string())?;
             continue;

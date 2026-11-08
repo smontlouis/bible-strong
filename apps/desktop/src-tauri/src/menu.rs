@@ -152,6 +152,8 @@ pub fn build<R: Runtime>(app: &AppHandle<R>, language: &str) -> tauri::Result<Me
             .item(&item("updates:check", labels.check_updates, None)?);
     }
 
+    // Only macOS adds the application menu in front of the others.
+    #[cfg_attr(not(target_os = "macos"), allow(unused_mut))]
     let mut menu = MenuBuilder::new(app);
     #[cfg(target_os = "macos")]
     {
