@@ -70,14 +70,19 @@ The installer is not code-signed yet: Windows SmartScreen warns on the first run
 earns a reputation. A Microsoft Store listing needs an MSIX package, which the Store signs; it is
 not built yet.
 
-## Before the first release
+## Services the desktop app needs
 
-- Deploy the Resource API (`yarn resources:worker:deploy`) and the assistant Worker with the
-  desktop origins in their CORS allowlists.
-- Deploy `createDesktopSignInToken` (`npx firebase-tools deploy --only functions:createDesktopSignInToken`)
-  and give its runtime service account the **Service Account Token Creator** role on itself, which
-  custom tokens need.
-- Deploy the web workspace (automatic from `master`): it serves the sign-in page at
+Set up on 2026-11-08. A new service the app reads across origins needs the same.
+
+- The desktop origins, `tauri://localhost` and `https://tauri.localhost`, in the CORS allowlists of
+  the Resource API (`RESOURCE_WEB_ORIGINS`, then `yarn resources:worker:deploy`), the assistant
+  Worker (`AI_WEB_ORIGINS`, in its own repository) and the media bucket `bible-strong-media-prod`
+  (`wrangler r2 bucket cors set`), which serves the catalogs of the portraits and of the timeline
+  paintings. Without the last one the app shows neither.
+- `createDesktopSignInToken` deployed (`npx firebase-tools deploy --only functions:createDesktopSignInToken`,
+  Node.js 22). Its runtime service account, the Compute Engine default one, holds **Service Account
+  Token Creator** on itself, and the project has the IAM Service Account Credentials API enabled:
+  custom tokens need both.
+- The web workspace (automatic from `master`) serves the sign-in page at
   `https://web.bible-strong.app/desktop-sign-in/`.
-- Check in Google Cloud that the Firebase browser API key accepts the desktop origins, or has no
-  referrer restriction.
+- The Firebase browser API key has no referrer restriction, so it accepts the desktop origins.
