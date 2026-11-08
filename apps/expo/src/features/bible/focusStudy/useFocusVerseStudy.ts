@@ -167,7 +167,8 @@ export const useFocusVerseStudy = ({
 
   const referencesQuery = useQuery({
     queryKey: resourceQueryKeys.bibleReferences(verseKey),
-    queryFn: () => resources.bibleReading.loadTresorReferences(verseKey),
+    // A verse without cross-references comes back undefined, which a query may not hold.
+    queryFn: async () => (await resources.bibleReading.loadTresorReferences(verseKey)) ?? null,
     enabled,
     retry: false,
     ...staticResourceQueryOptions,
