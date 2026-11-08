@@ -20,6 +20,7 @@ import DownloadSectionHeader from './components/DownloadSectionHeader'
 import DownloadSubsectionHeader from './components/DownloadSubsectionHeader'
 import DownloadManagementFooter from './components/DownloadManagementFooter'
 import EntityPortraitPackCard from './components/EntityPortraitPackCard'
+import { IS_DESKTOP } from '~desktop/isDesktop'
 import { DOWNLOAD_LIST_LAYOUT } from './components/downloadListLayout'
 import { AvailableUpdatesSheet, AvailableUpdatesWidget } from './components/AvailableUpdatesWidget'
 import { versions, type Version } from '~helpers/bibleVersions'
@@ -830,7 +831,8 @@ const DownloadsScreen = () => {
           ListHeaderComponent={
             <>
               <StorageSummaryCard />
-              <EntityPortraitPackCard downloadsDisabled={!isConnected} />
+              {/* The desktop app shows portraits through the webview's cache, as the browser does (ADR-0089). */}
+              {!IS_DESKTOP && <EntityPortraitPackCard downloadsDisabled={!isConnected} />}
               <AvailableUpdatesWidget
                 count={itemsToUpdate.length}
                 onPress={() => updatesRef.current?.present()}

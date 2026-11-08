@@ -58,7 +58,9 @@
 
 **Resource revision** — The immutable content-derived identifier of one published edition of a Resource identity.
 
-**Offline copy** — Complete resource content deliberately installed on the device for use without a network connection.
+**Offline copy** — Complete resource content deliberately installed on the device for use without a network connection. iOS, Android and the desktop app install them; the browser does not.
+
+**Desktop app** — The study workspace on macOS, Windows and Linux: the web interface run by the desktop shell (`apps/desktop`), with Offline copies (ADR-0107).
 
 **Query cache** — Temporary reuse of resource query results; it is not an Offline copy.
 

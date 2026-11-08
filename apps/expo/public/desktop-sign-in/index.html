@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Connexion – Bible Strong pour ordinateur</title>
+    <!-- Sign-in for the desktop app (ADR-0107). Values come from design-system/project/tokens.json. -->
+    <style>
+      :root {
+        --canvas: #f4f7ff;
+        --surface: #ffffff;
+        --ink: #101b35;
+        --muted: #58657a;
+        --line: rgba(16, 27, 53, 0.12);
+        --cta: #3f63cf;
+        --cta-ink: #f9fbff;
+        --accent-ink: #173a8a;
+        --sans: 'Pulp Display', ui-sans-serif, system-ui, sans-serif;
+        --serif: 'Literata', ui-serif, Georgia, serif;
+        color-scheme: light dark;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --canvas: #0e1521;
+          --surface: #121b2a;
+          --ink: #edf2ff;
+          --muted: #abb7c9;
+          --line: rgba(170, 192, 232, 0.16);
+          --cta: #7e9cf2;
+          --cta-ink: #0e1521;
+          --accent-ink: #b9c9fa;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 20px;
+        background: var(--canvas);
+        color: var(--ink);
+        font: 400 16px/24px var(--sans);
+      }
+      main {
+        width: 100%;
+        max-width: 440px;
+        padding: 24px;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: var(--surface);
+        text-align: center;
+      }
+      .mark {
+        width: 56px;
+        height: 56px;
+        margin: 4px auto 16px;
+      }
+      .eyebrow {
+        margin: 0 0 8px;
+        color: var(--muted);
+        font: 500 14px/20px var(--sans);
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font: 400 36px/1.25 var(--serif);
+      }
+      p {
+        margin: 0 0 24px;
+      }
+      button.cta {
+        width: 100%;
+        min-height: 48px;
+        padding: 0 20px;
+        border: 0;
+        border-radius: 999px;
+        background: var(--cta);
+        color: var(--cta-ink);
+        font: 600 0.9rem/20px var(--sans);
+        cursor: pointer;
+        transition: opacity 180ms ease-out;
+      }
+      button.cta:disabled {
+        opacity: 0.6;
+        cursor: progress;
+      }
+      button.link {
+        margin-top: 16px;
+        padding: 8px 12px;
+        border: 0;
+        background: none;
+        color: var(--accent-ink);
+        font: 400 16px/24px var(--sans);
+        cursor: pointer;
+      }
+      button:focus-visible {
+        outline: 2px solid #5983f0;
+        outline-offset: 3px;
+      }
+      .status {
+        min-height: 24px;
+        margin: 16px 0 0;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <svg class="mark" viewBox="0 0 102 102" role="img" aria-label="Bible Strong">
+        <defs>
+          <radialGradient id="bs-ring" cx="50%" cy="0%" r="100%">
+            <stop offset="0%" stop-color="#000000" stop-opacity="0.2" />
+            <stop offset="100%" stop-color="#000000" stop-opacity="0.5" />
+          </radialGradient>
+        </defs>
+        <circle cx="51" cy="51" r="51" fill="#ffffff" />
+        <circle cx="51" cy="51" r="47.13" fill="none" stroke="url(#bs-ring)" stroke-width="7.74" />
+        <circle cx="51" cy="51" r="23.5" fill="#5983f0" />
+      </svg>
+      <p class="eyebrow" data-text="eyebrow"></p>
+      <h1 data-text="title"></h1>
+      <p data-text="body"></p>
+      <button class="cta" type="button" id="continue" disabled></button>
+      <button class="link" type="button" id="cancel" data-text="cancel"></button>
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+    </main>
+    <script type="module" src="./sign-in.js"></script>
+  </body>
+</html>

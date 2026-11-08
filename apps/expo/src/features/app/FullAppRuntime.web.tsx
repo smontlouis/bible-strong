@@ -7,7 +7,7 @@ import { useWorkspaceRoutePanel } from '~navigation/useWorkspaceRoutePanel'
 import WorkspaceLayout from '~features/app-switcher/WorkspaceLayout'
 import * as Sentry from '@sentry/react-native'
 import { Stack, useLocalSearchParams, usePathname, useSegments } from 'expo-router'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { RootSiblingParent } from 'react-native-root-siblings'
 import TrackPlayer from 'react-native-track-player'
 
@@ -48,7 +48,8 @@ const NavigationTracking = () => {
   return null
 }
 
-const FullAppRuntime = ({ theme }: { theme: Theme }) => {
+/** `children` mount inside the workspace providers: the desktop app adds its shell there. */
+const FullAppRuntime = ({ theme, children }: { theme: Theme; children?: ReactNode }) => {
   const panel = useWorkspaceRoutePanel()
   useEffect(() => {
     void TrackPlayer.registerPlaybackService(() => PlaybackService)
@@ -61,6 +62,7 @@ const FullAppRuntime = ({ theme }: { theme: Theme }) => {
           <BookSelectorSheetProvider>
             <StrongAudioProvider>
               <InitHooks />
+              {children}
               <NavigationTracking />
               <WorkspaceLayout>
                 <Stack

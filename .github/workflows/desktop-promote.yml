@@ -1,0 +1,42 @@
+name: Desktop promote
+
+# Publishes a draft desktop release built by `Desktop release`, once its installers were tested,
+# and points the readers' updaters at it: the updater reads `latest.json` from the fixed
+# `desktop-latest` release, so other releases of this repository never redirect it (ADR-0107).
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Desktop version to publish, for example 0.1.0
+        required: true
+
+concurrency:
+  group: desktop-release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    environment: desktop-release
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TAG: desktop-v${{ inputs.version }}
+    steps:
+      - name: Check out the source
+        uses: actions/checkout@v5
+
+      - name: Publish the release
+        run: gh release edit "$TAG" --draft=false --latest=false
+
+      - name: Point the updaters at it
+        run: |
+          gh release download "$TAG" --pattern latest.json --dir manifest
+          gh release view desktop-latest >/dev/null 2>&1 ||
+            gh release create desktop-latest --prerelease --title "Desktop updater" \
+              --notes "Updater manifest of the desktop app. Do not delete."
+          gh release upload desktop-latest manifest/latest.json --clobber

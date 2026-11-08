@@ -2760,5 +2760,12 @@
   "Sélectionnez des mots": "Select words",
   "Sélectionnez des mots pour voir leur hébreu ou leur grec.": "Select words to see their Hebrew or Greek.",
   "Les mots de la {{version}} ne sont pas reliés aux numéros Strong.": "The words of the {{version}} are not linked to Strong's numbers.",
-  "Aucun mot hébreu ou grec dans la sélection.": "No Hebrew or Greek word in the selection."
+  "Aucun mot hébreu ou grec dans la sélection.": "No Hebrew or Greek word in the selection.",
+  "desktop.update.available": "Bible Strong {{version}} is ready.",
+  "desktop.update.restart": "Restart",
+  "desktop.update.installing": "Installing the update…",
+  "desktop.update.upToDate": "Bible Strong is up to date.",
+  "desktop.update.failed": "The update could not be checked. Try again later.",
+  "desktop.signIn.continueInBrowser": "Continue signing in in your browser.",
+  "desktop.signIn.cancel": "Cancel"
 }

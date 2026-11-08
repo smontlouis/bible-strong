@@ -12,6 +12,8 @@
     "dev:expo:web": "yarn workspace @bible-strong/expo web",
     "dev:expo:ios": "yarn workspace @bible-strong/expo ios",
     "dev:expo:android": "yarn workspace @bible-strong/expo android",
+    "dev:desktop:web": "yarn workspace @bible-strong/desktop web:dev",
+    "dev:desktop": "yarn workspace @bible-strong/desktop dev",
     "clean:expo:ios": "yarn workspace @bible-strong/expo clean:ios",
     "dev:site": "yarn workspace @bible-strong/site dev",
     "dev:world": "yarn workspace @bible-strong/world dev",

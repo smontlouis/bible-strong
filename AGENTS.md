@@ -15,6 +15,7 @@ Before designing or restyling a public page, a video or a share image, read `des
 ## Workspace layout
 
 - `apps/expo` — multiplatform Expo application for iOS, Android, and Web (`@bible-strong/expo`).
+- `apps/desktop` — Tauri shell that runs the Expo web export on macOS, Windows and Linux, with Offline copies (`@bible-strong/desktop`).
 - `apps/site` — public TanStack Start site (`@bible-strong/site`).
 - `apps/world` — explorable illustrated world with multiplayer and games (`@bible-strong/world`).
 - `apps/api` — API workspace and Firebase functions (`@bible-strong/api-functions`).
@@ -25,7 +26,7 @@ Before designing or restyling a public page, a video or a share image, read `des
 - `packages/bible-reference-parser` — Bible passage reference parser.
 - `packages/ai-contract` — public API contract of the separately hosted study assistant.
 
-App-specific instructions live in nested `AGENTS.md` files. In particular, read `apps/expo/AGENTS.md` before changing the Expo app and `apps/world/AGENTS.md` before changing World.
+App-specific instructions live in nested `AGENTS.md` files. In particular, read `apps/expo/AGENTS.md` before changing the Expo app, `apps/desktop/AGENTS.md` before changing the desktop app, and `apps/world/AGENTS.md` before changing World.
 
 ## Essential commands
 
@@ -37,7 +38,7 @@ yarn test
 yarn build
 ```
 
-Start one product from the root with `yarn dev:expo`, `yarn dev:site`, `yarn dev:world`, `yarn dev:api`, `yarn dev:studio`, or `yarn dev:resources`. Resource-authoring commands use the `resources:<domain>:<action>` prefix; production import, upload, and activation remain owned by the Resource service. Run a workspace-specific command with `yarn workspace <package-name> <script>`.
+Start one product from the root with `yarn dev:expo`, `yarn dev:desktop` (after `yarn dev:desktop:web`), `yarn dev:site`, `yarn dev:world`, `yarn dev:api`, `yarn dev:studio`, or `yarn dev:resources`. Resource-authoring commands use the `resources:<domain>:<action>` prefix; production import, upload, and activation remain owned by the Resource service. Run a workspace-specific command with `yarn workspace <package-name> <script>`.
 
 ## Dependency rules
 

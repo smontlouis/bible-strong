@@ -9,6 +9,7 @@
     "paths": {
       "~assets/*": ["src/assets/*"],
       "~common/*": ["src/common/*"],
+      "~desktop/*": ["src/desktop/*"],
       "~devtools/*": ["src/devtools/*"],
       "~features/*": ["src/features/*"],
       "~helpers/*": ["src/helpers/*"],

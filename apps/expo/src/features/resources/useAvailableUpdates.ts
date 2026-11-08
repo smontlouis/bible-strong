@@ -1,6 +1,6 @@
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useEffect, useEffectEvent } from 'react'
-import { Platform } from 'react-native'
+import { supportsOfflineCopies } from '~desktop/isDesktop'
 
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
 import {
@@ -21,8 +21,8 @@ const NO_UPDATES = new Map<string, string>()
 
 const useAvailableUpdateMap = () => {
   const registry = useOfflineResourceRegistry()
-  // Offline copies are not managed on web.
-  return Platform.OS === 'web' ? NO_UPDATES : getAvailableUpdates(registry)
+  // The browser manages no Offline copy.
+  return supportsOfflineCopies ? getAvailableUpdates(registry) : NO_UPDATES
 }
 
 export const useAvailableUpdatesIndicator = () => {

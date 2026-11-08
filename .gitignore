@@ -203,3 +203,7 @@ scripts/google-service-account.json
 
 # Generated video exports
 *.mp4
+
+# Desktop app: the web export it bundles, and the sign-in page settings written at build
+/apps/expo/dist-desktop/
+/apps/expo/public/desktop-sign-in/config.json

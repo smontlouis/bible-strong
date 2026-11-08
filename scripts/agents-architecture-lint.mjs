@@ -15,6 +15,8 @@ const allowedExpoSqliteFiles = new Set([
   'apps/expo/src/helpers/sqlite.ts',
   'apps/expo/src/helpers/biblesDb.ts',
   'apps/expo/src/helpers/getSQLTransaction.ts',
+  // The desktop app's expo-sqlite (ADR-0107): it takes the package's types to keep its contract.
+  'apps/expo/src/desktop/shims/expoSqlite.ts',
 ])
 
 const getFiles = dir => {

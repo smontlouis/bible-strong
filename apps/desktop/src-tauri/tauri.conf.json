@@ -1,0 +1,76 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Bible Strong",
+  "mainBinaryName": "Bible Strong",
+  "version": "../package.json",
+  "identifier": "com.smontlouis.biblestrong",
+  "build": {
+    "frontendDist": "../../expo/dist-desktop",
+    "devUrl": "http://localhost:9090",
+    "beforeDevCommand": "",
+    "beforeBuildCommand": ""
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [],
+    "security": {
+      "csp": null,
+      "dangerousDisableAssetCspModification": true,
+      "capabilities": [
+        "default",
+        {
+          "identifier": "updater",
+          "description": "Signed self-updates, outside the Mac App Store.",
+          "windows": ["main"],
+          "permissions": ["updater:default"]
+        }
+      ]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["app", "dmg", "nsis", "appimage", "deb"],
+    "category": "Education",
+    "shortDescription": "Bible d'étude",
+    "longDescription": "Bible d'étude avec concordance Strong, dictionnaires, commentaires et lecture hors ligne.",
+    "copyright": "© Stéphane Montlouis-Calixte",
+    "publisher": "Stéphane Montlouis-Calixte",
+    "homepage": "https://bible-strong.app",
+    "createUpdaterArtifacts": true,
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "11.0",
+      "entitlements": "Entitlements.plist",
+      "hardenedRuntime": true
+    },
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": ["French", "English"],
+        "displayLanguageSelector": false
+      },
+      "webviewInstallMode": { "type": "downloadBootstrapper" }
+    },
+    "linux": {
+      "deb": { "section": "education" }
+    }
+  },
+  "plugins": {
+    "deep-link": {
+      "desktop": { "schemes": ["biblestrong"] }
+    },
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEVCRUYyQzAxQzk2NjBDQUUKUldTdURHYkpBU3p2NjcyTTVsZEJKa092aWZVOEdsbVluSldEZ0srL3dlL1ZSd3U5bk5kNWxnUzAK",
+      "endpoints": [
+        "https://github.com/smontlouis/bible-strong/releases/download/desktop-latest/latest.json"
+      ],
+      "windows": { "installMode": "passive" }
+    }
+  }
+}

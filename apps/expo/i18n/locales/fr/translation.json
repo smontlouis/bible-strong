@@ -2788,5 +2788,12 @@
   "Sélectionnez des mots": "Sélectionnez des mots",
   "Sélectionnez des mots pour voir leur hébreu ou leur grec.": "Sélectionnez des mots pour voir leur hébreu ou leur grec.",
   "Les mots de la {{version}} ne sont pas reliés aux numéros Strong.": "Les mots de la {{version}} ne sont pas reliés aux numéros Strong.",
-  "Aucun mot hébreu ou grec dans la sélection.": "Aucun mot hébreu ou grec dans la sélection."
+  "Aucun mot hébreu ou grec dans la sélection.": "Aucun mot hébreu ou grec dans la sélection.",
+  "desktop.update.available": "La version {{version}} de Bible Strong est prête.",
+  "desktop.update.restart": "Redémarrer",
+  "desktop.update.installing": "Installation de la mise à jour…",
+  "desktop.update.upToDate": "Bible Strong est à jour.",
+  "desktop.update.failed": "La mise à jour n’a pas pu être vérifiée. Réessayez plus tard.",
+  "desktop.signIn.continueInBrowser": "Poursuivez la connexion dans votre navigateur.",
+  "desktop.signIn.cancel": "Annuler"
 }

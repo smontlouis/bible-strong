@@ -145,6 +145,16 @@
         "3214"
       ],
       "port": 3214
+    },
+    {
+      "name": "desktop-web",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": [
+        "workspace",
+        "@bible-strong/desktop",
+        "web:dev"
+      ],
+      "port": 9090
     }
   ]
 }

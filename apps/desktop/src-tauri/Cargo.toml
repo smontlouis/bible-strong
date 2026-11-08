@@ -1,0 +1,66 @@
+[package]
+name = "bible-strong-desktop"
+version = "0.1.0"
+description = "Bible Strong for macOS, Windows and Linux"
+authors = ["Stéphane Montlouis-Calixte"]
+license = "UNLICENSED"
+edition = "2021"
+rust-version = "1.85"
+
+[lib]
+name = "bible_strong_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+base64 = "0.22"
+getrandom = "0.3"
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-deep-link = "2"
+tauri-plugin-opener = "2"
+tauri-plugin-process = "2"
+tauri-plugin-window-state = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rusqlite = { version = "0.37", features = ["bundled"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream", "http2"] }
+futures-util = "0.3"
+tokio = { version = "1", features = ["fs", "io-util", "net", "rt", "sync", "time", "macros"] }
+zip = { version = "2.6", default-features = false, features = ["aes-crypto", "deflate"] }
+hkdf = "0.12"
+sha2 = "0.10"
+hex = "0.4"
+base64 = "0.22"
+url = "2"
+fs4 = "0.13"
+getrandom = "0.3"
+thiserror = "2"
+log = "0.4"
+
+[target.'cfg(any(target_os = "macos", windows, target_os = "linux"))'.dependencies]
+tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
+tauri-plugin-updater = { version = "2", optional = true }
+
+# Pictures of the page in development builds (`devtools.rs`): the versions Tauri already uses.
+[target.'cfg(target_os = "macos")'.dependencies]
+block2 = "0.6"
+objc2-app-kit = { version = "0.3", default-features = false, features = ["std", "NSImage", "NSImageRep", "NSBitmapImageRep"] }
+objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSData", "NSDictionary", "NSError", "NSString"] }
+objc2-web-kit = { version = "0.3", default-features = false, features = ["std", "block2", "objc2-app-kit", "WKWebView", "WKSnapshotConfiguration"] }
+
+[features]
+default = ["updater"]
+# The Mac App Store updates the app itself: its build turns the updater off.
+updater = ["dep:tauri-plugin-updater"]
+
+[dev-dependencies]
+tempfile = "3"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

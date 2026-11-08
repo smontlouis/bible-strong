@@ -1,0 +1,53 @@
+name: Desktop check
+
+# Compiles the desktop shell and runs its Rust tests on the three systems it ships to, for every
+# change to it (ADR-0107). No secret: the binary built here holds no Offline-copy key.
+
+on:
+  pull_request:
+    paths:
+      - apps/desktop/**
+      - .github/workflows/desktop-check.yml
+  push:
+    branches: [master]
+    paths:
+      - apps/desktop/**
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Rust tests on ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-latest, windows-latest, ubuntu-22.04]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 40
+    steps:
+      - name: Check out the source
+        uses: actions/checkout@v5
+
+      - name: Install the Linux webview dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust builds
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri -> target
+
+      - name: Test the installer build
+        run: cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml
+
+      - name: Check the Mac App Store build, without the updater
+        if: runner.os == 'macOS'
+        env:
+          TAURI_CONFIG: '{"app":{"security":{"capabilities":["default"]}}}'
+        run: cargo check --manifest-path apps/desktop/src-tauri/Cargo.toml --no-default-features

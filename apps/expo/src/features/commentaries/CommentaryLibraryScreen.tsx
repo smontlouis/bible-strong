@@ -7,7 +7,8 @@ import {
   type CommentaryLanguage,
 } from '@bible-strong/resource-catalog/commentaries'
 import React from 'react'
-import { Platform, SectionList, TouchableOpacity } from 'react-native'
+import { SectionList, TouchableOpacity } from 'react-native'
+import { supportsOfflineCopies } from '~desktop/isDesktop'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import FiltersHeader from '~common/FiltersHeader'
@@ -85,7 +86,7 @@ const CommentaryLibraryItem = ({
               {entry.author}
             </Text>
           </Box>
-          {installed && Platform.OS !== 'web' && (
+          {installed && supportsOfflineCopies && (
             <Box className="overflow-hidden border-continuous w-[30px] h-[28px] items-center justify-center">
               <FeatherIcon name="cloud" size={18} color="primary" />
             </Box>

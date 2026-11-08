@@ -4,9 +4,9 @@ import { resolveUniverseColors } from '~themes/universeColors'
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 import { getAppleReviewing } from '~helpers/getAppleReviewing'
 import { Image } from 'expo-image'
-import * as Updates from 'expo-updates'
 import { useSetAtom } from 'jotai/react'
-import { memo, useRef, useState, type ComponentPropsWithRef as UIComponentProps } from 'react'
+import { memo, useRef, type ComponentPropsWithRef as UIComponentProps } from 'react'
+import { supportsOfflineCopies } from '~desktop/isDesktop'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, Platform } from 'react-native'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
@@ -26,9 +26,9 @@ import Text from '~common/ui/Text'
 import UserAvatar from '~common/ui/UserAvatar'
 import DeleteAccountModal from '~features/profile/components/DeleteAccountModal'
 import { useAvailableUpdatesIndicator } from '~features/resources/useAvailableUpdates'
+import { useAppUpdateCheck } from './useAppUpdateCheck'
 import extractFirstName from '~helpers/extractFirstName'
 import { nukeApp } from '~helpers/nukeApp'
-import { toast } from '~helpers/toast'
 import useLanguage from '~helpers/useLanguage'
 import useLogin from '~helpers/useLogin'
 import { changelogModalAtom } from '~state/app'
@@ -88,7 +88,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
   const bottomInset = usePageBottomInset()
   const deleteAccountModalRef = useRef<SheetRef>(null)
   const contactDeveloperRef = useRef<SheetRef>(null)
-  const [isCheckingUpdate, setIsCheckingUpdate] = useState(false)
+  const appUpdate = useAppUpdateCheck()
   const openChangelogModal = useSetAtom(changelogModalAtom)
   const { hasUpdates } = useAvailableUpdatesIndicator()
 
@@ -105,27 +105,6 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
       destructive: true,
     })
     if (confirmed) await logout()
-  }
-
-  const checkForUpdate = async () => {
-    if (isCheckingUpdate) return
-    setIsCheckingUpdate(true)
-    try {
-      const result = await Updates.checkForUpdateAsync()
-      // A rollback to the embedded JavaScript is not "available", yet it still has to be fetched.
-      if (result.isAvailable || result.isRollBackToEmbedded) {
-        toast.info(t('app.updateAvailable'))
-        await Updates.fetchUpdateAsync()
-        toast.success(t('app.updateReady'))
-      } else {
-        toast.info(t('app.noUpdateAvailable'))
-      }
-    } catch (error) {
-      console.log(error)
-      toast.error(t('app.updateError'))
-    } finally {
-      setIsCheckingUpdate(false)
-    }
   }
 
   const appleIsReviewing = getAppleReviewing()
@@ -255,7 +234,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
               label={t('settings.keyboardShortcuts')}
             />
           )}
-          {Platform.OS !== 'web' && (
+          {supportsOfflineCopies && (
             <ListRow
               route="Downloads"
               accessibilityLabel={hasUpdates ? t('accessibility.downloadsWithUpdates') : undefined}
@@ -264,11 +243,11 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
               label={t('Gestion des téléchargements')}
             />
           )}
-          {Platform.OS !== 'web' && (
+          {appUpdate && (
             <ListRow
-              onPress={checkForUpdate}
+              onPress={appUpdate.check}
               icon={
-                isCheckingUpdate ? (
+                appUpdate.isChecking ? (
                   <ActivityIndicator size="small" color={theme.colors.grey} />
                 ) : (
                   <FeatherIcon name="refresh-cw" size={18} color="grey" />
