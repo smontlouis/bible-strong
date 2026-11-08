@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import { useAtom } from 'jotai'
 import { useQuery } from '@tanstack/react-query'
 import type { StudySource, StudyWidget as Descriptor } from '@bible-strong/ai-contract/contract'
 import Header from '~common/Header'
@@ -15,6 +16,7 @@ import SourceExcerptSheet from '../SourceExcerptSheet'
 import { messageSegments } from '../widgetSegments'
 import { resolveExample } from './resolveExample'
 import { useDemoAssistant } from './demoAssistant'
+import { scriptedAnswersAtom } from './scriptedAnswers'
 
 const passage = (book: number, chapter: number, start: number, end = start, version = 'LSG') => ({
   book,
@@ -247,6 +249,8 @@ export default function WidgetsPlayground() {
   const navigate = usePushRouteOnce()
   const [source, setSource] = useState<StudySource | null>(null)
   const assistant = useDemoAssistant(DEMOS)
+  // The real assistant answers with these, through its whole path (App Check fails here).
+  const [scripted, setScripted] = useAtom(scriptedAnswersAtom)
   return (
     <AssistantSheetContext.Provider value={demoSheet(navigate, setSource)}>
       <Container className="bg-reverse">
@@ -257,6 +261,12 @@ export default function WidgetsPlayground() {
               Ouvrir dans l’assistant
             </Toggle>
           )}
+          <Toggle
+            value={!!scripted}
+            onChange={() => setScripted(scripted ? null : [DEMOS[0], RESOURCE_DEMOS[1], DEMOS[1]])}
+          >
+            Réponses scriptées
+          </Toggle>
         </HStack>
         <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 12 }}>
           {[...RESOURCE_DEMOS, ...DEMOS].map(demo => (

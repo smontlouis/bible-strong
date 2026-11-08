@@ -875,3 +875,23 @@ button.bs-quote-name {
   font-size: 14px;
   line-height: 21px;
 }
+/* A card placed in an answer being written comes in from the top down (WidgetReveal.web.tsx);
+   the answer waits answerPace.widgetPauseMs for it. */
+.bs-widget-reveal {
+  animation: bs-widget-reveal 700ms cubic-bezier(0.45, 0, 0.55, 1) both;
+}
+@keyframes bs-widget-reveal {
+  from {
+    clip-path: inset(0 0 100% 0);
+    opacity: 0.4;
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bs-widget-reveal {
+    animation: none;
+  }
+}

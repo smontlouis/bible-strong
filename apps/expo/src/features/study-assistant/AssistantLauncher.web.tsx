@@ -3,6 +3,7 @@ import ErrorState from './ErrorState.web'
 import { createPortal } from 'react-dom'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useSelector } from 'react-redux'
+import { useAtomValue } from 'jotai'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
 import {
@@ -31,6 +32,7 @@ import { useAssistantSession } from './useAssistantSession'
 import { useReadingContext } from './useReadingContext.web'
 import './assistant-modal.css'
 import { LiveDictationAdapter } from './dictationAdapter'
+import { scriptedAnswersAtom, scriptedRequest } from './playground/scriptedAnswers'
 import { captureDictationAudio, dictationSupported } from './dictationAudio.web'
 import { convertMessage } from './messageRuntime'
 import { AssistantMessage, UserMessage } from './MessageRenderer.web'
@@ -61,6 +63,7 @@ function Icon({
     | 'bug'
     | 'pending'
     | 'error'
+    | 'down'
 }) {
   const paths = {
     error: 'M12 8v5m0 3.5v.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z',
@@ -75,6 +78,7 @@ function Icon({
     stopFilled: 'M7 7h10v10H7z',
     back: 'm14 5-7 7 7 7',
     trash: 'M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 10v7M14 10v7',
+    down: 'M12 5v14m7-7-7 7-7-7',
   }
   return (
     <svg
@@ -156,11 +160,14 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     if (!value) dictation.cancel()
   }
   const loginRef = useRef<HTMLButtonElement | null>(null)
+  const scripted = useAtomValue(scriptedAnswersAtom)
   const session = useAssistantSession({
     account,
     signedIn,
     liveContext,
+    reduceMotion: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
     createRequest: ({ isCurrent }) => {
+      if (__DEV__ && scripted) return scriptedRequest(scripted)
       const debug = __DEV__ && debugOpen ? debugSession : null
       if (!debug) return undefined
       return (input, signal, emit) => {
@@ -220,6 +227,38 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     attachContext,
     send,
   } = session
+  // Opening a conversation shows its last question at the top, not the end of its last
+  // answer (2026-11-08). A question asked here rises on its own (`turnAnchor` below).
+  const viewportRef = useRef<HTMLDivElement | null>(null)
+  const hasMessages = current.messages.length > 0
+  useEffect(() => {
+    const viewport = viewportRef.current
+    if (!open || historyOpen || !hasMessages || busy || !viewport) return
+    let stopped = false
+    const settle = () => {
+      if (stopped) return
+      const questions = viewport.querySelectorAll('.bs-assistant-message-user')
+      const question = questions[questions.length - 1]
+      if (!question) return
+      const top =
+        question.getBoundingClientRect().top -
+        viewport.getBoundingClientRect().top +
+        viewport.scrollTop
+      viewport.scrollTop = top - parseFloat(getComputedStyle(viewport).paddingTop)
+    }
+    // Held in place while the cards above load, until the reader scrolls.
+    const timers = [0, 150, 400, 900].map(delay => window.setTimeout(settle, delay))
+    const stop = () => {
+      stopped = true
+    }
+    const events = ['wheel', 'touchstart', 'pointerdown', 'keydown'] as const
+    events.forEach(name => viewport.addEventListener(name, stop, { passive: true }))
+    return () => {
+      timers.forEach(timer => window.clearTimeout(timer))
+      events.forEach(name => viewport.removeEventListener(name, stop))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, historyOpen, current.id, hasMessages])
   useEffect(() => {
     if (open || !ready) return
     const sleepTimer = window.setTimeout(() => setAvatarSleeping(true), 10_000)
@@ -424,7 +463,15 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
             <ThreadPrimitive.Root
               className={`bs-assistant-thread ${!current.messages.length ? 'bs-assistant-thread-empty' : ''}`}
             >
-              <ThreadPrimitive.Viewport className="bs-assistant-viewport">
+              <ThreadPrimitive.Viewport
+                ref={viewportRef}
+                className="bs-assistant-viewport"
+                // A question asked rises to the top and its answer is written below it; the
+                // page never follows the text, so the reader keeps their place.
+                turnAnchor="top"
+                scrollToBottomOnInitialize={false}
+                scrollToBottomOnThreadSwitch={false}
+              >
                 {!current.messages.length && (
                   <div className="bs-assistant-welcome">
                     <h2>{t('assistant.modal.welcome')}</h2>
@@ -464,6 +511,15 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                   />
                 )}
                 <ThreadPrimitive.ViewportFooter className="bs-assistant-compose-area">
+                  {hasMessages && (
+                    <ThreadPrimitive.ScrollToBottom
+                      className="bs-assistant-to-end"
+                      aria-label={t('assistant.modal.toEnd')}
+                      title={t('assistant.modal.toEnd')}
+                    >
+                      <Icon name="down" />
+                    </ThreadPrimitive.ScrollToBottom>
+                  )}
                   {signedIn ? (
                     <ComposerPrimitive.Root className="bs-assistant-composer">
                       <ComposerPrimitive.Input

@@ -110,6 +110,8 @@ function Assistant() {
     signedIn: true,
     liveContext: null,
     onAction: () => {},
+    // Persistence only: the answer shows as it arrives, without the reading pace.
+    reduceMotion: true,
   })
   useEffect(() => {
     session = value

@@ -4,8 +4,9 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { FullWindowOverlay } from 'react-native-screens'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { useSetAtom } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { usePathname, useRouter } from 'expo-router'
+import { useReducedMotion } from 'react-native-reanimated'
 import { useExternalStoreRuntime, type AppendMessage } from '@assistant-ui/react-native'
 import type { StudySource } from '@bible-strong/ai-contract/contract'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
@@ -24,6 +25,7 @@ import {
 } from './assistantSheetContext'
 import { connectAssistantDictation } from './client'
 import { LiveDictationAdapter } from './dictationAdapter'
+import { scriptedAnswersAtom, scriptedRequest } from './playground/scriptedAnswers'
 import { captureDictationAudio } from './dictationAudio'
 import { convertMessage } from './messageRuntime'
 import type { StrobiAnimation } from './StrobiAvatar'
@@ -79,10 +81,14 @@ function AccountAssistant({ account }: { account: string }) {
   useEffect(() => {
     if (!open || historyOpen) dictation.cancel()
   }, [open, historyOpen, dictation])
+  const scripted = useAtomValue(scriptedAnswersAtom)
+  const reduceMotion = useReducedMotion()
   const session = useAssistantSession({
     account,
     signedIn: true,
     liveContext,
+    reduceMotion,
+    createRequest: () => (__DEV__ && scripted ? scriptedRequest(scripted) : undefined),
     onAction: action => {
       const tab = createTabForAssistantAction(action)
       if (!tab) {

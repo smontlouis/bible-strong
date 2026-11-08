@@ -43,6 +43,30 @@ it. The native renderer takes text, not a syntax tree, so `linkifyBibleReference
 Bible references as links in the source itself (code, existing links and a link still being
 streamed are left alone).
 
+Reading pace (2026-11-08, both presentations). The model writes far faster than anyone reads, so
+`answerReveal.ts` sits between the run and the screen: the answer is shown word by word at
+`answerPace.charactersPerSecond` (50, a little faster than silent reading), speeding up gently
+when a long answer piles up (`backlogSpeedup`). The received text is never held back: it is
+saved as soon as it is complete, only the screen waits, and the session counts as busy until the
+answer is fully shown. A card link is shown at once and the text then waits `widgetPauseMs` while
+the card comes in from the top down (`widgets/WidgetReveal`: a cover sliding off on native, a
+`clip-path` on the web); a link that may still become a card is never shown in halves, and a card
+waits for its place in the text instead of showing at the end of the message. Stop shows at once
+everything received, and so does a new question; an error or an interruption shows what was
+received without waiting; reduced motion turns the pace off. Tune the pace in `answerPace` only.
+
+Scrolling (2026-11-08, both presentations). The page never follows the text being written. A
+question just asked rises to the top of the page and its answer is written below it: on the web
+with assistant-ui's `turnAnchor="top"`, on native in `AssistantThread.tsx`, which measures its
+cells, keeps room under a short answer so its question can reach the top, holds the question there
+until the reader scrolls, and keeps the end in view when the keyboard opens on it. Opening a
+conversation shows its last question at the top. A floating button goes to the end of the answer.
+
+Scripted answers (development). App Check refuses the assistant service in simulators, so
+`playground/scriptedAnswers.ts` can answer instead, through the whole real path (run, pace, cards,
+scrolling): turn it on from the cards playground (`/ai-widgets`, « Réponses scriptées ») or from
+a debugger with `__BIBLE_STRONG_SCRIPTED_ANSWERS__([{ answer, widgets }])`.
+
 Bundle Mode. A worklet can only call an npm module such as `remend` when
 `react-native-worklets` runs in Bundle Mode. It is enabled for native bundles in two places:
 `babel.config.js` (the Worklets plugin with `bundleMode` and `importForwarding` for `remend`; the

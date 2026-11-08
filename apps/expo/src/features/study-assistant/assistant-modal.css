@@ -271,6 +271,37 @@
   margin-top: 0;
   padding: 0;
 }
+/* The way down to the end of an answer, floating over it above the composer (2026-11-08). */
+.bs-assistant-to-end {
+  position: absolute;
+  top: -44px;
+  left: 50%;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--as-surface);
+  color: var(--as-ink);
+  box-shadow: 0 6px 20px rgba(16, 27, 53, 0.14);
+  cursor: pointer;
+  transform: translateX(-50%);
+  transition:
+    opacity 150ms,
+    transform 150ms;
+}
+.bs-assistant-to-end:disabled {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 6px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .bs-assistant-to-end {
+    transition: none;
+  }
+}
 .bs-assistant-composer {
   display: flex;
   flex-direction: column;

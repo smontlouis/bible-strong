@@ -39,6 +39,27 @@ export function messageSegments(text: string, widgetIds: ReadonlySet<string>): M
   return segments
 }
 
+/** The card link that starts exactly at `index`, with the index right after it. */
+export function widgetLinkAt(text: string, index: number): { id: string; end: number } | null {
+  const pattern = new RegExp(WIDGET_LINK.source, 'y')
+  pattern.lastIndex = index
+  const match = pattern.exec(text)
+  return match ? { id: match[2], end: index + match[0].length } : null
+}
+
+/**
+ * Whether the tail of a streamed answer may still turn into a card link once more text
+ * arrives: a title being written, then the start of the card address.
+ */
+export function mayBecomeWidgetLink(tail: string): boolean {
+  const title = /^\[[^\]\n]{0,200}/.exec(tail)
+  if (!title) return false
+  const after = tail.slice(title[0].length)
+  const address = `](${WIDGET_LINK_PREFIX}`
+  if (after.length <= address.length) return address.startsWith(after)
+  return after.startsWith(address) && /^[a-z0-9]{0,8}$/.test(after.slice(address.length))
+}
+
 /** The widget ids an answer places, so the message does not show them a second time. */
 export const placedWidgetIds = (text: string, widgetIds: ReadonlySet<string>) =>
   new Set(

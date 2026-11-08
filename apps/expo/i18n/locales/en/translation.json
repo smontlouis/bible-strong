@@ -2450,6 +2450,7 @@
   "assistant.modal.contextIntro": "Your reading is right here. Ask a question or choose a way to explore it.",
   "assistant.modal.intro": "Wondering about a passage? Explore it with the texts and resources in Bible Strong.",
   "assistant.modal.incomplete": "Interrupted or incomplete response.",
+  "assistant.modal.toEnd": "Go to the end of the answer",
   "assistant.modal.attachContext": "Attach {{context}} to the question",
   "assistant.modal.detachContext": "Remove {{context}} from the question",
   "assistant.modal.free": "Free conversation",

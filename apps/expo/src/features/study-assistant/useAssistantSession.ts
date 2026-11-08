@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import type { AssistantAction } from '@bible-strong/ai-contract/contract'
 import { getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
 import { askAssistant, captureAssistantPreferences, compactAssistant } from './client'
+import { AnswerReveal } from './answerReveal'
 import { assistantAvailable } from './assistantConfig'
 import { runConversation, type ConversationRequest } from './conversationRun'
 import type { Compactor } from './conversationMemory'
@@ -42,6 +43,7 @@ export function useAssistantSession({
   onRunStart,
   onThreadSwitch,
   onCurrentThreadDeleted,
+  reduceMotion = false,
 }: {
   account: string
   signedIn: boolean
@@ -54,6 +56,8 @@ export function useAssistantSession({
   onRunStart?: () => void
   onThreadSwitch?: () => void
   onCurrentThreadDeleted?: () => void
+  /** The reader asked for less motion: answers show as they arrive. */
+  reduceMotion?: boolean
 }) {
   const { t } = useTranslation()
   const [conversations, setConversations] = useState<Conversation[]>([]),
@@ -62,12 +66,17 @@ export function useAssistantSession({
     [storageError, setStorageError] = useState(false),
     [cloudIds, setCloudIds] = useState<string[]>([])
   const [busy, setBusy] = useState(false),
+    [revealing, setRevealing] = useState(false),
     [error, setError] = useState(''),
     [retrying, setRetrying] = useState(false),
     [progress, setProgress] = useState('')
   // The context a reader took off their question; another context comes joined again.
   const [detachedKey, setDetachedKey] = useState<string | null>(null)
   const active = useRef<AbortController | null>(null)
+  // The screen shows the answer at a reading pace while the run goes as fast as it can.
+  const [reveal] = useState(() => new AnswerReveal(setCurrent, setRevealing))
+  // A run is over once its answer is fully shown.
+  const working = busy || revealing
   const receivedInitialIndex = useRef(false)
   // What the reader is looking at goes with each question, like an attachment, unless they
   // took it off (2026-11-08): it replaced a « follow my reading » setting and a pin.
@@ -131,7 +140,7 @@ export function useAssistantSession({
           setCurrent(previous => (previous.id === current.id ? newConversation() : previous))
           return
         }
-        if (active.current) return
+        if (active.current || reveal.active) return
         setCurrent(conversation)
         setConversations(previous => [
           conversation,
@@ -140,15 +149,19 @@ export function useAssistantSession({
       },
       () => setStorageError(true)
     )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account, current.id, currentIsCloud])
+  useEffect(() => () => reveal.stop(), [reveal])
+  useEffect(() => reveal.setInstant(reduceMotion), [reveal, reduceMotion])
   const publish = (conversation: Conversation) => {
-    setCurrent(conversation)
     setConversations(previous => [conversation, ...previous.filter(c => c.id !== conversation.id)])
+    // Saved as soon as it is complete, even while the screen is still revealing it.
     if (conversation.messages.at(-1)?.state !== 'streaming') {
       void saveConversation(account, conversation)
         .then(() => setStorageError(false))
         .catch(() => setStorageError(true))
     }
+    reveal.receive(conversation)
   }
   const send = (
     text: string,
@@ -173,13 +186,17 @@ export function useAssistantSession({
       setStorageError(true)
       return
     }
+    // A new question shows the end of the previous answer at once, and builds on all of it.
+    const received = reveal.active ? reveal.latest : null
+    const base = received && source === current && received.id === current.id ? received : source
+    reveal.flush()
     const controller = new AbortController()
     active.current = controller
     setBusy(true)
     setError('')
     onRunStart?.()
     return runConversation({
-      conversation: source,
+      conversation: base,
       question,
       context: readingContext,
       retryOf,
@@ -202,13 +219,13 @@ export function useAssistantSession({
     })
   }
   const startNewThread = () => {
-    if (busy) return
+    if (working) return
     onThreadSwitch?.()
     setCurrent(newConversation())
     setError('')
   }
   const switchToThread = (id: string) => {
-    if (busy) return
+    if (working) return
     const conversation = conversations.find(item => item.id === id)
     if (!conversation) return
     onThreadSwitch?.()
@@ -216,7 +233,7 @@ export function useAssistantSession({
     setError('')
   }
   const deleteThread = (id: string) => {
-    if (busy) return
+    if (working) return
     void deleteConversation(account, id)
       .then(() => {
         if (current.id === id) onCurrentThreadDeleted?.()
@@ -244,7 +261,7 @@ export function useAssistantSession({
   }
   const failedQuestion = current.messages.at(-2)
   const retry =
-    !busy && retryableErrors.includes(error) && failedQuestion?.role === 'user'
+    !working && retryableErrors.includes(error) && failedQuestion?.role === 'user'
       ? () => {
           setRetrying(true)
           void Promise.resolve(
@@ -263,7 +280,8 @@ export function useAssistantSession({
     ready,
     storageError,
     setStorageError,
-    busy,
+    /** A run is going, or its answer is still being revealed. */
+    busy: working,
     error,
     retrying,
     progress,
@@ -272,7 +290,11 @@ export function useAssistantSession({
     detachContext: () => setDetachedKey(liveContext?.key ?? null),
     attachContext: () => setDetachedKey(null),
     send,
-    cancel: () => active.current?.abort(),
+    /** Stops the run and shows at once everything it received. */
+    cancel: () => {
+      active.current?.abort()
+      reveal.flush()
+    },
     retry,
     threadList: {
       threadId: current.id,

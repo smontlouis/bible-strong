@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   MessagePrimitive,
   useAuiState,
@@ -13,6 +14,7 @@ import type {
 import AssistantMessageMarkdown from './AssistantMessageMarkdown.web'
 import ToolTimeline from './ToolTimeline.web'
 import StudyWidget from './widgets/StudyWidget.web'
+import WidgetReveal from './widgets/WidgetReveal.web'
 import { messageSegments, placedWidgetIds } from './widgetSegments'
 import { type ReadingContext } from './conversations'
 import { contextCaption } from './contextDisplay'
@@ -87,6 +89,8 @@ export function AssistantMessage({
   const widgets = dataParts<StudyWidgetDescriptor>(message.content, messagePartNames.widget)
   const tools = toolActivities(message.content)
   const streaming = message.status?.type === 'running' && busy
+  // Cards of an answer seen being written come in as it is written; older ones show at once.
+  const [live] = useState(streaming)
   const incomplete = message.status?.type === 'incomplete'
   // Cards the answer places are shown at their link; older answers keep them at the end.
   const widgetIds = new Set(widgets.map(widget => widget.id))
@@ -113,7 +117,9 @@ export function AssistantMessage({
                       )
                     const widget = widgets.find(item => item.id === segment.id)
                     return widget ? (
-                      <StudyWidget key={`widget-${widget.id}`} widget={widget} />
+                      <WidgetReveal key={`widget-${widget.id}`} animate={live}>
+                        <StudyWidget widget={widget} />
+                      </WidgetReveal>
                     ) : null
                   })}
                 </>
@@ -122,7 +128,12 @@ export function AssistantMessage({
             if (part.type !== 'data') return null
             if (part.name === messagePartNames.widget) {
               const widget = part.data as StudyWidgetDescriptor
-              return placed.has(widget.id) ? null : <StudyWidget widget={widget} />
+              // While the answer is written, a card waits for its place in the text.
+              return placed.has(widget.id) || streaming ? null : (
+                <WidgetReveal animate={live}>
+                  <StudyWidget widget={widget} />
+                </WidgetReveal>
+              )
             }
             return null
           }}

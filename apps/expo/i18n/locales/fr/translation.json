@@ -2478,6 +2478,7 @@
   "assistant.modal.contextIntro": "Votre lecture est juste là. Posez votre question ou choisissez une piste pour l’approfondir.",
   "assistant.modal.intro": "Un passage vous interroge ? Cherchons ensemble, avec les textes et les ressources de Bible Strong.",
   "assistant.modal.incomplete": "Réponse interrompue ou incomplète.",
+  "assistant.modal.toEnd": "Aller à la fin de la réponse",
   "assistant.modal.attachContext": "Joindre {{context}} à la question",
   "assistant.modal.detachContext": "Retirer {{context}} de la question",
   "assistant.modal.free": "Conversation libre",
