@@ -315,7 +315,7 @@ export const DEFAULT_GROUP_ID = 'default-group'
 export const getDefaultBibleTab = (version?: VersionCode): BibleTab => ({
   id: `bible-${generateUUID()}`,
   isRemovable: true,
-  title: 'Genèse 1:1',
+  title: `${i18n.t('Genèse')} 1:1`,
   type: 'bible',
   data: {
     selectedVersion: version || getDefaultBibleVersion(getLanguage()),
