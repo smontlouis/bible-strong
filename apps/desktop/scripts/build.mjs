@@ -47,4 +47,10 @@ if (!appStore && !env.TAURI_SIGNING_PRIVATE_KEY && existsSync(updaterKey)) {
   env.TAURI_SIGNING_PRIVATE_KEY_PASSWORD ??= ''
 }
 
-execFileSync('yarn', tauriArgs, { cwd: desktopRoot, stdio: 'inherit', env })
+// On Windows `yarn` is a `.cmd` script, which only a shell can start.
+execFileSync('yarn', tauriArgs, {
+  cwd: desktopRoot,
+  stdio: 'inherit',
+  env,
+  shell: process.platform === 'win32',
+})

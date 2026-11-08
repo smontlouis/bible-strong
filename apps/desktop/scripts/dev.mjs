@@ -10,9 +10,11 @@ if (!readArchiveKeys()) {
   console.warn('[desktop] BIBLE_STRONG_ARCHIVE_KEYS is missing: Offline copies will not install')
 }
 
+// On Windows `yarn` is a `.cmd` script, which only a shell can start.
 const child = spawn('yarn', ['tauri', 'dev', '--config', 'src-tauri/tauri.dev.conf.json'], {
   cwd: join(dirname(fileURLToPath(import.meta.url)), '..'),
   stdio: 'inherit',
   env: withArchiveKeys(process.env),
+  shell: process.platform === 'win32',
 })
 child.on('exit', code => process.exit(code ?? 0))

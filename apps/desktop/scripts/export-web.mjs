@@ -10,6 +10,7 @@ const expoRoot = join(dirname(fileURLToPath(import.meta.url)), '../../expo')
 const outDir = join(expoRoot, 'dist-desktop')
 
 rmSync(outDir, { recursive: true, force: true })
+// On Windows `yarn` is a `.cmd` script, which only a shell can start.
 execFileSync(
   'yarn',
   [
@@ -27,6 +28,7 @@ execFileSync(
   {
     cwd: expoRoot,
     stdio: 'inherit',
+    shell: process.platform === 'win32',
     env: {
       ...process.env,
       EXPO_NO_DOTENV: '1',
