@@ -13,6 +13,7 @@ module.exports = function (api) {
           alias: {
             '~assets': './src/assets',
             '~common': './src/common',
+            '~desktop': './src/desktop',
             '~devtools': './src/devtools',
             '~features': './src/features',
             '~helpers': './src/helpers',

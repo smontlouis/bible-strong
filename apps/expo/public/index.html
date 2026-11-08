@@ -5,6 +5,12 @@
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title>%WEB_TITLE%</title>
+    <!-- Desktop app only (ADR-0107): its shell serves the state the bundle reads synchronously,
+         fresh on every load, as a blocking script that runs before the bundle. -->
+    <script>
+      if (window.__BIBLE_STRONG_BOOTSTRAP_URL__)
+        document.write('<script src="' + window.__BIBLE_STRONG_BOOTSTRAP_URL__ + '"><\/script>')
+    </script>
     <!-- Safari's banner offers the iOS app; the manifest lets Chrome offer the Android one. -->
     <meta name="apple-itunes-app" content="app-id=1454738221" />
     <link rel="manifest" href="/manifest.webmanifest" />

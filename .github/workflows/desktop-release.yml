@@ -1,0 +1,113 @@
+name: Desktop release
+
+# Builds the desktop app (ADR-0107) for macOS, Windows and Linux into a draft GitHub release
+# `desktop-v<version>`, version from apps/desktop/package.json. Nothing reaches the readers'
+# updaters until `Desktop promote` publishes it. See docs/desktop-release.md.
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: desktop-release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    if: github.ref == 'refs/heads/master'
+    environment: desktop-release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS
+            runner: macos-latest
+            args: --target universal-apple-darwin
+            rust-targets: aarch64-apple-darwin,x86_64-apple-darwin
+          - name: Windows
+            runner: windows-latest
+            args: ''
+            rust-targets: ''
+          - name: Linux
+            runner: ubuntu-22.04
+            args: ''
+            rust-targets: ''
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    steps:
+      - name: Check out the source
+        uses: actions/checkout@v5
+
+      - name: Refuse a build that could not install Offline copies
+        shell: bash
+        env:
+          BIBLE_STRONG_ARCHIVE_KEYS: ${{ secrets.BIBLE_STRONG_ARCHIVE_KEYS }}
+        run: |
+          if [ -z "$BIBLE_STRONG_ARCHIVE_KEYS" ]; then
+            echo "The BIBLE_STRONG_ARCHIVE_KEYS secret is missing" >&2
+            exit 1
+          fi
+
+      - name: Write the App Store Connect key for notarization
+        if: runner.os == 'macOS'
+        env:
+          APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY_CONTENT }}
+        run: printf '%s' "$APPLE_API_KEY_CONTENT" > "$GITHUB_WORKSPACE/apple-api-key.p8"
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install the Linux webview and bundler dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-targets }}
+
+      - name: Cache Rust builds
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri -> target
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Export the web app for desktop
+        run: node apps/desktop/scripts/export-web.mjs
+
+      - name: Build, sign and upload to the draft release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BIBLE_STRONG_ARCHIVE_KEYS: ${{ secrets.BIBLE_STRONG_ARCHIVE_KEYS }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_PATH: ${{ github.workspace }}/apple-api-key.p8
+        with:
+          projectPath: apps/desktop
+          tauriScript: yarn tauri
+          args: ${{ matrix.args }}
+          tagName: desktop-v__VERSION__
+          releaseName: Bible Strong desktop __VERSION__
+          releaseBody: Bible Strong for macOS, Windows and Linux.
+          releaseDraft: true
+          prerelease: false
+          includeUpdaterJson: true
+          updaterJsonPreferNsis: true

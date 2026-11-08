@@ -57,7 +57,7 @@
     "ios": "expo run:ios",
     "web": "expo start --web --port 9090",
     "web:export": "expo export --platform web",
-    "web:build": "EXPO_NO_DOTENV=1 dotenv -e .env.production -- expo export --platform web",
+    "web:build": "EXPO_NO_DOTENV=1 dotenv -e .env.production -- sh -c 'expo export --platform web && node scripts/write-desktop-sign-in-config.mjs dist'",
     "themes:generate": "node scripts/generate-theme-css.cjs",
     "themes:check": "node scripts/generate-theme-css.cjs --check"
   },
@@ -118,6 +118,10 @@
     "@sentry/react-native": "~8.28.0",
     "@shopify/flash-list": "2.3.2",
     "@tanstack/react-query": "^5.101.4",
+    "@tauri-apps/api": "2.12.4",
+    "@tauri-apps/plugin-opener": "^2",
+    "@tauri-apps/plugin-process": "^2",
+    "@tauri-apps/plugin-updater": "^2",
     "@types/color": "^3.0.6",
     "@types/react-redux": "^7.1.33",
     "await-to-js": "^2.1.1",
@@ -277,6 +281,7 @@
     "testPathIgnorePatterns": [],
     "moduleNameMapper": {
       "^@sentry/react-native$": "<rootDir>/test/jestSentryMock.js",
+      "^expo/virtual/env$": "<rootDir>/test/jestExpoEnvMock.js",
       "/modules/bible-strong-archive$": "<rootDir>/test/jestBibleStrongArchiveMock.js"
     },
     "transformIgnorePatterns": [

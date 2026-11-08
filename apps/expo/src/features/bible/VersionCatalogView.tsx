@@ -13,6 +13,7 @@ import { useNavigation } from 'expo-router'
 import { useAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import FiltersHeader from '~common/FiltersHeader'
+import { supportsOfflineCopies } from '~desktop/isDesktop'
 import { SheetHeader, SheetView, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import Box from '~common/ui/Box'
@@ -102,19 +103,18 @@ export const useVersionCatalog = (
     all: t('versionCatalog.availability.all'),
     downloaded: t('versionCatalog.availability.downloaded'),
   }
-  const onlineCatalog =
-    Platform.OS === 'web'
-      ? catalog.filter(
-          version =>
-            resources.capabilities.getOnlineAccess({
-              kind: 'bible-text',
-              versionId: version.id,
-            }).status === 'remotely-readable'
-        )
-      : catalog
+  const onlineCatalog = !supportsOfflineCopies
+    ? catalog.filter(
+        version =>
+          resources.capabilities.getOnlineAccess({
+            kind: 'bible-text',
+            versionId: version.id,
+          }).status === 'remotely-readable'
+      )
+    : catalog
   const visibleCatalog = filterVersionCatalogByAvailability(
     onlineCatalog,
-    Platform.OS === 'web' ? 'all' : availability,
+    supportsOfflineCopies ? availability : 'all',
     downloadedVersionIds
   )
   const sections = getVersionCatalogSections({
@@ -191,7 +191,7 @@ export const useVersionCatalog = (
           onSelect: () => setGrouping(value),
         })),
       },
-      ...(Platform.OS === 'web'
+      ...(!supportsOfflineCopies
         ? []
         : [
             {

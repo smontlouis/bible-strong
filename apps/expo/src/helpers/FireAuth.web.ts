@@ -14,7 +14,6 @@ import {
   sendPasswordResetEmail,
   signInWithCustomToken,
   signInWithEmailAndPassword,
-  signInWithPopup,
   signOut,
   updatePassword,
   updateProfile,
@@ -36,6 +35,7 @@ import {
 import { appLogger } from './agentObservability'
 import { runAllCleanups } from './cleanupRegistry'
 import { firebaseApp } from './firebaseApp.web'
+import { PROVIDER_SIGN_IN_CANCELLED, signInWithProvider } from './providerSignIn'
 import { storage } from './storage'
 import { toast } from './toast'
 import { tokenManager } from './TokenManager'
@@ -202,15 +202,12 @@ export class WebFireAuth {
     const providerId = provider.providerId as AccountEntryProvider
     const attempt = this.beginAccountEntryAttempt('provider-sign-in', providerId)
     try {
-      const credential = await signInWithPopup(getAuth(firebaseApp), provider)
-      attempt.complete({
-        userId: credential.user.uid,
-        credentialIsNewUser: getAdditionalUserInfo(credential)?.isNewUser,
-      })
+      const result = await signInWithProvider(getAuth(firebaseApp), provider)
+      attempt.complete({ userId: result.user.uid, credentialIsNewUser: result.isNewUser })
       return false
     } catch (error) {
       attempt.fail()
-      if (getErrorCode(error) !== 'auth/popup-closed-by-user') this.onError?.(error)
+      if (getErrorCode(error) !== PROVIDER_SIGN_IN_CANCELLED) this.onError?.(error)
       return false
     }
   }

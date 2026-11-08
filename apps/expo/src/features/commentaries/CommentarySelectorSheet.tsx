@@ -9,6 +9,7 @@ import { colorWithOpacity } from '~themes/colorValues'
 import { useTheme } from '~themes/ThemeProvider'
 import React from 'react'
 import { Platform, SectionList, TouchableOpacity } from 'react-native'
+import { supportsOfflineCopies } from '~desktop/isDesktop'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -123,7 +124,7 @@ const CommentarySelectorItem = ({
                 {entry.author}
               </Text>
             </Box>
-            {installed && Platform.OS !== 'web' && (
+            {installed && supportsOfflineCopies && (
               <Box className="overflow-hidden border-continuous w-[30px] h-[28px] items-center justify-center">
                 <FeatherIcon name="cloud" size={18} color="primary" />
               </Box>

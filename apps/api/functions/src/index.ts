@@ -14,3 +14,4 @@ export { exportStudyPDF, deleteStudy } from './studies'
 export { createUser, deleteUser } from './users'
 
 export { fetchOpenGraph } from './open-graph'
+export { createDesktopSignInToken } from './desktop-sign-in'

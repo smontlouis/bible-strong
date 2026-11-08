@@ -1,16 +1,17 @@
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-import { Platform, Pressable } from 'react-native'
+import { Pressable } from 'react-native'
 import Text from '~common/ui/Text'
+import { supportsOfflineCopies } from '~desktop/isDesktop'
 
 /**
  * Under display modes out of reach offline: the way to keep their resources on the device.
- * The web keeps no Offline copy, so it shows nothing there.
+ * The browser keeps no Offline copy, so it shows nothing there.
  */
 const OfflineCopiesLink = ({ onPress }: { onPress?: () => void }) => {
   const router = useRouter()
   const { t } = useTranslation()
-  if (Platform.OS === 'web') return null
+  if (!supportsOfflineCopies) return null
 
   return (
     <Pressable

@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query'
 import { type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Platform, Pressable } from 'react-native'
+import { supportsOfflineCopies } from '~desktop/isDesktop'
 import { SheetHeader, SheetView, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
 import Box from '~common/ui/Box'
@@ -124,7 +125,7 @@ const InterlinearModeSelectorSheet = ({
     const selected = selectedLocale === locale
     const available = isAvailable(locale)
 
-    if (Platform.OS === 'web' && !available) return null
+    if (!supportsOfflineCopies && !available) return null
 
     return (
       <Pressable

@@ -2,7 +2,8 @@
 
 ## Contexts
 
-- [Study workspace](./apps/expo/CONTEXT.md) — Bible reading, study, offline resources, and user-owned study data across iOS, Android, and Web.
+- [Study workspace](./apps/expo/CONTEXT.md) — Bible reading, study, offline resources, and user-owned study data across iOS, Android, the Web and the desktop app.
+- [Desktop shell](./apps/desktop/CONTEXT.md) — runs the study workspace on macOS, Windows and Linux, and gives it the device its Offline copies need.
 - [Resource delivery](./packages/resource-service/CONTEXT.md) — validates, publishes, imports, and serves versioned Bible resources.
 - [Resource domain](./packages/resource-domain/CONTEXT.md) — owns shared resource schemas, identities, cursors, and pure invariants.
 - [Resource catalog](./packages/resource-catalog/CONTEXT.md) — owns generated artifact catalogs and immutable publication metadata.
@@ -19,6 +20,8 @@
 
 - **Resource authoring → Resource delivery**: Resource Studio produces immutable publication bundles; the Resource service validates and activates them.
 - **Resource delivery → Study workspace**: the service exposes online resources and downloadable Offline copies consumed by the Expo app.
+- **Desktop shell → Study workspace**: the shell shows the web export built for desktop and stands in, through Rust commands, for the native modules of the Offline-copy pipeline (ADR-0107).
+- **Desktop shell → Application API**: Google and Apple sign-in happen in the reader's browser, which hands the app a custom token from `createDesktopSignInToken`.
 - **Resource domain → Resource delivery / Study workspace / Public site**: all use the same platform-neutral wire contracts and invariants.
 - **Resource catalog → Resource delivery / Study workspace**: publisher and client consume the same versioned artifact catalog.
 - **Bible reference parsing → Study workspace**: the parser recognizes inline references used for navigation and study links.

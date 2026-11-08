@@ -6,6 +6,8 @@ const { getSentryExpoConfig } = require('@sentry/react-native/metro')
 
 const { withUniwindConfig } = require('uniwind/metro')
 
+const { IS_DESKTOP_BUILD, withDesktopResolution } = require('./desktopResolution.cjs')
+
 const { getBundleModeMetroConfig } = require('react-native-worklets/bundleMode')
 const config = getSentryExpoConfig(__dirname)
 // Bundle Mode writes each worklet as its own module here, while Metro is running.
@@ -53,12 +55,16 @@ const styledConfig = withUniwindConfig(config, {
 // $TMPDIR/metro-cache. Expo's `use dom` proxies carry their absolute path: master could load
 // a lane's DOM bundle, and a lane's `--clear` emptied master's cache. Uniwind sets the store
 // (it skips CSS outputs): only its directory changes.
+// The desktop build inlines EXPO_PUBLIC_DESKTOP and resolves other files: its own cache too.
 if (styledConfig.cacheStores?.length === 1) {
   const checkoutId = crypto.createHash('sha1').update(__dirname).digest('hex').slice(0, 8)
   const checkoutName = path.basename(path.resolve(__dirname, '../..'))
+  const target = IS_DESKTOP_BUILD ? '-desktop' : ''
   const FileStore = styledConfig.cacheStores[0].constructor
   styledConfig.cacheStores = [
-    new FileStore({ root: path.join(os.tmpdir(), `metro-cache-${checkoutName}-${checkoutId}`) }),
+    new FileStore({
+      root: path.join(os.tmpdir(), `metro-cache-${checkoutName}-${checkoutId}${target}`),
+    }),
   ]
 }
 
@@ -83,4 +89,12 @@ function withBundleMode(metroConfig) {
   return bundleModeConfig
 }
 
-module.exports = webOnly ? styledConfig : withBundleMode(styledConfig)
+if (IS_DESKTOP_BUILD && !webOnly) {
+  throw new Error('BIBLE_STRONG_DESKTOP=1 only applies to a web export (--platform web)')
+}
+
+module.exports = IS_DESKTOP_BUILD
+  ? withDesktopResolution(styledConfig, __dirname)
+  : webOnly
+    ? styledConfig
+    : withBundleMode(styledConfig)
