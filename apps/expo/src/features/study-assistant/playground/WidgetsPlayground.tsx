@@ -10,11 +10,9 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import AssistantMessageMarkdown from '../AssistantMessageMarkdown'
 import { AssistantSheetContext, type AssistantSheet } from '../assistantSheetContext'
-import PassageWidget from '../widgets/PassageWidget'
 import StudyWidget from '../widgets/StudyWidget'
 import SourceExcerptSheet from '../SourceExcerptSheet'
 import { messageSegments } from '../widgetSegments'
-import { ProtoCard, hasProto } from './protoCards'
 import { resolveExample } from './resolveExample'
 import { useDemoAssistant } from './demoAssistant'
 
@@ -78,7 +76,7 @@ La patience y est d’abord celle de Dieu envers nous, puis un fruit de l’Espr
 
 const fr = { language: 'fr' as const }
 
-/** Answers that place the resource cards prototyped in protoCards.tsx. */
+/** Answers that place the resource cards. */
 const RESOURCE_DEMOS: Demo[] = [
   {
     question: 'Que disent les commentateurs de Jean 15:4 ?',
@@ -175,10 +173,8 @@ Les dates restent approximatives : les évangiles ne datent pas les événements
   },
 ]
 
-type Mode = 'before' | 'current' | 'proto'
-
 /** A demo card: commentaries and dictionaries first read their real excerpts. */
-function DemoCard({ widget, mode }: { widget: Descriptor; mode: Mode }) {
+function DemoCard({ widget }: { widget: Descriptor }) {
   const resources = useResourceAccess()
   const needsSources =
     widget.kind === 'commentary_comparison' || widget.kind === 'dictionary_articles'
@@ -190,8 +186,6 @@ function DemoCard({ widget, mode }: { widget: Descriptor; mode: Mode }) {
   })
   const resolved = needsSources ? query.data : widget
   if (!resolved) return <Text className="text-grey my-2 text-[13px]">Chargement des extraits…</Text>
-  if (mode === 'before' && 'passages' in resolved) return <PassageWidget widget={resolved} />
-  if (mode === 'proto' && hasProto(resolved)) return <ProtoCard widget={resolved} />
   return <StudyWidget widget={resolved} />
 }
 
@@ -202,7 +196,7 @@ const demoSheet = (
   // The demo only follows links, opens passages and shows excerpts: no conversation runs here.
   ({ navigate, showSource }) as unknown as AssistantSheet
 
-function DemoAnswer({ demo, mode }: { demo: Demo; mode: Mode }) {
+function DemoAnswer({ demo }: { demo: Demo }) {
   const ids = new Set(demo.widgets.map(widget => widget.id))
   return (
     <Box className="mb-8">
@@ -221,7 +215,7 @@ function DemoAnswer({ demo, mode }: { demo: Demo; mode: Mode }) {
             />
           )
         const widget = demo.widgets.find(item => item.id === segment.id)!
-        return <DemoCard key={index} widget={widget} mode={mode} />
+        return <DemoCard key={index} widget={widget} />
       })}
     </Box>
   )
@@ -248,10 +242,9 @@ function Toggle({
   )
 }
 
-/** Development only: the assistant's cards inside real-looking answers, before and after. */
+/** Development only: the assistant's cards inside real-looking answers, and in the real assistant page. */
 export default function WidgetsPlayground() {
   const navigate = usePushRouteOnce()
-  const [mode, setMode] = useState<Mode>('proto')
   const [source, setSource] = useState<StudySource | null>(null)
   const assistant = useDemoAssistant(DEMOS)
   return (
@@ -259,24 +252,15 @@ export default function WidgetsPlayground() {
       <Container className="bg-reverse">
         <Header hasBackButton title="Cartes de l’assistant" />
         <HStack className="gap-2 px-5 pb-2">
-          <Toggle value={mode === 'before'} onChange={() => setMode('before')}>
-            Avant
-          </Toggle>
-          <Toggle value={mode === 'current'} onChange={() => setMode('current')}>
-            Actuel
-          </Toggle>
-          <Toggle value={mode === 'proto'} onChange={() => setMode('proto')}>
-            Proto
-          </Toggle>
           {assistant.available && (
             <Toggle value={false} onChange={assistant.open}>
-              Assistant
+              Ouvrir dans l’assistant
             </Toggle>
           )}
         </HStack>
         <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 12 }}>
           {[...RESOURCE_DEMOS, ...DEMOS].map(demo => (
-            <DemoAnswer key={demo.question} demo={demo} mode={mode} />
+            <DemoAnswer key={demo.question} demo={demo} />
           ))}
         </ScrollView>
         <SourceExcerptSheet source={source} onClose={() => setSource(null)} />

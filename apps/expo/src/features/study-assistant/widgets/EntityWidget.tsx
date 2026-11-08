@@ -13,6 +13,7 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { useTheme } from '~themes/ThemeProvider'
 import { resolveFontFamily } from '~themes/styleValues'
+import { QuoteBlock } from './QuoteBlock'
 import WidgetFrame, {
   WidgetDisclosure,
   WidgetLoading,
@@ -138,8 +139,73 @@ function EntityBody({ widget }: { widget: Descriptor }) {
   )
 }
 
+/** A person or a place: portrait, name, roles and the first lines of the profile. */
+function EntityQuote({ widget }: { widget: Descriptor }) {
+  const { t } = useTranslation()
+  const resources = useResourceAccess()
+  const navigate = usePushRouteOnce()
+  const { fontFamily } = useTheme()
+  const query = useQuery({
+    queryKey: ['assistant-entity', widget.entityKey, widget.language],
+    queryFn: () => resources.strongLexicon.loadEntity(widget.entityKey, widget.language),
+    staleTime: 300000,
+  })
+  const entity = query.data
+  return (
+    <QuoteBlock
+      mark={widget.kind === 'place_profile' ? 'place' : 'person'}
+      foot={t('assistant.widgets.openProfile')}
+      onPress={() =>
+        navigate({
+          pathname: '/strong/entity',
+          params: { entityKey: widget.entityKey, language: widget.language },
+        })
+      }
+    >
+      {!entity ? (
+        <Text className="text-grey text-[15px]">
+          {query.isError ? t('assistant.widgets.resourceUnavailable') : widget.title}
+        </Text>
+      ) : (
+        <StrongEntitySummaryCard
+          entity={entity}
+          plain
+          compact
+          featured
+          previewLines={3}
+          editorialTypography={{
+            fontFamily: resolveFontFamily(fontFamily.text) || 'sans-serif',
+            fontSize: 14,
+            lineHeight: 22,
+          }}
+          readingTypography={{
+            fontFamily: resolveFontFamily(fontFamily.text),
+            fontSizeScale: -2,
+            lineHeight: 'normal',
+          }}
+          onOpenBibleReference={osis => {
+            const route = getBibleViewRouteForStrongOsisReference(osis)
+            if (route) navigate(route)
+          }}
+          onOpenStrong={code =>
+            navigate(
+              createStrongDetailRoute('index', {
+                book: code.startsWith('G') ? 40 : 1,
+                identityCode: code,
+                identityKind: 'dstrong',
+              })
+            )
+          }
+        />
+      )}
+    </QuoteBlock>
+  )
+}
+
+/** Profiles are quotations in the answer (2026-11-08); the relation graph keeps its card. */
 export default function EntityWidget({ widget }: { widget: Descriptor }) {
   const { t } = useTranslation()
+  if (widget.kind !== 'entity_relations') return <EntityQuote widget={widget} />
   return (
     <WidgetFrame
       icon={
