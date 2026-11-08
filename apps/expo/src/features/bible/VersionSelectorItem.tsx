@@ -46,6 +46,9 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import { localQueryOptions } from '~helpers/queryOptions'
 const ROW_PADDING_LEFT = 20
 const CHECKBOX_SLOT = 48
+// A web button cannot hold another one: on the desktop app the interlinear shortcut sits under
+// the row instead of inside it.
+const SHORTCUT_IN_ROW = Platform.OS !== 'web'
 
 const VersionItemContainer = ({
   children,
@@ -488,7 +491,7 @@ const VersionSelectorItem = ({
                 showStrongCapability={showStrongCapability}
                 highlightStrong={isSelected}
                 showInterlinearCapability={showInterlinearCapability}
-                interlinearShortcut={interlinearShortcut}
+                interlinearShortcut={SHORTCUT_IN_ROW ? interlinearShortcut : undefined}
               />
               {isLoading ? (
                 <Box className="overflow-hidden border-continuous w-[30px] items-center justify-center">
@@ -504,7 +507,7 @@ const VersionSelectorItem = ({
                     >
                       <Text
                         className="text-reverse text-[9px] font-bold"
-                        style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}
+                        style={{ fontFamily: Platform.OS === 'android' ? 'serif' : 'Georgia' }}
                       >
                         S
                       </Text>
@@ -527,6 +530,14 @@ const VersionSelectorItem = ({
             <FeatherIcon name="more-horizontal" size={20} color="default" />
           </ActionButton>
         </Box>
+        {!SHORTCUT_IN_ROW && interlinearShortcut && (
+          <Box
+            className="overflow-visible border-continuous mt-[4px] mb-[6px]"
+            style={{ marginLeft: showSelectionCheckbox ? CHECKBOX_SLOT : 0 }}
+          >
+            {interlinearShortcut}
+          </Box>
+        )}
       </VersionItemContainer>
     )
   }

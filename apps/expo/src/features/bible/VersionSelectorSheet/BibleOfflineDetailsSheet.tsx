@@ -4,7 +4,9 @@ import { getDefaultStore } from 'jotai/vanilla'
 import React from 'react'
 import { Platform, StyleSheet, Switch } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
+import { SheetScrollView, type SheetRef } from '~common/sheet'
+// A popover beside its button on the desktop app; the same sheet on mobile.
+import Sheet from '~common/ContextualPanel/ContextualSheet'
 import Box, { TouchableBox } from '~common/ui/Box'
 import IconTile from '~common/ui/IconTile'
 import SheetWell, { useSheetWellColor } from '~common/ui/SheetWell'
@@ -154,7 +156,8 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
     !indexInstalled &&
     includeIndex
   const indexMark = strongVersionId ? 'S' : hasInterlinearIndex ? 'I' : undefined
-  const serifFontFamily = Platform.OS === 'ios' ? 'Georgia' : 'serif'
+  // Georgia on iOS, macOS and Windows; Android has none.
+  const serifFontFamily = Platform.OS === 'android' ? 'serif' : 'Georgia'
 
   const refreshInstalledState = () => {
     const store = getDefaultStore()

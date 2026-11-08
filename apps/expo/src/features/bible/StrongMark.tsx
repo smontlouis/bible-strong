@@ -21,7 +21,8 @@ const StrongMark = ({
             : 'text-tertiary',
         'text-[17px] font-bold'
       )}
-      style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}
+      // Georgia on iOS, macOS and Windows; Android has none.
+      style={{ fontFamily: Platform.OS === 'android' ? 'serif' : 'Georgia' }}
     >
       S
     </Text>

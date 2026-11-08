@@ -6,6 +6,9 @@ import CommentarySelectorSheet, {
   type CommentaryProjection,
 } from '~features/commentaries/CommentarySelectorSheet'
 import CommentarySourceDetails from '~features/commentaries/CommentarySourceDetails'
+import CommentaryOfflineDetails from '~features/commentaries/CommentaryOfflineDetails'
+import Box from '~common/ui/Box'
+import { supportsOfflineCopies } from '~desktop/isDesktop'
 import HeaderAction from '~common/ContextualPanel/HeaderAction'
 import { useBibleBookmarkScreens } from '~features/bookmarks/useBibleBookmarkScreens'
 import ColorPickerModal from '~common/ColorPickerModal'
@@ -146,8 +149,15 @@ export default function BibleOptionsMenu({
         },
         'commentary-details': {
           title: commentaryDetails?.entry.title ?? t('Commentaires'),
+          // The desktop app installs commentaries: its panel offers what the mobile sheet does.
           content: () =>
-            commentaryDetails ? <CommentarySourceDetails projection={commentaryDetails} /> : null,
+            !commentaryDetails ? null : supportsOfflineCopies ? (
+              <Box className="px-[20px] pt-[16px] pb-[24px]">
+                <CommentaryOfflineDetails projection={commentaryDetails} />
+              </Box>
+            ) : (
+              <CommentarySourceDetails projection={commentaryDetails} />
+            ),
         },
         fonts: {
           title: t('Polices'),

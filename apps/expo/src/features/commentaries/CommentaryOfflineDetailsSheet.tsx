@@ -1,35 +1,11 @@
-import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import type { CommentaryCatalogEntry } from '@bible-strong/resource-catalog/commentaries'
 import React from 'react'
-import { StyleSheet } from 'react-native'
 
-import { useTranslation } from 'react-i18next'
 import { SheetScrollView, type SheetRef } from '~common/sheet'
 import Sheet from '~common/ContextualPanel/ContextualSheet'
-import Box, { TouchableBox } from '~common/ui/Box'
-import SheetWell, { useSheetWellColor } from '~common/ui/SheetWell'
-import Button from '~common/ui/Button'
-import { FeatherIcon } from '~common/ui/Icon'
-import Progress from '~common/ui/Progress'
-import Text from '~common/ui/Text'
-import {
-  useIsOfflineResourceInstalled,
-  useOfflineResourceState,
-} from '~features/resources/useOfflineResourceRegistry'
-import {
-  createDownloadedItemDeletionPlan,
-  deleteDownloadedItem,
-} from '~helpers/deleteDownloadedItem'
-import { createCommentaryDownloadItem } from '~helpers/downloadItemFactory'
-import { downloadManager } from '~helpers/downloadManager'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import { getMobileResourceCatalogEntry } from '~helpers/mobileResourceCatalog'
-import { createOfflineCopyId } from '~helpers/offlineCopyId'
-import useConnection from '~helpers/useConnection'
-import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
-import { useResourcePublicationStatus } from '~helpers/useResourcePublicationStatus'
-import { getDownloadItemProgress } from '~state/downloadQueue'
-import CommentaryAvatar from './CommentaryAvatar'
+import CommentaryOfflineDetails from './CommentaryOfflineDetails'
+
 type CommentaryProjection = {
   entry: CommentaryCatalogEntry
   language: ResourceLanguage
@@ -40,188 +16,15 @@ type Props = {
   projection?: CommentaryProjection
 }
 
-const formatMegabytes = (bytes: number, language: string) =>
-  new Intl.NumberFormat(language, { maximumFractionDigits: 1 }).format(bytes / 1_000_000)
-
 const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
-  const { t, i18n } = useTranslation()
-  const confirmDeletion = useConfirmDialog()
-  const sheetWellColor = useSheetWellColor()
-  const isConnected = useConnection()
-  const identity = projection
-    ? {
-        kind: 'commentary' as const,
-        resourceId: projection.entry.publicationId,
-        language: projection.language,
-      }
-    : undefined
-  const itemId = identity ? createOfflineCopyId(identity) : undefined
-  const queueState = useDownloadItemStatus(itemId)
-  const installed = useIsOfflineResourceInstalled(identity)
-  const offlineState = useOfflineResourceState(identity)
-  const corrupt = offlineState?.availability.status === 'corrupt'
-  const publicationStatus = useResourcePublicationStatus({
-    resourceId: itemId ?? '',
-    isInstalled: installed,
-  })
-  const downloading =
-    queueState && ['queued', 'downloading', 'inserting'].includes(queueState.status)
-  const progress = queueState ? getDownloadItemProgress(queueState) : 0
-
-  if (!projection || !identity || !itemId) return null
-
-  const { entry, language } = projection
-  const artifact = getMobileResourceCatalogEntry(itemId)
-  const description = entry.description[language]
-  const languageLabel = t(`versionCatalog.language.${language}`)
-  const size = t('downloads.size.mb', {
-    value: formatMegabytes(artifact.installedBytes, i18n.language),
-  })
-
-  const download = () => {
-    if (!isConnected) return
-    downloadManager.enqueue([createCommentaryDownloadItem(identity, entry.title)])
-  }
-
-  const remove = () => {
-    void confirmDeletion({
-      title: t('Attention'),
-      message: t('downloads.deleteConfirm'),
-      cancelLabel: t('Non'),
-      confirmLabel: t('Oui'),
-      destructive: true,
-    }).then(async confirmed => {
-      if (!confirmed) return
-      await deleteDownloadedItem(createDownloadedItemDeletionPlan(itemId))
-    })
-  }
+  if (!projection) return null
 
   return (
     <Sheet ref={sheetRef}>
       <SheetScrollView
         contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 22, paddingBottom: 32 }}
       >
-        <Box className="overflow-hidden border-continuous flex-row items-center gap-[16px]">
-          <CommentaryAvatar
-            resourceCode={`${entry.publicationId}:${language}`}
-            author={entry.author}
-            fallback={entry.shortName}
-            size={68}
-          />
-          <Box className="overflow-hidden border-continuous flex-[1] gap-[6px]">
-            <Text className="text-[22px] font-semibold" numberOfLines={3}>
-              {entry.title}
-            </Text>
-            <Text className="text-grey text-[13px]" numberOfLines={2}>
-              {entry.author}
-            </Text>
-          </Box>
-        </Box>
-
-        <Box
-          className="border-continuous overflow-hidden flex-row mt-[22px] py-[14px] border-separator"
-          style={{
-            borderTopWidth: StyleSheet.hairlineWidth,
-            borderBottomWidth: StyleSheet.hairlineWidth,
-          }}
-        >
-          <Box className="overflow-hidden border-continuous flex-[1] items-center gap-[4px]">
-            <Text className="text-grey text-[12px]">{t('bibleOfflineDetails.language')}</Text>
-            <Text className="text-[15px] font-semibold">{languageLabel}</Text>
-          </Box>
-          <Box
-            className="overflow-hidden border-continuous bg-separator"
-            style={{ width: StyleSheet.hairlineWidth }}
-          />
-          <Box className="overflow-hidden border-continuous flex-[1] items-center gap-[4px]">
-            <Text className="text-grey text-[12px]">{t('commentaries.details.tradition')}</Text>
-            <Text className="text-[15px] font-semibold text-center">{entry.tradition}</Text>
-          </Box>
-          <Box
-            className="overflow-hidden border-continuous bg-separator"
-            style={{ width: StyleSheet.hairlineWidth }}
-          />
-          <Box className="overflow-hidden border-continuous flex-[1] items-center gap-[4px]">
-            <Text className="text-grey text-[12px]">{t('bibleOfflineDetails.installedSize')}</Text>
-            <Text className="text-[15px] font-semibold">{size}</Text>
-          </Box>
-        </Box>
-
-        {!!description && (
-          <Text className="mt-[22px] text-[15px] leading-[22px]">{description}</Text>
-        )}
-
-        <Box
-          className="overflow-hidden border-continuous flex-row mt-[18px] gap-[8px]"
-          style={{ flexWrap: 'wrap' }}
-        >
-          {entry.tags.map(tag => (
-            <SheetWell className="px-[10px] py-[6px] rounded-full" key={tag}>
-              <Text className="text-[12px]">{tag}</Text>
-            </SheetWell>
-          ))}
-        </Box>
-
-        <Box
-          className="border-continuous overflow-hidden mt-[20px] pt-[16px] border-separator"
-          style={{ borderTopWidth: StyleSheet.hairlineWidth }}
-        >
-          <Text className="text-grey text-[12px]">{entry.rights}</Text>
-        </Box>
-
-        {downloading ? (
-          <SheetWell className="mt-[22px] p-[16px] flex-row items-center">
-            <Progress progress={Math.max(progress, 0.04)} size={30} thickness={3} />
-            <Text className="ml-[12px] flex-[1] font-semibold">{Math.round(progress * 100)} %</Text>
-            <TouchableBox
-              className="overflow-hidden border-continuous px-[8px] py-[6px]"
-              onPress={() => downloadManager.cancel(itemId)}
-            >
-              <Text className="text-quart font-semibold">{t('bibleOfflineDetails.cancel')}</Text>
-            </TouchableBox>
-          </SheetWell>
-        ) : (
-          <Box className="overflow-hidden border-continuous mt-[22px] flex-row items-center gap-[10px]">
-            <Box className="overflow-hidden border-continuous flex-[1]">
-              <Button
-                onPress={download}
-                disabled={
-                  !isConnected || (installed && publicationStatus.status !== 'update-available')
-                }
-                leftIcon={
-                  !installed || corrupt || publicationStatus.status === 'update-available' ? (
-                    <Box className="overflow-hidden border-continuous mr-[9px]">
-                      <FeatherIcon name="download" size={18} color="white" />
-                    </Box>
-                  ) : undefined
-                }
-              >
-                {corrupt
-                  ? t('resource.action.repairOfflineCopy')
-                  : publicationStatus.status === 'update-available'
-                    ? t('commentaries.details.update')
-                    : installed
-                      ? t('commentaries.selector.downloaded')
-                      : t('bibleOfflineDetails.downloadSize', {
-                          size: t('downloads.size.mb', {
-                            value: formatMegabytes(artifact.archiveBytes, i18n.language),
-                          }),
-                        })}
-              </Button>
-            </Box>
-            {installed && (
-              <TouchableBox
-                className="border-continuous overflow-hidden items-center justify-center rounded-full"
-                accessibilityRole="button"
-                accessibilityLabel={t('commentaries.selector.removeOffline')}
-                onPress={remove}
-                style={{ width: 48, height: 48, backgroundColor: sheetWellColor }}
-              >
-                <FeatherIcon name="trash-2" size={20} color="quart" />
-              </TouchableBox>
-            )}
-          </Box>
-        )}
+        <CommentaryOfflineDetails projection={projection} />
       </SheetScrollView>
     </Sheet>
   )

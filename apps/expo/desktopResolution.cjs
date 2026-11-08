@@ -24,6 +24,7 @@ const SHARED_ON_DESKTOP = new Set([
   'src/features/bible/BibleReferenceAvailability',
   'src/features/bible/VersionSelectorItem',
   'src/features/bible/VersionSelectorSheet/BibleOfflineDetailsSheet',
+  'src/features/commentaries/CommentaryDetailsTrigger',
   'src/features/commentaries/CommentaryManageButton',
   'src/features/home/ResourceDownloadWidget',
   'src/features/resources/ResourceUnavailableView',
