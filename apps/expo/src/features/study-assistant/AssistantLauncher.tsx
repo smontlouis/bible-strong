@@ -1,4 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { Platform, StyleSheet } from 'react-native'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { FullWindowOverlay } from 'react-native-screens'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { useSetAtom } from 'jotai'
@@ -150,16 +153,34 @@ function AccountAssistant({ account }: { account: string }) {
   }, [open])
   if (!ready) return null
   return (
-    <AssistantLauncherButton
-      animation={avatarAnimation}
-      accessibilityLabel={t('assistant.modal.open')}
-      hidden={open}
-      onPress={() => {
-        if (!open) router.push(ASSISTANT_PATH)
-      }}
-      onIdleChange={setAvatarSleeping}
-      onDragStart={() => setAvatarDragged(true)}
-      onDragEnd={() => setAvatarDragged(false)}
-    />
+    <AboveSheets>
+      <AssistantLauncherButton
+        animation={avatarAnimation}
+        accessibilityLabel={t('assistant.modal.open')}
+        hidden={open}
+        onPress={() => {
+          if (!open) router.push(ASSISTANT_PATH)
+        }}
+        onIdleChange={setAvatarSleeping}
+        onDragStart={() => setAvatarDragged(true)}
+        onDragEnd={() => setAvatarDragged(false)}
+      />
+    </AboveSheets>
+  )
+}
+
+/**
+ * On iOS a form sheet is a UIKit presentation laid over the whole React Native root, which held
+ * the avatar under it. Its own layer of the window keeps it in front; the gestures there need
+ * their own root.
+ */
+function AboveSheets({ children }: { children: ReactNode }) {
+  if (Platform.OS !== 'ios') return children
+  return (
+    <FullWindowOverlay>
+      <GestureHandlerRootView style={StyleSheet.absoluteFill} pointerEvents="box-none">
+        {children}
+      </GestureHandlerRootView>
+    </FullWindowOverlay>
   )
 }
