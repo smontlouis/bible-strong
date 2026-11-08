@@ -15,15 +15,14 @@ import ToolTimeline from './ToolTimeline.web'
 import StudyWidget from './widgets/StudyWidget.web'
 import { messageSegments, placedWidgetIds } from './widgetSegments'
 import { type ReadingContext } from './conversations'
+import { contextCaption } from './contextDisplay'
+import ContextMarkIcon from './ContextMarkIcon.web'
 import { messagePartNames } from './messageRuntime'
 
 type MessagePart = ThreadAssistantMessagePart | ThreadUserMessagePart
 
 const dataParts = <T,>(parts: readonly MessagePart[], name: string): T[] =>
   parts.flatMap(part => (part.type === 'data' && part.name === name ? [part.data as T] : []))
-
-const contextCaption = (value: ReadingContext) =>
-  ['passage', 'word'].includes(value.kind) ? value.detail : value.label
 
 const toolActivities = (parts: readonly MessagePart[]): ToolActivity[] =>
   parts.flatMap(part => {
@@ -59,7 +58,12 @@ export function UserMessage() {
           {({ part }) => {
             if (part.type === 'text') return <div>{part.text}</div>
             if (part.type === 'data' && part.name === messagePartNames.context)
-              return <small>{contextCaption(part.data as ReadingContext)}</small>
+              return (
+                <small>
+                  <ContextMarkIcon context={part.data as ReadingContext} size={11} />
+                  {contextCaption(part.data as ReadingContext)}
+                </small>
+              )
             return null
           }}
         </MessagePrimitive.Parts>

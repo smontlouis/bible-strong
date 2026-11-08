@@ -9,7 +9,6 @@ import { usePathname, useRouter } from 'expo-router'
 import { useExternalStoreRuntime, type AppendMessage } from '@assistant-ui/react-native'
 import type { StudySource } from '@bible-strong/ai-contract/contract'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
-import { storage } from '~helpers/storage'
 import { toast } from '~helpers/toast'
 import i18n from '~i18n'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
@@ -30,12 +29,6 @@ import { convertMessage } from './messageRuntime'
 import type { StrobiAnimation } from './StrobiAvatar'
 import { useAssistantSession } from './useAssistantSession'
 import { useReadingContext } from './useReadingContext'
-
-// The same per-account key as the web modal; MMKV plays the part of localStorage.
-const preferences = {
-  getItem: (key: string) => storage.getString(key) ?? null,
-  setItem: (key: string, value: string) => storage.set(key, value),
-}
 
 export default function AssistantLauncher() {
   const { id } = useSelector(selectUserLoginInfo)
@@ -90,7 +83,6 @@ function AccountAssistant({ account }: { account: string }) {
     account,
     signedIn: true,
     liveContext,
-    preferenceStorage: () => preferences,
     onAction: action => {
       const tab = createTabForAssistantAction(action)
       if (!tab) {

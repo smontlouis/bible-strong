@@ -10,22 +10,21 @@ import type {
   StudyWidget as StudyWidgetDescriptor,
   ToolActivity,
 } from '@bible-strong/ai-contract/contract'
-import Box from '~common/ui/Box'
+import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import AssistantMessageMarkdown from './AssistantMessageMarkdown'
 import ToolTimeline from './ToolTimeline'
 import StudyWidget from './widgets/StudyWidget'
 import { messageSegments, placedWidgetIds } from './widgetSegments'
 import { type ReadingContext } from './conversations'
+import { contextCaption } from './contextDisplay'
+import ContextMarkIcon from './ContextMarkIcon'
 import { messagePartNames } from './messageRuntime'
 
 type MessagePart = ThreadAssistantMessagePart | ThreadUserMessagePart
 
 const dataParts = <T,>(parts: readonly MessagePart[], name: string): T[] =>
   parts.flatMap(part => (part.type === 'data' && part.name === name ? [part.data as T] : []))
-
-export const contextCaption = (value: ReadingContext) =>
-  ['passage', 'word'].includes(value.kind) ? value.detail : value.label
 
 const toolActivities = (parts: readonly MessagePart[]): ToolActivity[] =>
   parts.flatMap(part => {
@@ -64,11 +63,15 @@ export function UserMessage() {
                 <Text selectable>{part.text}</Text>
               </Box>
             )
+          // The context the question went with, marked as in the composer.
           if (part.type === 'data' && part.name === messagePartNames.context)
             return (
-              <Text className="text-grey mt-1 text-[12px]" numberOfLines={1}>
-                {contextCaption(part.data as ReadingContext)}
-              </Text>
+              <HStack className="mt-1 max-w-full items-center gap-1">
+                <ContextMarkIcon context={part.data as ReadingContext} size={11} />
+                <Text className="text-grey shrink text-[12px]" numberOfLines={1}>
+                  {contextCaption(part.data as ReadingContext)}
+                </Text>
+              </HStack>
             )
           return null
         }}

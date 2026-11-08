@@ -280,19 +280,3 @@ export function assertConversationCapacity(conversations: Conversation[], curren
 export function newConversation(): Conversation {
   return { id: generateUUID(), title: '', updatedAt: Date.now(), messages: [] }
 }
-
-type PreferenceStorage = Pick<Storage, 'getItem' | 'setItem'>
-export const followReadingPreferenceKey = (account: string) =>
-  `bible-strong.assistant-ui.v1:${encodeURIComponent(account)}:follow-reading`
-
-export function loadFollowReadingPreference(storage: PreferenceStorage, account: string): boolean {
-  return storage.getItem(followReadingPreferenceKey(account)) === 'true'
-}
-
-export function saveFollowReadingPreference(
-  storage: PreferenceStorage,
-  account: string,
-  enabled: boolean
-) {
-  storage.setItem(followReadingPreferenceKey(account), enabled ? 'true' : 'false')
-}

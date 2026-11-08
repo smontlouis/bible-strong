@@ -206,7 +206,9 @@
   white-space: pre-wrap;
 }
 .bs-assistant-message-user small {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 10px;
   color: var(--as-muted);
   margin-top: 7px;
@@ -288,50 +290,33 @@
   gap: 8px;
   min-height: 30px;
 }
+/* What the reader is looking at goes with the question, as an attachment would (2026-11-08). */
 .bs-assistant-context-chip {
   display: flex;
   align-items: center;
+  gap: 5px;
   min-width: 0;
   max-width: calc(100% - 42px);
   border-radius: 20px;
   background: var(--as-soft);
   padding: 2px 4px 2px 9px;
+  color: var(--as-muted);
 }
-.bs-assistant-context-chip-pinned {
-  background: color-mix(in srgb, var(--as-accent) 12%, var(--as-surface));
-  color: var(--as-link);
-}
-.bs-assistant-chip-pin {
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
+.bs-assistant-context-chip > svg,
+.bs-assistant-context-restore > svg {
   flex-shrink: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: none;
-  color: var(--as-muted) !important;
-}
-.bs-assistant-chip-pin:hover,
-.bs-assistant-chip-pin[aria-pressed='true'] {
-  color: var(--as-accent) !important;
-  background: color-mix(in srgb, var(--as-accent) 12%, transparent);
-}
-.bs-assistant-chip-pin svg {
-  width: 13px;
-  height: 13px;
 }
 .bs-assistant-context-label {
   display: flex;
   align-items: center;
   min-width: 0;
-  padding: 4px 3px 4px 2px;
+  padding: 4px 3px 4px 0;
   font-size: 11px !important;
   line-height: 1.4;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--as-ink);
 }
 .bs-assistant-chip-remove {
   display: grid;
@@ -345,19 +330,34 @@
   color: var(--as-muted) !important;
 }
 .bs-assistant-chip-remove:hover {
-  background: var(--as-soft);
+  background: color-mix(in srgb, var(--as-muted) 14%, transparent);
 }
 .bs-assistant-chip-remove svg {
   width: 12px;
   height: 12px;
 }
 .bs-assistant-context-restore {
-  border: 0;
-  border-radius: 14px;
-  padding: 5px 9px;
-  background: var(--as-soft);
-  font-size: 11px !important;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: calc(100% - 42px);
+  border: 1px dashed var(--as-border);
+  border-radius: 20px;
+  padding: 1px 10px 1px 7px;
+  background: none;
   color: var(--as-muted) !important;
+  cursor: pointer;
+}
+.bs-assistant-context-restore svg {
+  width: 12px;
+  height: 12px;
+}
+.bs-assistant-context-restore .bs-assistant-context-label {
+  color: inherit;
+}
+.bs-assistant-context-restore:hover {
+  border-style: solid;
 }
 .bs-assistant-composer:focus-within {
   border-color: color-mix(in srgb, var(--as-accent) 70%, var(--as-border));

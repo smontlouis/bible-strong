@@ -1,7 +1,7 @@
 import type { DebugEntry, DebugSession } from './debug/trace'
 import ErrorState from './ErrorState.web'
 import { createPortal } from 'react-dom'
-import { useEffect, useEffectEvent, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
@@ -25,7 +25,8 @@ import i18n from '~i18n'
 import { useTheme } from '~themes/ThemeProvider'
 import { askAssistant, compactAssistant, connectAssistantDictation } from './client'
 import { assistantAccessible, assistantAvailable } from './assistantConfig'
-import { followReadingPreferenceKey, type ReadingContext } from './conversations'
+import { contextCaption } from './contextDisplay'
+import ContextMarkIcon from './ContextMarkIcon.web'
 import { useAssistantSession } from './useAssistantSession'
 import { useReadingContext } from './useReadingContext.web'
 import './assistant-modal.css'
@@ -41,9 +42,6 @@ const DebugPanel = __DEV__
   ? (require('./debug/DebugPanel.web').default as typeof import('./debug/DebugPanel.web').default)
   : null
 
-const contextCaption = (value: ReadingContext) =>
-  ['passage', 'word'].includes(value.kind) ? value.detail : value.label
-
 const StrobiAvatar = createAvatar(strobiDefinition)
 type StrobiAnimation = 'idle' | 'sleeping' | 'excited' | 'thinking' | 'listening'
 
@@ -57,8 +55,6 @@ function Icon({
     | 'send'
     | 'stop'
     | 'stopFilled'
-    | 'pin'
-    | 'pinFilled'
     | 'back'
     | 'trash'
     | 'mic'
@@ -77,8 +73,6 @@ function Icon({
     send: 'm5 12 7-7 7 7M12 5v14',
     stop: 'M7 7h10v10H7z',
     stopFilled: 'M7 7h10v10H7z',
-    pin: 'm9 3 6 0-1 6 4 4v2h-5v6h-2v-6H6v-2l4-4-1-6Z',
-    pinFilled: 'm9 3 6 0-1 6 4 4v2h-5v6h-2v-6H6v-2l4-4-1-6Z',
     back: 'm14 5-7 7 7 7',
     trash: 'M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 10v7M14 10v7',
   }
@@ -87,7 +81,7 @@ function Icon({
       width="18"
       height="18"
       viewBox="0 0 24 24"
-      fill={name === 'stopFilled' || name === 'pinFilled' ? 'currentColor' : 'none'}
+      fill={name === 'stopFilled' ? 'currentColor' : 'none'}
       stroke="currentColor"
       strokeWidth="1.65"
       strokeLinecap="round"
@@ -166,7 +160,6 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     account,
     signedIn,
     liveContext,
-    preferenceStorage: () => localStorage,
     createRequest: ({ isCurrent }) => {
       const debug = __DEV__ && debugOpen ? debugSession : null
       if (!debug) return undefined
@@ -222,11 +215,10 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     error,
     retrying,
     progress,
-    pinned,
-    setPinned,
     context,
+    detachContext,
+    attachContext,
     send,
-    changeFollowReading,
   } = session
   useEffect(() => {
     if (open || !ready) return
@@ -244,16 +236,6 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
             ? 'sleeping'
             : 'idle'
   const dictationActive = ['starting', 'listening', 'stopping'].includes(dictationState)
-  const syncFollowReading = useEffectEvent((enabled: boolean) => changeFollowReading(enabled))
-  useEffect(() => {
-    const key = followReadingPreferenceKey(account)
-    const sync = (event: StorageEvent) => {
-      if (event.key !== key) return
-      syncFollowReading(event.newValue === 'true')
-    }
-    window.addEventListener('storage', sync)
-    return () => window.removeEventListener('storage', sync)
-  }, [account])
   const onNew = async (message: AppendMessage) => {
     await send(message.content.flatMap(p => (p.type === 'text' ? [p.text] : [])).join('\n'))
   }
@@ -495,22 +477,8 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                       />
                       <div className="bs-assistant-composer-toolbar">
                         {context ? (
-                          <div
-                            className={`bs-assistant-context-chip${pinned ? ' bs-assistant-context-chip-pinned' : ''}`}
-                            data-pinned={pinned ? 'true' : 'false'}
-                          >
-                            <button
-                              type="button"
-                              className="bs-assistant-chip-pin"
-                              aria-pressed={Boolean(pinned)}
-                              aria-label={t(
-                                pinned ? 'assistant.modal.unpin' : 'assistant.modal.pin'
-                              )}
-                              title={t(pinned ? 'assistant.modal.unpin' : 'assistant.modal.pin')}
-                              onClick={() => setPinned(pinned ? null : { ...context })}
-                            >
-                              <Icon name={pinned ? 'pinFilled' : 'pin'} />
-                            </button>
+                          <div className="bs-assistant-context-chip">
+                            <ContextMarkIcon context={context} />
                             <span
                               className="bs-assistant-context-label"
                               title={contextCaption(context)}
@@ -520,8 +488,13 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                             <button
                               type="button"
                               className="bs-assistant-chip-remove"
-                              aria-label={t('assistant.modal.removeContext')}
-                              onClick={() => changeFollowReading(false)}
+                              aria-label={t('assistant.modal.detachContext', {
+                                context: contextCaption(context),
+                              })}
+                              title={t('assistant.modal.detachContext', {
+                                context: contextCaption(context),
+                              })}
+                              onClick={detachContext}
                             >
                               <Icon name="close" />
                             </button>
@@ -530,10 +503,15 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                           <button
                             type="button"
                             className="bs-assistant-context-restore"
-                            aria-pressed={false}
-                            onClick={() => changeFollowReading(true)}
+                            title={t('assistant.modal.attachContext', {
+                              context: contextCaption(liveContext),
+                            })}
+                            onClick={attachContext}
                           >
-                            {t('assistant.modal.followReading')}
+                            <Icon name="plus" />
+                            <span className="bs-assistant-context-label">
+                              {contextCaption(liveContext)}
+                            </span>
                           </button>
                         ) : (
                           <span />

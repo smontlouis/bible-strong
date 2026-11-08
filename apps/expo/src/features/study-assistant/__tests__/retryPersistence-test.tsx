@@ -103,19 +103,12 @@ jest.mock('~helpers/firebaseAuthRuntime', () => ({
 }))
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
 
-const preferences = new Map<string, string>()
-const storage = {
-  getItem: (key: string) => preferences.get(key) ?? null,
-  setItem: (key: string, value: string) => void preferences.set(key, value),
-}
-
 let session!: AssistantSession
 function Assistant() {
   const value = useAssistantSession({
     account: 'reader',
     signedIn: true,
     liveContext: null,
-    preferenceStorage: () => storage,
     onAction: () => {},
   })
   useEffect(() => {

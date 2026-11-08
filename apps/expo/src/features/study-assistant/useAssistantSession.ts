@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AssistantAction } from '@bible-strong/ai-contract/contract'
 import { getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
@@ -8,9 +8,7 @@ import { runConversation, type ConversationRequest } from './conversationRun'
 import type { Compactor } from './conversationMemory'
 import {
   assertConversationCapacity,
-  loadFollowReadingPreference,
   newConversation,
-  saveFollowReadingPreference,
   type Conversation,
   type LocalMessage,
   type ReadingContext,
@@ -23,8 +21,6 @@ import {
   saveConversation,
 } from './conversationRepository'
 
-type PreferenceStorage = Parameters<typeof loadFollowReadingPreference>[0]
-
 const retryableErrors = [
   'assistant.unavailable',
   'assistant.interrupted',
@@ -33,14 +29,13 @@ const retryableErrors = [
 
 /**
  * Account-scoped conversation state shared by the web modal and the native sheet:
- * cloud history, the single cancellable run and the reading-context preference.
+ * cloud history, the single cancellable run and the reading context joined to each question.
  * Presentation state (open panel, history view, dictation, diagnostics) stays in the host.
  */
 export function useAssistantSession({
   account,
   signedIn,
   liveContext,
-  preferenceStorage,
   createRequest,
   createCompact,
   onAction,
@@ -51,8 +46,6 @@ export function useAssistantSession({
   account: string
   signedIn: boolean
   liveContext: ReadingContext | null
-  /** Read lazily so a host without device storage only fails inside the guarded effect. */
-  preferenceStorage: () => PreferenceStorage
   /** Lets a host replace the transport for one run (development diagnostics). */
   createRequest?: (run: { isCurrent: () => boolean }) => ConversationRequest | undefined
   /** Same for the memory compaction that may precede the request. */
@@ -72,19 +65,14 @@ export function useAssistantSession({
     [error, setError] = useState(''),
     [retrying, setRetrying] = useState(false),
     [progress, setProgress] = useState('')
-  const [followReading, setFollowReading] = useState(false),
-    [pinned, setPinned] = useState<ReadingContext | null>(null)
+  // The context a reader took off their question; another context comes joined again.
+  const [detachedKey, setDetachedKey] = useState<string | null>(null)
   const active = useRef<AbortController | null>(null)
   const receivedInitialIndex = useRef(false)
-  const context = followReading ? pinned || liveContext : null
-  // The host passes a new function on each render: it must not restart the account's effects.
-  const readPreferenceStorage = useEffectEvent(() => preferenceStorage())
+  // What the reader is looking at goes with each question, like an attachment, unless they
+  // took it off (2026-11-08): it replaced a « follow my reading » setting and a pin.
+  const context = liveContext && liveContext.key !== detachedKey ? liveContext : null
   useEffect(() => {
-    try {
-      setFollowReading(loadFollowReadingPreference(readPreferenceStorage(), account))
-    } catch {
-      setStorageError(true)
-    }
     const stop = observeConversationIndex(
       account,
       remote => {
@@ -153,14 +141,6 @@ export function useAssistantSession({
       () => setStorageError(true)
     )
   }, [account, current.id, currentIsCloud])
-  useEffect(() => {
-    if (!ready) return
-    try {
-      saveFollowReadingPreference(readPreferenceStorage(), account, followReading)
-    } catch {
-      setStorageError(true)
-    }
-  }, [account, followReading, ready])
   const publish = (conversation: Conversation) => {
     setCurrent(conversation)
     setConversations(previous => [conversation, ...previous.filter(c => c.id !== conversation.id)])
@@ -262,10 +242,6 @@ export function useAssistantSession({
       setStorageError(true)
     )
   }
-  const changeFollowReading = (enabled: boolean) => {
-    setFollowReading(enabled)
-    if (!enabled) setPinned(null)
-  }
   const failedQuestion = current.messages.at(-2)
   const retry =
     !busy && retryableErrors.includes(error) && failedQuestion?.role === 'user'
@@ -291,13 +267,13 @@ export function useAssistantSession({
     error,
     retrying,
     progress,
-    pinned,
-    setPinned,
     context,
+    /** Takes the current context off the next questions, until the reader is somewhere else. */
+    detachContext: () => setDetachedKey(liveContext?.key ?? null),
+    attachContext: () => setDetachedKey(null),
     send,
     cancel: () => active.current?.abort(),
     retry,
-    changeFollowReading,
     threadList: {
       threadId: current.id,
       threads: conversations.map(conversation => ({

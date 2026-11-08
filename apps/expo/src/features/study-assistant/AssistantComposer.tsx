@@ -11,55 +11,55 @@ import { useTheme } from '~themes/ThemeProvider'
 import { assistantAvailable } from './assistantConfig'
 import AssistantComposerInput from './AssistantComposerInput'
 import { ComposerInsetContext, useAssistantSheet } from './assistantSheetContext'
-import { contextCaption } from './MessageRenderer'
+import { contextCaption } from './contextDisplay'
+import ContextMarkIcon from './ContextMarkIcon'
 
 const ROUND_BUTTON = 'h-[34px] w-[34px] items-center justify-center rounded-full'
 
+/**
+ * What the reader is looking at goes with the question, as an attachment would: its mark and
+ * name, and a cross to send the question without it. Taken off, it waits as a dashed chip.
+ */
 function ContextChip() {
   const { t } = useTranslation()
   const { session, liveContext } = useAssistantSheet()
-  const { context, pinned } = session
-  if (context)
+  const { context } = session
+  if (context) {
+    const caption = contextCaption(context)
     return (
-      <HStack
-        className={`mr-2 h-[30px] shrink items-center rounded-full pl-1 pr-1 ${
-          pinned ? 'bg-light-primary' : 'bg-light-grey'
-        }`}
-      >
-        <TouchableBox
-          accessibilityRole="button"
-          accessibilityState={{ selected: Boolean(pinned) }}
-          accessibilityLabel={t(pinned ? 'assistant.modal.unpin' : 'assistant.modal.pin')}
-          hitSlop={8}
-          onPress={() => session.setPinned(pinned ? null : { ...context })}
-          className="h-[26px] w-[26px] items-center justify-center"
-        >
-          <FeatherIcon name="map-pin" size={13} color={pinned ? 'primary' : 'grey'} />
-        </TouchableBox>
+      <HStack className="bg-light-grey mr-2 h-[30px] shrink items-center gap-[6px] rounded-full pl-[10px] pr-[2px]">
+        <ContextMarkIcon context={context} />
         <Text className="shrink text-[13px]" numberOfLines={1}>
-          {contextCaption(context)}
+          {caption}
         </Text>
         <TouchableBox
           accessibilityRole="button"
-          accessibilityLabel={t('assistant.modal.removeContext')}
+          accessibilityLabel={t('assistant.modal.detachContext', { context: caption })}
           hitSlop={8}
-          onPress={() => session.changeFollowReading(false)}
+          onPress={session.detachContext}
           className="h-[26px] w-[26px] items-center justify-center"
         >
           <FeatherIcon name="x" size={13} color="grey" />
         </TouchableBox>
       </HStack>
     )
-  if (liveContext)
+  }
+  if (liveContext) {
+    const caption = contextCaption(liveContext)
     return (
       <TouchableBox
         accessibilityRole="button"
-        onPress={() => session.changeFollowReading(true)}
-        className="bg-light-grey mr-2 h-[30px] justify-center rounded-full px-3"
+        accessibilityLabel={t('assistant.modal.attachContext', { context: caption })}
+        onPress={session.attachContext}
+        className="border-border mr-2 h-[30px] shrink flex-row items-center gap-[6px] rounded-full border border-dashed px-[10px]"
       >
-        <Text className="text-grey text-[13px]">{t('assistant.modal.followReading')}</Text>
+        <FeatherIcon name="plus" size={13} color="grey" />
+        <Text className="text-grey shrink text-[13px]" numberOfLines={1}>
+          {caption}
+        </Text>
       </TouchableBox>
     )
+  }
   return <Box />
 }
 
