@@ -6,8 +6,12 @@ import './debug.css'
 const record = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' ? (value as Record<string, unknown>) : {}
 const groups = ['all', 'router', 'model', 'tools', 'context'] as const
-// Workers that predate ADR-0099 name the router stages jev_*.
-const isRouterStage = (stage: string) => /^(router|jev)_/.test(stage)
+// Workers that predate ADR-0099 name the router stages jev_*. Clef's probabilities set the answer depth.
+const isRouterStage = (stage: string) => /^(router|jev)_/.test(stage) || stage === 'answer_depth'
+const isToolStage = (stage: string) => /tool|resource|routing|library/.test(stage)
+// A memory compaction may precede the request; its steps come first in the trace.
+const isContextStage = (stage: string) =>
+  ['request', 'base_prompt', 'setup'].includes(stage) || stage.startsWith('compaction_')
 export default function DebugPanel({
   session,
   entries,
@@ -58,8 +62,8 @@ export default function DebugPanel({
       group === 'all' ||
       (group === 'router' && isRouterStage(e.stage)) ||
       (group === 'model' && e.stage.startsWith('model_')) ||
-      (group === 'tools' && /tool|resource|routing/.test(e.stage)) ||
-      (group === 'context' && ['request', 'base_prompt', 'setup'].includes(e.stage))
+      (group === 'tools' && isToolStage(e.stage)) ||
+      (group === 'context' && isContextStage(e.stage))
   )
   return (
     <section className="bs-debug" aria-label={t('assistant.debug.title')}>
@@ -157,7 +161,7 @@ export default function DebugPanel({
               <p>{t('assistant.debug.nextRequest')}</p>
             ) : (
               visible.map(entry => (
-                <details key={entry.sequence} className="bs-debug-event">
+                <details key={`${entry.stage}:${entry.sequence}`} className="bs-debug-event">
                   <summary>
                     <span>{entry.sequence.toString().padStart(2, '0')}</span>
                     <strong>{entry.stage}</strong>

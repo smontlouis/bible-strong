@@ -23,7 +23,7 @@ import { resolveFontFamily } from '~themes/styleValues'
 import { toast } from '~helpers/toast'
 import i18n from '~i18n'
 import { useTheme } from '~themes/ThemeProvider'
-import { askAssistant, connectAssistantDictation } from './client'
+import { askAssistant, compactAssistant, connectAssistantDictation } from './client'
 import { assistantAccessible, assistantAvailable } from './assistantConfig'
 import { followReadingPreferenceKey, type ReadingContext } from './conversations'
 import { useAssistantSession } from './useAssistantSession'
@@ -176,7 +176,20 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
           require('./debug/client.web') as typeof import('./debug/client.web')
         return askDebugAssistant(input, signal, emit, debug, entry => {
           if (isCurrent() && !signal.aborted && Date.now() < debug.expiresAt)
-            setDebugEntries(previous => [...previous, entry].slice(-251))
+            setDebugEntries(previous => [...previous, entry].slice(-260))
+        })
+      }
+    },
+    createCompact: ({ isCurrent }) => {
+      const debug = __DEV__ && debugOpen ? debugSession : null
+      if (!debug) return undefined
+      return (input, signal) => {
+        if (!__DEV__) return compactAssistant(input, signal)
+        const { compactDebugAssistant } =
+          require('./debug/client.web') as typeof import('./debug/client.web')
+        return compactDebugAssistant(input, signal, debug, entry => {
+          if (isCurrent() && !signal.aborted && Date.now() < debug.expiresAt)
+            setDebugEntries(previous => [...previous, entry].slice(-260))
         })
       }
     },

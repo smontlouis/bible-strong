@@ -5,6 +5,7 @@ import { getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
 import { askAssistant, captureAssistantPreferences, compactAssistant } from './client'
 import { assistantAvailable } from './assistantConfig'
 import { runConversation, type ConversationRequest } from './conversationRun'
+import type { Compactor } from './conversationMemory'
 import {
   assertConversationCapacity,
   loadFollowReadingPreference,
@@ -41,6 +42,7 @@ export function useAssistantSession({
   liveContext,
   preferenceStorage,
   createRequest,
+  createCompact,
   onAction,
   onRunStart,
   onThreadSwitch,
@@ -53,6 +55,8 @@ export function useAssistantSession({
   preferenceStorage: () => PreferenceStorage
   /** Lets a host replace the transport for one run (development diagnostics). */
   createRequest?: (run: { isCurrent: () => boolean }) => ConversationRequest | undefined
+  /** Same for the memory compaction that may precede the request. */
+  createCompact?: (run: { isCurrent: () => boolean }) => Compactor | undefined
   onAction: (action: AssistantAction) => void
   onRunStart?: () => void
   onThreadSwitch?: () => void
@@ -202,7 +206,8 @@ export function useAssistantSession({
       preferences: captureAssistantPreferences(readingContext?.bibleVersion),
       controller,
       request: createRequest?.({ isCurrent: () => active.current === controller }) || askAssistant,
-      compact: compactAssistant,
+      compact:
+        createCompact?.({ isCurrent: () => active.current === controller }) || compactAssistant,
       isCurrent: () => active.current === controller,
       onUpdate: publish,
       onProgress: key => setProgress(t(key)),
