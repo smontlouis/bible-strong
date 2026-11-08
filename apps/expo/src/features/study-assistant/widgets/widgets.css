@@ -103,32 +103,6 @@
   color: var(--sw-muted);
   margin-right: 6px;
 }
-.bs-widget-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  padding: 11px 16px;
-  border-top: 1px solid var(--sw-line);
-  font-size: 11px;
-  color: var(--sw-muted);
-}
-.bs-widget-footer button {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  border: 0;
-  background: var(--sw-soft);
-  color: var(--sw-accent);
-  border-radius: 7px;
-  padding: 7px 10px;
-  font: inherit;
-  cursor: pointer;
-}
-.bs-widget-footer button:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
 .bs-widget-analysis {
   padding: 14px 16px;
   background: var(--sw-soft);
@@ -227,38 +201,8 @@
     max-height: 240px;
   }
 }
-.bs-widget-lexicon,
 .bs-widget-concordance {
   padding: 16px;
-}
-.bs-widget-lexicon-heading {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.bs-widget-lexicon-heading > div:first-child {
-  flex: 1;
-  min-width: 0;
-}
-.bs-widget-original {
-  font-size: 30px;
-  line-height: 1.5;
-  margin-top: 6px;
-  text-align: start;
-}
-.bs-widget-lexicon-heading p {
-  font-size: 12px;
-  color: var(--sw-muted);
-  margin: 4px 0;
-}
-.bs-widget-lexicon h4 {
-  font-size: 16px;
-  line-height: 1.45;
-  margin: 14px 0;
-}
-.bs-widget-definition {
-  max-height: 230px;
-  overflow: auto;
 }
 .bs-widget-notice {
   font-size: 11px;
@@ -346,68 +290,6 @@
   margin: 4px 6px 6px 0;
   color: var(--sw-accent);
 }
-.bs-widget-source-card {
-  padding: 16px;
-  border-bottom: 1px solid var(--sw-line);
-  min-width: 0;
-}
-.bs-widget-source-card:last-child {
-  border-bottom: 0;
-}
-.bs-widget-source-card > header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--sw-accent);
-  margin-bottom: 12px;
-}
-.bs-widget-source-card > header > svg {
-  flex-shrink: 0;
-}
-.bs-widget-source-card > header > button:not(.bs-widget-icon) {
-  flex: 1;
-  border: 0;
-  background: none;
-  padding: 0;
-  color: inherit;
-  font: inherit;
-  font-size: 13px;
-  text-align: left;
-  font-weight: 600;
-  cursor: pointer;
-}
-.bs-widget-source-card > small {
-  font-size: 12px;
-  color: var(--sw-muted);
-}
-.bs-widget-source-card > p {
-  font-size: 13px;
-  line-height: 1.75;
-  white-space: pre-wrap;
-  max-height: 200px;
-  overflow: auto;
-  margin: 8px 0 0;
-}
-.bs-widget-source-comparison {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-}
-.bs-widget-source-comparison .bs-widget-source-card {
-  border-right: 1px solid var(--sw-line);
-}
-.bs-widget-source-comparison .bs-widget-source-card > p {
-  max-height: 50dvh;
-}
-.bs-widget-nave {
-  padding: 16px;
-  max-height: 330px;
-  overflow: auto;
-}
-@media (max-width: 600px) {
-  .bs-widget-source-comparison {
-    grid-template-columns: 1fr;
-  }
-}
 .bs-widget-word-details > div > button {
   border: 0;
   background: transparent;
@@ -476,73 +358,6 @@
 }
 .bs-widget-relation-list small {
   color: var(--sw-muted);
-}
-.bs-widget-timeline-status {
-  padding: 16px;
-}
-.bs-widget-timeline {
-  list-style: none;
-  padding: 0 18px 18px 28px;
-  margin: 0;
-}
-.bs-widget-timeline > li {
-  position: relative;
-  border-left: 1px solid var(--sw-line);
-  padding: 0 0 22px 20px;
-}
-.bs-widget-time-dot {
-  position: absolute;
-  left: -5px;
-  top: 3px;
-  width: 9px;
-  height: 9px;
-  background: var(--sw-accent);
-  border: 2px solid var(--sw-surface);
-  border-radius: 50%;
-  box-shadow: 0 0 0 1px var(--sw-accent);
-}
-.bs-widget-timeline small {
-  font-size: 10px;
-  color: var(--sw-muted);
-}
-.bs-widget-timeline h4 {
-  font-size: 15px;
-  line-height: 1.4;
-  margin: 6px 0;
-}
-.bs-widget-timeline p {
-  font-size: 12px;
-  line-height: 1.6;
-  margin: 6px 0 10px;
-}
-.bs-widget-timeline button {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font: inherit;
-  font-size: 11px;
-  border: 0;
-  background: none;
-  color: var(--sw-accent);
-  padding: 0;
-  cursor: pointer;
-}
-.bs-widget-timeline-wide {
-  display: flex;
-  gap: 0;
-  overflow-x: auto;
-  padding-top: 22px;
-}
-.bs-widget-timeline-wide > li {
-  flex: 1;
-  min-width: 240px;
-  border-left: 0;
-  border-top: 1px solid var(--sw-line);
-  padding: 18px 20px 12px 0;
-}
-.bs-widget-timeline-wide .bs-widget-time-dot {
-  left: 0;
-  top: -5px;
 }
 .bs-widget-book,
 .bs-widget-reading {
@@ -832,4 +647,231 @@
   display: grid;
   min-height: 200px;
   place-items: center;
+}
+
+/*
+ * Quotes in the flow of an answer (2026-11-08), as on the phone: no frame and no tinted bubble,
+ * a rule in the resource's colour, the preview, then a foot line with its mark and name.
+ */
+.bs-quote-group {
+  margin: 4px 0;
+}
+.bs-quote-title {
+  margin: 4px 0 0;
+  font-size: 13px;
+}
+.bs-quote {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+  color: var(--q-ink);
+  overflow-wrap: anywhere;
+}
+.bs-quote[data-opens] {
+  cursor: pointer;
+}
+.bs-quote-body {
+  flex: 1;
+  min-width: 0;
+  padding-left: 14px;
+  border-left: 2px solid var(--q-rule);
+}
+.bs-quote-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  color: var(--q-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.bs-quote-foot > svg {
+  flex-shrink: 0;
+}
+.bs-quote-name {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--q-link);
+  font: inherit;
+  text-align: left;
+}
+button.bs-quote-name {
+  cursor: pointer;
+}
+.bs-quote-toggle {
+  flex-shrink: 0;
+  margin-left: 6px;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--q-muted);
+  font: inherit;
+  cursor: pointer;
+}
+.bs-quote-chevron {
+  flex-shrink: 0;
+  color: var(--q-link);
+}
+.bs-quote[data-opens]:hover .bs-quote-name,
+.bs-quote-toggle:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bs-quote-chevron {
+    transition: transform 160ms ease-out;
+  }
+  .bs-quote[data-opens]:hover .bs-quote-chevron {
+    transform: translateX(2px);
+  }
+}
+.bs-quote :is(button, a):focus-visible,
+.bs-quote-more:focus-visible {
+  outline: 2px solid var(--q-link);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+.bs-quote-verse {
+  margin: 0;
+  color: var(--q-link);
+}
+.bs-quote-verse sup {
+  margin-right: 3px;
+  color: var(--q-muted);
+  font-size: 11px;
+  vertical-align: super;
+  line-height: 0;
+}
+.bs-quote-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 23px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.bs-quote-muted {
+  margin: 0;
+  color: var(--q-muted);
+  font-size: 15px;
+  line-height: 23px;
+}
+.bs-quote-more {
+  display: block;
+  margin: 0;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--q-link);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.bs-quote-more:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.bs-quote-cut {
+  overflow: hidden;
+}
+.bs-quote-cut[data-tall] {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent);
+}
+.bs-quote-loading {
+  display: grid;
+  gap: 8px;
+  padding: 6px 0;
+}
+.bs-quote-loading span {
+  display: block;
+  height: 10px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--q-muted) 22%, transparent);
+}
+.bs-quote-loading span:last-child {
+  width: 60%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bs-quote-loading span {
+    animation: bs-quote-pulse 1.2s ease-in-out infinite alternate;
+  }
+}
+@keyframes bs-quote-pulse {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.bs-quote-word {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.bs-quote-original {
+  font-size: 22px;
+  line-height: 30px;
+}
+.bs-quote-sense {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--q-muted);
+  font-size: 14px;
+}
+.bs-quote-events {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.bs-quote-events li + li {
+  margin-top: 12px;
+}
+.bs-quote-event {
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.bs-quote-event:not(:disabled) {
+  cursor: pointer;
+}
+.bs-quote-event:not(:disabled):hover .bs-quote-event-title {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.bs-quote-event-date {
+  display: block;
+  color: var(--q-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.bs-quote-event-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+.bs-quote-event-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 21px;
 }

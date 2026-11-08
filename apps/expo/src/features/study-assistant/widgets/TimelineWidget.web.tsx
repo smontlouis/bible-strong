@@ -1,18 +1,22 @@
-import { calculateLabel } from '~features/timeline/constants'
-import { orderTimelineRows } from './timelineRows'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { ArrowUpRightIcon, ClockIcon } from 'lucide-react'
 import type { TimelineWidget as Descriptor } from '@bible-strong/ai-contract/contract'
 import { useResourceAccess } from '~features/resources/resourceAccess'
+import { calculateLabel } from '~features/timeline/constants'
 import { getEvents } from '~features/timeline/events'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import WidgetFrame, { useCloseExpandedWidget } from './WidgetFrame.web'
-function Events({ widget, expanded = false }: { widget: Descriptor; expanded?: boolean }) {
-  const { t } = useTranslation(),
-    resources = useResourceAccess(),
-    navigate = usePushRouteOnce(),
-    close = useCloseExpandedWidget()
+import { QuoteBlock, QuoteLoading, QuoteMore } from './QuoteBlock.web'
+import { orderTimelineRows } from './timelineRows'
+
+const SHOWN_EVENTS = 3
+
+/** Events in order, each a date, a title and two lines; each opens its event. */
+export default function TimelineWidget({ widget }: { widget: Descriptor }) {
+  const { t } = useTranslation()
+  const resources = useResourceAccess()
+  const navigate = usePushRouteOnce()
+  const [all, setAll] = useState(false)
   const query = useQuery({
     queryKey: ['assistant-timeline', widget.events, widget.language],
     queryFn: async () => {
@@ -34,72 +38,57 @@ function Events({ widget, expanded = false }: { widget: Descriptor; expanded?: b
     },
     staleTime: 300000,
   })
-  if (query.isPending)
-    return (
-      <p className="bs-widget-timeline-status" role="status">
-        {t('Chargement...')}
-      </p>
-    )
-  if (query.isError)
-    return (
-      <div className="bs-widget-timeline-status">
-        <p>{t('assistant.widgets.resourceUnavailable')}</p>
-        <button type="button" onClick={() => void query.refetch()}>
-          {t('assistant.errors.retry')}
-        </button>
-      </div>
-    )
+  const events = query.data || []
+  const shown = all ? events : events.slice(0, SHOWN_EVENTS)
   return (
-    <>
-      <p className="bs-widget-notice">{t('assistant.widgets.timelineNotice')}</p>
-      <ol className={`bs-widget-timeline ${expanded ? 'bs-widget-timeline-wide' : ''}`}>
-        {query.data.map(event => (
-          <li key={event.slug}>
-            <div className="bs-widget-time-dot" />
-            <small>
-              {event.position
-                ? calculateLabel(event.position.start, event.position.end, widget.language)
-                : event.detail?.dates || t('assistant.widgets.unknownDate')}
-              {event.position?.approx ? ` · ${t('assistant.widgets.approximate')}` : ''}
-            </small>
-            <h4>
-              {event.detail?.title ||
-                (widget.language === 'en' ? event.meta?.titleEn : event.meta?.title) ||
-                t('assistant.widgets.resourceUnavailable')}
-            </h4>
-            {!event.position && <small>{t('assistant.widgets.unknownOrder')}</small>}
-            <p>{event.detail?.description || t('assistant.widgets.resourceUnavailable')}</p>
-            {event.detail && (
+    <QuoteBlock
+      mark="timeline"
+      foot={t('assistant.widgets.timelineFoot', { count: widget.events.length })}
+    >
+      {query.isPending && <QuoteLoading label={t('Chargement...')} />}
+      {query.isError && (
+        <p className="bs-quote-muted">{t('assistant.widgets.resourceUnavailable')}</p>
+      )}
+      {shown.length > 0 && (
+        <ol className="bs-quote-events">
+          {shown.map(event => (
+            <li key={event.slug}>
               <button
                 type="button"
-                onClick={() => {
-                  close()
+                className="bs-quote-event"
+                disabled={!event.detail}
+                onClick={() =>
                   navigate({
                     pathname: '/event',
                     params: { slug: event.slug, language: widget.language },
                   })
-                }}
+                }
               >
-                {t('assistant.widgets.openEvent')}
-                <ArrowUpRightIcon size={14} />
+                <span className="bs-quote-event-date">
+                  {event.position
+                    ? calculateLabel(event.position.start, event.position.end, widget.language)
+                    : event.detail?.dates || t('assistant.widgets.unknownDate')}
+                  {event.position?.approx ? ` · ${t('assistant.widgets.approximate')}` : ''}
+                </span>
+                <span className="bs-quote-event-title">
+                  {event.detail?.title ||
+                    (widget.language === 'en' ? event.meta?.titleEn : event.meta?.title) ||
+                    t('assistant.widgets.resourceUnavailable')}
+                </span>
+                {!!event.detail?.description && (
+                  <span className="bs-quote-event-text">{event.detail.description}</span>
+                )}
               </button>
-            )}
-          </li>
-        ))}
-      </ol>
-    </>
-  )
-}
-export default function TimelineWidget({ widget }: { widget: Descriptor }) {
-  const { t } = useTranslation()
-  return (
-    <WidgetFrame
-      icon={<ClockIcon size={17} />}
-      title={widget.title}
-      eyebrow={t('assistant.widgets.timeline')}
-      expanded={<Events widget={widget} expanded />}
-    >
-      <Events widget={widget} />
-    </WidgetFrame>
+            </li>
+          ))}
+        </ol>
+      )}
+      {events.length > shown.length && (
+        <QuoteMore
+          label={t('assistant.widgets.moreEvents', { count: events.length - shown.length })}
+          onPress={() => setAll(true)}
+        />
+      )}
+    </QuoteBlock>
   )
 }

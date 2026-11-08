@@ -10,6 +10,7 @@ import type { StudyWidget as Descriptor } from '@bible-strong/ai-contract/contra
 import PassageWidget from './PassageWidget.web'
 import StrongWidget from './StrongWidget.web'
 import ConcordanceWidget from './ConcordanceWidget.web'
+import VerseQuoteWidget from './VerseQuoteWidget.web'
 export default function StudyWidget({ widget }: { widget: Descriptor }) {
   if (widget.kind === 'book_overview') return <BookWidget widget={widget} />
   if (widget.kind === 'reading_plan' || widget.kind === 'meditation')
@@ -23,5 +24,11 @@ export default function StudyWidget({ widget }: { widget: Descriptor }) {
   if (widget.kind === 'verse_analysis') return <VerseAnalysisWidget widget={widget} />
   if (widget.kind === 'concordance') return <ConcordanceWidget widget={widget} />
   if (widget.kind === 'strong_entry') return <StrongWidget widget={widget} />
-  return 'passages' in widget ? <PassageWidget widget={widget} /> : null
+  if (!('passages' in widget)) return null
+  // A translation comparison keeps its card; other passages are quotes in the text.
+  return widget.kind === 'translation_comparison' ? (
+    <PassageWidget widget={widget} />
+  ) : (
+    <VerseQuoteWidget widget={widget} />
+  )
 }

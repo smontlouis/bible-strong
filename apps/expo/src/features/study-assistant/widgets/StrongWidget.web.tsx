@@ -1,21 +1,21 @@
-import { useTheme } from '~themes/ThemeProvider'
-import { resolveFontFamily } from '~themes/styleValues'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { ArrowUpRightIcon } from 'lucide-react'
 import type { LexicalWidget } from '@bible-strong/ai-contract/contract'
-import { useResourceAccess } from '~features/resources/resourceAccess'
-import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import ListenToStrong from '~features/bible/ListenStrong'
+import { StrongEditorialPreview } from '~features/lexique/StrongDetailUI'
 import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
 import { getBibleViewRouteForStrongOsisReference } from '~features/lexique/strongReferenceNavigation'
-import { StrongEditorialHtml } from '~features/lexique/StrongDetailUI'
-import ListenToStrong from '~features/bible/ListenStrong'
-import WidgetFrame from './WidgetFrame.web'
+import { useStrongReadingTypography } from '~features/lexique/useStrongReadingTypography'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { QuoteBlock } from './QuoteBlock.web'
+
+/** A word of the lexicon: the word, its sound and sense, then the first lines of its entry. */
 export default function StrongWidget({ widget }: { widget: LexicalWidget }) {
-  const { fontFamily } = useTheme()
-  const { t } = useTranslation(),
-    resources = useResourceAccess(),
-    navigate = usePushRouteOnce()
+  const { t } = useTranslation()
+  const resources = useResourceAccess()
+  const navigate = usePushRouteOnce()
+  const reading = useStrongReadingTypography()
   const query = useQuery({
     queryKey: ['assistant-widget-lexicon', widget.reference, widget.identityKind, widget.language],
     queryFn: () =>
@@ -35,64 +35,41 @@ export default function StrongWidget({ widget }: { widget: LexicalWidget }) {
       })
     )
   return (
-    <WidgetFrame title={widget.title} eyebrow={t('assistant.widgets.strong')}>
-      <div className="bs-widget-lexicon">
-        {query.isPending ? (
-          <p role="status">{t('Chargement...')}</p>
-        ) : query.isError || !entry ? (
-          <div>
-            <p>{t('assistant.widgets.resourceUnavailable')}</p>
-            <button type="button" onClick={() => void query.refetch()}>
-              {t('assistant.errors.retry')}
-            </button>
+    <QuoteBlock
+      mark="strong"
+      foot={t('assistant.widgets.strongFoot', { reference: widget.reference })}
+      onPress={() => open()}
+    >
+      {!entry ? (
+        <p className="bs-quote-muted">
+          {query.isError ? t('assistant.widgets.resourceUnavailable') : widget.title}
+        </p>
+      ) : (
+        <>
+          <div className="bs-quote-word">
+            <span className="bs-quote-original" dir={entry.language === 'hebrew' ? 'rtl' : 'ltr'}>
+              {entry.original}
+            </span>
+            <span className="bs-quote-sense">
+              {[entry.transliteration, entry.gloss].filter(Boolean).join(' · ')}
+            </span>
+            <ListenToStrong
+              type={entry.language === 'hebrew' ? 'hebreu' : 'grec'}
+              code={entry.baseCode}
+            />
           </div>
-        ) : (
-          <>
-            <div className="bs-widget-lexicon-heading">
-              <div>
-                <div
-                  className="bs-widget-original"
-                  dir={entry.language === 'hebrew' ? 'rtl' : 'ltr'}
-                >
-                  {entry.original}
-                </div>
-                <p>
-                  {entry.transliteration}
-                  {entry.pronunciation ? ` · ${entry.pronunciation}` : ''}
-                </p>
-              </div>
-              <ListenToStrong
-                type={entry.language === 'hebrew' ? 'hebreu' : 'grec'}
-                code={entry.baseCode}
-              />
-              <button
-                type="button"
-                className="bs-widget-icon"
-                aria-label={t('assistant.widgets.open', { reference: widget.reference })}
-                onClick={() => open()}
-              >
-                <ArrowUpRightIcon size={17} />
-              </button>
-            </div>
-            <h4>{entry.gloss}</h4>
-            <div className="bs-widget-definition">
-              <StrongEditorialHtml
-                typography={{
-                  fontFamily: resolveFontFamily(fontFamily.text) || 'sans-serif',
-                  fontSize: 14,
-                  lineHeight: 24,
-                }}
-                value={entry.definitionHtml}
-                onOpenBibleReference={osis => {
-                  const route = getBibleViewRouteForStrongOsisReference(osis)
-                  if (route) navigate(route)
-                }}
-                onOpenStrong={open}
-              />
-            </div>
-          </>
-        )}
-      </div>
-    </WidgetFrame>
+          <StrongEditorialPreview
+            value={entry.definitionHtml}
+            numberOfLines={3}
+            readingTypography={{ ...reading, fontSizeScale: reading.fontSizeScale - 2 }}
+            onOpenBibleReference={osis => {
+              const route = getBibleViewRouteForStrongOsisReference(osis)
+              if (route) navigate(route)
+            }}
+            onOpenStrong={open}
+          />
+        </>
+      )}
+    </QuoteBlock>
   )
 }

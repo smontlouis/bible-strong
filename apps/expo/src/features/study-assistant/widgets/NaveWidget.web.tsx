@@ -1,23 +1,31 @@
-import { useTheme } from '~themes/ThemeProvider'
-import { resolveFontFamily } from '~themes/styleValues'
-import { useTranslation } from 'react-i18next'
-import { ArrowUpRightIcon } from 'lucide-react'
 import type { NaveWidget as Descriptor } from '@bible-strong/ai-contract/contract'
 import ResourcePreviewContent from '~features/bibleReferencePreview/ResourcePreviewContent'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import WidgetFrame from './WidgetFrame.web'
+import { useTheme } from '~themes/ThemeProvider'
+import { resolveFontFamily } from '~themes/styleValues'
+import { QuoteBlock, QuoteCut } from './QuoteBlock.web'
+
+/** A topic of Nave: the start of its entry, cut cleanly; the quote opens the whole topic. */
 export default function NaveWidget({ widget }: { widget: Descriptor }) {
+  const navigate = usePushRouteOnce()
   const { fontFamily } = useTheme()
-  const { t } = useTranslation(),
-    navigate = usePushRouteOnce()
   return (
-    <WidgetFrame title={widget.title} eyebrow={t('assistant.widgets.nave')}>
-      <div className="bs-widget-nave">
+    <QuoteBlock
+      mark="nave"
+      foot={`Nave · ${widget.title}`}
+      onPress={() =>
+        navigate({
+          pathname: '/nave-detail',
+          params: { name: widget.topic, name_lower: widget.topic, language: widget.language },
+        })
+      }
+    >
+      <QuoteCut maxHeight={132}>
         <ResourcePreviewContent
           typography={{
             fontFamily: resolveFontFamily(fontFamily.text) || 'sans-serif',
             fontSize: 14,
-            lineHeight: 24,
+            lineHeight: 22,
           }}
           target={{
             kind: 'nave',
@@ -26,22 +34,7 @@ export default function NaveWidget({ widget }: { widget: Descriptor }) {
             source: { kind: 'nave', language: widget.language },
           }}
         />
-      </div>
-      <footer className="bs-widget-footer">
-        <span>Nave · {widget.language.toUpperCase()}</span>
-        <button
-          type="button"
-          onClick={() =>
-            navigate({
-              pathname: '/nave-detail',
-              params: { name: widget.topic, name_lower: widget.topic, language: widget.language },
-            })
-          }
-        >
-          {t('assistant.widgets.openTopic')}
-          <ArrowUpRightIcon size={15} />
-        </button>
-      </footer>
-    </WidgetFrame>
+      </QuoteCut>
+    </QuoteBlock>
   )
 }
