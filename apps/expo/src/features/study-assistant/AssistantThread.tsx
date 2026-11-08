@@ -71,7 +71,9 @@ function ThreadStatus() {
           detail={t('assistant.modal.storageError')}
         />
       )}
-      {!!followUps.length && !error && <FollowUpQuestions questions={followUps} />}
+      {!!followUps.length && !error && (
+        <FollowUpQuestions questions={followUps} disabled={busy || !ready} />
+      )}
       {!current.messages.length && (
         <Box className="mt-2 gap-2">
           {shortcutsFor(context).map(key => (

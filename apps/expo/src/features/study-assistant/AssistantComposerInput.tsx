@@ -1,11 +1,9 @@
-import { useEffect, useRef, useState, type Ref } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { TextInput, type TextInputProps } from 'react-native'
 import { useAui } from '@assistant-ui/react-native'
 import { createComposerTextSync, receiveComposerText, sendComposerText } from './composerTextSync'
 
-type Props = Omit<TextInputProps, 'value' | 'defaultValue' | 'onChangeText'> & {
-  ref?: Ref<TextInput>
-}
+type Props = Omit<TextInputProps, 'value' | 'defaultValue' | 'onChangeText'>
 
 /**
  * The composer's text field. It owns the text while the user types, so that a fast typist

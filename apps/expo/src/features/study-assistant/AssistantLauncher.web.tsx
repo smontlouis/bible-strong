@@ -55,7 +55,6 @@ function Icon({
     | 'plus'
     | 'history'
     | 'send'
-    | 'stop'
     | 'stopFilled'
     | 'back'
     | 'trash'
@@ -75,7 +74,6 @@ function Icon({
     plus: 'M12 5v14M5 12h14',
     history: 'M3 11a9 9 0 1 1 2 7M3 4v7h7M12 7v5l3 2',
     send: 'm5 12 7-7 7 7M12 5v14',
-    stop: 'M7 7h10v10H7z',
     stopFilled: 'M7 7h10v10H7z',
     back: 'm14 5-7 7 7 7',
     trash: 'M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 10v7M14 10v7',
@@ -514,7 +512,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                   />
                 )}
                 {!!followUps.length && !error && (
-                  // A question picked goes into the composer, to be changed or sent.
+                  // A question picked is asked at once, like the starting points.
                   <div
                     className="bs-assistant-follow-ups"
                     role="group"
@@ -522,18 +520,16 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                   >
                     <p id="bs-follow-ups">{t('assistant.modal.followUps')}</p>
                     {followUps.map(question => (
-                      <button
+                      <ThreadPrimitive.Suggestion
                         key={question}
-                        type="button"
+                        prompt={question}
+                        send
+                        disabled={busy || !ready}
                         title={t('assistant.modal.followUpHint')}
-                        onClick={() => {
-                          runtime.thread.composer.setText(question)
-                          inputRef.current?.focus()
-                        }}
                       >
                         <Icon name="followUp" />
                         <span>{question}</span>
-                      </button>
+                      </ThreadPrimitive.Suggestion>
                     ))}
                   </div>
                 )}
@@ -659,7 +655,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                               className="bs-assistant-send"
                               aria-label={t('assistant.stop')}
                             >
-                              <Icon name="stop" />
+                              <Icon name="stopFilled" />
                             </ComposerPrimitive.Cancel>
                           ) : (
                             <ComposerPrimitive.Send

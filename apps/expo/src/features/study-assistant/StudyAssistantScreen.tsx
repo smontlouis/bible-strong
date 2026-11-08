@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { Platform, StyleSheet, type TextInput } from 'react-native'
+import { useEffect, useState } from 'react'
+import { Platform, StyleSheet } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useAtomValue } from 'jotai'
 import { useRouter } from 'expo-router'
@@ -15,7 +15,6 @@ import AssistantComposer from './AssistantComposer'
 import AssistantHistory from './AssistantHistory'
 import {
   AssistantSheetContext,
-  ComposerInputContext,
   ComposerInsetContext,
   assistantPageAtom,
   useAssistantSheet,
@@ -118,7 +117,6 @@ export default function StudyAssistantScreen() {
   const router = useRouter()
   const page = useAtomValue(assistantPageAtom)
   const [composerHeight, setComposerHeight] = useState(0)
-  const composerInput = useRef<TextInput>(null)
   // Signed out, or the assistant is not offered to this account: nothing to show here.
   useEffect(() => {
     if (page) return
@@ -133,24 +131,20 @@ export default function StudyAssistantScreen() {
         <ComposerInsetContext.Provider
           value={{ height: composerHeight, setHeight: setComposerHeight }}
         >
-          <ComposerInputContext.Provider value={composerInput}>
-            <ModalRouteFrame>
-              <Box className="bg-reverse flex-1">
-                <PageHeader />
-                <Box className="flex-1 overflow-hidden">
-                  {sheet.historyOpen ? <AssistantHistory /> : <AssistantThread />}
-                </Box>
-                {!sheet.historyOpen && (
-                  <KeyboardStickyView
-                    style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}
-                  >
-                    <AssistantComposer />
-                  </KeyboardStickyView>
-                )}
+          <ModalRouteFrame>
+            <Box className="bg-reverse flex-1">
+              <PageHeader />
+              <Box className="flex-1 overflow-hidden">
+                {sheet.historyOpen ? <AssistantHistory /> : <AssistantThread />}
               </Box>
-            </ModalRouteFrame>
-            <SourceExcerptSheet source={sheet.source} onClose={() => sheet.showSource(null)} />
-          </ComposerInputContext.Provider>
+              {!sheet.historyOpen && (
+                <KeyboardStickyView style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+                  <AssistantComposer />
+                </KeyboardStickyView>
+              )}
+            </Box>
+          </ModalRouteFrame>
+          <SourceExcerptSheet source={sheet.source} onClose={() => sheet.showSource(null)} />
         </ComposerInsetContext.Provider>
       </AssistantSheetContext.Provider>
     </AssistantRuntimeProvider>

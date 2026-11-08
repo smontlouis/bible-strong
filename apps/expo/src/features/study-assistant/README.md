@@ -221,7 +221,7 @@ Error banners use the installed assistant-ui Elements ErrorState with translated
 
 ### Questions to ask next
 
-The app declares the `follow_ups` capability; the service then sends up to four questions the reader may ask after a finished answer, written while it checks that answer (no extra wait, nothing after a refusal or a replaced answer). They show under the last answer once it is fully revealed (`FollowUpQuestions.tsx` on native, `.bs-assistant-follow-ups` on web). A question picked goes into the composer and focuses it: nothing is sent on the reader's behalf. They live in the session's memory only, keyed by the answer they follow: Firestore rules accept a fixed set of message fields, and a reopened conversation shows none. Older apps never declare the capability, so they never receive an event they would reject.
+The app declares the `follow_ups` capability; the service then sends up to four questions the reader may ask after a finished answer, written while it checks that answer (no extra wait, nothing after a refusal or a replaced answer). They show under the last answer once it is fully revealed (`FollowUpQuestions.tsx` on native, `.bs-assistant-follow-ups` on web). A question picked is asked at once, like the starting points of an empty conversation (2026-11-08: it first only filled the composer). They live in the session's memory only, keyed by the answer they follow: Firestore rules accept a fixed set of message fields, and a reopened conversation shows none. Older apps never declare the capability, so they never receive an event they would reject.
 
 ### Official component installation
 

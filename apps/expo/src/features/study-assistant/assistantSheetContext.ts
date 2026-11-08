@@ -1,5 +1,4 @@
-import { createContext, useContext, type RefObject } from 'react'
-import type { TextInput } from 'react-native'
+import { createContext, useContext } from 'react'
 import { atom } from 'jotai'
 import type { AssistantRuntime } from '@assistant-ui/react-native'
 import type { StudySource } from '@bible-strong/ai-contract/contract'
@@ -48,9 +47,6 @@ export const ComposerInsetContext = createContext<{
   height: 0,
   setHeight: () => {},
 })
-
-/** The composer's text field, focused when the reader picks a question to ask next. */
-export const ComposerInputContext = createContext<RefObject<TextInput | null>>({ current: null })
 
 export function useAssistantSheet(): AssistantSheet {
   const value = useContext(AssistantSheetContext)

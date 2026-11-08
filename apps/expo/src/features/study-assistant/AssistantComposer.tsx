@@ -10,15 +10,14 @@ import Text from '~common/ui/Text'
 import { useTheme } from '~themes/ThemeProvider'
 import { assistantAvailable } from './assistantConfig'
 import AssistantComposerInput from './AssistantComposerInput'
-import {
-  ComposerInputContext,
-  ComposerInsetContext,
-  useAssistantSheet,
-} from './assistantSheetContext'
+import { ComposerInsetContext, useAssistantSheet } from './assistantSheetContext'
 import { contextCaption } from './contextDisplay'
 import ContextMarkIcon from './ContextMarkIcon'
 
 const ROUND_BUTTON = 'h-[34px] w-[34px] items-center justify-center rounded-full'
+
+/** Stopping is a filled square, on native as on the web (Feather draws only an outline). */
+const StopSquare = () => <Box className="bg-reverse h-[11px] w-[11px] rounded-[2px]" />
 
 /**
  * What the reader is looking at goes with the question, as an attachment would: its mark and
@@ -111,11 +110,7 @@ function DictationButton() {
       onPress={() => aui.composer.stopDictation()}
       className={`${ROUND_BUTTON} ${listening ? 'bg-quart' : ''}`}
     >
-      {listening ? (
-        <FeatherIcon name="square" size={14} color="reverse" />
-      ) : (
-        <ActivityIndicator size="small" color={colors.grey} />
-      )}
+      {listening ? <StopSquare /> : <ActivityIndicator size="small" color={colors.grey} />}
     </TouchableBox>
   )
 }
@@ -130,7 +125,6 @@ export default function AssistantComposer() {
   const insets = useSafeAreaInsets()
   const keyboardVisible = useKeyboardState(state => state.isVisible)
   const inset = use(ComposerInsetContext)
-  const input = use(ComposerInputContext)
   return (
     <Box
       className="bg-reverse px-3 pt-1"
@@ -141,7 +135,6 @@ export default function AssistantComposer() {
     >
       <ComposerPrimitive.Root className="border-border bg-reverse rounded-[24px] border px-2 pb-2 pt-1">
         <AssistantComposerInput
-          ref={input}
           multiline
           maxLength={4000}
           placeholder={t('assistant.modal.placeholder')}
@@ -168,7 +161,7 @@ export default function AssistantComposer() {
                 accessibilityLabel={t('assistant.stop')}
                 className={`${ROUND_BUTTON} bg-primary`}
               >
-                <FeatherIcon name="square" size={14} color="reverse" />
+                <StopSquare />
               </ComposerPrimitive.Cancel>
             ) : (
               <ComposerPrimitive.Send
