@@ -1,0 +1,30 @@
+name: Publish a desktop release
+description: >
+  Publishes the draft release desktop-v<version> and points the readers' updaters at its manifest.
+  The updater reads latest.json from the fixed desktop-latest release, so other releases of this
+  repository never redirect it (ADR-0107). Needs GH_TOKEN with contents write.
+
+inputs:
+  version:
+    description: Desktop version, for example 0.1.0
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Publish the release
+      shell: bash
+      env:
+        TAG: desktop-v${{ inputs.version }}
+      run: gh release edit "$TAG" --draft=false --latest=false
+
+    - name: Point the updaters at it
+      shell: bash
+      env:
+        TAG: desktop-v${{ inputs.version }}
+      run: |
+        gh release download "$TAG" --pattern latest.json --dir manifest
+        gh release view desktop-latest >/dev/null 2>&1 ||
+          gh release create desktop-latest --prerelease --title "Desktop updater" \
+            --notes "Updater manifest of the desktop app. Do not delete."
+        gh release upload desktop-latest manifest/latest.json --clobber

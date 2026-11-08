@@ -33,14 +33,20 @@ password manager.
 
 ## Release
 
-1. Raise `version` in `apps/desktop/package.json`, merge to `master`.
-2. Run **Desktop release** (Actions, on `master`). It exports the web app with the desktop flags,
-   builds the three systems, signs and notarizes macOS, and fills the draft release
-   `desktop-v<version>` with the installers, their signatures and `latest.json`.
-3. Install from the draft on each system and test: sign in, read online, install a Bible and a
-   dictionary, read them with the network off, quit and reopen.
-4. Run **Desktop promote** with the version. It publishes the release and copies its
-   `latest.json` to `desktop-latest`; installed apps offer the update at their next launch.
+1. Raise `version` in `apps/desktop/package.json` and push it to `master`. The CI builds
+   `master` as pushed and refuses a version already published.
+2. `yarn desktop:release` runs **Desktop release** on `master` (about 20 minutes). It exports
+   the web app with the desktop flags, builds the three systems, signs and notarizes macOS, and
+   fills the release `desktop-v<version>` with the installers, their signatures and
+   `latest.json`. Once all three systems built, it publishes the release and copies its
+   `latest.json` to `desktop-latest`: installed apps offer the update at their next launch.
+3. For a risky release (a Tauri upgrade, a change in the Rust), `yarn desktop:release --draft`
+   stops at the draft release. Install from it on each system and test: sign in, read online,
+   install a Bible and a dictionary, read them with the network off, quit and reopen. Then
+   `yarn desktop:release --publish` publishes that draft (**Desktop promote**), without
+   rebuilding.
+
+The updater never goes back to an older version: a bad release is fixed by a newer one.
 
 ## Local builds
 

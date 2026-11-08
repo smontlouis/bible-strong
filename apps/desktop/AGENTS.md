@@ -23,6 +23,7 @@ Bible Strong for macOS, Windows and Linux: a Tauri 2 shell (`src-tauri/`, Rust) 
 | Run the app against it | `yarn dev` (root: `yarn dev:desktop`) |
 | Export the web app for desktop | `yarn web` |
 | Build the installers of the current OS | `yarn build` |
+| Release: build in CI and publish to the readers (`--draft` stops at the draft, `--publish` publishes it) | root: `yarn desktop:release` |
 | Build the Mac App Store app | `yarn build:appstore` |
 | Rust tests | `yarn test` |
 | Archives the Rust tests decrypt | `yarn fixtures` |

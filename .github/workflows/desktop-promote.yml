@@ -1,8 +1,8 @@
 name: Desktop promote
 
-# Publishes a draft desktop release built by `Desktop release`, once its installers were tested,
-# and points the readers' updaters at it: the updater reads `latest.json` from the fixed
-# `desktop-latest` release, so other releases of this repository never redirect it (ADR-0107).
+# Publishes a draft desktop release kept by `Desktop release` (its `draft` option), once its
+# installers were tested, and points the readers' updaters at it. Started by
+# `yarn desktop:release --publish` (docs/desktop-release.md).
 
 on:
   workflow_dispatch:
@@ -25,18 +25,11 @@ jobs:
     environment: desktop-release
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      TAG: desktop-v${{ inputs.version }}
     steps:
       - name: Check out the source
         uses: actions/checkout@v5
 
-      - name: Publish the release
-        run: gh release edit "$TAG" --draft=false --latest=false
-
-      - name: Point the updaters at it
-        run: |
-          gh release download "$TAG" --pattern latest.json --dir manifest
-          gh release view desktop-latest >/dev/null 2>&1 ||
-            gh release create desktop-latest --prerelease --title "Desktop updater" \
-              --notes "Updater manifest of the desktop app. Do not delete."
-          gh release upload desktop-latest manifest/latest.json --clobber
+      - name: Publish and point the updaters at it
+        uses: ./.github/actions/publish-desktop-release
+        with:
+          version: ${{ inputs.version }}
