@@ -208,6 +208,7 @@ export const AnnotationTypeSwitch = ({
   compact?: boolean
 }) => {
   const typeLabels = useAnnotationTypeLabels()
+  const theme = useTheme()
   return (
     <HStack
       className={twMerge(
@@ -223,9 +224,11 @@ export const AnnotationTypeSwitch = ({
             key={type}
             className={twMerge(
               'flex-1 min-w-0 items-center justify-center rounded-full',
-              compact ? 'h-[28px]' : 'h-[38px]',
-              isActive && 'bg-surface-raised'
+              compact ? 'h-[28px]' : 'h-[38px]'
             )}
+            // In the desktop menu a segment is a <button>, whose background the popover's reset
+            // clears over any class: the chosen one takes its background in style.
+            style={isActive ? { backgroundColor: theme.colors.surfaceRaised } : undefined}
             accessibilityRole="button"
             accessibilityLabel={label}
             accessibilityState={{ disabled, selected: isActive }}

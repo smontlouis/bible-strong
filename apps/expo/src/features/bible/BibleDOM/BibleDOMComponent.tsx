@@ -1466,42 +1466,45 @@ const LoadedBibleContent = ({
   }
 
   const isHebreu = version === 'BHS' || (version === 'BHG' && Number(verses[0].Livre) < 40)
-  const highlightLayer = !isVerseLayoutAnimating &&
-    (highlightRects.length > 0 || selection || verseSelectionHandles.length > 0) && (
-      <HighlightLayer $overflowVisible={isHorizontalParallelMode}>
-        {highlightRects.map(rect => (
-          <HighlightRectDiv
-            key={rect.id}
-            $top={rect.top}
-            $left={rect.left}
-            $width={rect.width}
-            $height={rect.height}
-            $color={rect.color}
-            $annotationType={rect.annotationType}
-            $isSelected={rect.annotationId === selectedAnnotationId}
-            $isDimmed={rect.isDimmed}
-            $primaryColor={settings.colors[settings.theme].primary}
-            $backgroundColor={settings.colors[settings.theme].reverse}
-            $animationDelay={rect.type === 'annotation' ? getAnimationDelay(rect.id) : 0}
+  // The marks are measured again once the verses stop moving: until then they are hidden, not
+  // removed, or each one would play its drawing again (a context header leaving the focus view)
+  const highlightLayer = (highlightRects.length > 0 ||
+    selection ||
+    verseSelectionHandles.length > 0) && (
+    <HighlightLayer $overflowVisible={isHorizontalParallelMode} $hidden={isVerseLayoutAnimating}>
+      {highlightRects.map(rect => (
+        <HighlightRectDiv
+          key={rect.id}
+          $top={rect.top}
+          $left={rect.left}
+          $width={rect.width}
+          $height={rect.height}
+          $color={rect.color}
+          $annotationType={rect.annotationType}
+          $isSelected={rect.annotationId === selectedAnnotationId}
+          $isDimmed={rect.isDimmed}
+          $primaryColor={settings.colors[settings.theme].primary}
+          $backgroundColor={settings.colors[settings.theme].reverse}
+          $animationDelay={rect.type === 'annotation' ? getAnimationDelay(rect.id) : 0}
+        />
+      ))}
+      <SelectionHandles
+        hasSelection={selection !== null}
+        startPosition={selectionHandlePositions.start}
+        endPosition={selectionHandlePositions.end}
+      />
+      {/* Selected verses: two handles per block of verses that follow one another */}
+      {!selection &&
+        verseSelectionHandles.map(handles => (
+          <SelectionHandles
+            key={`${handles.range.start.verseKey}:${handles.range.end.verseKey}`}
+            hasSelection
+            startPosition={handles.start}
+            endPosition={handles.end}
           />
         ))}
-        <SelectionHandles
-          hasSelection={selection !== null}
-          startPosition={selectionHandlePositions.start}
-          endPosition={selectionHandlePositions.end}
-        />
-        {/* Selected verses: two handles per block of verses that follow one another */}
-        {!selection &&
-          verseSelectionHandles.map(handles => (
-            <SelectionHandles
-              key={`${handles.range.start.verseKey}:${handles.range.end.verseKey}`}
-              hasSelection
-              startPosition={handles.start}
-              endPosition={handles.end}
-            />
-          ))}
-      </HighlightLayer>
-    )
+    </HighlightLayer>
+  )
   const isParallelVerse = Boolean(parallelVerses?.length)
   const parallelVersionTitles = isParallelVerse
     ? extractParallelVersionTitles(parallelVerses, version)

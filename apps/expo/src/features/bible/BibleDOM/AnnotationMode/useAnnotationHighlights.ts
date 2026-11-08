@@ -19,6 +19,7 @@ import {
   createAnnotationTextRanges,
 } from './annotationDomText'
 import { subscribeToBibleLayoutChanges } from '../annotationLayoutLifecycle'
+import { getWordAnnotationsLayoutKey } from './annotationLayoutKey'
 import { findVerseTextElement, findVerseTextElements } from './verseTargets'
 
 /**
@@ -316,14 +317,8 @@ export function useAnnotationHighlights({
   // Track if we're waiting for new rects to be calculated after a chapter change
   const [isPending, setIsPending] = useState(true)
 
-  // Create a stable key based on annotation IDs and dates
-  // Includes the date to detect modifications (color, type, etc.)
-  const annotationKey = wordAnnotations
-    ? Object.entries(wordAnnotations)
-        .map(([id, ann]) => `${id}:${ann.date}`)
-        .sort()
-        .join(',')
-    : ''
+  // Changes with every annotation drawn, its words, its color or its mark
+  const annotationKey = getWordAnnotationsLayoutKey(wordAnnotations)
 
   // Track previous values to detect chapter changes vs annotation/selection changes
   const prevBook = usePrevious(book)
