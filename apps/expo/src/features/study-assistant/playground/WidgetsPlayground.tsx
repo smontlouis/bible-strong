@@ -1,16 +1,21 @@
 import { useState, type ReactNode } from 'react'
-import type { StudyWidget as Descriptor } from '@bible-strong/ai-contract/contract'
+import { useQuery } from '@tanstack/react-query'
+import type { StudySource, StudyWidget as Descriptor } from '@bible-strong/ai-contract/contract'
 import Header from '~common/Header'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import AssistantMessageMarkdown from '../AssistantMessageMarkdown'
 import { AssistantSheetContext, type AssistantSheet } from '../assistantSheetContext'
 import PassageWidget from '../widgets/PassageWidget'
 import StudyWidget from '../widgets/StudyWidget'
+import SourceExcerptSheet from '../SourceExcerptSheet'
 import { messageSegments } from '../widgetSegments'
+import { ProtoCard, hasProto } from './protoCards'
+import { resolveExample } from './resolveExample'
 import { useDemoAssistant } from './demoAssistant'
 
 const passage = (book: number, chapter: number, start: number, end = start, version = 'LSG') => ({
@@ -71,11 +76,133 @@ La patience y est d’abord celle de Dieu envers nous, puis un fruit de l’Espr
   },
 ]
 
-const demoSheet = (navigate: AssistantSheet['navigate']) =>
-  // The demo only follows links and opens passages: no conversation runs here.
-  ({ navigate, showSource: () => {} }) as unknown as AssistantSheet
+const fr = { language: 'fr' as const }
 
-function DemoAnswer({ demo, before }: { demo: Demo; before: boolean }) {
+/** Answers that place the resource cards prototyped in protoCards.tsx. */
+const RESOURCE_DEMOS: Demo[] = [
+  {
+    question: 'Que disent les commentateurs de Jean 15:4 ?',
+    answer: `« Demeurez en moi » est au cœur de l’image de la vigne. Deux commentateurs s’y arrêtent :
+
+[Clarke et Barnes sur Jean 15:4](${card('w2')})
+
+Tous deux lisent « demeurer » comme une relation qui dure, entretenue chaque jour, plutôt qu’un état acquis une fois pour toutes.`,
+    widgets: [
+      {
+        id: 'w2',
+        ...fr,
+        kind: 'commentary_comparison',
+        title: 'Jean 15:4 · Clarke et Barnes',
+        sources: [],
+      },
+    ],
+  },
+  {
+    question: 'Que veut dire le mot grec μένω ?',
+    answer: `C’est le verbe que Jean emploie pour « demeurer ».
+
+[Le mot μένω](${card('w1')})
+
+Il revient plus de quarante fois dans l’Évangile de Jean, souvent pour parler de la relation entre le Père, le Fils et les disciples.`,
+    widgets: [
+      {
+        id: 'w1',
+        ...fr,
+        kind: 'strong_entry',
+        title: 'G3306 · μένω',
+        reference: 'G3306',
+        identityKind: 'strong',
+        scope: 'precise_identity',
+      },
+    ],
+  },
+  {
+    question: 'Que dit la Bible de la patience ?',
+    answer: `Les dictionnaires bibliques distinguent la patience envers les épreuves et la patience envers les personnes.
+
+[Patience dans deux dictionnaires](${card('w3')})
+
+Le thème de Nave rassemble les textes qui en parlent :
+
+[La patience selon Nave](${card('w4')})`,
+    widgets: [
+      {
+        id: 'w3',
+        ...fr,
+        kind: 'dictionary_articles',
+        title: 'Patience · deux dictionnaires',
+        sources: [],
+      },
+      { id: 'w4', ...fr, kind: 'nave_topic', title: 'Patience', topic: 'patience' },
+    ],
+  },
+  {
+    question: 'Qui était Adam, et où se trouve Jéricho ?',
+    answer: `Adam est le premier homme du récit de la création.
+
+[Adam](${card('w5')})
+
+Jéricho, elle, est l’une des plus anciennes villes connues, dans la vallée du Jourdain.
+
+[Jéricho](${card('w6')})`,
+    widgets: [
+      { id: 'w5', ...fr, kind: 'person_profile', title: 'Adam', entityKey: 'Adam@Gen.2.19-Jud' },
+      {
+        id: 'w6',
+        ...fr,
+        kind: 'place_profile',
+        title: 'Jéricho',
+        entityKey: 'Jericho@Num.22.1-Heb',
+      },
+    ],
+  },
+  {
+    question: 'Quelles sont les grandes étapes de la vie de Jésus ?',
+    answer: `De la naissance à Bethléem à la résurrection, les évangiles suivent un fil que la frise permet de situer :
+
+[De la naissance à la résurrection](${card('w1')})
+
+Les dates restent approximatives : les évangiles ne datent pas les événements comme le ferait une chronique.`,
+    widgets: [
+      {
+        id: 'w1',
+        ...fr,
+        kind: 'event_timeline',
+        title: 'De la naissance à la résurrection',
+        events: ['incarnation-of-jesus', 'the-resurrection'],
+      },
+    ],
+  },
+]
+
+type Mode = 'before' | 'current' | 'proto'
+
+/** A demo card: commentaries and dictionaries first read their real excerpts. */
+function DemoCard({ widget, mode }: { widget: Descriptor; mode: Mode }) {
+  const resources = useResourceAccess()
+  const needsSources =
+    widget.kind === 'commentary_comparison' || widget.kind === 'dictionary_articles'
+  const query = useQuery({
+    queryKey: ['assistant-demo-card', widget.kind, widget.id],
+    queryFn: () => resolveExample(widget, resources),
+    enabled: needsSources,
+    staleTime: Infinity,
+  })
+  const resolved = needsSources ? query.data : widget
+  if (!resolved) return <Text className="text-grey my-2 text-[13px]">Chargement des extraits…</Text>
+  if (mode === 'before' && 'passages' in resolved) return <PassageWidget widget={resolved} />
+  if (mode === 'proto' && hasProto(resolved)) return <ProtoCard widget={resolved} />
+  return <StudyWidget widget={resolved} />
+}
+
+const demoSheet = (
+  navigate: AssistantSheet['navigate'],
+  showSource: AssistantSheet['showSource']
+) =>
+  // The demo only follows links, opens passages and shows excerpts: no conversation runs here.
+  ({ navigate, showSource }) as unknown as AssistantSheet
+
+function DemoAnswer({ demo, mode }: { demo: Demo; mode: Mode }) {
   const ids = new Set(demo.widgets.map(widget => widget.id))
   return (
     <Box className="mb-8">
@@ -94,11 +221,7 @@ function DemoAnswer({ demo, before }: { demo: Demo; before: boolean }) {
             />
           )
         const widget = demo.widgets.find(item => item.id === segment.id)!
-        return before && 'passages' in widget ? (
-          <PassageWidget key={index} widget={widget} />
-        ) : (
-          <StudyWidget key={index} widget={widget} />
-        )
+        return <DemoCard key={index} widget={widget} mode={mode} />
       })}
     </Box>
   )
@@ -128,30 +251,35 @@ function Toggle({
 /** Development only: the assistant's cards inside real-looking answers, before and after. */
 export default function WidgetsPlayground() {
   const navigate = usePushRouteOnce()
-  const [before, setBefore] = useState(false)
+  const [mode, setMode] = useState<Mode>('proto')
+  const [source, setSource] = useState<StudySource | null>(null)
   const assistant = useDemoAssistant(DEMOS)
   return (
-    <AssistantSheetContext.Provider value={demoSheet(navigate)}>
+    <AssistantSheetContext.Provider value={demoSheet(navigate, setSource)}>
       <Container className="bg-reverse">
         <Header hasBackButton title="Cartes de l’assistant" />
         <HStack className="gap-2 px-5 pb-2">
-          <Toggle value={before} onChange={() => setBefore(true)}>
+          <Toggle value={mode === 'before'} onChange={() => setMode('before')}>
             Avant
           </Toggle>
-          <Toggle value={!before} onChange={() => setBefore(false)}>
-            Après
+          <Toggle value={mode === 'current'} onChange={() => setMode('current')}>
+            Actuel
+          </Toggle>
+          <Toggle value={mode === 'proto'} onChange={() => setMode('proto')}>
+            Proto
           </Toggle>
           {assistant.available && (
             <Toggle value={false} onChange={assistant.open}>
-              Dans l’assistant
+              Assistant
             </Toggle>
           )}
         </HStack>
         <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 12 }}>
-          {DEMOS.map(demo => (
-            <DemoAnswer key={demo.question} demo={demo} before={before} />
+          {[...RESOURCE_DEMOS, ...DEMOS].map(demo => (
+            <DemoAnswer key={demo.question} demo={demo} mode={mode} />
           ))}
         </ScrollView>
+        <SourceExcerptSheet source={source} onClose={() => setSource(null)} />
       </Container>
     </AssistantSheetContext.Provider>
   )
