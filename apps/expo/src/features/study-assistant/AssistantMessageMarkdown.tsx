@@ -56,15 +56,53 @@ export default function AssistantMessageMarkdown({
       selectable={!streaming}
       md4cFlags={{ latexMath: false }}
       onLinkPress={({ url }) => openLink(url)}
+      // Every block that carries text takes the theme's colours: the library's defaults are dark
+      // ink for a white page, and list items in them were near invisible in a dark theme.
       markdownStyle={{
         paragraph: { color: colors.default, fontSize: 16, lineHeight: 25 },
         h1: { color: colors.default, fontSize: 22 },
         h2: { color: colors.default, fontSize: 19 },
         h3: { color: colors.default, fontSize: 17 },
+        h4: { color: colors.default, fontSize: 16 },
+        h5: { color: colors.default, fontSize: 16 },
+        h6: { color: colors.default, fontSize: 16 },
+        list: {
+          color: colors.default,
+          fontSize: 16,
+          lineHeight: 25,
+          bulletColor: colors.grey,
+          markerColor: colors.grey,
+        },
+        blockquote: {
+          color: colors.grey,
+          fontSize: 16,
+          lineHeight: 25,
+          borderColor: colors.border,
+          backgroundColor: 'transparent',
+        },
         strong: { color: colors.default },
         link: { color: colors.link },
-        code: { color: colors.default, backgroundColor: colors.lightGrey },
-        codeBlock: { color: colors.default, backgroundColor: colors.lightGrey },
+        strikethrough: { color: colors.grey },
+        underline: { color: colors.default },
+        code: {
+          color: colors.default,
+          backgroundColor: colors.lightGrey,
+          borderColor: colors.lightGrey,
+        },
+        codeBlock: {
+          color: colors.default,
+          backgroundColor: colors.lightGrey,
+          borderColor: colors.border,
+        },
+        thematicBreak: { color: colors.separator },
+        table: {
+          color: colors.default,
+          headerTextColor: colors.default,
+          headerBackgroundColor: colors.lightGrey,
+          rowEvenBackgroundColor: 'transparent',
+          rowOddBackgroundColor: 'transparent',
+          borderColor: colors.border,
+        },
       }}
     />
   )
