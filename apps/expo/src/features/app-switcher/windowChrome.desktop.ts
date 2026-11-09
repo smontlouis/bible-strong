@@ -35,7 +35,7 @@ export const sidebarDragRegion = DRAG_REGION
  * lays the theme's canvas over it, see-through enough for the blurred desktop to show and opaque
  * enough for each theme to keep its hue: a grey material beside a sepia page would clash.
  */
-const MATERIAL_TINT_OPACITY = 0.65
+const MATERIAL_TINT_OPACITY = 0.5
 
 export const useWindowMaterialTint = (): string | undefined => {
   const { colors } = useTheme()
