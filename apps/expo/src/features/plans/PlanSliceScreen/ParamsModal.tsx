@@ -10,7 +10,7 @@ import Circle from '~common/ui/Circle'
 import Text from '~common/ui/Text'
 import { HalfContainer, useParamsModalLabels } from '~features/bible/BibleParamsModal'
 import TouchableIcon from '~features/bible/TouchableIcon'
-import getTheme from '~themes/index'
+import { themeSwatches } from '~themes/themeSwatches'
 import BibleFontList from '~features/bible/BibleFontList'
 import { FeatherIcon } from '~common/ui/Icon'
 import { selectBibleSettingsForParams } from '~redux/selectors/user'
@@ -112,7 +112,7 @@ const ParamsModal = ({ paramsModalRef, inline = false, onFonts }: Props) => {
               <Circle
                 isSelected={preferredLightTheme === 'default'}
                 size={20}
-                color="rgb(255,255,255)"
+                color={themeSwatches.default}
               />
             </LinkBox>
             <LinkBox
@@ -125,7 +125,7 @@ const ParamsModal = ({ paramsModalRef, inline = false, onFonts }: Props) => {
               <Circle
                 isSelected={preferredLightTheme === 'sepia'}
                 size={20}
-                color="rgb(245,242,227)"
+                color={themeSwatches.sepia}
               />
             </LinkBox>
             <LinkBox
@@ -135,7 +135,11 @@ const ParamsModal = ({ paramsModalRef, inline = false, onFonts }: Props) => {
               onPress={() => dispatch(setSettingsPreferredLightTheme('nature'))}
               style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
             >
-              <Circle isSelected={preferredLightTheme === 'nature'} size={20} color="#EAF9EC" />
+              <Circle
+                isSelected={preferredLightTheme === 'nature'}
+                size={20}
+                color={themeSwatches.nature}
+              />
             </LinkBox>
             <LinkBox
               accessibilityLabel={preferredLightThemeToString.sunset}
@@ -144,7 +148,11 @@ const ParamsModal = ({ paramsModalRef, inline = false, onFonts }: Props) => {
               onPress={() => dispatch(setSettingsPreferredLightTheme('sunset'))}
               style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
             >
-              <Circle isSelected={preferredLightTheme === 'sunset'} size={20} color="#FAE0D5" />
+              <Circle
+                isSelected={preferredLightTheme === 'sunset'}
+                size={20}
+                color={themeSwatches.sunset}
+              />
             </LinkBox>
           </HalfContainer>
           <HalfContainer border>
@@ -162,7 +170,7 @@ const ParamsModal = ({ paramsModalRef, inline = false, onFonts }: Props) => {
               <Circle
                 isSelected={preferredDarkTheme === 'dark'}
                 size={20}
-                color={getTheme.dark.colors.reverse}
+                color={themeSwatches.dark}
               />
             </LinkBox>
             <LinkBox
@@ -172,7 +180,11 @@ const ParamsModal = ({ paramsModalRef, inline = false, onFonts }: Props) => {
               onPress={() => dispatch(setSettingsPreferredDarkTheme('black'))}
               style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
             >
-              <Circle isSelected={preferredDarkTheme === 'black'} size={20} color="black" />
+              <Circle
+                isSelected={preferredDarkTheme === 'black'}
+                size={20}
+                color={themeSwatches.black}
+              />
             </LinkBox>
             <LinkBox
               accessibilityLabel={preferredDarkThemeToString.mauve}
@@ -184,7 +196,7 @@ const ParamsModal = ({ paramsModalRef, inline = false, onFonts }: Props) => {
               <Circle
                 isSelected={preferredDarkTheme === 'mauve'}
                 size={20}
-                color={getTheme.mauve.colors.reverse}
+                color={themeSwatches.mauve}
               />
             </LinkBox>
             <LinkBox
@@ -197,7 +209,7 @@ const ParamsModal = ({ paramsModalRef, inline = false, onFonts }: Props) => {
               <Circle
                 isSelected={preferredDarkTheme === 'night'}
                 size={20}
-                color={getTheme.night.colors.reverse}
+                color={themeSwatches.night}
               />
             </LinkBox>
           </HalfContainer>

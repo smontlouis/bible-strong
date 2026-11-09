@@ -11,7 +11,7 @@ import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
 import { useParamsModalLabels } from '~features/bible/BibleParamsModal'
 import TouchableIcon from '~features/bible/TouchableIcon'
-import getTheme from '~themes/index'
+import { themeSwatches } from '~themes/themeSwatches'
 import { RootState } from '~redux/modules/reducer'
 import {
   setSettingsPreferredColorScheme,
@@ -95,7 +95,7 @@ const ThemeScreen = () => {
               <Circle
                 isSelected={preferredLightTheme === 'default'}
                 size={28}
-                color="rgb(255,255,255)"
+                color={themeSwatches.default}
               />
             </LinkBox>
             <LinkBox
@@ -108,7 +108,7 @@ const ThemeScreen = () => {
               <Circle
                 isSelected={preferredLightTheme === 'sepia'}
                 size={28}
-                color="rgb(245,242,227)"
+                color={themeSwatches.sepia}
               />
             </LinkBox>
             <LinkBox
@@ -118,7 +118,11 @@ const ThemeScreen = () => {
               onPress={() => dispatch(setSettingsPreferredLightTheme('nature'))}
               style={{ width: 40, height: 40 }}
             >
-              <Circle isSelected={preferredLightTheme === 'nature'} size={28} color="#EAF9EC" />
+              <Circle
+                isSelected={preferredLightTheme === 'nature'}
+                size={28}
+                color={themeSwatches.nature}
+              />
             </LinkBox>
             <LinkBox
               accessibilityLabel={preferredLightThemeToString.sunset}
@@ -127,7 +131,11 @@ const ThemeScreen = () => {
               onPress={() => dispatch(setSettingsPreferredLightTheme('sunset'))}
               style={{ width: 40, height: 40 }}
             >
-              <Circle isSelected={preferredLightTheme === 'sunset'} size={28} color="#FAE0D5" />
+              <Circle
+                isSelected={preferredLightTheme === 'sunset'}
+                size={28}
+                color={themeSwatches.sunset}
+              />
             </LinkBox>
           </ChoiceRow>
         </ListSection>
@@ -147,7 +155,7 @@ const ThemeScreen = () => {
               <Circle
                 isSelected={preferredDarkTheme === 'dark'}
                 size={28}
-                color={getTheme.dark.colors.reverse}
+                color={themeSwatches.dark}
               />
             </LinkBox>
             <LinkBox
@@ -157,7 +165,11 @@ const ThemeScreen = () => {
               onPress={() => dispatch(setSettingsPreferredDarkTheme('black'))}
               style={{ width: 40, height: 40 }}
             >
-              <Circle isSelected={preferredDarkTheme === 'black'} size={28} color="black" />
+              <Circle
+                isSelected={preferredDarkTheme === 'black'}
+                size={28}
+                color={themeSwatches.black}
+              />
             </LinkBox>
             <LinkBox
               accessibilityLabel={preferredDarkThemeToString.mauve}
@@ -169,7 +181,7 @@ const ThemeScreen = () => {
               <Circle
                 isSelected={preferredDarkTheme === 'mauve'}
                 size={28}
-                color={getTheme.mauve.colors.reverse}
+                color={themeSwatches.mauve}
               />
             </LinkBox>
             <LinkBox
@@ -182,7 +194,7 @@ const ThemeScreen = () => {
               <Circle
                 isSelected={preferredDarkTheme === 'night'}
                 size={28}
-                color={getTheme.night.colors.reverse}
+                color={themeSwatches.night}
               />
             </LinkBox>
           </ChoiceRow>

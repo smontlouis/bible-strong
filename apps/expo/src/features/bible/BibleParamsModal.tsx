@@ -44,7 +44,7 @@ import {
 } from '~redux/modules/user'
 import { colorPickerModalAtom } from '~state/app'
 import TouchableIcon from './TouchableIcon'
-import getTheme from '~themes/index'
+import { themeSwatches } from '~themes/themeSwatches'
 import TouchableSvgIcon from './TouchableSvgIcon'
 
 export const HalfContainer = (
@@ -280,7 +280,7 @@ const BibleParamsModal = ({
               <Circle
                 isSelected={preferredLightTheme === 'default'}
                 size={20}
-                color="rgb(255,255,255)"
+                color={themeSwatches.default}
               />
             </LinkBox>
             <LinkBox
@@ -293,7 +293,7 @@ const BibleParamsModal = ({
               <Circle
                 isSelected={preferredLightTheme === 'sepia'}
                 size={20}
-                color="rgb(245,242,227)"
+                color={themeSwatches.sepia}
               />
             </LinkBox>
             <LinkBox
@@ -303,7 +303,11 @@ const BibleParamsModal = ({
               onPress={() => dispatch(setSettingsPreferredLightTheme('nature'))}
               style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
             >
-              <Circle isSelected={preferredLightTheme === 'nature'} size={20} color="#EAF9EC" />
+              <Circle
+                isSelected={preferredLightTheme === 'nature'}
+                size={20}
+                color={themeSwatches.nature}
+              />
             </LinkBox>
             <LinkBox
               accessibilityLabel={preferredLightThemeToString.sunset}
@@ -312,7 +316,11 @@ const BibleParamsModal = ({
               onPress={() => dispatch(setSettingsPreferredLightTheme('sunset'))}
               style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
             >
-              <Circle isSelected={preferredLightTheme === 'sunset'} size={20} color="#FAE0D5" />
+              <Circle
+                isSelected={preferredLightTheme === 'sunset'}
+                size={20}
+                color={themeSwatches.sunset}
+              />
             </LinkBox>
           </HalfContainer>
           <HalfContainer border>
@@ -332,7 +340,7 @@ const BibleParamsModal = ({
               <Circle
                 isSelected={preferredDarkTheme === 'dark'}
                 size={20}
-                color={getTheme.dark.colors.reverse}
+                color={themeSwatches.dark}
               />
             </LinkBox>
             <LinkBox
@@ -342,7 +350,11 @@ const BibleParamsModal = ({
               onPress={() => dispatch(setSettingsPreferredDarkTheme('black'))}
               style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
             >
-              <Circle isSelected={preferredDarkTheme === 'black'} size={20} color="black" />
+              <Circle
+                isSelected={preferredDarkTheme === 'black'}
+                size={20}
+                color={themeSwatches.black}
+              />
             </LinkBox>
             <LinkBox
               accessibilityLabel={preferredDarkThemeToString.mauve}
@@ -354,7 +366,7 @@ const BibleParamsModal = ({
               <Circle
                 isSelected={preferredDarkTheme === 'mauve'}
                 size={20}
-                color={getTheme.mauve.colors.reverse}
+                color={themeSwatches.mauve}
               />
             </LinkBox>
             <LinkBox
@@ -367,7 +379,7 @@ const BibleParamsModal = ({
               <Circle
                 isSelected={preferredDarkTheme === 'night'}
                 size={20}
-                color={getTheme.night.colors.reverse}
+                color={themeSwatches.night}
               />
             </LinkBox>
           </HalfContainer>
