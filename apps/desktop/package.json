@@ -8,7 +8,7 @@
     "dev": "node scripts/dev.mjs",
     "build": "node scripts/build.mjs",
     "build:appstore": "node scripts/build.mjs --appstore",
-    "icons": "tauri icon ../expo/assets/images/icon.png",
+    "icons": "node scripts/icons.mjs",
     "fixtures": "yarn workspace @bible-strong/resource-service exec tsx ../../apps/desktop/scripts/make-archive-fixtures.ts",
     "test": "cargo test --manifest-path src-tauri/Cargo.toml",
     "tauri": "tauri"

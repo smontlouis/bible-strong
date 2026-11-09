@@ -197,6 +197,9 @@ jobs:
           APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
           APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
           APPLE_API_KEY_PATH: ${{ github.workspace }}/apple-api-key.p8
+          # Lays out the DMG window (background, icon positions) through Finder, which the
+          # bundler skips when CI is true.
+          TAURI_BUNDLER_DMG_IGNORE_CI: 'true'
         with:
           projectPath: apps/desktop
           tauriScript: yarn tauri

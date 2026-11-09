@@ -70,8 +70,17 @@ to an older version: a bad release is fixed by a newer one.
 `yarn workspace @bible-strong/desktop build` builds the installers of the current system on that
 machine, with the archive keys of `apps/expo/.env.local` and the updater key of
 `~/.tauri/bible-strong-updater.key`. On macOS it skips the DMG window layout, which drives Finder
-and needs an automation permission (`CI=true`); the DMG is otherwise the same. Without a Developer
-ID certificate in the keychain the app is signed ad hoc: fine to test, not to distribute.
+and needs an automation permission (`CI=true`); the DMG is otherwise the same. The release
+workflow lays it out (`TAURI_BUNDLER_DMG_IGNORE_CI`): the background and icon positions of
+`bundle.macOS.dmg`. Without a Developer ID certificate in the keychain the app is signed ad hoc:
+fine to test, not to distribute.
+
+## Icons and installer images
+
+`yarn workspace @bible-strong/desktop icons` (macOS) regenerates them all: Tauri's icons for
+Windows and Linux from the app's round icon, the macOS icon from the iOS app's Icon Composer file
+(`Assets.car`, named by `CFBundleIconName` in `src-tauri/Info.plist`, drawn to the macOS grid),
+and the DMG background and NSIS images in `src-tauri/installer/` (`scripts/icons.mjs`).
 
 ## Mac App Store
 
