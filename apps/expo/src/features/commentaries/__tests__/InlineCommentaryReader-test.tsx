@@ -37,7 +37,6 @@ jest.mock('~common/ui/MenuView', () => ({ MenuView: 'MenuView' }), { virtual: tr
 jest.mock('../shareCommentary', () => ({
   getCommentaryShare: jest.fn(({ passage }: { passage: string }) => ({
     url: 'https://bible-strong.app/commentary/fr/mhy-fr/gen/1',
-    title: passage,
     text: () => 'text',
   })),
 }))

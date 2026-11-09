@@ -1,5 +1,5 @@
 import Clipboard from '@react-native-clipboard/clipboard'
-import { Share } from 'react-native'
+import { Platform, Share } from 'react-native'
 import { toast } from '~helpers/toast'
 import {
   COPY_TEXT_ACTION,
@@ -23,9 +23,13 @@ jest.mock('~helpers/toast', () => ({ toast: Object.assign(jest.fn(), { error: je
 jest.mock('~i18n', () => ({ __esModule: true, default: { t: (key: string) => key } }))
 
 const t = ((key: string) => key) as unknown as Parameters<typeof resourceShareMenuActions>[0]
+const setPlatform = (os: typeof Platform.OS) => Object.assign(Platform, { OS: os })
 const flush = () => new Promise(resolve => setImmediate(resolve))
 
-beforeEach(() => jest.clearAllMocks())
+beforeEach(() => {
+  jest.clearAllMocks()
+  setPlatform('ios')
+})
 
 it('offers the link and the text of a resource that has a page', () => {
   expect(
@@ -43,9 +47,22 @@ it('offers the text alone when there is no page to link, and nothing without a r
 })
 
 it('shares the link alone, so that the receiving app draws the card of the page', async () => {
-  await shareResourceLink({ url: 'https://bible-strong.app/strong/fr/g26', title: 'G26' })
+  await shareResourceLink({ url: 'https://bible-strong.app/strong/fr/g26' })
   expect(Share.share).toHaveBeenCalledWith({ url: 'https://bible-strong.app/strong/fr/g26' })
   expect(Clipboard.setString).not.toHaveBeenCalled()
+})
+
+it('shares the link alone on Android, with no subject beside it', async () => {
+  setPlatform('android')
+  await shareResourceLink({ url: 'https://bible-strong.app/strong/fr/g26' })
+  expect(Share.share).toHaveBeenCalledWith({ message: 'https://bible-strong.app/strong/fr/g26' })
+})
+
+it('shares the link alone in a browser with a share sheet, with no title beside it', async () => {
+  setPlatform('web')
+  Object.assign(globalThis, { navigator: { share: jest.fn() } })
+  await shareResourceLink({ url: 'https://bible-strong.app/strong/fr/g26' })
+  expect(Share.share).toHaveBeenCalledWith({ url: 'https://bible-strong.app/strong/fr/g26' })
 })
 
 it('shares nothing when there is no link', async () => {

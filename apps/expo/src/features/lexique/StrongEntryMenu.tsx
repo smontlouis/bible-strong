@@ -47,7 +47,6 @@ const StrongEntryMenu = ({ context, entry }: Props) => {
 
   const share: ResourceShare = {
     url: getStrongShareUrl(stepStrongCode, entry.language, language),
-    title: `${stepStrongCode} — ${entry.gloss}`,
     text: () =>
       [
         `${stepStrongCode} — ${entry.gloss}`,

@@ -95,7 +95,6 @@ const TimelineEventDetailContent = ({
   const title = getLegacyLocalizedField(lang, { fr: event.title, en: event.titleEn })
   const share: ResourceShare = {
     url: getPublicSiteUrl(() => buildPublicTimelineEventPath({ language: lang, slug: event.slug })),
-    title,
     // The article is read where the event is read from; without it the title is what is left.
     text: async () => {
       const result = await resources.timeline.loadEvent(lang, event.slug)

@@ -15,7 +15,6 @@ import i18n from '~i18n'
 export type ResourceShare = {
   /** The page of the public site; absent when the site has no page for what is read. */
   url?: string
-  title?: string
   text: () => string | Promise<string>
 }
 
@@ -48,7 +47,7 @@ export const resourceShareMenuActions = (
       ]
     : []
 
-export const shareResourceLink = async ({ url, title }: Pick<ResourceShare, 'url' | 'title'>) => {
+export const shareResourceLink = async ({ url }: Pick<ResourceShare, 'url'>) => {
   if (!url) return
   try {
     // A browser without a share sheet: the link is copied instead.
@@ -57,8 +56,10 @@ export const shareResourceLink = async ({ url, title }: Pick<ResourceShare, 'url
       toast(i18n.t('Copié dans le presse-papiers.'))
       return
     }
-    // iOS hands a link over as a link; elsewhere the message is the link itself.
-    await Share.share(Platform.OS === 'ios' ? { url } : { message: url, title })
+    // The link travels alone, with no title: Android would put one in the subject and the
+    // browser beside the link, and both would end up in what the receiver copies. Android
+    // has no field for a link, so its message is the link itself.
+    await Share.share(Platform.OS === 'android' ? { message: url } : { url })
   } catch (error) {
     toast.error(i18n.t('Erreur lors du partage.'))
     Sentry.captureException(error)

@@ -162,7 +162,6 @@ describe('CompareVersesTabScreen', () => {
 
     expect(mockShareResourceLink).toHaveBeenCalledWith({
       url: 'https://bible-strong.app/bible/lsg/rom/2/2',
-      title: 'Romains 2:2',
     })
   })
 })

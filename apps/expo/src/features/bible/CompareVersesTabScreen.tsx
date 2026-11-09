@@ -126,7 +126,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
                     compareVersionSelectorRef.current?.present()
                     break
                   case SHARE_LINK_ACTION:
-                    void shareResourceLink({ url: shareUrl, title })
+                    void shareResourceLink({ url: shareUrl })
                     break
                   case 'open-tab':
                     openInNewTab({

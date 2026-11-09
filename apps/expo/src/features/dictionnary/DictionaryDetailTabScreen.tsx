@@ -370,7 +370,6 @@ const DictionnaryDetailScreen = ({
             word: dictionnaireItem.word,
           })
         ),
-        title: word,
         text: () =>
           `${word}\n\n${truncHTML(dictionnaireItem.definition, 4000)
             .text.replace(/&#/g, '\\')

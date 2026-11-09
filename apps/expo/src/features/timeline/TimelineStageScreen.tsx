@@ -54,7 +54,6 @@ const TimelineStageScreen = ({
 
   const share: ResourceShare = {
     url: getPublicSiteUrl(() => buildPublicTimelineIndexPath(language)),
-    title: t('La Chronologie biblique'),
     text: () => t('La Chronologie biblique'),
   }
 

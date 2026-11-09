@@ -67,6 +67,5 @@ export const getCommentaryShare = ({
   url: getPublicSiteUrl(() =>
     buildPublicCommentaryPath({ resourceId: options.entry.id, ...location })
   ),
-  title: `${options.entry.author} — ${options.passage}`,
   text: () => getCommentaryShareText(options),
 })

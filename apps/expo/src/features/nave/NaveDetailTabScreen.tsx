@@ -208,7 +208,6 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
         url: getPublicSiteUrl(() =>
           buildPublicNavePath({ language: naveResourceLanguage, topic: naveItem.normalizedName })
         ),
-        title: naveItem.name || name,
         text: () =>
           `${naveItem.name || name}\n\n${truncHTML(naveItem.description, 4000)
             .text.replace(/&#/g, '\\')

@@ -356,10 +356,7 @@ const Header = ({
         bookmarkModalRef.current?.present()
         break
       case SHARE_LINK_ACTION:
-        void shareResourceLink({
-          url: chapterShareUrl,
-          title: `${verseToReference({ bookNum: bookNumber, chapterNum: chapter, verses: [] })} - ${version}`,
-        })
+        void shareResourceLink({ url: chapterShareUrl })
         break
       case 'export':
         exportSheetRef.current?.present()
