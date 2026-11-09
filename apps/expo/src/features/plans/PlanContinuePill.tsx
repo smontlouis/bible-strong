@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import Link from '~common/Link'
+import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import type { PlanJourney } from './planSchedule'
 
@@ -20,7 +21,36 @@ export const getContinueLabel = (journey: PlanJourney): string | undefined =>
         ? 'readingPlans.catchUp'
         : undefined
 
-/** The small filled button at the end of a plan's row. */
+/**
+ * The round filled button at the end of a home plan row: a chevron, with « Continuer » or
+ * « Rattraper » read aloud. The row's detail already says how many days are behind.
+ */
+export const PlanContinueButton = ({
+  label,
+  hint,
+  onPress,
+}: {
+  label: string
+  hint?: string
+  onPress: () => void
+}) => {
+  const { t } = useTranslation()
+  return (
+    <Link
+      accessibilityRole="button"
+      accessibilityLabel={t(label)}
+      accessibilityHint={hint}
+      hitSlop={6}
+      onPress={onPress}
+      className="w-[32px] h-[32px] rounded-full bg-primary items-center justify-center"
+    >
+      {/* Centred by its box, a chevron looks left of centre: nudge it right. */}
+      <FeatherIcon name="chevron-right" size={18} color="white" style={{ marginLeft: 2 }} />
+    </Link>
+  )
+}
+
+/** The small filled button at the end of a row of the plan list, which may also restart. */
 const PlanContinuePill = ({
   label,
   hint,

@@ -6,15 +6,16 @@ out differently. There is no separate desktop home.
 
 ## Groups and parts
 
-Four groups carry large titles (`HomeSectionTitle`). Parts inside a group carry the app's one
-section title (`HomeSubsectionTitle`, built on `ListSectionTitle`), and groups are spaced more
-widely than parts, so the page reads as four blocks rather than a list of equal sections.
+Below the header and the day, four groups carry large titles (`HomeSectionTitle`). Parts inside
+a group carry the app's one section title (`HomeSubsectionTitle`, built on `ListSectionTitle`),
+and groups are spaced more widely than parts, so the page reads as four blocks rather than a
+list of equal sections.
 
 The home is a hub (design-system README, « The app »): its ground is `canvas`, its content
-sits in `surface` cards with no border and no shadow. The daily card, the event card and the
-footer band take the hub's large radius (24); the other cards take 16, tiles 8, buttons and
-chips the pill. Rows grouped in one card (plans, « Aller plus loin » on a phone) use
-`ListRow` and hairline separators. Only the floating close button carries `floatingShadow`.
+sits in `surface` cards with no border and no shadow. The daily card and the event card take
+the hub's large radius (24); the other cards take 16, tiles 8, buttons and chips the pill. Rows
+grouped in one card (plans, the six counts, « Aller plus loin » on a phone) are separated by
+hairlines. Only the floating close button carries `floatingShadow`.
 The event card stays a deliberate dark feature card, and the Explorer illustrations keep the
 light tint they were drawn on.
 
@@ -24,27 +25,32 @@ light tint they were drawn on.
    Below it, only while Firebase has ended the session of the account shown, a card says the
    edits stay on the device and offers « Se reconnecter » (`SessionExpiredNotice`); offline it
    drops the button, since signing in needs a connection.
-2. **Aujourd’hui**: the verse or meditation of the day, always in full. Touch screens swipe the
+2. **The day**, with no title, since the date of the header already says it: the verse or
+   meditation of the day, always in full. Touch screens swipe the
    five days in a carousel (`UserWidget`); every card takes the height of the day shown, 280
    points at least, so the sections below move when a day needs more room. The wide Web home
    pages through the same days with previous/next buttons and dots and animates the card height
    (`HomeToday.web.tsx`, `AnimatedVerseHeight.web.tsx`).
-3. **Ma bibliothèque**, what belongs to the reader: the six counters, the sign-in prompt,
-   then the work in progress as parts (`HomeResumeSection`): **Reprendre** (latest History
-   entries, hidden while the history is empty; « Tout voir » opens the full History) and
-   **Mes plans** (followed reading plans, or an invitation to the catalogue). « À découvrir »
-   leads to the catalogue, not to all the reader's plans, so it keeps its own wording; it
-   only joins real plans, since the invitation already opens the catalogue. Title actions are
-   verbs, never a second noun beside the title.
-4. **Explorer**, what the app offers. Its title action, **Nouvel onglet**, adds an empty tab
-   and switches to it, like the sidebar button. Below it, without a title, one shortcut per
-   tab type of the new tab (`HomeOpenSection`), each opening the same scoped search
-   (ADR-0045); then the four illustrated cards (`HomeExploreGrid`); then the **Un mot au
-   hasard** part with random Greek, Hebrew, Nave and dictionary entries (`HomeDiscovery`).
-5. **Aller plus loin**: Audibible and donation rows (`HomeGoFurther`), grouped in one card on
-   a phone and set side by side in two cards on a wide home.
-6. **Footer** (`HomeFooter`): Follow and FAQ buttons on a surface band for touch layouts; a
-   row of links under a hairline, with the app download, on the wide Web home.
+3. **Reprendre**, the work in progress, right after the day (`HomeResumeSection`): the latest
+   History entries (« Tout voir » on the title opens the full History), then the **Mes plans**
+   part (followed reading plans, or an invitation to the catalogue). While the history is
+   empty, the group is « Mes plans » alone. A plan row ends in a round filled button with a
+   chevron (`PlanContinueButton`), which reads « Continuer » or « Rattraper » aloud and opens
+   the next reading; the row's detail already says how many days are behind. « À découvrir »
+   leads to the catalogue, not to all the reader's plans, so it keeps its own wording; it only
+   joins real plans, since the invitation already opens the catalogue. Title actions are verbs,
+   never a second noun beside the title.
+4. **Ma bibliothèque**, what belongs to the reader: the six counts in one card
+   (`ProfileStats home`), then the sign-in prompt. The profile keeps the six cards.
+5. **Explorer**, what the app offers: the four illustrated cards (`HomeExploreGrid`), their
+   title alone on screen and their hint read aloud; then the **Un mot au hasard** part with
+   random Greek, Hebrew, Nave and dictionary entries (`HomeDiscovery`). The home carries no
+   shortcut per tab type: the new tab and the search already open each scoped search
+   (ADR-0045).
+6. **Aller plus loin**: Audibible, donation, Follow and FAQ, one line each with no description
+   (`HomeGoFurther`), grouped in one card on a phone and set two by two on a wide home.
+7. **Footer** (`HomeFooter`): room for the floating close button on touch layouts; the app
+   download as a link under a hairline on the wide Web home.
 
 ## Width-driven layout
 
@@ -59,12 +65,11 @@ verse, whose text stops at a reading width.
 
 | Content width | Change                                                                                |
 | ------------- | ------------------------------------------------------------------------------------- |
-| < 620         | Phone layout: shortcuts and random words scroll horizontally                          |
-| ≥ 620         | Shortcuts in two rows of five, random words in two columns, partner rows side by side |
-| ≥ 680         | The six counters on a single row                                                      |
+| < 620         | Phone layout: history entries and random words scroll horizontally                    |
+| ≥ 620         | Random words in two columns, partner rows two by two                                  |
+| ≥ 680         | The six counts on a single row of their card                                          |
 | ≥ 720         | The four Explorer cards and the four random words on a single row each                |
-| ≥ 760         | Reprendre and Mes plans side by side, the history as a two-column grid                |
-| ≥ 780         | All ten shortcuts on a single row, in cells without gaps                              |
+| ≥ 760         | History and Mes plans side by side under part titles, the history as a two-column grid |
 
 `HomeGrid` lays out equal cells inside the gutters; cells stay in one parent, so a column
 change re-wraps them without remounting their content (random words keep their entry).
@@ -82,11 +87,10 @@ change re-wraps them without remounting their content (random words keep their e
 
 Browser regression scenario (the measured layout needs a real browser, not Jest):
 
-1. At a 1440px viewport, open Home: one centred column of 830px, counters on one row,
-   Reprendre beside Mes plans when the history has entries, ten shortcuts on one row with
-   every label whole, four Explorer cards and four random words.
-2. Narrow the window to 1024px: Reprendre and Mes plans stack, the shortcuts take two rows,
-   random words and the selected day stay unchanged.
+1. At a 1440px viewport, open Home: one centred column of 830px, the history beside Mes plans
+   when it has entries, the six counts on one row, four Explorer cards and four random words.
+2. Narrow the window to 1024px: the history and Mes plans stack, random words and the selected
+   day stay unchanged.
 3. Open a route panel or hide the sidebar: the sections follow the new column width.
-4. Below the 768px viewport gate, the carousel replaces the day buttons and the footer
-   buttons replace the links.
+4. Below the 768px viewport gate, the carousel replaces the day buttons and the download link
+   leaves the footer.

@@ -18,7 +18,6 @@ import HomeExploreGrid from './HomeExploreGrid'
 import HomeFooter from './HomeFooter'
 import HomeGoFurther from './HomeGoFurther'
 import HomeHeader from './HomeHeader'
-import HomeOpenSection, { NewTabLink } from './HomeOpenSection'
 import HomeResumeSection from './HomeResumeSection'
 import HomeSectionTitle from './HomeSectionTitle'
 import HomeSubsectionTitle from './HomeSubsectionTitle'
@@ -37,9 +36,9 @@ type HomeProps = {
 /**
  * One home for every size: the sections a phone stacks are the ones a wide window shows, in the
  * same order, each laying out its rows from the measured column width (see homeLayout.tsx).
- * Four groups with large titles: what today brings, what is mine (counters, then my work in
- * progress as small parts), what the app offers, and partners. Parts inside a group get small
- * titles so they read as belonging to it.
+ * Under the header and the day, which needs no title, four groups with large titles: my work in
+ * progress, my library, what the app offers, and partners. Parts inside a group get small titles
+ * so they read as belonging to it.
  */
 export const Home = ({ closeHome, inWorkspace = false }: HomeProps) => {
   const { t } = useTranslation()
@@ -61,15 +60,14 @@ export const Home = ({ closeHome, inWorkspace = false }: HomeProps) => {
             <Box className="pt-[16px]">
               <Events />
             </Box>
-            <HomeSectionTitle title={t('home.today')} />
+            {/* The day needs no title: the date of the header already says it. */}
+            <Box className="h-[12px]" />
             <HomeToday />
+            <HomeResumeSection />
             <HomeSectionTitle title={t('home.myLibrary')} />
             <ProfileStats home />
             <LoginPrompt className="mt-[12px]" />
-            <HomeResumeSection />
-            <HomeSectionTitle title={t('home.explore')} action={<NewTabLink />} />
-            <HomeOpenSection />
-            <Box className="h-[16px]" />
+            <HomeSectionTitle title={t('home.explore')} />
             <HomeExploreGrid />
             <HomeSubsectionTitle title={t('home.randomWord')} className="pt-[16px] pb-[4px]" />
             <HomeDiscovery />

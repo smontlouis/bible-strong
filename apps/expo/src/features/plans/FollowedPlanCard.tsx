@@ -12,12 +12,12 @@ import { useLocalReadingDate } from '~features/daily-reading/useDailyMeditation'
 import { useFireStorage } from './plan.hooks'
 import { getParticipationJourney } from './planSchedule'
 import { getJourneyDetail } from './planJourneyLabel'
-import PlanContinuePill, { getContinueLabel, useContinuePlan } from './PlanContinuePill'
+import { getContinueLabel, PlanContinueButton, useContinuePlan } from './PlanContinuePill'
 import PlanStreak from './PlanStreak'
 
 /**
  * Home list row: small cover, title with its streak, where the plan stands over a full-width
- * progress bar, and « Continuer » at the end, which opens the next reading over the plan.
+ * progress bar, and a round button at the end, which opens the next reading over the plan.
  */
 const FollowedPlanCard = ({
   plan,
@@ -89,7 +89,7 @@ const FollowedPlanCard = ({
         </Box>
       </Link>
       {pill && (
-        <PlanContinuePill label={pill} hint={plan.title} onPress={() => continuePlan(plan.id)} />
+        <PlanContinueButton label={pill} hint={plan.title} onPress={() => continuePlan(plan.id)} />
       )}
     </Box>
   )

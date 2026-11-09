@@ -19,7 +19,8 @@ const SINGLE_ROW_CONTENT = 720
 type ExploreCard = {
   id: string
   title: string
-  description: string
+  /** Read aloud with the title; the card itself shows the title alone. */
+  hint: string
   image: ImageSource
   /**
    * Transparent illustration drawn on a tint, which belongs to the illustration and so keeps its
@@ -32,7 +33,7 @@ type ExploreCard = {
 }
 
 /**
- * Editorial entries of the home, all in the same card on the canvas: image, title, one-line hint.
+ * Editorial entries of the home, all in the same card on the canvas: image and title.
  * The card keeps its overflow visible so the illustration can rise above it.
  */
 const HomeExploreGrid = () => {
@@ -49,7 +50,7 @@ const HomeExploreGrid = () => {
     {
       id: 'videos',
       title: t('passageMediaLibrary.title'),
-      description: t('passageMediaLibrary.heading'),
+      hint: t('passageMediaLibrary.heading'),
       image: require('~assets/images/home/explore/courses-videos.webp'),
       art: { tint: '#E6EDFF', align: 'left', drop: 12 },
       link: { onPress: () => pushRoute({ pathname: '/(library)/passage-media' }) },
@@ -57,7 +58,7 @@ const HomeExploreGrid = () => {
     {
       id: 'timeline',
       title: t('La Chronologie biblique'),
-      description: t('newTab.timelineDescription'),
+      hint: t('newTab.timelineDescription'),
       image: require('~assets/images/home/explore/timeline.webp'),
       art: { tint: '#E3EFE6', align: 'center', drop: 14 },
       link: { route: 'TimelineHome' },
@@ -67,7 +68,7 @@ const HomeExploreGrid = () => {
           {
             id: 'bible-project',
             title: t('home.learning.bibleProjectPlan'),
-            description: t('readingPlans.readAtYourPace'),
+            hint: t('readingPlans.readAtYourPace'),
             image: require('~assets/images/home/bible-project-plan.jpg'),
             link: {
               route: 'Plan',
@@ -79,7 +80,7 @@ const HomeExploreGrid = () => {
     {
       id: 'meditations',
       title: t('home.meditations.collections'),
-      description: t('dailyReading.howItWorks'),
+      hint: t('dailyReading.howItWorks'),
       image: require('~assets/images/home/explore/meditations.webp'),
       art: { tint: '#FFF3D1', align: 'center', drop: 8 },
       link: { onPress: () => pushRoute({ pathname: '/daily-reading' }) },
@@ -98,7 +99,7 @@ const HomeExploreGrid = () => {
           key={card.id}
           {...card.link}
           accessibilityLabel={card.title}
-          accessibilityHint={card.description}
+          accessibilityHint={card.hint}
           className="rounded-[16px] bg-surface"
         >
           {card.art ? (
@@ -133,12 +134,10 @@ const HomeExploreGrid = () => {
               />
             </Box>
           )}
-          <Box className="px-[12px] pt-[16px] pb-[12px] gap-[2px] min-h-[82px]">
+          {/* Room for two lines of title, so the cards of a row keep one height. */}
+          <Box className="px-[12px] pt-[16px] pb-[12px] min-h-[66px]">
             <Text className="text-[15px] leading-[19px] font-bold" numberOfLines={2}>
               {card.title}
-            </Text>
-            <Text className="text-[12px] leading-[16px] text-grey" numberOfLines={2}>
-              {card.description}
             </Text>
           </Box>
         </Link>

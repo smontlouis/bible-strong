@@ -3,6 +3,7 @@ import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import HistoryHomeSection, { useHomeHistory } from '~features/history/HistoryHomeSection'
+import HomeSectionTitle from './HomeSectionTitle'
 import HomeSubsectionTitle from './HomeSubsectionTitle'
 import PlanHome, { PlansExploreLink, useFollowedPlans } from './PlanHome'
 import { useHomeLayout } from './homeLayout'
@@ -10,63 +11,71 @@ import { useHomeLayout } from './homeLayout'
 /** Content width from which the history and the plans sit side by side. */
 const SPLIT_CONTENT = 760
 
+/** « Tout voir », the History link. */
+const SeeAllHistory = () => {
+  const { t } = useTranslation()
+  return (
+    <Link
+      route="History"
+      accessibilityLabel={`${t('history.seeAll')} · ${t('history.title')}`}
+      className="py-[12px]"
+    >
+      <Text className="text-link text-[13px] font-bold">{t('history.seeAll')}</Text>
+    </Link>
+  )
+}
+
 /**
- * « Reprendre » and « Mes plans », the reader's work in progress, as parts of « Ma
- * bibliothèque ». A wide home sets them side by side; « Reprendre » disappears while the
- * history is empty, and the plans then take the whole width.
+ * « Reprendre », the reader's work in progress, right after the day: the latest History entries,
+ * then the followed plans under « Mes plans ». A wide home sets the two side by side, each under
+ * its own part title. While the history is empty the group is « Mes plans » alone.
  */
 const HomeResumeSection = () => {
   const { t } = useTranslation()
   const { content } = useHomeLayout()
   const hasHistory = useHomeHistory().length > 0
-  const hasPlans = useFollowedPlans().length > 0
-  const split = content >= SPLIT_CONTENT
-  const titleClassName = split ? 'px-0' : undefined
-
-  const resume = hasHistory && (
-    <Box className={split ? 'flex-1 min-w-0' : undefined}>
-      <HomeSubsectionTitle
-        title={t('home.resume')}
-        className={titleClassName}
-        action={
-          <Link
-            route="History"
-            accessibilityLabel={`${t('history.seeAll')} · ${t('history.title')}`}
-            className="py-[12px]"
-          >
-            <Text className="text-link text-[13px] font-bold">{t('history.seeAll')}</Text>
-          </Link>
-        }
-      />
-      <HistoryHomeSection headerless columns={split ? 2 : undefined} />
-    </Box>
-  )
   // The invitation card already opens the catalogue, so « À découvrir » only joins real plans.
-  const plans = (
-    <Box className={split ? 'flex-1 min-w-0' : undefined}>
-      <HomeSubsectionTitle
-        title={t('home.myPlans')}
-        className={titleClassName}
-        action={hasPlans ? <PlansExploreLink /> : undefined}
-      />
-      <Box className={split ? undefined : 'px-[20px]'}>
-        <PlanHome />
-      </Box>
-    </Box>
-  )
+  const explore = useFollowedPlans().length > 0 ? <PlansExploreLink /> : undefined
 
-  if (split)
+  if (!hasHistory)
     return (
-      <Box className="flex-row gap-[20px] px-[20px]">
-        {resume}
-        {plans}
-      </Box>
+      <>
+        <HomeSectionTitle title={t('home.myPlans')} action={explore} />
+        <Box className="px-[20px]">
+          <PlanHome />
+        </Box>
+      </>
+    )
+
+  if (content >= SPLIT_CONTENT)
+    return (
+      <>
+        <HomeSectionTitle title={t('home.resume')} />
+        <Box className="flex-row gap-[20px] px-[20px]">
+          <Box className="flex-1 min-w-0">
+            <HomeSubsectionTitle
+              title={t('history.title')}
+              className="px-0 pt-0"
+              action={<SeeAllHistory />}
+            />
+            <HistoryHomeSection headerless columns={2} />
+          </Box>
+          <Box className="flex-1 min-w-0">
+            <HomeSubsectionTitle title={t('home.myPlans')} className="px-0 pt-0" action={explore} />
+            <PlanHome />
+          </Box>
+        </Box>
+      </>
     )
 
   return (
     <>
-      {resume}
-      {plans}
+      <HomeSectionTitle title={t('home.resume')} action={<SeeAllHistory />} />
+      <HistoryHomeSection headerless />
+      <HomeSubsectionTitle title={t('home.myPlans')} action={explore} />
+      <Box className="px-[20px]">
+        <PlanHome />
+      </Box>
     </>
   )
 }
