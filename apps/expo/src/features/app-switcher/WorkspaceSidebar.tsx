@@ -40,13 +40,12 @@ import TabIcon, { tabIconColorConfig } from './utils/getIconByTabType'
 import { useOpenInNewTab } from './utils/useOpenInNewTab'
 import { shortcutTitle } from '~features/keyboard-shortcuts/shortcutTitle'
 import { floatingShadow, radii } from '~common/ui/surfaces'
+import { useWorkspaceSidebarWidth, workspaceSidebarVariant } from './utils/useResponsiveWorkspace'
 import {
-  WORKSPACE_FRAME_GAP,
-  useWorkspaceSidebarWidth,
-  workspaceSidebarVariant,
-} from './utils/useResponsiveWorkspace'
-import { sidebarDragRegion, useWindowControlsInset, useWindowMaterialTint } from './windowChrome'
-import { WORKSPACE_SIDEBAR_BUTTON_HEIGHT } from './workspaceHeaderInset'
+  sidebarDragRegion,
+  useWindowControlsStripHeight,
+  useWindowMaterialTint,
+} from './windowChrome'
 import { IS_DESKTOP } from '~desktop/isDesktop'
 
 const sidebarFrameClassName = {
@@ -77,7 +76,7 @@ const WorkspaceSidebar = ({
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   // The desktop app on macOS sets its window buttons over the sidebar's top.
-  const windowControlsInset = useWindowControlsInset()
+  const windowControlsStripHeight = useWindowControlsStripHeight()
   // Docked, the sidebar lets the shell's tinted material through; over the page it stays opaque.
   const sidebarDocked = useAtomValue(workspaceSidebarDockedAtom)
   const seeThrough = !!useWindowMaterialTint() && sidebarDocked
@@ -139,13 +138,9 @@ const WorkspaceSidebar = ({
         >
           {IS_DESKTOP ? (
             // The window, the Dock and the menu bar name the desktop app, and Home is the first
-            // row. On macOS this strip holds the window buttons, on the page headers' line, down
-            // to the headers' bottom edge, and drags the window.
-            windowControlsInset ? (
-              <Box
-                style={{ height: WORKSPACE_FRAME_GAP + WORKSPACE_SIDEBAR_BUTTON_HEIGHT }}
-                dataSet={sidebarDragRegion}
-              />
+            // row. On macOS this strip holds the window buttons and drags the window.
+            windowControlsStripHeight ? (
+              <Box style={{ height: windowControlsStripHeight }} dataSet={sidebarDragRegion} />
             ) : null
           ) : (
             <HStack className="overflow-hidden border-continuous items-center pl-[20px] pr-[8px] py-[10px]">
@@ -172,7 +167,7 @@ const WorkspaceSidebar = ({
             contentContainerStyle={{
               paddingHorizontal: 12,
               // Without the brand row or the window buttons' strip above, the rows keep off the top.
-              paddingTop: IS_DESKTOP && !windowControlsInset ? 8 : 0,
+              paddingTop: IS_DESKTOP && !windowControlsStripHeight ? 8 : 0,
               paddingBottom: 8,
               gap: 8,
             }}

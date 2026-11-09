@@ -7,6 +7,9 @@
 /** Room the window buttons take at the top left of the page. */
 export const useWindowControlsInset = (): number => 0
 
+/** Height of the strip at the sidebar's top that holds the window buttons. */
+export const useWindowControlsStripHeight = (): number => 0
+
 /** The marks that let a workspace page header, whose left room is `headerInset`, drag the window. */
 export const windowDragRegion = (_headerInset: number): Record<string, string> | undefined =>
   undefined

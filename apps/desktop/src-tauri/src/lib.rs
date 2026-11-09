@@ -46,9 +46,9 @@ fn create_main_window(app: &tauri::AppHandle) -> tauri::Result<()> {
         url: WebviewUrl::App("index.html".into()),
         ..Default::default()
     };
-    // macOS: no title bar. The window buttons sit over the sidebar's top, centred 35 points
-    // from the top like the page headers (y is the top of the buttons plus 9), and the page
-    // leaves them their room (`windowControls.ts` counts on the first at x 16). Set on the window
+    // macOS: no title bar. The window buttons sit over the sidebar's top, 13 points from the left
+    // and 16 from the top, as Chrome sets them (y is the top of the buttons plus 9); the page
+    // leaves them their room (`windowControls.ts`). Set on the window
     // through its config, the position survives the title changes, which put the buttons back
     // in their default place otherwise. The title still names the window in Mission Control and
     // the Window menu.
@@ -60,7 +60,7 @@ fn create_main_window(app: &tauri::AppHandle) -> tauri::Result<()> {
         config.title_bar_style = tauri::TitleBarStyle::Overlay;
         config.hidden_title = true;
         config.traffic_light_position =
-            Some(tauri::utils::config::LogicalPosition { x: 16.0, y: 37.0 });
+            Some(tauri::utils::config::LogicalPosition { x: 13.0, y: 25.0 });
         config.transparent = true;
         config.window_effects = Some(tauri::utils::config::WindowEffectsConfig {
             effects: vec![tauri::window::Effect::Sidebar],

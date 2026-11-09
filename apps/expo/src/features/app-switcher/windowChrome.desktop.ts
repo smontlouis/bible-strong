@@ -1,7 +1,11 @@
 import { useAtomValue } from 'jotai/react'
 
 import { desktopBootstrap } from '~desktop/bridge'
-import { WINDOW_CONTROLS_INSET, windowFullscreenAtom } from '~desktop/windowControls'
+import {
+  WINDOW_CONTROLS_INSET,
+  WINDOW_CONTROLS_STRIP_HEIGHT,
+  windowFullscreenAtom,
+} from '~desktop/windowControls'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { colorWithOpacity } from '~themes/colorValues'
 import { isDarkThemeName } from '~themes/darkThemes'
@@ -22,6 +26,12 @@ const DRAG_REGION = MAC ? { tauriDragRegion: 'deep' } : undefined
 export const useWindowControlsInset = (): number => {
   const fullscreen = useAtomValue(windowFullscreenAtom)
   return MAC && !fullscreen ? WINDOW_CONTROLS_INSET : 0
+}
+
+/** Height of the strip at the sidebar's top that holds the window buttons; none in full screen. */
+export const useWindowControlsStripHeight = (): number => {
+  const fullscreen = useAtomValue(windowFullscreenAtom)
+  return MAC && !fullscreen ? WINDOW_CONTROLS_STRIP_HEIGHT : 0
 }
 
 /**
