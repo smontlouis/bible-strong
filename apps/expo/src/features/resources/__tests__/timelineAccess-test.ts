@@ -127,7 +127,7 @@ describe('Timeline Resource access', () => {
       readText,
     })
 
-    await expect(access.loadEvent('fr', 'exode')).resolves.toEqual({
+    await expect(access.loadEvent('fr', 'exode')).resolves.toMatchObject({
       status: 'available',
       detail: { id: '2', slug: 'exode', title: 'Exode', article: 'Another long article' },
     })
@@ -139,6 +139,58 @@ describe('Timeline Resource access', () => {
     })
 
     expect(readText).toHaveBeenCalledTimes(1)
+  })
+
+  it('reads an Offline copy older than the publication with the shape of the contract', async () => {
+    const access = createLocalTimelineAccess({
+      getAvailability: async identity => ({ status: 'available', resource: identity }),
+      getPath: () => '/timeline.json',
+      readText: async () =>
+        JSON.stringify([
+          { id: 1, slug: 'creation', title: 'Création', period: 'Origines', date: '4004 BC' },
+          { id: 2, slug: 'deluge', title: 'Déluge', period: 'Origines', related: [] },
+        ]),
+    })
+
+    await expect(access.loadIndex('fr')).resolves.toEqual({
+      status: 'available',
+      details: [
+        {
+          id: '1',
+          slug: 'creation',
+          title: 'Création',
+          description: '',
+          period: 'Origines',
+          dates: '4004 BC',
+          images: [],
+        },
+        {
+          id: '2',
+          slug: 'deluge',
+          title: 'Déluge',
+          description: '',
+          period: 'Origines',
+          dates: '',
+          images: [],
+        },
+      ],
+    })
+    await expect(access.loadEvent('fr', 'deluge')).resolves.toEqual({
+      status: 'available',
+      detail: {
+        id: '2',
+        slug: 'deluge',
+        title: 'Déluge',
+        description: '',
+        article: '',
+        period: 'Origines',
+        dates: '',
+        related: [],
+        images: [],
+        videos: [],
+        scriptures: [],
+      },
+    })
   })
 
   it.each(['not-json', '{}'])(

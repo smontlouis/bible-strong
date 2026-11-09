@@ -76,9 +76,33 @@ const defaultDependencies: TimelineAccessDependencies = {
   },
 }
 
-const isTimelineEventDetailList = (value: unknown): value is TimelineEventDetail[] =>
+type TimelineRecord = Record<string, unknown>
+
+const isTimelineRecordList = (value: unknown): value is TimelineRecord[] =>
   Array.isArray(value) &&
   value.every(item => item !== null && typeof item === 'object' && !Array.isArray(item))
+
+const readString = (value: unknown) => (typeof value === 'string' ? value : '')
+const readList = <Item>(value: unknown): Item[] => (Array.isArray(value) ? value : [])
+
+/**
+ * An Offline copy installed before the Timeline publication may lack fields of the contract:
+ * some events write their dating `date`, others have none, and none lists its scriptures. The
+ * copy is read the way the publication reads its source, so every event has the contract's shape.
+ */
+const readTimelineEvent = (event: TimelineRecord): TimelineEventDetail => ({
+  id: typeof event.id === 'number' ? String(event.id) : readString(event.id),
+  slug: readString(event.slug),
+  title: readString(event.title),
+  description: readString(event.description),
+  article: readString(event.article),
+  period: readString(event.period),
+  dates: readString(event.dates ?? event.date),
+  related: readList(event.related),
+  images: readList(event.images),
+  videos: readList(event.videos),
+  scriptures: readList(event.scriptures),
+})
 
 export const createLocalTimelineAccess = (
   dependencies: TimelineAccessDependencies = defaultDependencies
@@ -132,8 +156,8 @@ export const createLocalTimelineAccess = (
 
     try {
       const value: unknown = JSON.parse(serialized)
-      if (!isTimelineEventDetailList(value)) throw new Error('TIMELINE_CONTENT_INVALID')
-      return { status: 'available', details: value }
+      if (!isTimelineRecordList(value)) throw new Error('TIMELINE_CONTENT_INVALID')
+      return { status: 'available', details: value.map(readTimelineEvent) }
     } catch {
       return {
         status: 'unavailable',
