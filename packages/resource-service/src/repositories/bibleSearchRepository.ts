@@ -140,7 +140,10 @@ export const makeKyselyBibleSearchRepository = (
             )}) / ${fuzzyTerms.length}`
           : sql`0`
       const normalizedTopicQuery = normalizeTopicSearchText(topicQuery)
-      const topicSearchEnabled = parsed?.kind !== 'phrase' && input.mode !== 'semantic'
+      // Standard mode answers the verses that contain the words: topics only lift the ones they
+      // also cover. Semantic mode answers the topics, named or close in meaning, without the single
+      // verses standard mode already shows. A phrase in quotes asks for the words alone.
+      const topicSearchEnabled = parsed?.kind !== 'phrase'
       const topicTerms = normalizedTopicQuery.split(/\s+/).filter(Boolean)
       const semanticQueryEnabled =
         parsed?.kind !== 'phrase' &&
@@ -152,17 +155,19 @@ export const makeKyselyBibleSearchRepository = (
         : sql`to_tsquery('simple', '')`
       let topicEmbedding: number[] | undefined
       if (options.embeddingProvider && normalizedTopicQuery && semanticQueryEnabled) {
-        const exactTopic =
-          input.mode === 'semantic'
-            ? undefined
-            : yield* tryDatabasePromise('bible.search.topic-exact-probe', () =>
-                database
-                  .selectFrom('thematic_topic_aliases')
-                  .select('topic_id')
-                  .where('normalized_alias', '=', normalizedTopicQuery)
-                  .limit(1)
-                  .executeTakeFirst()
-              ).pipe(Effect.mapError(cause => new BibleSearchRepositoryFailure({ cause })))
+        // A query that names a topic needs no vector: the named topic outranks every neighbour.
+        const exactTopic = yield* tryDatabasePromise('bible.search.topic-exact-probe', () =>
+          database
+            .selectFrom('thematic_topic_aliases as tta')
+            .innerJoin('thematic_topics as tt', join =>
+              join.onRef('tt.id', '=', 'tta.topic_id').on('tt.active', '=', true)
+            )
+            .select('tta.topic_id')
+            .where('tta.normalized_alias', '=', normalizedTopicQuery)
+            .where('tta.language', 'in', [input.language ?? 'fr', 'en'])
+            .limit(1)
+            .executeTakeFirst()
+        ).pipe(Effect.mapError(cause => new BibleSearchRepositoryFailure({ cause })))
         if (!exactTopic) {
           topicEmbedding = yield* Effect.tryPromise({
             try: () => options.embeddingProvider!.embedQuery(topicQuery),
@@ -179,6 +184,17 @@ export const makeKyselyBibleSearchRepository = (
       }
       const topicEmbeddingVector = topicEmbedding ? `[${topicEmbedding.join(',')}]` : null
       const topicLanguage = input.language ?? 'fr'
+      // Standard mode shows these verses on their own; a passage that spans several verses still
+      // belongs to the topics, since it is more than the verse that contains the words.
+      const thematicPassageFilter =
+        input.mode === 'semantic' && parsed
+          ? sql`NOT (
+              source_passage.chapter_end = source_passage.chapter_start AND
+              source_passage.verse_end = source_passage.verse_start AND
+              ${textSearchPredicate}
+            )`
+          : sql`TRUE`
+      const resultFilter = input.mode === 'standard' ? sql`has_lexical` : sql`TRUE`
       const resultOrder =
         input.sortOrder === 'book'
           ? sql`canonical_book_order, chapter, verse, version_order`
@@ -514,6 +530,7 @@ export const makeKyselyBibleSearchRepository = (
                AND range_end.verse = source_passage.verse_end +
                  coalesce(end_reference_offset.verse_offset, 0)
              WHERE ${filterSql}
+               AND ${thematicPassageFilter}
           ),
           thematic_collapsed AS (
             SELECT version_id,
@@ -621,6 +638,7 @@ export const makeKyselyBibleSearchRepository = (
                    END AS match_kind,
                    row_number() OVER (ORDER BY ${resultOrder}) AS result_position
               FROM fused
+             WHERE ${resultFilter}
           ),
           totals AS (
             SELECT count(*) AS total_count FROM matched
@@ -747,8 +765,13 @@ export const makeKyselyBibleSearchRepository = (
                       ? { sources: row.source_list.split(',').filter(Boolean).sort() }
                       : {}),
                   },
-                  ...(row.end_chapter !== null ? { endChapter: row.end_chapter } : {}),
-                  ...(row.end_verse !== null ? { endVerse: row.end_verse } : {}),
+                  // A verse found by its words is answered alone, not as the topic's passage.
+                  ...(input.mode !== 'standard' && row.end_chapter !== null
+                    ? { endChapter: row.end_chapter }
+                    : {}),
+                  ...(input.mode !== 'standard' && row.end_verse !== null
+                    ? { endVerse: row.end_verse }
+                    : {}),
                 },
               ]
         ),

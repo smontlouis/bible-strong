@@ -431,4 +431,156 @@ describe('Bible search PostgreSQL repository', { skip: !runIntegration }, () => 
       await isolated.dispose()
     }
   })
+
+  it('answers the words in standard mode and the topics around them in semantic mode', async () => {
+    const isolated = await createIsolatedPostgres(connectionString, 'bible_search_words_and_topics')
+    const { database } = isolated
+
+    try {
+      const publication = await database
+        .insertInto('resource_publications')
+        .values({
+          resource_identity: 'bible-text:LSG',
+          resource_kind: 'bible-text',
+          revision: 'lsg-words-topics-r1',
+          language: 'fr',
+          status: 'active',
+          canonical_sha256: '8'.repeat(64),
+          offline_artifact_sha256: '9'.repeat(64),
+          provenance: { source: 'integration-test', imported_at: new Date(0).toISOString() },
+          rights: { holder: 'integration-test', online: true, offline: true },
+          metadata: {
+            resource_revision: 'lsg-words-topics-r1',
+            text_revision: 'lsg-words-topics-r1',
+            canon: { id: 'protestant-66', orderedBooks: [43, 50] },
+          },
+        })
+        .returning('id')
+        .executeTakeFirstOrThrow()
+
+      const presentation = { startTags: [], layout: [], notes: [], headings: [] }
+      const verse = (book: number, chapter: number, number: number, text: string) => ({
+        publication_id: publication.id,
+        book,
+        chapter,
+        verse: number,
+        text,
+        presentation,
+      })
+      await database
+        .insertInto('bible_verses')
+        .values([
+          verse(43, 14, 27, 'Je vous laisse la paix, je vous donne ma paix.'),
+          verse(43, 14, 28, 'Vous avez entendu que je vous ai dit : Je m’en vais.'),
+          verse(43, 16, 33, 'Je vous ai dit ces choses, afin que vous ayez la paix en moi.'),
+          verse(50, 4, 6, 'Ne vous inquiétez de rien.'),
+        ])
+        .execute()
+
+      await database
+        .insertInto('thematic_topics')
+        .values({
+          id: 'topic:peace',
+          canonical_name: 'Peace',
+          normalized_name: 'peace',
+          language: 'en',
+          active: true,
+        })
+        .execute()
+      await database
+        .insertInto('thematic_topic_aliases')
+        .values({
+          topic_id: 'topic:peace',
+          language: 'fr',
+          alias: 'Paix',
+          normalized_alias: 'paix',
+          method: 'editorial-controlled',
+          validation_status: 'validated',
+          is_preferred: true,
+        })
+        .execute()
+      const passage = (
+        source: string,
+        book: number,
+        chapter: number,
+        verseStart: number,
+        verseEnd: number
+      ) => ({
+        topic_id: 'topic:peace',
+        source,
+        book,
+        chapter_start: chapter,
+        verse_start: verseStart,
+        chapter_end: chapter,
+        verse_end: verseEnd,
+        source_score: null,
+        source_votes: null,
+        provenance: { test: `${source}-${book}-${chapter}-${verseStart}-${verseEnd}` },
+      })
+      await database
+        .insertInto('thematic_topic_passages')
+        .values([
+          // The verse that contains the word: standard mode shows it, semantic mode leaves it.
+          passage('openbible', 43, 14, 27, 27),
+          // The passage that starts on it: more than the verse, so it stays with the topic.
+          passage('torrey', 43, 14, 27, 28),
+          // A verse of the topic without the word.
+          passage('openbible', 50, 4, 6, 6),
+        ])
+        .execute()
+
+      let embeddingCalls = 0
+      const repository = makeKyselyBibleSearchRepository(database, {
+        embeddingProvider: {
+          ...testEmbeddingProvider,
+          embedQuery: async text => {
+            embeddingCalls += 1
+            return testEmbeddingProvider.embedQuery(text)
+          },
+        },
+      })
+      const search = (query: string, mode: 'standard' | 'semantic') =>
+        Effect.runPromise(
+          repository.search({ versionId: 'LSG', query, mode, language: 'fr', limit: 20 })
+        )
+
+      const words = await search('paix', 'standard')
+      assert.equal(words.count, 2)
+      assert.deepEqual(
+        words.results.map(result => [result.chapter, result.verse, result.match?.kind]),
+        [
+          [14, 27, 'hybrid'],
+          [16, 33, 'lexical'],
+        ]
+      )
+      assert.ok(words.results.every(result => result.endVerse === undefined))
+
+      const topics = await search('paix', 'semantic')
+      assert.equal(embeddingCalls, 0)
+      assert.equal(topics.count, 2)
+      assert.deepEqual(
+        topics.results.map(result => [
+          result.book,
+          result.chapter,
+          result.verse,
+          result.endVerse,
+          result.match?.kind,
+          result.match?.topicLabel,
+        ]),
+        [
+          [43, 14, 27, 28, 'topic', 'Paix'],
+          [50, 4, 6, 6, 'topic', 'Paix'],
+        ]
+      )
+
+      const absentWord = await search('passages sur la paix intérieure', 'standard')
+      assert.equal(absentWord.count, 0)
+
+      const phrase = await search('"paix"', 'semantic')
+      assert.equal(phrase.count, 0)
+      assert.equal(embeddingCalls, 0)
+    } finally {
+      await isolated.dispose()
+    }
+  })
 })

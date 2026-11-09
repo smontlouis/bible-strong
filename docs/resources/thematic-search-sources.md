@@ -28,8 +28,14 @@ translated.
   publication contains one or two explicit superscription verses.
 - The result explanation identifies lexical, topical, semantic, or hybrid retrieval and lists its
   topical sources.
-- Reciprocal Rank Fusion combines lexical and thematic ranks. Exact/controlled topic matches are
-  weighted above fuzzy topic matches, which are weighted above vector-only similarity.
+- The two routes answer apart. `/search` answers only the verses that contain the words; Reciprocal
+  Rank Fusion with the topics the query names lifts the verses those topics also cover (`hybrid`),
+  and a verse is answered alone, without the topic's range. `/semantic-search` answers the passages
+  of the topics the query names, matches by alias or comes close to in meaning, and leaves out the
+  single verses that contain the words, which `/search` already shows; a passage of several verses
+  stays even when its first verse contains them. Exact/controlled topic matches are weighted above
+  fuzzy topic matches, which are weighted above vector-only similarity, and a query that names a
+  topic exactly needs no vector.
 
 ## Vector representation
 

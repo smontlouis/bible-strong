@@ -8,7 +8,7 @@ import {
 // whenever the lexical/thematic fusion or ordering rules change.
 export const THEMATIC_SEARCH_INDEX_REVISION =
   'neuu-eeb9b741-openbible-2026-08-17-e0dc0a5a-fr-aliases-v1'
-export const BIBLE_SEARCH_RANKING_REVISION = 'hybrid-rrf-v1'
+export const BIBLE_SEARCH_RANKING_REVISION = 'words-apart-from-topics-v1'
 
 export const BIBLE_SEARCH_CACHE_REVISION = JSON.stringify({
   index: THEMATIC_SEARCH_INDEX_REVISION,
