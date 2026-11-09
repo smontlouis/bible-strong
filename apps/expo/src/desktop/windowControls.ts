@@ -7,9 +7,9 @@ import { desktopBootstrap } from './bridge'
 
 /**
  * Room the macOS window buttons take at the top left of the page: the shell places the first
- * at x 20 (`create_main_window` in `lib.rs`), the three span 60 points, then a margin.
+ * at x 16 (`create_main_window` in `lib.rs`), the three span 60 points, then a margin.
  */
-export const WINDOW_CONTROLS_INSET = 92
+export const WINDOW_CONTROLS_INSET = 88
 
 /** In full screen macOS hides the window buttons, and the page takes back their room. */
 export const windowFullscreenAtom = atom(false)

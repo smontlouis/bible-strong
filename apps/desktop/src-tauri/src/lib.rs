@@ -46,9 +46,9 @@ fn create_main_window(app: &tauri::AppHandle) -> tauri::Result<()> {
         url: WebviewUrl::App("index.html".into()),
         ..Default::default()
     };
-    // macOS: no title bar. The window buttons sit in the sidebar's header, centred 35 points
+    // macOS: no title bar. The window buttons sit over the sidebar's top, centred 35 points
     // from the top like the page headers (y is the top of the buttons plus 9), and the page
-    // leaves them their room (`windowControls.ts` counts on the first at x 20). Set on the window
+    // leaves them their room (`windowControls.ts` counts on the first at x 16). Set on the window
     // through its config, the position survives the title changes, which put the buttons back
     // in their default place otherwise. The title still names the window in Mission Control and
     // the Window menu.
@@ -57,7 +57,7 @@ fn create_main_window(app: &tauri::AppHandle) -> tauri::Result<()> {
         config.title_bar_style = tauri::TitleBarStyle::Overlay;
         config.hidden_title = true;
         config.traffic_light_position =
-            Some(tauri::utils::config::LogicalPosition { x: 20.0, y: 37.0 });
+            Some(tauri::utils::config::LogicalPosition { x: 16.0, y: 37.0 });
     }
     let mut builder = WebviewWindowBuilder::from_config(app, &config)?;
     // The last theme's ground and appearance, so that the window is not white before the first

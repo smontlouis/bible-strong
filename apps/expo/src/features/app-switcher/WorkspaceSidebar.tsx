@@ -39,8 +39,14 @@ import TabIcon, { tabIconColorConfig } from './utils/getIconByTabType'
 import { useOpenInNewTab } from './utils/useOpenInNewTab'
 import { shortcutTitle } from '~features/keyboard-shortcuts/shortcutTitle'
 import { floatingShadow, radii } from '~common/ui/surfaces'
-import { useWorkspaceSidebarWidth, workspaceSidebarVariant } from './utils/useResponsiveWorkspace'
+import {
+  WORKSPACE_FRAME_GAP,
+  useWorkspaceSidebarWidth,
+  workspaceSidebarVariant,
+} from './utils/useResponsiveWorkspace'
 import { sidebarDragRegion, useWindowControlsInset } from './windowChrome'
+import { WORKSPACE_SIDEBAR_BUTTON_HEIGHT } from './workspaceHeaderInset'
+import { IS_DESKTOP } from '~desktop/isDesktop'
 
 const sidebarFrameClassName = {
   inset: 'bg-canvas',
@@ -69,7 +75,7 @@ const WorkspaceSidebar = ({
 
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
-  // The desktop app on macOS sets its window buttons in this header, which drags the window.
+  // The desktop app on macOS sets its window buttons over the sidebar's top.
   const windowControlsInset = useWindowControlsInset()
   const sidebarWidth = useWorkspaceSidebarWidth()
   const { colorScheme } = useCurrentThemeSelector()
@@ -126,38 +132,45 @@ const WorkspaceSidebar = ({
               : { width: sidebarWidth }),
           }}
         >
-          <HStack
-            className="overflow-hidden border-continuous items-center pl-[20px] pr-[8px] py-[10px]"
-            // Centred on the page headers' line, like the window buttons beside it.
-            style={
-              windowControlsInset ? { paddingLeft: windowControlsInset, paddingTop: 15 } : undefined
-            }
-            dataSet={sidebarDragRegion}
-          >
-            <TouchableBox
-              className={`${windowControlsInset ? '' : 'flex-1 '}flex-row items-center min-h-[40px]`}
-              onPress={openHome}
-              accessibilityRole="button"
-              accessibilityLabel={`Bible Strong — ${t('accessibility.home')}`}
-            >
-              <Image
-                source={require('~assets/images/icon.png')}
-                style={{ width: 24, height: 24, borderRadius: 12 }}
-                accessible={false}
+          {IS_DESKTOP ? (
+            // The window, the Dock and the menu bar name the desktop app, and Home is the first
+            // row. On macOS this strip holds the window buttons, on the page headers' line, down
+            // to the headers' bottom edge, and drags the window.
+            windowControlsInset ? (
+              <Box
+                style={{ height: WORKSPACE_FRAME_GAP + WORKSPACE_SIDEBAR_BUTTON_HEIGHT }}
+                dataSet={sidebarDragRegion}
               />
-              <Text
-                className={`${windowControlsInset ? 'shrink' : 'flex-1'} ml-[10px] font-bold text-[15px]`}
+            ) : null
+          ) : (
+            <HStack className="overflow-hidden border-continuous items-center pl-[20px] pr-[8px] py-[10px]">
+              <TouchableBox
+                className="flex-1 flex-row items-center min-h-[40px]"
+                onPress={openHome}
+                accessibilityRole="button"
+                accessibilityLabel={`Bible Strong — ${t('accessibility.home')}`}
               >
-                Bible Strong
-              </Text>
-            </TouchableBox>
-          </HStack>
+                <Image
+                  source={require('~assets/images/icon.png')}
+                  style={{ width: 24, height: 24, borderRadius: 12 }}
+                  accessible={false}
+                />
+                <Text className="flex-1 ml-[10px] font-bold text-[15px]">Bible Strong</Text>
+              </TouchableBox>
+            </HStack>
+          )}
           {/* A desktop scrollbar would take its width from the right margin of the rows only. */}
           <ScrollView
             {...scrollProps}
             style={{ flex: 1 }}
             showsVerticalScrollIndicator={Platform.OS !== 'web'}
-            contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 8, gap: 8 }}
+            contentContainerStyle={{
+              paddingHorizontal: 12,
+              // Without the brand row or the window buttons' strip above, the rows keep off the top.
+              paddingTop: IS_DESKTOP && !windowControlsInset ? 8 : 0,
+              paddingBottom: 8,
+              gap: 8,
+            }}
           >
             {[
               ...(previewGroups ?? groups).filter(group => group.isDefault),
