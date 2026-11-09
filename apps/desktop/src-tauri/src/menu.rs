@@ -4,11 +4,12 @@
 //! JavaScript which shortcut to run, so one action never has two implementations. The Edit
 //! menu also gives macOS its clipboard and undo key equivalents inside the webview. The Bible
 //! menu's shortcuts are bare keys (arrows, letters): a native key equivalent would take them
-//! from every text field, so its items carry none.
+//! from every text field, so its items carry none. The desktop app follows the system's
+//! conventions for its tabs (⌘T, ⌘W, ⌃⇥) and its search (⌘F), so closing the window takes ⇧⌘W.
 
 use tauri::{
     menu::{AboutMetadataBuilder, Menu, MenuBuilder, MenuItem, PredefinedMenuItem, SubmenuBuilder},
-    AppHandle, Emitter, Runtime,
+    AppHandle, Emitter, Manager, Runtime,
 };
 
 pub const EVENT: &str = "desktop://menu";
@@ -27,6 +28,10 @@ struct Labels {
     downloads: &'static str,
     print: &'static str,
     sidebar: &'static str,
+    find: &'static str,
+    previous_tab: &'static str,
+    next_tab: &'static str,
+    close_window: &'static str,
     previous_chapter: &'static str,
     next_chapter: &'static str,
     go_to_verse: &'static str,
@@ -52,6 +57,10 @@ const FRENCH: Labels = Labels {
     downloads: "Téléchargements",
     print: "Imprimer…",
     sidebar: "Afficher ou masquer la barre latérale",
+    find: "Rechercher…",
+    previous_tab: "Onglet précédent",
+    next_tab: "Onglet suivant",
+    close_window: "Fermer la fenêtre",
     previous_chapter: "Chapitre précédent",
     next_chapter: "Chapitre suivant",
     go_to_verse: "Aller au verset…",
@@ -77,6 +86,10 @@ const ENGLISH: Labels = Labels {
     downloads: "Downloads",
     print: "Print…",
     sidebar: "Show or Hide Sidebar",
+    find: "Find…",
+    previous_tab: "Previous Tab",
+    next_tab: "Next Tab",
+    close_window: "Close Window",
     previous_chapter: "Previous Chapter",
     next_chapter: "Next Chapter",
     go_to_verse: "Go to Verse…",
@@ -88,15 +101,6 @@ const ENGLISH: Labels = Labels {
     check_updates: "Check for Updates…",
 };
 
-/// ⌃ on a Mac, Alt elsewhere: the workspace family of `keymap.ts`.
-fn workspace(key: &str) -> String {
-    if cfg!(target_os = "macos") {
-        format!("Ctrl+{key}")
-    } else {
-        format!("Alt+{key}")
-    }
-}
-
 pub fn build<R: Runtime>(app: &AppHandle<R>, language: &str) -> tauri::Result<Menu<R>> {
     let labels = if language == "en" { &ENGLISH } else { &FRENCH };
     let item = |id: &str, label: &str, accelerator: Option<String>| {
@@ -107,12 +111,12 @@ pub fn build<R: Runtime>(app: &AppHandle<R>, language: &str) -> tauri::Result<Me
         .item(&item(
             "shortcut:newTab",
             labels.new_tab,
-            Some(workspace("T")),
+            Some("CmdOrCtrl+T".into()),
         )?)
         .item(&item(
             "shortcut:closeTab",
             labels.close_tab,
-            Some(workspace("W")),
+            Some("CmdOrCtrl+W".into()),
         )?)
         .separator()
         .item(&item(
@@ -141,7 +145,13 @@ pub fn build<R: Runtime>(app: &AppHandle<R>, language: &str) -> tauri::Result<Me
         .item(&PredefinedMenuItem::cut(app, None)?)
         .item(&PredefinedMenuItem::copy(app, None)?)
         .item(&PredefinedMenuItem::paste(app, None)?)
-        .item(&PredefinedMenuItem::select_all(app, None)?);
+        .item(&PredefinedMenuItem::select_all(app, None)?)
+        .separator()
+        .item(&item(
+            "shortcut:find",
+            labels.find,
+            Some("CmdOrCtrl+F".into()),
+        )?);
 
     let view = SubmenuBuilder::new(app, labels.view)
         .item(&item(
@@ -169,7 +179,23 @@ pub fn build<R: Runtime>(app: &AppHandle<R>, language: &str) -> tauri::Result<Me
         .item(&PredefinedMenuItem::minimize(app, None)?)
         .item(&PredefinedMenuItem::maximize(app, None)?)
         .separator()
-        .item(&PredefinedMenuItem::close_window(app, None)?);
+        .item(&item(
+            "shortcut:previousTab",
+            labels.previous_tab,
+            Some("Ctrl+Shift+Tab".into()),
+        )?)
+        .item(&item(
+            "shortcut:nextTab",
+            labels.next_tab,
+            Some("Ctrl+Tab".into()),
+        )?)
+        .separator()
+        // ⌘W closes a tab, as in a browser: the window takes ⇧⌘W.
+        .item(&item(
+            "window:close",
+            labels.close_window,
+            Some("CmdOrCtrl+Shift+W".into()),
+        )?);
 
     let mut help = SubmenuBuilder::new(app, labels.help)
         .item(&item(
@@ -229,6 +255,12 @@ pub fn build<R: Runtime>(app: &AppHandle<R>, language: &str) -> tauri::Result<Me
 }
 
 pub fn forward<R: Runtime>(app: &AppHandle<R>, id: &str) {
+    if id == "window:close" {
+        if let Some(window) = app.get_webview_window("main") {
+            let _ = window.close();
+        }
+        return;
+    }
     let _ = app.emit_to("main", EVENT, id);
 }
 

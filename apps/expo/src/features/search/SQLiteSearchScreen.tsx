@@ -16,13 +16,17 @@ import PageContent, { pageContentStyle } from '~common/ui/PageContent'
 import type { ReactNode } from 'react'
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, Keyboard, StyleSheet } from 'react-native'
+import { FlatList, Keyboard, Platform, StyleSheet } from 'react-native'
 import { TextInput } from '~common/ui/InterfaceTextInput'
 import { KeyboardAwareScrollView, useKeyboardState } from '~common/KeyboardAwareScrollView'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { Image } from 'expo-image'
 import { useAtomValue, useSetAtom } from 'jotai/react'
+import {
+  SEARCH_FOCUS_REQUEST_TTL_MS,
+  searchFocusRequestAtom,
+} from '~features/search/searchFocusRequest'
 import Empty from '~common/Empty'
 import AlphabetList from '~common/AlphabetList'
 import FilterHeaderButton from '~common/FilterHeaderButton'
@@ -187,6 +191,28 @@ const SQLiteSearchScreen = ({
   const sourceFiltersRef = useRef<SheetRef>(null)
   const passageFiltersRef = useRef<SheetRef>(null)
   const searchInputRef = useRef<TextInput>(null)
+  // The desktop app's ⌘F opens this tab and asks for the cursor in its field, once the tab shows.
+  const searchFocusRequest = useAtomValue(searchFocusRequestAtom)
+  const setSearchFocusRequest = useSetAtom(searchFocusRequestAtom)
+  useEffect(() => {
+    if (Platform.OS !== 'web' || searchFocusRequest === null) return
+    const deadline = searchFocusRequest + SEARCH_FOCUS_REQUEST_TTL_MS
+    let frame = 0
+    const attempt = () => {
+      if (Date.now() > deadline) return
+      const field = searchInputRef.current as unknown as HTMLElement | null
+      // A tab kept in the background is hidden, and its field takes no focus.
+      if (field && field.offsetParent !== null) {
+        field.focus()
+        setSearchFocusRequest(null)
+        return
+      }
+      frame = requestAnimationFrame(attempt)
+    }
+    attempt()
+    return () => cancelAnimationFrame(frame)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchFocusRequest])
   const activeItemFilterTypes = searchItemFilterOrder.filter(itemType => itemFilters[itemType])
   const singleActiveItemType =
     activeItemFilterTypes.length === 1 ? activeItemFilterTypes[0] : undefined

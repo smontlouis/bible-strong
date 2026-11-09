@@ -72,3 +72,65 @@ describe('keymap', () => {
       expect(listed.has(id)).toBe(true)
   })
 })
+
+describe('the desktop keymap', () => {
+  const desktopKeymap = (): typeof import('../keymap') => {
+    const previous = process.env.EXPO_PUBLIC_DESKTOP
+    process.env.EXPO_PUBLIC_DESKTOP = '1'
+    let keymap: typeof import('../keymap') | undefined
+    jest.isolateModules(() => {
+      keymap = require('../keymap')
+    })
+    process.env.EXPO_PUBLIC_DESKTOP = previous
+    return keymap!
+  }
+
+  it('drives the tabs with the command key, as the system does', () => {
+    const desktop = desktopKeymap()
+    const t = key({ key: 't', code: 'KeyT' })
+    expect(desktop.matchShortcut({ ...t, metaKey: true }, 'newTab', true)).toBe(true)
+    expect(desktop.matchShortcut({ ...t, ctrlKey: true }, 'newTab', true)).toBe(false)
+    expect(desktop.matchShortcut({ ...t, ctrlKey: true }, 'newTab', false)).toBe(true)
+    expect(desktop.formatShortcut('closeTab', true)).toBe('⌘W')
+    expect(desktop.formatShortcut('closeTab', false)).toBe('Ctrl+W')
+    // ⌘Q quits: the recent tabs keep ⌃Q.
+    expect(desktop.formatShortcut('recentTabs', true)).toBe('⌃Q')
+  })
+
+  it('moves between tabs with Control-Tab on every system, and keeps ⌥↑ and ⌥↓', () => {
+    const desktop = desktopKeymap()
+    const tab = key({ key: 'Tab', code: 'Tab', ctrlKey: true })
+    expect(desktop.matchShortcut(tab, 'nextTab', true)).toBe(true)
+    expect(desktop.matchShortcut(tab, 'nextTab', false)).toBe(true)
+    expect(desktop.matchShortcut({ ...tab, shiftKey: true }, 'previousTab', true)).toBe(true)
+    expect(desktop.matchShortcut({ ...tab, shiftKey: true }, 'nextTab', true)).toBe(false)
+    expect(desktop.matchShortcut(key({ key: 'ArrowDown', altKey: true }), 'nextTab', true)).toBe(
+      true
+    )
+  })
+
+  it('reaches a tab by its place and opens the search', () => {
+    const desktop = desktopKeymap()
+    expect(
+      desktop.matchShortcut(key({ key: '&', code: 'Digit1', metaKey: true }), 'goToTab', true)
+    ).toBe(true)
+    expect(
+      desktop.matchShortcut(key({ key: '&', code: 'Digit1', metaKey: true }), 'highlight', true)
+    ).toBe(false)
+    expect(desktop.formatShortcut('find', true)).toBe('⌘F')
+    const rows = desktop.SHORTCUT_SECTIONS.flatMap(section =>
+      section.rows.flatMap(row => row.shortcuts)
+    )
+    expect(rows).toEqual(expect.arrayContaining(['goToTab', 'find']))
+  })
+})
+
+describe('the Web keymap', () => {
+  it('leaves ⌘T, ⌘W, ⌘1–9 and ⌘F to the browser', () => {
+    expect(formatShortcut('newTab', true)).toBe('⌃T')
+    expect(formatShortcut('closeTab', false)).toBe('Alt+W')
+    const rows = SHORTCUT_SECTIONS.flatMap(section => section.rows.flatMap(row => row.shortcuts))
+    expect(rows).not.toContain('goToTab')
+    expect(rows).not.toContain('find')
+  })
+})

@@ -7,6 +7,9 @@ import { useAtom, useAtomValue, useStore } from 'jotai/react'
 import { useRouter, usePathname } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { activeGroupAtom, activeTabIdAtom, tabGroupsAtom, type TabItem } from '~state/tabs'
+import generateUUID from '~helpers/generateUUID'
+import { digitOf } from '~features/keyboard-shortcuts/keymap'
+import { searchFocusRequestAtom } from '~features/search/searchFocusRequest'
 import { useSwitchGroup } from '~state/tabGroups'
 import { useTheme } from '~themes/ThemeProvider'
 import { useOpenInNewTab } from './utils/useOpenInNewTab'
@@ -137,8 +140,35 @@ export default function WorkspaceKeyboardShortcuts({
       event.stopPropagation()
       if (event.repeat) return
       const group = store.get(activeGroupAtom)
+      const candidate = (tab: TabItem | undefined): Candidate | undefined =>
+        tab && {
+          id: tab.id,
+          type: tab.type,
+          title: tab.title,
+          groupId: group.id,
+          groupName: group.name,
+        }
       if (shortcut === 'newTab') newTab(undefined, { autoRedirect: true })
-      else if (shortcut === 'closeTab' && pathname === '/') {
+      else if (shortcut === 'goToTab') {
+        // ⌘9 is the last tab, as in a browser.
+        const digit = digitOf(event) ?? 0
+        select(candidate(digit === 9 ? group.tabs.at(-1) : group.tabs[digit - 1]))
+      } else if (shortcut === 'find') {
+        const search = group.tabs.find(tab => tab.type === 'search')
+        if (search) select(candidate(search))
+        else
+          newTab(
+            {
+              id: generateUUID(),
+              type: 'search',
+              isRemovable: true,
+              title: t('tabs.search'),
+              data: { searchValue: '' },
+            } as TabItem,
+            { autoRedirect: true }
+          )
+        store.set(searchFocusRequestAtom, Date.now())
+      } else if (shortcut === 'closeTab' && pathname === '/') {
         const tab = group.tabs[group.activeTabIndex]
         if (tab) closeTab(group, tab.id)
       } else if (shortcut === 'sidebar') toggleSidebar()

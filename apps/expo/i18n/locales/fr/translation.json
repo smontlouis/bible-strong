@@ -2685,6 +2685,8 @@
   "shortcutGuide.newTab": "Créer un onglet",
   "shortcutGuide.closeTab": "Fermer l’onglet actif",
   "shortcutGuide.previousNext": "Onglet précédent / suivant",
+  "shortcutGuide.goToTab": "Aller à l’onglet 1 à 9 (9 : le dernier)",
+  "shortcutGuide.find": "Ouvrir la recherche",
   "shortcutGuide.sidebar": "Afficher ou masquer la barre latérale",
   "shortcutGuide.recentHint": "Maintenez {{modifier}} et appuyez sur Q pour avancer, ou Maj + Q pour reculer. ↑ / ↓ naviguent aussi. Relâchez {{modifier}} ou appuyez sur Entrée pour ouvrir ; Échap annule.",
   "shortcutGuide.bible": "Dans un onglet Bible",

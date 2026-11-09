@@ -1,6 +1,7 @@
+import { IS_DESKTOP } from '~desktop/isDesktopBuild'
 import { findShortcut, type ShortcutEvent } from '~features/keyboard-shortcuts/keymap'
 
-const WORKSPACE_SHORTCUTS = [
+const SHARED_SHORTCUTS = [
   'newTab',
   'closeTab',
   'previousTab',
@@ -9,8 +10,16 @@ const WORKSPACE_SHORTCUTS = [
   'sidebar',
   'guide',
 ] as const
+// A browser keeps ⌘1–9 and ⌘F for its own tabs and its find bar.
+const DESKTOP_SHORTCUTS = ['goToTab', 'find'] as const
 
-export type WorkspaceShortcut = (typeof WORKSPACE_SHORTCUTS)[number]
+export type WorkspaceShortcut =
+  | (typeof SHARED_SHORTCUTS)[number]
+  | (typeof DESKTOP_SHORTCUTS)[number]
+
+const WORKSPACE_SHORTCUTS: readonly WorkspaceShortcut[] = IS_DESKTOP
+  ? [...SHARED_SHORTCUTS, ...DESKTOP_SHORTCUTS]
+  : SHARED_SHORTCUTS
 
 export function workspaceShortcut(
   event: ShortcutEvent,

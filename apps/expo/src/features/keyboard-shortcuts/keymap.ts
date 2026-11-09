@@ -8,7 +8,12 @@
  * at, the Bible or the selection, as long as no field has the focus. One letter means one thing
  * across the app, and Shift gives the other action that starts with the same letter, in French as
  * in English: C compares and ⇧C opens the commentary, T tags and ⇧T opens the themes.
+ *
+ * The desktop app has no browser around it, so its tabs follow the system: ⌘T and ⌘W (Ctrl
+ * elsewhere), ⌃Tab and ⌃⇧Tab, ⌘1 to ⌘9, and ⌘F for the search. ⌃Q keeps the recent tabs: ⌘Q
+ * quits.
  */
+import { IS_DESKTOP } from '~desktop/isDesktopBuild'
 
 type Chord = {
   /** A letter (`'T'`), a digit (`'0'`), `'digit'` for 1 to 9, or a key's own name (`'ArrowUp'`, `'?'`). */
@@ -19,6 +24,8 @@ type Chord = {
   workspace?: boolean
   /** ⌥ on a Mac, Alt elsewhere. */
   option?: boolean
+  /** ⌃ on every system. */
+  control?: boolean
   /** `'any'` ignores Shift, for a character some layouts only type with it (`?`, AZERTY digits). */
   shift?: boolean | 'any'
 }
@@ -26,11 +33,20 @@ type Chord = {
 export const SHORTCUTS = {
   palette: [{ key: 'K', command: true }],
   tabActions: [{ key: 'K', command: true, shift: true }],
-  newTab: [{ key: 'T', workspace: true }],
-  closeTab: [{ key: 'W', workspace: true }],
+  newTab: [IS_DESKTOP ? { key: 'T', command: true } : { key: 'T', workspace: true }],
+  closeTab: [IS_DESKTOP ? { key: 'W', command: true } : { key: 'W', workspace: true }],
   recentTabs: [{ key: 'Q', workspace: true, shift: 'any' }],
-  previousTab: [{ key: 'ArrowUp', option: true }],
-  nextTab: [{ key: 'ArrowDown', option: true }],
+  previousTab: [
+    { key: 'ArrowUp', option: true },
+    ...(IS_DESKTOP ? [{ key: 'Tab', control: true, shift: true }] : []),
+  ],
+  nextTab: [
+    { key: 'ArrowDown', option: true },
+    ...(IS_DESKTOP ? [{ key: 'Tab', control: true }] : []),
+  ],
+  // The desktop app only: a browser keeps these for its own tabs and its find bar.
+  goToTab: [{ key: 'digit', command: true }],
+  find: [{ key: 'F', command: true }],
   sidebar: [{ key: 'B', command: true }],
   guide: [{ key: '?', shift: 'any' }],
   // Inside the palette, where its list handles them
@@ -108,8 +124,16 @@ export function digitOf(event: Pick<KeyboardEvent, 'code'>) {
 
 function matchesChord(event: ShortcutEvent, chord: Chord, mac: boolean) {
   const expected = mac
-    ? { metaKey: !!chord.command, ctrlKey: !!chord.workspace, altKey: !!chord.option }
-    : { metaKey: false, ctrlKey: !!chord.command, altKey: !!(chord.workspace || chord.option) }
+    ? {
+        metaKey: !!chord.command,
+        ctrlKey: !!(chord.workspace || chord.control),
+        altKey: !!chord.option,
+      }
+    : {
+        metaKey: false,
+        ctrlKey: !!(chord.command || chord.control),
+        altKey: !!(chord.workspace || chord.option),
+      }
   if (
     event.metaKey !== expected.metaKey ||
     event.ctrlKey !== expected.ctrlKey ||
@@ -146,6 +170,7 @@ const KEY_LABELS: Record<string, string> = {
   Escape: 'Esc',
   Backspace: '⌫',
   Delete: '⌦',
+  Tab: '⇥',
   digit: '1–9',
 }
 
@@ -154,12 +179,12 @@ export function shortcutKeys(id: ShortcutId, mac = isMacPlatform()) {
   const chord: Chord = SHORTCUTS[id][0]
   const keys: string[] = []
   if (mac) {
-    if (chord.workspace) keys.push('⌃')
+    if (chord.workspace || chord.control) keys.push('⌃')
     if (chord.option) keys.push('⌥')
     if (chord.shift === true) keys.push('⇧')
     if (chord.command) keys.push('⌘')
   } else {
-    if (chord.command) keys.push('Ctrl')
+    if (chord.command || chord.control) keys.push('Ctrl')
     if (chord.workspace || chord.option) keys.push('Alt')
     if (chord.shift === true) keys.push('⇧')
   }
@@ -187,6 +212,12 @@ export const SHORTCUT_SECTIONS: ShortcutSection[] = [
       { label: 'shortcutGuide.newTab', shortcuts: ['newTab'] },
       { label: 'shortcutGuide.closeTab', shortcuts: ['closeTab'] },
       { label: 'shortcutGuide.previousNext', shortcuts: ['previousTab', 'nextTab'] },
+      ...(IS_DESKTOP
+        ? [
+            { label: 'shortcutGuide.goToTab', shortcuts: ['goToTab'] as ShortcutId[] },
+            { label: 'shortcutGuide.find', shortcuts: ['find'] as ShortcutId[] },
+          ]
+        : []),
       { label: 'hotkeys.recentTabs', shortcuts: ['recentTabs'] },
       { label: 'shortcutGuide.sidebar', shortcuts: ['sidebar'] },
       { label: 'shortcutGuide.guide', shortcuts: ['guide'] },

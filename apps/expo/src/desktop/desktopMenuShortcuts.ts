@@ -4,6 +4,9 @@ import { SHORTCUTS, type ShortcutId, isMacPlatform } from '~features/keyboard-sh
 export const MENU_SHORTCUTS = [
   'newTab',
   'closeTab',
+  'previousTab',
+  'nextTab',
+  'find',
   'palette',
   'sidebar',
   'previousChapter',
@@ -40,16 +43,26 @@ export const shortcutKeyboardEvent = (id: MenuShortcut, mac = isMacPlatform()): 
   })
 }
 
+/** The workspace's own actions, which its listener ignores from a field. */
+const PAGE_ACTIONS: readonly MenuShortcut[] = [
+  'newTab',
+  'closeTab',
+  'previousTab',
+  'nextTab',
+  'find',
+]
+
 /**
- * Where the key press goes. A chord with ⌘ or the workspace modifier works from a field, so it
- * goes where the focus is. A bare key acts on the Bible only outside a field: a menu item chosen
- * while a field has the focus still means the Bible, so its key press goes to the page.
+ * Where the key press goes. A bare key acts on the Bible only outside a field, and the tabs and
+ * the search are the workspace's: a menu item chosen while a field has the focus still means
+ * them, so their key press goes to the page. The other chords go where the focus is, where an
+ * editor may take them (⌘B, ⌘K).
  */
 export const menuShortcutTarget = (id: MenuShortcut, doc: Document = document): EventTarget => {
   const [chord] = SHORTCUTS[id]
   const modified =
     ('command' in chord && !!chord.command) || ('workspace' in chord && !!chord.workspace)
-  return modified ? (doc.activeElement ?? doc.body) : doc.body
+  return modified && !PAGE_ACTIONS.includes(id) ? (doc.activeElement ?? doc.body) : doc.body
 }
 
 export const runMenuShortcut = (id: MenuShortcut) => {

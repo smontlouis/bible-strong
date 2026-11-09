@@ -2657,6 +2657,8 @@
   "shortcutGuide.newTab": "Create a tab",
   "shortcutGuide.closeTab": "Close the active tab",
   "shortcutGuide.previousNext": "Previous / next tab",
+  "shortcutGuide.goToTab": "Go to tab 1 to 9 (9: the last)",
+  "shortcutGuide.find": "Open the search",
   "shortcutGuide.sidebar": "Show or hide the sidebar",
   "shortcutGuide.recentHint": "Hold {{modifier}} and press Q to move forward, or Shift + Q to go back. ↑ / ↓ also navigate. Release {{modifier}} or press Enter to open; Escape cancels.",
   "shortcutGuide.bible": "Inside a Bible tab",

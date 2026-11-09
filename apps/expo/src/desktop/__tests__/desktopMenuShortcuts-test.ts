@@ -13,9 +13,15 @@ describe('the menu runs workspace shortcuts', () => {
     expect(MENU_SHORTCUTS).toContain('newTab')
   })
 
-  it('sends a chord with a modifier where the focus is', () => {
-    expect(menuShortcutTarget('newTab', doc)).toBe(field)
+  it('sends a chord with a modifier where the focus is, where an editor may take it', () => {
     expect(menuShortcutTarget('palette', doc)).toBe(field)
+    expect(menuShortcutTarget('sidebar', doc)).toBe(field)
+  })
+
+  it('sends the tabs and the search to the page, which ignores them from a field', () => {
+    for (const id of ['newTab', 'closeTab', 'previousTab', 'nextTab', 'find'] as const) {
+      expect(menuShortcutTarget(id, doc)).toBe(body)
+    }
   })
 
   it('sends a bare key to the page, so a focused field does not swallow it', () => {
