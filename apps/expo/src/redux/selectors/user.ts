@@ -1,6 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { RootState } from '~redux/modules/reducer'
 import type { CurrentTheme } from '~common/types'
+import { getThemePalette } from '~themes/themePalette'
 
 // Base selectors
 const selectUser = (state: RootState) => state.user
@@ -42,11 +43,14 @@ export const selectThemePreferences = createSelector([selectBibleSettings], sett
   preferredDarkTheme: settings.preferredDarkTheme,
 }))
 
-// Selector factory for colors by current theme
+// Selector factory for the current theme's palette, with the reader's highlight colours
 export const makeColorsSelector = () =>
   createSelector(
-    [selectBibleSettings, (_: RootState, currentTheme: CurrentTheme) => currentTheme],
-    (settings, currentTheme) => settings.colors[currentTheme]
+    [
+      (state: RootState) => state.user.bible.settings.colors,
+      (_: RootState, currentTheme: CurrentTheme) => currentTheme,
+    ],
+    (colors, currentTheme) => getThemePalette(currentTheme, colors)
   )
 
 // Selector for highlights (used in HighlightsScreen)

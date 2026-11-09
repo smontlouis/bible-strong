@@ -1,7 +1,7 @@
 import { styled } from 'goober'
 import truncate from './truncate'
 import { scaleFontSize } from './scaleFontSize'
-import { RootState } from '~redux/modules/reducer'
+import type { BibleReaderSettings } from '../bibleReaderSettings'
 import { LinkedVerse, RootStyles } from './BibleDOMWrapper'
 import { getLinkTypeIconComponent, getLinkTypeColor } from './LinkIcons'
 import { InlineItemContainer, InlineItemIconWrapper, InlineItemText } from './InlineItem'
@@ -19,7 +19,7 @@ const LinkTypeIndicator = styled('span')<RootStyles>(({ settings: { fontSizeScal
 
 interface Props {
   linksText: LinkedVerse[]
-  settings: RootState['user']['bible']['settings']
+  settings: BibleReaderSettings
   onClick: (x: string) => void
   isParallel?: boolean
   isDisabled?: boolean

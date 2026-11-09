@@ -1,6 +1,6 @@
 import { createAction } from '@reduxjs/toolkit'
 import { PreferredColorScheme, PreferredDarkTheme, PreferredLightTheme } from '~common/types'
-import defaultColors from '~themes/colors'
+import type { DefaultColorKey } from '~helpers/constants'
 import { HighlightType } from '../user'
 import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
 
@@ -109,7 +109,7 @@ export const setSettingsPress = createAction(SET_SETTINGS_PRESS, (payload: strin
 
 export const changeColor = createAction(
   CHANGE_COLOR,
-  ({ name, color }: { name: keyof typeof defaultColors; color?: string }) => ({
+  ({ name, color }: { name: DefaultColorKey; color?: string }) => ({
     payload: { name, color },
   })
 )

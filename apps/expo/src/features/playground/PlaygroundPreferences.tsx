@@ -21,7 +21,7 @@ export const PLAYGROUND_THEME_OPTIONS: readonly PlaygroundThemeOption[] = [
   { id: 'dark', labelKey: 'Sombre' },
   { id: 'black', labelKey: 'Noir' },
   { id: 'mauve', labelKey: 'Mauve' },
-  { id: 'night', labelKey: 'Bleu nuit' },
+  { id: 'night', labelKey: 'Forêt' },
 ]
 
 type PlaygroundPreferencesProps = {

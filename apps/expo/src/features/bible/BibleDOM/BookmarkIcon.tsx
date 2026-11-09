@@ -1,6 +1,6 @@
 import { styled } from 'goober'
 import { RootStyles } from './BibleDOMWrapper'
-import { RootState } from '~redux/modules/reducer'
+import type { BibleReaderSettings } from '../bibleReaderSettings'
 import { SvgProps } from 'react-native-svg'
 import { getDisabledStyles } from './disabledStyles'
 
@@ -26,7 +26,7 @@ const Div = styled<RootStyles & { onClick?: () => void; isDisabled?: boolean }>(
 
 interface Props {
   color: string
-  settings: RootState['user']['bible']['settings']
+  settings: BibleReaderSettings
   onClick?: () => void
   isDisabled?: boolean
 }

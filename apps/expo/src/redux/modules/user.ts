@@ -7,6 +7,7 @@ import { Appearance } from 'react-native'
 import {
   BookmarksObj,
   ChangelogItem,
+  CurrentTheme,
   OngoingPlan,
   PreferredColorScheme,
   PreferredDarkTheme,
@@ -26,14 +27,11 @@ import {
 import { getLanguage } from '~i18n'
 import { TabGroup, tabGroupsAtom } from '~state/tabs'
 import { migrateLegacyPersistedValue } from '../../migrations/legacyPersistedReferences'
-import blackColors from '~themes/blackColors'
-import defaultColors from '~themes/colors'
-import darkColors from '~themes/darkColors'
-import mauveColors from '~themes/mauveColors'
-import natureColors from '~themes/natureColors'
-import nightColors from '~themes/nightColors'
-import sepiaColors from '~themes/sepiaColors'
-import sunsetColors from '~themes/sunsetColors'
+import {
+  getThemePalette,
+  pickStoredThemeColors,
+  type StoredThemeColors,
+} from '~themes/themePalette'
 import type { RootState } from '../store'
 import { COMPARE_SELECTION_VERSION, normalizeCompareSelection } from '../compareSelectionMigration'
 
@@ -128,9 +126,6 @@ import { getDatabaseUpdate, getVersionUpdate, setVersionUpdated } from './user/v
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const deepmerge = require('@fastify/deepmerge')()
-
-// Type for color keys (used for dynamic theme color access)
-type ColorKeys = keyof typeof defaultColors
 
 type CleanedFirestoreData =
   | string
@@ -578,16 +573,8 @@ export interface UserState {
       theme: PreferredLightTheme | PreferredDarkTheme
       // Dynamically provided for bible webview in BibleTabScreen
       fontFamily: string
-      colors: {
-        default: typeof defaultColors
-        dark: typeof darkColors
-        black: typeof blackColors
-        sepia: typeof sepiaColors
-        nature: typeof natureColors
-        sunset: typeof sunsetColors
-        mauve: typeof mauveColors
-        night: typeof nightColors
-      }
+      /** The default highlight colours repainted per theme; the palettes themselves live in code. */
+      colors: StoredThemeColors
       compare: {
         [x: string]: boolean
       }
@@ -680,16 +667,7 @@ const getInitialState = (): UserState => ({
       },
       fontFamily: 'Literata Book',
       theme: 'default',
-      colors: {
-        default: defaultColors,
-        dark: darkColors,
-        black: blackColors,
-        sepia: sepiaColors,
-        nature: natureColors,
-        sunset: sunsetColors,
-        mauve: mauveColors,
-        night: nightColors,
-      },
+      colors: {},
       compare: {},
       compareSelectionVersion: COMPARE_SELECTION_VERSION,
       customHighlightColors: [],
@@ -785,6 +763,7 @@ const userSlice = createSlice({
       // Clean corrupted data before merging (removes {_type: 'delete'} objects)
       const cleanedBible = cleanCorruptedFirestoreData(bible || {})
       state.bible = deepmerge(getInitialState().bible, cleanedBible)
+      state.bible.settings.colors = pickStoredThemeColors(state.bible.settings.colors)
       Object.assign(state.bible.settings, normalizeCompareSelection(bible?.settings))
       state.bible.settings.commentarySelection = normalizeCommentarySelection(
         bible?.settings?.commentarySelection ?? currentCommentarySelection
@@ -988,6 +967,7 @@ const userSlice = createSlice({
       const cleanedBible = cleanCorruptedFirestoreData(bible || {})
       const importedBible = cleanedBible as Partial<UserState['bible']>
       state.bible = deepmerge(getInitialState().bible, cleanedBible)
+      state.bible.settings.colors = pickStoredThemeColors(state.bible.settings.colors)
       Object.assign(state.bible.settings, normalizeCompareSelection(importedBible.settings))
       state.bible.relations = normalizeImportedRelations(importedBible, state.bible.relations)
       state.bible.relationIndex = rebuildRelationIndexes(state.bible.relations)
@@ -1403,28 +1383,13 @@ const userSlice = createSlice({
         return preferredLightTheme
       })()
 
-      type ThemeKey = keyof typeof state.bible.settings.colors
-      const colorName = action.payload.name as ColorKeys
-      const themeColors = state.bible.settings.colors[currentTheme as ThemeKey]
+      const colorName = action.payload.name
+      const theme = currentTheme as CurrentTheme
+      const storedColors = (state.bible.settings.colors ??= {})
+      const themeColors = (storedColors[theme] ??= {})
 
-      const getColorValue = (): string => {
-        if (action.payload.color) {
-          return action.payload.color as string
-        }
-        const themeColorMaps: Record<string, typeof defaultColors> = {
-          black: blackColors,
-          mauve: mauveColors,
-          nature: natureColors,
-          night: nightColors,
-          sepia: sepiaColors,
-          sunset: sunsetColors,
-          dark: darkColors,
-          default: defaultColors,
-        }
-        return themeColorMaps[currentTheme]?.[colorName] ?? defaultColors[colorName]
-      }
-
-      themeColors[colorName] = getColorValue()
+      // A reset writes the theme's default rather than deleting it, so that the sync carries it.
+      themeColors[colorName] = action.payload.color || getThemePalette(theme)[colorName]
     })
     builder.addCase(toggleSettingsShareVerseNumbers, state => {
       state.bible.settings.shareVerses.hasVerseNumbers =

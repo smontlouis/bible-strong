@@ -20,7 +20,7 @@ import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import IconTile from '~common/ui/IconTile'
 import Text from '~common/ui/Text'
-import { MAX_CUSTOM_COLORS } from '~helpers/constants'
+import { MAX_CUSTOM_COLORS, type DefaultColorKey } from '~helpers/constants'
 import { EMPTY_OBJECT } from '~helpers/emptyReferences'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { useHighlightColors } from '~helpers/useHighlightColors'
@@ -39,10 +39,9 @@ import {
 } from '~redux/modules/user'
 import { removeWordAnnotation } from '~redux/modules/user/wordAnnotations'
 import { colorPickerModalAtom } from '~state/app'
-import defaultColors from '~themes/colors'
 import getTheme from '~themes/index'
 
-type ColorKey = keyof typeof defaultColors
+type ColorKey = DefaultColorKey
 
 const ColorRow = (
   componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {

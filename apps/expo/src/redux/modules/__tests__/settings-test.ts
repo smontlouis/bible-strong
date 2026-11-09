@@ -79,7 +79,7 @@ jest.mock('~helpers/languageUtils', () => ({
 }))
 
 // Mock theme imports
-jest.mock('~themes/colors', () => ({ primary: '#000', secondary: '#111' }))
+jest.mock('~themes/colors', () => ({ primary: '#000', secondary: '#111', color1: '#c1c1c1' }))
 jest.mock('~themes/darkColors', () => ({ primary: '#222', secondary: '#333' }))
 jest.mock('~themes/blackColors', () => ({ primary: '#444', secondary: '#555' }))
 jest.mock('~themes/sepiaColors', () => ({ primary: '#666', secondary: '#777' }))
@@ -143,16 +143,7 @@ const getInitialState = (): UserState =>
         },
         fontFamily: 'Avenir',
         theme: 'default' as const,
-        colors: {
-          default: { primary: '#000', secondary: '#111' },
-          dark: { primary: '#222', secondary: '#333' },
-          black: { primary: '#444', secondary: '#555' },
-          sepia: { primary: '#666', secondary: '#777' },
-          nature: { primary: '#888', secondary: '#999' },
-          sunset: { primary: '#aaa', secondary: '#bbb' },
-          mauve: { primary: '#ccc', secondary: '#ddd' },
-          night: { primary: '#eee', secondary: '#fff' },
-        },
+        colors: {},
         compare: { LSG: true },
         customHighlightColors: [],
       },
@@ -522,20 +513,15 @@ describe('Settings Reducer', () => {
   })
 
   describe('changeColor', () => {
-    it('should change color with provided color value', () => {
-      const newState = userReducer(initialState, changeColor({ name: 'primary', color: '#ff0000' }))
-      expect(newState.bible.settings.colors.default.primary).toBe('#ff0000')
+    it('stores a repainted highlight colour for the current theme only', () => {
+      const newState = userReducer(initialState, changeColor({ name: 'color1', color: '#ff0000' }))
+      expect(newState.bible.settings.colors).toEqual({ default: { color1: '#ff0000' } })
     })
 
-    it('should reset color to default when no color provided', () => {
-      const state = createState({
-        colors: {
-          ...getInitialState().bible.settings.colors,
-          default: { ...getInitialState().bible.settings.colors.default, primary: '#ff0000' },
-        },
-      })
-      const newState = userReducer(state, changeColor({ name: 'primary' }))
-      expect(newState.bible.settings.colors.default.primary).toBe('#000')
+    it("resets a highlight colour to the theme's default, which the sync then carries", () => {
+      const state = createState({ colors: { default: { color1: '#ff0000' } } })
+      const newState = userReducer(state, changeColor({ name: 'color1' }))
+      expect(newState.bible.settings.colors.default?.color1).toBe('#c1c1c1')
     })
   })
 

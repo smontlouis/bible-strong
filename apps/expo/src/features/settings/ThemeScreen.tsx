@@ -11,6 +11,7 @@ import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
 import { useParamsModalLabels } from '~features/bible/BibleParamsModal'
 import TouchableIcon from '~features/bible/TouchableIcon'
+import getTheme from '~themes/index'
 import { RootState } from '~redux/modules/reducer'
 import {
   setSettingsPreferredColorScheme,
@@ -143,7 +144,11 @@ const ThemeScreen = () => {
               onPress={() => dispatch(setSettingsPreferredDarkTheme('dark'))}
               style={{ width: 40, height: 40 }}
             >
-              <Circle isSelected={preferredDarkTheme === 'dark'} size={28} color="rgb(18,45,66)" />
+              <Circle
+                isSelected={preferredDarkTheme === 'dark'}
+                size={28}
+                color={getTheme.dark.colors.reverse}
+              />
             </LinkBox>
             <LinkBox
               accessibilityLabel={preferredDarkThemeToString.black}
@@ -161,7 +166,11 @@ const ThemeScreen = () => {
               onPress={() => dispatch(setSettingsPreferredDarkTheme('mauve'))}
               style={{ width: 40, height: 40 }}
             >
-              <Circle isSelected={preferredDarkTheme === 'mauve'} size={28} color="rgb(51,4,46)" />
+              <Circle
+                isSelected={preferredDarkTheme === 'mauve'}
+                size={28}
+                color={getTheme.mauve.colors.reverse}
+              />
             </LinkBox>
             <LinkBox
               accessibilityLabel={preferredDarkThemeToString.night}
@@ -170,7 +179,11 @@ const ThemeScreen = () => {
               onPress={() => dispatch(setSettingsPreferredDarkTheme('night'))}
               style={{ width: 40, height: 40 }}
             >
-              <Circle isSelected={preferredDarkTheme === 'night'} size={28} color="rgb(0,50,100)" />
+              <Circle
+                isSelected={preferredDarkTheme === 'night'}
+                size={28}
+                color={getTheme.night.colors.reverse}
+              />
             </LinkBox>
           </ChoiceRow>
         </ListSection>

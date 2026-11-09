@@ -56,6 +56,7 @@
   --resource-cta: #3f63cf;
   --resource-cta-ink: #f9fbff;
   --resource-mark: #fff1b8;
+  --resource-words-of-jesus: #cc0000;
   --resource-chip-shadow: rgb(0 0 0 / 16%);
   /* The header controls are shared with the landing page and read its tokens. */
   --landing-canvas: var(--resource-canvas);
@@ -93,6 +94,7 @@
     --resource-cta: #7e9cf2;
     --resource-cta-ink: #0e1521;
     --resource-mark: #5b4a12;
+    --resource-words-of-jesus: #ff6b6b;
     --resource-chip-shadow: rgb(255 255 255 / 12%);
   }
 }
@@ -110,6 +112,7 @@
   --resource-cta: #7e9cf2;
   --resource-cta-ink: #0e1521;
   --resource-mark: #5b4a12;
+  --resource-words-of-jesus: #ff6b6b;
   --resource-chip-shadow: rgb(255 255 255 / 12%);
 }
 
@@ -304,9 +307,9 @@ a.resource-chip:hover {
   color: var(--resource-accent-ink);
 }
 
-/* Words of Jesus, as in red-letter editions. */
+/* Words of Jesus, as in red-letter editions, in the red of the app's reader. */
 .bible-text .bible-wj {
-  color: color-mix(in srgb, #d33a3a 78%, var(--resource-ink));
+  color: var(--resource-words-of-jesus);
 }
 
 /* Strong numbers printed after their word, as in the study workspace. */

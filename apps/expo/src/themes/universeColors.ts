@@ -5,8 +5,8 @@ import { colorWithOpacity } from './colorValues'
  * Visual identity of each universe. State colors (selected/disabled) stay with the control.
  *
  * What the reader makes (highlights, bookmarks, notes, studies, links, tags) keeps the same
- * color in every theme where a theme token would collide: `primary` turns teal in the dark
- * themes, like links, and `quint` turns pink.
+ * color in every theme where a theme token would collide: `primary` follows each theme's
+ * accent (teal in Mauve, green in Forêt), and `quint` turns pink in the dark themes.
  */
 export const universeColors = {
   bible: 'tertiary',

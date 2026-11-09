@@ -5,7 +5,7 @@ import { personalContentIcons } from '~common/personalContent'
 import { resolveUniverseColors } from '~themes/universeColors'
 import { scaleFontSize } from './scaleFontSize'
 import { RootStyles, TaggedVerse } from './BibleDOMWrapper'
-import { RootState } from '~redux/modules/reducer'
+import type { BibleReaderSettings } from '../bibleReaderSettings'
 import { useReaderIntent } from './useReaderIntent'
 import { InlineItemContainer, InlineItemIconWrapper } from './InlineItem'
 import { noSelect } from './utils'
@@ -65,7 +65,7 @@ const ExpandButton = styled('div')<RootStyles>(
 )
 
 interface Props {
-  settings: RootState['user']['bible']['settings']
+  settings: BibleReaderSettings
   tag: TaggedVerse
   isDisabled?: boolean
   onOpenTags?: () => void

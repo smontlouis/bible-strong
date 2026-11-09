@@ -3,7 +3,7 @@ import { resolveUniverseColors } from '~themes/universeColors'
 import Feather from '@expo/vector-icons/Feather'
 import { useState } from 'react'
 import { styled } from 'goober'
-import { RootState } from '~redux/modules/reducer'
+import type { BibleReaderSettings } from '../bibleReaderSettings'
 import { RootStyles, VerseRelationItem } from './BibleDOMWrapper'
 import { InlineItemContainer } from './InlineItem'
 import truncate from './truncate'
@@ -24,7 +24,7 @@ const resolveSvgAssetUri = (source: SvgAsset): string =>
 
 interface Props {
   relationItems: VerseRelationItem[]
-  settings: RootState['user']['bible']['settings']
+  settings: BibleReaderSettings
   /** The verse the items stand beside: a Relation whose target is gone falls back on it. */
   verseKey: string
   isDisabled?: boolean

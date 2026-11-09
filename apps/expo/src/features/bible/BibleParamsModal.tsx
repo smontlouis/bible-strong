@@ -44,6 +44,7 @@ import {
 } from '~redux/modules/user'
 import { colorPickerModalAtom } from '~state/app'
 import TouchableIcon from './TouchableIcon'
+import getTheme from '~themes/index'
 import TouchableSvgIcon from './TouchableSvgIcon'
 
 export const HalfContainer = (
@@ -127,7 +128,7 @@ export const useParamsModalLabels = () => {
     dark: t('Sombre'),
     black: t('Noir'),
     mauve: t('Mauve'),
-    night: t('Bleu nuit'),
+    night: t('Forêt'),
   }
 
   const pressToString = {
@@ -328,7 +329,11 @@ const BibleParamsModal = ({
               onPress={() => dispatch(setSettingsPreferredDarkTheme('dark'))}
               style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
             >
-              <Circle isSelected={preferredDarkTheme === 'dark'} size={20} color="rgb(18,45,66)" />
+              <Circle
+                isSelected={preferredDarkTheme === 'dark'}
+                size={20}
+                color={getTheme.dark.colors.reverse}
+              />
             </LinkBox>
             <LinkBox
               accessibilityLabel={preferredDarkThemeToString.black}
@@ -346,7 +351,11 @@ const BibleParamsModal = ({
               onPress={() => dispatch(setSettingsPreferredDarkTheme('mauve'))}
               style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
             >
-              <Circle isSelected={preferredDarkTheme === 'mauve'} size={20} color="rgb(51,4,46)" />
+              <Circle
+                isSelected={preferredDarkTheme === 'mauve'}
+                size={20}
+                color={getTheme.mauve.colors.reverse}
+              />
             </LinkBox>
             <LinkBox
               accessibilityLabel={preferredDarkThemeToString.night}
@@ -355,7 +364,11 @@ const BibleParamsModal = ({
               onPress={() => dispatch(setSettingsPreferredDarkTheme('night'))}
               style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
             >
-              <Circle isSelected={preferredDarkTheme === 'night'} size={20} color="rgb(0,50,100)" />
+              <Circle
+                isSelected={preferredDarkTheme === 'night'}
+                size={20}
+                color={getTheme.night.colors.reverse}
+              />
             </LinkBox>
           </HalfContainer>
           <HalfContainer border>

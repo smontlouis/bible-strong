@@ -186,7 +186,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         dark: {
           image: './assets/images/splash-dark.png',
           imageWidth: 200,
-          backgroundColor: '#0F2132',
+          // The canvas of the « Sombre » theme; splash-dark.png carries the same ground.
+          backgroundColor: '#0e1521',
         },
       },
     ],

@@ -171,4 +171,25 @@ describe('redux migrations', () => {
 
     expect(migrated.user.bible.settings.commentarySelection).toEqual(['acbc:fr', 'barnes:fr'])
   })
+
+  it('keeps only the repainted highlight colours of each stored palette', () => {
+    const state = createLegacyState() as any
+    state.user.bible.settings = {
+      theme: 'dark',
+      colors: {
+        default: { primary: '#000', reverse: '#fff', color1: '#abc', color2: '#def' },
+        dark: { canvas: 'rgb(18,45,66)', primary: 'rgb(14,211,185)', color3: '#123' },
+        night: { reverse: 'rgb(0,50,100)' },
+        unknownTheme: { color1: '#999' },
+      },
+    }
+
+    const migrated = migrations[39](state)
+
+    expect(migrated.user.bible.settings.colors).toEqual({
+      default: { color1: '#abc', color2: '#def' },
+      dark: { color3: '#123' },
+    })
+    expect(migrated.user.bible.settings.theme).toBe('dark')
+  })
 })

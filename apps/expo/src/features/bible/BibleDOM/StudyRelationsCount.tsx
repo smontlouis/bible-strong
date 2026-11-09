@@ -1,6 +1,6 @@
 import Feather from '@expo/vector-icons/Feather'
 import { styled } from 'goober'
-import { RootState } from '~redux/modules/reducer'
+import type { BibleReaderSettings } from '../bibleReaderSettings'
 import { RootStyles } from './BibleDOMWrapper'
 import { getDisabledStyles } from './disabledStyles'
 import { referenceHalo } from './referenceHalo'
@@ -42,7 +42,7 @@ const Count = styled<RootStyles>('div')(({ settings: { theme, colors } }) => ({
 
 interface Props {
   count: number
-  settings: RootState['user']['bible']['settings']
+  settings: BibleReaderSettings
   onClick: () => void
   isDisabled?: boolean
 }

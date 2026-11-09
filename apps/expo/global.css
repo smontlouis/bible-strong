@@ -10,19 +10,19 @@
 @layer theme {
   :root {
     @variant light {
-      --color-default: rgb(0,0,0);
-      --color-opacity5: rgba(0,0,0,0.05);
+      --color-default: #101b35;
+      --color-opacity5: rgba(16,27,53,0.05);
       --color-reverse: rgb(255,255,255);
-      --color-border: rgb(230,230,230);
+      --color-border: #e1e5ee;
       --color-light-grey: #F4F7FF;
       --color-canvas: #F4F7FF;
       --color-surface: rgb(255,255,255);
       --color-surface-raised: rgb(255,255,255);
       --color-separator: rgba(16,27,53,0.14);
-      --color-grey: rgb(78,79,79);
-      --color-dark-grey: rgba(0,0,0,0.5);
+      --color-grey: #58657a;
+      --color-dark-grey: rgba(16,27,53,0.5);
       --color-primary: rgb(89,131,240);
-      --color-light-primary: rgb(233, 243, 252);
+      --color-light-primary: #e6edff;
       --color-link: #3f63cf;
       --color-secondary: rgb(255,188,0);
       --color-light-secondary: rgb(255, 238, 198);
@@ -36,22 +36,22 @@
       --color-color4: #74b9ff;
       --color-color5: #95afc0;
       --color-background: rgb(255,255,255);
-      --color-foreground: rgb(0,0,0);
+      --color-foreground: #101b35;
     }
     @variant default {
-      --color-default: rgb(0,0,0);
-      --color-opacity5: rgba(0,0,0,0.05);
+      --color-default: #101b35;
+      --color-opacity5: rgba(16,27,53,0.05);
       --color-reverse: rgb(255,255,255);
-      --color-border: rgb(230,230,230);
+      --color-border: #e1e5ee;
       --color-light-grey: #F4F7FF;
       --color-canvas: #F4F7FF;
       --color-surface: rgb(255,255,255);
       --color-surface-raised: rgb(255,255,255);
       --color-separator: rgba(16,27,53,0.14);
-      --color-grey: rgb(78,79,79);
-      --color-dark-grey: rgba(0,0,0,0.5);
+      --color-grey: #58657a;
+      --color-dark-grey: rgba(16,27,53,0.5);
       --color-primary: rgb(89,131,240);
-      --color-light-primary: rgb(233, 243, 252);
+      --color-light-primary: #e6edff;
       --color-link: #3f63cf;
       --color-secondary: rgb(255,188,0);
       --color-light-secondary: rgb(255, 238, 198);
@@ -65,23 +65,23 @@
       --color-color4: #74b9ff;
       --color-color5: #95afc0;
       --color-background: rgb(255,255,255);
-      --color-foreground: rgb(0,0,0);
+      --color-foreground: #101b35;
     }
     @variant dark {
-      --color-default: rgb(200,200,200);
-      --color-opacity5: rgba(200,200,200,0.05);
-      --color-reverse: rgb(18,45,66);
-      --color-border: #253e51;
-      --color-light-grey: rgb(30, 61, 82);
-      --color-canvas: rgb(18,45,66);
-      --color-surface: rgb(30,61,82);
-      --color-surface-raised: rgb(38,72,96);
-      --color-separator: rgba(255,255,255,0.12);
-      --color-grey: rgb(150,150,150);
-      --color-dark-grey: rgba(255, 255, 255, 0.5);
-      --color-primary: rgb(14,211,185);
-      --color-light-primary: rgba(14, 211, 185, 0.5);
-      --color-link: rgb(14,211,185);
+      --color-default: #d6deeb;
+      --color-opacity5: rgba(214,222,235,0.05);
+      --color-reverse: #0e1521;
+      --color-border: #273041;
+      --color-light-grey: #172235;
+      --color-canvas: #0e1521;
+      --color-surface: #172235;
+      --color-surface-raised: #1e2b42;
+      --color-separator: rgba(170,192,232,0.16);
+      --color-grey: #abb7c9;
+      --color-dark-grey: rgba(214,222,235,0.5);
+      --color-primary: rgb(89,131,240);
+      --color-light-primary: #17294c;
+      --color-link: #7e9cf2;
       --color-secondary: rgb(255,188,0);
       --color-light-secondary: rgba(255,188,0, 0.15);
       --color-tertiary: rgb(166,190,204);
@@ -93,8 +93,8 @@
       --color-color3: #fdcb6e;
       --color-color4: #74b9ff;
       --color-color5: #9b59b6;
-      --color-background: rgb(18,45,66);
-      --color-foreground: rgb(200,200,200);
+      --color-background: #0e1521;
+      --color-foreground: #d6deeb;
     }
     @variant sepia {
       --color-default: rgb(72,54,35);
@@ -242,23 +242,23 @@
       --color-foreground: rgb(228,194,225);
     }
     @variant night {
-      --color-default: rgb(198,225,255);
-      --color-opacity5: rgba(200,200,200,0.05);
-      --color-reverse: rgb(0,50,100);
-      --color-border: #164778;
-      --color-light-grey: rgb(17, 69, 120);
-      --color-canvas: rgb(0,50,100);
-      --color-surface: rgb(17,69,120);
-      --color-surface-raised: rgb(26,80,134);
-      --color-separator: rgba(255,255,255,0.12);
-      --color-grey: rgb(150,170,187);
-      --color-dark-grey: rgba(255, 255, 255, 0.5);
-      --color-primary: rgb(14,211,185);
-      --color-light-primary: rgba(14, 211, 185, 0.5);
-      --color-link: #23dabf;
-      --color-secondary: rgb(255,240,187);
-      --color-light-secondary: rgba(255,240,187, 0.3);
-      --color-tertiary: rgb(160,220,255);
+      --color-default: #d5e3da;
+      --color-opacity5: rgba(213,227,218,0.05);
+      --color-reverse: #0f1915;
+      --color-border: #28362f;
+      --color-light-grey: #18261f;
+      --color-canvas: #0f1915;
+      --color-surface: #18261f;
+      --color-surface-raised: #1f2f27;
+      --color-separator: rgba(180,215,195,0.15);
+      --color-grey: #a7b9ae;
+      --color-dark-grey: rgba(213,227,218,0.5);
+      --color-primary: #3f9a6b;
+      --color-light-primary: rgba(63,154,107,0.25);
+      --color-link: #7fd3a4;
+      --color-secondary: rgb(255,188,0);
+      --color-light-secondary: rgba(255,188,0, 0.15);
+      --color-tertiary: rgb(170,196,182);
       --color-quart: rgb(224,128,138);
       --color-quint: rgb(253, 121, 168);
       --color-success: #2ecc71;
@@ -267,8 +267,8 @@
       --color-color3: #fdcb6e;
       --color-color4: #74b9ff;
       --color-color5: #9b59b6;
-      --color-background: rgb(0,50,100);
-      --color-foreground: rgb(198,225,255);
+      --color-background: #0f1915;
+      --color-foreground: #d5e3da;
     }
   }
 }

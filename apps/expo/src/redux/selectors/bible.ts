@@ -13,7 +13,7 @@ import {
   Relation,
 } from '~redux/modules/user'
 import { WordAnnotation } from '~redux/modules/user/wordAnnotations'
-import { Tag, CurrentTheme, TagsObj } from '~common/types'
+import { Tag, TagsObj } from '~common/types'
 import { VersionCode } from '~state/tabs'
 import verseToReference from '~helpers/verseToReference'
 import { getNoteTitle } from '~helpers/getNoteTitle'
@@ -122,7 +122,6 @@ const selectNaves = (state: RootState) => state.user.bible.naves ?? {}
 const selectWords = (state: RootState) => state.user.bible.words ?? {}
 const selectStrongsGrec = (state: RootState) => state.user.bible.strongsGrec ?? {}
 const selectStrongsHebreu = (state: RootState) => state.user.bible.strongsHebreu ?? {}
-const selectColors = (state: RootState) => state.user.bible.settings?.colors ?? {}
 
 // Base selectors - exported for use by other selectors and components
 export const selectNotes = (state: RootState) => state.user.bible.notes ?? {}
@@ -517,13 +516,6 @@ export const makeSelectedVerseHighlightColorSelector = () =>
 
       return allSameColor ? firstColor : null
     }
-  )
-
-// Selector factory for colors by theme
-export const makeColorsByThemeSelector = () =>
-  createSelector(
-    [selectColors, (_: RootState, theme: CurrentTheme) => theme],
-    (colors, theme) => colors[theme]
   )
 
 // Selector factory for counting grouped highlights (by unique date) for a tag

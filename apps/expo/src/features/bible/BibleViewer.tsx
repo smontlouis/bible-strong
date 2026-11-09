@@ -81,6 +81,7 @@ import { chapterToReference } from '~helpers/chapterToReference'
 import { usePlanDayStep } from '~features/plans/usePlanDayStep'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { RootState } from '~redux/modules/reducer'
+import type { BibleReaderSettings } from './bibleReaderSettings'
 import {
   addHighlight,
   isContextualInformationDisplayEnabled,
@@ -211,7 +212,7 @@ const selectTaggedVersesInChapter = makeTaggedVersesInChapterSelector()
 
 interface BibleViewerProps {
   bibleAtom: PrimitiveAtom<BibleTab>
-  settings: RootState['user']['bible']['settings']
+  settings: BibleReaderSettings
   isFormSheet?: boolean
   isInTab?: boolean
   initialAnnotationId?: string

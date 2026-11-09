@@ -15,6 +15,7 @@ import {
 import type { WebViewProps } from './BibleDOM/BibleDOMWrapper'
 import { BibleDOMWrapper } from './BibleDOM/BibleDOMWrapper'
 import { sharedBibleDOMPaintAtom } from './sharedBibleDOMPaint'
+import { toBibleReaderSettings } from './bibleReaderSettings'
 import type { RootState } from '~redux/modules/reducer'
 
 export const getBibleDOMDestination = (tabId: string) => `bible-dom-${tabId}`
@@ -41,7 +42,13 @@ const SharedBibleDOM = () => {
   const bibleDOMHostLayouts = useAtomValue(bibleDOMHostLayoutsAtom)
   const sharedProps = useAtomValue(sharedBibleDOMPropsAtom)
   const bibleDomRemountSignal = useAtomValue(bibleDomRemountSignalAtom)
-  const settings = useSelector((state: RootState) => state.user.bible.settings)
+  const storedSettings = useSelector((state: RootState) => state.user.bible.settings)
+  // The warm-up page has no reader yet: it takes the stored theme until a viewer pushes its own.
+  const settings = toBibleReaderSettings(
+    storedSettings,
+    storedSettings.theme,
+    storedSettings.fontFamily
+  )
   const setPaint = useSetAtom(sharedBibleDOMPaintAtom)
 
   const activeProps =

@@ -48,9 +48,9 @@ describe('the window ground follows the theme', () => {
     })
     expect(mockSet).toHaveBeenCalledWith(
       APPEARANCE_KEY,
-      JSON.stringify({ background: 'rgb(18,45,66)', scheme: 'dark' })
+      JSON.stringify({ background: '#0e1521', scheme: 'dark' })
     )
-    expect(mockInvoke).toHaveBeenCalledWith('window_set_background', { color: 'rgb(18,45,66)' })
+    expect(mockInvoke).toHaveBeenCalledWith('window_set_background', { color: '#0e1521' })
   })
 
   it('follows a change to a light theme', () => {

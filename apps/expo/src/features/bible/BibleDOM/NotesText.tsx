@@ -1,7 +1,7 @@
 import { styled } from 'goober'
 import truncate from './truncate'
 import { scaleFontSize } from './scaleFontSize'
-import { RootState } from '~redux/modules/reducer'
+import type { BibleReaderSettings } from '../bibleReaderSettings'
 import { NotedVerse, RootStyles } from './BibleDOMWrapper'
 import Feather from '@expo/vector-icons/Feather'
 import { personalContentIcons } from '~common/personalContent'
@@ -10,7 +10,7 @@ import { InlineItemContainer, InlineItemIconWrapper, InlineItemText } from './In
 
 interface Props {
   notesText: NotedVerse[]
-  settings: RootState['user']['bible']['settings']
+  settings: BibleReaderSettings
   onClick: (note: NotedVerse) => void
   isDisabled?: boolean
 }

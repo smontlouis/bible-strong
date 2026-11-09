@@ -1,7 +1,7 @@
 import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 
-import type { RootState } from '~redux/modules/reducer'
+import type { BibleReaderSettings } from '../../bibleReaderSettings'
 import type { ReaderIntentMessage } from '../../readerIntent/types'
 import { ReaderIntentProvider } from '../useReaderIntent'
 import ReverseInterlinearVerse from '../ReverseInterlinearVerse'
@@ -24,7 +24,7 @@ const settings = {
   },
   fontFamily: 'Arial',
   fontSizeScale: 1,
-} as RootState['user']['bible']['settings']
+} as unknown as BibleReaderSettings
 
 describe('interlinear Strong selection context', () => {
   let consoleError: jest.SpiedFunction<typeof console.error>

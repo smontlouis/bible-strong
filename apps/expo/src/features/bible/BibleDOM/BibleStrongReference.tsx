@@ -3,7 +3,7 @@ import { styled } from 'goober'
 import { RootStyles } from './BibleDOMWrapper'
 import { useReaderIntent } from './useReaderIntent'
 import { SelectedCode } from '~common/types'
-import { RootState } from '~redux/modules/reducer'
+import type { BibleReaderSettings } from '../bibleReaderSettings'
 import { scaleFontSize } from './scaleFontSize'
 import { noSelect } from './utils'
 import { getDisabledStyles } from './disabledStyles'
@@ -90,7 +90,7 @@ export const BibleStrongRef = ({
   verse?: string | number
   isDisabled?: boolean
   selectedCode?: SelectedCode | null
-  settings: RootState['user']['bible']['settings']
+  settings: BibleReaderSettings
 }) => {
   const sendReaderIntent = useReaderIntent()
   const numericReferences = identities.flatMap(identity => {

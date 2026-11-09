@@ -6,8 +6,9 @@ highlights, bookmarks, notes, studies, links and tags.
 
 Change `universeColors` to recolor an identity across its consumers. Values are
 existing theme tokens, except the commentary brand color and three of the reader's
-contents (bookmarks, links, tags): `primary` turns teal in the dark themes and
-`quint` turns pink, so these keep fixed colors to stay apart in every theme. Do not
+contents (bookmarks, links, tags): `primary` follows each theme's accent (teal in
+Mauve, green in Forêt, pink in Nature) and `quint` turns pink in the dark themes, so
+these keep fixed colors to stay apart in every theme. Do not
 use a highlight slot (`color1`) to identify Bible passages: Bible uses neutral `tertiary`.
 
 | Reader's content                  | Color               | Icon (`~common/personalContent`) |

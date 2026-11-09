@@ -9,7 +9,7 @@ import BookmarkIcon from './BookmarkIcon'
 import RelationsCount from './RelationsCount'
 import RelationsText from './RelationsText'
 import TagsIndicator from './TagsIndicator'
-import { RootState } from '~redux/modules/reducer'
+import type { BibleReaderSettings } from '../bibleReaderSettings'
 import { useReaderIntent } from './useReaderIntent'
 import { Bookmark, SelectedCode, StudyNavigateBibleType, Verse as TVerse } from '~common/types'
 import { RootStyles, TaggedVerse, VerseRelationItem } from './BibleDOMWrapper'
@@ -152,7 +152,7 @@ const LoadingVerseText = styled('span')<RootStyles>(({ settings: { theme, colors
 
 const DARK_THEMES = new Set(['dark', 'black', 'mauve', 'night'])
 
-const getRedColor = (settings: RootState['user']['bible']['settings']): string => {
+const getRedColor = (settings: BibleReaderSettings): string => {
   return DARK_THEMES.has(settings.theme) ? '#FF6B6B' : '#CC0000'
 }
 
@@ -170,7 +170,7 @@ const getVerseText = ({
   version: string
   annotationMode: boolean
   selectedCode: SelectedCode | null
-  settings: RootState['user']['bible']['settings']
+  settings: BibleReaderSettings
   redWords?: Record<string, { start: number; end: number }[]> | null
   openCanonicalBibleNoteLabel: string
   onOpenCanonicalNote: (note: CanonicalBibleNote) => void
@@ -221,7 +221,7 @@ const renderCanonicalPresentation = (
     verse: string | number
     isDisabled: boolean
     selectedCode: SelectedCode | null
-    settings: RootState['user']['bible']['settings']
+    settings: BibleReaderSettings
     redColor: string
     openCanonicalBibleNoteLabel: string
     onOpenCanonicalNote: (note: CanonicalBibleNote) => void
@@ -360,7 +360,7 @@ const getNumberHighlight = ({
   highlightedColor?: HighlightColor
   hasWordAnnotations?: boolean
   isStrongModeVerse?: boolean
-  settings: RootState['user']['bible']['settings']
+  settings: BibleReaderSettings
 }): { show: boolean; bg?: string; color?: string } => {
   if (
     !highlightedColor ||
@@ -375,7 +375,7 @@ const getNumberHighlight = ({
 /** The colors of a verse number that carries the verse highlight. */
 export const getVerseNumberHighlight = (
   highlightedColor: HighlightColor,
-  settings: RootState['user']['bible']['settings']
+  settings: BibleReaderSettings
 ): { show: boolean; bg?: string; color?: string } => {
   const { theme, colors, customHighlightColors, defaultColorTypes } = settings
   const highlightInfo = resolveHighlightInfo(
@@ -404,7 +404,7 @@ export const getVerseNumberHighlight = (
 
 export interface VerseContentProps {
   verse: TVerse
-  settings: RootState['user']['bible']['settings']
+  settings: BibleReaderSettings
   isSelectionMode: StudyNavigateBibleType | undefined
   annotationMode?: boolean
   bookmark?: Bookmark
@@ -570,7 +570,7 @@ export const hasVerseEndContent = ({
 interface Props {
   verse: TVerse
   isSelectionMode: StudyNavigateBibleType | undefined
-  settings: RootState['user']['bible']['settings']
+  settings: BibleReaderSettings
   // Empty row of a version that omits this verse in parallel display
   isMissingVerse?: boolean
   // Parallel display: the version's chapter is still loading, the cell shows this text's shape

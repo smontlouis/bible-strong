@@ -2,7 +2,7 @@ import { useReaderIntent } from './useReaderIntent'
 import { scaleFontSize } from './scaleFontSize'
 import type { SelectedCode, Verse } from '~common/types'
 import { radii } from '~common/ui/surfaces'
-import type { RootState } from '~redux/modules/reducer'
+import type { BibleReaderSettings } from '../bibleReaderSettings'
 import { buildInterlinearVerseLayout } from '~helpers/interlinearVerseLayout'
 import { normalizeInterlinearMode, type InterlinearMode } from '~helpers/interlinearDisplayMode'
 import {
@@ -20,7 +20,7 @@ import UntranslatedStrongMarker from './UntranslatedStrongMarker'
 interface Props {
   verse: Verse
   version: string
-  settings: RootState['user']['bible']['settings']
+  settings: BibleReaderSettings
   isHebreu: boolean
   selectedCode?: SelectedCode | null
   mode?: InterlinearMode

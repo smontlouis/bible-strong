@@ -1,7 +1,7 @@
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 import type { SelectedCode, Verse } from '~common/types'
 import { radii } from '~common/ui/surfaces'
-import type { RootState } from '~redux/modules/reducer'
+import type { BibleReaderSettings } from '../bibleReaderSettings'
 import { buildTokenizedVerseLayout } from '~helpers/interlinearVerseLayout'
 import {
   getStrongReferenceNumber,
@@ -21,7 +21,7 @@ import UntranslatedStrongMarker from './UntranslatedStrongMarker'
 interface Props {
   verse: Verse
   version: string
-  settings: RootState['user']['bible']['settings']
+  settings: BibleReaderSettings
   selectedCode?: SelectedCode | null
 }
 

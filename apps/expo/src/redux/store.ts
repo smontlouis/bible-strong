@@ -42,7 +42,7 @@ function configureStore() {
     keyPrefix: '',
     storage: mmkvStorage,
     stateReconciler: autoMergeLevel2,
-    version: 38,
+    version: 39,
     throttle: PERSIST_THROTTLE_MS,
     // debug: true,
     blacklist: ['plan'],

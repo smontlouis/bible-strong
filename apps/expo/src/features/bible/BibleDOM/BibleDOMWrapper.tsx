@@ -43,7 +43,7 @@ import { BibleError } from '~helpers/bibleErrors'
 import type { InterlinearMode } from '~helpers/interlinearDisplayMode'
 import { toast } from '~helpers/toast'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
-import { RootState } from '~redux/modules/reducer'
+import type { BibleReaderSettings } from '../bibleReaderSettings'
 import {
   HighlightsObj,
   LinksObj,
@@ -98,7 +98,7 @@ export type TaggedVerse = {
 }
 
 export type RootStyles = {
-  settings: RootState['user']['bible']['settings']
+  settings: BibleReaderSettings
 }
 
 export type PericopeChapter = Pericope[string][string]
@@ -195,7 +195,7 @@ export type WebViewProps = {
   allLinks: LinksObj
   studyRelations: StudyRelationsObj
   wordAnnotations: WordAnnotationsObj
-  settings: RootState['user']['bible']['settings']
+  settings: BibleReaderSettings
   verseNavigationRequest?: number
   verseToScroll: number | undefined
   pericopeChapter: PericopeChapter

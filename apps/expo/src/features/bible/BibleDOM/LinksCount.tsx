@@ -1,6 +1,6 @@
 import { styled } from 'goober'
 import { RootStyles } from './BibleDOMWrapper'
-import { RootState } from '~redux/modules/reducer'
+import type { BibleReaderSettings } from '../bibleReaderSettings'
 import { getLinkTypeIconComponent, getLinkTypeColor } from './LinkIcons'
 import { getDisabledStyles } from './disabledStyles'
 import { referenceHalo } from './referenceHalo'
@@ -43,7 +43,7 @@ const Count = styled<RootStyles>('div')(({ settings: { theme, colors } }) => ({
 interface Props {
   count: number
   linkType?: string
-  settings: RootState['user']['bible']['settings']
+  settings: BibleReaderSettings
   onClick: () => void
   isDisabled?: boolean
 }
