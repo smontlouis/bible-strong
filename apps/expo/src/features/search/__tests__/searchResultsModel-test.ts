@@ -319,6 +319,31 @@ it('leaves out the search by meaning when its source is off', () => {
   expect(model.sections.map(section => section.id)).toEqual(['passages'])
 })
 
+it('puts commentaries, plans and the timeline after every other section', () => {
+  const model = getSearchResultsModel({
+    ...baseInput,
+    catalogResults: [
+      { id: 'timeline:a', title: 'Moïse', type: 'timeline', iconType: 'timeline' },
+      { id: 'plan:a', title: 'Lecture', type: 'plan', iconType: 'plan' },
+      { id: 'commentary:a', title: 'Study notes', type: 'commentary', iconType: 'commentary' },
+    ],
+    itemFilters: { ...allFilters, commentary: true, plan: true, timeline: true },
+    noteResults: [noteResult],
+    passageResults: [passage],
+    totalPassageCount: 1,
+    meaningResults: [topicPassage],
+    totalMeaningCount: 1,
+  })
+  expect(model.sections.map(section => section.id)).toEqual([
+    'passages',
+    'meaning',
+    'notes',
+    'commentary',
+    'plan',
+    'timeline',
+  ])
+})
+
 it('integrates catalog matches into existing result sections and counted facets', () => {
   const catalogResults: SearchEntityResult[] = [
     { id: 'commentary:a', title: 'Study notes', type: 'commentary', iconType: 'commentary' },

@@ -130,7 +130,7 @@ Le Worker doit être déployé avant de distribuer le client ; la révision de c
 ## Content discovery
 
 The existing Passages filter covers both Bible references and full-text passage search.
-Commentary, Plans and Timeline are appended to the source filters.
+Commentary, Plans and Timeline are appended to the source filters, and their sections come after every other one, in the search results as in the passage picker.
 All sources share the same input, result sections and counted facets. Passage results expose icon actions for a Bible tab and
 a comparison tab. Commentary search indexes catalog titles/authors, plans index
 saved and published titles, and timeline indexes period/event names. Published

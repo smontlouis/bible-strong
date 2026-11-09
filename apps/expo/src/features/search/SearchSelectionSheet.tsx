@@ -665,28 +665,6 @@ const SearchSelectionSheet = ({
     catalogSources
   )
   const searchSections: RelationTargetSection[] = [
-    ...catalogSources.flatMap(type => {
-      const items = catalog.items
-        .filter(item => item.type === type)
-        .map(item => ({
-          id: item.id,
-          title: item.title,
-          subtitle: item.subtitle,
-          type: item.type,
-          iconType: item.type,
-          catalogResult: item,
-        }))
-      return items.length
-        ? [
-            {
-              id: type,
-              title: t(type === 'plan' ? 'Plans' : `tabs.${type}`),
-              count: items.length,
-              items,
-            },
-          ]
-        : []
-    }),
     ...(passageItems.length
       ? [
           {
@@ -759,6 +737,29 @@ const SearchSelectionSheet = ({
     ...(naveItems.length
       ? [{ id: 'nave' as const, title: t('Nave'), count: naveItems.length, items: naveItems }]
       : []),
+    // Commentaries, plans and the timeline come last, as in the search results.
+    ...catalogSources.flatMap(type => {
+      const items = catalog.items
+        .filter(item => item.type === type)
+        .map(item => ({
+          id: item.id,
+          title: item.title,
+          subtitle: item.subtitle,
+          type: item.type,
+          iconType: item.type,
+          catalogResult: item,
+        }))
+      return items.length
+        ? [
+            {
+              id: type,
+              title: t(type === 'plan' ? 'Plans' : `tabs.${type}`),
+              count: items.length,
+              items,
+            },
+          ]
+        : []
+    }),
   ]
   const isListLoading =
     passageSearch.isSearching ||

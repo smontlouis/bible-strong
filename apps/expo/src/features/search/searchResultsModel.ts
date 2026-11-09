@@ -180,19 +180,6 @@ export const getSearchResultsModel = ({
     : []
 
   const sections: SQLiteSearchResultSection[] = [
-    ...(['commentary', 'plan', 'timeline'] as const).flatMap(type => {
-      const items = catalogResults.filter(item => item.type === type)
-      return itemFilters[type] && (items.length || loading.catalog || catalogError)
-        ? [
-            getSection({
-              id: type,
-              title: t(type === 'plan' ? 'Plans' : `tabs.${type}`),
-              items,
-              itemFilterType: type,
-            }),
-          ]
-        : []
-    }),
     ...(referenceItems.length
       ? [
           getSection({
@@ -264,6 +251,21 @@ export const getSearchResultsModel = ({
     ...(naveItems.length
       ? [getSection({ id: 'nave', title: t('Nave'), items: naveItems, itemFilterType: 'nave' })]
       : []),
+    // Commentaries, plans and the timeline come last, as in the facets: the Bible and its
+    // studies are what a search is for first.
+    ...(['commentary', 'plan', 'timeline'] as const).flatMap(type => {
+      const items = catalogResults.filter(item => item.type === type)
+      return itemFilters[type] && (items.length || loading.catalog || catalogError)
+        ? [
+            getSection({
+              id: type,
+              title: t(type === 'plan' ? 'Plans' : `tabs.${type}`),
+              items,
+              itemFilterType: type,
+            }),
+          ]
+        : []
+    }),
   ]
 
   const isBrowseLoading =
