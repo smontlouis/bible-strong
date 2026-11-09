@@ -28,6 +28,9 @@ struct Labels {
     downloads: &'static str,
     print: &'static str,
     sidebar: &'static str,
+    text_larger: &'static str,
+    text_smaller: &'static str,
+    text_actual_size: &'static str,
     find: &'static str,
     previous_tab: &'static str,
     next_tab: &'static str,
@@ -57,6 +60,9 @@ const FRENCH: Labels = Labels {
     downloads: "Téléchargements",
     print: "Imprimer…",
     sidebar: "Afficher ou masquer la barre latérale",
+    text_larger: "Agrandir le texte",
+    text_smaller: "Réduire le texte",
+    text_actual_size: "Taille réelle",
     find: "Rechercher…",
     previous_tab: "Onglet précédent",
     next_tab: "Onglet suivant",
@@ -86,6 +92,9 @@ const ENGLISH: Labels = Labels {
     downloads: "Downloads",
     print: "Print…",
     sidebar: "Show or Hide Sidebar",
+    text_larger: "Make Text Bigger",
+    text_smaller: "Make Text Smaller",
+    text_actual_size: "Actual Size",
     find: "Find…",
     previous_tab: "Previous Tab",
     next_tab: "Next Tab",
@@ -158,6 +167,23 @@ pub fn build<R: Runtime>(app: &AppHandle<R>, language: &str) -> tauri::Result<Me
             "shortcut:sidebar",
             labels.sidebar,
             Some("CmdOrCtrl+B".into()),
+        )?)
+        .separator()
+        // The reader's text size setting, as Mac reading apps do (`DesktopShell`).
+        .item(&item(
+            "text:larger",
+            labels.text_larger,
+            Some("CmdOrCtrl+=".into()),
+        )?)
+        .item(&item(
+            "text:smaller",
+            labels.text_smaller,
+            Some("CmdOrCtrl+-".into()),
+        )?)
+        .item(&item(
+            "text:reset",
+            labels.text_actual_size,
+            Some("CmdOrCtrl+0".into()),
         )?)
         .separator()
         .item(&PredefinedMenuItem::fullscreen(app, None)?);

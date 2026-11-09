@@ -15,6 +15,7 @@ import { isQueueProcessingAtom } from '~state/downloadQueue'
 import { desktopBootstrap, invoke } from './bridge'
 import { isMenuShortcut, runMenuShortcut } from './desktopMenuShortcuts'
 import { checkDesktopUpdate } from './desktopUpdates'
+import { type TextSizeChange, useTextSizeChange } from './textSize'
 import { useDesktopAppearance } from './useDesktopAppearance'
 import { useDesktopWindowTitle } from './useDesktopWindowTitle'
 import { useDesktopFullscreen } from './windowControls'
@@ -44,6 +45,7 @@ const DesktopShell = () => {
   useDesktopAppearance()
   useDesktopWindowTitle()
   useDesktopFullscreen()
+  const changeTextSize = useTextSizeChange()
 
   // A hidden page must not freeze halfway through an installation. The shell turns WebKit's
   // throttling off on macOS 14+; Chromium (Windows) does not freeze a page holding a Web Lock.
@@ -80,6 +82,8 @@ const DesktopShell = () => {
           void openUrl(value)
         } else if (kind === 'updates') {
           void checkDesktopUpdate({ announce: true })
+        } else if (kind === 'text') {
+          changeTextSize(value as TextSizeChange)
         } else if (kind === 'print') {
           markForPrint(document)
           invoke('webview_print').catch(error =>
