@@ -27,6 +27,7 @@ redirect it. The manifest and every installer are signed with the updater key; i
 | `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD` | The Developer ID Application certificate as a base64 `.p12`, and its password. |
 | `APPLE_SIGNING_IDENTITY` | Its name, `Developer ID Application: … (TEAM)`. |
 | `APPLE_API_ISSUER`, `APPLE_API_KEY`, `APPLE_API_KEY_CONTENT` | An App Store Connect API key for notarization: issuer id, key id, and the `.p8` content. |
+| `APPLE_PROVISIONING_PROFILE` | A Developer ID provisioning profile for `com.smontlouis.biblestrong` with the Associated Domains capability, as base64 (`base64 -i <file>.provisionprofile`). macOS reads the `applinks:bible-strong.app` entitlement only from a profile; without the secret the workflow refuses to build. Locally, save the file as `apps/desktop/src-tauri/embedded.provisionprofile` (git-ignored). |
 
 Losing the updater key means installed apps can no longer update themselves: keep a copy in the
 password manager.
@@ -65,8 +66,9 @@ The App Store build runs sandboxed (`Entitlements.appstore.plist`), without the 
 Store Connect record and replaces the iPad app on Apple Silicon Macs.
 
 1. In App Store Connect, add the macOS platform to the Bible Strong app.
-2. Create a Mac App Store provisioning profile for `com.smontlouis.biblestrong` and save it as
-   `apps/desktop/src-tauri/embedded.provisionprofile` (git-ignored).
+2. Create a Mac App Store provisioning profile for `com.smontlouis.biblestrong`, with the
+   Associated Domains capability, and save it as `apps/desktop/src-tauri/embedded.provisionprofile`
+   (git-ignored).
 3. On the Mac: `yarn workspace @bible-strong/desktop build:appstore`, with the Apple Distribution
    certificate in the keychain (`APPLE_SIGNING_IDENTITY="Apple Distribution: …"`).
 4. Package it with `xcrun productbuild --sign "3rd Party Mac Developer Installer: …" --component <app> /Applications Bible-Strong.pkg`

@@ -48,3 +48,9 @@ that screen; every other page stays in the browser.
   web links.
 - A link typed in the address bar, or followed inside the same site in a browser, does not open
   the application: both systems only hand over links followed from elsewhere.
+- The desktop app on macOS shares the application's bundle identifier, so the same document
+  names it: it declares the domain in its entitlements and, as a Developer ID app, embeds a
+  provisioning profile that grants it, or macOS ignores the declaration. Safari offers the app in
+  a banner at the top of a page rather than switching to it.
+- Safari's banner for the iOS app hands the page to the application (`app-argument`), so that its
+  Open button lands on the page and not on the home screen.

@@ -93,7 +93,7 @@ jobs:
         include:
           - name: macOS
             runner: macos-latest
-            args: --target universal-apple-darwin
+            args: --target universal-apple-darwin --config src-tauri/tauri.provisioned.conf.json
             rust-targets: aarch64-apple-darwin,x86_64-apple-darwin
           - name: Windows
             runner: windows-latest
@@ -124,6 +124,20 @@ jobs:
         env:
           APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY_CONTENT }}
         run: printf '%s' "$APPLE_API_KEY_CONTENT" > "$GITHUB_WORKSPACE/apple-api-key.p8"
+
+      # Without it macOS ignores the associated-domains entitlement, and links to bible-strong.app
+      # would stop opening the app (ADR-0082): better no release than that one.
+      - name: Write the Developer ID provisioning profile
+        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          APPLE_PROVISIONING_PROFILE: ${{ secrets.APPLE_PROVISIONING_PROFILE }}
+        run: |
+          if [ -z "$APPLE_PROVISIONING_PROFILE" ]; then
+            echo "The APPLE_PROVISIONING_PROFILE secret is missing" >&2
+            exit 1
+          fi
+          printf '%s' "$APPLE_PROVISIONING_PROFILE" | base64 --decode > apps/desktop/src-tauri/embedded.provisionprofile
 
       - name: Set up Node
         uses: actions/setup-node@v6

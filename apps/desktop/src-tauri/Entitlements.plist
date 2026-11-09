@@ -4,5 +4,10 @@
 <dict>
   <key>com.apple.security.network.client</key>
   <true/>
+  <!-- Universal links: a public page of bible-strong.app opens here when the app is installed (ADR-0082). -->
+  <key>com.apple.developer.associated-domains</key>
+  <array>
+    <string>applinks:bible-strong.app</string>
+  </array>
 </dict>
 </plist>

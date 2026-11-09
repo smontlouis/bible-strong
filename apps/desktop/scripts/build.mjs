@@ -32,9 +32,20 @@ if (!args.has('--skip-web')) {
 
 const tauriArgs = ['tauri', 'build']
 if (process.platform === 'darwin') tauriArgs.push('--target', 'universal-apple-darwin')
+// macOS honours the associated-domains entitlement of a Developer ID app only when the app
+// embeds a provisioning profile that grants it (ADR-0082). The profile stays outside git.
+const provisioningProfile = join(desktopRoot, 'src-tauri/embedded.provisionprofile')
 if (appStore) {
   if (process.platform !== 'darwin') throw new Error('The App Store build is macOS only')
   tauriArgs.push('--config', 'src-tauri/tauri.appstore.conf.json', '--', '--no-default-features')
+} else if (process.platform === 'darwin') {
+  if (existsSync(provisioningProfile)) {
+    tauriArgs.push('--config', 'src-tauri/tauri.provisioned.conf.json')
+  } else {
+    console.warn(
+      'No src-tauri/embedded.provisionprofile: links to bible-strong.app will not open this build.'
+    )
+  }
 }
 
 // Installers carry update signatures: locally, with the key kept outside the repository.

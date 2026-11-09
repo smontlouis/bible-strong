@@ -6,6 +6,11 @@
   <true/>
   <key>com.apple.security.network.client</key>
   <true/>
+  <!-- Universal links: a public page of bible-strong.app opens here when the app is installed (ADR-0082). -->
+  <key>com.apple.developer.associated-domains</key>
+  <array>
+    <string>applinks:bible-strong.app</string>
+  </array>
   <!-- Google and Apple sign-in hand their token back through a loopback server on 127.0.0.1. -->
   <key>com.apple.security.network.server</key>
   <true/>
