@@ -1,0 +1,11 @@
+/*
+ * The macOS desktop app's window is transparent over the system's sidebar material (`lib.rs`),
+ * and its shell marks the page `data-window-material` before the bundle runs. The page lets the
+ * material through; the shell tints it with the theme (`windowChrome.desktop.ts`) and the main
+ * panel stays opaque.
+ */
+html[data-window-material],
+html[data-window-material] body,
+html[data-window-material] #root {
+  background-color: transparent !important;
+}

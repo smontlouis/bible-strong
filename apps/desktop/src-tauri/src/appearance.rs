@@ -11,6 +11,11 @@ use tauri::{window::Color, Theme};
 
 pub const KV_KEY: &str = "desktop.appearance";
 
+/// macOS: the window is transparent over the system's sidebar material (`create_main_window`).
+/// The page lets it through where it marks `data-window-material` and tints it with the theme
+/// (`windowChrome.desktop.ts`), so the shell paints no ground of its own there.
+pub const WINDOW_MATERIAL: bool = cfg!(target_os = "macos");
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Appearance {
     pub background: Color,
@@ -95,11 +100,24 @@ pub fn parse_stored(value: &str) -> Option<Appearance> {
     })
 }
 
-/// Paints the page with the stored ground before the bundle runs. Built from the parsed values
-/// only, so nothing from the store reaches the script as written.
-pub fn page_script(appearance: &Appearance) -> String {
-    let Color(red, green, blue, _) = appearance.background;
+/// Marks the page, before the bundle runs, to let the window's material through.
+pub fn material_script(material: bool) -> &'static str {
+    if material {
+        "document.documentElement.setAttribute('data-window-material','');"
+    } else {
+        ""
+    }
+}
+
+/// Paints the page with the stored ground before the bundle runs, or over a material only sets
+/// its scheme. Built from the parsed values only, so nothing from the store reaches the script
+/// as written.
+pub fn page_script(appearance: &Appearance, material: bool) -> String {
     let scheme = if appearance.dark { "dark" } else { "light" };
+    if material {
+        return format!("document.documentElement.style.colorScheme='{scheme}';");
+    }
+    let Color(red, green, blue, _) = appearance.background;
     format!(
         "document.documentElement.style.backgroundColor='rgb({red}, {green}, {blue})';\
          document.documentElement.style.colorScheme='{scheme}';"
@@ -116,9 +134,11 @@ pub fn window_set_appearance(
     follows_system: bool,
 ) -> Result<(), String> {
     let color = parse_color(&color).ok_or_else(|| format!("Not a color: {color}"))?;
-    window
-        .set_background_color(Some(color))
-        .map_err(|error| error.to_string())?;
+    if !WINDOW_MATERIAL {
+        window
+            .set_background_color(Some(color))
+            .map_err(|error| error.to_string())?;
+    }
     window
         .set_theme(window_theme(follows_system, scheme == "dark"))
         .map_err(|error| error.to_string())
@@ -180,16 +200,34 @@ mod tests {
 
     #[test]
     fn writes_only_parsed_values_into_the_page_script() {
-        let script = page_script(&Appearance {
+        let appearance = Appearance {
             background: Color(18, 45, 66, 255),
             dark: true,
             follows_system: false,
-        });
+        };
         assert_eq!(
-            script,
+            page_script(&appearance, false),
             "document.documentElement.style.backgroundColor='rgb(18, 45, 66)';\
              document.documentElement.style.colorScheme='dark';"
         );
+    }
+
+    #[test]
+    fn paints_no_ground_over_the_material() {
+        let appearance = Appearance {
+            background: Color(18, 45, 66, 255),
+            dark: true,
+            follows_system: false,
+        };
+        assert_eq!(
+            page_script(&appearance, true),
+            "document.documentElement.style.colorScheme='dark';"
+        );
+        assert_eq!(
+            material_script(true),
+            "document.documentElement.setAttribute('data-window-material','');"
+        );
+        assert_eq!(material_script(false), "");
     }
 
     #[test]

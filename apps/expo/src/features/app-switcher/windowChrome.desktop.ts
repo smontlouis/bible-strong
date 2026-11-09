@@ -2,6 +2,10 @@ import { useAtomValue } from 'jotai/react'
 
 import { desktopBootstrap } from '~desktop/bridge'
 import { WINDOW_CONTROLS_INSET, windowFullscreenAtom } from '~desktop/windowControls'
+import { colorWithOpacity } from '~themes/colorValues'
+import { useTheme } from '~themes/ThemeProvider'
+
+import './windowMaterial.css'
 
 /**
  * On macOS the window has no title bar: its buttons sit over the top left of the page
@@ -25,3 +29,15 @@ export const useWindowControlsInset = (): number => {
 export const windowDragRegion = (headerInset: number) => (headerInset > 0 ? DRAG_REGION : undefined)
 
 export const sidebarDragRegion = DRAG_REGION
+
+/**
+ * On macOS the window is transparent over the system's sidebar material (`lib.rs`). The shell
+ * lays the theme's canvas over it, see-through enough for the blurred desktop to show and opaque
+ * enough for each theme to keep its hue: a grey material beside a sepia page would clash.
+ */
+const MATERIAL_TINT_OPACITY = 0.65
+
+export const useWindowMaterialTint = (): string | undefined => {
+  const { colors } = useTheme()
+  return MAC ? colorWithOpacity(colors.canvas, MATERIAL_TINT_OPACITY) : undefined
+}

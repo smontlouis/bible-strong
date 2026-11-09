@@ -72,9 +72,12 @@ fn script<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<String, String> {
     let ground = kv
         .get(appearance::KV_KEY)
         .and_then(|value| appearance::parse_stored(value))
-        .map(|stored| appearance::page_script(&stored))
+        .map(|stored| appearance::page_script(&stored, appearance::WINDOW_MATERIAL))
         .unwrap_or_default();
-    Ok(format!("window.__BIBLE_STRONG_DESKTOP__ = {json};{ground}"))
+    let material = appearance::material_script(appearance::WINDOW_MATERIAL);
+    Ok(format!(
+        "window.__BIBLE_STRONG_DESKTOP__ = {json};{material}{ground}"
+    ))
 }
 
 pub fn handle<R: Runtime>(

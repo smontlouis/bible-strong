@@ -52,25 +52,35 @@ fn create_main_window(app: &tauri::AppHandle) -> tauri::Result<()> {
     // through its config, the position survives the title changes, which put the buttons back
     // in their default place otherwise. The title still names the window in Mission Control and
     // the Window menu.
+    // The window is also transparent over the sidebar material, which the shell's ground lets
+    // through, tinted by the theme (`appearance::WINDOW_MATERIAL`). Inactive, it turns flat, as
+    // macOS windows do.
     #[cfg(target_os = "macos")]
     {
         config.title_bar_style = tauri::TitleBarStyle::Overlay;
         config.hidden_title = true;
         config.traffic_light_position =
             Some(tauri::utils::config::LogicalPosition { x: 16.0, y: 37.0 });
+        config.transparent = true;
+        config.window_effects = Some(tauri::utils::config::WindowEffectsConfig {
+            effects: vec![tauri::window::Effect::Sidebar],
+            state: Some(tauri::window::EffectState::FollowsWindowActiveState),
+            ..Default::default()
+        });
     }
     let mut builder = WebviewWindowBuilder::from_config(app, &config)?;
     // The last theme's ground and appearance, so that the window is not white before the first
-    // paint and its title bar matches the page.
+    // paint and its title bar matches the page. Over a material, the window keeps no ground.
     let stored = app.state::<kv::KvStore>().get(appearance::KV_KEY);
     if let Some(stored) = stored
         .ok()
         .flatten()
         .and_then(|value| appearance::parse_stored(&value))
     {
-        builder = builder
-            .background_color(stored.background)
-            .theme(stored.window_theme());
+        if !appearance::WINDOW_MATERIAL {
+            builder = builder.background_color(stored.background);
+        }
+        builder = builder.theme(stored.window_theme());
     }
     let window = builder
         .title("Bible Strong")

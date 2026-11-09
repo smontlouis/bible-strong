@@ -11,6 +11,7 @@ import { resolveThemeColor, colorWithOpacity } from '~themes/colorValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react'
 import { collapsedWorkspaceGroupsAtom } from '~state/workspacePreferences'
+import { workspaceSidebarDockedAtom } from '~navigation/useWorkspaceRoutePanel'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Image, Platform, ScrollView, StyleSheet } from 'react-native'
@@ -44,7 +45,7 @@ import {
   useWorkspaceSidebarWidth,
   workspaceSidebarVariant,
 } from './utils/useResponsiveWorkspace'
-import { sidebarDragRegion, useWindowControlsInset } from './windowChrome'
+import { sidebarDragRegion, useWindowControlsInset, useWindowMaterialTint } from './windowChrome'
 import { WORKSPACE_SIDEBAR_BUTTON_HEIGHT } from './workspaceHeaderInset'
 import { IS_DESKTOP } from '~desktop/isDesktop'
 
@@ -77,6 +78,9 @@ const WorkspaceSidebar = ({
   const insets = useSafeAreaInsets()
   // The desktop app on macOS sets its window buttons over the sidebar's top.
   const windowControlsInset = useWindowControlsInset()
+  // Docked, the sidebar lets the shell's tinted material through; over the page it stays opaque.
+  const sidebarDocked = useAtomValue(workspaceSidebarDockedAtom)
+  const seeThrough = !!useWindowMaterialTint() && sidebarDocked
   const sidebarWidth = useWorkspaceSidebarWidth()
   const { colorScheme } = useCurrentThemeSelector()
   const rowHeight = Platform.OS === 'web' ? 32 : 44
@@ -123,6 +127,7 @@ const WorkspaceSidebar = ({
           style={{
             // The docked sidebar is set off from the page by a hairline.
             borderRightWidth: workspaceSidebarVariant === 'sidebar' ? StyleSheet.hairlineWidth : 0,
+            ...(seeThrough ? { backgroundColor: 'transparent' } : {}),
             paddingTop: insets.top,
             paddingBottom: insets.bottom,
             // Keep the rows clear of a landscape iPhone's camera.
