@@ -34,7 +34,7 @@ import {
   WORKSPACE_SIDEBAR_BUTTON_WIDTH,
   WorkspaceHeaderInsetProvider,
 } from './workspaceHeaderInset'
-import { useWindowControlsInset, useWindowMaterialTint } from './windowChrome'
+import { useWindowControlsInset, useWindowMaterial } from './windowChrome'
 
 /** Room between the sidebar button's edge and its icon. */
 const SIDEBAR_BUTTON_ICON_INSET = 12
@@ -78,8 +78,8 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
   // Without the sidebar beside it, the page reaches the window buttons of the desktop app on
   // macOS: the sidebar button, and the page headers with it, move past them.
   const windowControlsInset = useWindowControlsInset()
-  // Over the macOS window's material, the shell's ground is the theme's tint (`windowChrome`).
-  const materialTint = useWindowMaterialTint()
+  // Over the macOS window's tinted material, the shell paints no ground (`windowChrome`).
+  const windowMaterial = useWindowMaterial()
   const sidebarButtonLeft = sidebarBesideContent
     ? 0
     : Math.max(0, windowControlsInset - contentLeft - SIDEBAR_BUTTON_ICON_INSET)
@@ -116,7 +116,7 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
   return (
     <HStack
       className="flex-1 bg-canvas overflow-hidden"
-      style={materialTint ? { backgroundColor: materialTint } : undefined}
+      style={windowMaterial ? { backgroundColor: 'transparent' } : undefined}
     >
       <GlobalCommandPalette />
       <WorkspaceKeyboardShortcuts

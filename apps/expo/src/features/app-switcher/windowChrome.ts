@@ -18,7 +18,7 @@ export const windowDragRegion = (_headerInset: number): Record<string, string> |
 export const sidebarDragRegion: Record<string, string> | undefined = undefined
 
 /**
- * The shell's ground over a translucent window, tinted by the theme; none where the window is
- * opaque, and the shell keeps its own ground.
+ * Whether the window is translucent behind the shell, which then paints no ground of its own;
+ * otherwise the shell keeps its ground.
  */
-export const useWindowMaterialTint = (): string | undefined => undefined
+export const useWindowMaterial = (): boolean => false

@@ -11,9 +11,9 @@ use tauri::{window::Color, Theme};
 
 pub const KV_KEY: &str = "desktop.appearance";
 
-/// macOS: the window is transparent over the system's sidebar material (`create_main_window`).
-/// The page lets it through where it marks `data-window-material` and tints it with the theme
-/// (`windowChrome.desktop.ts`), so the shell paints no ground of its own there.
+/// macOS: the window is transparent over the system's sidebar material (`create_main_window`),
+/// tinted with the theme by a native view (`material.rs`). The page lets both through where it
+/// marks `data-window-material`, so the shell paints no ground of its own there.
 pub const WINDOW_MATERIAL: bool = cfg!(target_os = "macos");
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -22,6 +22,8 @@ pub struct Appearance {
     pub dark: bool,
     /// The reader's theme follows the system: so does the window.
     pub follows_system: bool,
+    /// The theme's tint over the window's material, translucent.
+    pub tint: Option<Color>,
 }
 
 impl Appearance {
@@ -38,6 +40,8 @@ struct Stored {
     scheme: Option<String>,
     #[serde(default)]
     follows_system: bool,
+    #[serde(default)]
+    tint: Option<String>,
 }
 
 /// The title bar draws in the theme's appearance. A theme that follows the system leaves the
@@ -90,6 +94,20 @@ pub fn parse_color(css: &str) -> Option<Color> {
     Some(color)
 }
 
+/// A translucent color: `rgba(14, 21, 33, 0.65)`, its alpha kept.
+pub fn parse_tint(css: &str) -> Option<Color> {
+    let inner = css.trim().strip_prefix("rgba(")?.strip_suffix(')')?;
+    let mut parts = inner.split(',');
+    let red = channel(parts.next()?)?;
+    let green = channel(parts.next()?)?;
+    let blue = channel(parts.next()?)?;
+    let alpha = parts.next()?.trim().parse::<f64>().ok()?;
+    if parts.next().is_some() || !(0.0..=1.0).contains(&alpha) {
+        return None;
+    }
+    Some(Color(red, green, blue, (alpha * 255.0).round() as u8))
+}
+
 /// What `DesktopShell` stored, or nothing when it is missing or malformed.
 pub fn parse_stored(value: &str) -> Option<Appearance> {
     let stored: Stored = serde_json::from_str(value).ok()?;
@@ -97,6 +115,7 @@ pub fn parse_stored(value: &str) -> Option<Appearance> {
         background: parse_color(&stored.background)?,
         dark: stored.scheme.as_deref() == Some("dark"),
         follows_system: stored.follows_system,
+        tint: stored.tint.as_deref().and_then(parse_tint),
     })
 }
 
@@ -125,16 +144,20 @@ pub fn page_script(appearance: &Appearance, material: bool) -> String {
 }
 
 /// The window and its webview take the theme's ground and appearance when the reader changes
-/// theme.
+/// theme, and on macOS its tint over the material.
 #[tauri::command]
 pub fn window_set_appearance(
     window: tauri::WebviewWindow,
     color: String,
     scheme: String,
     follows_system: bool,
+    tint: Option<String>,
 ) -> Result<(), String> {
     let color = parse_color(&color).ok_or_else(|| format!("Not a color: {color}"))?;
-    if !WINDOW_MATERIAL {
+    if WINDOW_MATERIAL {
+        crate::material::set_tint(&window, tint.as_deref().and_then(parse_tint))
+            .map_err(|error| error.to_string())?;
+    } else {
         window
             .set_background_color(Some(color))
             .map_err(|error| error.to_string())?;
@@ -183,6 +206,7 @@ mod tests {
                 background: Color(18, 45, 66, 255),
                 dark: true,
                 follows_system: false,
+                tint: None,
             })
         );
         assert_eq!(
@@ -204,6 +228,7 @@ mod tests {
             background: Color(18, 45, 66, 255),
             dark: true,
             follows_system: false,
+            tint: None,
         };
         assert_eq!(
             page_script(&appearance, false),
@@ -218,6 +243,7 @@ mod tests {
             background: Color(18, 45, 66, 255),
             dark: true,
             follows_system: false,
+            tint: None,
         };
         assert_eq!(
             page_script(&appearance, true),
@@ -228,6 +254,34 @@ mod tests {
             "document.documentElement.setAttribute('data-window-material','');"
         );
         assert_eq!(material_script(false), "");
+    }
+
+    #[test]
+    fn reads_the_tint_with_its_alpha() {
+        assert_eq!(
+            parse_tint("rgba(14, 21, 33, 0.65)"),
+            Some(Color(14, 21, 33, 166))
+        );
+        assert_eq!(
+            parse_tint("rgba(244,247,255,0.4)"),
+            Some(Color(244, 247, 255, 102))
+        );
+        for value in [
+            "rgb(1,2,3)",
+            "rgba(1,2,3)",
+            "rgba(1,2,3,2)",
+            "rgba(1,2,3,0.5,1)",
+            "#fff",
+        ] {
+            assert_eq!(parse_tint(value), None, "{value}");
+        }
+        assert_eq!(
+            parse_stored(
+                r#"{"background":"rgb(14,21,33)","scheme":"dark","tint":"rgba(14, 21, 33, 0.65)"}"#
+            )
+            .and_then(|appearance| appearance.tint),
+            Some(Color(14, 21, 33, 166))
+        );
     }
 
     #[test]

@@ -41,11 +41,7 @@ import { useOpenInNewTab } from './utils/useOpenInNewTab'
 import { shortcutTitle } from '~features/keyboard-shortcuts/shortcutTitle'
 import { floatingShadow, radii } from '~common/ui/surfaces'
 import { useWorkspaceSidebarWidth, workspaceSidebarVariant } from './utils/useResponsiveWorkspace'
-import {
-  sidebarDragRegion,
-  useWindowControlsStripHeight,
-  useWindowMaterialTint,
-} from './windowChrome'
+import { sidebarDragRegion, useWindowControlsStripHeight, useWindowMaterial } from './windowChrome'
 import { IS_DESKTOP } from '~desktop/isDesktop'
 
 const sidebarFrameClassName = {
@@ -79,7 +75,7 @@ const WorkspaceSidebar = ({
   const windowControlsStripHeight = useWindowControlsStripHeight()
   // Docked, the sidebar lets the shell's tinted material through; over the page it stays opaque.
   const sidebarDocked = useAtomValue(workspaceSidebarDockedAtom)
-  const seeThrough = !!useWindowMaterialTint() && sidebarDocked
+  const seeThrough = useWindowMaterial() && sidebarDocked
   const sidebarWidth = useWorkspaceSidebarWidth()
   const { colorScheme } = useCurrentThemeSelector()
   const rowHeight = Platform.OS === 'web' ? 32 : 44

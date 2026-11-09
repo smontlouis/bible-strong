@@ -44,11 +44,13 @@ log = "0.4"
 tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
 tauri-plugin-updater = { version = "2", optional = true }
 
-# Pictures of the page in development builds (`devtools.rs`): the versions Tauri already uses.
+# Pictures of the page in development builds (`devtools.rs`) and the tint over the window's
+# material (`material.rs`): the versions Tauri already uses.
 [target.'cfg(target_os = "macos")'.dependencies]
 block2 = "0.6"
-objc2-app-kit = { version = "0.3", default-features = false, features = ["std", "NSImage", "NSImageRep", "NSBitmapImageRep"] }
-objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSData", "NSDictionary", "NSError", "NSString"] }
+objc2 = "0.6"
+objc2-app-kit = { version = "0.3", default-features = false, features = ["std", "NSImage", "NSImageRep", "NSBitmapImageRep", "NSBox", "NSColor", "NSGraphics", "NSResponder", "NSUserInterfaceItemIdentification", "NSView"] }
+objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSArray", "NSData", "NSDictionary", "NSError", "NSGeometry", "NSString"] }
 objc2-web-kit = { version = "0.3", default-features = false, features = ["std", "block2", "objc2-app-kit", "WKWebView", "WKSnapshotConfiguration"] }
 
 [features]

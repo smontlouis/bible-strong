@@ -6,10 +6,7 @@ import {
   WINDOW_CONTROLS_STRIP_HEIGHT,
   windowFullscreenAtom,
 } from '~desktop/windowControls'
-import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
-import { colorWithOpacity } from '~themes/colorValues'
-import { isDarkThemeName } from '~themes/darkThemes'
-import { useTheme } from '~themes/ThemeProvider'
+import { hasWindowMaterial } from '~desktop/windowMaterial'
 
 import './windowMaterial.css'
 
@@ -43,16 +40,7 @@ export const windowDragRegion = (headerInset: number) => (headerInset > 0 ? DRAG
 export const sidebarDragRegion = DRAG_REGION
 
 /**
- * On macOS the window is transparent over the system's sidebar material (`lib.rs`). The shell
- * lays the theme's canvas over it, see-through enough for the blurred desktop to show and opaque
- * enough for each theme to keep its hue: a grey material beside a sepia page would clash. The
- * dark material shows through more than the light one, so dark themes lay more of their ground.
+ * On macOS the window is transparent over the system's sidebar material, tinted with the theme
+ * by a native view (`windowMaterial.ts`): the shell paints no ground of its own.
  */
-const MATERIAL_TINT_OPACITY = { light: 0.4, dark: 0.65 }
-
-export const useWindowMaterialTint = (): string | undefined => {
-  const { colors } = useTheme()
-  const { theme } = useCurrentThemeSelector()
-  const opacity = MATERIAL_TINT_OPACITY[isDarkThemeName(theme) ? 'dark' : 'light']
-  return MAC ? colorWithOpacity(colors.canvas, opacity) : undefined
-}
+export const useWindowMaterial = (): boolean => hasWindowMaterial()

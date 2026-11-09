@@ -2,6 +2,7 @@ const mockSet = jest.fn()
 const mockInvoke = jest.fn((..._args: unknown[]) => Promise.resolve())
 let mockTheme = 'dark'
 let mockPreferredColorScheme: string | undefined = 'dark'
+let mockPlatform = 'windows'
 
 jest.mock('~helpers/useCurrentThemeSelector', () => () => ({ theme: mockTheme }))
 jest.mock('react-redux', () => ({
@@ -12,7 +13,10 @@ jest.mock('~helpers/storage.desktop', () => ({
   storage: { set: (...args: unknown[]) => mockSet(...args) },
 }))
 jest.mock('~helpers/agentObservability', () => ({ appLogger: { warn: jest.fn() } }))
-jest.mock('../bridge', () => ({ invoke: (...args: unknown[]) => mockInvoke(...args) }))
+jest.mock('../bridge', () => ({
+  invoke: (...args: unknown[]) => mockInvoke(...args),
+  desktopBootstrap: () => ({ platform: mockPlatform }),
+}))
 // The palettes themselves; the theme index also loads React Native, which this suite does not.
 jest.mock('~themes/index', () => {
   const colors = jest.requireActual('../../themes/colors').default
@@ -45,6 +49,7 @@ describe('the window ground and title bar follow the theme', () => {
     mockSet.mockClear()
     mockInvoke.mockClear()
     mockPreferredColorScheme = 'dark'
+    mockPlatform = 'windows'
   })
 
   it('stores the dark ground for the next launch and paints the window with it', () => {
@@ -98,5 +103,30 @@ describe('the window ground and title bar follow the theme', () => {
         followsSystem: true,
       })
     }
+  })
+
+  it('tints the macOS material with the theme, more in a dark theme', () => {
+    mockPlatform = 'macos'
+    mockTheme = 'dark'
+    let renderer: ReactTestRenderer | undefined
+    act(() => {
+      renderer = create(<Probe />)
+    })
+    expect(mockInvoke).toHaveBeenLastCalledWith('window_set_appearance', {
+      color: '#0e1521',
+      scheme: 'dark',
+      followsSystem: false,
+      tint: 'rgba(14, 21, 33, 0.65)',
+    })
+    mockTheme = 'sepia'
+    act(() => {
+      renderer?.update(<Probe />)
+    })
+    const sepiaCall = mockInvoke.mock.calls.at(-1)?.[1] as { tint: string }
+    expect(sepiaCall.tint).toMatch(/^rgba\(\d+, \d+, \d+, 0\.4\)$/)
+    expect(mockSet).toHaveBeenLastCalledWith(
+      APPEARANCE_KEY,
+      expect.stringContaining('"tint":"rgba(')
+    )
   })
 })

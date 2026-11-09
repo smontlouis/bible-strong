@@ -10,6 +10,7 @@ mod devtools;
 mod download;
 mod files;
 mod kv;
+mod material;
 mod menu;
 mod paths;
 mod sign_in;
@@ -19,7 +20,8 @@ use std::time::Duration;
 use tauri::{
     utils::config::{BackgroundThrottlingPolicy, WindowConfig},
     webview::PageLoadEvent,
-    Emitter, LogicalSize, Manager, RunEvent, WebviewUrl, WebviewWindowBuilder,
+    Emitter, LogicalSize, Manager, PhysicalSize, RunEvent, WebviewUrl, WebviewWindowBuilder,
+    WindowEvent,
 };
 use tauri_plugin_deep_link::DeepLinkExt;
 
@@ -71,12 +73,13 @@ fn create_main_window(app: &tauri::AppHandle) -> tauri::Result<()> {
     let mut builder = WebviewWindowBuilder::from_config(app, &config)?;
     // The last theme's ground and appearance, so that the window is not white before the first
     // paint and its title bar matches the page. Over a material, the window keeps no ground.
-    let stored = app.state::<kv::KvStore>().get(appearance::KV_KEY);
-    if let Some(stored) = stored
+    let stored = app
+        .state::<kv::KvStore>()
+        .get(appearance::KV_KEY)
         .ok()
         .flatten()
-        .and_then(|value| appearance::parse_stored(&value))
-    {
+        .and_then(|value| appearance::parse_stored(&value));
+    if let Some(stored) = stored {
         if !appearance::WINDOW_MATERIAL {
             builder = builder.background_color(stored.background);
         }
@@ -100,17 +103,31 @@ fn create_main_window(app: &tauri::AppHandle) -> tauri::Result<()> {
             }
         })
         .build()?;
-    // The saved window state is restored as it was, even below the minimum (an older version
-    // allowed 760 points).
-    let scale = window.scale_factor()?;
-    let size = window.inner_size()?.to_logical::<f64>(scale);
-    if size.width < MIN_WIDTH || size.height < MIN_HEIGHT {
-        window.set_size(LogicalSize::new(
-            size.width.max(MIN_WIDTH),
-            size.height.max(MIN_HEIGHT),
-        ))?;
+    // The last theme's tint over the material, before the page says it again.
+    if appearance::WINDOW_MATERIAL {
+        material::set_tint(&window, stored.and_then(|stored| stored.tint))?;
     }
     Ok(())
+}
+
+/// The reader cannot make the window smaller than its minimum, but code can: the saved window
+/// state comes back in physical pixels, so a window saved on a standard display reopens at half
+/// its size on a Retina one, and an older version allowed 760 points. Such a size goes back up
+/// to the minimum, or the narrow layout would show under the macOS window buttons.
+fn keep_minimum_size(window: &tauri::Window, size: PhysicalSize<u32>) {
+    if size.width == 0 || size.height == 0 || window.is_minimized().unwrap_or(false) {
+        return;
+    }
+    let Ok(scale) = window.scale_factor() else {
+        return;
+    };
+    let size = size.to_logical::<f64>(scale);
+    if size.width < MIN_WIDTH || size.height < MIN_HEIGHT {
+        let _ = window.set_size(LogicalSize::new(
+            size.width.max(MIN_WIDTH),
+            size.height.max(MIN_HEIGHT),
+        ));
+    }
 }
 
 fn focus_main_window(app: &tauri::AppHandle) {
@@ -135,6 +152,11 @@ fn webview_print(window: tauri::WebviewWindow) -> Result<(), String> {
 
 pub fn run() {
     let builder = tauri::Builder::default()
+        .on_window_event(|window, event| {
+            if let WindowEvent::Resized(size) = event {
+                keep_minimum_size(window, *size);
+            }
+        })
         // First, so that a second launch only hands its links to the running app.
         .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
             focus_main_window(app)
