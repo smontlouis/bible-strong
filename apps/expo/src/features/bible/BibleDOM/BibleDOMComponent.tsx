@@ -1524,6 +1524,8 @@ const LoadedBibleContent = ({
       <div ref={readerSurfaceRef} style={{ width: '100%' }}>
         <Container
           ref={containerRef}
+          // Printed without the room kept for the header and the footer (print.css)
+          data-print-flush
           rtl={isHebreu}
           settings={settings}
           isParallelVerse={

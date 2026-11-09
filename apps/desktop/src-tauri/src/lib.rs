@@ -116,6 +116,13 @@ fn app_exit(app: tauri::AppHandle) {
     app.exit(0);
 }
 
+/// The system's print dialog for the page, which prints with its print styles. WKWebView ignores
+/// `window.print()`; its print operation does not.
+#[tauri::command]
+fn webview_print(window: tauri::WebviewWindow) -> Result<(), String> {
+    window.print().map_err(|error| error.to_string())
+}
+
 pub fn run() {
     let builder = tauri::Builder::default()
         // First, so that a second launch only hands its links to the running app.
@@ -133,6 +140,7 @@ pub fn run() {
         .register_uri_scheme_protocol(bootstrap::SCHEME, bootstrap::handle)
         .invoke_handler(tauri::generate_handler![
             app_exit,
+            webview_print,
             appearance::window_set_appearance,
             archive::archive_unzip,
             archive::archive_extract_encrypted,

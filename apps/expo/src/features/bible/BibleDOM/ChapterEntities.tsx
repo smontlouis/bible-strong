@@ -114,7 +114,7 @@ const ChapterEntities = ({
   }
 
   return (
-    <section style={sectionStyle} aria-label={translations.title}>
+    <section style={sectionStyle} aria-label={translations.title} data-print-hide>
       <h2 style={titleStyle}>
         <span aria-hidden style={dividerStyle} />
         <span>{translations.title}</span>

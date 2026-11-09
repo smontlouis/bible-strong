@@ -25,6 +25,7 @@ struct Labels {
     close_tab: &'static str,
     palette: &'static str,
     downloads: &'static str,
+    print: &'static str,
     sidebar: &'static str,
     previous_chapter: &'static str,
     next_chapter: &'static str,
@@ -49,6 +50,7 @@ const FRENCH: Labels = Labels {
     close_tab: "Fermer l'onglet",
     palette: "Rechercher une action…",
     downloads: "Téléchargements",
+    print: "Imprimer…",
     sidebar: "Afficher ou masquer la barre latérale",
     previous_chapter: "Chapitre précédent",
     next_chapter: "Chapitre suivant",
@@ -73,6 +75,7 @@ const ENGLISH: Labels = Labels {
     close_tab: "Close Tab",
     palette: "Search Actions…",
     downloads: "Downloads",
+    print: "Print…",
     sidebar: "Show or Hide Sidebar",
     previous_chapter: "Previous Chapter",
     next_chapter: "Next Chapter",
@@ -117,7 +120,9 @@ pub fn build<R: Runtime>(app: &AppHandle<R>, language: &str) -> tauri::Result<Me
             labels.palette,
             Some("CmdOrCtrl+K".into()),
         )?)
-        .item(&item("navigate:/downloads", labels.downloads, None)?);
+        .item(&item("navigate:/downloads", labels.downloads, None)?)
+        .separator()
+        .item(&item("print:", labels.print, Some("CmdOrCtrl+P".into()))?);
     #[cfg(not(target_os = "macos"))]
     let file = file
         .separator()

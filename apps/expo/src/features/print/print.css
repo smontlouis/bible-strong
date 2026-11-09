@@ -1,0 +1,84 @@
+/*
+ * Prints the content marked by `markForPrint.ts` whole, alone, on white paper. The chain from
+ * the page to it unfolds (no fixed height, no scrolling, no offset), and everything beside it is
+ * hidden: the sidebar, the headers, the floating buttons, the other tabs, the sheets.
+ */
+@media print {
+  @page {
+    margin: 16mm 18mm;
+  }
+
+  html,
+  body,
+  #root {
+    height: auto !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+
+  [data-print-path] {
+    display: block !important;
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    overflow: visible !important;
+    transform: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  [data-print-path] > :not([data-print-path]):not([data-print-root]) {
+    display: none !important;
+  }
+
+  [data-print-root] {
+    display: block !important;
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: transparent !important;
+  }
+
+  /* The grounds of the theme go; highlights, set on the text, print. */
+  [data-print-root] div {
+    background-color: transparent !important;
+  }
+
+  [data-print-root] * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* WebKit prints an animated element at its first frame: the Bible page's fade-in left every
+     page blank. The scroll-driven ones follow a scroll that paper does not have. */
+  [data-print-root],
+  [data-print-root] * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* What is operated, not read, stays on screen: buttons, and the parts marked so. A reading
+     surface marked flush drops the room it keeps for the header and the footer. */
+  [data-print-root] button,
+  [data-print-root] [data-print-hide] {
+    display: none !important;
+  }
+
+  [data-print-root] [data-print-flush] {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  /* A dark theme's light text prints dark. */
+  html[data-print-dark] [data-print-root] * {
+    color: #101b35 !important;
+  }
+}

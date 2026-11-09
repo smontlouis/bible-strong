@@ -178,6 +178,7 @@ const PassageMediaThumbnails = ({
         disabled={isDisabled}
         aria-disabled={isDisabled}
         data-ignore-verse-touch
+        data-print-hide
         aria-label={items.map(item => item.title).join(', ')}
         style={{
           ...stackStyle,

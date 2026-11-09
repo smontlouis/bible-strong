@@ -54,6 +54,8 @@ When a computed value replaces a class in one state only, put both values in `st
 
 Theme palettes live in `src/themes/`; `global.css` is generated from them. Never edit generated palette values by hand.
 
+Printing (the browser's Print, the desktop app's File › Print) prints the active tab's content alone and whole (`src/features/print/`). Mark with `data-print-hide` a part of a reading surface that is operated rather than read, and with `data-print-flush` a surface that keeps room for a header or a footer.
+
 ### Forward classes
 
 Pass `className` through shared UI wrappers to the underlying React Native component; Uniwind's Metro integration handles native styles and direct Web CSS. Do not call `useResolveClassNames` inside UI components. Use `twMerge` for wrapper defaults, with caller classes last, and keep computed values in `style`. Custom components such as `Link` must forward classes. Use `withUniwind` for third-party style slots (see `src/common/ui/classNameIcons.ts`). See ADR-0044.

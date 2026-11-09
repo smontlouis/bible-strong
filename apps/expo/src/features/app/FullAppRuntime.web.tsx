@@ -3,6 +3,7 @@ import { trackAnalyticsScreen } from '~helpers/analytics'
 import WorkspaceAnalytics from '~features/app-switcher/WorkspaceAnalytics.web'
 import ReferencePreviewHost from '~features/bibleReferencePreview/ReferencePreviewHost'
 import ConfirmDialogHost from '~common/ConfirmDialog/ConfirmDialogHost.web'
+import PrintPreparation from '~features/print/PrintPreparation.web'
 import { useWorkspaceRoutePanel } from '~navigation/useWorkspaceRoutePanel'
 import WorkspaceLayout from '~features/app-switcher/WorkspaceLayout'
 import IncomingLinkTab from '~features/app-switcher/IncomingLinkTab'
@@ -103,6 +104,7 @@ const FullAppRuntime = ({ theme, children }: { theme: Theme; children?: ReactNod
               <WorkspaceAnalytics />
               <AssistantLauncher />
               <ConfirmDialogHost />
+              <PrintPreparation />
               <ThemedToaster />
               <ChangelogModal />
               <UnifiedTagsModal />

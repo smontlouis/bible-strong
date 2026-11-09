@@ -6,6 +6,7 @@ import { useAtomValue } from 'jotai/react'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { markForPrint } from '~features/print/markForPrint'
 import { appLogger } from '~helpers/agentObservability'
 import { flushStorage } from '~helpers/storage.desktop'
 import { resolveSystemPath } from '~navigation/systemLinks'
@@ -79,6 +80,11 @@ const DesktopShell = () => {
           void openUrl(value)
         } else if (kind === 'updates') {
           void checkDesktopUpdate({ announce: true })
+        } else if (kind === 'print') {
+          markForPrint(document)
+          invoke('webview_print').catch(error =>
+            appLogger.captureError('startup', 'desktop.print_failed', error)
+          )
         }
       }),
       listen<string[]>('desktop://open-url', ({ payload }) => {
