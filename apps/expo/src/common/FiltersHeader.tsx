@@ -14,6 +14,7 @@ import Back from './Back'
 import ContextualPanel from './ContextualPanel'
 import type { PanelScreen } from './ContextualPanel/types'
 import { useWorkspaceHeaderInset } from '~features/app-switcher/workspaceHeaderInset'
+import { windowDragRegion } from '~features/app-switcher/windowChrome'
 export type FiltersHeaderItem = {
   key: string
   icon: ComponentProps<typeof FeatherIcon>['name']
@@ -166,6 +167,7 @@ export default function FiltersHeader({
       className="border-separator"
       style={{ borderBottomWidth: StyleSheet.hairlineWidth, paddingLeft: workspaceHeaderInset }}
       testID="workspace-page-header"
+      dataSet={windowDragRegion(workspaceHeaderInset)}
     >
       <PageContent className="min-h-[54px] items-center flex-row">
         {hasBackButton ? (

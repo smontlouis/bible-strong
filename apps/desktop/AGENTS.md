@@ -39,6 +39,8 @@ Bible Strong for macOS, Windows and Linux: a Tauri 2 shell (`src-tauri/`, Rust) 
 - Rust error messages keep the words `resourceDeviceCondition.ts` and `sqliteErrors.ts` match (`timed out`, `could not connect to the server`, `No space left`, `SQLITE_CORRUPT`, `already released`).
 - Keep `derive_password` in `archive.rs` pinned to the same test vector as `ArchivePassword.swift` and `encryptedOfflineArchive.ts`.
 - The window's origin (`tauri://localhost`, `https://tauri.localhost` on Windows) is permanent: changing it loses the webview's stored data.
+- On macOS the window has no title bar: its buttons sit over the sidebar's header (`create_main_window` in `lib.rs`, `WINDOW_CONTROLS_INSET` in `src/desktop/windowControls.ts`; move both together), and the workspace's page headers drag the window. A new page header passes `dataSet={windowDragRegion(useWorkspaceHeaderInset())}` from `~features/app-switcher/windowChrome`. The window is never narrower than 800 points, so the narrow layout, which leaves no room for the buttons, never shows.
+- The Bible menu's items carry no native key equivalent: their shortcuts are bare keys (arrows, letters), which a native menu would take from every text field.
 
 ## Testing
 

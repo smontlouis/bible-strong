@@ -12,9 +12,11 @@ import { resolveSystemPath } from '~navigation/systemLinks'
 import { isQueueProcessingAtom } from '~state/downloadQueue'
 
 import { desktopBootstrap, invoke } from './bridge'
-import { isMenuShortcut, shortcutKeyboardEvent } from './desktopMenuShortcuts'
+import { isMenuShortcut, runMenuShortcut } from './desktopMenuShortcuts'
 import { checkDesktopUpdate } from './desktopUpdates'
 import { useDesktopAppearance } from './useDesktopAppearance'
+import { useDesktopWindowTitle } from './useDesktopWindowTitle'
+import { useDesktopFullscreen } from './windowControls'
 
 const APP_SCHEME = 'biblestrong://'
 const UPDATE_CHECK_DELAY_MS = 15_000
@@ -30,14 +32,17 @@ export const desktopLinkRoute = (url: string): string | undefined => {
 }
 
 /**
- * What only the desktop app does at runtime: the native menu, links handed over by the system,
- * updates, and the last key-value writes before the app quits. Renders nothing.
+ * What only the desktop app does at runtime: the native menu, the window's appearance and title,
+ * links handed over by the system, updates, and the last key-value writes before the app quits.
+ * Renders nothing.
  */
 const DesktopShell = () => {
   const router = useRouter()
   const { i18n } = useTranslation()
   const downloading = useAtomValue(isQueueProcessingAtom)
   useDesktopAppearance()
+  useDesktopWindowTitle()
+  useDesktopFullscreen()
 
   // A hidden page must not freeze halfway through an installation. The shell turns WebKit's
   // throttling off on macOS 14+; Chromium (Windows) does not freeze a page holding a Web Lock.
@@ -67,7 +72,7 @@ const DesktopShell = () => {
         const [kind, ...rest] = payload.split(':')
         const value = rest.join(':')
         if (kind === 'shortcut' && isMenuShortcut(value)) {
-          ;(document.activeElement ?? document.body).dispatchEvent(shortcutKeyboardEvent(value))
+          runMenuShortcut(value)
         } else if (kind === 'navigate') {
           router.push(value as never)
         } else if (kind === 'open') {

@@ -1,11 +1,13 @@
-//! The ground of the reader's theme, so that no white shows before a page paints.
+//! The ground and the light or dark appearance of the reader's theme, so that no white shows
+//! before a page paints and the title bar matches the page.
 //!
 //! JavaScript keeps the current theme's background and scheme in the key-value store
 //! (`desktop.appearance`, written by `DesktopShell`). The next launch opens its window with that
-//! color, and every page load gets it from the bootstrap script, before the bundle runs.
+//! color and appearance, and every page load gets it from the bootstrap script, before the
+//! bundle runs.
 
 use serde::Deserialize;
-use tauri::window::Color;
+use tauri::{window::Color, Theme};
 
 pub const KV_KEY: &str = "desktop.appearance";
 
@@ -13,13 +15,35 @@ pub const KV_KEY: &str = "desktop.appearance";
 pub struct Appearance {
     pub background: Color,
     pub dark: bool,
+    /// The reader's theme follows the system: so does the window.
+    pub follows_system: bool,
+}
+
+impl Appearance {
+    pub fn window_theme(&self) -> Option<Theme> {
+        window_theme(self.follows_system, self.dark)
+    }
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct Stored {
     background: String,
     #[serde(default)]
     scheme: Option<String>,
+    #[serde(default)]
+    follows_system: bool,
+}
+
+/// The title bar draws in the theme's appearance. A theme that follows the system leaves the
+/// window to the system too: forced, the window would also answer the page's
+/// `prefers-color-scheme`, and the theme could no longer see the system change.
+fn window_theme(follows_system: bool, dark: bool) -> Option<Theme> {
+    match (follows_system, dark) {
+        (true, _) => None,
+        (false, true) => Some(Theme::Dark),
+        (false, false) => Some(Theme::Light),
+    }
 }
 
 fn channel(value: &str) -> Option<u8> {
@@ -67,6 +91,7 @@ pub fn parse_stored(value: &str) -> Option<Appearance> {
     Some(Appearance {
         background: parse_color(&stored.background)?,
         dark: stored.scheme.as_deref() == Some("dark"),
+        follows_system: stored.follows_system,
     })
 }
 
@@ -81,12 +106,21 @@ pub fn page_script(appearance: &Appearance) -> String {
     )
 }
 
-/// The window and its webview take the theme's ground when the reader changes theme.
+/// The window and its webview take the theme's ground and appearance when the reader changes
+/// theme.
 #[tauri::command]
-pub fn window_set_background(window: tauri::WebviewWindow, color: String) -> Result<(), String> {
+pub fn window_set_appearance(
+    window: tauri::WebviewWindow,
+    color: String,
+    scheme: String,
+    follows_system: bool,
+) -> Result<(), String> {
     let color = parse_color(&color).ok_or_else(|| format!("Not a color: {color}"))?;
     window
         .set_background_color(Some(color))
+        .map_err(|error| error.to_string())?;
+    window
+        .set_theme(window_theme(follows_system, scheme == "dark"))
         .map_err(|error| error.to_string())
 }
 
@@ -127,12 +161,18 @@ mod tests {
             parse_stored(r#"{"background":"rgb(18,45,66)","scheme":"dark"}"#),
             Some(Appearance {
                 background: Color(18, 45, 66, 255),
-                dark: true
+                dark: true,
+                follows_system: false,
             })
         );
         assert_eq!(
             parse_stored(r##"{"background":"#FFFAF8","scheme":"light"}"##).map(|a| a.dark),
             Some(false)
+        );
+        assert_eq!(
+            parse_stored(r##"{"background":"#FFFAF8","scheme":"light","followsSystem":true}"##)
+                .map(|a| a.follows_system),
+            Some(true)
         );
         assert_eq!(parse_stored(r#"{"background":"red"}"#), None);
         assert_eq!(parse_stored("not json"), None);
@@ -143,11 +183,20 @@ mod tests {
         let script = page_script(&Appearance {
             background: Color(18, 45, 66, 255),
             dark: true,
+            follows_system: false,
         });
         assert_eq!(
             script,
             "document.documentElement.style.backgroundColor='rgb(18, 45, 66)';\
              document.documentElement.style.colorScheme='dark';"
         );
+    }
+
+    #[test]
+    fn leaves_the_window_to_the_system_only_when_the_theme_follows_it() {
+        assert_eq!(window_theme(false, true), Some(Theme::Dark));
+        assert_eq!(window_theme(false, false), Some(Theme::Light));
+        assert_eq!(window_theme(true, true), None);
+        assert_eq!(window_theme(true, false), None);
     }
 }

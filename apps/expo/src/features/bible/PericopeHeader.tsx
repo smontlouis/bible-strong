@@ -11,6 +11,7 @@ import Back from '~common/Back'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useWorkspaceHeaderInset } from '~features/app-switcher/workspaceHeaderInset'
+import { windowDragRegion } from '~features/app-switcher/windowChrome'
 
 const HeaderBox = (
   componentProps: Omit<UIComponentProps<typeof Box>, 'theme'> & {
@@ -58,7 +59,11 @@ function PericopeHeader({ hasBackButton, title }: PericopeHeaderProps) {
   const workspaceHeaderInset = useWorkspaceHeaderInset()
 
   return (
-    <HeaderBox className="overflow-visible" style={{ paddingLeft: workspaceHeaderInset }}>
+    <HeaderBox
+      className="overflow-visible"
+      style={{ paddingLeft: workspaceHeaderInset }}
+      dataSet={windowDragRegion(workspaceHeaderInset)}
+    >
       <PageContent className="flex-[1] items-center flex-row">
         <Box className="overflow-hidden border-continuous justify-center">
           {hasBackButton && (

@@ -10,6 +10,7 @@ import {
   useWorkspaceHeaderInset,
   WORKSPACE_SIDEBAR_BUTTON_HEIGHT,
 } from '~features/app-switcher/workspaceHeaderInset'
+import { windowDragRegion } from '~features/app-switcher/windowChrome'
 import useLogin from '~helpers/useLogin'
 import { useTheme } from '~themes/ThemeProvider'
 import HomeSearch from './HomeSearch'
@@ -27,7 +28,8 @@ const HomeHeader = () => {
   const { isLogged, user } = useLogin()
   const isWide = useResponsiveWorkspace()
   // The home has no header bar: its greeting starts below the sidebar button.
-  const sidebarButtonClearance = useWorkspaceHeaderInset() ? WORKSPACE_SIDEBAR_BUTTON_HEIGHT : 20
+  const workspaceHeaderInset = useWorkspaceHeaderInset()
+  const sidebarButtonClearance = workspaceHeaderInset ? WORKSPACE_SIDEBAR_BUTTON_HEIGHT : 20
   const search = Platform.OS === 'web' && isWide
   const firstName = user.displayName?.trim().split(/\s+/)[0]
   const date = new Date().toLocaleDateString(i18n.language, {
@@ -40,6 +42,7 @@ const HomeHeader = () => {
     <Box
       className={`flex-row items-end justify-between gap-[12px] px-[20px] ${search ? 'flex-wrap' : ''}`}
       style={{ paddingTop: sidebarButtonClearance }}
+      dataSet={windowDragRegion(workspaceHeaderInset)}
     >
       <Box className="min-w-0" style={search ? { flexGrow: 1, flexBasis: 240 } : { flex: 1 }}>
         <Text className="text-[12px] leading-[16px] font-medium uppercase tracking-[1.5px] text-grey">

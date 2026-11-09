@@ -34,6 +34,10 @@ import {
   WORKSPACE_SIDEBAR_BUTTON_WIDTH,
   WorkspaceHeaderInsetProvider,
 } from './workspaceHeaderInset'
+import { useWindowControlsInset } from './windowChrome'
+
+/** Room between the sidebar button's edge and its icon. */
+const SIDEBAR_BUTTON_ICON_INSET = 12
 
 // global.web.css animates the sidebar on the web; native runs the same motion through Reanimated.
 const SidebarMotionBox = Platform.OS === 'web' ? Box : AnimatedBox
@@ -71,6 +75,12 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
   const inset = isWide && workspaceSidebarVariant === 'inset'
   // The inset panel keeps its gap on the left only when no sidebar sits beside it.
   const contentLeft = sidebarBesideContent ? sidebarWidth : inset ? WORKSPACE_FRAME_GAP : 0
+  // Without the sidebar beside it, the page reaches the window buttons of the desktop app on
+  // macOS: the sidebar button, and the page headers with it, move past them.
+  const windowControlsInset = useWindowControlsInset()
+  const sidebarButtonLeft = sidebarBesideContent
+    ? 0
+    : Math.max(0, windowControlsInset - contentLeft - SIDEBAR_BUTTON_ICON_INSET)
   useEffect(() => {
     setOverlayOpen(false)
   }, [overlayMode, isWide, pathname])
@@ -188,7 +198,10 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
       >
         {/* Page headers leave this button's room, so it never moves their content. */}
         {isWide && (
-          <Box className="absolute left-0 z-20 bg-transparent" style={{ top: insets.top }}>
+          <Box
+            className="absolute z-20 bg-transparent"
+            style={{ top: insets.top, left: sidebarButtonLeft }}
+          >
             <TouchableBox
               testID="workspace-sidebar-toggle"
               className="items-center justify-center"
@@ -210,7 +223,9 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
             </TouchableBox>
           </Box>
         )}
-        <WorkspaceHeaderInsetProvider value={isWide ? WORKSPACE_SIDEBAR_BUTTON_WIDTH : 0}>
+        <WorkspaceHeaderInsetProvider
+          value={isWide ? sidebarButtonLeft + WORKSPACE_SIDEBAR_BUTTON_WIDTH : 0}
+        >
           <Box className="flex-1 min-h-0">
             {isWide && (
               <Box

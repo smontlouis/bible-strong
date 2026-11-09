@@ -1,8 +1,13 @@
 const mockSet = jest.fn()
 const mockInvoke = jest.fn((..._args: unknown[]) => Promise.resolve())
 let mockTheme = 'dark'
+let mockPreferredColorScheme: string | undefined = 'dark'
 
 jest.mock('~helpers/useCurrentThemeSelector', () => () => ({ theme: mockTheme }))
+jest.mock('react-redux', () => ({
+  useSelector: (select: (state: unknown) => unknown) =>
+    select({ user: { bible: { settings: { preferredColorScheme: mockPreferredColorScheme } } } }),
+}))
 jest.mock('~helpers/storage.desktop', () => ({
   storage: { set: (...args: unknown[]) => mockSet(...args) },
 }))
@@ -31,7 +36,7 @@ const Probe = () => {
   return null
 }
 
-describe('the window ground follows the theme', () => {
+describe('the window ground and title bar follow the theme', () => {
   beforeAll(() => {
     ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
   })
@@ -39,6 +44,7 @@ describe('the window ground follows the theme', () => {
   beforeEach(() => {
     mockSet.mockClear()
     mockInvoke.mockClear()
+    mockPreferredColorScheme = 'dark'
   })
 
   it('stores the dark ground for the next launch and paints the window with it', () => {
@@ -48,13 +54,18 @@ describe('the window ground follows the theme', () => {
     })
     expect(mockSet).toHaveBeenCalledWith(
       APPEARANCE_KEY,
-      JSON.stringify({ background: '#0e1521', scheme: 'dark' })
+      JSON.stringify({ background: '#0e1521', scheme: 'dark', followsSystem: false })
     )
-    expect(mockInvoke).toHaveBeenCalledWith('window_set_background', { color: '#0e1521' })
+    expect(mockInvoke).toHaveBeenCalledWith('window_set_appearance', {
+      color: '#0e1521',
+      scheme: 'dark',
+      followsSystem: false,
+    })
   })
 
   it('follows a change to a light theme', () => {
     mockTheme = 'dark'
+    mockPreferredColorScheme = 'light'
     let renderer: ReactTestRenderer | undefined
     act(() => {
       renderer = create(<Probe />)
@@ -65,10 +76,27 @@ describe('the window ground follows the theme', () => {
     })
     expect(mockSet).toHaveBeenLastCalledWith(
       APPEARANCE_KEY,
-      JSON.stringify({ background: 'rgb(245,242,227)', scheme: 'light' })
+      JSON.stringify({ background: 'rgb(245,242,227)', scheme: 'light', followsSystem: false })
     )
-    expect(mockInvoke).toHaveBeenLastCalledWith('window_set_background', {
+    expect(mockInvoke).toHaveBeenLastCalledWith('window_set_appearance', {
       color: 'rgb(245,242,227)',
+      scheme: 'light',
+      followsSystem: false,
     })
+  })
+
+  it('leaves the title bar to the system when the theme follows the system', () => {
+    mockTheme = 'dark'
+    for (const preference of ['auto', undefined]) {
+      mockPreferredColorScheme = preference
+      act(() => {
+        create(<Probe />)
+      })
+      expect(mockInvoke).toHaveBeenLastCalledWith('window_set_appearance', {
+        color: '#0e1521',
+        scheme: 'dark',
+        followsSystem: true,
+      })
+    }
   })
 })

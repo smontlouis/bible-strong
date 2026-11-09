@@ -40,6 +40,7 @@ import { useOpenInNewTab } from './utils/useOpenInNewTab'
 import { shortcutTitle } from '~features/keyboard-shortcuts/shortcutTitle'
 import { floatingShadow, radii } from '~common/ui/surfaces'
 import { useWorkspaceSidebarWidth, workspaceSidebarVariant } from './utils/useResponsiveWorkspace'
+import { sidebarDragRegion, useWindowControlsInset } from './windowChrome'
 
 const sidebarFrameClassName = {
   inset: 'bg-canvas',
@@ -68,6 +69,8 @@ const WorkspaceSidebar = ({
 
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
+  // The desktop app on macOS sets its window buttons in this header, which drags the window.
+  const windowControlsInset = useWindowControlsInset()
   const sidebarWidth = useWorkspaceSidebarWidth()
   const { colorScheme } = useCurrentThemeSelector()
   const rowHeight = Platform.OS === 'web' ? 32 : 44
@@ -123,9 +126,16 @@ const WorkspaceSidebar = ({
               : { width: sidebarWidth }),
           }}
         >
-          <HStack className="overflow-hidden border-continuous items-center pl-[20px] pr-[8px] py-[10px]">
+          <HStack
+            className="overflow-hidden border-continuous items-center pl-[20px] pr-[8px] py-[10px]"
+            // Centred on the page headers' line, like the window buttons beside it.
+            style={
+              windowControlsInset ? { paddingLeft: windowControlsInset, paddingTop: 15 } : undefined
+            }
+            dataSet={sidebarDragRegion}
+          >
             <TouchableBox
-              className="flex-1 flex-row items-center min-h-[40px]"
+              className={`${windowControlsInset ? '' : 'flex-1 '}flex-row items-center min-h-[40px]`}
               onPress={openHome}
               accessibilityRole="button"
               accessibilityLabel={`Bible Strong — ${t('accessibility.home')}`}
@@ -135,7 +145,11 @@ const WorkspaceSidebar = ({
                 style={{ width: 24, height: 24, borderRadius: 12 }}
                 accessible={false}
               />
-              <Text className="flex-1 ml-[10px] font-bold text-[15px]">Bible Strong</Text>
+              <Text
+                className={`${windowControlsInset ? 'shrink' : 'flex-1'} ml-[10px] font-bold text-[15px]`}
+              >
+                Bible Strong
+              </Text>
             </TouchableBox>
           </HStack>
           {/* A desktop scrollbar would take its width from the right margin of the rows only. */}

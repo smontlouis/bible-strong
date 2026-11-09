@@ -8,6 +8,7 @@ import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from './ui/Icon'
 import { useWorkspaceHeaderInset } from '~features/app-switcher/workspaceHeaderInset'
+import { windowDragRegion } from '~features/app-switcher/windowChrome'
 interface Props {
   maxWidth?: number
   background?: boolean
@@ -43,6 +44,7 @@ const Header = ({
     <Box
       {...props}
       testID="workspace-page-header"
+      dataSet={windowDragRegion(workspaceHeaderInset)}
       className={twMerge(
         'overflow-hidden border-continuous border-separator',
         background ? 'bg-reverse' : ''

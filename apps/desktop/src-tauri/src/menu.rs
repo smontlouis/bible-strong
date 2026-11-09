@@ -2,7 +2,9 @@
 //!
 //! Items that drive the workspace carry the web app's own chords (`keymap.ts`) and only tell
 //! JavaScript which shortcut to run, so one action never has two implementations. The Edit
-//! menu also gives macOS its clipboard and undo key equivalents inside the webview.
+//! menu also gives macOS its clipboard and undo key equivalents inside the webview. The Bible
+//! menu's shortcuts are bare keys (arrows, letters): a native key equivalent would take them
+//! from every text field, so its items carry none.
 
 use tauri::{
     menu::{AboutMetadataBuilder, Menu, MenuBuilder, MenuItem, PredefinedMenuItem, SubmenuBuilder},
@@ -15,6 +17,7 @@ struct Labels {
     file: &'static str,
     edit: &'static str,
     view: &'static str,
+    bible: &'static str,
     window: &'static str,
     help: &'static str,
     settings: &'static str,
@@ -23,6 +26,11 @@ struct Labels {
     palette: &'static str,
     downloads: &'static str,
     sidebar: &'static str,
+    previous_chapter: &'static str,
+    next_chapter: &'static str,
+    go_to_verse: &'static str,
+    presentation: &'static str,
+    compare: &'static str,
     shortcuts: &'static str,
     website: &'static str,
     support: &'static str,
@@ -33,6 +41,7 @@ const FRENCH: Labels = Labels {
     file: "Fichier",
     edit: "Édition",
     view: "Présentation",
+    bible: "Bible",
     window: "Fenêtre",
     help: "Aide",
     settings: "Réglages…",
@@ -41,6 +50,11 @@ const FRENCH: Labels = Labels {
     palette: "Rechercher une action…",
     downloads: "Téléchargements",
     sidebar: "Afficher ou masquer la barre latérale",
+    previous_chapter: "Chapitre précédent",
+    next_chapter: "Chapitre suivant",
+    go_to_verse: "Aller au verset…",
+    presentation: "Texte, Strong ou interlinéaire",
+    compare: "Comparer les versets sélectionnés",
     shortcuts: "Raccourcis clavier",
     website: "Site de Bible Strong",
     support: "Nous contacter",
@@ -51,6 +65,7 @@ const ENGLISH: Labels = Labels {
     file: "File",
     edit: "Edit",
     view: "View",
+    bible: "Bible",
     window: "Window",
     help: "Help",
     settings: "Settings…",
@@ -59,6 +74,11 @@ const ENGLISH: Labels = Labels {
     palette: "Search Actions…",
     downloads: "Downloads",
     sidebar: "Show or Hide Sidebar",
+    previous_chapter: "Previous Chapter",
+    next_chapter: "Next Chapter",
+    go_to_verse: "Go to Verse…",
+    presentation: "Text, Strong or Interlinear",
+    compare: "Compare Selected Verses",
     shortcuts: "Keyboard Shortcuts",
     website: "Bible Strong Website",
     support: "Contact Us",
@@ -127,6 +147,19 @@ pub fn build<R: Runtime>(app: &AppHandle<R>, language: &str) -> tauri::Result<Me
         .separator()
         .item(&PredefinedMenuItem::fullscreen(app, None)?);
 
+    let bible = SubmenuBuilder::new(app, labels.bible)
+        .item(&item(
+            "shortcut:previousChapter",
+            labels.previous_chapter,
+            None,
+        )?)
+        .item(&item("shortcut:nextChapter", labels.next_chapter, None)?)
+        .item(&item("shortcut:goToVerse", labels.go_to_verse, None)?)
+        .separator()
+        .item(&item("shortcut:strongMode", labels.presentation, None)?)
+        .separator()
+        .item(&item("shortcut:compare", labels.compare, None)?);
+
     let window = SubmenuBuilder::new(app, labels.window)
         .item(&PredefinedMenuItem::minimize(app, None)?)
         .item(&PredefinedMenuItem::maximize(app, None)?)
@@ -184,6 +217,7 @@ pub fn build<R: Runtime>(app: &AppHandle<R>, language: &str) -> tauri::Result<Me
     menu.item(&file.build()?)
         .item(&edit.build()?)
         .item(&view.build()?)
+        .item(&bible.build()?)
         .item(&window.build()?)
         .item(&help.build()?)
         .build()

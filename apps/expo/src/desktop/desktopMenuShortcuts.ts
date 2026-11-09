@@ -6,6 +6,11 @@ export const MENU_SHORTCUTS = [
   'closeTab',
   'palette',
   'sidebar',
+  'previousChapter',
+  'nextChapter',
+  'goToVerse',
+  'strongMode',
+  'compare',
 ] as const satisfies readonly ShortcutId[]
 
 export type MenuShortcut = (typeof MENU_SHORTCUTS)[number]
@@ -33,4 +38,20 @@ export const shortcutKeyboardEvent = (id: MenuShortcut, mac = isMacPlatform()): 
     altKey: !mac && 'workspace' in chord && !!chord.workspace,
     shiftKey: 'shift' in chord && chord.shift === true,
   })
+}
+
+/**
+ * Where the key press goes. A chord with ⌘ or the workspace modifier works from a field, so it
+ * goes where the focus is. A bare key acts on the Bible only outside a field: a menu item chosen
+ * while a field has the focus still means the Bible, so its key press goes to the page.
+ */
+export const menuShortcutTarget = (id: MenuShortcut, doc: Document = document): EventTarget => {
+  const [chord] = SHORTCUTS[id]
+  const modified =
+    ('command' in chord && !!chord.command) || ('workspace' in chord && !!chord.workspace)
+  return modified ? (doc.activeElement ?? doc.body) : doc.body
+}
+
+export const runMenuShortcut = (id: MenuShortcut) => {
+  menuShortcutTarget(id).dispatchEvent(shortcutKeyboardEvent(id))
 }

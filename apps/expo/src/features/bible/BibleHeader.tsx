@@ -66,6 +66,7 @@ import type { BibleTextModeKind } from './BibleTextModeSheets'
 import type { BibleTextModeColumn } from '~helpers/bibleColumnTextModes'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
 import { useWorkspaceHeaderInset } from '~features/app-switcher/workspaceHeaderInset'
+import { windowDragRegion } from '~features/app-switcher/windowChrome'
 interface BibleHeaderProps {
   bibleAtom: PrimitiveAtom<BibleTab>
   isFormSheet?: boolean
@@ -554,6 +555,7 @@ const Header = ({
         },
       ]}
       testID="workspace-page-header"
+      dataSet={windowDragRegion(workspaceHeaderInset)}
       key={planPassage ? 'plan-header' : hasFocusVerses ? 'focused-header' : 'chapter-header'}
       entering={FadeIn}
       exiting={FadeOut}

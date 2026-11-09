@@ -17,8 +17,9 @@ mod sqlite;
 
 use std::time::Duration;
 use tauri::{
-    utils::config::BackgroundThrottlingPolicy, webview::PageLoadEvent, Emitter, Manager, RunEvent,
-    WebviewUrl, WebviewWindowBuilder,
+    utils::config::{BackgroundThrottlingPolicy, WindowConfig},
+    webview::PageLoadEvent,
+    Emitter, LogicalSize, Manager, RunEvent, WebviewUrl, WebviewWindowBuilder,
 };
 use tauri_plugin_deep_link::DeepLinkExt;
 
@@ -33,21 +34,48 @@ fn release_page_resources(app: &tauri::AppHandle) {
     sign_in::cancel(&app.state::<sign_in::SignIn>());
 }
 
+/// The smallest window: always the wide workspace (the narrow layout starts below 768), whose
+/// headers leave room for the window buttons.
+const MIN_WIDTH: f64 = 800.0;
+const MIN_HEIGHT: f64 = 540.0;
+
 fn create_main_window(app: &tauri::AppHandle) -> tauri::Result<()> {
-    let mut builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::App("index.html".into()));
-    // The last theme's ground, so that the window is not white before the first paint.
+    #[cfg_attr(not(target_os = "macos"), allow(unused_mut))]
+    let mut config = WindowConfig {
+        label: "main".into(),
+        url: WebviewUrl::App("index.html".into()),
+        ..Default::default()
+    };
+    // macOS: no title bar. The window buttons sit in the sidebar's header, centred 35 points
+    // from the top like the page headers (y is the top of the buttons plus 9), and the page
+    // leaves them their room (`windowControls.ts` counts on the first at x 20). Set on the window
+    // through its config, the position survives the title changes, which put the buttons back
+    // in their default place otherwise. The title still names the window in Mission Control and
+    // the Window menu.
+    #[cfg(target_os = "macos")]
+    {
+        config.title_bar_style = tauri::TitleBarStyle::Overlay;
+        config.hidden_title = true;
+        config.traffic_light_position =
+            Some(tauri::utils::config::LogicalPosition { x: 20.0, y: 37.0 });
+    }
+    let mut builder = WebviewWindowBuilder::from_config(app, &config)?;
+    // The last theme's ground and appearance, so that the window is not white before the first
+    // paint and its title bar matches the page.
     let stored = app.state::<kv::KvStore>().get(appearance::KV_KEY);
     if let Some(stored) = stored
         .ok()
         .flatten()
         .and_then(|value| appearance::parse_stored(&value))
     {
-        builder = builder.background_color(stored.background);
+        builder = builder
+            .background_color(stored.background)
+            .theme(stored.window_theme());
     }
-    builder
+    let window = builder
         .title("Bible Strong")
         .inner_size(1280.0, 840.0)
-        .min_inner_size(760.0, 540.0)
+        .min_inner_size(MIN_WIDTH, MIN_HEIGHT)
         .initialization_script(bootstrap::initialization_script())
         // One origin for good: changing it later would lose the webview's stored data.
         .use_https_scheme(true)
@@ -62,6 +90,16 @@ fn create_main_window(app: &tauri::AppHandle) -> tauri::Result<()> {
             }
         })
         .build()?;
+    // The saved window state is restored as it was, even below the minimum (an older version
+    // allowed 760 points).
+    let scale = window.scale_factor()?;
+    let size = window.inner_size()?.to_logical::<f64>(scale);
+    if size.width < MIN_WIDTH || size.height < MIN_HEIGHT {
+        window.set_size(LogicalSize::new(
+            size.width.max(MIN_WIDTH),
+            size.height.max(MIN_HEIGHT),
+        ))?;
+    }
     Ok(())
 }
 
@@ -95,7 +133,7 @@ pub fn run() {
         .register_uri_scheme_protocol(bootstrap::SCHEME, bootstrap::handle)
         .invoke_handler(tauri::generate_handler![
             app_exit,
-            appearance::window_set_background,
+            appearance::window_set_appearance,
             archive::archive_unzip,
             archive::archive_extract_encrypted,
             devtools::dev_snapshot,

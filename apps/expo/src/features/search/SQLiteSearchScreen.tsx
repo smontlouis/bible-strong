@@ -106,6 +106,7 @@ import {
 } from './searchAnalyticsModel'
 import { createSearchExperienceController } from './searchExperience'
 import { useWorkspaceHeaderInset } from '~features/app-switcher/workspaceHeaderInset'
+import { windowDragRegion } from '~features/app-switcher/windowChrome'
 type Props = {
   searchValue: string
   setSearchValue: (value: string) => void
@@ -1326,6 +1327,7 @@ const SQLiteSearchScreen = ({
         testID="workspace-page-header"
         className="border-separator"
         style={{ borderBottomWidth: StyleSheet.hairlineWidth, paddingLeft: workspaceHeaderInset }}
+        dataSet={windowDragRegion(workspaceHeaderInset)}
       >
         <PageContent>
           <HStack className="items-center gap-[4px] pl-[20px] pt-[6px] pb-[4px]">
