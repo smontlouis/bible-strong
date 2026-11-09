@@ -30,7 +30,9 @@ translated.
   topical sources.
 - The two routes answer apart. `/search` answers only the verses that contain the words; Reciprocal
   Rank Fusion with the topics the query names lifts the verses those topics also cover (`hybrid`),
-  and a verse is answered alone, without the topic's range. `/semantic-search` answers the passages
+  and a verse is answered alone, without the topic's range. The verses that hold the words as typed
+  (whole words in order, accents and case aside) come before those that hold only another form of
+  them, whatever the topics lift. `/semantic-search` answers the passages
   of the topics the query names, matches by alias or comes close to in meaning, and leaves out the
   single verses that contain the words, which `/search` already shows; a passage of several verses
   stays even when its first verse contains them. Exact/controlled topic matches are weighted above

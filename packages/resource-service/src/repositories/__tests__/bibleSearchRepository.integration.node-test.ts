@@ -452,7 +452,7 @@ describe('Bible search PostgreSQL repository', { skip: !runIntegration }, () => 
           metadata: {
             resource_revision: 'lsg-words-topics-r1',
             text_revision: 'lsg-words-topics-r1',
-            canon: { id: 'protestant-66', orderedBooks: [43, 50] },
+            canon: { id: 'protestant-66', orderedBooks: [1, 43, 45, 50] },
           },
         })
         .returning('id')
@@ -474,39 +474,62 @@ describe('Bible search PostgreSQL repository', { skip: !runIntegration }, () => 
           verse(43, 14, 28, 'Vous avez entendu que je vous ai dit : Je m’en vais.'),
           verse(43, 16, 33, 'Je vous ai dit ces choses, afin que vous ayez la paix en moi.'),
           verse(50, 4, 6, 'Ne vous inquiétez de rien.'),
+          verse(1, 32, 28, 'Ton nom ne sera plus Jacob, mais tu seras appelé Israël.'),
+          verse(45, 11, 1, 'Car moi aussi je suis Israélite, de la postérité d’Abraham.'),
         ])
         .execute()
 
       await database
         .insertInto('thematic_topics')
-        .values({
-          id: 'topic:peace',
-          canonical_name: 'Peace',
-          normalized_name: 'peace',
-          language: 'en',
-          active: true,
-        })
+        .values([
+          {
+            id: 'topic:peace',
+            canonical_name: 'Peace',
+            normalized_name: 'peace',
+            language: 'en',
+            active: true,
+          },
+          {
+            id: 'topic:israel',
+            canonical_name: 'Israel',
+            normalized_name: 'israel',
+            language: 'en',
+            active: true,
+          },
+        ])
         .execute()
       await database
         .insertInto('thematic_topic_aliases')
-        .values({
-          topic_id: 'topic:peace',
-          language: 'fr',
-          alias: 'Paix',
-          normalized_alias: 'paix',
-          method: 'editorial-controlled',
-          validation_status: 'validated',
-          is_preferred: true,
-        })
+        .values([
+          {
+            topic_id: 'topic:peace',
+            language: 'fr',
+            alias: 'Paix',
+            normalized_alias: 'paix',
+            method: 'editorial-controlled',
+            validation_status: 'validated',
+            is_preferred: true,
+          },
+          {
+            topic_id: 'topic:israel',
+            language: 'fr',
+            alias: 'Israël',
+            normalized_alias: 'israel',
+            method: 'editorial-controlled',
+            validation_status: 'validated',
+            is_preferred: true,
+          },
+        ])
         .execute()
       const passage = (
         source: string,
+        topicId: string,
         book: number,
         chapter: number,
         verseStart: number,
         verseEnd: number
       ) => ({
-        topic_id: 'topic:peace',
+        topic_id: topicId,
         source,
         book,
         chapter_start: chapter,
@@ -521,11 +544,13 @@ describe('Bible search PostgreSQL repository', { skip: !runIntegration }, () => 
         .insertInto('thematic_topic_passages')
         .values([
           // The verse that contains the word: standard mode shows it, semantic mode leaves it.
-          passage('openbible', 43, 14, 27, 27),
+          passage('openbible', 'topic:peace', 43, 14, 27, 27),
           // The passage that starts on it: more than the verse, so it stays with the topic.
-          passage('torrey', 43, 14, 27, 28),
+          passage('torrey', 'topic:peace', 43, 14, 27, 28),
           // A verse of the topic without the word.
-          passage('openbible', 50, 4, 6, 6),
+          passage('openbible', 'topic:peace', 50, 4, 6, 6),
+          // The topic lifts a verse that has only another form of the word.
+          passage('openbible', 'topic:israel', 45, 11, 1, 1),
         ])
         .execute()
 
@@ -570,6 +595,16 @@ describe('Bible search PostgreSQL repository', { skip: !runIntegration }, () => 
         [
           [43, 14, 27, 28, 'topic', 'Paix'],
           [50, 4, 6, 6, 'topic', 'Paix'],
+        ]
+      )
+
+      // The word as typed comes first, even when a topic lifts another form of it.
+      const israel = await search('Israël', 'standard')
+      assert.deepEqual(
+        israel.results.map(result => [result.book, result.chapter, result.verse, result.match?.kind]),
+        [
+          [1, 32, 28, 'lexical'],
+          [45, 11, 1, 'hybrid'],
         ]
       )
 

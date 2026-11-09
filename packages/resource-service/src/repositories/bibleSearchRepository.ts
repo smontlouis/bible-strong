@@ -195,10 +195,13 @@ export const makeKyselyBibleSearchRepository = (
             )`
           : sql`TRUE`
       const resultFilter = input.mode === 'standard' ? sql`has_lexical` : sql`TRUE`
+      // In standard mode the words as typed come before their other forms, whatever topics lift.
       const resultOrder =
         input.sortOrder === 'book'
           ? sql`canonical_book_order, chapter, verse, version_order`
-          : sql`fused_score DESC, canonical_book_order, chapter, verse, version_order`
+          : input.mode === 'standard'
+            ? sql`match_tier, fused_score DESC, canonical_book_order, chapter, verse, version_order`
+            : sql`fused_score DESC, canonical_book_order, chapter, verse, version_order`
       const limit = input.limit ?? 100
       const offset = input.offset ?? 0
 
@@ -241,8 +244,13 @@ export const makeKyselyBibleSearchRepository = (
                    bv.verse,
                    bv.text,
                    array_position(ap.canonical_books, bv.book) AS canonical_book_order,
+                   -- Tier 0: the words as typed, whole and in order, accents and case aside;
+                   -- tier 1: their other forms (stems, prefixes).
                    CASE
-                     WHEN strpos(lower(bv.text), lower(${parsed?.raw ?? query})) > 0 THEN 0
+                     WHEN strpos(
+                       ' ' || ${normalizedText} || ' ',
+                       ' ' || ${normalizedQuery} || ' '
+                     ) > 0 THEN 0
                      ELSE 1
                    END AS match_tier,
                    ${relevanceScore} AS relevance_score
