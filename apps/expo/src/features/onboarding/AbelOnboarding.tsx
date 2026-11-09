@@ -112,8 +112,6 @@ const StrongCarouselPrompt = ({
   entering,
   exiting,
 }: StrongCarouselPromptProps) => {
-  const stylingTheme = useStylingTheme()
-
   const properPromptStyle = useAnimatedStyle(() => {
     const rawPhase = carouselProgress.get() % 2
     const phase = rawPhase < 0 ? rawPhase + 2 : rawPhase
@@ -153,7 +151,7 @@ const StrongCarouselPrompt = ({
   const renderPrompt = (prompt: string) => (
     <Text
       className="text-[25px] leading-[32px] text-center"
-      style={[titleFontStyle(stylingTheme), { fontFamily: 'Literata Book' }]}
+      style={{ fontFamily: 'Literata Book' }}
     >
       {prompt}
     </Text>
@@ -554,14 +552,11 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
             >
               <Text
                 className="text-center"
-                style={[
-                  {
-                    fontSize: currentScene.id === 'scene-one' ? 32 : isFinalScene ? 22 : 25,
-                    lineHeight: currentScene.id === 'scene-one' ? 38 : isFinalScene ? 26 : 32,
-                    ...titleFontStyle(stylingTheme),
-                  },
-                  { fontFamily: 'Literata Book' },
-                ]}
+                style={{
+                  fontSize: currentScene.id === 'scene-one' ? 32 : isFinalScene ? 22 : 25,
+                  lineHeight: currentScene.id === 'scene-one' ? 38 : isFinalScene ? 26 : 32,
+                  fontFamily: 'Literata Book',
+                }}
               >
                 {t(promptKey)}
               </Text>

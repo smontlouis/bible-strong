@@ -1,5 +1,3 @@
-import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
-import { titleFontStyle } from '~themes/styleValues'
 import type { TFunction } from 'i18next'
 import { type SharedValue, useAnimatedStyle } from 'react-native-reanimated'
 import Box, { AnimatedBox, HStack, VStack } from '~common/ui/Box'
@@ -12,7 +10,6 @@ type SourceCardProps = {
   metrics: OnboardingStageMetrics
   shakeRotation?: SharedValue<number>
   title: string
-  titleItalic?: boolean
   variant?: 'small' | 'large'
 }
 
@@ -23,11 +20,8 @@ export const SourceCard = ({
   metrics,
   shakeRotation,
   title,
-  titleItalic = false,
   variant = 'large',
 }: SourceCardProps) => {
-  const stylingTheme = useStylingTheme()
-
   const s = metrics.s
   const shakeStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${shakeRotation?.get() ?? 0}deg` }],
@@ -58,18 +52,11 @@ export const SourceCard = ({
           />
         </HStack>
         <Text
-          style={[
-            {
-              fontSize: (variant === 'small' ? s(12) : s(16)) || 16,
-              lineHeight: variant === 'small' ? s(18) : s(21),
-              ...titleFontStyle(stylingTheme),
-              fontWeight: !titleItalic ? 'bold' : undefined,
-            },
-            {
-              fontFamily: 'Literata Book',
-              fontStyle: titleItalic ? 'italic' : 'normal',
-            },
-          ]}
+          style={{
+            fontSize: (variant === 'small' ? s(12) : s(16)) || 16,
+            lineHeight: variant === 'small' ? s(18) : s(21),
+            fontFamily: 'Literata Book',
+          }}
         >
           {title}
         </Text>
@@ -112,7 +99,6 @@ export const HevelSourceCard = ({ metrics, shakeRotation, t }: ShakableSourceCar
     metrics={metrics}
     shakeRotation={shakeRotation}
     title={t('onboarding.abel.sceneThree.commonTitle')}
-    titleItalic
     variant="small"
   />
 )

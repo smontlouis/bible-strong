@@ -1,5 +1,4 @@
-import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
-import { titleFontStyle } from '~themes/styleValues'
+import { useTheme } from '~themes/ThemeProvider'
 import { Image } from 'expo-image'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -94,8 +93,6 @@ const VerseCard = ({
   highlightOverrideColor,
   resourceIllustration,
 }: VerseCardProps) => {
-  const stylingTheme = useStylingTheme()
-
   const theme = useTheme()
   const { colorScheme } = useCurrentThemeSelector()
   const { i18n, t } = useTranslation()
@@ -157,12 +154,8 @@ const VerseCard = ({
             <AnimatedText
               className="text-link"
               style={[
-                {
-                  fontSize: s(31) || 16,
-                  lineHeight: s(38),
-                  ...titleFontStyle(stylingTheme),
-                },
-                [{ fontFamily: 'Literata Book' }, dimmedTextStyle],
+                { fontSize: s(31) || 16, lineHeight: s(38), fontFamily: 'Literata Book' },
+                dimmedTextStyle,
               ]}
             >
               {t('onboarding.abel.sceneOne.chapter')}

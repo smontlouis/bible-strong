@@ -39,6 +39,11 @@ const PULP_DISPLAY_FACES = PULP_DISPLAY_WEIGHTS.flatMap(([name, weight]) =>
   }))
 )
 
+// The reading face, Literata Book, built into both apps under the name the app gives it. Android
+// only knew it once the startup's deferred `Font.loadAsync` ran, so the first screens, the
+// onboarding among them, were drawn in Roboto.
+const LITERATA_BOOK = './src/assets/fonts/LiterataBook-Regular.otf'
+
 // The families of public pages a link opens in the application.
 const PUBLIC_RESOURCE_PATHS = [
   '/bible/',
@@ -164,14 +169,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-font',
       {
-        fonts: ['./src/assets/fonts/LiterataBook-Regular.otf'],
         ios: {
-          fonts: PULP_DISPLAY_FACES.map(face => face.path),
+          fonts: [LITERATA_BOOK, ...PULP_DISPLAY_FACES.map(face => face.path)],
         },
         android: {
           fonts: [
             vectorIconFont('feather', 'Feather.ttf'),
             vectorIconFont('ionicons', 'Ionicons.ttf'),
+            {
+              fontFamily: 'Literata Book',
+              fontDefinitions: [{ path: LITERATA_BOOK, weight: 400 }],
+            },
             { fontFamily: 'Pulp Display', fontDefinitions: PULP_DISPLAY_FACES },
           ],
         },

@@ -143,16 +143,7 @@ const StrongDefinitionCard = ({
         >
           הֶבֶל
         </Text>
-        <Text
-          style={[
-            {
-              fontSize: s(28) || 16,
-              lineHeight: s(34),
-              ...titleFontStyle(stylingTheme),
-            },
-            { fontFamily: 'Literata Book', fontStyle: 'italic' },
-          ]}
-        >
+        <Text style={{ fontSize: s(28) || 16, lineHeight: s(34), fontFamily: 'Literata Book' }}>
           {t(definition.transliterationKey)}
         </Text>
       </VStack>

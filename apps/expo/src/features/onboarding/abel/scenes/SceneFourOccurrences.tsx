@@ -144,8 +144,6 @@ const OccurrenceCounter = ({ metrics, t }: StrongLemmaCardProps) => {
 }
 
 const StrongLemmaCard = ({ metrics, t }: StrongLemmaCardProps) => {
-  const stylingTheme = useStylingTheme()
-
   const s = metrics.s
 
   return (
@@ -170,14 +168,7 @@ const StrongLemmaCard = ({ metrics, t }: StrongLemmaCardProps) => {
       </Text>
       <Text
         className="text-link"
-        style={[
-          {
-            fontSize: s(21) || 16,
-            lineHeight: s(24),
-            ...titleFontStyle(stylingTheme),
-          },
-          { fontFamily: 'Literata Book', fontStyle: 'italic' },
-        ]}
+        style={{ fontSize: s(21) || 16, lineHeight: s(24), fontFamily: 'Literata Book' }}
       >
         {t('onboarding.abel.sceneThree.commonTransliteration')}
       </Text>
