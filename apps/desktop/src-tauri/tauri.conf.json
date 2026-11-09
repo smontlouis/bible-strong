@@ -2,7 +2,7 @@
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Bible Strong",
   "mainBinaryName": "Bible Strong",
-  "version": "../package.json",
+  "version": "../../expo/package.json",
   "identifier": "com.smontlouis.biblestrong",
   "build": {
     "frontendDist": "../../expo/dist-desktop",

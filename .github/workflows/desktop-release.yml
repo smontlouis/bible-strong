@@ -1,7 +1,7 @@
 name: Desktop release
 
 # Builds the desktop app (ADR-0107) for macOS, Windows and Linux into the GitHub release
-# `desktop-v<version>`, version from apps/desktop/package.json, then publishes it and points the
+# `desktop-v<version>`, the app's version from apps/expo/package.json, then publishes it and points the
 # readers' updaters at it once all three systems built. With `draft`, it stops at the draft so
 # the installers can be tested; `Desktop promote` publishes it later. Started by
 # `yarn desktop:release [--draft]` (docs/desktop-release.md).
@@ -37,10 +37,10 @@ jobs:
       - name: Refuse a version already published
         id: version
         run: |
-          version=$(node -p "require('./apps/desktop/package.json').version")
+          version=$(node -p "require('./apps/expo/package.json').version")
           published=$(gh release view "desktop-v$version" --json isDraft --jq '.isDraft | not' 2>/dev/null || true)
           if [ "$published" = "true" ]; then
-            echo "desktop-v$version is already published: raise the version in apps/desktop/package.json" >&2
+            echo "desktop-v$version is already published: raise the version in apps/expo/package.json" >&2
             exit 1
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"

@@ -1,6 +1,5 @@
 {
   "name": "@bible-strong/desktop",
-  "version": "0.1.0",
   "private": true,
   "description": "Bible Strong for macOS, Windows and Linux: the Expo web export in a Tauri shell, with Offline copies.",
   "scripts": {

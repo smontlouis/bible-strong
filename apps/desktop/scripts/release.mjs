@@ -1,5 +1,6 @@
 // Starts a desktop release in GitHub Actions, which builds, signs and publishes it
-// (docs/desktop-release.md). The version is the one of apps/desktop/package.json on master.
+// (docs/desktop-release.md). The version is the app's, apps/expo/package.json on master: iOS,
+// Android, the Web and the desktop app share it.
 //
 //   yarn desktop:release            build the three systems, then publish them to the readers
 //   yarn desktop:release --draft    stop at the draft release, to test the installers first
@@ -25,7 +26,7 @@ const { version } = JSON.parse(
     'api',
     '-H',
     'Accept: application/vnd.github.raw+json',
-    `repos/${REPO}/contents/apps/desktop/package.json?ref=master`
+    `repos/${REPO}/contents/apps/expo/package.json?ref=master`
   )
 )
 const tag = `desktop-v${version}`
@@ -55,7 +56,7 @@ if (publish) {
   run('desktop-promote.yml', '-f', `version=${version}`)
 } else {
   if (existing && !existing.isDraft) {
-    throw new Error(`${tag} is already published: raise version in apps/desktop/package.json`)
+    throw new Error(`${tag} is already published: raise the version in apps/expo/package.json`)
   }
   // A draft left by a failed run is reused: the build replaces its installers.
   const into = existing ? `the existing draft ${tag}` : `a draft release ${tag}`

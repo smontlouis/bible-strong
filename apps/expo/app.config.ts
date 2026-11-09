@@ -1,6 +1,9 @@
 import { ExpoConfig, ConfigContext } from 'expo/config'
+import app from './package.json'
 
-const APP_VERSION = '28.0.3'
+// One version for iOS, Android, the Web and the desktop app, kept in package.json: the desktop
+// app reads it there too (apps/desktop/src-tauri/tauri.conf.json).
+const APP_VERSION = app.version
 // Patch releases share a runtime and receive the same OTA updates. Any native change must
 // ship in a new major or minor version, which creates a new runtime.
 const [majorVersion, minorVersion] = APP_VERSION.split('.')

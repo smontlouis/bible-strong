@@ -1,7 +1,20 @@
 # Desktop release
 
-How the desktop app (`apps/desktop`, ADR-0107) is built, signed and delivered. The version is
-`apps/desktop/package.json`; raise it before a release.
+How the desktop app (`apps/desktop`, ADR-0107) is built, signed and delivered.
+
+## Version
+
+iOS, Android, the Web and the desktop app carry one version: `version` in
+`apps/expo/package.json`, which `apps/expo/app.config.ts` and `src-tauri/tauri.conf.json` both
+read. The desktop app releases whatever version `master` carries; a version is published only
+once, so a desktop-only fix (the Rust, an installer) raises the patch for everyone, and the mobile
+apps may skip that number. A suffix does not work: the updater ignores `+1` when it compares, and
+`-1` is a pre-release, older than the version it extends. The patch never changes the mobile
+runtime (major.minor), so OTA updates are not affected.
+
+The macOS bundle takes the version as its build number too; the Mac App Store refuses a second
+upload of one build number, so its first submission needs `bundle.macOS.bundleVersion` in
+`tauri.appstore.conf.json`.
 
 ## Channels
 
@@ -34,7 +47,8 @@ password manager.
 
 ## Release
 
-1. Raise `version` in `apps/desktop/package.json` and push it to `master`. The CI builds
+1. Make sure `version` in `apps/expo/package.json` on `master` has no desktop release yet, or
+   raise it and push. The CI builds
    `master` as pushed and refuses a version already published.
 2. `yarn desktop:release` runs **Desktop release** on `master` (about 20 minutes). It exports
    the web app with the desktop flags, builds the three systems, signs and notarizes macOS, and

@@ -1,6 +1,7 @@
 [package]
 name = "bible-strong-desktop"
-version = "0.1.0"
+# The app's version is the Expo app's (apps/expo/package.json), read by tauri.conf.json.
+version = "0.0.0"
 description = "Bible Strong for macOS, Windows and Linux"
 authors = ["Stéphane Montlouis-Calixte"]
 license = "UNLICENSED"
