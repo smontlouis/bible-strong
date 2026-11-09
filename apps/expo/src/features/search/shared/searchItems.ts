@@ -259,7 +259,27 @@ export const getNaveSearchItems = (results: NaveSearchItemRow[]) =>
     endpoint: getNaveEndpoint(nave),
   }))
 
-export const getPassageSearchItems = (results: SearchResult[]) =>
+const thematicSourceLabels: Record<string, string> = {
+  nave: 'Nave',
+  torrey: 'Torrey',
+  openbible: 'OpenBible',
+}
+
+/** Why a passage that does not contain the words was found: its topic and where it comes from. */
+export const getPassageReason = (match: SearchResult['match']) => {
+  if (!match?.topicLabel || (match.kind !== 'topic' && match.kind !== 'semantic')) return undefined
+  const reason = i18n.t(
+    match.kind === 'semantic' ? 'search.passageReason.semantic' : 'search.passageReason.topic',
+    { topic: match.topicLabel }
+  )
+  const sources = (match.sources ?? []).map(source => thematicSourceLabels[source] ?? source)
+  return sources.length ? `${reason} · ${sources.join(', ')}` : reason
+}
+
+export const getPassageSearchItems = (
+  results: SearchResult[],
+  { idPrefix = 'passage' }: { idPrefix?: string } = {}
+) =>
   results.map<SearchEntityResult>(result => {
     const endVerse = result.endChapter === result.chapter ? result.endVerse : undefined
     const verseIds = Array.from(
@@ -271,11 +291,10 @@ export const getPassageSearchItems = (results: SearchResult[]) =>
       result.endChapter && result.endChapter !== result.chapter && result.endVerse
         ? `${startTitle}–${result.endChapter}:${result.endVerse}`
         : startTitle
-    const topicLabel = result.match?.topicLabel
-    const passageReason = topicLabel || undefined
+    const passageReason = getPassageReason(result.match)
 
     return {
-      id: `passage:${result.version}:${result.book}:${result.chapter}:${result.verse}`,
+      id: `${idPrefix}:${result.version}:${result.book}:${result.chapter}:${result.verse}`,
       type: 'passages',
       iconType: 'passages',
       title,

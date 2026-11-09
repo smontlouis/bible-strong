@@ -208,7 +208,14 @@ export const SearchEntityResultRow = ({
           {description ? (
             description
           ) : item.passage ? (
-            <PassageDescription highlighted={item.description} />
+            <>
+              <PassageDescription highlighted={item.description} />
+              {item.passageReason ? (
+                <Text className="text-tertiary text-[12px] mt-[4px]" numberOfLines={1}>
+                  {item.passageReason}
+                </Text>
+              ) : null}
+            </>
           ) : item.description ? (
             <HighlightedText
               value={item.description}

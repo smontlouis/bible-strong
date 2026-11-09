@@ -27,6 +27,7 @@ export type SearchSectionId =
   | 'dictionary'
   | 'nave'
   | 'passages'
+  | 'meaning'
 
 export type SQLiteSearchResultSection = SearchResultSection<SearchSectionId> & {
   itemFilterType: SearchItemType
@@ -41,6 +42,7 @@ export type SearchFacet = {
 
 const searchFacetOrder: SearchItemType[] = [
   'passages',
+  'meaning',
   'notes',
   'links',
   'studies',
@@ -54,7 +56,7 @@ const searchFacetOrder: SearchItemType[] = [
 
 type SearchLoadingState = {
   catalog?: boolean
-  semanticPassages?: boolean
+  meaning?: boolean
   passages: boolean
   notes: boolean
   links: boolean
@@ -78,8 +80,11 @@ type SearchResultsModelInput = {
   dictionaryResults: DictionarySearchRow[]
   naveResults: NaveSearchItemRow[]
   passageResults: SearchResult[] | null
-  semanticSearchError?: string | null
   totalPassageCount: number
+  /** Passages of the topics the query names or comes close to, without the verses above. */
+  meaningResults?: SearchResult[]
+  totalMeaningCount?: number
+  semanticSearchError?: string | null
   searchError: string | null
   loading: SearchLoadingState
   t: (key: string) => string
@@ -154,11 +159,14 @@ export const getSearchResultsModel = ({
   naveResults,
   passageResults,
   totalPassageCount,
+  meaningResults = [],
+  totalMeaningCount = 0,
   semanticSearchError,
   searchError,
   loading,
   t,
 }: SearchResultsModelInput) => {
+  const meaningEnabled = itemFilters.meaning ?? itemFilters.passages
   const referenceItems = itemFilters.passages ? getReferenceSearchItems(debouncedQuery) : []
   const noteItems = itemFilters.notes ? noteResults : []
   const linkItems = itemFilters.links ? linkResults : []
@@ -167,6 +175,9 @@ export const getSearchResultsModel = ({
   const dictionaryItems = itemFilters.dictionary ? getDictionarySearchItems(dictionaryResults) : []
   const naveItems = itemFilters.nave ? getNaveSearchItems(naveResults) : []
   const passageItems = itemFilters.passages ? getPassageSearchItems(passageResults ?? []) : []
+  const meaningItems = meaningEnabled
+    ? getPassageSearchItems(meaningResults, { idPrefix: 'meaning' })
+    : []
 
   const sections: SQLiteSearchResultSection[] = [
     ...(['commentary', 'plan', 'timeline'] as const).flatMap(type => {
@@ -192,16 +203,25 @@ export const getSearchResultsModel = ({
           }),
         ]
       : []),
-    ...(passageItems.length ||
-    (itemFilters.passages &&
-      (loading.passages || loading.semanticPassages || searchError || semanticSearchError))
+    ...(passageItems.length || (itemFilters.passages && (loading.passages || searchError))
       ? [
           getSection({
             id: 'passages',
             title: t('Passages'),
-            count: totalPassageCount || passageItems.length,
+            count: Math.max(totalPassageCount, passageItems.length),
             items: passageItems,
             itemFilterType: 'passages',
+          }),
+        ]
+      : []),
+    ...(meaningItems.length || (meaningEnabled && (loading.meaning || semanticSearchError))
+      ? [
+          getSection({
+            id: 'meaning',
+            title: t('Par le sens'),
+            count: Math.max(totalMeaningCount, meaningItems.length),
+            items: meaningItems,
+            itemFilterType: 'meaning',
           }),
         ]
       : []),

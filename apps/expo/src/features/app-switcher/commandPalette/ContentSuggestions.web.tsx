@@ -20,6 +20,7 @@ const sourceLabels: Record<SearchItemType, string> = {
   dictionary: 'Dictionnaire',
   nave: 'Nave',
   passages: 'Passages',
+  meaning: 'Par le sens',
 }
 
 export default function ContentSuggestions({
@@ -62,7 +63,7 @@ export default function ContentSuggestions({
       )}
       {source &&
         !waiting &&
-        !sections.some(section => section.loading || section.enriching) &&
+        !sections.some(section => section.loading) &&
         !rankedSections.length && (
           <div className="bs-command-status" role="status">
             {t('commandPalette.noResults')}

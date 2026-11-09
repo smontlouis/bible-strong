@@ -22,12 +22,21 @@ jest.mock('~helpers/agentObservability', () => ({
 }))
 
 let latest: ReturnType<typeof usePassageSearch>
-function Probe({ value, enabled = true }: { value: string; enabled?: boolean }) {
+function Probe({
+  value,
+  enabled = true,
+  meaningEnabled,
+}: {
+  value: string
+  enabled?: boolean
+  meaningEnabled?: boolean
+}) {
   const result = usePassageSearch({
     searchValue: value,
     version: 'LSG',
     searchLanguage: 'fr',
     enabled,
+    meaningEnabled,
     book: 43,
     sortOrder: 'book',
   })
@@ -61,11 +70,11 @@ afterEach(() => {
   act(() => tree?.unmount())
   client.clear()
 })
-async function render(value: string, enabled = true) {
+async function render(value: string, enabled = true, meaningEnabled?: boolean) {
   await act(async () => {
     tree = create(
       <QueryClientProvider client={client}>
-        <Probe value={value} enabled={enabled} />
+        <Probe value={value} enabled={enabled} meaningEnabled={meaningEnabled} />
       </QueryClientProvider>
     )
   })
@@ -74,7 +83,7 @@ async function render(value: string, enabled = true) {
   })
 }
 
-it('runs text and semantic search with the same filters and deduplicates their results', async () => {
+it('runs text and semantic search with the same filters and keeps their results apart', async () => {
   await render('amour')
   expect(mockSearchPage).toHaveBeenCalledTimes(2)
   expect(mockSearchPage).toHaveBeenCalledWith(
@@ -91,7 +100,10 @@ it('runs text and semantic search with the same filters and deduplicates their r
     'amour',
     expect.objectContaining({ mode: 'semantic' })
   )
-  expect(latest.mergedPassages).toHaveLength(1)
+  expect(latest.passages).toHaveLength(1)
+  expect(latest.meaningPassages).toHaveLength(1)
+  expect(latest.passageCount).toBe(2)
+  expect(latest.meaningCount).toBe(2)
   await act(async () => {
     await latest.passageQuery.fetchNextPage()
   })
@@ -99,7 +111,21 @@ it('runs text and semantic search with the same filters and deduplicates their r
     await new Promise(resolve => setTimeout(resolve, 20))
   })
   expect(mockSearchPage).toHaveBeenLastCalledWith('amour', expect.objectContaining({ offset: 1 }))
-  expect(latest.mergedPassages.map(result => result.verse)).toEqual([16, 17])
+  expect(latest.passages.map(result => result.verse)).toEqual([16, 17])
+  expect(latest.meaningPassages.map(result => result.verse)).toEqual([16])
+})
+
+it('asks for the words alone when they are in quotes', async () => {
+  await render('"amour"')
+  expect(mockSearchPage).toHaveBeenCalledTimes(1)
+  expect(mockSearchPage.mock.calls[0][1].mode).toBeUndefined()
+  expect(latest.canSearchSemantic).toBe(false)
+})
+
+it('leaves the search by meaning out when its source is off', async () => {
+  await render('amour', true, false)
+  expect(mockSearchPage).toHaveBeenCalledTimes(1)
+  expect(mockSearchPage.mock.calls[0][1].mode).toBeUndefined()
 })
 
 it('keeps text search available offline without requesting semantic search', async () => {

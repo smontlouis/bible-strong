@@ -11,6 +11,7 @@ export const contentPriority: SearchItemType[] = [
   'studies',
   'links',
   'passages',
+  'meaning',
 ]
 const strongKey = (value: string) => value.toUpperCase().replace(/^([GH])0+(\d)/, '$1$2')
 export function tabContentKey(tab: TabItem | CatalogResult['tab']): string | undefined {

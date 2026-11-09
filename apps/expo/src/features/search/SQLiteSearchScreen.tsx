@@ -188,10 +188,14 @@ const SQLiteSearchScreen = ({
   const activeItemFilterTypes = searchItemFilterOrder.filter(itemType => itemFilters[itemType])
   const singleActiveItemType =
     activeItemFilterTypes.length === 1 ? activeItemFilterTypes[0] : undefined
-  const browseItemType = singleActiveItemType !== 'passages' ? singleActiveItemType : undefined
+  const browseItemType =
+    singleActiveItemType !== 'passages' && singleActiveItemType !== 'meaning'
+      ? singleActiveItemType
+      : undefined
   const isSoloPaginatedSection = (sectionId: SearchSectionId) =>
     singleActiveItemType === sectionId &&
     (sectionId === 'passages' ||
+      sectionId === 'meaning' ||
       sectionId === 'strong' ||
       sectionId === 'dictionary' ||
       sectionId === 'nave')
@@ -322,10 +326,13 @@ const SQLiteSearchScreen = ({
     shouldSearchPassages,
     passageQuery,
     semanticPassageQuery,
+    canSearchSemantic,
     isSemanticSearching,
     semanticSearchError,
-    mergedPassages,
-    totalCount,
+    passages,
+    passageCount,
+    meaningPassages,
+    meaningCount,
     isSearching,
     searchError,
   } = usePassageSearch({
@@ -333,6 +340,7 @@ const SQLiteSearchScreen = ({
     version: resolvedSelectedVersion,
     searchLanguage: resourcesLanguage.NAVE,
     enabled: itemFilters.passages,
+    meaningEnabled: itemFilters.meaning,
     section,
     canon,
     book,
@@ -480,7 +488,7 @@ const SQLiteSearchScreen = ({
 
   const rateLimitNotice = getSearchRateLimitNotice([
     ...(shouldSearchPassages ? [passageQuery] : []),
-    ...(shouldSearchPassages && isConnected ? [semanticPassageQuery] : []),
+    ...(canSearchSemantic ? [semanticPassageQuery] : []),
     ...(shouldSearchStrong ? [strongQuery] : []),
     ...(shouldSearchDictionary ? [dictionaryQuery] : []),
     ...(shouldSearchNave ? [naveQuery] : []),
@@ -520,14 +528,16 @@ const SQLiteSearchScreen = ({
     strongResults,
     dictionaryResults,
     naveResults,
-    passageResults: mergedPassages,
-    totalPassageCount: totalCount,
+    passageResults: passages,
+    totalPassageCount: passageCount,
+    meaningResults: meaningPassages,
+    totalMeaningCount: meaningCount,
     semanticSearchError,
     searchError,
     loading: {
       catalog: catalog.loading,
       passages: isSearching,
-      semanticPassages: isSemanticSearching,
+      meaning: isSemanticSearching,
       notes: false,
       links: false,
       studies: false,
@@ -558,10 +568,10 @@ const SQLiteSearchScreen = ({
   const searchFacets = getSearchFacets(searchModel.sections)
   const publicSearchSources = getPublicSearchSources(itemFilters)
   const publicResultCounts = getPublicSearchResultCounts(currentSearchModel.sections)
-  const passageMatchAnalytics = getPassageMatchAnalytics(mergedPassages)
+  const passageMatchAnalytics = getPassageMatchAnalytics([...passages, ...meaningPassages])
   const publicSearchErrorCount = [
     itemFilters.passages && passageQuery.isError,
-    itemFilters.passages && semanticPassageQuery.isError,
+    itemFilters.meaning && semanticPassageQuery.isError,
     itemFilters.strong && strongQuery.isError,
     itemFilters.dictionary && dictionaryQuery.isError,
     itemFilters.nave && naveQuery.isError,
@@ -632,7 +642,10 @@ const SQLiteSearchScreen = ({
         strongResults,
       }),
       sources: publicSearchSources,
-      versionIds: itemFilters.passages && resolvedSelectedVersion ? [resolvedSelectedVersion] : [],
+      versionIds:
+        (itemFilters.passages || itemFilters.meaning) && resolvedSelectedVersion
+          ? [resolvedSelectedVersion]
+          : [],
       outcome: searchAnalyticsOutcome,
       resultCounts: publicResultCounts,
       matchKind: passageMatchAnalytics.matchKind,
@@ -1059,7 +1072,7 @@ const SQLiteSearchScreen = ({
       const fetchNextPage = (sectionId: SearchSectionId) => {
         if (isShowingPreviousResults) return
         if (
-          sectionId === 'passages' &&
+          sectionId === 'meaning' &&
           semanticPassageQuery.hasNextPage &&
           !semanticPassageQuery.isFetchingNextPage
         )
@@ -1090,13 +1103,14 @@ const SQLiteSearchScreen = ({
         (['commentary', 'plan', 'timeline'].includes(sectionId) &&
           (catalog.loading || catalogSelection.loading)) ||
         (sectionId === 'passages' && isSearching) ||
+        (sectionId === 'meaning' && isSemanticSearching) ||
         (sectionId === 'strong' && isStrongSearching) ||
         (sectionId === 'dictionary' && isDictionarySearching) ||
         (sectionId === 'nave' && isNaveSearching)
 
       const sectionHasMore = (sectionId: SearchSectionId) =>
-        (sectionId === 'passages' &&
-          (passageQuery.hasNextPage || semanticPassageQuery.hasNextPage)) ||
+        (sectionId === 'passages' && passageQuery.hasNextPage) ||
+        (sectionId === 'meaning' && semanticPassageQuery.hasNextPage) ||
         (sectionId === 'strong' && strongQuery.hasNextPage) ||
         (sectionId === 'dictionary' && dictionaryQuery.hasNextPage) ||
         (sectionId === 'nave' && naveQuery.hasNextPage)
@@ -1161,18 +1175,19 @@ const SQLiteSearchScreen = ({
                 onLoadMore={() => undefined}
                 onPressItem={openSearchItem}
                 statusMessage={
-                  soloPaginatedSection.id === 'passages' ? (
-                    <>
-                      {renderPassageError()}
-                      {renderSemanticStatus()}
-                    </>
-                  ) : null
+                  soloPaginatedSection.id === 'passages'
+                    ? renderPassageError()
+                    : soloPaginatedSection.id === 'meaning'
+                      ? renderSemanticStatus()
+                      : null
                 }
                 isLoading={!isShowingPreviousResults && isSectionLoading(soloPaginatedSection.id)}
                 hasMore={!isShowingPreviousResults && sectionHasMore(soloPaginatedSection.id)}
                 showLoadMoreButton={false}
                 headerAction={
-                  soloPaginatedSection.id === 'passages' ? passageFilterAction : undefined
+                  soloPaginatedSection.id === 'passages' || soloPaginatedSection.id === 'meaning'
+                    ? passageFilterAction
+                    : undefined
                 }
                 renderItems={false}
               />
@@ -1239,7 +1254,7 @@ const SQLiteSearchScreen = ({
               onLoadMore={() => {
                 const currentVisible = visibleCounts[section.id] || SEARCH_SECTION_PREVIEW_LIMIT
                 if (
-                  section.id === 'passages' &&
+                  (section.id === 'passages' || section.id === 'meaning') &&
                   currentVisible + SEARCH_SECTION_LOAD_MORE_COUNT >= section.items.length
                 )
                   fetchNextPage(section.id)
@@ -1282,16 +1297,19 @@ const SQLiteSearchScreen = ({
                     <Text className="text-link">{t('Réessayer')}</Text>
                   </TouchableBox>
                 ) : section.id === 'passages' ? (
-                  <>
-                    {renderPassageError()}
-                    {renderSemanticStatus()}
-                  </>
+                  renderPassageError()
+                ) : section.id === 'meaning' ? (
+                  renderSemanticStatus()
                 ) : null
               }
               isLoading={!isShowingPreviousResults && isSectionLoading(section.id)}
               hasMore={!isShowingPreviousResults && sectionHasMore(section.id)}
               showLoadMoreButton={!isSoloPaginatedSection(section.id)}
-              headerAction={section.id === 'passages' ? passageFilterAction : undefined}
+              headerAction={
+                section.id === 'passages' || section.id === 'meaning'
+                  ? passageFilterAction
+                  : undefined
+              }
             />
           )}
         />

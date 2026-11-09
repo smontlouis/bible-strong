@@ -9,22 +9,26 @@ import type {
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import type { SearchCanon, SearchSection } from '~state/searchFilters'
 import useConnection from '~helpers/useConnection'
-import { parseStrongReference } from '~helpers/bibleSearchInput'
+import { parseBibleTextSearchQuery, parseStrongReference } from '~helpers/bibleSearchInput'
 import { isExactBibleReferenceInput } from '~helpers/bcvParser'
 import { getBibleVersionCanonId } from '~helpers/bibleVersions'
 import { appLogger } from '~helpers/agentObservability'
 import { localQueryOptions, staticResourceQueryOptions } from '~helpers/queryOptions'
 import { searchRateLimitQueryOptions } from './searchRateLimit'
 import { SEARCH_MIN_QUERY_LENGTH } from './searchResultsModel'
-import { useAppendOnlySearchResults, passageResultKey } from './useAppendOnlySearchResults'
 
 const PASSAGE_SEARCH_PAGE_SIZE = 20
 
+/**
+ * Two searches with the same filters, shown apart: the verses that contain the words (offline too)
+ * and, online, the passages of the topics the query names or comes close to in meaning.
+ */
 export function usePassageSearch({
   searchValue,
   version,
   searchLanguage,
   enabled,
+  meaningEnabled = enabled,
   section = '',
   canon = '',
   book = 0,
@@ -34,6 +38,8 @@ export function usePassageSearch({
   version: string
   searchLanguage: ResourceLanguage
   enabled: boolean
+  /** Searches by meaning; follows `enabled` unless the caller shows it as a source of its own. */
+  meaningEnabled?: boolean
   section?: SearchSection
   canon?: SearchCanon
   book?: number
@@ -49,15 +55,19 @@ export function usePassageSearch({
     trimmedSearchValue,
     uiLanguage.startsWith('fr') ? 'fr' : 'en'
   )
-  const shouldSearchPassages =
-    enabled &&
+  const isPassageQuery =
     trimmedSearchValue.length >= SEARCH_MIN_QUERY_LENGTH &&
     Boolean(version) &&
     !strongReference &&
     !isBibleReference
+  const shouldSearchPassages = enabled && isPassageQuery
+  // Words in quotes ask for those words alone.
+  const isPhrase = parseBibleTextSearchQuery(trimmedSearchValue)?.kind === 'phrase'
+  const shouldSearchMeaning = meaningEnabled && isPassageQuery && !isPhrase && Boolean(isConnected)
   const passageQuery = useInfiniteQuery({
     queryKey: [
-      'sqlite-passage-search-v2',
+      'sqlite-passage-search',
+      'v3',
       searchLanguage,
       uiLanguage,
       trimmedSearchValue,
@@ -110,7 +120,7 @@ export function usePassageSearch({
   })
   const semanticPassageQuery = useInfiniteQuery({
     queryKey: [
-      'semantic-passage-search-v1',
+      'semantic-passage-search-v2',
       searchLanguage,
       uiLanguage,
       trimmedSearchValue,
@@ -157,51 +167,17 @@ export function usePassageSearch({
       const count = pages[0]?.count ?? 0
       return loaded < count ? loaded : undefined
     },
-    enabled: shouldSearchPassages && Boolean(isConnected),
+    enabled: shouldSearchMeaning,
     ...searchRateLimitQueryOptions,
     ...staticResourceQueryOptions,
     ...localQueryOptions,
   })
-  const results: SearchResult[] | null = !enabled
-    ? null
-    : strongReference || isBibleReference
-      ? []
-      : shouldSearchPassages
-        ? (passageQuery.data?.pages.flatMap(page => page.results) ?? null)
-        : null
-  const semanticResults =
-    shouldSearchPassages && isConnected
-      ? (semanticPassageQuery.data?.pages.flatMap(page => page.results) ?? [])
-      : []
-  const isSemanticSearching =
-    shouldSearchPassages && Boolean(isConnected) && semanticPassageQuery.isFetching
-  const semanticSearchError =
-    shouldSearchPassages && isConnected && semanticPassageQuery.isError
-      ? t('search.semanticUnavailable')
-      : null
-  const mergedPassages = useAppendOnlySearchResults(
-    JSON.stringify([
-      trimmedSearchValue,
-      section,
-      canon,
-      book,
-      version,
-      sortOrder,
-      searchLanguage,
-      isConnected,
-    ]),
-    shouldSearchPassages
-      ? [
-          ...(results ?? []),
-          ...(!passageQuery.isPending || passageQuery.isError ? semanticResults : []),
-        ]
-      : [],
-    passageResultKey
-  )
-  const totalCount = mergedPassages.length
-  const isSearching = shouldSearchPassages && passageQuery.isFetching
-  const searchError =
-    shouldSearchPassages && passageQuery.isError ? t('search.error.searchFailed') : null
+  const passages: SearchResult[] = shouldSearchPassages
+    ? (passageQuery.data?.pages.flatMap(page => page.results) ?? [])
+    : []
+  const meaningPassages: SearchResult[] = shouldSearchMeaning
+    ? (semanticPassageQuery.data?.pages.flatMap(page => page.results) ?? [])
+    : []
 
   return {
     trimmedSearchValue,
@@ -210,14 +186,17 @@ export function usePassageSearch({
     shouldSearchPassages,
     passageQuery,
     semanticPassageQuery,
-    canSearchSemantic: shouldSearchPassages && Boolean(isConnected),
-    results,
-    semanticResults,
-    isSemanticSearching,
-    semanticSearchError,
-    mergedPassages,
-    totalCount,
-    isSearching,
-    searchError,
+    canSearchSemantic: shouldSearchMeaning,
+    passages,
+    /** Every verse that contains the words, not only the pages loaded. */
+    passageCount: shouldSearchPassages ? (passageQuery.data?.pages[0]?.count ?? 0) : 0,
+    meaningPassages,
+    meaningCount: shouldSearchMeaning ? (semanticPassageQuery.data?.pages[0]?.count ?? 0) : 0,
+    isSearching: shouldSearchPassages && passageQuery.isFetching,
+    isSemanticSearching: shouldSearchMeaning && semanticPassageQuery.isFetching,
+    searchError:
+      shouldSearchPassages && passageQuery.isError ? t('search.error.searchFailed') : null,
+    semanticSearchError:
+      shouldSearchMeaning && semanticPassageQuery.isError ? t('search.semanticUnavailable') : null,
   }
 }

@@ -48,14 +48,17 @@ export const getSearchAnalyticsInputKind = ({
   return query.trim().split(/\s+/u).filter(Boolean).length >= 3 ? 'natural_language' : 'keyword'
 }
 
+// The passages found by meaning are recorded with Passages, the source they come from.
 export const getPublicSearchSources = (filters: SearchItemFilters): SearchAnalyticsSource[] =>
-  (['passages', 'strong', 'dictionary', 'nave'] as const).filter(source => filters[source])
+  (['passages', 'strong', 'dictionary', 'nave'] as const).filter(
+    source => filters[source] || (source === 'passages' && filters.meaning)
+  )
 
 export const getPublicSearchResultCounts = (sections: readonly SQLiteSearchResultSection[]) => {
   const count = (id: SQLiteSearchResultSection['id']) =>
     sections.find(section => section.id === id)?.count ?? 0
   const references = count('reference')
-  const passages = count('passages')
+  const passages = count('passages') + count('meaning')
   const strong = count('strong')
   const dictionary = count('dictionary')
   const nave = count('nave')

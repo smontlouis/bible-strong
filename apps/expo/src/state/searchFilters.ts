@@ -7,6 +7,7 @@ export type SearchSection = '' | 'at' | 'nt'
 export type SearchCanon = '' | BibleCanonId
 export type SearchItemType =
   | 'passages'
+  | 'meaning'
   | 'notes'
   | 'links'
   | 'studies'
@@ -18,8 +19,10 @@ export type SearchItemType =
   | 'timeline'
 
 export type CatalogSearchItemType = 'commentary' | 'plan' | 'timeline'
-export type SearchItemFilters = Record<Exclude<SearchItemType, CatalogSearchItemType>, boolean> &
-  Partial<Record<CatalogSearchItemType, boolean>>
+/** Sources added after filters were first saved: a missing value follows the older source. */
+type LaterSearchItemType = CatalogSearchItemType | 'meaning'
+export type SearchItemFilters = Record<Exclude<SearchItemType, LaterSearchItemType>, boolean> &
+  Partial<Record<LaterSearchItemType, boolean>>
 
 export interface SearchFilters {
   openResultsInNewTabs?: boolean
@@ -43,6 +46,7 @@ const defaultSearchFilters: SearchFilters = {
     plan: true,
     timeline: true,
     passages: true,
+    meaning: true,
     notes: true,
     links: true,
     studies: true,
@@ -78,9 +82,12 @@ export function normalizeSearchItemFilters(
   const allLegacy = ['passages', 'notes', 'links', 'studies', 'strong', 'dictionary', 'nave'].every(
     key => filters[key as keyof SearchItemFilters]
   )
+  const passages = filters.passages || references === true
   const normalized = {
     ...currentFilters,
-    passages: filters.passages || references === true,
+    passages,
+    // The passages found by meaning were part of Passages until they got a section of their own.
+    meaning: filters.meaning ?? passages,
     commentary: filters.commentary ?? allLegacy,
     plan: filters.plan ?? allLegacy,
     timeline: filters.timeline ?? allLegacy,
@@ -88,7 +95,10 @@ export function normalizeSearchItemFilters(
   if (legacyScope) {
     const selected = legacyScope === 'passage' ? 'passages' : legacyScope
     return Object.fromEntries(
-      Object.keys(normalized).map(key => [key, key === selected])
+      Object.keys(normalized).map(key => [
+        key,
+        key === selected || (key === 'meaning' && selected === 'passages'),
+      ])
     ) as Record<SearchItemType, boolean>
   }
   return normalized as Record<SearchItemType, boolean>

@@ -16,6 +16,7 @@ export const searchTypeIconConfig: Record<
   plan: { name: 'calendar', color: getUniverseColor('plan') },
   timeline: { name: 'clock', color: getUniverseColor('timeline') },
   passages: { name: 'book-open', color: getUniverseColor('passages') },
+  meaning: { name: 'compass', color: getUniverseColor('meaning') },
   notes: { name: 'file-text', color: getUniverseColor('notes') },
   links: { name: 'link', color: getUniverseColor('links') },
   studies: { name: 'feather', color: getUniverseColor('studies') },
@@ -40,6 +41,7 @@ const SearchTypeIcon = ({
     case 'plan':
     case 'timeline':
     case 'passages':
+    case 'meaning':
     case 'notes':
     case 'links':
     case 'studies':

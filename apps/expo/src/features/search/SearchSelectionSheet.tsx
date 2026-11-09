@@ -103,6 +103,7 @@ type RelationTargetSectionId =
   | 'plan'
   | 'timeline'
   | 'passages'
+  | 'meaning'
   | 'annotations'
   | 'notes'
   | 'links'
@@ -160,6 +161,7 @@ const searchItemTypeToBrowseMode: Record<SearchItemType, BrowseMode | null> = {
   plan: null,
   timeline: null,
   passages: null,
+  meaning: null,
   notes: 'note',
   links: 'link',
   studies: 'study',
@@ -629,7 +631,8 @@ const SearchSelectionSheet = ({
         isSelectableVersePassage
       )
     : []
-  const passageItems = [...referenceItems, ...getPassageSearchItems(passageSearch.mergedPassages)]
+  const passageItems = [...referenceItems, ...getPassageSearchItems(passageSearch.passages)]
+  const meaningItems = getPassageSearchItems(passageSearch.meaningPassages, { idPrefix: 'meaning' })
   const noteItems = itemFilters.notes ? fuzzyNoteTargets : []
   const linkItems = itemFilters.links ? fuzzyLinkTargets : []
   const studyItems = itemFilters.studies ? fuzzyStudyTargets : []
@@ -689,8 +692,21 @@ const SearchSelectionSheet = ({
           {
             id: 'passages' as const,
             title: t('Passages'),
-            count: passageItems.length,
+            count: Math.max(
+              passageItems.length,
+              referenceItems.length + passageSearch.passageCount
+            ),
             items: passageItems,
+          },
+        ]
+      : []),
+    ...(meaningItems.length
+      ? [
+          {
+            id: 'meaning' as const,
+            title: t('Par le sens'),
+            count: Math.max(meaningItems.length, passageSearch.meaningCount),
+            items: meaningItems,
           },
         ]
       : []),
@@ -1039,20 +1055,19 @@ const SearchSelectionSheet = ({
                     increaseVisibleCount(section.id)
                     if (
                       section.id === 'passages' &&
-                      currentVisible + SEARCH_SECTION_LOAD_MORE_COUNT >= section.items.length
-                    ) {
-                      if (
-                        passageSearch.passageQuery.hasNextPage &&
-                        !passageSearch.passageQuery.isFetchingNextPage
-                      )
-                        void passageSearch.passageQuery.fetchNextPage()
-                      if (
-                        passageSearch.canSearchSemantic &&
-                        passageSearch.semanticPassageQuery.hasNextPage &&
-                        !passageSearch.semanticPassageQuery.isFetchingNextPage
-                      )
-                        void passageSearch.semanticPassageQuery.fetchNextPage()
-                    }
+                      currentVisible + SEARCH_SECTION_LOAD_MORE_COUNT >= section.items.length &&
+                      passageSearch.passageQuery.hasNextPage &&
+                      !passageSearch.passageQuery.isFetchingNextPage
+                    )
+                      void passageSearch.passageQuery.fetchNextPage()
+                    if (
+                      section.id === 'meaning' &&
+                      currentVisible + SEARCH_SECTION_LOAD_MORE_COUNT >= section.items.length &&
+                      passageSearch.canSearchSemantic &&
+                      passageSearch.semanticPassageQuery.hasNextPage &&
+                      !passageSearch.semanticPassageQuery.isFetchingNextPage
+                    )
+                      void passageSearch.semanticPassageQuery.fetchNextPage()
                     if (
                       section.id === 'strong' &&
                       currentVisible + SEARCH_SECTION_LOAD_MORE_COUNT >= section.items.length &&
@@ -1081,17 +1096,16 @@ const SearchSelectionSheet = ({
                   onPressItem={() => undefined}
                   renderItem={renderTargetSearchItem}
                   isLoading={
-                    (section.id === 'passages' &&
-                      (passageSearch.isSearching || passageSearch.isSemanticSearching)) ||
+                    (section.id === 'passages' && passageSearch.isSearching) ||
+                    (section.id === 'meaning' && passageSearch.isSemanticSearching) ||
                     (section.id === 'strong' && (strongQuery.isFetching || isStrongPending)) ||
                     (section.id === 'dictionary' &&
                       (dictionaryQuery.isFetching || isDictionaryPending)) ||
                     (section.id === 'nave' && (naveQuery.isFetching || isNavePending))
                   }
                   hasMore={
-                    (section.id === 'passages' &&
-                      (passageSearch.passageQuery.hasNextPage ||
-                        passageSearch.semanticPassageQuery.hasNextPage)) ||
+                    (section.id === 'passages' && passageSearch.passageQuery.hasNextPage) ||
+                    (section.id === 'meaning' && passageSearch.semanticPassageQuery.hasNextPage) ||
                     (section.id === 'strong' && strongQuery.hasNextPage) ||
                     (section.id === 'dictionary' && dictionaryQuery.hasNextPage) ||
                     (section.id === 'nave' && naveQuery.hasNextPage)

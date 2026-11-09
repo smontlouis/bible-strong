@@ -34,6 +34,8 @@ export type Universe = keyof typeof universeColors
 // Names used by tabs, search results and relation endpoints refer to the same identity.
 const aliases = {
   passages: 'bible',
+  // Passages found by meaning rather than by their words.
+  meaning: 'bible',
   verse: 'bible',
   note: 'notes',
   studies: 'study',

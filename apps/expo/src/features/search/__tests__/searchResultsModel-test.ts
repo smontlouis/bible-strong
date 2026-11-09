@@ -252,27 +252,71 @@ describe('searchResultsModel', () => {
   })
 })
 
-it('keeps standard passages visible while semantic passages load or fail', () => {
-  const passage = {
-    version: 'LSG',
-    book: 43,
-    chapter: 3,
-    verse: 16,
-    text: 'Dieu aime',
-    highlighted: 'Dieu aime',
-  }
+const passage = {
+  version: 'LSG',
+  book: 43,
+  chapter: 3,
+  verse: 16,
+  text: 'Dieu aime',
+  highlighted: 'Dieu {{aime}}',
+}
+const topicPassage = {
+  ...passage,
+  verse: 17,
+  endChapter: 3,
+  endVerse: 18,
+  highlighted: 'Dieu a envoyé son Fils',
+  match: { kind: 'topic' as const, topicLabel: 'Amour', sources: ['nave', 'torrey'] },
+}
+
+it('shows the passages found by meaning apart from the words, with their own total', () => {
+  const model = getSearchResultsModel({
+    ...baseInput,
+    passageResults: [passage],
+    totalPassageCount: 120,
+    meaningResults: [topicPassage],
+    totalMeaningCount: 40,
+  })
+  expect(model.sections.map(section => section.id)).toEqual(['passages', 'meaning'])
+  expect(getSearchFacets(model.sections)).toEqual([
+    { id: 'all', count: 160 },
+    { id: 'passages', count: 120 },
+    { id: 'meaning', count: 40 },
+  ])
+  expect(model.sections[0].items[0].passageReason).toBeUndefined()
+  expect(model.sections[1].items[0]).toMatchObject({
+    id: 'meaning:LSG:43:3:17',
+    type: 'passages',
+    title: 'Jean 3:17-18',
+    passageReason: 'search.passageReason.topic · Nave, Torrey',
+  })
+})
+
+it('keeps the passages visible while the search by meaning loads or fails', () => {
   for (const failed of [false, true]) {
     const model = getSearchResultsModel({
       ...baseInput,
       passageResults: [passage],
       totalPassageCount: 1,
-      loading: { ...emptyLoading, semanticPassages: !failed },
+      loading: { ...emptyLoading, meaning: !failed },
       semanticSearchError: failed ? 'unavailable' : null,
     })
     expect(model.sections.find(section => section.id === 'passages')?.items).toHaveLength(1)
-    expect(model.sections.filter(section => section.itemFilterType === 'passages')).toHaveLength(1)
+    expect(model.sections.find(section => section.id === 'meaning')?.items).toHaveLength(0)
     expect(model.showNoResults).toBe(false)
   }
+})
+
+it('leaves out the search by meaning when its source is off', () => {
+  const model = getSearchResultsModel({
+    ...baseInput,
+    itemFilters: { ...allFilters, meaning: false },
+    passageResults: [passage],
+    totalPassageCount: 1,
+    meaningResults: [topicPassage],
+    totalMeaningCount: 1,
+  })
+  expect(model.sections.map(section => section.id)).toEqual(['passages'])
 })
 
 it('integrates catalog matches into existing result sections and counted facets', () => {

@@ -10,6 +10,7 @@ import type { SearchItemFilters, SearchItemType } from '~state/searchFilters'
 import SearchTypeIcon from './SearchTypeIcon'
 export const searchItemFilterOrder: SearchItemType[] = [
   'passages',
+  'meaning',
   'notes',
   'links',
   'studies',
@@ -21,8 +22,9 @@ export const searchItemFilterOrder: SearchItemType[] = [
   'timeline',
 ]
 
+// A relation picks a verse: the passages found by meaning follow the Passages filter there.
 export const relationSearchItemFilterOrder = searchItemFilterOrder.filter(
-  type => !['commentary', 'plan', 'timeline'].includes(type)
+  type => !['commentary', 'plan', 'timeline', 'meaning'].includes(type)
 )
 
 export const allSearchItemFilters = searchItemFilterOrder.reduce(
@@ -44,6 +46,7 @@ export const searchItemFilterConfig: Record<
   plan: { labelKey: 'Plans', color: getUniverseColor('plan') },
   timeline: { labelKey: 'tabs.timeline', color: getUniverseColor('timeline') },
   passages: { labelKey: 'Passages', color: getUniverseColor('passages') },
+  meaning: { labelKey: 'Par le sens', color: getUniverseColor('meaning') },
   notes: { labelKey: 'Notes', color: getUniverseColor('notes') },
   links: { labelKey: 'Liens', color: getUniverseColor('links') },
   studies: { labelKey: 'Études', color: getUniverseColor('studies') },

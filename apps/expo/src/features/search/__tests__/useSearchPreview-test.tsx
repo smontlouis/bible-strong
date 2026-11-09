@@ -6,7 +6,12 @@ import { useSearchPreview } from '../useSearchPreview'
 jest.mock('~state/resourcesLanguage', () => ({ resourcesLanguageAtom: {} }))
 const mockSearchPage = jest.fn()
 jest.mock('~features/resources/resourceAccess', () => ({
-  useResourceAccess: () => ({ bibleSearch: { searchPage: mockSearchPage } }),
+  useResourceAccess: () => ({
+    bibleSearch: { searchPage: mockSearchPage },
+    strongLexicon: { listEntries: async () => ({ entries: [] }) },
+    dictionary: { searchPage: async () => ({ entries: [] }) },
+    nave: { searchPage: async () => ({ topics: [] }) },
+  }),
 }))
 jest.mock('~helpers/useConnection', () => ({ __esModule: true, default: () => true }))
 jest.mock('~helpers/useDebounce', () => ({ __esModule: true, default: (value: string) => value }))
@@ -36,7 +41,7 @@ beforeAll(() => {
 
 const flush = () => new Promise(resolve => setTimeout(resolve, 20))
 
-it('shows classic results before AI, isolates AI failure, and discards late results from an old query', async () => {
+it('shows the words and the meaning apart, isolates a failure of meaning, and discards late results', async () => {
   let resolveOld!: (value: ReturnType<typeof page>) => void
   let rejectNew!: (reason: Error) => void
   let oldSignal: AbortSignal | undefined
@@ -55,9 +60,10 @@ it('shows classic results before AI, isolates AI failure, and discards late resu
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } })
   let latest!: ReturnType<typeof useSearchPreview>
   function Probe({ query }: { query: string }) {
-    latest = useSearchPreview(query, 'LSG', 'passages')
+    latest = useSearchPreview(query, 'LSG')
     return null
   }
+  const section = (source: string) => latest.sections.find(candidate => candidate.source === source)
   const render = (query: string) => (
     <QueryClientProvider client={client}>
       <Probe query={query} />
@@ -71,8 +77,8 @@ it('shows classic results before AI, isolates AI failure, and discards late resu
     await act(async () => {
       await flush()
     })
-    expect(latest.sections.find(section => section.source === 'passages')?.items).toHaveLength(1)
-    expect(latest.sections.find(section => section.source === 'passages')?.enriching).toBe(true)
+    expect(section('passages')?.items).toHaveLength(1)
+    expect(section('meaning')?.loading).toBe(true)
     await act(async () => {
       tree.update(render('paix'))
       await flush()
@@ -84,16 +90,16 @@ it('shows classic results before AI, isolates AI failure, and discards late resu
     expect(oldSignal?.aborted).toBe(true)
     expect(
       latest.sections
-        .flatMap(section => section.items)
+        .flatMap(candidate => candidate.items)
         .some(item => item.description?.includes('OLD AI'))
     ).toBe(false)
     await act(async () => {
       rejectNew(new Error('AI unavailable'))
       await flush()
     })
-    expect(latest.sections).toHaveLength(1)
-    expect(latest.sections[0].error).toBe(false)
-    expect(latest.sections[0].enriching).toBe(false)
+    expect(section('passages')?.items).toHaveLength(1)
+    expect(section('passages')?.error).toBe(false)
+    expect(section('meaning')?.error).toBe(true)
     mockSearchPage.mockImplementation((query, options) =>
       Promise.resolve(
         options.mode === 'semantic'
@@ -108,9 +114,12 @@ it('shows classic results before AI, isolates AI failure, and discards late resu
       await client.invalidateQueries()
       await flush()
     })
-    expect(latest.sections.find(section => section.source === 'passages')?.items).toHaveLength(2)
-    expect(latest.sections.find(section => section.source === 'passages')?.error).toBe(false)
-    expect(latest.sections.find(section => section.source === 'passages')?.items).toHaveLength(2)
+    expect(section('passages')?.items.map(item => item.id)).toEqual(['passage:LSG:43:3:16'])
+    expect(section('meaning')?.items.map(item => item.id)).toEqual([
+      'meaning:LSG:43:3:16',
+      'meaning:LSG:43:3:17',
+    ])
+    expect(section('meaning')?.error).toBe(false)
   } finally {
     await act(async () => tree?.unmount())
     client.clear()

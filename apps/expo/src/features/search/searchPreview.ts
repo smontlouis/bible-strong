@@ -1,7 +1,7 @@
 import type { ResourceAccessRegistry } from '~features/resources/resourceAccess'
 import { getBibleVersionCanonId } from '~helpers/bibleVersions'
 import { isExactBibleReferenceInput, type BcvLanguage } from '~helpers/bcvParser'
-import { parseStrongReference } from '~helpers/bibleSearchInput'
+import { parseBibleTextSearchQuery, parseStrongReference } from '~helpers/bibleSearchInput'
 import { createStrongIdentity } from '~helpers/strongIdentities'
 import type { SearchFilters, SearchItemType } from '~state/searchFilters'
 import type { SearchEntityResult } from './shared/searchResultTypes'
@@ -13,7 +13,7 @@ import {
 } from './shared/searchItems'
 
 export const SEARCH_PREVIEW_LIMIT = 3
-export const publicPreviewSources = ['passages', 'strong', 'dictionary', 'nave'] as const
+export const publicPreviewSources = ['passages', 'meaning', 'strong', 'dictionary', 'nave'] as const
 export type PublicPreviewSource = (typeof publicPreviewSources)[number]
 export type SearchPreviewPage = { items: SearchEntityResult[]; hasMore: boolean }
 
@@ -32,6 +32,7 @@ export function createPreviewSearchFilters(
       plan: !source || source === 'plan',
       timeline: !source || source === 'timeline',
       passages: !source || source === 'passages',
+      meaning: !source || source === 'meaning',
       notes: !source || source === 'notes',
       studies: !source || source === 'studies',
       links: !source || source === 'links',
@@ -50,7 +51,6 @@ export async function loadSearchPreview({
   version,
   languages,
   parserLanguage,
-  mode,
   signal,
   t,
 }: {
@@ -62,7 +62,6 @@ export async function loadSearchPreview({
   }
   limit?: number
   source: PublicPreviewSource
-  mode?: 'standard' | 'semantic'
   query: string
   version: string
   languages: { STRONG: 'fr' | 'en'; DICTIONNAIRE: 'fr' | 'en'; NAVE: 'fr' | 'en' }
@@ -71,11 +70,15 @@ export async function loadSearchPreview({
   t: (key: string) => string
 }): Promise<SearchPreviewPage> {
   switch (source) {
-    case 'passages': {
+    case 'passages':
+    case 'meaning': {
       if (parseStrongReference(query) || isExactBibleReferenceInput(query, parserLanguage))
         return { items: [], hasMore: false }
+      // Words in quotes ask for those words alone.
+      if (source === 'meaning' && parseBibleTextSearchQuery(query)?.kind === 'phrase')
+        return { items: [], hasMore: false }
       const page = await resources.bibleSearch.searchPage(query, {
-        mode,
+        ...(source === 'meaning' ? { mode: 'semantic' as const } : {}),
         signal,
         limit,
         offset: 0,
@@ -85,7 +88,9 @@ export async function loadSearchPreview({
         searchLanguage: languages.NAVE,
       })
       return {
-        items: getPassageSearchItems(page.results),
+        items: getPassageSearchItems(page.results, {
+          idPrefix: source === 'meaning' ? 'meaning' : 'passage',
+        }),
         hasMore: page.count > page.results.length,
       }
     }

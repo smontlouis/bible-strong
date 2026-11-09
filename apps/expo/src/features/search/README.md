@@ -116,16 +116,16 @@ ces segments, y compris les limites réelles des chapitres. Les anciens accès d
 à `bcv` et la conversion intermédiaire `parseResponse` ont été supprimés. Les
 références enregistrées et les données utilisateur ne nécessitent aucune migration.
 
-### Recherche classique et recherche par sens
+### Passages et Par le sens
 
-L'onglet Recherche (mobile et web) et les aperçus Commande K lancent deux requêtes indépendantes :
+L'onglet Recherche (mobile et web) et les aperçus Commande K lancent deux requêtes indépendantes, affichées dans deux sections :
 
-- `/v1/bibles/:version/search` (ou `/v1/bibles/search`) : texte, tolérance aux fautes et alias thématiques, sans appel d'embedding.
-- `/v1/bibles/:version/semantic-search` (ou `/v1/bibles/semantic-search`) : embedding et correspondances vectorielles, ajoutées au groupe unique « Passages ».
+- **Passages** — `/v1/bibles/:version/search` (ou `/v1/bibles/search`) : seulement les versets qui contiennent les mots, avec leurs formes fléchies et la tolérance aux fautes, sans appel d'embedding. Les versets que couvre aussi un thème nommé par la requête remontent en tête ; chacun est un verset seul, sans la plage du thème. Hors ligne, la même section vient de SQLite.
+- **Par le sens** — `/v1/bibles/:version/semantic-search` (ou `/v1/bibles/semantic-search`) : les passages des thèmes que la requête nomme, rejoint par un alias ou approche par le sens (Nave, Torrey, OpenBible), sans les versets seuls que Passages montre déjà. Une ligne sous le texte dit pourquoi le passage est là (« Thème « Israël » · Nave »). Cette section demande une connexion et n'est pas lancée pour des mots entre guillemets.
 
-Les deux opérations partagent les filtres et le contrat de réponse, mais ont leurs propres clés TanStack Query, erreurs et pages. Les résultats classiques sont affichés en premier, puis les résultats supplémentaires sont ajoutés sans doublons (version, livre, chapitre, verset de début). Les pages suivantes conservent les positions déjà affichées. Le compteur indique le nombre de résultats uniques chargés ; « Voir plus » reste disponible tant qu’une des sources a une page suivante. La recherche par sens dispose d'un délai client de 45 secondes, sans retarder la recherche classique. Elle n'est pas lancée hors ligne ; une panne IA ne déclenche pas une copie des résultats SQLite dans la liste. Un changement de texte, langue ou filtre invalide la requête affichée et annule le signal de l'ancienne requête.
+Chaque section a sa source dans les filtres, sa pastille avec le total renvoyé par le serveur, ses pages, ses erreurs et ses clés TanStack Query. Une source « Par le sens » absente d'anciens filtres enregistrés suit Passages (`normalizeSearchItemFilters`). Le sélecteur de passages des études montre les deux sections sans pastille séparée : « Par le sens » y suit Passages. La recherche par sens dispose d'un délai client de 45 secondes, sans retarder Passages. Un changement de texte, langue ou filtre invalide la requête affichée et annule le signal de l'ancienne requête. Les analytics comptent les deux sections sous la source `passages` de leur contrat.
 
-Le Worker doit être déployé avec les nouvelles routes avant de distribuer le client. La révision du cache change pour éviter qu'une ancienne réponse hybride soit servie par la route classique. Les anciens clients peuvent toujours lire `/search`, mais n'obtiennent plus les correspondances vectorielles par cette route.
+Le Worker doit être déployé avant de distribuer le client ; la révision de classement du cache de recherche change avec lui. Les anciens clients lisent toujours les deux routes et les mettent bout à bout : ils montrent donc les versets qui contiennent les mots avant les thèmes.
 
 ## Content discovery
 
@@ -143,7 +143,7 @@ new-tab launch behavior. Existing library/list tabs remain valid.
 
 `usePassageSearch` est commun à la recherche globale et à `SearchSelectionSheet`.
 Il orchestre les mêmes requêtes textuelles et sémantiques, filtres, clés de cache,
-annulations, pagination et déduplication stable. Le texte reste recherchable hors
+annulations et pagination, et rend leurs résultats séparément. Le texte reste recherchable hors
 ligne ; la recherche sémantique nécessite une connexion. Les références bibliques
 et codes Strong ne déclenchent pas ces requêtes textuelles.
 
