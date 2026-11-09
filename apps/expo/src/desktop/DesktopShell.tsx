@@ -15,6 +15,7 @@ import { isQueueProcessingAtom } from '~state/downloadQueue'
 import { desktopBootstrap, invoke } from './bridge'
 import { isMenuShortcut, runMenuShortcut } from './desktopMenuShortcuts'
 import { checkDesktopUpdate } from './desktopUpdates'
+import { useDesktopDownloadProgress } from './downloadProgress'
 import { type TextSizeChange, useTextSizeChange } from './textSize'
 import { useDesktopAppearance } from './useDesktopAppearance'
 import { useDesktopWindowTitle } from './useDesktopWindowTitle'
@@ -35,7 +36,8 @@ export const desktopLinkRoute = (url: string): string | undefined => {
 
 /**
  * What only the desktop app does at runtime: the native menu, the window's appearance and title,
- * links handed over by the system, updates, and the last key-value writes before the app quits.
+ * the Offline copies' progress on the Dock icon, links handed over by the system, updates, and the
+ * last key-value writes before the app quits.
  * Renders nothing.
  */
 const DesktopShell = () => {
@@ -45,6 +47,7 @@ const DesktopShell = () => {
   useDesktopAppearance()
   useDesktopWindowTitle()
   useDesktopFullscreen()
+  useDesktopDownloadProgress()
   const changeTextSize = useTextSizeChange()
 
   // A hidden page must not freeze halfway through an installation. The shell turns WebKit's
