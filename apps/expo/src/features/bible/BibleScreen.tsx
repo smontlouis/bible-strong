@@ -1,19 +1,9 @@
-import { produce } from 'immer'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Book } from '~assets/bible_versions/books-desc'
-import { getBook } from '~helpers/bibleBookCatalog'
-import generateUUID from '~helpers/generateUUID'
 import { useLocalSearchParams } from 'expo-router'
 import { atom } from 'jotai/vanilla'
-import {
-  BibleContextDisplayMode,
-  type BiblePlanPassage,
-  BibleTab,
-  getDefaultBibleTab,
-  VersionCode,
-} from '../../state/tabs'
-import { StudyNavigateBibleType } from '~common/types'
+import { BibleContextDisplayMode, BibleTab } from '../../state/tabs'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 import BibleTabScreen from './BibleTabScreen'
 import { IS_FORM_SHEET } from '~helpers/constants'
@@ -25,32 +15,16 @@ import {
 import Box from '~common/ui/Box'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
-import type { InterlinearMode } from '~helpers/interlinearDisplayMode'
 import type { StrongMode } from '~helpers/strongBiblePublications'
-import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { selectBibleReferenceVersion } from '~helpers/bibleReferenceVersion'
 import {
   BiblePartialReferenceNotice,
   BibleReferenceUnavailable,
 } from './BibleReferenceAvailability'
 import type { BibleRouteNavigationAdapter } from '~state/bibleRouteNavigation'
-export type BibleRouteInput = {
-  focusVerses?: number[]
-  isSelectionMode?: string
-  contextDisplayMode?: BibleContextDisplayMode
-  book?: Book | number
-  chapter?: number
-  verse?: number
-  version: string
-  strongMode?: StrongMode
-  interlinearMode?: InterlinearMode
-  interlinearLocale?: ResourceLanguage
-  annotationId?: string
-  /** Last chapter of a reading-plan passage starting at `chapter`; opens the reader in plan mode. */
-  planEndChapter?: number
-  /** The element of a plan day the passage is. */
-  planEntity?: BiblePlanPassage['entity']
-}
+import { createBibleRouteTab, type BibleRouteInput } from './bibleRouteTab'
+
+export type { BibleRouteInput }
 
 type BibleScreenContentProps = BibleRouteInput
 
@@ -74,34 +48,25 @@ const BibleScreenContent = ({
   planEntity,
   routeNavigation,
 }: BibleScreenContentRouteProps) => {
-  const initialValues = produce(getDefaultBibleTab(version as VersionCode), draft => {
-    draft.id = `bible-${generateUUID()}`
-    if (book)
-      draft.data.selectedBook = Number.isInteger(book)
-        ? getBook(book as number) || getBook(1)!
-        : (book as Book)
-
-    if (chapter) draft.data.selectedChapter = chapter
-    if (verse !== undefined) draft.data.selectedVerse = verse
-    if (focusVerses) draft.data.focusVerses = focusVerses
-    if (isSelectionMode) draft.data.isSelectionMode = isSelectionMode as StudyNavigateBibleType
-    if (contextDisplayMode) {
-      draft.data.contextDisplayMode = contextDisplayMode
-    }
-    if (strongMode) draft.data.strongMode = strongMode
-    if (interlinearMode) draft.data.interlinearMode = interlinearMode
-    if (interlinearLocale) draft.data.interlinearLocale = interlinearLocale
-    if (planEndChapter && chapter)
-      draft.data.planPassage = {
-        book: draft.data.selectedBook.Numero,
-        startChapter: chapter,
-        endChapter: Math.max(chapter, planEndChapter),
-        ...(planEntity ? { entity: planEntity } : {}),
-      }
-  })
-
   // Always create an on-the-fly atom for this screen
-  const [bibleAtom] = useState(() => atom<BibleTab>(initialValues))
+  const [bibleAtom] = useState(() =>
+    atom<BibleTab>(
+      createBibleRouteTab({
+        focusVerses,
+        isSelectionMode,
+        contextDisplayMode,
+        book,
+        chapter,
+        verse,
+        version,
+        strongMode,
+        interlinearMode,
+        interlinearLocale,
+        planEndChapter,
+        planEntity,
+      })
+    )
+  )
 
   return (
     <BibleTabScreen

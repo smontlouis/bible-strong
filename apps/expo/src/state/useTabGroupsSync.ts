@@ -41,6 +41,7 @@ import {
   recordAccountMigrationPreferredDocuments,
 } from '../migrations/accountMigrationMutationJournal'
 
+import { takeTabGroupsChangedBeforeSync } from './tabGroupsChangedBeforeSync'
 import { createTabGroupsSyncQueue, type TabGroupChanges } from './tabGroupsSyncQueue'
 
 const changesToIntent = (changes: TabGroupChanges): FirestoreSyncIntent => ({
@@ -200,6 +201,18 @@ export const useTabGroupsSync = ({
           }
         })
       : () => {}
+
+    // A group changed before this sync started (the Tab of an Incoming link, at launch) goes
+    // out as a local change: the baseline would take it as sent, and the server snapshot as old.
+    if (outgoingEnabled) {
+      const changedBeforeSync = takeTabGroupsChangedBeforeSync(userId)
+      if (queue.includeLocal(changedBeforeSync)) {
+        if (!incomingEnabled) {
+          recordAccountMigrationPreferredDocuments(userId, 'tabGroups', changedBeforeSync)
+        }
+        debouncedSync()
+      }
+    }
 
     const handleInitialLoad = async () => {
       let migrationChanges: BatchChanges | undefined

@@ -6,6 +6,8 @@ Accepted. Supersedes
 [ADR-0057](./0057-render-public-routes-outside-the-workspace-for-guests.md) and applies the
 indexing decision of
 [ADR-0068](./0068-serve-indexable-resource-pages-from-the-public-site.md) to the workspace.
+Partially superseded by [ADR-0108](./0108-open-an-incoming-link-in-a-tab.md): a link followed
+from elsewhere opens its resource in a Tab rather than in the route panel.
 
 ## Context
 

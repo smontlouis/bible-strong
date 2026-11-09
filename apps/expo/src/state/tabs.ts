@@ -14,7 +14,12 @@ import { storage } from '~helpers/storage'
 import { versions } from '~helpers/bibleVersions'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import i18n, { getLanguage } from '~i18n'
-import { clampTabIndex, updateTabGroupActiveIndex, updateTabGroupTabs } from './tabWorkspace'
+import {
+  clampTabIndex,
+  keepLocalTabGroupsState,
+  updateTabGroupActiveIndex,
+  updateTabGroupTabs,
+} from './tabWorkspace'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
 import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
 import { type StrongBibleVersionId, type StrongMode } from '~helpers/strongBiblePublications'
@@ -559,14 +564,30 @@ const maxCachedTabs = 5
 // ============================================================================
 
 // Main groups atom with persistence
+// Every page of the workspace open in the browser shares one storage: a page follows the Tabs
+// the others open, move and close, and keeps its own active Tab and selection (ADR-0108).
 export const tabGroupsAtom = atomWithAsyncStorage<TabGroup[]>(
   'tabGroupsAtom',
   [createDefaultGroup()],
-  { migrate: migrateTabGroups, replacer: omitSessionTabPreview }
+  {
+    migrate: migrateTabGroups,
+    replacer: omitSessionTabPreview,
+    mergeFromOtherPages: followTabGroupsOfOtherPage,
+  }
 )
 
 // Active group ID (persisted)
 export const activeGroupIdAtom = atomWithAsyncStorage<string>('activeGroupIdAtom', DEFAULT_GROUP_ID)
+
+function followTabGroupsOfOtherPage(written: TabGroup[], current: TabGroup[]): TabGroup[] {
+  const groups = keepLocalTabGroupsState(written, current)
+  const store = getDefaultStore()
+  // The other page deleted the group this one shows: this one moves to the first group.
+  if (!groups.some(group => group.id === store.get(activeGroupIdAtom))) {
+    queueMicrotask(() => store.set(activeGroupIdAtom, groups[0]?.id ?? DEFAULT_GROUP_ID))
+  }
+  return groups
+}
 
 // Persisted atom for global parallel versions preference
 export const savedParallelVersionsAtom = atomWithAsyncStorage<VersionCode[]>(

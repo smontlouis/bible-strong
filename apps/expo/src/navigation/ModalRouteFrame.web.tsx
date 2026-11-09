@@ -2,7 +2,7 @@ import { finishPageTransition } from './pageTransition'
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useTheme } from '~themes/ThemeProvider'
-import { useSetAtom } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import {
   useNavigationContainerRef,
   useRouter,
@@ -15,6 +15,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { floatingShadow } from '~common/ui/surfaces'
 import { useWorkspaceRoutePanel, workspacePanelClosingAtom } from './useWorkspaceRoutePanel'
 import { WithoutWorkspaceHeaderInset } from '~features/app-switcher/workspaceHeaderInset'
+import { incomingLinkPendingAtom } from '~features/app-switcher/IncomingLinkGate'
 
 const ModalRouteFrame = ({ children }: { children: ReactNode }) => {
   const { enabled, open, panelWidth, reservedWidth, closeTarget } = useWorkspaceRoutePanel()
@@ -28,6 +29,8 @@ const ModalRouteFrame = ({ children }: { children: ReactNode }) => {
   const navigation = useNavigationContainerRef()
   const { t } = useTranslation()
   const setClosing = useSetAtom(workspacePanelClosingAtom)
+  // The route of an Incoming link becomes a Tab: its panel never shows (ADR-0108).
+  const incomingLinkPending = useAtomValue(incomingLinkPendingAtom)
   const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   useEffect(
     () => () => {
@@ -58,6 +61,8 @@ const ModalRouteFrame = ({ children }: { children: ReactNode }) => {
     setClosing(true)
     closeTimer.current = setTimeout(back, 240)
   }
+
+  if (incomingLinkPending) return null
 
   return (
     <Box testID="workspace-route-frame" className="flex-1 items-end" pointerEvents="box-none">

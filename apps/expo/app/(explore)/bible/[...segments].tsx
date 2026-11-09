@@ -1,7 +1,8 @@
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router'
 import { Platform } from 'react-native'
 
-import { BibleRouteScreen, type BibleRouteInput } from '~features/bible/BibleScreen'
+import { BibleRouteScreen } from '~features/bible/BibleScreen'
+import { bibleRouteInputFromPublicRoute } from '~features/bible/bibleRouteTab'
 import { buildPublicBiblePath, parsePublicBibleRoute } from '~features/bible/publicBibleRoutes'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { createPublicBibleNavigation } from '~features/bible/publicBibleNavigation'
@@ -45,33 +46,9 @@ const PublicBibleRoute = () => {
         })
       : undefined
 
-  const passage = route.passage
-  const focusVerses = passage
-    ? Array.from(
-        { length: (passage.endVerse ?? passage.startVerse) - passage.startVerse + 1 },
-        (_, index) => passage.startVerse + index
-      )
-    : undefined
-  const strongMode: BibleRouteInput['strongMode'] =
-    route.presentation === 'strong'
-      ? 'visible'
-      : route.presentation === 'transliteration' || route.presentation === 'reverse-interlinear'
-        ? route.presentation
-        : 'hidden'
-
   return (
     <BibleRouteScreen
-      input={{
-        version: route.version,
-        book: route.book,
-        chapter: route.chapter,
-        verse: passage?.startVerse,
-        focusVerses,
-        contextDisplayMode: passage ? 'focused' : 'fullChapter',
-        strongMode,
-        interlinearMode: route.presentation === 'interlinear' ? 'interlinear' : undefined,
-        interlinearLocale: route.glossLanguage,
-      }}
+      input={bibleRouteInputFromPublicRoute(route)}
       routeNavigation={routeNavigation}
     />
   )

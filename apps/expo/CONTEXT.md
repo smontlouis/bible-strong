@@ -70,6 +70,8 @@
 
 **Tab group** — A persisted collection of Tabs with one active Tab.
 
+**Incoming link** — The address a browser page of the workspace was opened on from elsewhere (another site, a message, the address bar), not by a reload. When it names a resource a Tab can show, it opens as a Tab, or selects the Tab already showing it, and leaves the address (ADR-0108).
+
 **Timeline stage** — The whole timeline drawn on one axis, as the public site draws it: the thirteen periods with their scenes, every dated event of the publication on a lane above the axis, and the strip of the periods to go anywhere. An event opens in its sheet, and the stage under the sheet follows the event it shows (ADR-0097).
 
 **Timeline painting** — The picture of a timeline event or period, painted for the application. It stands in for the pictures of the publication, whose real documents stay beside it; the rest of the publication's pictures are no longer shown. Paintings are artwork: a catalog on the media host says which exist, not the Timeline resource, and they have no Offline form (ADR-0096).

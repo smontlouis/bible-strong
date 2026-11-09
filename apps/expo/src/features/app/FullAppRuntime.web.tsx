@@ -5,6 +5,7 @@ import ReferencePreviewHost from '~features/bibleReferencePreview/ReferencePrevi
 import ConfirmDialogHost from '~common/ConfirmDialog/ConfirmDialogHost.web'
 import { useWorkspaceRoutePanel } from '~navigation/useWorkspaceRoutePanel'
 import WorkspaceLayout from '~features/app-switcher/WorkspaceLayout'
+import IncomingLinkTab from '~features/app-switcher/IncomingLinkTab'
 import * as Sentry from '@sentry/react-native'
 import { Stack, useLocalSearchParams, usePathname, useSegments } from 'expo-router'
 import { useEffect, useRef, type ReactNode } from 'react'
@@ -98,6 +99,7 @@ const FullAppRuntime = ({ theme, children }: { theme: Theme; children?: ReactNod
                   />
                 </Stack>
               </WorkspaceLayout>
+              <IncomingLinkTab />
               <WorkspaceAnalytics />
               <AssistantLauncher />
               <ConfirmDialogHost />

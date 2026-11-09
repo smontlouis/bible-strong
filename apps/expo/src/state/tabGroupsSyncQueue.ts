@@ -36,6 +36,21 @@ export function createTabGroupsSyncQueue(
     return changed
   }
 
+  /**
+   * Sends groups of the baseline as local changes: groups changed before the queue started,
+   * which it would otherwise take as already sent. Returns whether there is any.
+   */
+  const includeLocal = (groupIds: readonly string[]) => {
+    let included = false
+    for (const id of groupIds) {
+      const group = observed.find(candidate => candidate.id === id)
+      if (!group) continue
+      pending.set(id, group)
+      included = true
+    }
+    return included
+  }
+
   const applyRemote = (groups: TabGroup[], retryingIds: Set<string>) => {
     const protectedChanges: TabGroupChanges = new Map()
     for (const id of retryingIds) {
@@ -79,5 +94,5 @@ export function createTabGroupsSyncQueue(
     return getOutstanding()
   }
 
-  return { recordLocal, applyRemote, flush, dispose, getOutstanding }
+  return { recordLocal, includeLocal, applyRemote, flush, dispose, getOutstanding }
 }

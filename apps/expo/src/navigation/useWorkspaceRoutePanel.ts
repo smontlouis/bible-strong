@@ -6,6 +6,7 @@ import {
   WORKSPACE_SIDEBAR_WIDTH,
   workspaceSidebarVariant,
 } from '~features/app-switcher/utils/useResponsiveWorkspace'
+import { incomingLinkPendingAtom } from '~features/app-switcher/IncomingLinkGate'
 import { resolveWorkspaceLayout } from './workspaceLayoutPolicy'
 export { WORKSPACE_ROUTE_PANEL_WIDTH } from './workspaceLayoutPolicy'
 
@@ -22,8 +23,10 @@ export function useWorkspaceRoutePanel() {
   const wasDocked = useAtomValue(workspaceSidebarDockedAtom)
   const segments = useSegments()
   const state = useRootNavigationState()
+  // The route of an Incoming link becomes a Tab: its panel never opens (ADR-0108).
+  const incomingLinkPending = useAtomValue(incomingLinkPendingAtom)
   const enabled = Platform.OS === 'web' && width >= WORKSPACE_ROUTE_PANEL_BREAKPOINT
-  const open = enabled && panelRoutes.has(segments[0] as string)
+  const open = enabled && panelRoutes.has(segments[0] as string) && !incomingLinkPending
   const { sidebarDocked, panelWidth } = resolveWorkspaceLayout({
     // The inset panel gives up its frame gap on both sides.
     width: workspaceSidebarVariant === 'inset' ? width - 2 * WORKSPACE_FRAME_GAP : width,

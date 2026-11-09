@@ -1,6 +1,10 @@
 import { BibleTab, TabGroup, TabItem } from '~state/tabs'
 import { withoutTabPreview } from '~state/tabPreview'
-import { clampTabIndex, compareTabGroupOrder } from '~state/tabWorkspace'
+import {
+  compareTabGroupOrder,
+  resolveLocalActiveTabIndex,
+  withLocalTabState,
+} from '~state/tabWorkspace'
 import {
   writeToSubcollection,
   deleteFromSubcollection,
@@ -125,24 +129,6 @@ export const createTabGroupsSyncIntent = (
   }
 }
 
-function resolveLocalActiveTabIndex(remoteTabs: FirestoreTabItem[], localGroup?: TabGroup): number {
-  if (!localGroup) {
-    return 0
-  }
-
-  const localActiveTab = localGroup.tabs[localGroup.activeTabIndex]
-  const activeTabId = localActiveTab?.id
-
-  if (activeTabId) {
-    const nextIndex = remoteTabs.findIndex(tab => tab.id === activeTabId)
-    if (nextIndex !== -1) {
-      return nextIndex
-    }
-  }
-
-  return clampTabIndex(localGroup.activeTabIndex, remoteTabs.length)
-}
-
 /**
  * Transform Firestore data back to local TabGroup format
  * Preserves local-only state if available
@@ -161,26 +147,7 @@ export function hydrateTabGroup(
     // from (or cleared in) the Firestore representation.
     const localTab = localGroup?.tabs.find(t => t.id === firestoreTab.id)
     // A preview is a file of this device: never one from Firestore, nor an older inline one.
-    const syncedTab = withoutTabPreview(firestoreTab)
-
-    if (syncedTab.type === 'bible' && localTab?.type === 'bible') {
-      return {
-        ...syncedTab,
-        data: {
-          ...syncedTab.data,
-          selectedVerses: localTab.data.selectedVerses,
-          ...(localTab.data.selectedVersesVersion && {
-            selectedVersesVersion: localTab.data.selectedVersesVersion,
-          }),
-        },
-        previewUri: localTab.previewUri,
-      } as TabItem
-    }
-
-    return {
-      ...syncedTab,
-      previewUri: localTab?.previewUri,
-    } as TabItem
+    return withLocalTabState(withoutTabPreview(firestoreTab) as TabItem, localTab)
   })
 
   return {

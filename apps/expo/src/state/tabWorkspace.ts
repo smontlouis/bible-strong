@@ -15,6 +15,72 @@ export const clampTabIndex = (index: number, tabsLength: number): number => {
   return index
 }
 
+/**
+ * The index of the active Tab once a group's Tabs were rewritten elsewhere (another device,
+ * another page of the browser): the same Tab by its identity, else the nearest position.
+ */
+export const resolveLocalActiveTabIndex = (
+  tabs: readonly Pick<TabItem, 'id'>[],
+  localGroup?: TabGroup
+): number => {
+  if (!localGroup) return 0
+  const activeTabId = localGroup.tabs[localGroup.activeTabIndex]?.id
+  if (activeTabId) {
+    const nextIndex = tabs.findIndex(tab => tab.id === activeTabId)
+    if (nextIndex !== -1) return nextIndex
+  }
+  return clampTabIndex(localGroup.activeTabIndex, tabs.length)
+}
+
+/**
+ * A Tab written elsewhere, with what belongs to this page alone: its preview and, for a Bible
+ * Tab, its Selected verses.
+ */
+export const withLocalTabState = (tab: TabItem, localTab?: TabItem): TabItem => {
+  if (tab.type === 'bible' && localTab?.type === 'bible') {
+    return {
+      ...tab,
+      data: {
+        ...tab.data,
+        selectedVerses: localTab.data.selectedVerses,
+        ...(localTab.data.selectedVersesVersion && {
+          selectedVersesVersion: localTab.data.selectedVersesVersion,
+        }),
+      },
+      previewUri: localTab.previewUri,
+    }
+  }
+  return { ...tab, previewUri: localTab?.previewUri } as TabItem
+}
+
+/**
+ * The groups another page of the workspace wrote, with what belongs to this page: the active
+ * Tab of each group, the Selected verses and the previews. Which group is active is kept apart
+ * (`activeGroupIdAtom`) and does not follow the other page either.
+ *
+ * A group this page changed after the version written (a later `updatedAt`) stays as it is
+ * here: the other page may be writing an older version, such as a Firestore snapshot that
+ * does not hold this page's change yet.
+ */
+export const keepLocalTabGroupsState = (
+  written: readonly TabGroup[],
+  current: readonly TabGroup[]
+): TabGroup[] =>
+  written.map(group => {
+    const localGroup = current.find(candidate => candidate.id === group.id)
+    if (localGroup && localGroup.updatedAt > group.updatedAt) return localGroup
+    return {
+      ...group,
+      tabs: group.tabs.map(tab =>
+        withLocalTabState(
+          tab,
+          localGroup?.tabs.find(candidate => candidate.id === tab.id)
+        )
+      ),
+      activeTabIndex: resolveLocalActiveTabIndex(group.tabs, localGroup),
+    }
+  })
+
 export const updateTabGroupTabs = (
   groups: TabGroup[],
   groupId: string,

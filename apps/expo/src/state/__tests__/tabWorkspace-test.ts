@@ -4,6 +4,7 @@ import {
   createTabWorkspaceController,
   createTabGroup,
   deleteTabGroup,
+  keepLocalTabGroupsState,
   moveTabToGroup,
   reorderTabGroups,
   switchTabGroup,
@@ -231,5 +232,53 @@ describe('tabWorkspace', () => {
     expect(groups.map(group => group.id)).toEqual(['default'])
     expect(cachedTabIds).toEqual(['a'])
     expect(cleaned).toEqual(['other'])
+  })
+
+  it('follows the Tabs another page wrote and keeps the state of this page', () => {
+    const bible = (id: string, selectedVerses: Record<string, true>, previewUri?: string) =>
+      ({
+        id,
+        title: id,
+        isRemovable: true,
+        type: 'bible',
+        previewUri,
+        data: { selectedVerses, parallelVersions: [] },
+      }) as unknown as TabItem
+    const current = [
+      makeGroup('default', [makeTab('a'), bible('b', { '1-1-1': true }, 'data:b')], 1),
+    ]
+    // The other page opened a Tab in front, selected another verse, and created a group.
+    const written = [
+      makeGroup('default', [makeTab('new'), makeTab('a'), bible('b', { '1-1-2': true })], 0),
+      makeGroup('other', [makeTab('c'), makeTab('d')], 1),
+    ]
+
+    const kept = keepLocalTabGroupsState(written, current)
+
+    expect(kept.map(group => group.tabs.map(tab => tab.id))).toEqual([
+      ['new', 'a', 'b'],
+      ['c', 'd'],
+    ])
+    expect(kept[0]).toMatchObject({ activeTabIndex: 2 })
+    expect(kept[0]!.tabs[2]).toMatchObject({
+      previewUri: 'data:b',
+      data: { selectedVerses: { '1-1-1': true } },
+    })
+    expect(kept[1]).toMatchObject({ activeTabIndex: 0 })
+  })
+
+  it('keeps a group this page changed after the version the other page wrote', () => {
+    const current = [{ ...makeGroup('default', [makeTab('a')]), updatedAt: 20 }]
+    // The other page writes a Firestore snapshot older than this page's close of a Tab.
+    const written = [{ ...makeGroup('default', [makeTab('a'), makeTab('closed')]), updatedAt: 10 }]
+
+    expect(keepLocalTabGroupsState(written, current)).toEqual(current)
+  })
+
+  it('keeps the position of an active Tab the other page closed', () => {
+    const current = [makeGroup('default', [makeTab('a'), makeTab('b'), makeTab('c')], 2)]
+    const written = [makeGroup('default', [makeTab('a'), makeTab('b')], 0)]
+
+    expect(keepLocalTabGroupsState(written, current)[0]).toMatchObject({ activeTabIndex: 1 })
   })
 })

@@ -6,6 +6,9 @@ let mockWidth = 1440
 let mockPlatform = 'web'
 let mockSegments = ['(explore)', 'note']
 let mockRoutes = [{ name: 'index' }, { name: '(explore)' }]
+jest.mock('~features/app-switcher/IncomingLinkGate', () => ({
+  incomingLinkPendingAtom: jest.requireActual('jotai').atom(false),
+}))
 jest.mock('react-native', () => ({
   Platform: {
     get OS() {

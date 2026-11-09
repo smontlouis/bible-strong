@@ -3,6 +3,7 @@ import React, { act } from 'react'
 import { create, type ReactTestRenderer } from 'react-test-renderer'
 import { getDefaultStore } from 'jotai/vanilla'
 import { tabGroupsAtom, type TabGroup } from '../tabs'
+import { markTabGroupChangedBeforeSync } from '../tabGroupsChangedBeforeSync'
 import {
   cleanupTabGroupsSubscription,
   SYNC_DEBOUNCE_MS,
@@ -435,6 +436,36 @@ test('a delayed initial fetch cannot erase a local action waiting to be sent', a
   expect(store.get(tabGroupsAtom)[0].tabs.map(t => t.id)).toEqual(['a', 'b'])
   await advance(SYNC_DEBOUNCE_MS)
   expect(writeToSubcollection).toHaveBeenCalledTimes(1)
+})
+
+test('sends a group changed before the sync started instead of taking the server version back', async () => {
+  // The Tab of an Incoming link opens at launch, before the session of the account is restored.
+  await act(async () => {
+    root.update(<Probe incomingEnabled={false} outgoingEnabled={false} />)
+  })
+  await local(makeGroup(['a', 'link']), store.get(tabGroupsAtom)[1])
+  markTabGroupChangedBeforeSync('test-user', 'default')
+  await act(async () => {
+    root.update(<Probe />)
+  })
+  const callback = jest.mocked(subscribeToSubcollection).mock.calls.at(-1)![2]
+  await act(async () => {
+    callback(
+      { default: makeGroup(['a']), other: makeGroup(['x'], 'other') },
+      { added: {}, modified: {}, removed: [], fromCache: false, isFirstSnapshot: true }
+    )
+  })
+
+  expect(store.get(tabGroupsAtom)[0].tabs.map(tab => tab.id)).toEqual(['a', 'link'])
+  await advance(SYNC_DEBOUNCE_MS)
+  expect(writeToSubcollection).toHaveBeenCalledWith(
+    'test-user',
+    'tabGroups',
+    'default',
+    expect.objectContaining({
+      tabs: [expect.objectContaining({ id: 'a' }), expect.objectContaining({ id: 'link' })],
+    })
+  )
 })
 
 test('sends a dragged group order and restores it from an unordered Firestore snapshot', async () => {

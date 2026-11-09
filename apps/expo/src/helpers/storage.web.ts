@@ -52,6 +52,22 @@ export const storage = {
     return Number.isFinite(parsed) ? parsed : undefined
   },
   remove,
+  /**
+   * Calls back when another browser tab of the workspace writes `key`. Each tab runs its own
+   * copy of the application over the same `localStorage`; the browser tells every other tab
+   * of a write, never the one that made it.
+   */
+  subscribe(key: string, callback: (value: string | null) => void): () => void {
+    if (typeof window === 'undefined') return () => undefined
+    const namespacedKey = `${STORAGE_PREFIX}${key}`
+    const listener = (event: StorageEvent) => {
+      if (event.key === namespacedKey && event.storageArea === browserStorage()) {
+        callback(event.newValue)
+      }
+    }
+    window.addEventListener('storage', listener)
+    return () => window.removeEventListener('storage', listener)
+  },
   clearAll() {
     const target = browserStorage()
     if (target) {

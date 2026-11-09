@@ -3,6 +3,9 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import ModalRouteFrame from '../ModalRouteFrame.web'
 
 let mockEnabled = true
+jest.mock('~features/app-switcher/IncomingLinkGate', () => ({
+  incomingLinkPendingAtom: jest.requireActual('jotai').atom(false),
+}))
 jest.mock('~themes/ThemeProvider', () => ({ useTheme: () => ({ colors: { reverse: '#fff' } }) }))
 jest.mock('../useWorkspaceRoutePanel', () => ({
   WORKSPACE_ROUTE_PANEL_WIDTH: 550,
