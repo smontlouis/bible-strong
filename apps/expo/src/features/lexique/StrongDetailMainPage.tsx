@@ -1,3 +1,4 @@
+import { transliterationTextStyle } from '~common/ui/textTypography'
 import HorizontalControlScrollView from '~common/HorizontalControlScrollView'
 import StrongEntryMetadata from './StrongEntryMetadata'
 import { twMerge } from '~common/ui/classNames'
@@ -358,7 +359,7 @@ const StrongDetailMainPage = ({
             </Text>
             <Text className="font-medium text-[24px]">{entry.gloss}</Text>
             {!isOriginalUnnamed && (entry.transliteration || entry.pronunciation) && (
-              <Text className="text-grey text-[14px]">
+              <Text className="text-grey text-[14px]" style={transliterationTextStyle}>
                 {[entry.transliteration, entry.pronunciation].filter(Boolean).join(' · ')}
               </Text>
             )}

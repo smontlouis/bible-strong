@@ -3,7 +3,9 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import FilterChoices from '../FilterChoices'
 jest.mock('react-native', () => ({ TextInput: 'TextInput', Platform: { OS: 'ios' } }))
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
-jest.mock('~themes/ThemeProvider', () => ({ useTheme: () => ({ colors: {} }) }))
+jest.mock('~themes/ThemeProvider', () => ({
+  useTheme: () => ({ colors: {}, fontFamily: { text: 'Pulp Display' } }),
+}))
 jest.mock('../ui/Box', () => ({ __esModule: true, default: 'Box', TouchableBox: 'TouchableBox' }))
 jest.mock('../ui/Text', () => ({ __esModule: true, default: 'Text' }))
 jest.mock('../ui/Checkbox', () => ({ __esModule: true, default: 'Checkbox' }))

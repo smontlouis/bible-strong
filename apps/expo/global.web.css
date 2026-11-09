@@ -1,10 +1,106 @@
 @import 'tw-shimmer';
 
+/* The interface face, as on the site: Pulp Display, served from `public/fonts`. Until it
+   arrives, Arial scaled to its width, so that lines break where they will and nothing moves
+   when the font swaps (the values of `apps/site/src/styles.css`). */
+@font-face {
+  font-family: 'Pulp Display Fallback';
+  src: local('Arial'), local('ArialMT'), local('Roboto');
+  font-weight: 100 549;
+  size-adjust: 102%;
+}
+@font-face {
+  font-family: 'Pulp Display Fallback';
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('Roboto Bold'), local('Roboto-Bold');
+  font-weight: 550 900;
+  size-adjust: 97.5%;
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Pulp Display';
+  src: url('/fonts/PulpDisplay-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Pulp Display';
+  src: url('/fonts/PulpDisplay-RegularItalic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Pulp Display';
+  src: url('/fonts/PulpDisplay-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Pulp Display';
+  src: url('/fonts/PulpDisplay-MediumItalic.woff2') format('woff2');
+  font-weight: 500;
+  font-style: italic;
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Pulp Display';
+  src: url('/fonts/PulpDisplay-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Pulp Display';
+  src: url('/fonts/PulpDisplay-SemiBoldItalic.woff2') format('woff2');
+  font-weight: 600;
+  font-style: italic;
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Pulp Display';
+  src: url('/fonts/PulpDisplay-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Pulp Display';
+  src: url('/fonts/PulpDisplay-BoldItalic.woff2') format('woff2');
+  font-weight: 700;
+  font-style: italic;
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Pulp Display';
+  src: url('/fonts/PulpDisplay-ExtraBold.woff2') format('woff2');
+  font-weight: 800 900;
+  font-style: normal;
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Pulp Display';
+  src: url('/fonts/PulpDisplay-ExtraBoldItalic.woff2') format('woff2');
+  font-weight: 800 900;
+  font-style: italic;
+}
+
 /* macOS browsers thicken text with their default smoothing; grayscale smoothing draws the
    fonts at their designed weight, as native apps do. Other platforms ignore it. */
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* What sets no face of its own (a control in a web view, a portalled menu) takes the
+     interface face; `webFontFamily` gives the same stack to React Native Web. */
+  font-family:
+    'Pulp Display',
+    'Pulp Display Fallback',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
 }
 
 * {

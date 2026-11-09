@@ -14,6 +14,7 @@ jest.mock('react-native', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
   return {
     Platform: { OS: 'web' },
+    StyleSheet: { flatten: (style: unknown) => style },
     Text: 'Text',
     View: 'View',
     TouchableOpacity: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>

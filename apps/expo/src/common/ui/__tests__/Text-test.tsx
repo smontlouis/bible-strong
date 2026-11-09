@@ -43,3 +43,22 @@ it('forwards merged classes, inline overrides and refs without resolving CSS', (
   expect(ref.current).toBe(nativeText)
   act(() => renderer!.unmount())
 })
+
+it('lets a nested text inherit the face of the text around it', () => {
+  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
+  let renderer: ReactTestRenderer
+  act(() => {
+    renderer = create(
+      <Text style={{ fontFamily: 'Literata Book' }}>
+        Avant <Text className="font-bold">mot</Text>
+      </Text>
+    )
+  })
+  const [outer, inner] = renderer!.root.findAllByType('Text' as React.ElementType)
+  expect(outer.props.style).toEqual([
+    { fontFamily: 'Literata Book' },
+    { fontFamily: '"Literata Book", Georgia, serif' },
+  ])
+  expect(inner.props.style).toBeUndefined()
+  act(() => renderer!.unmount())
+})

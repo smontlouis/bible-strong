@@ -1,3 +1,4 @@
+import { transliterationTextStyle } from '~common/ui/textTypography'
 import { useQuery } from '@tanstack/react-query'
 import { ActivityIndicator, Linking } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -116,7 +117,9 @@ export default function ResourcePreviewContent({
       {'original' in data && (
         <>
           <Text className="text-[22px]">{data.original}</Text>
-          <Text className="text-[13px] text-grey">{data.transliteration}</Text>
+          <Text className="text-[13px] text-grey" style={transliterationTextStyle}>
+            {data.transliteration}
+          </Text>
           <Text className="text-[16px] font-semibold">{data.gloss}</Text>
         </>
       )}

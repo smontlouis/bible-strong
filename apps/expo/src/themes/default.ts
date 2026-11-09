@@ -1,4 +1,14 @@
 import { Platform } from 'react-native'
+
+/**
+ * The interface face of the site, Pulp Display (design-system README, « Type »): built into the
+ * native apps (`app.config.ts`), served by the web from `public/fonts`. A binary built without
+ * it draws the system sans instead. `paragraph` stays on the platform's sans: it sets verses
+ * and other text read.
+ */
+const nativeSans = Platform.OS === 'ios' ? 'System' : 'normal'
+const interfaceFont = 'Pulp Display'
+
 const theme = {
   measures: {
     headerHeight: 60,
@@ -7,10 +17,10 @@ const theme = {
     paddingBottom: 30,
   },
   fontFamily: {
-    text: Platform.OS === 'ios' ? 'System' : 'normal',
-    title: Platform.OS === 'ios' ? 'System' : 'normal',
-    titleItalic: Platform.OS === 'ios' ? 'System' : 'normal',
-    paragraph: Platform.OS === 'ios' ? 'System' : 'normal',
+    text: interfaceFont,
+    title: interfaceFont,
+    titleItalic: interfaceFont,
+    paragraph: nativeSans,
   },
 }
 

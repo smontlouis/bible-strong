@@ -1,6 +1,7 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { Text as NativeText, TouchableOpacity as NativeTouchableOpacity } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
+import { resolveTextTypography } from '~common/ui/textTypography'
 
 import type { Theme as AppTheme } from '~themes'
 import { useTheme as useAppTheme } from '~themes/ThemeProvider'
@@ -48,15 +49,13 @@ const Text = (
     <NativeText
       {...props}
       className={resolvedClassName}
-      style={
-        [
-          {
-            color: isSelected ? theme.colors.primary : theme.colors.default,
-            fontWeight: isSelected ? 'bold' : 'normal',
-          },
-          props.style,
-        ] as UIComponentProps<typeof NativeText>['style']
-      }
+      style={resolveTextTypography(theme.fontFamily.text, [
+        {
+          color: isSelected ? theme.colors.primary : theme.colors.default,
+          fontWeight: isSelected ? 'bold' : 'normal',
+        },
+        props.style,
+      ] as UIComponentProps<typeof NativeText>['style'])}
     />
   )
 }

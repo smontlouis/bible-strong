@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { TextInput } from 'react-native'
+import { TextInput } from '~common/ui/InterfaceTextInput'
 import { useTheme } from '~themes/ThemeProvider'
 
 import ChoiceFilterModal, { type ChoiceFilterOption } from './ChoiceFilterModal'

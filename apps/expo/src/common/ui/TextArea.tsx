@@ -1,5 +1,6 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
-import { TextInputProps, TextInput } from 'react-native'
+import { TextInputProps } from 'react-native'
+import { TextInput } from '~common/ui/InterfaceTextInput'
 import { twMerge } from '~common/ui/classNames'
 
 import type { Theme as AppTheme } from '~themes'

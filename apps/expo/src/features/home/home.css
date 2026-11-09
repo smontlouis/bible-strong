@@ -58,8 +58,14 @@
   border-radius: 4px;
   background: var(--color-canvas);
   color: var(--color-grey);
-  font:
-    12px system-ui,
+  font-family:
+    'Pulp Display',
+    'Pulp Display Fallback',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
     sans-serif;
+  font-size: 12px;
   white-space: nowrap;
 }

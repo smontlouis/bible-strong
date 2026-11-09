@@ -1,3 +1,4 @@
+import { INTERFACE_FONT } from './interfaceFont'
 import { styled } from 'goober'
 import { RootStyles } from './BibleDOMWrapper'
 import type { BibleReaderSettings } from '../bibleReaderSettings'
@@ -33,7 +34,7 @@ const Count = styled<RootStyles>('div')(({ settings: { theme, colors } }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  fontFamily: 'arial',
+  fontFamily: INTERFACE_FONT,
   fontSize: '10px',
   color: colors[theme].reverse,
   bottom: '0',

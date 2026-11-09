@@ -1,3 +1,4 @@
+import { INTERFACE_FONT } from './interfaceFont'
 import Feather from '@expo/vector-icons/Feather'
 import { personalContentIcons } from '~common/personalContent'
 import { resolveUniverseColors } from '~themes/universeColors'
@@ -35,7 +36,7 @@ const Count = styled<RootStyles>('div')(({ settings: { theme, colors } }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  fontFamily: 'arial',
+  fontFamily: INTERFACE_FONT,
   fontSize: '10px',
   color: colors[theme].reverse,
   bottom: '0',

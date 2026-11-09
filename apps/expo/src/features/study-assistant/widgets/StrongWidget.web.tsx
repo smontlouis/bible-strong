@@ -1,3 +1,4 @@
+import { TRANSLITERATION_FONT, webFontFamily } from '~helpers/webFontFamily'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import type { LexicalWidget } from '@bible-strong/ai-contract/contract'
@@ -51,7 +52,13 @@ export default function StrongWidget({ widget }: { widget: LexicalWidget }) {
               {entry.original}
             </span>
             <span className="bs-quote-sense">
-              {[entry.transliteration, entry.gloss].filter(Boolean).join(' · ')}
+              {!!entry.transliteration && (
+                <span style={{ fontFamily: webFontFamily(TRANSLITERATION_FONT) }}>
+                  {entry.transliteration}
+                </span>
+              )}
+              {entry.transliteration && entry.gloss ? ' · ' : ''}
+              {entry.gloss}
             </span>
             <ListenToStrong
               type={entry.language === 'hebrew' ? 'hebreu' : 'grec'}

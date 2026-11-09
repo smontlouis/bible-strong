@@ -1,3 +1,4 @@
+import { INTERFACE_FONT } from './interfaceFont'
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 import type { SelectedCode, Verse } from '~common/types'
 import { radii } from '~common/ui/surfaces'
@@ -159,7 +160,7 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode }: Pro
                 <span
                   style={{
                     opacity: 0.55,
-                    fontFamily: 'Arial',
+                    fontFamily: INTERFACE_FONT,
                     fontSize: scaleFontSize(9, settings.fontSizeScale),
                     lineHeight: 1.2,
                   }}
@@ -171,7 +172,7 @@ const ReverseInterlinearVerse = ({ verse, version, settings, selectedCode }: Pro
                 <span
                   style={{
                     color: selected ? colors.reverse : colors.tertiary,
-                    fontFamily: 'Arial',
+                    fontFamily: INTERFACE_FONT,
                     fontSize: scaleFontSize(9, settings.fontSizeScale),
                     lineHeight: 1.2,
                   }}

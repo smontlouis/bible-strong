@@ -89,6 +89,16 @@
       "port": 9090
     },
     {
+      "name": "expo-metro",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": [
+        "workspace",
+        "@bible-strong/expo",
+        "start"
+      ],
+      "port": 8081
+    },
+    {
       "name": "world-client",
       "runtimeExecutable": "yarn",
       "runtimeArgs": [

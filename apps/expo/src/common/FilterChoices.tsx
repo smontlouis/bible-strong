@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Platform, TextInput } from 'react-native'
+import { Platform } from 'react-native'
+import { TextInput } from '~common/ui/InterfaceTextInput'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '~themes/ThemeProvider'
 import Box, { TouchableBox } from './ui/Box'

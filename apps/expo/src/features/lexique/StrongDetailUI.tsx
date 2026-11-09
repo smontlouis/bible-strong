@@ -1,3 +1,4 @@
+import { transliterationTextStyle } from '~common/ui/textTypography'
 import { getReadingTypography, type ReadingTypography } from '~common/readingHtml'
 import { useReferencePreview } from '~features/bibleReferencePreview/state'
 
@@ -58,7 +59,11 @@ export const StrongLexicalRelationRow = ({
       accessibilityLabel={`${relation.gloss}, ${code}`}
     >
       <VStack className="flex-[1] gap-[2px]">
-        <Text className="text-[15px]" numberOfLines={2}>
+        <Text
+          className="text-[15px]"
+          numberOfLines={2}
+          style={relation.gloss ? undefined : transliterationTextStyle}
+        >
           {relation.gloss || relation.transliteration}
         </Text>
         <Text className="text-[13px] text-grey" numberOfLines={1}>

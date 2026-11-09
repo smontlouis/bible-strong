@@ -1,3 +1,4 @@
+import { INTERFACE_FONT } from './interfaceFont'
 import { useReaderIntent } from './useReaderIntent'
 import { scaleFontSize } from './scaleFontSize'
 import type { SelectedCode, Verse } from '~common/types'
@@ -120,7 +121,7 @@ const StructuredInterlinearVerse = ({
                   <sup
                     style={{
                       color: selected ? colors.reverse : colors.primary,
-                      fontFamily: 'Arial',
+                      fontFamily: INTERFACE_FONT,
                       fontSize: scaleFontSize(9, settings.fontSizeScale),
                       marginInlineStart: 2,
                     }}
@@ -246,7 +247,7 @@ const StructuredInterlinearVerse = ({
               <span
                 style={{
                   opacity: 0.55,
-                  fontFamily: 'Arial',
+                  fontFamily: INTERFACE_FONT,
                   fontSize: scaleFontSize(9, settings.fontSizeScale),
                   lineHeight: 1.2,
                 }}
@@ -256,7 +257,7 @@ const StructuredInterlinearVerse = ({
               <span
                 style={{
                   color: selected ? colors.reverse : colors.tertiary,
-                  fontFamily: 'Arial',
+                  fontFamily: INTERFACE_FONT,
                   fontSize: scaleFontSize(9, settings.fontSizeScale),
                   lineHeight: 1.2,
                 }}

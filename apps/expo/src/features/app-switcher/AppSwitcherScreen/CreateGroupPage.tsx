@@ -1,6 +1,7 @@
 import { useTheme } from '~themes/ThemeProvider'
 import React, { memo, useRef, useState } from 'react'
-import { TextInput, useWindowDimensions, ScrollView } from 'react-native'
+import { useWindowDimensions, ScrollView } from 'react-native'
+import { TextInput } from '~common/ui/InterfaceTextInput'
 import { KeyboardController } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { toast } from '~helpers/toast'

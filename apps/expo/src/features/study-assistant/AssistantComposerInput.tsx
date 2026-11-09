@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { TextInput, type TextInputProps } from 'react-native'
+import { type TextInputProps } from 'react-native'
+import { TextInput } from '~common/ui/InterfaceTextInput'
 import { useAui } from '@assistant-ui/react-native'
 import { createComposerTextSync, receiveComposerText, sendComposerText } from './composerTextSync'
 

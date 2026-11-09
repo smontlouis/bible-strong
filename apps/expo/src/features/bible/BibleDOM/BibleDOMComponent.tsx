@@ -1,5 +1,6 @@
 'use dom'
 
+import { INTERFACE_FONT } from './interfaceFont'
 import './arrayAtPolyfill'
 import { getPassageContextHeaderHeight } from '../passagePreviewPresentation'
 import EntityChipsDOM from '~common/EntityChipsDOM'
@@ -37,6 +38,7 @@ import { OverlayCloseRequestProvider } from './overlayLifecycle'
 import { TranslationsProvider, BibleDOMTranslations } from './TranslationsContext'
 import { scaleFontSize } from './scaleFontSize'
 import { useFonts } from 'expo-font'
+import { useInterfaceFontInDOM } from '~common/useInterfaceFontInDOM'
 import {
   BIBLE_FORM_SHEET_HEADER_HEIGHT,
   HEADER_HEIGHT,
@@ -311,7 +313,7 @@ const Container = styled('div')<
 const RightDirection = styled('div')<RootStyles>(({ settings: { theme, colors } }) => ({
   textAlign: 'right',
   marginBottom: '20px',
-  fontFamily: 'arial',
+  fontFamily: INTERFACE_FONT,
   fontSize: '13px',
   color: colors[theme].darkGrey,
 }))
@@ -1941,6 +1943,7 @@ const VersesRendererContent = ({ settings, translations, verses, ...rest }: Prop
   useFonts({
     'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
   })
+  useInterfaceFontInDOM()
 
   const headerHeight =
     (rest.isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT) +

@@ -1,3 +1,4 @@
+import { transliterationTextStyle } from '~common/ui/textTypography'
 import { resolveThemeColor, colorWithOpacity } from '~themes/colorValues'
 import { useTheme as useStylingTheme, Theme } from '~themes/ThemeProvider'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
@@ -190,16 +191,12 @@ const StrongCard = (props: Props) => {
                 <Text className="font-medium text-[16px]">{Mot}</Text>
 
                 {!!(Phonetique || Pronunciation || original) && (
-                  <Text className="text-tertiary text-[12px]">
+                  <Text className="text-tertiary text-[12px]" style={transliterationTextStyle}>
                     {[Phonetique, Pronunciation, original].filter(Boolean).join(' · ')}
                   </Text>
                 )}
 
-                {!!morphology && (
-                  <Text className="text-tertiary text-[11px]" style={{ fontFamily: 'Arial' }}>
-                    {morphology}
-                  </Text>
-                )}
+                {!!morphology && <Text className="text-tertiary text-[11px]">{morphology}</Text>}
               </VStack>
             </TouchableBox>
             {isSelectionMode ? (

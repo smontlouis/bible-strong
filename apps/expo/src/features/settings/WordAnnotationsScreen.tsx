@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { FlatList, Platform, Text as NativeText, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import { twMerge } from '~common/ui/classNames'
+import { resolveTextTypography } from '~common/ui/textTypography'
 
 import { pageContentStyle } from '~common/ui/PageContent'
 import type { Theme as AppTheme } from '~themes'
@@ -92,15 +93,13 @@ const TabText = (
     <NativeText
       {...props}
       className={resolvedClassName}
-      style={
-        [
-          {
-            fontWeight: active ? 'bold' : 'normal',
-            color: active ? theme.colors.primary : theme.colors.tertiary,
-          },
-          props.style,
-        ] as UIComponentProps<typeof NativeText>['style']
-      }
+      style={resolveTextTypography(theme.fontFamily.text, [
+        {
+          fontWeight: active ? 'bold' : 'normal',
+          color: active ? theme.colors.primary : theme.colors.tertiary,
+        },
+        props.style,
+      ] as UIComponentProps<typeof NativeText>['style'])}
     />
   )
 }

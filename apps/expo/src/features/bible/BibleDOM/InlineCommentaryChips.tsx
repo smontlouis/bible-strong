@@ -1,3 +1,4 @@
+import { INTERFACE_FONT } from './interfaceFont'
 import {
   getCommentaryInitials,
   getCommentaryAvatarColor,
@@ -63,7 +64,7 @@ export default function InlineCommentaryChips({
             fontSize: 12,
             padding: 0,
             cursor: 'pointer',
-            fontFamily: 'system-ui',
+            fontFamily: INTERFACE_FONT,
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'flex-start',

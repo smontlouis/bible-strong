@@ -20,6 +20,25 @@ const vectorIconFont = (fontFamily: string, file: string) => ({
   ],
 })
 
+// The interface face, Pulp Display, built into both apps as one family of five weights, upright
+// and italic, so that `fontWeight` and `fontStyle` pick the file. The files carry the metrics,
+// weights and italic flags of the originals (`scripts/pulp-display-metrics.py`): iOS picks a
+// face by them, Android by the definitions below.
+const PULP_DISPLAY_WEIGHTS = [
+  ['Regular', 400],
+  ['Medium', 500],
+  ['SemiBold', 600],
+  ['Bold', 700],
+  ['ExtraBold', 800],
+] as const
+const PULP_DISPLAY_FACES = PULP_DISPLAY_WEIGHTS.flatMap(([name, weight]) =>
+  (['normal', 'italic'] as const).map(style => ({
+    path: `./src/assets/fonts/PulpDisplay-${name}${style === 'italic' ? 'Italic' : ''}.ttf`,
+    weight,
+    style,
+  }))
+)
+
 // The families of public pages a link opens in the application.
 const PUBLIC_RESOURCE_PATHS = [
   '/bible/',
@@ -146,10 +165,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'expo-font',
       {
         fonts: ['./src/assets/fonts/LiterataBook-Regular.otf'],
+        ios: {
+          fonts: PULP_DISPLAY_FACES.map(face => face.path),
+        },
         android: {
           fonts: [
             vectorIconFont('feather', 'Feather.ttf'),
             vectorIconFont('ionicons', 'Ionicons.ttf'),
+            { fontFamily: 'Pulp Display', fontDefinitions: PULP_DISPLAY_FACES },
           ],
         },
       },

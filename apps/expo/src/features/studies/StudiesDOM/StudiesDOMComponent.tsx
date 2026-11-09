@@ -6,6 +6,7 @@ import debounce from 'debounce'
 import { DOMImperativeFactory, useDOMImperativeHandle } from 'expo/dom'
 import type { JSONValue } from 'expo/build/dom/dom.types'
 import { useFonts } from 'expo-font'
+import { useInterfaceFontInDOM } from '~common/useInterfaceFontInDOM'
 import { Ref, useEffect, useRef } from 'react'
 import { dispatch } from './dispatch'
 import Quill from './quill'
@@ -142,6 +143,7 @@ export default function StudiesDOMComponent({
   const [_loaded] = useFonts({
     'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
   })
+  useInterfaceFontInDOM()
 
   const quillRef = useRef<QuillInstance | null>(null)
   const editorRef = useRef<HTMLDivElement>(null)

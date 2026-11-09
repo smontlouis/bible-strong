@@ -35,7 +35,8 @@ import {
   useState,
   useRef,
 } from 'react'
-import { ActivityIndicator, FlatList, Platform, TextInput } from 'react-native'
+import { ActivityIndicator, FlatList, Platform } from 'react-native'
+import { TextInput } from '~common/ui/InterfaceTextInput'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import AlphabetList from '~common/AlphabetList'

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { TextInput } from 'react-native'
+import { TextInput } from '~common/ui/InterfaceTextInput'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '~themes/ThemeProvider'
 import Box from '~common/ui/Box'

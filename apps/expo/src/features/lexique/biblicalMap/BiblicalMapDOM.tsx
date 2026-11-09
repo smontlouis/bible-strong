@@ -1,5 +1,7 @@
 'use dom'
 
+import { PULP_DISPLAY_STACK } from '~helpers/webFontFamily'
+import { useInterfaceFontInDOM } from '~common/useInterfaceFontInDOM'
 import {
   BiblicalMapCanvas,
   type BiblicalMapColors,
@@ -30,6 +32,7 @@ export default function BiblicalMapDOM({
   labels: BiblicalMapLabels
   onOpenPlace: (uniqueName: string) => void
 }) {
+  useInterfaceFontInDOM()
   return (
     <BiblicalMapCanvas
       places={places}
@@ -43,7 +46,7 @@ export default function BiblicalMapDOM({
       style={{
         position: 'fixed',
         inset: 0,
-        fontFamily: '-apple-system, system-ui, Roboto, sans-serif',
+        fontFamily: PULP_DISPLAY_STACK,
       }}
     />
   )

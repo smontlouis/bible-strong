@@ -1,5 +1,5 @@
 import Box from '~common/ui/Box'
-import { TextInput } from 'react-native'
+import { TextInput } from '~common/ui/InterfaceTextInput'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '~themes/ThemeProvider'
 

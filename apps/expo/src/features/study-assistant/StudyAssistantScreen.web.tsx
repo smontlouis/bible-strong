@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput } from 'react-native'
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView } from 'react-native'
+import { TextInput } from '~common/ui/InterfaceTextInput'
 import { useSelector } from 'react-redux'
 import { selectUserLoginInfo } from '~redux/selectors/user'
 import { useTranslation } from 'react-i18next'

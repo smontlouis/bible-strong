@@ -33,8 +33,21 @@ it('preserves a selected reading face and explicit override precedence', () => {
     )?.fontFamily
   ).toBe('"Literata Book", Georgia, serif')
 })
-it('does not alter native styles', () => {
+it('sets the interface face on native under any face the style names', () => {
   Object.assign(Platform, { OS: 'ios' })
   const style = { fontFamily: 'System', fontSize: 20 }
-  expect(resolveTextTypography('normal', style)).toBe(style)
+  expect(resolveTextTypography('Pulp Display', style)).toEqual([
+    { fontFamily: 'Pulp Display' },
+    style,
+  ])
+  expect(StyleSheet.flatten(resolveTextTypography('Pulp Display', { fontSize: 20 }))).toEqual({
+    fontFamily: 'Pulp Display',
+    fontSize: 20,
+  })
+})
+it('lets a nested text inherit its parent face', () => {
+  const style = { fontSize: 20 }
+  expect(resolveTextTypography(undefined, style)).toBe(style)
+  Object.assign(Platform, { OS: 'ios' })
+  expect(resolveTextTypography(undefined, style)).toBe(style)
 })

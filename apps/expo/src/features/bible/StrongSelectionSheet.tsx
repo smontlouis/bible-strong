@@ -1,3 +1,4 @@
+import { transliterationTextStyle } from '~common/ui/textTypography'
 import { getSimpleStrongModuleId } from '@bible-strong/resource-domain/strong-lexicon'
 import { getPrimaryStrongLexiconAvailability } from '~features/resources/layeredStrongLexiconAccess'
 import HorizontalControlScrollView from '~common/HorizontalControlScrollView'
@@ -534,18 +535,16 @@ const StrongSelectionSheet = ({
                             <HStack className="overflow-hidden border-continuous items-baseline gap-[8px] flex-wrap">
                               <Text className="text-[17px]">{card.original}</Text>
                               {!!card.transliteration && (
-                                <Text className="text-tertiary text-[12px]">
+                                <Text
+                                  className="text-tertiary text-[12px]"
+                                  style={transliterationTextStyle}
+                                >
                                   {card.transliteration}
                                 </Text>
                               )}
                             </HStack>
                             {!!card.morphology && (
-                              <Text
-                                className="text-tertiary text-[11px]"
-                                style={{ fontFamily: 'Arial' }}
-                              >
-                                {card.morphology}
-                              </Text>
+                              <Text className="text-tertiary text-[11px]">{card.morphology}</Text>
                             )}
                           </VStack>
                           <FeatherIcon name="chevron-right" size={18} color="tertiary" />

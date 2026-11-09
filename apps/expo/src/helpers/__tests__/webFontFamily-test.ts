@@ -8,6 +8,14 @@ describe('browser font families', () => {
     }
   })
 
+  it('sets the interface in Pulp Display, then its width-matched fallback, then the system sans', () => {
+    expect(webFontFamily('Pulp Display')).toBe(
+      '"Pulp Display", "Pulp Display Fallback", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    )
+    // A reading face the reader chose as « System » stays the system sans.
+    expect(webFontFamily('System')).not.toContain('Pulp Display')
+  })
+
   it('keeps bundled and saved reading faces with matching fallbacks', () => {
     expect(webFontFamily('Literata Book')).toBe('"Literata Book", Georgia, serif')
     expect(webFontFamily('Baskerville')).toBe('"Baskerville", Georgia, serif')

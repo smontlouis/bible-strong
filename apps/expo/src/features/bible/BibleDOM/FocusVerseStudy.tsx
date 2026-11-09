@@ -1,3 +1,4 @@
+import { TRANSLITERATION_FONT, webFontFamily } from '~helpers/webFontFamily'
 import { styled } from 'goober'
 import type { CSSProperties, ReactNode } from 'react'
 
@@ -349,7 +350,13 @@ const FocusVerseStudy = ({
                     <span style={{ fontFamily: bibleFont, fontSize: 17 }}>{word.original}</span>
                     {(word.transliteration || word.gloss) && (
                       <span style={{ fontSize: 13, color: colors.grey }}>
-                        {[word.transliteration, word.gloss].filter(Boolean).join(' · ')}
+                        {!!word.transliteration && (
+                          <span style={{ fontFamily: webFontFamily(TRANSLITERATION_FONT) }}>
+                            {word.transliteration}
+                          </span>
+                        )}
+                        {word.transliteration && word.gloss ? ' · ' : ''}
+                        {word.gloss}
                       </span>
                     )}
                   </span>

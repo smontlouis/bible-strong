@@ -1,5 +1,6 @@
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { titleFontStyle } from '~themes/styleValues'
+import { resolveTextTypography } from '~common/ui/textTypography'
 import distanceInWords from 'date-fns/formatDistance'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -33,13 +34,14 @@ const DateText = (
   }
 ) => {
   const { theme: _themeOverride, className, ...props } = componentProps
+  const theme = useStylingTheme()
 
   const resolvedClassName = twMerge('text-tertiary', className)
   return (
     <NativeText
       {...props}
       className={resolvedClassName}
-      style={[props.style] as UIComponentProps<typeof NativeText>['style']}
+      style={resolveTextTypography(theme.fontFamily.text, props.style)}
     />
   )
 }

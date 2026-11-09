@@ -1,3 +1,4 @@
+import { transliterationTextStyle } from '~common/ui/textTypography'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import type { LexicalWidget } from '@bible-strong/ai-contract/contract'
@@ -56,7 +57,11 @@ export default function StrongWidget({ widget }: { widget: LexicalWidget }) {
               {entry.original}
             </Text>
             <Text className="text-grey flex-1 text-[14px]" numberOfLines={1}>
-              {[entry.transliteration, entry.gloss].filter(Boolean).join(' · ')}
+              {!!entry.transliteration && (
+                <Text style={transliterationTextStyle}>{entry.transliteration}</Text>
+              )}
+              {entry.transliteration && entry.gloss ? ' · ' : ''}
+              {entry.gloss}
             </Text>
             <ListenToStrong
               type={entry.language === 'hebrew' ? 'hebreu' : 'grec'}
