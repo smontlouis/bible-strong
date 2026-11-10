@@ -64,6 +64,15 @@ export const syncPurchasesIdentity = async (userId: string | null): Promise<Prem
   return { kind: 'none' }
 }
 
+/**
+ * Leaves RevenueCat alone for an account that does not see Premium: the SDK is not set up for it,
+ * and an account signed in before (a beta account on this device) is signed out of it.
+ */
+export const releasePurchasesIdentity = async (): Promise<void> => {
+  if (configuredUserId === undefined || configuredUserId === null) return
+  await syncPurchasesIdentity(null)
+}
+
 export const loadPremiumOffer = async (): Promise<PremiumOffer> => {
   const offerings = await Purchases.getOfferings()
   return toPremiumOffer(offerings.current)

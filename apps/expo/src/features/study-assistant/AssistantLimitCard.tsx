@@ -6,8 +6,7 @@ import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Text from '~common/ui/Text'
 import { premiumStatusAtom } from '~features/premium/premiumStatus'
-import { isPurchasesAvailable } from '~features/premium/purchasesClient'
-import { salesChannel } from '~features/premium/salesChannel'
+import { usePremiumVisible } from '~features/premium/premiumVisibility'
 import useLanguage from '~helpers/useLanguage'
 
 import { useAssistantSheet } from './assistantSheetContext'
@@ -26,6 +25,7 @@ export default function AssistantLimitCard() {
   const lang = useLanguage()
   const { navigate } = useAssistantSheet()
   const premium = useAtomValue(premiumStatusAtom)
+  const premiumVisible = usePremiumVisible()
   // The sentence names the account's daily questions once the service has said how many.
   const quota = useAssistantQuota()
   const [now] = useState(() => new Date())
@@ -35,8 +35,7 @@ export default function AssistantLimitCard() {
     quota?.kind === 'daily' ? quota.limit : undefined
   )
   const [animation] = useStrobiReaction('sleeping', { animation: 'drowsy', ms: 2800 })
-  const offersPremium =
-    premium.kind === 'none' && salesChannel() !== 'none' && isPurchasesAvailable()
+  const offersPremium = premium.kind === 'none' && premiumVisible
   return (
     <Box
       accessibilityRole="alert"

@@ -14,6 +14,8 @@ export const syncPurchasesIdentity = async (_userId: string | null): Promise<Pre
   kind: 'unknown',
 })
 
+export const releasePurchasesIdentity = async (): Promise<void> => {}
+
 export const loadPremiumOffer = async (): Promise<PremiumOffer> => ({ savingsPercent: null })
 
 export const buyPremium = async (

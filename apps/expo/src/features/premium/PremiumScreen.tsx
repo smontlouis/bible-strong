@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 import * as Haptics from 'expo-haptics'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { Redirect, useLocalSearchParams, useRouter } from 'expo-router'
 import { useAtomValue } from 'jotai/react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -36,6 +36,7 @@ import {
   restorePremium,
 } from './purchasesClient'
 import { salesChannel } from './salesChannel'
+import { usePremiumVisible } from './premiumVisibility'
 
 type PlanChoice = 'annual' | 'monthly'
 
@@ -383,4 +384,7 @@ const PremiumScreen = () => {
   )
 }
 
-export default PremiumScreen
+/** Until sales open, the page exists only for the beta list; a link to it leads home. */
+const PremiumRoute = () => (usePremiumVisible() ? <PremiumScreen /> : <Redirect href="/" />)
+
+export default PremiumRoute

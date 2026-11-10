@@ -4,7 +4,12 @@ import { useEffect } from 'react'
 import useLogin from '~helpers/useLogin'
 
 import { premiumStatusAtom } from './premiumStatus'
-import { setPremiumListener, syncPurchasesIdentity } from './purchasesClient'
+import { premiumVisible } from './premiumVisibility'
+import {
+  releasePurchasesIdentity,
+  setPremiumListener,
+  syncPurchasesIdentity,
+} from './purchasesClient'
 
 /**
  * Keeps RevenueCat's customer on the signed-in account and `premiumStatusAtom` current
@@ -14,11 +19,20 @@ export const usePremiumIdentity = () => {
   const { isLogged, user } = useLogin()
   const setStatus = useSetAtom(premiumStatusAtom)
   const userId = isLogged && user.id ? user.id : null
+  // Until sales open, only the beta list reaches RevenueCat (ADR-0110).
+  const visible = premiumVisible(userId)
 
   useEffect(() => setPremiumListener(setStatus), [setStatus])
 
   useEffect(() => {
     let cancelled = false
+    if (!visible) {
+      setStatus({ kind: 'none' })
+      void releasePurchasesIdentity().catch(error =>
+        console.warn('[Premium] RevenueCat did not sign out', error)
+      )
+      return
+    }
     syncPurchasesIdentity(userId)
       .then(status => {
         if (!cancelled) setStatus(status)
@@ -30,5 +44,5 @@ export const usePremiumIdentity = () => {
     return () => {
       cancelled = true
     }
-  }, [userId, setStatus])
+  }, [userId, visible, setStatus])
 }

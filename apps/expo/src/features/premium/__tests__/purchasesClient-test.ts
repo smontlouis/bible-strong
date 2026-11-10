@@ -4,6 +4,7 @@ import type { PremiumOfferPlan } from '../premiumOffer'
 import {
   buyPremium,
   isPurchasesAvailable,
+  releasePurchasesIdentity,
   resetPurchasesClientForTests,
   restorePremium,
   setPremiumListener,
@@ -154,4 +155,19 @@ describe('restorePremium', () => {
     sdk.restorePurchases.mockResolvedValue(premiumInfo as never)
     await expect(restorePremium()).resolves.toMatchObject({ kind: 'active' })
   })
+})
+
+it('leaves RevenueCat untouched for an account that does not see Premium', async () => {
+  await releasePurchasesIdentity()
+  expect(sdk.configure).not.toHaveBeenCalled()
+  expect(sdk.logOut).not.toHaveBeenCalled()
+
+  // A beta account signed in on this device is signed out when another account takes over.
+  sdk.getCustomerInfo.mockResolvedValueOnce(freeInfo as never)
+  await syncPurchasesIdentity('beta-account')
+  sdk.isAnonymous.mockResolvedValueOnce(false)
+  await releasePurchasesIdentity()
+  expect(sdk.logOut).toHaveBeenCalledTimes(1)
+  await releasePurchasesIdentity()
+  expect(sdk.logOut).toHaveBeenCalledTimes(1)
 })

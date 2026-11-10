@@ -6,8 +6,7 @@ import { getAppleReviewing } from '~helpers/getAppleReviewing'
 import { Image } from 'expo-image'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { premiumStatusAtom } from '~features/premium/premiumStatus'
-import { isPurchasesAvailable } from '~features/premium/purchasesClient'
-import { salesChannel } from '~features/premium/salesChannel'
+import { usePremiumVisible } from '~features/premium/premiumVisibility'
 import StrobiAvatar from '~features/study-assistant/StrobiAvatar'
 import { memo, useRef, type ComponentPropsWithRef as UIComponentProps } from 'react'
 import { supportsOfflineCopies } from '~desktop/isDesktop'
@@ -100,6 +99,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
   const { t } = useTranslation()
   const confirm = useConfirmDialog()
   const premiumStatus = useAtomValue(premiumStatusAtom)
+  const premiumVisible = usePremiumVisible()
 
   const promptLogout = async () => {
     const confirmed = await confirm({
@@ -172,7 +172,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
           )}
         </ListSection>
 
-        {salesChannel() !== 'none' && isPurchasesAvailable() && (
+        {premiumVisible && (
           <ListSection>
             <ListRow
               route="Premium"

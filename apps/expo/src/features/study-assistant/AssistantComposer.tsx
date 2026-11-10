@@ -9,8 +9,7 @@ import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { premiumStatusAtom } from '~features/premium/premiumStatus'
-import { isPurchasesAvailable } from '~features/premium/purchasesClient'
-import { salesChannel } from '~features/premium/salesChannel'
+import { usePremiumVisible } from '~features/premium/premiumVisibility'
 import useLanguage from '~helpers/useLanguage'
 import { useTheme } from '~themes/ThemeProvider'
 import { assistantAvailable } from './assistantConfig'
@@ -132,10 +131,10 @@ function QuotaLine() {
   const lang = useLanguage()
   const { navigate } = useAssistantSheet()
   const premium = useAtomValue(premiumStatusAtom)
+  const premiumVisible = usePremiumVisible()
   const line = quotaLine(useAssistantQuota(), lang)
   if (!line) return null
-  const offersPremium =
-    premium.kind === 'none' && salesChannel() !== 'none' && isPurchasesAvailable()
+  const offersPremium = premium.kind === 'none' && premiumVisible
   return (
     <HStack
       accessibilityLiveRegion="polite"
