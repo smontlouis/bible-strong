@@ -507,7 +507,7 @@ input {
   --landing-ink: #111827;
   --landing-muted: #526071;
   --landing-line: rgb(40 67 128 / 14%);
-  --landing-accent: #496fda;
+  --landing-accent: #5983f0;
   --landing-accent-soft: #e6edff;
   --landing-accent-ink: #173a8a;
   --landing-dark: #0b1320;
@@ -3357,6 +3357,68 @@ input {
   background: #fff;
   color: #101b35;
 }
+/* The installer of a computer, offered alone, keeps the width of a store button. */
+.store-link:only-child {
+  flex: 0 1 auto;
+  min-width: 220px;
+  padding-inline: 24px;
+}
+.download-started {
+  max-width: 480px;
+  margin-top: 18px;
+  color: rgb(247 249 255 / 82%);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+.download-started a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+/* Every platform, under the buttons: each leads to its part of the download page. */
+.download-platforms {
+  max-width: 520px;
+  margin-top: 30px;
+  padding-top: 22px;
+  border-top: 1px solid rgb(247 249 255 / 14%);
+}
+.download-platforms__all {
+  display: inline-block;
+  color: rgb(247 249 255 / 62%);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: color 180ms ease-out;
+}
+.download-platforms ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin-top: 10px;
+}
+.download-platforms ul a {
+  display: inline-block;
+  padding-block: 4px;
+  color: rgb(247 249 255 / 88%);
+  font-size: 0.95rem;
+  text-decoration: underline;
+  text-decoration-color: rgb(247 249 255 / 28%);
+  text-underline-offset: 4px;
+  transition: text-decoration-color 180ms ease-out;
+}
+.download-platforms__all:hover {
+  color: rgb(247 249 255 / 92%);
+}
+.download-platforms ul a:hover {
+  text-decoration-color: currentColor;
+}
+.download-started a:focus-visible,
+.download-platforms a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
 .download-word {
   right: 4%;
   bottom: -12%;
@@ -3676,7 +3738,8 @@ input {
   }
   .download-section {
     min-height: 510px;
-    padding: 44px 26px;
+    /* The links of every platform end above the word drawn at the bottom. */
+    padding: 44px 26px 168px;
     border-radius: 24px;
   }
   .store-links {
@@ -4128,6 +4191,11 @@ html[data-theme-transition='active']::view-transition-new(root) {
     width: auto;
     min-width: 0;
     padding-inline: 12px;
+  }
+  /* A single button, such as the installer of a computer, takes the whole row. */
+  .store-link:only-child {
+    grid-column: 1 / -1;
+    min-width: 0;
   }
   .store-link span {
     font-size: 0.61rem;

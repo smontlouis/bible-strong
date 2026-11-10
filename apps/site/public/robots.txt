@@ -2,6 +2,8 @@ User-agent: *
 Allow: /
 # Server functions answer the pages that call them, not readers.
 Disallow: /_serverFn/
+# The installers of the desktop app, on GitHub: files to download, not pages.
+Disallow: /download/latest/
 # A Bible page with commentaries in its text adds them to a page that is indexed without them.
 Disallow: /*?*commentary=
 # A card's address renders the whole gallery around it (about 1 MB) and is not indexed: the
@@ -14,6 +16,7 @@ User-agent: ClaudeBot
 Crawl-delay: 1
 Allow: /
 Disallow: /_serverFn/
+Disallow: /download/latest/
 Disallow: /*?*commentary=
 Disallow: /atlas/*/cards/
 
@@ -26,6 +29,7 @@ User-agent: facebookexternalhit
 User-agent: TelegramBot
 Allow: /
 Disallow: /_serverFn/
+Disallow: /download/latest/
 Disallow: /*?*commentary=
 
 Sitemap: https://bible-strong.app/sitemap.xml

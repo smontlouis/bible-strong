@@ -16,7 +16,8 @@ import {
 } from '../components/SiteThemeControls'
 import ExploreMenu from '../features/resources/ExploreMenu'
 import { RESOURCE_SECTIONS, resourceSection } from '../features/resources/sections'
-import { androidApkUrl, appStoreUrl, playStoreUrl, webAppUrl } from '../lib/app-links'
+import LandingDownloadChoices from '../features/download/LandingDownloadChoices'
+import { webAppUrl } from '../lib/app-links'
 
 gsap.registerPlugin(useGSAP, ScrollTrigger)
 
@@ -78,15 +79,6 @@ const worldsCarouselStyle = {
 
 export type HomeProps = {
   initialTheme: ThemePreference
-}
-
-function StoreLink({ href, kicker, label }: { href: string; kicker: string; label: string }) {
-  return (
-    <SiteLink className="store-link" href={href} target="_blank" rel="noreferrer">
-      <span>{kicker}</span>
-      <strong>{label}</strong>
-    </SiteLink>
-  )
 }
 
 function Reveal({ children, className = '' }: { children: React.ReactNode; className?: string }) {
@@ -1113,17 +1105,7 @@ export default function Home({ initialTheme }: HomeProps) {
             <TextReveal>{t('home.download.title')}</TextReveal>
           </h2>
           <p>{t('home.download.body')}</p>
-          <div className="store-links">
-            <StoreLink href={appStoreUrl} kicker={t('home.store.apple.kicker')} label="App Store" />
-            <StoreLink
-              href={playStoreUrl}
-              kicker={t('home.store.google.kicker')}
-              label="Google Play"
-            />
-          </div>
-          <a className="apk-download-link" href={androidApkUrl} target="_blank" rel="noreferrer">
-            {t('home.download.apk')}
-          </a>
+          <LandingDownloadChoices />
         </Reveal>
         <div className="download-word" aria-hidden="true" data-word="Strong" data-original="חָזָק" />
       </section>

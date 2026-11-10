@@ -24,6 +24,8 @@ export function usePublishedLinks() {
       // The attribute, not the property: on a link of an SVG map `target` is an object.
       const target = link?.getAttribute('target')
       if (!link || !href || (target && target !== '_self')) return
+      // A file to download, such as an installer the site leads to on GitHub, is no page.
+      if (link.hasAttribute('download')) return
       if (!siteAddress(href)) return
       event.preventDefault()
       void router.navigate({ href })

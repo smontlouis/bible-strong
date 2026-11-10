@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DataDeletionRouteImport } from './routes/data-deletion'
+import { Route as DownloadRouteImport } from './routes/download'
 import { Route as EulaRouteImport } from './routes/eula'
 import { Route as EulaEnRouteImport } from './routes/eula-en'
 import { Route as GiveRouteImport } from './routes/give'
@@ -29,6 +30,7 @@ import { Route as DictionaryLanguageRouteImport } from './routes/dictionary.$lan
 import { Route as FrIndexRouteImport } from './routes/fr.index'
 import { Route as FrBibleRouteImport } from './routes/fr.bible'
 import { Route as FrDataDeletionRouteImport } from './routes/fr.data-deletion'
+import { Route as FrDownloadRouteImport } from './routes/fr.download'
 import { Route as FrEulaRouteImport } from './routes/fr.eula'
 import { Route as FrEulaEnRouteImport } from './routes/fr.eula-en'
 import { Route as FrGiveRouteImport } from './routes/fr.give'
@@ -45,6 +47,7 @@ import { Route as AtlasLanguageNameRouteImport } from './routes/atlas.$language_
 import { Route as AtlasLanguageCardsRouteImport } from './routes/atlas.$language_.cards'
 import { Route as CommentaryLanguageResourceRouteImport } from './routes/commentary.$language_.$resource'
 import { Route as DictionaryLanguageWorkRouteImport } from './routes/dictionary.$language_.$work'
+import { Route as DownloadLatestFileRouteImport } from './routes/download_.latest.$file'
 import { Route as FrStudiesIdRouteImport } from './routes/fr.studies.$id'
 import { Route as NaveLanguageTopicRouteImport } from './routes/nave.$language_.$topic'
 import { Route as StrongLanguageCodeRouteImport } from './routes/strong.$language.$code'
@@ -71,6 +74,11 @@ const IndexRoute = IndexRouteImport.update({
 const DataDeletionRoute = DataDeletionRouteImport.update({
   id: '/data-deletion',
   path: '/data-deletion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DownloadRoute = DownloadRouteImport.update({
+  id: '/download',
+  path: '/download',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EulaRoute = EulaRouteImport.update({
@@ -166,6 +174,11 @@ const FrDataDeletionRoute = FrDataDeletionRouteImport.update({
   path: '/fr/data-deletion',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FrDownloadRoute = FrDownloadRouteImport.update({
+  id: '/fr/download',
+  path: '/fr/download',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FrEulaRoute = FrEulaRouteImport.update({
   id: '/fr/eula',
   path: '/fr/eula',
@@ -246,6 +259,11 @@ const CommentaryLanguageResourceRoute =
 const DictionaryLanguageWorkRoute = DictionaryLanguageWorkRouteImport.update({
   id: '/dictionary/$language_/$work',
   path: '/dictionary/$language/$work',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DownloadLatestFileRoute = DownloadLatestFileRouteImport.update({
+  id: '/download_/latest/$file',
+  path: '/download/latest/$file',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FrStudiesIdRoute = FrStudiesIdRouteImport.update({
@@ -346,6 +364,7 @@ const CommentaryLanguageResourceBookChapterSectionRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/data-deletion': typeof DataDeletionRoute
+  '/download': typeof DownloadRoute
   '/eula': typeof EulaRoute
   '/eula-en': typeof EulaEnRoute
   '/give': typeof GiveRoute
@@ -362,6 +381,7 @@ export interface FileRoutesByFullPath {
   '/dictionary/$language': typeof DictionaryLanguageRoute
   '/fr/bible': typeof FrBibleRoute
   '/fr/data-deletion': typeof FrDataDeletionRoute
+  '/fr/download': typeof FrDownloadRoute
   '/fr/eula': typeof FrEulaRoute
   '/fr/eula-en': typeof FrEulaEnRoute
   '/fr/give': typeof FrGiveRoute
@@ -380,6 +400,7 @@ export interface FileRoutesByFullPath {
   '/atlas/$language/cards': typeof AtlasLanguageCardsRouteWithChildren
   '/commentary/$language/$resource': typeof CommentaryLanguageResourceRoute
   '/dictionary/$language/$work': typeof DictionaryLanguageWorkRoute
+  '/download/latest/$file': typeof DownloadLatestFileRoute
   '/fr/studies/$id': typeof FrStudiesIdRoute
   '/nave/$language/$topic': typeof NaveLanguageTopicRoute
   '/strong/$language/$code': typeof StrongLanguageCodeRoute
@@ -401,6 +422,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/data-deletion': typeof DataDeletionRoute
+  '/download': typeof DownloadRoute
   '/eula': typeof EulaRoute
   '/eula-en': typeof EulaEnRoute
   '/give': typeof GiveRoute
@@ -417,6 +439,7 @@ export interface FileRoutesByTo {
   '/dictionary/$language': typeof DictionaryLanguageRoute
   '/fr/bible': typeof FrBibleRoute
   '/fr/data-deletion': typeof FrDataDeletionRoute
+  '/fr/download': typeof FrDownloadRoute
   '/fr/eula': typeof FrEulaRoute
   '/fr/eula-en': typeof FrEulaEnRoute
   '/fr/give': typeof FrGiveRoute
@@ -434,6 +457,7 @@ export interface FileRoutesByTo {
   '/atlas/$language/$name': typeof AtlasLanguageNameRoute
   '/commentary/$language/$resource': typeof CommentaryLanguageResourceRoute
   '/dictionary/$language/$work': typeof DictionaryLanguageWorkRoute
+  '/download/latest/$file': typeof DownloadLatestFileRoute
   '/fr/studies/$id': typeof FrStudiesIdRoute
   '/nave/$language/$topic': typeof NaveLanguageTopicRoute
   '/strong/$language/$code': typeof StrongLanguageCodeRoute
@@ -456,6 +480,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/data-deletion': typeof DataDeletionRoute
+  '/download': typeof DownloadRoute
   '/eula': typeof EulaRoute
   '/eula-en': typeof EulaEnRoute
   '/give': typeof GiveRoute
@@ -472,6 +497,7 @@ export interface FileRoutesById {
   '/dictionary/$language': typeof DictionaryLanguageRoute
   '/fr/bible': typeof FrBibleRoute
   '/fr/data-deletion': typeof FrDataDeletionRoute
+  '/fr/download': typeof FrDownloadRoute
   '/fr/eula': typeof FrEulaRoute
   '/fr/eula-en': typeof FrEulaEnRoute
   '/fr/give': typeof FrGiveRoute
@@ -490,6 +516,7 @@ export interface FileRoutesById {
   '/atlas/$language_/cards': typeof AtlasLanguageCardsRouteWithChildren
   '/commentary/$language_/$resource': typeof CommentaryLanguageResourceRoute
   '/dictionary/$language_/$work': typeof DictionaryLanguageWorkRoute
+  '/download_/latest/$file': typeof DownloadLatestFileRoute
   '/fr/studies/$id': typeof FrStudiesIdRoute
   '/nave/$language_/$topic': typeof NaveLanguageTopicRoute
   '/strong/$language/$code': typeof StrongLanguageCodeRoute
@@ -513,6 +540,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/data-deletion'
+    | '/download'
     | '/eula'
     | '/eula-en'
     | '/give'
@@ -529,6 +557,7 @@ export interface FileRouteTypes {
     | '/dictionary/$language'
     | '/fr/bible'
     | '/fr/data-deletion'
+    | '/fr/download'
     | '/fr/eula'
     | '/fr/eula-en'
     | '/fr/give'
@@ -547,6 +576,7 @@ export interface FileRouteTypes {
     | '/atlas/$language/cards'
     | '/commentary/$language/$resource'
     | '/dictionary/$language/$work'
+    | '/download/latest/$file'
     | '/fr/studies/$id'
     | '/nave/$language/$topic'
     | '/strong/$language/$code'
@@ -568,6 +598,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/data-deletion'
+    | '/download'
     | '/eula'
     | '/eula-en'
     | '/give'
@@ -584,6 +615,7 @@ export interface FileRouteTypes {
     | '/dictionary/$language'
     | '/fr/bible'
     | '/fr/data-deletion'
+    | '/fr/download'
     | '/fr/eula'
     | '/fr/eula-en'
     | '/fr/give'
@@ -601,6 +633,7 @@ export interface FileRouteTypes {
     | '/atlas/$language/$name'
     | '/commentary/$language/$resource'
     | '/dictionary/$language/$work'
+    | '/download/latest/$file'
     | '/fr/studies/$id'
     | '/nave/$language/$topic'
     | '/strong/$language/$code'
@@ -622,6 +655,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/data-deletion'
+    | '/download'
     | '/eula'
     | '/eula-en'
     | '/give'
@@ -638,6 +672,7 @@ export interface FileRouteTypes {
     | '/dictionary/$language'
     | '/fr/bible'
     | '/fr/data-deletion'
+    | '/fr/download'
     | '/fr/eula'
     | '/fr/eula-en'
     | '/fr/give'
@@ -656,6 +691,7 @@ export interface FileRouteTypes {
     | '/atlas/$language_/cards'
     | '/commentary/$language_/$resource'
     | '/dictionary/$language_/$work'
+    | '/download_/latest/$file'
     | '/fr/studies/$id'
     | '/nave/$language_/$topic'
     | '/strong/$language/$code'
@@ -678,6 +714,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DataDeletionRoute: typeof DataDeletionRoute
+  DownloadRoute: typeof DownloadRoute
   EulaRoute: typeof EulaRoute
   EulaEnRoute: typeof EulaEnRoute
   GiveRoute: typeof GiveRoute
@@ -694,6 +731,7 @@ export interface RootRouteChildren {
   DictionaryLanguageRoute: typeof DictionaryLanguageRoute
   FrBibleRoute: typeof FrBibleRoute
   FrDataDeletionRoute: typeof FrDataDeletionRoute
+  FrDownloadRoute: typeof FrDownloadRoute
   FrEulaRoute: typeof FrEulaRoute
   FrEulaEnRoute: typeof FrEulaEnRoute
   FrGiveRoute: typeof FrGiveRoute
@@ -712,6 +750,7 @@ export interface RootRouteChildren {
   AtlasLanguageCardsRoute: typeof AtlasLanguageCardsRouteWithChildren
   CommentaryLanguageResourceRoute: typeof CommentaryLanguageResourceRoute
   DictionaryLanguageWorkRoute: typeof DictionaryLanguageWorkRoute
+  DownloadLatestFileRoute: typeof DownloadLatestFileRoute
   FrStudiesIdRoute: typeof FrStudiesIdRoute
   NaveLanguageTopicRoute: typeof NaveLanguageTopicRoute
   StrongLanguageCodeRoute: typeof StrongLanguageCodeRoute
@@ -743,6 +782,13 @@ declare module '@tanstack/react-router' {
       path: '/data-deletion'
       fullPath: '/data-deletion'
       preLoaderRoute: typeof DataDeletionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/download': {
+      id: '/download'
+      path: '/download'
+      fullPath: '/download'
+      preLoaderRoute: typeof DownloadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/eula': {
@@ -871,6 +917,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FrDataDeletionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/fr/download': {
+      id: '/fr/download'
+      path: '/fr/download'
+      fullPath: '/fr/download'
+      preLoaderRoute: typeof FrDownloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/fr/eula': {
       id: '/fr/eula'
       path: '/fr/eula'
@@ -981,6 +1034,13 @@ declare module '@tanstack/react-router' {
       path: '/dictionary/$language/$work'
       fullPath: '/dictionary/$language/$work'
       preLoaderRoute: typeof DictionaryLanguageWorkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/download_/latest/$file': {
+      id: '/download_/latest/$file'
+      path: '/download/latest/$file'
+      fullPath: '/download/latest/$file'
+      preLoaderRoute: typeof DownloadLatestFileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/fr/studies/$id': {
@@ -1121,6 +1181,7 @@ const AtlasLanguageCardsRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DataDeletionRoute: DataDeletionRoute,
+  DownloadRoute: DownloadRoute,
   EulaRoute: EulaRoute,
   EulaEnRoute: EulaEnRoute,
   GiveRoute: GiveRoute,
@@ -1138,6 +1199,7 @@ const rootRouteChildren: RootRouteChildren = {
   DictionaryLanguageRoute: DictionaryLanguageRoute,
   FrBibleRoute: FrBibleRoute,
   FrDataDeletionRoute: FrDataDeletionRoute,
+  FrDownloadRoute: FrDownloadRoute,
   FrEulaRoute: FrEulaRoute,
   FrEulaEnRoute: FrEulaEnRoute,
   FrGiveRoute: FrGiveRoute,
@@ -1156,6 +1218,7 @@ const rootRouteChildren: RootRouteChildren = {
   AtlasLanguageCardsRoute: AtlasLanguageCardsRouteWithChildren,
   CommentaryLanguageResourceRoute: CommentaryLanguageResourceRoute,
   DictionaryLanguageWorkRoute: DictionaryLanguageWorkRoute,
+  DownloadLatestFileRoute: DownloadLatestFileRoute,
   FrStudiesIdRoute: FrStudiesIdRoute,
   NaveLanguageTopicRoute: NaveLanguageTopicRoute,
   StrongLanguageCodeRoute: StrongLanguageCodeRoute,

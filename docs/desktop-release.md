@@ -30,6 +30,14 @@ a fixed release that only `Desktop promote` writes, so the repository's other re
 redirect it. The manifest and every installer are signed with the updater key; its public half is
 `plugins.updater.pubkey` in `src-tauri/tauri.conf.json`.
 
+Readers download from the site's download page (`bible-strong.app/download`, `/fr/download`), whose
+buttons lead to `/download/latest/<file>` (`mac`, `windows`, `linux-appimage`, `linux-deb`). The
+site reads the same manifest and sends the reader to the installer of that version on GitHub, so a
+promoted version reaches the site within ten minutes, with nothing to change there, and a draft
+never does. The manifest does not name the DMG: the site takes it beside the Windows installer,
+with `universal.dmg` for its end (`apps/site/features/download/desktopRelease.ts`). Renaming the
+installers or the product means checking that address.
+
 ## Secrets (GitHub environment `desktop-release`)
 
 | Secret | Content |

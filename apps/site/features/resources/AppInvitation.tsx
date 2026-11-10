@@ -98,7 +98,7 @@ export default function AppInvitation({
   language: ResourceLanguage
   /** The same resource in the study workspace. */
   appUrl: string
-  /** Where the mobile apps are offered. */
+  /** Where the app is offered for every device. */
   downloadPath: string
 }) {
   const invitation = INVITATIONS[section][language]

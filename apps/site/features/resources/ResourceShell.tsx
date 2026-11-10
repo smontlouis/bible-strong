@@ -9,6 +9,7 @@ import {
   type ThemePreference,
 } from '@/components/SiteThemeControls'
 import { useCurrentLocale, useI18n } from '@/locales'
+import { DOWNLOAD_PATHS } from '../download/downloadMessages'
 import AppInvitation from './AppInvitation'
 import ExploreMenu from './ExploreMenu'
 import type { Breadcrumb } from './resourceHead'
@@ -159,7 +160,7 @@ export default function ResourceShell({
                   section={section}
                   language={locale}
                   appUrl={appUrl}
-                  downloadPath={`${homePath}#telecharger`}
+                  downloadPath={DOWNLOAD_PATHS[locale]}
                 />
               </div>
             )}
@@ -173,7 +174,7 @@ export default function ResourceShell({
               ))}
             </ul>
             <p className="resource-muted mt-6">{t('resource.footer.tagline')}</p>
-            <SiteLink className="resource-link mt-2 inline-block" href={homePath}>
+            <SiteLink className="resource-link mt-2 inline-block" href={DOWNLOAD_PATHS[locale]}>
               {t('resource.footer.getApp')}
             </SiteLink>
           </footer>
