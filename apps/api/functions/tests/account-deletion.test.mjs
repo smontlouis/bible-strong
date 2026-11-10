@@ -12,7 +12,7 @@ const sourceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '.
 
 // Load the real exported Firebase handlers without initializing credentials or
 // connecting to a project. Only the SDK boundary is replaced.
-function fixture(entries, initialFiles = []) {
+function fixture(entries, initialFiles = [], { env = { REVENUECAT_DELETION_API_KEY: 'rc-key' }, responses = [] } = {}) {
   const documents = new Map(entries)
   const files = new Set(initialFiles)
   const fileFailures = new Set()
@@ -85,6 +85,23 @@ function fixture(entries, initialFiles = []) {
     firestore: { document: () => ({ onDelete: wrap(options), onUpdate: wrap(options) }) },
     https: { onRequest: wrap(options) },
   })
+  // RevenueCat answers each call with the next queued response (a status, or 'network' for a
+  // failed request), then 404: most accounts never had a RevenueCat customer.
+  const revenueCatCalls = []
+  const errors = []
+  const fetch = async (url, init) => {
+    revenueCatCalls.push({ url, method: init.method, authorization: init.headers.Authorization, documents: [...documents.keys()] })
+    const next = responses.shift() ?? 404
+    if (next === 'network') throw new TypeError('fetch failed')
+    return { ok: next >= 200 && next < 300, status: next, text: async () => `{"object":"error","code":${next}}` }
+  }
+  const sandbox = () => ({
+    console: { log() {}, error: (...args) => errors.push(args) },
+    process: { env },
+    fetch,
+    AbortSignal,
+    setTimeout: resolve => resolve(),
+  })
   const cache = new Map()
   const load = filename => {
     if (cache.has(filename)) return cache.get(filename).exports
@@ -101,10 +118,10 @@ function fixture(entries, initialFiles = []) {
       if (id.startsWith('.')) return load(path.resolve(path.dirname(filename), `${id}.ts`))
       return require(id)
     }
-    vm.runInNewContext('(function(require,module,exports){' + compiled + '\n})', { console: { log() {}, error() {} } }, { filename })(moduleRequire, module, module.exports)
+    vm.runInNewContext('(function(require,module,exports){' + compiled + '\n})', sandbox(), { filename })(moduleRequire, module, module.exports)
     return module.exports
   }
-  return { documents, files, fileFailures, documentFailures, fileAttempts, queries, removals, users: load(path.join(sourceRoot, 'users.ts')), studies: () => load(path.join(sourceRoot, 'studies.ts')) }
+  return { documents, files, fileFailures, documentFailures, fileAttempts, queries, removals, revenueCatCalls, errors, users: load(path.join(sourceRoot, 'users.ts')), studies: () => load(path.join(sourceRoot, 'studies.ts')) }
 }
 
 const imageNames = id => [`images/studies/${id}.jpg`, `images/studies/${id}-whatsapp.jpg`]
@@ -135,6 +152,7 @@ test('deletion handles more than one page and a repeated Auth event', async () =
   assert.ok(f.queries.filter(query => query.collectionPath === 'studies' && query.size > 0).length > 1)
   assert.ok(f.queries.every(query => Number.isFinite(query.maximum)))
   assert.equal(f.users.deleteUser.runtimeOptions.failurePolicy, true)
+  assert.deepEqual([...f.users.deleteUser.runtimeOptions.secrets], ['REVENUECAT_DELETION_API_KEY'])
 })
 
 test('a missing preview does not prevent deletion of the other preview', async () => {
@@ -191,4 +209,63 @@ test('standalone study deletion reports storage failures instead of swallowing t
   const f = fixture([], imageNames('own'))
   f.fileFailures.add(imageNames('own')[0])
   await assert.rejects(f.studies().deleteStudy({ id: 'own', data: () => ({ id: 'own' }) }, { params: { studyId: 'own' } }), /storage unavailable/)
+})
+
+const customerUrl = uid => `https://api.revenuecat.com/v2/projects/proja6b849f6/customers/${uid}`
+
+test('account deletion asks RevenueCat to delete the customer once Firestore holds nothing of the account', async () => {
+  const f = fixture([['users/alice', {}], ['users/alice/notes/note', {}], ['studies/own', { user: { id: 'alice' } }], ['users/bob', {}]], [], { responses: [200] })
+  await f.users.deleteUser({ uid: 'alice' })
+  assert.deepEqual(f.revenueCatCalls, [{ url: customerUrl('alice'), method: 'DELETE', authorization: 'Bearer rc-key', documents: ['users/bob'] }])
+  assert.deepEqual(f.errors, [])
+})
+
+test('an account without a RevenueCat customer is deleted without retrying or logging an error', async () => {
+  const f = fixture([['users/alice', {}]])
+  await f.users.deleteUser({ uid: 'alice' })
+  assert.equal(f.revenueCatCalls.length, 1)
+  assert.deepEqual(f.errors, [])
+  assert.equal(f.documents.size, 0)
+})
+
+test('RevenueCat server errors and network failures are retried, then logged without failing the deletion', async () => {
+  const f = fixture([['users/alice', {}]], [], { responses: [503, 'network', 429] })
+  await f.users.deleteUser({ uid: 'alice' })
+  assert.equal(f.revenueCatCalls.length, 3)
+  assert.equal(f.documents.size, 0)
+  assert.equal(f.errors.length, 1)
+  assert.match(f.errors[0][0], /\[revenuecat\] customer not deleted/)
+  assert.equal(f.errors[0][1].uid, 'alice')
+  assert.match(f.errors[0][1].error, /RevenueCat answered 429/)
+})
+
+test('a transient RevenueCat failure followed by success logs nothing', async () => {
+  const f = fixture([['users/alice', {}]], [], { responses: ['network', 200] })
+  await f.users.deleteUser({ uid: 'alice' })
+  assert.equal(f.revenueCatCalls.length, 2)
+  assert.deepEqual(f.errors, [])
+})
+
+test('a refused RevenueCat key is not retried and never reaches the logs', async () => {
+  const f = fixture([['users/alice', {}]], [], { responses: [403] })
+  await f.users.deleteUser({ uid: 'alice' })
+  assert.equal(f.revenueCatCalls.length, 1)
+  assert.equal(f.errors.length, 1)
+  assert.match(f.errors[0][1].error, /RevenueCat answered 403/)
+  assert.doesNotMatch(JSON.stringify(f.errors), /rc-key/)
+})
+
+test('a missing RevenueCat secret is logged and the deletion still completes', async () => {
+  const f = fixture([['users/alice', {}]], [], { env: {} })
+  await f.users.deleteUser({ uid: 'alice' })
+  assert.equal(f.revenueCatCalls.length, 0)
+  assert.equal(f.documents.size, 0)
+  assert.match(f.errors[0][1].error, /REVENUECAT_DELETION_API_KEY is not set/)
+})
+
+test('RevenueCat is not called while Firestore data remains to be deleted', async () => {
+  const f = fixture([['users/alice', {}], ['studies/own', { user: { id: 'alice' } }], ['studies/own/children/child', {}]])
+  f.documentFailures.add('studies/own/children')
+  await assert.rejects(f.users.deleteUser({ uid: 'alice' }), /firestore unavailable/)
+  assert.equal(f.revenueCatCalls.length, 0)
 })
