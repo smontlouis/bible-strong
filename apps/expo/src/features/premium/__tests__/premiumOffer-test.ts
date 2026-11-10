@@ -1,6 +1,6 @@
 import type { PurchasesPackage } from 'react-native-purchases'
 
-import { annualSavingsPercent, toPremiumOffer } from '../premiumOffer'
+import { annualSavingsPercent, toPremiumOffer, toWebPremiumOffer } from '../premiumOffer'
 
 const pkg = (price: number, currencyCode = 'EUR', pricePerMonthString: string | null = null) =>
   ({
@@ -35,6 +35,34 @@ describe('toPremiumOffer', () => {
 
   it('is empty without a current offering', () => {
     expect(toPremiumOffer(null)).toEqual({
+      annual: undefined,
+      monthly: undefined,
+      savingsPercent: null,
+    })
+  })
+})
+
+describe('toWebPremiumOffer', () => {
+  const webPkg = (amountMicros: number, currency = 'EUR') => ({
+    webBillingProduct: { currentPrice: { amountMicros, currency } },
+  })
+  // Intl separates the euro sign with a no-break space, narrow or not depending on the engine.
+  const plain = (text?: string | null) => text?.replace(/\s/g, ' ')
+
+  it('prices the plans in the app’s language, a twelfth of the year rounded down', () => {
+    const fr = toWebPremiumOffer({ annual: webPkg(59_990_000), monthly: webPkg(8_990_000) }, 'fr')
+    expect(plain(fr.annual?.priceString)).toBe('59,99 €')
+    expect(plain(fr.annual?.pricePerMonthString)).toBe('4,99 €')
+    expect(plain(fr.monthly?.priceString)).toBe('8,99 €')
+    expect(fr.monthly?.pricePerMonthString).toBeNull()
+    expect(fr.savingsPercent).toBe(44)
+    const en = toWebPremiumOffer({ annual: webPkg(59_990_000), monthly: null }, 'en')
+    expect(en.annual?.priceString).toBe('€59.99')
+    expect(en.monthly).toBeUndefined()
+  })
+
+  it('is empty without a current offering', () => {
+    expect(toWebPremiumOffer(null, 'fr')).toEqual({
       annual: undefined,
       monthly: undefined,
       savingsPercent: null,

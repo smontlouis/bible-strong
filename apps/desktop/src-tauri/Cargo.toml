@@ -57,6 +57,9 @@ objc2-web-kit = { version = "0.3", default-features = false, features = ["std", 
 default = ["updater"]
 # The Mac App Store updates the app itself: its build turns the updater off.
 updater = ["dep:tauri-plugin-updater"]
+# The Mac App Store build: its bootstrap states that distribution, and the app sells nothing there
+# through the web checkout (ADR-0110).
+mac-app-store = []
 
 [dev-dependencies]
 tempfile = "3"

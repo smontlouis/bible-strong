@@ -350,6 +350,16 @@
   line-height: 1.4;
   color: var(--as-muted);
 }
+/* Beside the count, where Premium is sold: a link in the text. */
+.bs-assistant-quota-premium {
+  margin-left: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--as-link);
+  cursor: pointer;
+}
 /* The free questions wait for a verified address: a panel, not an error. */
 .bs-assistant-verify {
   margin: 12px 0;

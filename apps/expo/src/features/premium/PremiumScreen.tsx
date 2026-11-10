@@ -16,7 +16,7 @@ import ListSection, { ListRow } from '~common/ui/ListSection'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
 import { assistantAccessible } from '~features/study-assistant/assistantConfig'
-import { ASSISTANT_PATH } from '~features/study-assistant/assistantSheetContext'
+import { returnToAssistant } from '~features/study-assistant/returnToAssistant'
 import type { StrobiAnimation } from '~features/study-assistant/StrobiAvatar'
 import { useStrobiReaction } from '~features/study-assistant/useStrobiReaction'
 import { getDateLocale } from '~helpers/languageUtils'
@@ -27,16 +27,17 @@ import useLogin from '~helpers/useLogin'
 import PlanCard from './PlanCard'
 import PremiumHero from './PremiumHero'
 import PremiumWelcome from './PremiumWelcome'
+import { premiumPrivacyUrl, premiumTermsUrl } from './premiumConfig'
 import type { PremiumOffer, PremiumOfferPlan } from './premiumOffer'
 import { premiumStatusAtom, type PremiumStore } from './premiumStatus'
+import { usePremiumVisible } from './premiumVisibility'
 import {
   buyPremium,
   isPurchasesAvailable,
   loadPremiumOffer,
   restorePremium,
 } from './purchasesClient'
-import { salesChannel } from './salesChannel'
-import { usePremiumVisible } from './premiumVisibility'
+import { salesChannel, sellsThroughStripe } from './salesChannel'
 
 type PlanChoice = 'annual' | 'monthly'
 
@@ -44,7 +45,7 @@ const STORE_LABELS: Record<PremiumStore, string> = {
   APP_STORE: 'App Store',
   MAC_APP_STORE: 'App Store',
   PLAY_STORE: 'Google Play',
-  STRIPE: 'bible-strong.app',
+  STRIPE: 'Stripe',
   PROMOTIONAL: 'Bible Strong',
   TEST_STORE: 'Test Store',
   OTHER: 'Bible Strong',
@@ -59,7 +60,8 @@ const tapHaptic = () => {
  * surface's sales channel with the button kept at the bottom of the screen, and, for a reader
  * who holds it, where it is managed. It sells only to a signed-in account. Strobi follows what
  * the reader does: he is proud of the annual plan, thinks while the store sheet is up, is sad
- * when it is closed, and celebrates on the welcome screen once Premium starts.
+ * when it is closed, and celebrates on the welcome screen once Premium starts. On the Web and in
+ * the desktop app, Stripe runs the checkout: no store account is involved and nothing is restored.
  */
 const PremiumScreen = () => {
   const { t } = useTranslation()
@@ -71,14 +73,23 @@ const PremiumScreen = () => {
   const status = useAtomValue(premiumStatusAtom)
   const channel = salesChannel()
   const canSell = channel !== 'none' && isPurchasesAvailable()
+  const throughStripe = sellsThroughStripe(channel)
 
   const [offer, setOffer] = useState<PremiumOffer | null>(null)
   const [offerFailed, setOfferFailed] = useState(false)
   const [choice, setChoice] = useState<PlanChoice>('annual')
   const [busy, setBusy] = useState<'buy' | 'restore' | null>(null)
   const [welcome, setWelcome] = useState(false)
+  // A purchase that ends elsewhere (the browser of the desktop app, a store that has to settle
+  // the payment): the welcome waits for Premium to arrive.
+  const [awaitingPremium, setAwaitingPremium] = useState(false)
 
   const active = status.kind === 'active'
+  useEffect(() => {
+    if (!awaitingPremium || !active) return
+    setAwaitingPremium(false)
+    setWelcome(true)
+  }, [awaitingPremium, active])
   const resting: StrobiAnimation = active
     ? 'happy'
     : !isLogged
@@ -121,10 +132,13 @@ const PremiumScreen = () => {
     if (!selectedPlan || busy) return
     setBusy('buy')
     try {
-      const result = await buyPremium(selectedPlan)
+      const result = await buyPremium(selectedPlan, { email: user.email, language: lang })
       if (result === 'purchased') setWelcome(true)
       if (result === 'pending') {
-        toast.info(t('premiumPlan.pending'))
+        setAwaitingPremium(true)
+        toast.info(
+          t(channel === 'web_link' ? 'premiumPlan.continueInBrowser' : 'premiumPlan.pending')
+        )
         react('curious')
       }
       if (result === 'cancelled') react('sad', 1800)
@@ -162,12 +176,16 @@ const PremiumScreen = () => {
     format(new Date(iso), 'd MMMM yyyy', { locale: getDateLocale(lang) })
 
   const storeName = channel === 'play_store' ? 'Google Play' : 'App Store'
-  const termsUrl =
-    lang === 'fr' ? 'https://bible-strong.app/eula' : 'https://bible-strong.app/eula-en'
-  const privacyUrl =
-    lang === 'fr'
-      ? 'https://bible-strong.app/politique-de-confidentialite'
-      : 'https://bible-strong.app/privacy-policy'
+  const renewalTerms = throughStripe
+    ? t('premiumPlan.renewalTermsWeb')
+    : t('premiumPlan.renewalTerms', { store: storeName })
+  const renewalShort = throughStripe
+    ? t('premiumPlan.renewalShortWeb')
+    : t('premiumPlan.renewalShort', { store: storeName })
+  const termsUrl = premiumTermsUrl(lang)
+  const privacyUrl = premiumPrivacyUrl(lang)
+  // The stores keep the purchases of their account: App Review asks for a way to restore them.
+  const canRestore = canSell && !throughStripe
 
   const offerReady =
     !active && isLogged && canSell && !!offer && !!(offer.annual || offer.monthly) && !offerFailed
@@ -287,7 +305,7 @@ const PremiumScreen = () => {
           />
         ) : null}
         <Text className="text-[12px] leading-[17px] text-grey mx-[4px] mt-[2px]">
-          {t('premiumPlan.renewalTerms', { store: storeName })}
+          {renewalTerms}
         </Text>
       </Box>
     )
@@ -310,7 +328,7 @@ const PremiumScreen = () => {
 
         {offerReady ? null : (
           <ListSection>
-            {canSell && isLogged && !active ? (
+            {canRestore && isLogged && !active ? (
               <ListRow
                 onPress={restore}
                 disabled={busy !== null}
@@ -347,15 +365,19 @@ const PremiumScreen = () => {
             {t('premiumPlan.subscribe')}
           </Button>
           <Text className="text-[12px] leading-[16px] text-grey text-center mt-[8px]">
-            {t('premiumPlan.renewalShort', { store: storeName })}
+            {renewalShort}
           </Text>
           <HStack className="justify-center items-center gap-[14px] mt-[6px]">
-            <Link onPress={restore} disabled={busy !== null}>
-              <Text className="text-[13px] text-link font-semibold">
-                {t('premiumPlan.restoreShort')}
-              </Text>
-            </Link>
-            <Text className="text-[13px] text-grey">·</Text>
+            {canRestore ? (
+              <>
+                <Link onPress={restore} disabled={busy !== null}>
+                  <Text className="text-[13px] text-link font-semibold">
+                    {t('premiumPlan.restoreShort')}
+                  </Text>
+                </Link>
+                <Text className="text-[13px] text-grey">·</Text>
+              </>
+            ) : null}
             <Link href={termsUrl}>
               <Text className="text-[13px] text-link">{t('premiumPlan.termsShort')}</Text>
             </Link>
@@ -373,8 +395,7 @@ const PremiumScreen = () => {
           canAsk
             ? () => {
                 setWelcome(false)
-                if (from === 'assistant' && router.canGoBack()) router.back()
-                else router.push(ASSISTANT_PATH)
+                returnToAssistant(router, from)
               }
             : undefined
         }

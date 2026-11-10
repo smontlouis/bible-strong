@@ -27,6 +27,7 @@ struct Bootstrap<'a> {
     platform: &'static str,
     app_version: String,
     updater: bool,
+    distribution: &'static str,
     kv: &'a BTreeMap<String, String>,
 }
 
@@ -37,6 +38,16 @@ pub fn platform() -> &'static str {
         "windows"
     } else {
         "linux"
+    }
+}
+
+/// How this build reaches readers, which decides where the app sells Premium (ADR-0110): the Mac
+/// App Store build sells nothing through the web checkout.
+pub fn distribution() -> &'static str {
+    if cfg!(feature = "mac-app-store") {
+        "mac_app_store"
+    } else {
+        "direct"
     }
 }
 
@@ -66,6 +77,7 @@ fn script<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<String, String> {
         platform: platform(),
         app_version: app.package_info().version.to_string(),
         updater: cfg!(feature = "updater"),
+        distribution: distribution(),
         kv: &kv,
     };
     let json = serde_json::to_string(&bootstrap).map_err(|error| error.to_string())?;

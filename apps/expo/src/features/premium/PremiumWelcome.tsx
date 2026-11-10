@@ -28,8 +28,9 @@ function Welcome({ onAsk, onClose }: { onAsk?: () => void; onClose: () => void }
     }
   }, [])
 
-  // Android's back closes the welcome before it leaves the page.
+  // Android's back closes the welcome before it leaves the page. The Web has no such button.
   useEffect(() => {
+    if (Platform.OS !== 'android') return
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
       onClose()
       return true

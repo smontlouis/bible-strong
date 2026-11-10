@@ -11,6 +11,11 @@ export type DesktopBootstrap = {
   appVersion: string
   /** False in the Mac App Store build, which the store updates. */
   updater: boolean
+  /**
+   * How this build reaches readers: `direct` for the installers, `mac_app_store` for the Mac App
+   * Store build. Missing in a shell older than this field. It decides the sales channel.
+   */
+  distribution?: 'direct' | 'mac_app_store'
   /** The key-value store when the page loaded. */
   kv: Record<string, string>
 }

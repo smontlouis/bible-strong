@@ -60,5 +60,33 @@ export const toPremiumStatus = (info: PremiumCustomerInfo): PremiumStatus => {
   }
 }
 
+/** The same part of CustomerInfo as `purchases-js` gives it on the Web: dates, lower-case stores. */
+export type WebCustomerInfo = {
+  entitlements: {
+    active: Record<
+      string,
+      { expirationDate: Date | null; willRenew: boolean; store: string } | undefined
+    >
+  }
+  managementURL: string | null
+}
+
+export const toWebPremiumStatus = (info: WebCustomerInfo): PremiumStatus =>
+  toPremiumStatus({
+    entitlements: {
+      active: Object.fromEntries(
+        Object.entries(info.entitlements.active).map(([id, entitlement]) => [
+          id,
+          entitlement && {
+            expirationDate: entitlement.expirationDate?.toISOString() ?? null,
+            willRenew: entitlement.willRenew,
+            store: entitlement.store.toUpperCase(),
+          },
+        ])
+      ),
+    },
+    managementURL: info.managementURL,
+  })
+
 /** Premium of the signed-in account, kept current by `usePremiumIdentity`. */
 export const premiumStatusAtom = atom<PremiumStatus>({ kind: 'unknown' })

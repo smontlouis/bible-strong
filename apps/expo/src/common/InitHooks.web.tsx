@@ -1,6 +1,7 @@
 import { useStore } from 'react-redux'
 
 import AccountMigrationModal from '~features/migrations/AccountMigrationModal'
+import { usePremiumIdentity } from '~features/premium/usePremiumIdentity'
 import { canStartRemoteHydration } from '~helpers/accountEntry'
 import { useAccountMigrations } from '~helpers/useAccountMigrations'
 import useInitFireAuth from '~helpers/useInitFireAuth'
@@ -29,6 +30,7 @@ const InitHooks = () => {
     incomingEnabled: hydrationEnabled && accountMigrations.isAccountSyncReady && !isSessionLost,
     outgoingEnabled: (hydrationEnabled && accountMigrations.isAccountWriteReady) || isSessionLost,
   })
+  usePremiumIdentity()
 
   return (
     <AccountMigrationModal

@@ -1,10 +1,12 @@
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { useAtomValue } from 'jotai/react'
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import { SheetFooter, SheetHeader, SheetTextInput, SheetView, type SheetRef } from '~common/sheet'
+import { premiumStatusAtom } from '~features/premium/premiumStatus'
 import Sheet from '~common/ModalSheet'
 import { deleteCurrentAuthUser, getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
 import type { Theme as AppTheme } from '~themes'
@@ -26,6 +28,9 @@ const DeleteAccountModal = ({ modalRef }: DeleteAccountModalProps) => {
   const theme = useTheme()
 
   const confirmationText = t('app.deleteAccountConfirmationText')
+  // Deleting the account does not cancel a subscription that still renews (ADR-0110).
+  const premium = useAtomValue(premiumStatusAtom)
+  const renewingPremium = premium.kind === 'active' && premium.willRenew
   const [confirmText, setConfirmText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
@@ -103,6 +108,9 @@ const DeleteAccountModal = ({ modalRef }: DeleteAccountModalProps) => {
       <SheetView>
         <VStack className="overflow-hidden border-continuous gap-[15px] px-[20px] py-[20px]">
           <Text className="text-[15px]">{t('app.deleteAccountBody')}</Text>
+          {renewingPremium ? (
+            <Text className="text-[15px] font-semibold">{t('app.deleteAccountPremium')}</Text>
+          ) : null}
           <Text className="text-[14px] text-grey">
             {t('app.deleteAccountTypeConfirm', { text: confirmationText })}
           </Text>

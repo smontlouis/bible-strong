@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useStore } from 'react-redux'
 
 import AccountMigrationModal from '~features/migrations/AccountMigrationModal'
+import { usePremiumIdentity } from '~features/premium/usePremiumIdentity'
 import { useStudyLinksOfflineCopy } from '~features/resources/useStudyLinksOfflineCopy'
 import { canStartRemoteHydration } from '~helpers/accountEntry'
 import { appLogger } from '~helpers/agentObservability'
@@ -79,6 +80,7 @@ const InitHooks = () => {
     incomingEnabled: hydrationEnabled && accountMigrations.isAccountSyncReady && !isSessionLost,
     outgoingEnabled: (hydrationEnabled && accountMigrations.isAccountWriteReady) || isSessionLost,
   })
+  usePremiumIdentity()
   useStudyLinksOfflineCopy()
 
   return (

@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useSelector } from 'react-redux'
 import { useAtomValue } from 'jotai'
 import { useTranslation } from 'react-i18next'
-import { useRouter } from 'expo-router'
+import { usePathname, useRouter } from 'expo-router'
 import {
   AssistantModalPrimitive as Modal,
   AssistantRuntimeProvider,
@@ -18,6 +18,8 @@ import {
 } from '@assistant-ui/react'
 import { createAvatar } from '@bible-strong/avatar-react'
 import '@bible-strong/avatar-react/styles.css'
+import { premiumStatusAtom } from '~features/premium/premiumStatus'
+import { usePremiumVisible } from '~features/premium/premiumVisibility'
 import { selectUserLoginInfo } from '~redux/selectors/user'
 import { floatingShadow } from '~common/ui/surfaces'
 import { resolveFontFamily } from '~themes/styleValues'
@@ -44,6 +46,7 @@ import {
 import { useAssistantSession } from './useAssistantSession'
 import { useReadingContext } from './useReadingContext.web'
 import './assistant-modal.css'
+import { OPEN_ASSISTANT_EVENT } from './returnToAssistant'
 import { LiveDictationAdapter } from './dictationAdapter'
 import { scriptedAnswersAtom, scriptedRequest } from './playground/scriptedAnswers'
 import { captureDictationAudio, dictationSupported } from './dictationAudio.web'
@@ -171,6 +174,22 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     setOpen(value)
     setAvatarSleeping(false)
     if (!value) dictation.cancel()
+  }
+  // A page asks for the window: Premium's welcome, once the reader may ask without limit.
+  useEffect(() => {
+    const openWindow = () => changeOpen(true)
+    window.addEventListener(OPEN_ASSISTANT_EVENT, openWindow)
+    return () => window.removeEventListener(OPEN_ASSISTANT_EVENT, openWindow)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  const pathname = usePathname()
+  const premium = useAtomValue(premiumStatusAtom)
+  const premiumVisible = usePremiumVisible()
+  // Where it is sold, an account without Premium is offered it at the limit and beside the count.
+  const offersPremium = signedIn && premium.kind === 'none' && premiumVisible
+  const discoverPremium = () => {
+    changeOpen(false)
+    router.push({ pathname: '/premium', params: { from: 'assistant' } })
   }
   const loginRef = useRef<HTMLButtonElement | null>(null)
   const scripted = useAtomValue(scriptedAnswersAtom)
@@ -361,6 +380,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
         unstable_openOnRunStart={false}
       >
         {ready &&
+          (open || pathname !== '/premium') &&
           createPortal(
             <Modal.Anchor className="bs-assistant-anchor" style={vars}>
               <Modal.Trigger
@@ -581,6 +601,14 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                     />
                   )
                 )}
+                {limited && offersPremium && (
+                  <div className="bs-assistant-verify">
+                    <p>{t('assistant.limitCard.premiumHint')}</p>
+                    <button type="button" onClick={discoverPremium}>
+                      {t('assistant.limitCard.premium')}
+                    </button>
+                  </div>
+                )}
                 {!!followUps.length && !error && (
                   // A question picked is asked at once, like the starting points.
                   <div
@@ -621,6 +649,15 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                         : quotaText.kind === 'paused'
                           ? t('assistant.quota.paused', { date: quotaText.date })
                           : t('assistant.quota.none', { time: quotaText.time })}
+                      {offersPremium && (
+                        <button
+                          type="button"
+                          className="bs-assistant-quota-premium"
+                          onClick={discoverPremium}
+                        >
+                          {t('assistant.quota.premium')}
+                        </button>
+                      )}
                     </p>
                   )}
                   {signedIn ? (

@@ -37,7 +37,14 @@ if (process.platform === 'darwin') tauriArgs.push('--target', 'universal-apple-d
 const provisioningProfile = join(desktopRoot, 'src-tauri/embedded.provisionprofile')
 if (appStore) {
   if (process.platform !== 'darwin') throw new Error('The App Store build is macOS only')
-  tauriArgs.push('--config', 'src-tauri/tauri.appstore.conf.json', '--', '--no-default-features')
+  tauriArgs.push(
+    '--config',
+    'src-tauri/tauri.appstore.conf.json',
+    '--',
+    '--no-default-features',
+    '--features',
+    'mac-app-store'
+  )
 } else if (process.platform === 'darwin') {
   if (existsSync(provisioningProfile)) {
     tauriArgs.push('--config', 'src-tauri/tauri.provisioned.conf.json')

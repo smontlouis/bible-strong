@@ -3,10 +3,16 @@ import Purchases, {
   LOG_LEVEL,
   PURCHASES_ERROR_CODE,
   type CustomerInfo,
+  type PurchasesPackage,
 } from 'react-native-purchases'
 
 import { revenueCatApiKey } from './premiumConfig'
-import { toPremiumOffer, type PremiumOffer, type PremiumOfferPlan } from './premiumOffer'
+import {
+  toPremiumOffer,
+  type PremiumBuyer,
+  type PremiumOffer,
+  type PremiumOfferPlan,
+} from './premiumOffer'
 import { toPremiumStatus, type PremiumStatus } from './premiumStatus'
 
 /**
@@ -88,10 +94,11 @@ const isCancellation = (error: unknown): boolean => {
  * Buy, a pending Google Play payment) comes back as `pending`; RevenueCat reports it later.
  */
 export const buyPremium = async (
-  plan: PremiumOfferPlan
+  plan: PremiumOfferPlan,
+  _reader?: PremiumBuyer
 ): Promise<'purchased' | 'pending' | 'cancelled'> => {
   try {
-    const { customerInfo } = await Purchases.purchasePackage(plan.package)
+    const { customerInfo } = await Purchases.purchasePackage(plan.package as PurchasesPackage)
     const status = toPremiumStatus(customerInfo)
     premiumListener?.(status)
     return status.kind === 'active' ? 'purchased' : 'pending'
