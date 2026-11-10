@@ -2687,6 +2687,7 @@ __metadata:
     react-native-keyboard-controller: "npm:1.22.7"
     react-native-mmkv: "npm:4.3.2"
     react-native-nitro-modules: "npm:^0.37.2"
+    react-native-purchases: "npm:10.16.0"
     react-native-reanimated: "npm:4.7.0"
     react-native-reanimated-carousel: "npm:^5.2.0"
     react-native-reanimated-dnd: "patch:react-native-reanimated-dnd@npm%3A2.0.0#~/.yarn/patches/react-native-reanimated-dnd-npm-2.0.0-b5a7ddfd0c.patch"
@@ -11856,6 +11857,29 @@ __metadata:
   version: 2.6.2
   resolution: "@resvg/resvg-wasm@npm:2.6.2"
   checksum: 10c0/74eb061c53510dad516e42375d1802a5b70ff531abd3c858921178add5acd136382a2f0afc1bd83fa72ec2c2c9bd40a636000572a152b53a9b04e9c131ba0223
+  languageName: node
+  linkType: hard
+
+"@revenuecat/purchases-js-hybrid-mappings@npm:19.17.0":
+  version: 19.17.0
+  resolution: "@revenuecat/purchases-js-hybrid-mappings@npm:19.17.0"
+  dependencies:
+    "@revenuecat/purchases-js": "npm:1.73.1"
+  checksum: 10c0/be41945bc3d651715e1293e2da283cd9d9cf3ec7c35737aef90e8c5956d61303af01cff9fbdbed7501c1428a902c40e7f35c0fac00c2c7b90d773a9d9dece4a8
+  languageName: node
+  linkType: hard
+
+"@revenuecat/purchases-js@npm:1.73.1":
+  version: 1.73.1
+  resolution: "@revenuecat/purchases-js@npm:1.73.1"
+  checksum: 10c0/7cc7ebdb3e9db9c7092565fa433e8301d0cfe920ca74d68ab06174457d7d8a1eb93860b6750cec1cadfc5cc9052b94cd220cf3747b99c5ba9ac9f978a3443a61
+  languageName: node
+  linkType: hard
+
+"@revenuecat/purchases-typescript-internal@npm:19.17.0":
+  version: 19.17.0
+  resolution: "@revenuecat/purchases-typescript-internal@npm:19.17.0"
+  checksum: 10c0/4a5fae2dad0dbd59864a1fbba39b92c2c40abd7c56bc076c295e83f7460194aeea146cbc87504d8778f3556aef6358daa257e794221a5bbf471af671a5a968cb
   languageName: node
   linkType: hard
 
@@ -29979,6 +30003,23 @@ multer@emadalam/multer:
     react: "*"
     react-native: "*"
   checksum: 10c0/226396e7e355e4c1962b8f8742eea9efd6f04bc322b264b7d6133757c16a59d431005610ca2f4dd2e7ef125cc5e05e5c3be042a1bb0d5846b995f77af6647541
+  languageName: node
+  linkType: hard
+
+"react-native-purchases@npm:10.16.0":
+  version: 10.16.0
+  resolution: "react-native-purchases@npm:10.16.0"
+  dependencies:
+    "@revenuecat/purchases-js-hybrid-mappings": "npm:19.17.0"
+    "@revenuecat/purchases-typescript-internal": "npm:19.17.0"
+  peerDependencies:
+    react: ">= 16.6.3"
+    react-native: ">= 0.73.0"
+    react-native-web: "*"
+  peerDependenciesMeta:
+    react-native-web:
+      optional: true
+  checksum: 10c0/c0aa5a1a0865dca552feb847a43ce55e4c36788d708704718be0145c73b3cb5e0a4da16fab1dbca3dabae074386521e9db09ad09a959c5903da3c83ea211a681
   languageName: node
   linkType: hard
 

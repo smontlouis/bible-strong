@@ -14,8 +14,10 @@ import { toast } from '~helpers/toast'
 import i18n from '~i18n'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { selectUserLoginInfo } from '~redux/selectors/user'
+import { premiumStatusAtom } from '~features/premium/premiumStatus'
 import { createTabForAssistantAction } from './assistantActions'
 import { assistantAccessible } from './assistantConfig'
+import { nextQuotaReset } from './assistantQuota'
 import AssistantLauncherButton from './AssistantLauncherButton'
 import {
   ASSISTANT_PATH,
@@ -31,6 +33,8 @@ import { convertMessage } from './messageRuntime'
 import type { StrobiAnimation } from './StrobiAvatar'
 import { useAssistantSession } from './useAssistantSession'
 import { useReadingContext } from './useReadingContext'
+
+const PREMIUM_PATH = '/premium'
 
 export default function AssistantLauncher() {
   const { id } = useSelector(selectUserLoginInfo)
@@ -106,6 +110,18 @@ function AccountAssistant({ account }: { account: string }) {
     onCurrentThreadDeleted: () => dictation.cancel(),
   })
   const { current, ready, busy, send } = session
+  // The daily quota used up, Strobi sleeps until it starts again, unless the account holds Premium.
+  const premium = useAtomValue(premiumStatusAtom)
+  const [restingUntil, setRestingUntil] = useState<number | null>(null)
+  useEffect(() => {
+    if (session.error === 'assistant.limit') setRestingUntil(nextQuotaReset(new Date()).getTime())
+  }, [session.error])
+  useEffect(() => {
+    if (restingUntil === null) return
+    const timer = setTimeout(() => setRestingUntil(null), restingUntil - Date.now())
+    return () => clearTimeout(timer)
+  }, [restingUntil])
+  const resting = restingUntil !== null && premium.kind !== 'active'
   const onNew = async (message: AppendMessage) => {
     await send(message.content.flatMap(p => (p.type === 'text' ? [p.text] : [])).join('\n'))
   }
@@ -123,7 +139,7 @@ function AccountAssistant({ account }: { account: string }) {
     ? 'thinking'
     : avatarDragged
       ? 'excited'
-      : avatarSleeping
+      : avatarSleeping || resting
         ? 'sleeping'
         : 'idle'
   const sheet: AssistantSheet = {
@@ -155,7 +171,8 @@ function AccountAssistant({ account }: { account: string }) {
       <AssistantLauncherButton
         animation={avatarAnimation}
         accessibilityLabel={t('assistant.modal.open')}
-        hidden={open}
+        // The Premium page has its own Strobi.
+        hidden={open || pathname === PREMIUM_PATH}
         onPress={() => {
           if (!open) router.push(ASSISTANT_PATH)
         }}

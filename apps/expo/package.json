@@ -1,6 +1,6 @@
 {
   "name": "@bible-strong/expo",
-  "version": "28.0.3",
+  "version": "28.1.0",
   "main": "expo-router/entry",
   "scripts": {
     "eas-build-pre-install": "corepack enable",
@@ -193,6 +193,7 @@
     "react-native-keyboard-controller": "1.22.7",
     "react-native-mmkv": "4.3.2",
     "react-native-nitro-modules": "^0.37.2",
+    "react-native-purchases": "10.16.0",
     "react-native-reanimated": "4.7.0",
     "react-native-reanimated-carousel": "^5.2.0",
     "react-native-reanimated-dnd": "patch:react-native-reanimated-dnd@npm%3A2.0.0#~/.yarn/patches/react-native-reanimated-dnd-npm-2.0.0-b5a7ddfd0c.patch",

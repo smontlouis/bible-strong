@@ -97,7 +97,11 @@ the JS thread again: a `requestAnimationFrame` loop there cost 12–19 % CPU at 
 app in background where nothing paces `requestAnimationFrame`, spun at 100 % CPU while the heap
 grew by about 40 MB a minute until taps no longer reached JavaScript (2026-10-21). Do not update
 the paths with `setNativeProps` either: measured in development on the iOS simulator, it cost
-about 64 ms per frame against about 2 ms with shared values.
+about 64 ms per frame against about 2 ms with shared values. A Strobi set in a row or a card (More's Premium row, the Premium pages,
+the card of the daily limit) passes `settleAfterMs`: it holds its pose that long after an
+animation starts, eyes open, and its frame callback stops; a new animation plays again.
+`StrobiAvatar.web.tsx` draws the same definition with `@bible-strong/avatar-react`, under the same
+props.
 
 Dictation. `dictationAudio.ts` captures mono PCM16 with `expo-audio`'s native audio stream and
 feeds the same `LiveDictationAdapter` as the web. The microphone is requested on first use and

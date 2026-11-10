@@ -200,6 +200,7 @@ export type MainStackProps = {
   DictionnaryDetail: DictionaryDetailScreenProps
   Login: undefined
   Support: undefined
+  Premium: undefined
   ImportExport: undefined
   Backup: undefined
   AutomaticBackups: undefined

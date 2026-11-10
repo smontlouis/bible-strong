@@ -15,6 +15,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { floatingShadow, radii } from '~common/ui/surfaces'
 import { useTheme } from '~themes/ThemeProvider'
+import AssistantLimitCard from './AssistantLimitCard'
 import { ComposerInsetContext, useAssistantSheet } from './assistantSheetContext'
 import type { ReadingContext } from './conversations'
 import ErrorState from './ErrorState'
@@ -51,19 +52,23 @@ function ThreadStatus() {
           <Text className="text-grey text-[13px]">{progress}</Text>
         </HStack>
       )}
-      {(!!error || retrying) && (
-        <ErrorState
-          retrying={retrying}
-          title={t(
-            error === 'assistant.limit'
-              ? 'assistant.errors.limitTitle'
-              : error === 'assistant.signIn'
-                ? 'assistant.errors.signInTitle'
-                : 'assistant.errors.title'
-          )}
-          detail={t(error === 'assistant.limit' ? 'assistant.errors.limitDetail' : error)}
-          onRetry={session.retry}
-        />
+      {error === 'assistant.limit' && !retrying ? (
+        <AssistantLimitCard />
+      ) : (
+        (!!error || retrying) && (
+          <ErrorState
+            retrying={retrying}
+            title={t(
+              error === 'assistant.limit'
+                ? 'assistant.errors.limitTitle'
+                : error === 'assistant.signIn'
+                  ? 'assistant.errors.signInTitle'
+                  : 'assistant.errors.title'
+            )}
+            detail={t(error === 'assistant.limit' ? 'assistant.errors.limitDetail' : error)}
+            onRetry={session.retry}
+          />
+        )
       )}
       {storageError && (
         <ErrorState

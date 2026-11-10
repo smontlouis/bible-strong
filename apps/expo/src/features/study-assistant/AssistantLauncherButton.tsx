@@ -124,7 +124,8 @@ export default function AssistantLauncherButton({
   const y = useSharedValue(0)
   const scale = useSharedValue(1)
   const hideOffset = useSharedValue(0)
-  const visibility = useSharedValue(1)
+  // A page that opens without it (Premium, reached by a link) starts it hidden.
+  const visibility = useSharedValue(hidden ? 0 : 1)
   const shownOnce = useRef(false)
 
   // Reads the latest layout without sliding again when it changes.

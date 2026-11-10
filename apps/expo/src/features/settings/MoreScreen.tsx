@@ -4,7 +4,11 @@ import { resolveUniverseColors } from '~themes/universeColors'
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 import { getAppleReviewing } from '~helpers/getAppleReviewing'
 import { Image } from 'expo-image'
-import { useSetAtom } from 'jotai/react'
+import { useAtomValue, useSetAtom } from 'jotai/react'
+import { premiumStatusAtom } from '~features/premium/premiumStatus'
+import { isPurchasesAvailable } from '~features/premium/purchasesClient'
+import { salesChannel } from '~features/premium/salesChannel'
+import StrobiAvatar from '~features/study-assistant/StrobiAvatar'
 import { memo, useRef, type ComponentPropsWithRef as UIComponentProps } from 'react'
 import { supportsOfflineCopies } from '~desktop/isDesktop'
 import { useTranslation } from 'react-i18next'
@@ -95,6 +99,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
   const lang = useLanguage()
   const { t } = useTranslation()
   const confirm = useConfirmDialog()
+  const premiumStatus = useAtomValue(premiumStatusAtom)
 
   const promptLogout = async () => {
     const confirmed = await confirm({
@@ -166,6 +171,29 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
             />
           )}
         </ListSection>
+
+        {salesChannel() !== 'none' && isPurchasesAvailable() && (
+          <ListSection>
+            <ListRow
+              route="Premium"
+              // Strobi looks up, then holds still: a row need not move while the page is open.
+              icon={
+                <StrobiAvatar
+                  animation={premiumStatus.kind === 'active' ? 'happy' : 'curious'}
+                  size={36}
+                  settleAfterMs={2600}
+                />
+              }
+              iconBg="transparent"
+              label={t('premiumPlan.headline')}
+              description={
+                premiumStatus.kind === 'active'
+                  ? t('premiumPlan.active')
+                  : t('premiumPlan.benefit.assistant')
+              }
+            />
+          </ListSection>
+        )}
 
         <ListSection title={t('settings.resources')}>
           <ListRow

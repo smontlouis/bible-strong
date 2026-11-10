@@ -24,7 +24,8 @@ import {
 } from '@bible-strong/avatar-core'
 import strobiDefinition from './strobi.avatar.json'
 
-export type StrobiAnimation = 'idle' | 'sleeping' | 'excited' | 'thinking' | 'listening'
+/** Every animation of the definition: idle, sleeping, happy, celebrate, proud, curious… */
+export type StrobiAnimation = keyof typeof strobiDefinition.animations
 
 const validated = validateAvatarDefinition(strobiDefinition)
 if (!validated.ok) throw new Error(`Invalid avatar definition: ${validated.errors[0]?.message}`)
@@ -107,11 +108,18 @@ export default function StrobiAvatar({
   animation,
   size,
   muted = false,
+  settleAfterMs = 0,
 }: {
   animation: StrobiAnimation
   size: number
   /** Greyed out, as a floating button left idle. */
   muted?: boolean
+  /**
+   * Holds the pose this long after an animation starts, eyes open, and stops sampling: for an
+   * avatar set in a row or a card, which need not move for as long as it is on screen. A new
+   * `animation` plays again. 0 keeps it moving.
+   */
+  settleAfterMs?: number
 }) {
   const clipId = `${useId().replaceAll(':', '')}-head`
   const [initial] = useState(() => renderAvatarDefinition(definition))
@@ -134,8 +142,12 @@ export default function StrobiAvatar({
   const shownColors = useSharedValue(initial.colors)
   const holdStill = useSharedValue(muted)
   const asleep = useSharedValue(false)
+  const settleAfter = useSharedValue(settleAfterMs)
+  const startedAt = useSharedValue(0)
+  const settled = useSharedValue(false)
   const reportedStill = useSharedValue(false)
-  // The frame callback reports when a muted avatar reached its sleeping pose.
+  // The frame callback reports when a muted avatar reached its sleeping pose, or a settling one
+  // its resting frame.
   const [still, setStill] = useState(false)
   const [appActive, setAppActive] = useState(AppState.currentState === 'active')
 
@@ -149,10 +161,15 @@ export default function StrobiAvatar({
 
   useEffect(() => {
     requestedAnimation.set(animation)
-  }, [animation, requestedAnimation])
+    settleAfter.set(settleAfterMs)
+    // A settled avatar no longer runs its frame callback: wake it from here.
+    settled.set(false)
+    reportedStill.set(false)
+    setStill(false)
+  }, [animation, settleAfterMs, requestedAnimation, settleAfter, settled, reportedStill])
 
   const frameCallback = useFrameCallback(({ timestamp: now }) => {
-    const hold = holdStill.get() && asleep.get()
+    const hold = (holdStill.get() && asleep.get()) || settled.get()
     if (hold !== reportedStill.get()) {
       reportedStill.set(hold)
       scheduleOnRN(setStill, hold)
@@ -164,6 +181,7 @@ export default function StrobiAvatar({
       const started = playAvatarAnimation(definition, requested, now, sample.get() ?? undefined)
       playback.set(started.ok ? started.value : null)
       renderedAt.set(0)
+      startedAt.set(now)
     }
     const state = playback.get()
     if (!state || now - renderedAt.get() < FRAME_MS - 1) return
@@ -176,6 +194,15 @@ export default function StrobiAvatar({
     sample.set(current)
     // Settled in the sleeping pose, between two blinks: a frame a muted avatar can hold.
     asleep.set(next.activeAnimation === 'sleeping' && next.phase === 'hold' && current.blink === 1)
+    const settleDelay = settleAfter.get()
+    if (
+      settleDelay > 0 &&
+      now - startedAt.get() >= settleDelay &&
+      next.phase === 'hold' &&
+      current.blink === 1
+    ) {
+      settled.set(true)
+    }
     const expression = environment.reduceMotion
       ? current.expression
       : applyAmbientMotion(current.expression, current.sampledAt)
@@ -198,7 +225,13 @@ export default function StrobiAvatar({
   useEffect(() => {
     mutedProgress.set(withTiming(muted ? 1 : 0, { duration: 300 }))
     holdStill.set(muted)
-  }, [muted, mutedProgress, holdStill])
+    // A muted avatar asleep no longer runs its frame callback: wake it from here. A settled one
+    // reports itself still again on its first frame.
+    if (!muted) {
+      reportedStill.set(false)
+      setStill(false)
+    }
+  }, [muted, mutedProgress, holdStill, reportedStill])
 
   // The display may keep firing in background (it does in the simulator): nothing to draw there.
   useEffect(() => {
@@ -209,8 +242,8 @@ export default function StrobiAvatar({
   }, [])
 
   useEffect(() => {
-    frameCallback.setActive(appActive && !(muted && still))
-  }, [frameCallback, appActive, muted, still])
+    frameCallback.setActive(appActive && !still)
+  }, [frameCallback, appActive, still])
 
   const body = { color: colors.body, grey: toGrey(colors.body), muted: mutedProgress }
   const eyes = { color: colors.eyes, grey: toGrey(colors.eyes), muted: mutedProgress }

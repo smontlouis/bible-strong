@@ -26,6 +26,7 @@ import i18n from '~i18n'
 import { useTheme } from '~themes/ThemeProvider'
 import { askAssistant, compactAssistant, connectAssistantDictation } from './client'
 import { assistantAccessible, assistantAvailable } from './assistantConfig'
+import { quotaReturn } from './assistantQuota'
 import { contextCaption } from './contextDisplay'
 import ContextMarkIcon from './ContextMarkIcon.web'
 import { useAssistantSession } from './useAssistantSession'
@@ -270,11 +271,15 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
       ? 'thinking'
       : avatarHovered
         ? 'listening'
-        : open
-          ? 'excited'
-          : avatarSleeping
-            ? 'sleeping'
-            : 'idle'
+        : // The daily quota used up, Strobi sleeps until it starts again.
+          error === 'assistant.limit'
+          ? 'sleeping'
+          : open
+            ? 'excited'
+            : avatarSleeping
+              ? 'sleeping'
+              : 'idle'
+  const limitReturn = quotaReturn(new Date(), i18n.language)
   const dictationActive = ['starting', 'listening', 'stopping'].includes(dictationState)
   const onNew = async (message: AppendMessage) => {
     await send(message.content.flatMap(p => (p.type === 'text' ? [p.text] : [])).join('\n'))
@@ -502,13 +507,17 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                     retrying={retrying}
                     title={t(
                       error === 'assistant.limit'
-                        ? 'assistant.errors.limitTitle'
+                        ? 'assistant.limitCard.title'
                         : error === 'assistant.signIn'
                           ? 'assistant.errors.signInTitle'
                           : 'assistant.errors.title'
                     )}
-                    detail={t(error === 'assistant.limit' ? 'assistant.errors.limitDetail' : error)}
-                    onRetry={session.retry}
+                    detail={
+                      error === 'assistant.limit'
+                        ? t(limitReturn.key, { time: limitReturn.time })
+                        : t(error ?? '')
+                    }
+                    onRetry={error === 'assistant.limit' ? undefined : session.retry}
                   />
                 )}
                 {!!followUps.length && !error && (

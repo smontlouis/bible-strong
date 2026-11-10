@@ -1,4 +1,5 @@
 import * as Icon from '@expo/vector-icons'
+import { useAtomValue } from 'jotai/react'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
@@ -8,13 +9,17 @@ import type { Theme as AppTheme } from '~themes'
 
 import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { premiumStatusAtom } from '~features/premium/premiumStatus'
 import { RootState } from '~redux/modules/reducer'
 
 const SubscriptionBadge = () => {
   const { t } = useTranslation()
+  // A sponsorship IAPHUB still renews writes `subscription`; RevenueCat holds Premium (ADR-0110).
+  // The badge reads both until those sponsorships move to RevenueCat.
   const subscription = useSelector((state: RootState) => state.user.subscription)
+  const premium = useAtomValue(premiumStatusAtom)
 
-  if (!subscription) return null
+  if (!subscription && premium.kind !== 'active') return null
 
   return (
     <HStack className="overflow-hidden border-continuous gap-[10px] mt-[5px]">

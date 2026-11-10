@@ -17,6 +17,7 @@ import MigrationModal from '~common/MigrationModal'
 import AccountMigrationModal from '~features/migrations/AccountMigrationModal'
 import { useAppRatingCheck } from '~features/app-rating/useAppRatingCheck'
 import { useStudyLinksOfflineCopy } from '~features/resources/useStudyLinksOfflineCopy'
+import { usePremiumIdentity } from '~features/premium/usePremiumIdentity'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
 import { migrateBibleJsonToSqlite, needsBibleMigration } from '~helpers/bibleMigration'
 import { checkBiblesDbHealth, openBiblesDb, resetBiblesDb } from '~helpers/biblesDb'
@@ -217,6 +218,7 @@ const InitHooks = (_props: InitHooksProps) => {
   })
   useAppRatingCheck()
   useStudyLinksOfflineCopy()
+  usePremiumIdentity()
 
   return (
     <>
