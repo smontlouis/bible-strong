@@ -143,7 +143,9 @@ function QuotaLine() {
       <Text className="text-grey text-[12px]">
         {line.kind === 'remaining'
           ? t('assistant.quota.remaining', { count: line.count })
-          : t('assistant.quota.none', { time: line.time })}
+          : line.kind === 'paused'
+            ? t('assistant.quota.paused', { date: line.date })
+            : t('assistant.quota.none', { time: line.time })}
       </Text>
       {offersPremium && (
         <TouchableBox

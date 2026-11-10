@@ -113,6 +113,8 @@ export default function StudyAssistantScreen() {
         BETA_ACCESS_REQUIRED: 'assistant.betaOnly',
         DAILY_LIMIT: 'assistant.limit',
         EMAIL_VERIFICATION_REQUIRED: 'assistant.verifyEmail',
+        FREE_PAUSED: 'assistant.freePaused',
+        QUESTION_IN_PROGRESS: 'assistant.questionInProgress',
         INTERRUPTED: 'assistant.interrupted',
       }
       setError(t(keys[code] || 'assistant.unavailable'))

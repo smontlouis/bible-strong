@@ -26,7 +26,13 @@ import i18n from '~i18n'
 import { useTheme } from '~themes/ThemeProvider'
 import { askAssistant, compactAssistant, connectAssistantDictation } from './client'
 import { assistantAccessible, assistantAvailable } from './assistantConfig'
-import { asksEmailVerification, quotaLine, quotaReturn } from './assistantQuota'
+import {
+  asksEmailVerification,
+  freeQuestionsPaused,
+  quotaLine,
+  quotaReturn,
+  resumeDate,
+} from './assistantQuota'
 import { contextCaption } from './contextDisplay'
 import ContextMarkIcon from './ContextMarkIcon.web'
 import FireAuth from '~helpers/FireAuth'
@@ -240,6 +246,9 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
   const quota = useAssistantQuota()
   const quotaText = quotaLine(quota, i18n.language)
   const verification = asksEmailVerification(error, quota) && !busy
+  // The free questions are paused until the first of next month: shown as the daily limit is.
+  const paused = freeQuestionsPaused(error, quota) && !busy
+  const limited = paused || error === 'assistant.limit'
   useEmailVerificationWatch(open && verification)
   const [sendingVerification, setSendingVerification] = useState(false)
   // Opening a conversation shows its last question at the top, not the end of its last
@@ -285,7 +294,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
       : avatarHovered
         ? 'listening'
         : // The daily quota used up, Strobi sleeps until it starts again.
-          error === 'assistant.limit'
+          limited
           ? 'sleeping'
           : open
             ? 'excited'
@@ -541,24 +550,34 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                     </button>
                   </div>
                 ) : (
-                  (error || retrying) &&
+                  (error || retrying || paused) &&
                   // A refusal for the address says nothing more once the address is verified.
-                  error !== 'assistant.verifyEmail' && (
+                  error !== 'assistant.verifyEmail' &&
+                  (paused || error !== 'assistant.freePaused') && (
                     <ErrorState
                       retrying={retrying}
                       title={t(
-                        error === 'assistant.limit'
+                        limited
                           ? 'assistant.limitCard.title'
                           : error === 'assistant.signIn'
                             ? 'assistant.errors.signInTitle'
                             : 'assistant.errors.title'
                       )}
                       detail={
-                        error === 'assistant.limit'
-                          ? t(limitReturn.key, { time: limitReturn.time, count: limitReturn.count })
-                          : t(error ?? '')
+                        paused
+                          ? quota?.kind === 'paused'
+                            ? t('assistant.limitCard.paused', {
+                                date: resumeDate(quota.resumesAt, i18n.language),
+                              })
+                            : t('assistant.freePausedUndated')
+                          : error === 'assistant.limit'
+                            ? t(limitReturn.key, {
+                                time: limitReturn.time,
+                                count: limitReturn.count,
+                              })
+                            : t(error ?? '')
                       }
-                      onRetry={error === 'assistant.limit' ? undefined : session.retry}
+                      onRetry={limited ? undefined : session.retry}
                     />
                   )
                 )}
@@ -599,7 +618,9 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                     <p className="bs-assistant-quota" aria-live="polite">
                       {quotaText.kind === 'remaining'
                         ? t('assistant.quota.remaining', { count: quotaText.count })
-                        : t('assistant.quota.none', { time: quotaText.time })}
+                        : quotaText.kind === 'paused'
+                          ? t('assistant.quota.paused', { date: quotaText.date })
+                          : t('assistant.quota.none', { time: quotaText.time })}
                     </p>
                   )}
                   {signedIn ? (

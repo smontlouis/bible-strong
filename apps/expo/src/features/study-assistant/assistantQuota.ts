@@ -46,14 +46,37 @@ export const currentQuota = (
   now: Date
 ): StudyQuota | null => {
   if (!state || !uid || state.uid !== uid) return null
-  if (state.quota.kind === 'daily' && now.getTime() >= Date.parse(state.quota.resetsAt)) return null
+  const ends = quotaEnd(state.quota)
+  if (ends && now.getTime() >= Date.parse(ends)) return null
   return state.quota
 }
 
+/** When the quota stops holding: the day's reset, or the end of a pause of the free questions. */
+export const quotaEnd = (quota: StudyQuota | null) =>
+  quota?.kind === 'daily' ? quota.resetsAt : quota?.kind === 'paused' ? quota.resumesAt : null
+
+/** The day the free questions resume, as the reader's calendar names it. */
+export const resumeDate = (resumesAt: string, lang: string) =>
+  format(new Date(resumesAt), lang === 'fr' ? 'do MMMM' : 'MMMM d', {
+    locale: getDateLocale(lang),
+  })
+
+/**
+ * Whether the free questions are paused for this account: the service says so, or refused a
+ * question for it and has not said otherwise since.
+ */
+export const freeQuestionsPaused = (error: string, quota: StudyQuota | null) =>
+  quota?.kind === 'paused' ||
+  (error === 'assistant.freePaused' && quota?.kind !== 'daily' && quota?.kind !== 'unlimited')
+
 /** What the line above the composer says, or null when it says nothing. */
-export type QuotaLine = { kind: 'remaining'; count: number } | { kind: 'none'; time: string }
+export type QuotaLine =
+  | { kind: 'remaining'; count: number }
+  | { kind: 'none'; time: string }
+  | { kind: 'paused'; date: string }
 
 export const quotaLine = (quota: StudyQuota | null, lang: string): QuotaLine | null => {
+  if (quota?.kind === 'paused') return { kind: 'paused', date: resumeDate(quota.resumesAt, lang) }
   if (quota?.kind !== 'daily') return null
   if (quota.remaining > 0) return { kind: 'remaining', count: quota.remaining }
   return {

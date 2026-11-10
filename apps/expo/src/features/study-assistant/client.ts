@@ -133,7 +133,9 @@ export async function askAssistant(
           ? 'EMAIL_VERIFICATION_REQUIRED'
           : 'BETA_ACCESS_REQUIRED'
       )
-    if (response.status === 429) throw new Error('DAILY_LIMIT')
+    if (response.status === 409) throw new Error('QUESTION_IN_PROGRESS')
+    if (response.status === 429)
+      throw new Error(refusal.code === 'FREE_PAUSED' ? 'FREE_PAUSED' : 'DAILY_LIMIT')
     throw new Error('AI_UNAVAILABLE')
   }
   if (!response.body) throw new Error('INCOMPLETE_STREAM')

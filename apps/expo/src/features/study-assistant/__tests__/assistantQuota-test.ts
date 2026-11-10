@@ -1,6 +1,7 @@
 import { getDefaultStore } from 'jotai'
 import {
   asksEmailVerification,
+  freeQuestionsPaused,
   assistantQuotaAtom,
   currentQuota,
   nextQuotaReset,
@@ -93,5 +94,23 @@ describe('asksEmailVerification', () => {
     expect(asksEmailVerification('assistant.verifyEmail', daily(3))).toBe(false)
     expect(asksEmailVerification('assistant.verifyEmail', { kind: 'unlimited' })).toBe(false)
     expect(asksEmailVerification('assistant.limit', daily(0))).toBe(false)
+  })
+})
+
+describe('a pause of the free questions', () => {
+  const paused = { kind: 'paused', resumesAt: '2026-12-01T00:00:00.000Z' } as const
+
+  it('holds until the free questions resume, and says until when', () => {
+    const state = { uid: 'reader', quota: paused }
+    expect(currentQuota(state, 'reader', new Date('2026-11-20T00:00:00Z'))).toEqual(paused)
+    expect(currentQuota(state, 'reader', new Date('2026-12-01T00:00:00Z'))).toBeNull()
+    expect(quotaLine(paused, 'fr')).toMatchObject({ kind: 'paused' })
+  })
+
+  it('is shown while the service says so, or after a refusal it has not taken back', () => {
+    expect(freeQuestionsPaused('', paused)).toBe(true)
+    expect(freeQuestionsPaused('assistant.freePaused', null)).toBe(true)
+    expect(freeQuestionsPaused('assistant.freePaused', daily(3))).toBe(false)
+    expect(freeQuestionsPaused('assistant.limit', daily(0))).toBe(false)
   })
 })

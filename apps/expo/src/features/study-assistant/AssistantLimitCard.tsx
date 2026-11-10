@@ -10,7 +10,7 @@ import { usePremiumVisible } from '~features/premium/premiumVisibility'
 import useLanguage from '~helpers/useLanguage'
 
 import { useAssistantSheet } from './assistantSheetContext'
-import { quotaReturn } from './assistantQuota'
+import { quotaReturn, resumeDate } from './assistantQuota'
 import { useAssistantQuota } from './useAssistantQuota'
 import StrobiAvatar from './StrobiAvatar'
 import { useStrobiReaction } from './useStrobiReaction'
@@ -20,7 +20,7 @@ import { useStrobiReaction } from './useStrobiReaction'
  * back, at the hour said in the reader's own time. Where Premium is sold, it is offered here,
  * the one place where its value is plain.
  */
-export default function AssistantLimitCard() {
+export default function AssistantLimitCard({ paused = false }: { paused?: boolean }) {
   const { t } = useTranslation()
   const lang = useLanguage()
   const { navigate } = useAssistantSheet()
@@ -47,7 +47,14 @@ export default function AssistantLimitCard() {
         {t('assistant.limitCard.title')}
       </Text>
       <Text className="text-grey mt-1 text-center text-[14px] leading-[20px]">
-        {t(key, { time, count })}
+        {
+          // The free questions are paused until the first of next month, not just until tomorrow.
+          paused
+            ? quota?.kind === 'paused'
+              ? t('assistant.limitCard.paused', { date: resumeDate(quota.resumesAt, lang) })
+              : t('assistant.freePausedUndated')
+            : t(key, { time, count })
+        }
       </Text>
       {offersPremium ? (
         <>

@@ -172,6 +172,11 @@ The capability is declared only after the service has shown it counts questions,
 Worker refuses it as unknown. Sending stays open at zero: the Worker checks Premium again before it
 refuses.
 
+The service may also pause the free questions of every account until the first of next month (a
+`paused` quota, refusal `FREE_PAUSED`): the limit card and the composer line then say until when.
+It runs one question at a time per account; a second one meanwhile, from another device, is refused
+with `QUESTION_IN_PROGRESS` and can be retried.
+
 Web messages use the official `ThreadPrimitive.Messages`, `MessagePrimitive.Root` and
 `MessagePrimitive.Parts` pipeline. `LocalMessage` remains the validated application format;
 `messageRuntime.ts` converts it at the runtime boundary without rewriting stored conversations.

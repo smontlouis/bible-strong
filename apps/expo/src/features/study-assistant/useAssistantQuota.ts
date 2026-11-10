@@ -5,7 +5,7 @@ import { premiumStatusAtom } from '~features/premium/premiumStatus'
 import FireAuth from '~helpers/FireAuth'
 import useLogin from '~helpers/useLogin'
 
-import { assistantQuotaAtom, currentQuota } from './assistantQuota'
+import { assistantQuotaAtom, currentQuota, quotaEnd } from './assistantQuota'
 import { fetchAssistantQuota } from './client'
 
 let loading: Promise<unknown> | null = null
@@ -48,12 +48,18 @@ export function useAssistantQuotaSync({
 
   const wasBusy = useRef(busy)
   useEffect(() => {
-    if (wasBusy.current && !busy && active && error && error !== 'assistant.limit')
+    if (
+      wasBusy.current &&
+      !busy &&
+      active &&
+      error &&
+      !['assistant.limit', 'assistant.freePaused'].includes(error)
+    )
       void refreshAssistantQuota()
     wasBusy.current = busy
   }, [busy, error, active])
 
-  const resetsAt = quota?.kind === 'daily' ? quota.resetsAt : null
+  const resetsAt = quotaEnd(quota)
   useEffect(() => {
     if (!active || !resetsAt) return
     const timer = setTimeout(
@@ -75,7 +81,7 @@ export function useAssistantQuota(): StudyQuota | null {
   // Re-render when the day's questions come back, so a used-up count does not linger.
   const [now, setNow] = useState(() => new Date())
   const quota = currentQuota(state, isLogged ? user.id : null, now)
-  const resetsAt = quota?.kind === 'daily' ? quota.resetsAt : null
+  const resetsAt = quotaEnd(quota)
   useEffect(() => {
     if (!resetsAt) return
     const timer = setTimeout(

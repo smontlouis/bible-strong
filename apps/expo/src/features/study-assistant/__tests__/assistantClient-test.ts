@@ -72,6 +72,14 @@ it('keeps the quota a refusal carries and names the refusal', async () => {
   // The beta refusal carries no quota and stays what it was.
   mockFetch.mockResolvedValueOnce(json(403, { code: 'BETA_ACCESS_REQUIRED', requestId: 'r' }))
   await expect(ask()).rejects.toThrow('BETA_ACCESS_REQUIRED')
+  const paused = { kind: 'paused', resumesAt: '2026-12-01T00:00:00.000Z' }
+  mockFetch.mockResolvedValueOnce(json(429, { code: 'FREE_PAUSED', requestId: 'r', quota: paused }))
+  await expect(ask()).rejects.toThrow('FREE_PAUSED')
+  expect(getDefaultStore().get(assistantQuotaAtom)?.quota).toEqual(paused)
+  expect(errorTranslationKey('FREE_PAUSED')).toBe('assistant.freePaused')
+  mockFetch.mockResolvedValueOnce(json(409, { code: 'QUESTION_IN_PROGRESS', requestId: 'r' }))
+  await expect(ask()).rejects.toThrow('QUESTION_IN_PROGRESS')
+  expect(errorTranslationKey('QUESTION_IN_PROGRESS')).toBe('assistant.questionInProgress')
   // A body that is not JSON still names the status.
   mockFetch.mockResolvedValueOnce({
     ok: false,

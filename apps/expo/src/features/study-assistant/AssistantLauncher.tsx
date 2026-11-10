@@ -116,7 +116,8 @@ function AccountAssistant({ account }: { account: string }) {
   const premium = useAtomValue(premiumStatusAtom)
   const [restingUntil, setRestingUntil] = useState<number | null>(null)
   useEffect(() => {
-    if (session.error === 'assistant.limit') setRestingUntil(nextQuotaReset(new Date()).getTime())
+    if (session.error === 'assistant.limit' || session.error === 'assistant.freePaused')
+      setRestingUntil(nextQuotaReset(new Date()).getTime())
   }, [session.error])
   useEffect(() => {
     if (restingUntil === null) return

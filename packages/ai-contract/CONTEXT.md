@@ -4,7 +4,7 @@
 
 **Study event** — Public streaming event for text, resource activity and completion.
 
-**Quota** — What an account may still ask the assistant today: unlimited, a number of questions until a reset time, or none until the account's address is verified. The service counts and decides it; a client only shows it, and receives it in the stream only when it declares the quota capability.
+**Quota** — What an account may still ask the assistant today: unlimited, a number of questions until a reset time, none until the account's address is verified, or none while the service has paused the questions of accounts without Premium. The service counts and decides it; a client only shows it, and receives it in the stream only when it declares the quota capability.
 
 **Follow-up question** — A question the reader may ask next, suggested after a finished answer. Sent only to clients that declare the follow-up capability; the client offers it to the reader and sends nothing on its own.
 

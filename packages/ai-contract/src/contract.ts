@@ -110,11 +110,13 @@ export type AssistantAction = OpenTabAction
  * What an account may still ask today. `unlimited`: no daily quota applies. `daily`: the account
  * has `remaining` of its `limit` questions until `resetsAt` (an ISO date, midnight UTC).
  * `verify_email`: the account receives `limit` questions a day once it has verified its address.
+ * `paused`: the service has stopped the questions of accounts without Premium until `resumesAt`.
  */
 export type StudyQuota =
   | { kind: 'unlimited' }
   | { kind: 'daily'; limit: number; remaining: number; resetsAt: string }
   | { kind: 'verify_email'; limit: number }
+  | { kind: 'paused'; resumesAt: string }
 export type StudyEvent =
   | { type: 'widget'; widget: StudyWidget }
   | { type: 'source'; source: StudySource }
@@ -341,7 +343,15 @@ export function parseStudyQuota(value: unknown): StudyQuota {
   const count = (field: unknown, max: number) =>
     Number.isInteger(field) && Number(field) >= 0 && Number(field) <= max
   const keys = Object.keys(quota)
+  const date = (field: unknown): field is string =>
+    typeof field === 'string' && field.length <= 40 && !Number.isNaN(Date.parse(field))
   if (quota.kind === 'unlimited' && keys.length === 1) return { kind: 'unlimited' }
+  if (
+    quota.kind === 'paused' &&
+    keys.every(key => ['kind', 'resumesAt'].includes(key)) &&
+    date(quota.resumesAt)
+  )
+    return { kind: 'paused', resumesAt: quota.resumesAt }
   if (
     quota.kind === 'verify_email' &&
     keys.every(key => ['kind', 'limit'].includes(key)) &&
@@ -353,9 +363,7 @@ export function parseStudyQuota(value: unknown): StudyQuota {
     keys.every(key => ['kind', 'limit', 'remaining', 'resetsAt'].includes(key)) &&
     count(quota.limit, MAX_DAILY_QUESTIONS) &&
     count(quota.remaining, Number(quota.limit)) &&
-    typeof quota.resetsAt === 'string' &&
-    quota.resetsAt.length <= 40 &&
-    !Number.isNaN(Date.parse(quota.resetsAt))
+    date(quota.resetsAt)
   )
     return {
       kind: 'daily',

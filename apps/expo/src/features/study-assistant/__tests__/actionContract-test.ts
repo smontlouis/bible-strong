@@ -58,6 +58,11 @@ it('accepts the quota capability and parses the three kinds of quota', () => {
     kind: 'verify_email',
     limit: 3,
   })
+  expect(parseStudyQuota({ kind: 'paused', resumesAt: '2026-12-01T00:00:00.000Z' })).toEqual({
+    kind: 'paused',
+    resumesAt: '2026-12-01T00:00:00.000Z',
+  })
+  expect(() => parseStudyQuota({ kind: 'paused', resumesAt: 'soon' })).toThrow('INVALID_QUOTA')
   expect(() => parseStudyQuota({ ...daily, remaining: 5 })).toThrow('INVALID_QUOTA')
   expect(() => parseStudyQuota({ kind: 'unlimited', premium: true })).toThrow('INVALID_QUOTA')
 })
