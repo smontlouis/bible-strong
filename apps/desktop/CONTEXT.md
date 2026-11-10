@@ -14,11 +14,11 @@
 
 **Browser sign-in** — Google or Apple sign-in for the desktop app, done in the reader's own browser and handed back to the shell on 127.0.0.1 with a one-time custom token.
 
-**Installer build** — A desktop build that updates itself with the signed updater; the **Mac App Store build** is sandboxed and updated by the store instead.
+**Installer build** — A desktop build that updates itself with the signed updater and sells Premium through the web checkout, in the reader's browser; the **Mac App Store build** is sandboxed, updated by the store instead, and sells Premium only through the App Store (ADR-0110).
 
 ## Avoid
 
 - Use **Desktop app**, not “Electron app” or “Mac app”: it runs on three systems through Tauri.
 - Use **Offline copy**, as in the Study workspace, for what the desktop app installs.
 
-Decisions and their reasons live in `../../docs/adr/0107-ship-a-desktop-app-that-installs-encrypted-offline-copies.md`.
+Decisions and their reasons live in `../../docs/adr/0107-ship-a-desktop-app-that-installs-encrypted-offline-copies.md`, and for Premium in `../../docs/adr/0110-sell-one-premium-plan-through-each-surface-channel.md`.

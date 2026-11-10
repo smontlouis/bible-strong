@@ -84,6 +84,10 @@
 
 **Assistant conversation** — A private account-owned sequence of complete question/answer turns, synchronized through Firestore independently of the assistant model service.
 
+**Premium** — The one paid plan of Bible Strong, held by an account rather than by a device or a store account: bought on one surface, it applies wherever the account signs in. It frees the study assistant from its daily limit. Former sponsorships and donors' grants are Premium too (ADR-0110).
+
+**Sales channel** — Where a surface sells Premium: the App Store in the iOS app and the Mac App Store build, Google Play in the Android app, and a web checkout run by Stripe on the Web, in installer builds and from the public site. A surface offers only its own channel.
+
 ## Avoid
 
 - Use **Offline copy**, not “offline cache”, for a deliberately installed complete resource.
@@ -92,5 +96,6 @@
 - Use **Relation endpoint**, not “relation item” or “linkable thing”.
 - Use **Reader intent**, not “bridge action”, “dispatch action” or “DOM message”.
 - Use **Bible version** for a readable Bible source; reserve **Resource identity** for publication and delivery lifecycle discussions.
+- Use **Premium**, not “Pro”, “Plus”, “sponsor tier” or “subscription”, for the paid plan; a subscription is one way of holding it.
 
 Detailed product invariants and implementation references live in `../../docs/study-workspace-domain-reference.md`.
