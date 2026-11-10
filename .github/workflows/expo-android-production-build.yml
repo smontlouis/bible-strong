@@ -1,0 +1,138 @@
+name: Build Android Production AAB
+
+# Manual only. The same EAS local build as `android-pc build-prod`, on a GitHub runner: the
+# upload keystore comes from the Expo account (EXPO_TOKEN), the other secrets from this repository.
+# This repository is public, so its logs and artifacts are too: the build log stays in a file and
+# only short excerpts are printed.
+on:
+  workflow_dispatch:
+    inputs:
+      register:
+        description: Declare the AAB to the update server as a base for delta patches (store builds only)
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: expo-android-production-build
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build AAB (production)
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CI: '1'
+      EXPO_NO_TELEMETRY: '1'
+      # The yarn build script removes "${TMPDIR}metro-cache"; Linux runners leave TMPDIR unset.
+      TMPDIR: /tmp/
+      BUILD_LOG: /tmp/android-build.log
+
+    steps:
+      - name: Check for secrets
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          BIBLE_STRONG_ARCHIVE_KEYS: ${{ secrets.BIBLE_STRONG_ARCHIVE_KEYS }}
+          EXPO_PUBLIC_DEEPL_AUTH_KEY: ${{ secrets.EXPO_PUBLIC_DEEPL_AUTH_KEY }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: |
+          missing=""
+          for name in EXPO_TOKEN SENTRY_AUTH_TOKEN BIBLE_STRONG_ARCHIVE_KEYS EXPO_PUBLIC_DEEPL_AUTH_KEY YOUTUBE_API_KEY; do
+            [ -n "${!name}" ] || missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secrets:$missing"
+            exit 1
+          fi
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          df -h / | tail -1
+
+      - name: Check out production source
+        uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: |
+          yarn workspaces focus @bible-strong/expo
+          npm install --global eas-cli
+
+      - name: Build the AAB
+        working-directory: apps/expo
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          BIBLE_STRONG_ARCHIVE_KEYS: ${{ secrets.BIBLE_STRONG_ARCHIVE_KEYS }}
+          EXPO_PUBLIC_DEEPL_AUTH_KEY: ${{ secrets.EXPO_PUBLIC_DEEPL_AUTH_KEY }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: |
+          set -euo pipefail
+          rm -f build-*.aab
+          if ! yarn build:android:prod > "$BUILD_LOG" 2>&1; then
+            echo "::error::The build failed. Excerpts of its log follow."
+            grep -A15 "What went wrong" "$BUILD_LOG" | head -30 || true
+            tail -40 "$BUILD_LOG"
+            exit 1
+          fi
+          # An AAB built without the Offline-copy keys cannot open any Offline copy (ADR-0065).
+          if ! grep -q "Offline-copy key versions: [0-9]" "$BUILD_LOG"; then
+            echo "::error::Built without an Offline-copy key: AAB discarded."
+            exit 1
+          fi
+          grep -E "Offline-copy key versions|BUILD SUCCESSFUL" "$BUILD_LOG"
+
+      - name: Name the AAB
+        id: aab
+        working-directory: apps/expo
+        run: |
+          set -euo pipefail
+          version=$(node -p "require('./package.json').version")
+          code=$(sed -n 's/^ *versionCode: \([0-9]*\),/\1/p' app.config.ts)
+          if [ -z "$version" ] || [ -z "$code" ]; then
+            echo "::error::Could not read the version or the versionCode."
+            exit 1
+          fi
+          name="bible-strong-prod-$version-$code-${GITHUB_SHA::7}.aab"
+          mkdir -p "$RUNNER_TEMP/aab"
+          mv build-*.aab "$RUNNER_TEMP/aab/$name"
+          ls -lh "$RUNNER_TEMP/aab"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "path=$RUNNER_TEMP/aab/$name" >> "$GITHUB_OUTPUT"
+
+      - name: Declare the AAB to the update server
+        if: inputs.register
+        working-directory: apps/expo
+        env:
+          OTA_PUBLISH_TOKEN: ${{ secrets.OTA_PUBLISH_TOKEN }}
+        run: yarn dotenv -c production -- node scripts/register-store-build.mjs "${{ steps.aab.outputs.path }}"
+
+      - name: Upload the AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.aab.outputs.name }}
+          path: ${{ steps.aab.outputs.path }}
+          if-no-files-found: error
+          # Anyone signed in to GitHub can download it meanwhile: fetch it, then let it expire.
+          retention-days: 1
+          compression-level: 0
