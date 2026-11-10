@@ -1,0 +1,139 @@
+name: Build iOS Production IPA
+
+# Manual only. The same EAS local build as `yarn build:ios:prod` on the Mac, on a GitHub runner:
+# the distribution certificate and the provisioning profile come from the Expo account
+# (EXPO_TOKEN), the other secrets from this repository.
+# This repository is public, so its logs and artifacts are too: the build log stays in a file and
+# only short excerpts are printed.
+on:
+  workflow_dispatch:
+    inputs:
+      register:
+        description: Declare the IPA to the update server as a base for delta patches (store builds only)
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: expo-ios-production-build
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build IPA (production)
+    if: github.ref == 'refs/heads/master'
+    # The image that carries the Xcode the Mac builds with; `macos-latest` is still Xcode 26.
+    runs-on: xcode-27
+    timeout-minutes: 120
+    env:
+      CI: '1'
+      EXPO_NO_TELEMETRY: '1'
+      # fastlane and CocoaPods both refuse a locale that is not UTF-8.
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+      XCODE_APP: /Applications/Xcode_27.2.app
+
+    steps:
+      - name: Check for secrets
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          BIBLE_STRONG_ARCHIVE_KEYS: ${{ secrets.BIBLE_STRONG_ARCHIVE_KEYS }}
+          EXPO_PUBLIC_DEEPL_AUTH_KEY: ${{ secrets.EXPO_PUBLIC_DEEPL_AUTH_KEY }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: |
+          missing=""
+          for name in EXPO_TOKEN SENTRY_AUTH_TOKEN BIBLE_STRONG_ARCHIVE_KEYS EXPO_PUBLIC_DEEPL_AUTH_KEY YOUTUBE_API_KEY; do
+            [ -n "${!name}" ] || missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secrets:$missing"
+            exit 1
+          fi
+
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s "$XCODE_APP"
+          xcodebuild -version
+          pod --version
+          df -h / | tail -1
+
+      - name: Check out production source
+        uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: |
+          yarn workspaces focus @bible-strong/expo
+          npm install --global eas-cli
+
+      - name: Build the IPA
+        working-directory: apps/expo
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          BIBLE_STRONG_ARCHIVE_KEYS: ${{ secrets.BIBLE_STRONG_ARCHIVE_KEYS }}
+          EXPO_PUBLIC_DEEPL_AUTH_KEY: ${{ secrets.EXPO_PUBLIC_DEEPL_AUTH_KEY }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: |
+          set -euo pipefail
+          BUILD_LOG="$RUNNER_TEMP/ios-build.log"
+          rm -f build-*.ipa
+          # `yarn build:ios:prod` without its last step: declaring the build is the input's choice.
+          if ! yarn dotenv -c production -- eas build -p ios --local --profile production --non-interactive > "$BUILD_LOG" 2>&1; then
+            echo "::error::The build failed. Excerpts of its log follow."
+            grep -E "error:|❌|\[!\]" "$BUILD_LOG" | head -30 || true
+            tail -40 "$BUILD_LOG"
+            exit 1
+          fi
+          # An IPA built without the Offline-copy keys cannot open any Offline copy (ADR-0065).
+          if ! grep -q "Offline-copy key versions: [0-9]" "$BUILD_LOG"; then
+            echo "::error::Built without an Offline-copy key: IPA discarded."
+            exit 1
+          fi
+          grep "Offline-copy key versions" "$BUILD_LOG" | sort -u
+
+      - name: Name the IPA
+        id: ipa
+        working-directory: apps/expo
+        run: |
+          set -euo pipefail
+          version=$(node -p "require('./package.json').version")
+          number=$(sed -n "s/^ *buildNumber: '\([0-9]*\)',/\1/p" app.config.ts)
+          if [ -z "$version" ] || [ -z "$number" ]; then
+            echo "::error::Could not read the version or the buildNumber."
+            exit 1
+          fi
+          name="bible-strong-prod-$version-$number-${GITHUB_SHA::7}.ipa"
+          mkdir -p "$RUNNER_TEMP/ipa"
+          mv build-*.ipa "$RUNNER_TEMP/ipa/$name"
+          ls -lh "$RUNNER_TEMP/ipa"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "path=$RUNNER_TEMP/ipa/$name" >> "$GITHUB_OUTPUT"
+
+      - name: Declare the IPA to the update server
+        if: inputs.register
+        working-directory: apps/expo
+        env:
+          OTA_PUBLISH_TOKEN: ${{ secrets.OTA_PUBLISH_TOKEN }}
+        run: yarn dotenv -c production -- node scripts/register-store-build.mjs "${{ steps.ipa.outputs.path }}"
+
+      - name: Upload the IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.ipa.outputs.name }}
+          path: ${{ steps.ipa.outputs.path }}
+          if-no-files-found: error
+          # Anyone signed in to GitHub can download it meanwhile: fetch it, then let it expire.
+          retention-days: 1
+          compression-level: 0
