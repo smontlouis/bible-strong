@@ -25,7 +25,7 @@ export default function LegalDocument({
           <a href={paths.deletion}>{french ? 'Supprimer mes données' : 'Delete my data'}</a>
         </nav>
         <h1>{content.title}</h1>
-        <p>{french ? 'Texte révisé le ' : 'Text revised on '}<time dateTime="2026-09-18">{french ? '18 septembre 2026' : '18 September 2026'}</time></p>
+        <p>{french ? 'Texte révisé le ' : 'Text revised on '}<time dateTime="2026-11-10">{french ? '10 novembre 2026' : '10 November 2026'}</time></p>
         <p>{content.introduction}</p>
         <section aria-labelledby="publisher">
           <h2 id="publisher">{french ? 'Le Studio 316 — éditeur et contact' : 'Le Studio 316 — publisher and contact'}</h2>

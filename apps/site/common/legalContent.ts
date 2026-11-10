@@ -15,7 +15,7 @@ export type LegalDocumentContent = {
 export const privacyContent: Record<Locale, LegalDocumentContent> = {
   fr: {
     title: 'Politique de confidentialité',
-    introduction: 'Cette politique décrit les traitements liés au site Bible Strong, à l’application mobile et à l’application web. Le Studio 316 est le responsable du traitement. Les données utilisées dépendent des fonctionnalités que vous utilisez et de votre connexion à un compte.',
+    introduction: 'Cette politique décrit les traitements liés au site Bible Strong, à l’application mobile, à l’application web et à l’application de bureau. Le Studio 316 est le responsable du traitement. Les données utilisées dépendent des fonctionnalités que vous utilisez et de votre connexion à un compte.',
     sections: [
       {
         id: 'account', title: 'Compte et données d’étude',
@@ -35,11 +35,11 @@ export const privacyContent: Record<Locale, LegalDocumentContent> = {
       },
       {
         id: 'assistant', title: 'Assistant d’étude IA',
-        paragraphs: ['L’assistant utilise Gloo AI pour acheminer les requêtes vers les modèles d’intelligence artificielle utilisés par le service. Gloo et les fournisseurs des modèles sollicités reçoivent les éléments nécessaires à la génération des réponses.', 'Lorsque cette fonctionnalité est disponible et que vous envoyez une question, votre message, l’historique nécessaire à la conversation et le contexte de lecture joint sont transmis à un service distant authentifié pour produire une réponse. Le contexte peut contenir une référence biblique ou des extraits de la ressource éditoriale ouverte. Un historique long peut aussi être transmis pour en produire un résumé.', 'Dans l’application web, les conversations et leurs résumés sont conservés dans le navigateur, séparément pour chaque compte. Ils ne sont pas synchronisés entre vos appareils par cette fonction. Ce stockage local ne signifie pas que le traitement par l’IA s’effectue uniquement sur votre appareil.', 'N’incluez pas de mots de passe, de secrets ou de données personnelles concernant des tiers. La suppression d’une conversation dans le navigateur efface sa copie locale ; elle ne constitue pas une demande d’effacement auprès du service distant. Pour une demande portant sur les données transmises, contactez Le Studio 316.'],
+        paragraphs: ['Lorsque cette fonctionnalité est disponible et que vous envoyez une question, votre message, l’historique nécessaire à la conversation et le contexte de lecture joint sont transmis au service de l’assistant, hébergé par Cloudflare, pour produire une réponse. Le contexte peut contenir une référence biblique ou des extraits de la ressource éditoriale ouverte. Un historique long peut aussi être transmis pour en produire un résumé.', 'Le service fait traiter ces éléments par des modèles d’intelligence artificielle, exécutés chez notre hébergeur ou chez des fournisseurs de modèles joints par un service d’acheminement. Ces fournisseurs sont choisis parmi ceux qui ne conservent pas les requêtes et ne les utilisent pas pour entraîner leurs modèles. La dictée transmet de la même façon l’enregistrement de votre voix, pour le transcrire. La liste à jour de ces prestataires vous est communiquée sur demande.', 'Vos conversations et leurs résumés sont enregistrés avec votre compte dans Google Firebase et synchronisés entre vos appareils. Supprimer une conversation l’efface de votre compte ; la suppression du compte efface toutes ses conversations.', 'Pour appliquer la limite des questions gratuites, le service compte les questions posées par chaque compte et vérifie auprès de RevenueCat si le compte détient Premium.', 'N’incluez pas de mots de passe, de secrets ou de données personnelles concernant des tiers. Pour une demande portant sur les données transmises au service, contactez Le Studio 316.']
       },
       {
-        id: 'payments', title: 'Soutien financier et services externes',
-        paragraphs: ['La page de soutien utilise Stripe pour les paiements. L’application propose également un lien vers PayPal. Le prestataire choisi traite les informations nécessaires à votre paiement selon ses propres conditions et sa politique de confidentialité. Ne nous envoyez jamais de numéro de carte bancaire par e-mail.', 'L’ouverture de liens, de vidéos ou de contenus hébergés par des tiers peut leur transmettre des informations de connexion. Leurs règles de confidentialité s’appliquent à leurs propres services.'],
+        id: 'payments', title: 'Abonnement Premium et paiements',
+        paragraphs: ['L’abonnement Premium est géré par RevenueCat, qui agit pour le compte du Studio 316. RevenueCat reçoit l’identifiant de votre compte, vos achats et leur état : dates, renouvellement et boutique utilisée. Ces données sont effacées chez RevenueCat lorsque vous supprimez votre compte.', 'Un achat dans l’application iOS ou Android est traité par Apple ou par Google Play, selon leur propre politique de confidentialité. Nous ne recevons pas vos coordonnées bancaires.', 'Sur le web et dans l’application de bureau, Stripe traite le paiement comme vendeur officiel, sous le nom de Link. Il reçoit votre adresse e-mail, votre nom, votre pays et votre moyen de paiement pour calculer les taxes, prévenir la fraude, émettre les reçus et gérer l’abonnement, selon sa propre politique de confidentialité.', 'La page de soutien utilise Stripe pour les dons. L’application propose également un lien vers PayPal. Le prestataire choisi traite les informations nécessaires à votre paiement selon ses propres conditions et sa politique de confidentialité. Ne nous envoyez jamais de numéro de carte bancaire par e-mail.', 'L’ouverture de liens, de vidéos ou de contenus hébergés par des tiers peut leur transmettre des informations de connexion. Leurs règles de confidentialité s’appliquent à leurs propres services.']
       },
       {
         id: 'purposes', title: 'Pourquoi ces données sont utilisées',
@@ -47,21 +47,22 @@ export const privacyContent: Record<Locale, LegalDocumentContent> = {
       },
       {
         id: 'providers', title: 'Qui peut recevoir les données',
-        paragraphs: ['Le Studio 316 et les prestataires nécessaires aux fonctions utilisées peuvent recevoir les données correspondantes : Google Firebase pour le compte, la synchronisation, la mesure d’utilisation et la protection contre les abus ; Sentry pour les erreurs ; Cloudflare pour l’hébergement du site public, la distribution des ressources, les services de recherche et leurs statistiques, ainsi que la mesure de fréquentation du site ; les prestataires de paiement et, lors de l’utilisation de l’assistant, Gloo et les fournisseurs de modèles sollicités pour le traitement IA.', 'Sur l’application web, Firebase App Check utilise reCAPTCHA Enterprise pour protéger les accès aux ressources contre les abus. Certains prestataires peuvent traiter des données hors de l’Espace économique européen. Vous pouvez nous demander des précisions sur les destinataires, lieux de traitement et garanties applicables à votre utilisation.'],
+        paragraphs: ['Le Studio 316 et les prestataires nécessaires aux fonctions utilisées peuvent recevoir les données correspondantes : Google Firebase pour le compte, la synchronisation, la mesure d’utilisation et la protection contre les abus ; Sentry pour les erreurs ; Cloudflare pour l’hébergement du site public, la distribution des ressources, les services de recherche et leurs statistiques, ainsi que la mesure de fréquentation du site et le service de l’assistant ; RevenueCat pour l’abonnement Premium ; Apple, Google Play et Stripe, sous le nom de Link, pour le paiement de l’abonnement ; Stripe et PayPal pour les dons ; et, lors de l’utilisation de l’assistant, un service d’acheminement et des fournisseurs de modèles d’intelligence artificielle.', 'Sur l’application web, Firebase App Check utilise reCAPTCHA Enterprise pour protéger les accès aux ressources contre les abus. Certains prestataires peuvent traiter des données hors de l’Espace économique européen. Vous pouvez nous demander des précisions sur les destinataires, lieux de traitement et garanties applicables à votre utilisation.'],
         links: [
           { label: 'Confidentialité et sécurité de Firebase', href: 'https://firebase.google.com/support/privacy' },
           { label: 'Confidentialité de Google', href: 'https://policies.google.com/privacy' },
           { label: 'Confidentialité de Sentry', href: 'https://sentry.io/privacy/' },
           { label: 'Confidentialité de Cloudflare', href: 'https://www.cloudflare.com/privacypolicy/' },
-          { label: 'Conditions de Gloo AI Studio', href: 'https://gloo.com/legal/ai-studio-supplemental-terms-of-service' },
-          { label: 'Protection des données chez Gloo', href: 'https://gloo.com/legal/data-processing-agreement' },
+          { label: 'Confidentialité de RevenueCat', href: 'https://www.revenuecat.com/privacy' },
+          { label: 'Confidentialité d’Apple', href: 'https://www.apple.com/fr/legal/privacy/fr-ww/' },
           { label: 'Confidentialité de Stripe', href: 'https://stripe.com/privacy' },
+          { label: 'Confidentialité de Link', href: 'https://link.com/privacy' },
           { label: 'Confidentialité de PayPal', href: 'https://www.paypal.com/fr/legalhub/paypal/privacy-full' },
         ],
       },
       {
         id: 'storage', title: 'Stockage local, cookies et conservation',
-        paragraphs: ['Le stockage de l’appareil ou du navigateur permet de conserver la connexion, les préférences, les données de travail, les ressources téléchargées et l’historique local de l’assistant. Vous pouvez effacer les données du site dans votre navigateur ou les données de l’application sur votre appareil. Cela peut supprimer des données non synchronisées et ne supprime pas votre compte distant.', 'Les données du compte sont conservées pour permettre son utilisation et sa synchronisation jusqu’à leur suppression. Les études privées et publiées sont également supprimées lors de la suppression du compte. Les historiques locaux restent dans le navigateur jusqu’à leur suppression. Les limites de stockage peuvent empêcher l’enregistrement de nouveaux échanges ; elles ne constituent pas une durée d’expiration.', 'Les journaux techniques, statistiques, sauvegardes et données détenues par les prestataires suivent des durées propres aux services et à leurs finalités. Les éléments nécessaires à une obligation légale ou à la gestion d’un litige peuvent devoir être conservés séparément. Contactez-nous pour connaître les durées applicables à une catégorie de données ou demander sa suppression.'],
+        paragraphs: ['Le stockage de l’appareil ou du navigateur permet de conserver la connexion, les préférences, les données de travail et les ressources téléchargées. Vous pouvez effacer les données du site dans votre navigateur ou les données de l’application sur votre appareil. Cela peut supprimer des données non synchronisées et ne supprime pas votre compte distant.', 'Les données du compte sont conservées pour permettre son utilisation et sa synchronisation jusqu’à leur suppression. Les études privées et publiées sont également supprimées lors de la suppression du compte. Les limites de stockage peuvent empêcher l’enregistrement de nouveaux échanges ; elles ne constituent pas une durée d’expiration. Les informations d’achat tenues par RevenueCat sont effacées avec le compte ; les vendeurs conservent les justificatifs de paiement le temps qu’exigent leurs obligations légales, comptables notamment.', 'Les journaux techniques, statistiques, sauvegardes et données détenues par les prestataires suivent des durées propres aux services et à leurs finalités. Les éléments nécessaires à une obligation légale ou à la gestion d’un litige peuvent devoir être conservés séparément. Contactez-nous pour connaître les durées applicables à une catégorie de données ou demander sa suppression.'],
       },
       {
         id: 'rights', title: 'Vos droits et vos demandes',
@@ -79,7 +80,7 @@ export const privacyContent: Record<Locale, LegalDocumentContent> = {
   },
   en: {
     title: 'Privacy policy',
-    introduction: 'This policy describes processing associated with the Bible Strong website, mobile application and web application. Le Studio 316 is the data controller. The data used depends on the features you use and whether you sign in to an account.',
+    introduction: 'This policy describes processing associated with the Bible Strong website, mobile application, web application and desktop application. Le Studio 316 is the data controller. The data used depends on the features you use and whether you sign in to an account.',
     sections: [
       {
         id: 'account', title: 'Account and study data',
@@ -99,11 +100,11 @@ export const privacyContent: Record<Locale, LegalDocumentContent> = {
       },
       {
         id: 'assistant', title: 'AI study assistant',
-        paragraphs: ['The assistant uses Gloo AI to route requests to the artificial intelligence models used by the service. Gloo and the providers of the models invoked receive the information needed to generate responses.', 'When this feature is available and you send a question, your message, the conversation history needed for the exchange and the attached reading context are sent to an authenticated remote service to generate a response. The context may contain a Bible reference or excerpts from the editorial resource you have open. A long conversation history may also be sent for summarization.', 'In the web application, conversations and their summaries are stored in the browser, separately for each account. This feature does not synchronize them between devices. Local storage does not mean that AI processing happens only on your device.', 'Do not include passwords, secrets or personal information about others. Deleting a conversation in the browser removes its local copy; it does not submit an erasure request to the remote service. Contact Le Studio 316 for requests concerning data you have sent.'],
+        paragraphs: ['When this feature is available and you send a question, your message, the conversation history needed for the exchange and the attached reading context are sent to the assistant service, hosted by Cloudflare, to generate a response. The context may contain a Bible reference or excerpts from the editorial resource you have open. A long conversation history may also be sent for summarization.', 'The service has this information processed by artificial intelligence models, run by our hosting provider or by model providers reached through a routing service. These providers are chosen among those that do not retain requests or use them to train their models. Dictation sends the recording of your voice the same way, to transcribe it. The current list of these providers is available on request.', 'Your conversations and their summaries are stored with your account in Google Firebase and synchronized between your devices. Deleting a conversation removes it from your account; deleting the account removes all its conversations.', 'To apply the limit on free questions, the service counts the questions asked by each account and checks with RevenueCat whether the account holds Premium.', 'Do not include passwords, secrets or personal information about others. Contact Le Studio 316 for requests concerning data sent to the service.']
       },
       {
-        id: 'payments', title: 'Financial support and external services',
-        paragraphs: ['The support page uses Stripe for payments. The application also provides a PayPal link. Your chosen provider processes the information needed for payment under its own terms and privacy policy. Never send us a card number by email.', 'Opening links, videos or content hosted by third parties may send connection information to them. Their privacy rules apply to their own services.'],
+        id: 'payments', title: 'Premium subscription and payments',
+        paragraphs: ['RevenueCat manages the Premium subscription on behalf of Le Studio 316. RevenueCat receives your account identifier, your purchases and their status: dates, renewal and the store used. This data is erased at RevenueCat when you delete your account.', 'A purchase in the iOS or Android application is processed by Apple or Google Play under their own privacy policies. We do not receive your payment details.', 'On the web and in the desktop application, Stripe processes the payment as merchant of record, under the name Link. It receives your email address, name, country and payment method to calculate taxes, prevent fraud, issue receipts and manage the subscription, under its own privacy policy.', 'The support page uses Stripe for donations. The application also provides a PayPal link. Your chosen provider processes the information needed for payment under its own terms and privacy policy. Never send us a card number by email.', 'Opening links, videos or content hosted by third parties may send connection information to them. Their privacy rules apply to their own services.']
       },
       {
         id: 'purposes', title: 'Why the data is used',
@@ -111,21 +112,22 @@ export const privacyContent: Record<Locale, LegalDocumentContent> = {
       },
       {
         id: 'providers', title: 'Who may receive data',
-        paragraphs: ['Le Studio 316 and the providers needed for the features you use may receive the corresponding data: Google Firebase for accounts, synchronization, usage measurement and abuse protection; Sentry for errors; Cloudflare for hosting the public website, resource delivery, search services and their statistics, and website traffic measurement; payment providers; and Gloo and the model providers invoked when you use the assistant.', 'In the web application, Firebase App Check uses reCAPTCHA Enterprise to protect resource access against abuse. Some providers may process data outside the European Economic Area. You can ask us about recipients, processing locations and safeguards applicable to your use.'],
+        paragraphs: ['Le Studio 316 and the providers needed for the features you use may receive the corresponding data: Google Firebase for accounts, synchronization, usage measurement and abuse protection; Sentry for errors; Cloudflare for hosting the public website, resource delivery, search services and their statistics, website traffic measurement and the assistant service; RevenueCat for the Premium subscription; Apple, Google Play and Stripe, under the name Link, for subscription payments; Stripe and PayPal for donations; and, when you use the assistant, a routing service and artificial intelligence model providers.', 'In the web application, Firebase App Check uses reCAPTCHA Enterprise to protect resource access against abuse. Some providers may process data outside the European Economic Area. You can ask us about recipients, processing locations and safeguards applicable to your use.'],
         links: [
           { label: 'Firebase privacy and security', href: 'https://firebase.google.com/support/privacy' },
           { label: 'Google privacy policy', href: 'https://policies.google.com/privacy' },
           { label: 'Sentry privacy policy', href: 'https://sentry.io/privacy/' },
           { label: 'Cloudflare privacy policy', href: 'https://www.cloudflare.com/privacypolicy/' },
-          { label: 'Gloo AI Studio terms', href: 'https://gloo.com/legal/ai-studio-supplemental-terms-of-service' },
-          { label: 'Gloo data processing agreement', href: 'https://gloo.com/legal/data-processing-agreement' },
+          { label: 'RevenueCat privacy policy', href: 'https://www.revenuecat.com/privacy' },
+          { label: 'Apple privacy policy', href: 'https://www.apple.com/legal/privacy/' },
           { label: 'Stripe privacy policy', href: 'https://stripe.com/privacy' },
+          { label: 'Link privacy policy', href: 'https://link.com/privacy' },
           { label: 'PayPal privacy policy', href: 'https://www.paypal.com/us/legalhub/paypal/privacy-full' },
         ],
       },
       {
         id: 'storage', title: 'Local storage, cookies and retention',
-        paragraphs: ['Device or browser storage maintains your session, preferences, working data, downloaded resources and local assistant history. You can clear site data in your browser or application data on your device. This may delete unsynchronized data and does not delete your remote account.', 'Account data is retained to support account use and synchronization until deletion. Private and published studies are also deleted when the account is deleted. Local histories remain in the browser until deleted. Storage limits can prevent new exchanges from being saved; they are not an expiration period.', 'Technical logs, statistics, backups and data held by providers have retention periods specific to their services and purposes. Information needed for a legal obligation or dispute may need to be retained separately. Contact us for the retention period applicable to a category of data or to request its deletion.'],
+        paragraphs: ['Device or browser storage maintains your session, preferences, working data and downloaded resources. You can clear site data in your browser or application data on your device. This may delete unsynchronized data and does not delete your remote account.', 'Account data is retained to support account use and synchronization until deletion. Private and published studies are also deleted when the account is deleted. Storage limits can prevent new exchanges from being saved; they are not an expiration period. Purchase information held by RevenueCat is erased with the account; the merchants keep payment records for as long as their legal obligations, notably accounting, require.', 'Technical logs, statistics, backups and data held by providers have retention periods specific to their services and purposes. Information needed for a legal obligation or dispute may need to be retained separately. Contact us for the retention period applicable to a category of data or to request its deletion.'],
       },
       {
         id: 'rights', title: 'Your rights and requests',
@@ -146,7 +148,7 @@ export const privacyContent: Record<Locale, LegalDocumentContent> = {
 export const termsContent: Record<Locale, LegalDocumentContent> = {
   fr: {
     title: 'Conditions d’utilisation',
-    introduction: 'Ces conditions concernent le site, l’application mobile et l’application web Bible Strong, édités par Le Studio 316. Elles décrivent les règles d’accès aux outils de lecture, d’étude et de partage.',
+    introduction: 'Ces conditions concernent le site, l’application mobile, l’application web et l’application de bureau Bible Strong, édités par Le Studio 316. Elles décrivent les règles d’accès aux outils de lecture, d’étude et de partage.',
     sections: [
       {
         id: 'service', title: 'Utilisation de Bible Strong',
@@ -154,7 +156,7 @@ export const termsContent: Record<Locale, LegalDocumentContent> = {
       },
       {
         id: 'account', title: 'Compte et données personnelles',
-        paragraphs: ['Fournissez des informations de compte exactes, protégez vos moyens de connexion et signalez-nous un accès non autorisé. Vous pouvez demander la suppression de votre compte ou utiliser la commande prévue dans l’application.', 'La politique de confidentialité explique les données traitées. Accepter ces conditions ne vaut pas consentement à des traitements qui nécessitent un accord spécifique.'],
+        paragraphs: ['Fournissez des informations de compte exactes, protégez vos moyens de connexion et signalez-nous un accès non autorisé. Vous pouvez demander la suppression de votre compte ou utiliser la commande prévue dans l’application. La suppression efface vos données synchronisées, vos études, vos conversations avec l’assistant et les données de votre abonnement chez RevenueCat ; elle ne résilie pas un abonnement Premium.', 'La politique de confidentialité explique les données traitées. Accepter ces conditions ne vaut pas consentement à des traitements qui nécessitent un accord spécifique.'],
         links: [{ label: 'Politique de confidentialité', href: '/fr/politique-de-confidentialite' }, { label: 'Suppression des données', href: '/fr/data-deletion' }],
       },
       {
@@ -170,8 +172,13 @@ export const termsContent: Record<Locale, LegalDocumentContent> = {
         paragraphs: ['Lorsqu’il est proposé, l’assistant est un outil d’aide à l’étude. Ses réponses peuvent contenir des erreurs, des interprétations discutables ou des références inexactes. Vérifiez les citations et les sources avant de les réutiliser. Les réponses sont produites par un logiciel et ne constituent ni une parole divine ni une autorité doctrinale.', 'Vous choisissez les questions envoyées et pouvez vérifier le contexte de lecture joint. Évitez les informations personnelles sensibles et les informations concernant des tiers. La disponibilité, les quotas et les fonctions de l’assistant peuvent évoluer, notamment pendant une phase de test.'],
       },
       {
-        id: 'support', title: 'Soutien financier et paiements',
-        paragraphs: ['Les modalités d’un soutien financier, notamment son montant et son caractère ponctuel ou récurrent, sont présentées au moment du paiement. Les opérations effectuées auprès d’un prestataire ou d’une boutique d’applications sont également soumises à leurs conditions applicables.', 'Supprimer un compte Bible Strong ou désinstaller l’application ne résilie pas automatiquement un paiement récurrent. Gérez-le auprès du prestataire ou de la boutique utilisés. Aucun avantage fiscal ne doit être présumé du seul fait d’un soutien à Bible Strong.'],
+        id: 'premium', title: 'Bible Strong Premium',
+        paragraphs: ['Premium est un abonnement lié à votre compte Bible Strong. Il donne accès à l’assistant d’étude sans limite quotidienne, sur tous les appareils où vous êtes connecté. Sans Premium, un compte dont l’adresse est vérifiée peut poser un nombre limité de questions par jour, indiqué dans l’application ; cette offre gratuite peut être suspendue temporairement.', 'Le prix, la périodicité et les taxes applicables sont indiqués avant le paiement. L’abonnement se renouvelle automatiquement au même prix et pour la même durée, jusqu’à sa résiliation. Si le prix change, vous en êtes informé à l’avance et pouvez résilier avant qu’il s’applique.', 'Dans l’application iOS, l’abonnement est vendu et facturé par Apple ; dans l’application Android, par Google Play. Sur le web et dans l’application de bureau, Stripe traite le paiement comme vendeur officiel, sous le nom de Link : il collecte les taxes, émet les reçus et traite les remboursements. Les conditions de ces vendeurs s’appliquent au paiement.', 'Vous pouvez résilier à tout moment, dans les réglages de votre compte Apple ou Google Play, ou depuis « Gérer mon abonnement » pour un abonnement souscrit sur le web ou dans l’application de bureau. Premium reste actif jusqu’à la fin de la période payée, qui n’est pas remboursée, sauf disposition légale contraire ou décision du vendeur. Supprimer votre compte ou désinstaller l’application ne résilie pas l’abonnement : résiliez-le avant de supprimer votre compte, car Premium, lié à ce compte, ne pourra plus être utilisé.', 'Lorsque le droit de votre pays prévoit un délai de rétractation, il s’exerce auprès du vendeur (Apple, Google Play ou Link), selon ses conditions.', 'Premium est personnel : il ne permet pas de partager un compte entre plusieurs personnes, d’automatiser des questions ou de revendre l’accès à l’assistant.'],
+        links: [{ label: 'Résilier un abonnement Apple', href: 'https://support.apple.com/fr-fr/118428' }, { label: 'Résilier un abonnement Google Play', href: 'https://support.google.com/googleplay/answer/7018481?hl=fr' }],
+      },
+      {
+        id: 'support', title: 'Dons et soutien financier',
+        paragraphs: ['Les modalités d’un don, notamment son montant et son caractère ponctuel ou récurrent, sont présentées au moment du paiement. Un don est distinct de l’abonnement Premium. Les opérations effectuées auprès d’un prestataire ou d’une boutique d’applications sont également soumises à leurs conditions applicables.', 'Supprimer un compte Bible Strong ou désinstaller l’application ne résilie pas automatiquement un paiement récurrent. Gérez-le auprès du prestataire ou de la boutique utilisés. Aucun avantage fiscal ne doit être présumé du seul fait d’un soutien à Bible Strong.'],
       },
       {
         id: 'availability', title: 'Disponibilité et responsabilité',
@@ -190,7 +197,7 @@ export const termsContent: Record<Locale, LegalDocumentContent> = {
   },
   en: {
     title: 'Terms of use',
-    introduction: 'These terms cover the Bible Strong website, mobile application and web application, published by Le Studio 316. They describe access to the reading, study and sharing tools.',
+    introduction: 'These terms cover the Bible Strong website, mobile application, web application and desktop application, published by Le Studio 316. They describe access to the reading, study and sharing tools.',
     sections: [
       {
         id: 'service', title: 'Using Bible Strong',
@@ -198,7 +205,7 @@ export const termsContent: Record<Locale, LegalDocumentContent> = {
       },
       {
         id: 'account', title: 'Accounts and personal data',
-        paragraphs: ['Provide accurate account information, protect your sign-in credentials and notify us of unauthorized access. You can request account deletion or use the corresponding command in the application.', 'The privacy policy explains data processing. Accepting these terms does not constitute consent to processing that requires separate agreement.'],
+        paragraphs: ['Provide accurate account information, protect your sign-in credentials and notify us of unauthorized access. You can request account deletion or use the corresponding command in the application. Deletion erases your synchronized data, your studies, your conversations with the assistant and your subscription data at RevenueCat; it does not cancel a Premium subscription.', 'The privacy policy explains data processing. Accepting these terms does not constitute consent to processing that requires separate agreement.'],
         links: [{ label: 'Privacy policy', href: '/privacy-policy' }, { label: 'Data deletion', href: '/data-deletion' }],
       },
       {
@@ -214,8 +221,13 @@ export const termsContent: Record<Locale, LegalDocumentContent> = {
         paragraphs: ['Where offered, the assistant is a study aid. Its responses may contain errors, disputed interpretations or incorrect references. Check quotations and sources before reusing them. Responses are produced by software and are neither divine speech nor doctrinal authority.', 'You choose the questions you send and can check the attached reading context. Avoid sensitive personal information and information about others. Assistant availability, quotas and features may change, especially during testing.'],
       },
       {
-        id: 'support', title: 'Financial support and payments',
-        paragraphs: ['The terms of financial support, including the amount and whether it is one-time or recurring, are presented at payment. Transactions through a payment provider or app store are also subject to its applicable terms.', 'Deleting a Bible Strong account or uninstalling the application does not automatically cancel recurring payments. Manage them with the provider or store you used. Supporting Bible Strong does not in itself imply eligibility for a tax benefit.'],
+        id: 'premium', title: 'Bible Strong Premium',
+        paragraphs: ['Premium is a subscription tied to your Bible Strong account. It gives access to the study assistant without a daily limit, on every device where you are signed in. Without Premium, an account with a verified email address may ask a limited number of questions a day, shown in the application; this free offer may be suspended temporarily.', 'The price, billing period and applicable taxes are shown before payment. The subscription renews automatically at the same price and for the same period until you cancel it. If the price changes, you are told in advance and may cancel before it applies.', 'In the iOS application, the subscription is sold and billed by Apple; in the Android application, by Google Play. On the web and in the desktop application, Stripe processes the payment as merchant of record, under the name Link: it collects taxes, issues receipts and handles refunds. The terms of these merchants apply to the payment.', 'You may cancel at any time, in your Apple or Google Play account settings, or from “Manage my subscription” for a subscription taken on the web or in the desktop application. Premium stays active until the end of the paid period, which is not refunded unless the law or the merchant provides otherwise. Deleting your account or uninstalling the application does not cancel the subscription: cancel it before deleting your account, since Premium, tied to that account, can no longer be used.', 'Where the law of your country provides a withdrawal period, it is exercised with the merchant (Apple, Google Play or Link), under its terms.', 'Premium is personal: it does not allow sharing an account among several people, automating questions or reselling access to the assistant.'],
+        links: [{ label: 'Cancel an Apple subscription', href: 'https://support.apple.com/en-us/118428' }, { label: 'Cancel a Google Play subscription', href: 'https://support.google.com/googleplay/answer/7018481?hl=en' }],
+      },
+      {
+        id: 'support', title: 'Donations and financial support',
+        paragraphs: ['The terms of a donation, including the amount and whether it is one-time or recurring, are presented at payment. A donation is separate from the Premium subscription. Transactions through a payment provider or app store are also subject to its applicable terms.', 'Deleting a Bible Strong account or uninstalling the application does not automatically cancel recurring payments. Manage them with the provider or store you used. Supporting Bible Strong does not in itself imply eligibility for a tax benefit.'],
       },
       {
         id: 'availability', title: 'Availability and liability',
@@ -237,7 +249,7 @@ export const termsContent: Record<Locale, LegalDocumentContent> = {
 export const deletionContent: Record<Locale, LegalDocumentContent> = {
   fr: {
     title: 'Supprimer mon compte et mes données',
-    introduction: 'La suppression de votre compte supprime aussi vos études privées et publiées ainsi que leurs aperçus hébergés par Bible Strong. Les copies locales et les exports sur vos appareils se gèrent séparément.',
+    introduction: 'La suppression de votre compte supprime aussi vos études privées et publiées ainsi que leurs aperçus hébergés par Bible Strong, vos conversations avec l’assistant et les données de votre abonnement chez RevenueCat. Les copies locales et les exports sur vos appareils se gèrent séparément.',
     sections: [
       {
         id: 'before', title: 'Avant de supprimer votre compte',
@@ -245,7 +257,7 @@ export const deletionContent: Record<Locale, LegalDocumentContent> = {
       },
       {
         id: 'account', title: 'Depuis l’application',
-        paragraphs: ['Connectez-vous au compte concerné. Ouvrez votre profil, ou le menu « Plus » selon votre version, puis choisissez « Supprimer mon compte ». Saisissez le texte de confirmation demandé et validez. Une reconnexion récente peut être nécessaire pour autoriser cette opération.', 'Cette action supprime le compte d’authentification et déclenche la suppression du profil, des données synchronisées associées, de toutes ses études privées et publiées et de leurs aperçus. Le traitement serveur peut ne pas être immédiat ; les erreurs temporaires font l’objet de nouvelles tentatives.'],
+        paragraphs: ['Connectez-vous au compte concerné. Ouvrez votre profil, ou le menu « Plus » selon votre version, puis choisissez « Supprimer mon compte ». Saisissez le texte de confirmation demandé et validez. Une reconnexion récente peut être nécessaire pour autoriser cette opération.', 'Cette action supprime le compte d’authentification et déclenche la suppression du profil, des données synchronisées associées, de toutes ses études privées et publiées et de leurs aperçus. Elle demande aussi à RevenueCat d’effacer le client Premium associé au compte et l’historique de ses achats. Le traitement serveur peut ne pas être immédiat ; les erreurs temporaires font l’objet de nouvelles tentatives.'],
       },
       {
         id: 'request', title: 'Par e-mail, même sans accès à l’application',
@@ -254,18 +266,18 @@ export const deletionContent: Record<Locale, LegalDocumentContent> = {
       },
       {
         id: 'local', title: 'Données sur vos appareils et conversations IA',
-        paragraphs: ['L’historique de l’assistant web est conservé dans votre navigateur. Supprimez les conversations depuis son historique ou effacez les données du site dans les réglages du navigateur. Effectuez cette opération sur chaque navigateur utilisé : se déconnecter ou supprimer le compte n’efface pas automatiquement toutes les copies locales.', 'Sur mobile, les réglages du système permettent de supprimer les données de l’application ou de la désinstaller selon la plateforme. Les exports et sauvegardes que vous avez créés ailleurs doivent être supprimés séparément. Effacer des données locales ne supprime pas votre compte distant.', 'La suppression locale d’une conversation IA ne demande pas son effacement au service distant. Précisez dans votre e-mail si votre demande porte aussi sur les messages transmis à l’assistant.'],
+        paragraphs: ['Les conversations de l’assistant sont enregistrées avec votre compte : supprimez-les une à une depuis son historique, ou supprimez le compte pour les effacer toutes.', 'Sur mobile et sur ordinateur, les réglages du système permettent de supprimer les données de l’application ou de la désinstaller, selon la plateforme. Les exports et sauvegardes que vous avez créés ailleurs doivent être supprimés séparément. Effacer des données locales ne supprime pas votre compte distant.', 'Précisez dans votre e-mail si votre demande porte aussi sur des messages déjà transmis à l’assistant.']
       },
       {
         id: 'limits', title: 'Autres données et paiements',
-        paragraphs: ['Les copies détenues par d’autres personnes ne peuvent pas être effacées à distance par Bible Strong. Certains journaux, sauvegardes ou justificatifs peuvent avoir une durée de conservation distincte, notamment en raison d’obligations légales. Une demande concernant ces données est examinée selon leur nature et les obligations applicables. Si une conservation reste nécessaire, nous vous en expliquons le motif.', 'La suppression du compte ne résilie pas un soutien récurrent ou un abonnement souscrit auprès d’un prestataire. Résiliez-le auprès de la boutique ou du service de paiement concerné.'],
+        paragraphs: ['Les copies détenues par d’autres personnes ne peuvent pas être effacées à distance par Bible Strong. Certains journaux, sauvegardes ou justificatifs peuvent avoir une durée de conservation distincte, notamment en raison d’obligations légales. Une demande concernant ces données est examinée selon leur nature et les obligations applicables. Si une conservation reste nécessaire, nous vous en expliquons le motif.', 'La suppression du compte ne résilie ni un don récurrent ni un abonnement Premium. Résiliez d’abord l’abonnement auprès de la boutique ou du service de paiement concerné : dans les réglages de votre compte Apple ou Google Play, ou depuis « Gérer mon abonnement » pour un abonnement souscrit sur le web. Les vendeurs conservent les justificatifs de paiement que la loi leur impose.'],
         links: [{ label: 'Politique de confidentialité et droits', href: '/fr/politique-de-confidentialite' }],
       },
     ],
   },
   en: {
     title: 'Delete my account and data',
-    introduction: 'Deleting your account also deletes your private and published studies and their previews hosted by Bible Strong. Local copies and exports on your devices are managed separately.',
+    introduction: 'Deleting your account also deletes your private and published studies and their previews hosted by Bible Strong, your conversations with the assistant and your subscription data at RevenueCat. Local copies and exports on your devices are managed separately.',
     sections: [
       {
         id: 'before', title: 'Before deleting your account',
@@ -273,7 +285,7 @@ export const deletionContent: Record<Locale, LegalDocumentContent> = {
       },
       {
         id: 'account', title: 'From the application',
-        paragraphs: ['Sign in to the account concerned. Open your profile, or the “More” menu depending on your version, then choose “Delete account”. Enter the requested confirmation text and confirm. You may need to sign in again recently to authorize this action.', 'This deletes the authentication account and triggers deletion of the profile, associated synchronized data, all its private and published studies and their previews. Server processing may not be immediate; temporary failures are retried.'],
+        paragraphs: ['Sign in to the account concerned. Open your profile, or the “More” menu depending on your version, then choose “Delete account”. Enter the requested confirmation text and confirm. You may need to sign in again recently to authorize this action.', 'This deletes the authentication account and triggers deletion of the profile, associated synchronized data, all its private and published studies and their previews. It also asks RevenueCat to erase the Premium customer associated with the account and its purchase history. Server processing may not be immediate; temporary failures are retried.'],
       },
       {
         id: 'request', title: 'By email, including without application access',
@@ -282,11 +294,11 @@ export const deletionContent: Record<Locale, LegalDocumentContent> = {
       },
       {
         id: 'local', title: 'Data on your devices and AI conversations',
-        paragraphs: ['Web assistant history is stored in your browser. Delete conversations from its history or clear site data in browser settings. Do this in each browser you used: signing out or deleting the account does not automatically erase every local copy.', 'On mobile, system settings let you clear application data or uninstall the application, depending on the platform. Exports and backups you created elsewhere must be deleted separately. Clearing local data does not delete your remote account.', 'Deleting an AI conversation locally does not request erasure from the remote service. Specify in your email if your request also covers messages sent to the assistant.'],
+        paragraphs: ['Assistant conversations are stored with your account: delete them one by one from its history, or delete the account to remove them all.', 'On mobile and on a computer, system settings let you clear application data or uninstall the application, depending on the platform. Exports and backups you created elsewhere must be deleted separately. Clearing local data does not delete your remote account.', 'Specify in your email if your request also covers messages already sent to the assistant.']
       },
       {
         id: 'limits', title: 'Other data and payments',
-        paragraphs: ['Bible Strong cannot remotely erase copies held by other people. Some logs, backups or records may have separate retention periods, including for legal obligations. Requests concerning these records are assessed according to their nature and applicable obligations. If retention remains necessary, we explain the reason.', 'Deleting your account does not cancel recurring support payments or subscriptions with a provider. Cancel these through the relevant store or payment service.'],
+        paragraphs: ['Bible Strong cannot remotely erase copies held by other people. Some logs, backups or records may have separate retention periods, including for legal obligations. Requests concerning these records are assessed according to their nature and applicable obligations. If retention remains necessary, we explain the reason.', 'Deleting your account cancels neither a recurring donation nor a Premium subscription. Cancel the subscription first through the relevant store or payment service: in your Apple or Google Play account settings, or from “Manage my subscription” for a subscription taken on the web. Merchants keep the payment records the law requires of them.'],
         links: [{ label: 'Privacy policy and rights', href: '/privacy-policy' }],
       },
     ],
