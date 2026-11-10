@@ -26,9 +26,15 @@ import i18n from '~i18n'
 import { useTheme } from '~themes/ThemeProvider'
 import { askAssistant, compactAssistant, connectAssistantDictation } from './client'
 import { assistantAccessible, assistantAvailable } from './assistantConfig'
-import { quotaReturn } from './assistantQuota'
+import { asksEmailVerification, quotaLine, quotaReturn } from './assistantQuota'
 import { contextCaption } from './contextDisplay'
 import ContextMarkIcon from './ContextMarkIcon.web'
+import FireAuth from '~helpers/FireAuth'
+import {
+  useAssistantQuota,
+  useAssistantQuotaSync,
+  useEmailVerificationWatch,
+} from './useAssistantQuota'
 import { useAssistantSession } from './useAssistantSession'
 import { useReadingContext } from './useReadingContext.web'
 import './assistant-modal.css'
@@ -229,6 +235,13 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     send,
     followUps,
   } = session
+  useAssistantQuotaSync({ active: open, busy, error })
+  // What the account may still ask today, and whether it waits for a verified address.
+  const quota = useAssistantQuota()
+  const quotaText = quotaLine(quota, i18n.language)
+  const verification = asksEmailVerification(error, quota) && !busy
+  useEmailVerificationWatch(open && verification)
+  const [sendingVerification, setSendingVerification] = useState(false)
   // Opening a conversation shows its last question at the top, not the end of its last
   // answer (2026-11-08). A question asked here rises on its own (`turnAnchor` below).
   const viewportRef = useRef<HTMLDivElement | null>(null)
@@ -279,7 +292,11 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
             : avatarSleeping
               ? 'sleeping'
               : 'idle'
-  const limitReturn = quotaReturn(new Date(), i18n.language)
+  const limitReturn = quotaReturn(
+    new Date(),
+    i18n.language,
+    quota?.kind === 'daily' ? quota.limit : undefined
+  )
   const dictationActive = ['starting', 'listening', 'stopping'].includes(dictationState)
   const onNew = async (message: AppendMessage) => {
     await send(message.content.flatMap(p => (p.type === 'text' ? [p.text] : [])).join('\n'))
@@ -502,23 +519,48 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                     {progress}
                   </div>
                 )}
-                {(error || retrying) && (
-                  <ErrorState
-                    retrying={retrying}
-                    title={t(
-                      error === 'assistant.limit'
-                        ? 'assistant.limitCard.title'
-                        : error === 'assistant.signIn'
-                          ? 'assistant.errors.signInTitle'
-                          : 'assistant.errors.title'
-                    )}
-                    detail={
-                      error === 'assistant.limit'
-                        ? t(limitReturn.key, { time: limitReturn.time })
-                        : t(error ?? '')
-                    }
-                    onRetry={error === 'assistant.limit' ? undefined : session.retry}
-                  />
+                {verification ? (
+                  <div className="bs-assistant-verify" role="alert">
+                    <p className="bs-assistant-verify-title">{t('assistant.verifyCard.title')}</p>
+                    <p>
+                      {quota?.kind === 'verify_email'
+                        ? t('assistant.verifyCard.detail', { count: quota.limit })
+                        : t('assistant.verifyEmail')}
+                    </p>
+                    <button
+                      type="button"
+                      disabled={sendingVerification}
+                      onClick={() => {
+                        setSendingVerification(true)
+                        void FireAuth.sendEmailVerification().finally(() =>
+                          setSendingVerification(false)
+                        )
+                      }}
+                    >
+                      {t('assistant.verifyCard.resend')}
+                    </button>
+                  </div>
+                ) : (
+                  (error || retrying) &&
+                  // A refusal for the address says nothing more once the address is verified.
+                  error !== 'assistant.verifyEmail' && (
+                    <ErrorState
+                      retrying={retrying}
+                      title={t(
+                        error === 'assistant.limit'
+                          ? 'assistant.limitCard.title'
+                          : error === 'assistant.signIn'
+                            ? 'assistant.errors.signInTitle'
+                            : 'assistant.errors.title'
+                      )}
+                      detail={
+                        error === 'assistant.limit'
+                          ? t(limitReturn.key, { time: limitReturn.time, count: limitReturn.count })
+                          : t(error ?? '')
+                      }
+                      onRetry={error === 'assistant.limit' ? undefined : session.retry}
+                    />
+                  )
                 )}
                 {!!followUps.length && !error && (
                   // A question picked is asked at once, like the starting points.
@@ -551,6 +593,14 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                     >
                       <Icon name="down" />
                     </ThreadPrimitive.ScrollToBottom>
+                  )}
+                  {signedIn && quotaText && (
+                    // Sending stays open at zero: the service checks Premium before it refuses.
+                    <p className="bs-assistant-quota" aria-live="polite">
+                      {quotaText.kind === 'remaining'
+                        ? t('assistant.quota.remaining', { count: quotaText.count })
+                        : t('assistant.quota.none', { time: quotaText.time })}
+                    </p>
                   )}
                   {signedIn ? (
                     <ComposerPrimitive.Root className="bs-assistant-composer">

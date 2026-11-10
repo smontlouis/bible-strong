@@ -6,9 +6,15 @@ import { getLanguage } from '~i18n'
 import { store } from '~redux/store'
 import { fetch as expoFetch } from 'expo/fetch'
 import { readStudyStream } from '@bible-strong/ai-contract/stream'
-import type { StudyRequest, StudyEvent } from '@bible-strong/ai-contract/contract'
+import {
+  parseStudyQuota,
+  type StudyQuota,
+  type StudyRequest,
+  type StudyEvent,
+} from '@bible-strong/ai-contract/contract'
 import { getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
 import { assistantAuthHeaders } from './assistantAuthHeaders'
+import { recordAssistantQuota } from './assistantQuota'
 import type { DictationConnection } from './dictationAdapter'
 /** AbortSignal.any/timeout are missing from the native runtime: one portable deadline instead. */
 function withDeadline(signal: AbortSignal, milliseconds: number) {
@@ -73,6 +79,13 @@ export function captureAssistantPreferences(readingBibleVersion?: string) {
     resolveStrongNavigationVersionId(settings.defaultStrongBibleVersionId || '') || 'LSG'
   )
 }
+/**
+ * Whether this service counts questions and says so: its quota route has answered, or a refusal
+ * carried a quota. Only then does a question declare the quota capability, which an older service
+ * refuses as unknown; the app thus runs against either, whichever is deployed first.
+ */
+let quotaSupported = false
+
 export async function askAssistant(
   input: StudyRequest,
   signal: AbortSignal,
@@ -98,17 +111,77 @@ export async function askAssistant(
       'Content-Type': 'application/json',
       ...auth,
     },
-    body: JSON.stringify({ ...input, ...preferences }),
+    body: JSON.stringify({
+      ...input,
+      ...preferences,
+      ...(quotaSupported && !input.clientCapabilities?.includes('quota')
+        ? { clientCapabilities: [...(input.clientCapabilities ?? []), 'quota'] }
+        : {}),
+    }),
     signal,
   })
   if (!response.ok) {
+    const refusal = await readRefusal(response)
+    if (refusal.quota) {
+      quotaSupported = true
+      recordAssistantQuota(user.uid, refusal.quota)
+    }
     if (response.status === 401) throw new Error('SIGN_IN_REQUIRED')
-    if (response.status === 403) throw new Error('BETA_ACCESS_REQUIRED')
+    if (response.status === 403)
+      throw new Error(
+        refusal.code === 'EMAIL_VERIFICATION_REQUIRED'
+          ? 'EMAIL_VERIFICATION_REQUIRED'
+          : 'BETA_ACCESS_REQUIRED'
+      )
     if (response.status === 429) throw new Error('DAILY_LIMIT')
     throw new Error('AI_UNAVAILABLE')
   }
   if (!response.body) throw new Error('INCOMPLETE_STREAM')
-  for await (const event of readStudyStream(response.body)) onEvent(event)
+  for await (const event of readStudyStream(response.body)) {
+    if (event.type === 'quota') recordAssistantQuota(user.uid, event.quota)
+    onEvent(event)
+  }
+}
+
+/** The code and quota a refusal carries in its JSON body; nothing when it carries none. */
+async function readRefusal(response: Response): Promise<{ code?: string; quota?: StudyQuota }> {
+  try {
+    const body = await response.json()
+    if (!body || typeof body !== 'object') return {}
+    let quota: StudyQuota | undefined
+    try {
+      quota = body.quota === undefined ? undefined : parseStudyQuota(body.quota)
+    } catch {
+      quota = undefined
+    }
+    return { code: typeof body.code === 'string' ? body.code : undefined, quota }
+  } catch {
+    return {}
+  }
+}
+
+/**
+ * What the signed-in account may still ask today, read without spending a question, and kept
+ * for the composer. Throws when the service cannot say.
+ */
+export async function fetchAssistantQuota(signal: AbortSignal): Promise<StudyQuota> {
+  const base = process.env.EXPO_PUBLIC_AI_API_URL,
+    user = getCurrentAuthUser()
+  if (!base) throw new Error('AI_UNAVAILABLE')
+  if (!user) throw new Error('SIGN_IN_REQUIRED')
+  const auth = await assistantAuthHeaders(user)
+  const deadline = withDeadline(signal, 15000)
+  const response = await expoFetch(`${base.replace(/\/$/, '')}/v1/study-assistant/quota`, {
+    method: 'POST',
+    signal: deadline.signal,
+    headers: auth,
+  }).finally(deadline.clear)
+  if (!response.ok) throw new Error('QUOTA_UNAVAILABLE')
+  const quota = parseStudyQuota((await response.json())?.quota)
+  quotaSupported = true
+  if (getCurrentAuthUser()?.uid !== user.uid) throw new Error('INTERRUPTED')
+  recordAssistantQuota(user.uid, quota)
+  return quota
 }
 
 export async function compactAssistant(

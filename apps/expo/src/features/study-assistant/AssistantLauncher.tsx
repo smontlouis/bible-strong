@@ -31,6 +31,7 @@ import { scriptedAnswersAtom, scriptedRequest } from './playground/scriptedAnswe
 import { captureDictationAudio } from './dictationAudio'
 import { convertMessage } from './messageRuntime'
 import type { StrobiAnimation } from './StrobiAvatar'
+import { useAssistantQuotaSync } from './useAssistantQuota'
 import { useAssistantSession } from './useAssistantSession'
 import { useReadingContext } from './useReadingContext'
 
@@ -110,6 +111,7 @@ function AccountAssistant({ account }: { account: string }) {
     onCurrentThreadDeleted: () => dictation.cancel(),
   })
   const { current, ready, busy, send } = session
+  useAssistantQuotaSync({ active: open, busy, error: session.error })
   // The daily quota used up, Strobi sleeps until it starts again, unless the account holds Premium.
   const premium = useAtomValue(premiumStatusAtom)
   const [restingUntil, setRestingUntil] = useState<number | null>(null)

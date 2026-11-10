@@ -16,6 +16,9 @@ import Text from '~common/ui/Text'
 import { floatingShadow, radii } from '~common/ui/surfaces'
 import { useTheme } from '~themes/ThemeProvider'
 import AssistantLimitCard from './AssistantLimitCard'
+import AssistantVerifyEmailCard from './AssistantVerifyEmailCard'
+import { asksEmailVerification } from './assistantQuota'
+import { useAssistantQuota } from './useAssistantQuota'
 import { ComposerInsetContext, useAssistantSheet } from './assistantSheetContext'
 import type { ReadingContext } from './conversations'
 import ErrorState from './ErrorState'
@@ -44,6 +47,8 @@ function ThreadStatus() {
   const { session } = useAssistantSheet()
   const { current, busy, ready, error, retrying, progress, storageError, context, followUps } =
     session
+  const quota = useAssistantQuota()
+  const verification = asksEmailVerification(error, quota)
   return (
     <Box>
       {!!progress && (
@@ -52,10 +57,14 @@ function ThreadStatus() {
           <Text className="text-grey text-[13px]">{progress}</Text>
         </HStack>
       )}
-      {error === 'assistant.limit' && !retrying ? (
+      {verification && !busy ? (
+        <AssistantVerifyEmailCard limit={quota?.kind === 'verify_email' ? quota.limit : null} />
+      ) : error === 'assistant.limit' && !retrying ? (
         <AssistantLimitCard />
       ) : (
-        (!!error || retrying) && (
+        // A refusal for the address says nothing more once the address is verified.
+        (!!error || retrying) &&
+        error !== 'assistant.verifyEmail' && (
           <ErrorState
             retrying={retrying}
             title={t(

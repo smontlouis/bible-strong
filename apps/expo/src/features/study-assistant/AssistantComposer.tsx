@@ -1,4 +1,5 @@
 import { use } from 'react'
+import { useAtomValue } from 'jotai'
 import { ActivityIndicator } from 'react-native'
 import { ComposerPrimitive, useAui } from '@assistant-ui/react-native'
 import { useTranslation } from 'react-i18next'
@@ -7,12 +8,18 @@ import { useKeyboardState } from '~common/KeyboardAwareScrollView'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
+import { premiumStatusAtom } from '~features/premium/premiumStatus'
+import { isPurchasesAvailable } from '~features/premium/purchasesClient'
+import { salesChannel } from '~features/premium/salesChannel'
+import useLanguage from '~helpers/useLanguage'
 import { useTheme } from '~themes/ThemeProvider'
 import { assistantAvailable } from './assistantConfig'
 import AssistantComposerInput from './AssistantComposerInput'
 import { ComposerInsetContext, useAssistantSheet } from './assistantSheetContext'
 import { contextCaption } from './contextDisplay'
 import ContextMarkIcon from './ContextMarkIcon'
+import { quotaLine } from './assistantQuota'
+import { useAssistantQuota } from './useAssistantQuota'
 
 const ROUND_BUTTON = 'h-[34px] w-[34px] items-center justify-center rounded-full'
 
@@ -115,6 +122,43 @@ function DictationButton() {
   )
 }
 
+/**
+ * What an account without Premium may still ask today, above the composer; where Premium is
+ * sold, the way to ask without limit. Sending stays open at zero: the service checks Premium
+ * again before it refuses, so a reader who has just subscribed elsewhere is answered.
+ */
+function QuotaLine() {
+  const { t } = useTranslation()
+  const lang = useLanguage()
+  const { navigate } = useAssistantSheet()
+  const premium = useAtomValue(premiumStatusAtom)
+  const line = quotaLine(useAssistantQuota(), lang)
+  if (!line) return null
+  const offersPremium =
+    premium.kind === 'none' && salesChannel() !== 'none' && isPurchasesAvailable()
+  return (
+    <HStack
+      accessibilityLiveRegion="polite"
+      className="flex-wrap items-center justify-center gap-x-[6px] px-4 pb-[6px]"
+    >
+      <Text className="text-grey text-[12px]">
+        {line.kind === 'remaining'
+          ? t('assistant.quota.remaining', { count: line.count })
+          : t('assistant.quota.none', { time: line.time })}
+      </Text>
+      {offersPremium && (
+        <TouchableBox
+          accessibilityRole="link"
+          hitSlop={8}
+          onPress={() => navigate({ pathname: '/premium', params: { from: 'assistant' } })}
+        >
+          <Text className="text-link text-[12px]">{t('assistant.quota.premium')}</Text>
+        </TouchableBox>
+      )}
+    </HStack>
+  )
+}
+
 /** The page footer: it stays above the keyboard while the conversation scrolls behind it. */
 export default function AssistantComposer() {
   const { t } = useTranslation()
@@ -133,6 +177,7 @@ export default function AssistantComposer() {
       // Above the keyboard there is no home indicator to clear.
       style={{ paddingBottom: keyboardVisible ? 8 : insets.bottom + 4 }}
     >
+      <QuotaLine />
       <ComposerPrimitive.Root className="border-border bg-reverse rounded-[24px] border px-2 pb-2 pt-1">
         <AssistantComposerInput
           multiline

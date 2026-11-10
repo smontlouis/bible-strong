@@ -12,6 +12,7 @@ import useLanguage from '~helpers/useLanguage'
 
 import { useAssistantSheet } from './assistantSheetContext'
 import { quotaReturn } from './assistantQuota'
+import { useAssistantQuota } from './useAssistantQuota'
 import StrobiAvatar from './StrobiAvatar'
 import { useStrobiReaction } from './useStrobiReaction'
 
@@ -25,7 +26,14 @@ export default function AssistantLimitCard() {
   const lang = useLanguage()
   const { navigate } = useAssistantSheet()
   const premium = useAtomValue(premiumStatusAtom)
-  const [{ key, time }] = useState(() => quotaReturn(new Date(), lang))
+  // The sentence names the account's daily questions once the service has said how many.
+  const quota = useAssistantQuota()
+  const [now] = useState(() => new Date())
+  const { key, time, count } = quotaReturn(
+    now,
+    lang,
+    quota?.kind === 'daily' ? quota.limit : undefined
+  )
   const [animation] = useStrobiReaction('sleeping', { animation: 'drowsy', ms: 2800 })
   const offersPremium =
     premium.kind === 'none' && salesChannel() !== 'none' && isPurchasesAvailable()
@@ -40,7 +48,7 @@ export default function AssistantLimitCard() {
         {t('assistant.limitCard.title')}
       </Text>
       <Text className="text-grey mt-1 text-center text-[14px] leading-[20px]">
-        {t(key, { time })}
+        {t(key, { time, count })}
       </Text>
       {offersPremium ? (
         <>

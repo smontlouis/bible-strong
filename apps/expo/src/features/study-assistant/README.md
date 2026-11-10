@@ -160,6 +160,18 @@ and direct-screen composer for accounts outside the beta. It is bundled client m
 not an authorization boundary. The Worker independently authenticates Firebase Auth and
 App Check, then enforces its server-owned `AI_ALLOWED_UIDS` on every endpoint.
 
+Daily quota (2026-11-10): the Worker counts the questions of an account without Premium per UTC
+day, checks Premium itself (ADR-0110) and asks for a verified address before the free questions.
+The app only shows what it is told. `useAssistantQuotaSync` reads the quota route when the
+assistant opens, after a failed answer and when the day's questions come back; a question then
+declares the `quota` capability and its stream begins with the quota; a refusal carries it in its
+body. The line above the composer counts what is left for an account without Premium, the limit
+card names the daily number, and a verification card resends the link and opens the questions once
+the address is verified (`assistantAuthHeaders` refreshes a token issued before the verification).
+The capability is declared only after the service has shown it counts questions, because an older
+Worker refuses it as unknown. Sending stays open at zero: the Worker checks Premium again before it
+refuses.
+
 Web messages use the official `ThreadPrimitive.Messages`, `MessagePrimitive.Root` and
 `MessagePrimitive.Parts` pipeline. `LocalMessage` remains the validated application format;
 `messageRuntime.ts` converts it at the runtime boundary without rewriting stored conversations.
@@ -197,7 +209,7 @@ Additional browser checks: Strong-tab identity was normalized using the existing
 
 `conversationMemory.ts` now replaces the short fixed window for the web modal. It keeps all eligible complete exchanges until memory exceeds 32,000 characters, then retains whole recent pairs around 12,000 characters and requests a summary capped at 3,000. The versioned checkpoint is stored alongside the full transcript, validated by a prefix hash, and reused across reloads. Summaries are generated through the authenticated Worker, not in the browser. The legacy standalone screen retains a bounded recent window for compatibility.
 
-Preparation has a visible status. Failure/cancellation preserves the full transcript and does not send an incomplete memory to chat. Existing very large histories are processed in bounded batches, up to four per attempt; a remaining backlog is explicit and resumable. Each compaction counts toward the existing beta request quota. No automatic retries. See ADR-0050 for limits and exceptional large-pair handling.
+Preparation has a visible status. Failure/cancellation preserves the full transcript and does not send an incomplete memory to chat. Existing very large histories are processed in bounded batches, up to four per attempt; a remaining backlog is explicit and resumable. A compaction counts toward the account's daily cap of requests that are not questions, never toward its free questions. No automatic retries. See ADR-0050 for limits and exceptional large-pair handling.
 
 ## Resource-aware context
 

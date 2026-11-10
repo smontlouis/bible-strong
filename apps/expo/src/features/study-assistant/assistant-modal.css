@@ -342,6 +342,47 @@
     transition: none;
   }
 }
+/* What an account without Premium may still ask today, above the composer. */
+.bs-assistant-quota {
+  margin: 0 0 8px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--as-muted);
+}
+/* The free questions wait for a verified address: a panel, not an error. */
+.bs-assistant-verify {
+  margin: 12px 0;
+  padding: 14px 16px 16px;
+  border-radius: 12px;
+  background: var(--as-soft);
+}
+.bs-assistant-verify p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--as-muted);
+}
+.bs-assistant-verify .bs-assistant-verify-title {
+  margin-bottom: 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--as-ink);
+}
+.bs-assistant-verify button {
+  margin-top: 12px;
+  padding: 7px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--as-accent);
+  color: white !important;
+  font-size: 13px;
+  cursor: pointer;
+}
+.bs-assistant-verify button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
 .bs-assistant-composer {
   display: flex;
   flex-direction: column;

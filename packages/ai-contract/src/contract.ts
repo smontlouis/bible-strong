@@ -31,6 +31,7 @@ export const CLIENT_CAPABILITIES = [
   'open_public_tab',
   'inline_widgets',
   'follow_ups',
+  'quota',
 ] as const
 export type ClientCapability = (typeof CLIENT_CAPABILITIES)[number]
 export const STUDY_SURFACE_KINDS = [
@@ -105,6 +106,15 @@ export type PassageOpenTabAction = {
 }
 export type OpenTabAction = PassageOpenTabAction | PublicOpenTabAction
 export type AssistantAction = OpenTabAction
+/**
+ * What an account may still ask today. `unlimited`: no daily quota applies. `daily`: the account
+ * has `remaining` of its `limit` questions until `resetsAt` (an ISO date, midnight UTC).
+ * `verify_email`: the account receives `limit` questions a day once it has verified its address.
+ */
+export type StudyQuota =
+  | { kind: 'unlimited' }
+  | { kind: 'daily'; limit: number; remaining: number; resetsAt: string }
+  | { kind: 'verify_email'; limit: number }
 export type StudyEvent =
   | { type: 'widget'; widget: StudyWidget }
   | { type: 'source'; source: StudySource }
@@ -116,6 +126,8 @@ export type StudyEvent =
   | { type: 'reset' }
   /** Questions the reader may ask next, sent only to clients that declare follow_ups. */
   | { type: 'follow_ups'; questions: string[] }
+  /** The account's quota once the question is counted, sent first to clients that declare quota. */
+  | { type: 'quota'; quota: StudyQuota }
   | { type: 'done'; requestId: string; model: string; modelCalls: number; toolCalls: number }
   | { type: 'error'; code: string }
 
@@ -297,6 +309,7 @@ export function parseStudyEvent(value: unknown): StudyEvent {
   if (event.type === 'reset') return { type: 'reset' }
   if (event.type === 'follow_ups')
     return { type: 'follow_ups', questions: parseFollowUps(event.questions) }
+  if (event.type === 'quota') return { type: 'quota', quota: parseStudyQuota(event.quota) }
   if (event.type === 'delta' && typeof event.text === 'string')
     return { type: 'delta', text: event.text }
   if (event.type === 'status' && typeof event.message === 'string')
@@ -318,6 +331,39 @@ export function parseStudyEvent(value: unknown): StudyEvent {
       toolCalls: event.toolCalls,
     }
   throw new Error('INVALID_STREAM')
+}
+
+const MAX_DAILY_QUESTIONS = 1000
+/** A quota from the stream, the quota route or a refusal's body. */
+export function parseStudyQuota(value: unknown): StudyQuota {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('INVALID_QUOTA')
+  const quota = value as Record<string, unknown>
+  const count = (field: unknown, max: number) =>
+    Number.isInteger(field) && Number(field) >= 0 && Number(field) <= max
+  const keys = Object.keys(quota)
+  if (quota.kind === 'unlimited' && keys.length === 1) return { kind: 'unlimited' }
+  if (
+    quota.kind === 'verify_email' &&
+    keys.every(key => ['kind', 'limit'].includes(key)) &&
+    count(quota.limit, MAX_DAILY_QUESTIONS)
+  )
+    return { kind: 'verify_email', limit: Number(quota.limit) }
+  if (
+    quota.kind === 'daily' &&
+    keys.every(key => ['kind', 'limit', 'remaining', 'resetsAt'].includes(key)) &&
+    count(quota.limit, MAX_DAILY_QUESTIONS) &&
+    count(quota.remaining, Number(quota.limit)) &&
+    typeof quota.resetsAt === 'string' &&
+    quota.resetsAt.length <= 40 &&
+    !Number.isNaN(Date.parse(quota.resetsAt))
+  )
+    return {
+      kind: 'daily',
+      limit: Number(quota.limit),
+      remaining: Number(quota.remaining),
+      resetsAt: quota.resetsAt,
+    }
+  throw new Error('INVALID_QUOTA')
 }
 
 export const MAX_FOLLOW_UPS = 4
