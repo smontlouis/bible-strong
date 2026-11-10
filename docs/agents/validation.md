@@ -142,6 +142,15 @@ yarn workspace @bible-strong/expo build:ios:prod
 
 `build:ios:prod` then registers the build with the update server (`scripts/register-store-build.mjs`), so its embedded JavaScript becomes a base for delta patches; Android production AABs come from `android-pc build-prod`, which does the same from the Mac. Register any other store build by hand: `dotenv -c production -- node scripts/register-store-build.mjs <file.aab|file.ipa>` in `apps/expo`.
 
+The same production builds run on a GitHub runner, for free on this public repository, from the tip of master on GitHub:
+
+```bash
+yarn workspace @bible-strong/expo build:android:github   # about 50 min
+yarn workspace @bible-strong/expo build:ios:github       # about 75 min, against 15 to 20 on the Mac
+```
+
+Each starts its workflow (`expo-android-production-build.yml`, `expo-ios-production-build.yml`), waits, and stores the file in `~/Builds/bible-strong`. Add `--no-register` for a trial, and `--submit` to send the build to the store from the runner. Logs and artifacts are public there: the workflows keep the build log off the page and the artifact for one day.
+
 ## UI Validation Notes
 
 Argent is the preferred simulator tooling and should be verified against the target booted simulator before runtime validation. The existing `builds/biblestrong.dev.app` was installed and launched with bundle id `com.smontlouis.biblestrong.dev`.

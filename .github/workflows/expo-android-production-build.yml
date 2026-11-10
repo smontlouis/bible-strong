@@ -12,6 +12,11 @@ on:
         required: false
         type: boolean
         default: false
+      submit:
+        description: Send the AAB to the store once built (Play production track, published by hand)
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: expo-android-production-build
@@ -136,3 +141,19 @@ jobs:
           # Anyone signed in to GitHub can download it meanwhile: fetch it, then let it expire.
           retention-days: 1
           compression-level: 0
+
+      # After the upload, so a refused submission still leaves the AAB to download.
+      - name: Send the AAB to the store
+        if: inputs.submit
+        working-directory: apps/expo
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          set -euo pipefail
+          SUBMIT_LOG="$RUNNER_TEMP/submit.log"
+          if ! yarn dotenv -c production -- eas submit -p android --profile production --path "${{ steps.aab.outputs.path }}" --non-interactive --wait > "$SUBMIT_LOG" 2>&1; then
+            echo "::error::The submission failed. The end of its log follows."
+            tail -25 "$SUBMIT_LOG"
+            exit 1
+          fi
+          grep -iE "submission|submitted|success" "$SUBMIT_LOG" | tail -5 || true

@@ -18,6 +18,8 @@
     "build:ios:staging": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c staging -- eas build -p ios --local --profile staging --non-interactive",
     "build:ios:staging-sim": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c staging -- eas build -p ios --local --profile staging-simulator --non-interactive",
     "build:ios:prod": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c production -- eas build -p ios --local --profile production --non-interactive && dotenv -c production -- node scripts/register-store-build.mjs --newest ipa",
+    "build:android:github": "node scripts/build-on-github.mjs android",
+    "build:ios:github": "node scripts/build-on-github.mjs ios",
     "test:watch": "jest --watchAll",
     "test": "jest",
     "resources:smoke:nave:artifacts": "node scripts/smokeNaveResourceArtifacts.mjs",

@@ -13,6 +13,11 @@ on:
         required: false
         type: boolean
         default: false
+      submit:
+        description: Send the IPA to the store once built (TestFlight)
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: expo-ios-production-build
@@ -137,3 +142,19 @@ jobs:
           # Anyone signed in to GitHub can download it meanwhile: fetch it, then let it expire.
           retention-days: 1
           compression-level: 0
+
+      # After the upload, so a refused submission still leaves the IPA to download.
+      - name: Send the IPA to the store
+        if: inputs.submit
+        working-directory: apps/expo
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          set -euo pipefail
+          SUBMIT_LOG="$RUNNER_TEMP/submit.log"
+          if ! yarn dotenv -c production -- eas submit -p ios --profile production --path "${{ steps.ipa.outputs.path }}" --non-interactive --wait > "$SUBMIT_LOG" 2>&1; then
+            echo "::error::The submission failed. The end of its log follows."
+            tail -25 "$SUBMIT_LOG"
+            exit 1
+          fi
+          grep -iE "submission|submitted|success" "$SUBMIT_LOG" | tail -5 || true
