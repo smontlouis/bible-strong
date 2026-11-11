@@ -185,6 +185,10 @@ describe('library embedding and search input', () => {
         perspectives: undefined,
         fullText: undefined,
         sections: undefined,
+        perPerspective: undefined,
+        perspectiveSections: undefined,
+        labelledDocuments: undefined,
+        perspectiveExcludeWorks: undefined,
       }
     )
     assert.deepEqual(
@@ -202,6 +206,10 @@ describe('library embedding and search input', () => {
         perspectives: undefined,
         fullText: true,
         sections: 8,
+        perPerspective: undefined,
+        perspectiveSections: undefined,
+        labelledDocuments: undefined,
+        perspectiveExcludeWorks: undefined,
       }
     )
     for (const invalid of [
@@ -216,6 +224,11 @@ describe('library embedding and search input', () => {
       { query: 'pardon', fullText: 'yes' },
       { query: 'pardon', sections: 11 },
       { query: 'pardon', sections: -1 },
+      { query: 'pardon', perPerspective: 0 },
+      { query: 'pardon', perPerspective: 5 },
+      { query: 'pardon', perspectiveSections: 5 },
+      { query: 'pardon', labelledDocuments: ['lutheran'] },
+      { query: 'pardon', perspectiveExcludeWorks: ['a work'] },
     ])
       assert.throws(() => parseLibrarySearchInput(invalid), /LIBRARY_SEARCH_INVALID_INPUT/)
   })
@@ -314,6 +327,17 @@ describe('library collections', () => {
     assert.throws(() => parseLibrarySearchInput({ query: 'les langues', perspectives: 'yes' }))
     assert.deepEqual(parseLibrarySearchInput({ query: 'les langues', excludeWorks: ['a-work'] }).excludeWorks, ['a-work'])
     assert.throws(() => parseLibrarySearchInput({ query: 'les langues', excludeWorks: ['a work'] }))
+    const byPerspective = parseLibrarySearchInput({
+      query: 'les langues',
+      perPerspective: 2,
+      perspectiveSections: 1,
+      labelledDocuments: ['evangelical', 'catholic'],
+      perspectiveExcludeWorks: ['a-work'],
+    })
+    assert.equal(byPerspective.perPerspective, 2)
+    assert.equal(byPerspective.perspectiveSections, 1)
+    assert.deepEqual(byPerspective.labelledDocuments, ['evangelical', 'catholic'])
+    assert.deepEqual(byPerspective.perspectiveExcludeWorks, ['a-work'])
     const { parseLibraryDocumentInput } = await import('../librarySearchInput')
     assert.deepEqual(parseLibraryDocumentInput({ collection: 'studies', language: 'en', documentKey: '2016-04/01/1' }), { collection: 'studies', language: 'en', documentKey: '2016-04/01/1' })
     for (const bad of [{ collection: 'studies', language: 'de', documentKey: 'a' }, { collection: 'studies', language: 'en', documentKey: '../a' }, { collection: 'studies', language: 'en', documentKey: 'a', extra: 1 }])

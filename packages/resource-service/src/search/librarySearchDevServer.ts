@@ -22,7 +22,8 @@ const database = makeLocalDatabase({
   connectionString:
     process.env.RESOURCE_DATABASE_URL ??
     'postgresql://bible_strong:bible_strong@127.0.0.1:54329/bible_strong',
-  maxConnections: 4,
+  // As many as the Worker opens for a search by perspective, with room for the lexical one.
+  maxConnections: 6,
 })
 const provider = process.env.CLOUDFLARE_ACCOUNT_ID
   ? makeRestLibraryEmbeddingProvider(process.env.CLOUDFLARE_ACCOUNT_ID)

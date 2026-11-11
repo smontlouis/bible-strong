@@ -11,7 +11,7 @@ import {
 import { importLibraryCollection } from '../libraryCollectionRepository'
 import { readLibraryDocument } from '../libraryDocumentRepository'
 import { indexLibrary } from '../libraryIndexRepository'
-import { searchLibrary } from '../librarySearchRepository'
+import { LIBRARY_PERSPECTIVES, perspectiveOf, searchLibrary } from '../librarySearchRepository'
 
 const runIntegration = process.env.RESOURCE_INTEGRATION === '1'
 const connectionString =
@@ -465,6 +465,74 @@ describe('Library search index', { skip: !runIntegration }, () => {
       assert.ok(long(sections)!.text!.length > long(passages)!.text!.length)
       const short = sections.hits.find(hit => hit.title === 'Millennial Views')
       if (short) assert.equal(short.text, 'The millennium is spent in heaven with Christ.', 'a one-passage section is its passage')
+    } finally {
+      await isolated.dispose()
+    }
+  })
+  it('searches each perspective on its own, with labelled documents only where asked', async () => {
+    const isolated = await createIsolatedPostgres(connectionString, 'library_perspective')
+    const { database } = isolated
+    try {
+      const rights = { holder: 'integration-test', terms_reference: 'integration-test' }
+      const collection = (id: string, tradition: string, tags: string[]) => ({ id, title: id, tradition, tags, language: 'en' as const, rights })
+      const article = (key: string, title: string, body: string, labels?: string[]) => ({
+        url: `https://studies.example/${key}`,
+        key,
+        title,
+        authors: ['A. Writer'],
+        date: '2026-01-01',
+        text: body,
+        ...(labels ? { labels } : {}),
+      })
+      const imports: [ReturnType<typeof collection>, ReturnType<typeof article>[]][] = [
+        // Six near articles of one tradition fill a plain search.
+        [collection('reformed', 'Protestantisme', ['Réformé']), Array.from({ length: 6 }, (_, index) => article(`m-${index}`, `Millennium ${index}`, `The millennium, view ${index}.`))],
+        // A tradition whose only article is far from the question.
+        [collection('rabbis', 'Judaïsme', ['Rabbinique']), [article('covenant', 'The Covenant', 'The covenant with the fathers.')]],
+        [collection('answers', 'Protestantisme', ['Évangélique']), [
+          article('labelled', 'Millennium Answered', 'The millennium on earth after the return.', ['Millennium']),
+          article('plain', 'Millennium Explained', 'The millennium explained simply.'),
+        ]],
+        // Left out of every search, but not of the search by perspective.
+        [collection('contested', 'Protestantisme', ['Évangélique']), [article('contested', 'Millennium Contested', 'The millennium against another view.', ['Millennium'])]],
+        [collection('adventists', 'Protestantisme', ['Adventiste']), [
+          article('long', 'The Thousand Years', 'The millennium begins at the second coming.\n\n' + 'Satan is bound on a desolate earth. '.repeat(80)),
+        ]],
+      ]
+      for (const [header, records] of imports)
+        await importLibraryCollection({ connectionString: isolated.connectionString, provider, collection: header, records, source: `${header.id}.jsonl` })
+
+      const plain = await searchLibrary(database, provider, { query: 'the millennium', limit: 3, excludeWorks: ['contested'] })
+      assert.equal(plain.perspectiveHits, undefined, 'no search by perspective unless asked')
+      const result = await searchLibrary(database, provider, {
+        query: 'the millennium',
+        limit: 3,
+        excludeWorks: ['contested'],
+        perspectiveExcludeWorks: [],
+        perPerspective: 2,
+        labelledDocuments: ['evangelical'],
+        fullText: true,
+        perspectiveSections: 1,
+      })
+      assert.ok(!result.hits.some(hit => hit.perspective === 'jewish'), 'the far tradition is not in the plain search')
+      assert.ok(!result.hits.some(hit => hit.work === 'contested'))
+      const perspectiveHits = result.perspectiveHits ?? []
+      const order = perspectiveHits.map(hit => LIBRARY_PERSPECTIVES.indexOf(hit.perspective))
+      assert.deepEqual(order, [...order].sort((a, b) => a - b), 'in the order of the perspectives')
+      for (const perspective of LIBRARY_PERSPECTIVES)
+        assert.ok(perspectiveHits.filter(hit => hit.perspective === perspective).length <= 2)
+      assert.deepEqual(perspectiveHits.filter(hit => hit.perspective === 'jewish').map(hit => hit.title), ['The Covenant'])
+      assert.deepEqual(
+        perspectiveHits.filter(hit => hit.perspective === 'evangelical').map(hit => hit.title).sort(),
+        ['Millennium Answered', 'Millennium Contested'],
+        'only labelled documents, and the work the plain search leaves out'
+      )
+      assert.equal(perspectiveHits.filter(hit => hit.perspective === 'protestant').length, 2)
+      assert.equal(new Set(perspectiveHits.filter(hit => hit.perspective === 'protestant').map(hit => hit.title)).size, 2)
+      const [adventist] = perspectiveHits.filter(hit => hit.perspective === 'adventist')
+      assert.match(adventist?.text ?? '', /^The millennium begins at the second coming\./u, 'the first hit of a perspective carries its section')
+      assert.match(adventist?.text ?? '', /desolate earth\.$/u)
+      for (const hit of perspectiveHits) assert.equal(hit.perspective, perspectiveOf(hit.tradition, hit.tags))
     } finally {
       await isolated.dispose()
     }

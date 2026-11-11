@@ -89,3 +89,45 @@ that wants to answer from the hits without opening each resource needs their who
 - On the assistant's bench (private repository, 2026-11-11), 25 hits with 8 whole sections gave
   answers at least as good as 5 snippets, faster and cheaper, because the model no longer opens
   the resources one round at a time.
+
+## Amendment of 2026-11-11: a search within each perspective
+
+### Context
+
+`perspectives: true` (ADR-0106) keeps the best hit of each perspective among the 150 nearest
+passages of the whole library. A small tradition reaches that pool only when one of its passages
+happens to be near the question: the 5,782 Catholic passages are 0.7 % of the index, the
+patristic ones exist in French only, and on many questions the pool held none of them. A caller
+that wants every tradition heard needs each one searched on its own.
+
+### Decision
+
+- `perPerspective: n` (1 to 4) adds `perspectiveHits` to the result: up to `n` hits of each
+  perspective, one per work first, in the order of `LIBRARY_PERSPECTIVES`, best first within each.
+  Each perspective is searched by meaning (its nearest passages in each language) and by words
+  (its best ranked passages), fused by reciprocal rank as the plain search is. `hits` is
+  unchanged, and the query is embedded once for both.
+- A perspective is a list of works: the works of the active publications, read by primary key
+  (one passage each, 22 ms for 123 publications), are sorted with `perspectiveOf`. The lists filter
+  on `work`, so the planner walks the vector index or reads a small work whole. A filter on
+  tradition and tags read most of the index (12 to 21 s a search on 2026-11-11), and a perspective
+  without a work in a language would walk all of it: it gets no list in that language.
+- The lists of the perspectives run beside the plain ones, spread over three statements on their
+  own connections; the entrypoint opens five connections for such a search instead of two.
+- `perspectiveSections: n`, with `fullText`, gives the first `n` hits of each perspective their
+  whole section, by the rule of `sections`.
+- `labelledDocuments`: in these perspectives, a document counts only when it carries labels
+  (`target.labels`). A collection labels the documents that argue a view, so a caller can ask for
+  those alone.
+- `perspectiveExcludeWorks` replaces `excludeWorks` for the search within each perspective, which
+  otherwise takes the same exclusions: a work can stay out of every plain search and still speak
+  for its perspective.
+- Without `perPerspective`, a search returns what it returned before.
+
+### Consequences
+
+- Warm, the database answers the lists of all perspectives in about 300 ms when one statement
+  runs them one after the other, and about a third of that side by side; cold pages cost more.
+  From a laptop on 2026-11-11 the search took about 0.5 s more in the median.
+- Every perspective with a work in a language gets its nearest passages there, however far they
+  are from the question: the caller decides what to do with a remote excerpt.

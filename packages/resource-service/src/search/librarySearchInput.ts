@@ -1,8 +1,11 @@
 // Arguments of a library search call (ADR-0103). The assistant is a trusted caller, but its
 // arguments come from a model: every field is checked and unknown fields are refused.
 import {
+  LIBRARY_PERSPECTIVES,
   LIBRARY_SEARCH_MAX_LIMIT,
+  LIBRARY_SEARCH_MAX_PER_PERSPECTIVE,
   LIBRARY_SEARCH_MAX_SECTIONS,
+  type LibraryPerspective,
   type LibrarySearchInput,
 } from '../repositories/librarySearchRepository'
 import type { LibraryDocumentInput } from '../repositories/libraryDocumentRepository'
@@ -48,6 +51,10 @@ export const parseLibrarySearchInput = (value: unknown): LibrarySearchInput => {
     'perspectives',
     'fullText',
     'sections',
+    'perPerspective',
+    'perspectiveSections',
+    'labelledDocuments',
+    'perspectiveExcludeWorks',
   ]
   if (Object.keys(input).some(key => !known.includes(key)))
     throw new Error('LIBRARY_SEARCH_INVALID_INPUT')
@@ -70,6 +77,18 @@ export const parseLibrarySearchInput = (value: unknown): LibrarySearchInput => {
     perspectives: boolean(input.perspectives),
     fullText: boolean(input.fullText),
     sections: integer(input.sections, 0, LIBRARY_SEARCH_MAX_SECTIONS),
+    perPerspective: integer(input.perPerspective, 1, LIBRARY_SEARCH_MAX_PER_PERSPECTIVE),
+    perspectiveSections: integer(input.perspectiveSections, 0, LIBRARY_SEARCH_MAX_PER_PERSPECTIVE),
+    labelledDocuments: strings(
+      input.labelledDocuments,
+      item => LIBRARY_PERSPECTIVES.includes(item as LibraryPerspective),
+      LIBRARY_PERSPECTIVES.length
+    ) as LibraryPerspective[] | undefined,
+    perspectiveExcludeWorks: strings(
+      input.perspectiveExcludeWorks,
+      item => /^[A-Za-z0-9-]{1,64}$/u.test(item),
+      16
+    ),
   }
 }
 
