@@ -131,3 +131,7 @@ that wants every tradition heard needs each one searched on its own.
   From a laptop on 2026-11-11 the search took about 0.5 s more in the median.
 - Every perspective with a work in a language gets its nearest passages there, however far they
   are from the question: the caller decides what to do with a remote excerpt.
+- Two perspectives join the list for the collections being added: `orthodox` (a tradition or
+  tag naming Orthodoxy) and `academic` (critical, university or modernist exegesis, whatever its
+  authors' confession), sorted before `protestant`. Until a work of theirs is indexed they have no
+  list and no hit.

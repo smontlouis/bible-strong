@@ -57,10 +57,12 @@ export type LibrarySearchInput = {
 export const LIBRARY_PERSPECTIVES = [
   'adventist',
   'catholic',
+  'orthodox',
   'patristic',
   'jewish',
   'evangelical',
   'protestant',
+  'academic',
   'reference',
 ] as const
 export type LibraryPerspective = (typeof LIBRARY_PERSPECTIVES)[number]
@@ -70,7 +72,10 @@ const PERSPECTIVE_WORDS: readonly (readonly [LibraryPerspective, string])[] = [
   ['adventist', 'adventiste'],
   ['catholic', 'catholi|thomiste|scolastique'],
   ['patristic', 'christianisme ancien|patristique'],
+  ['orthodox', 'orthodox'],
   ['jewish', 'judaisme|rabbinique'],
+  // Critical and university exegesis, whatever the confession of its authors.
+  ['academic', 'exegese critique|universitaire|moderniste'],
   ['evangelical', 'dispensational|freres|evangelique|baptiste|restaurationniste|pentecot'],
 ]
 
