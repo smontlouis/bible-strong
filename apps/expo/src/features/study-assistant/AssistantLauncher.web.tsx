@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useSelector } from 'react-redux'
 import { useAtomValue } from 'jotai'
+import { workspaceStoryOpenAtom } from '~features/onboarding/workspace/state'
 import { useTranslation } from 'react-i18next'
 import { usePathname, useRouter } from 'expo-router'
 import {
@@ -122,6 +123,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     router = useRouter(),
     { colors, fontFamily } = useTheme()
   const openInNewTab = useOpenInNewTab()
+  const storyOpen = useAtomValue(workspaceStoryOpenAtom)
   const liveContext = useReadingContext()
   const [debugOpen, setDebugOpen] = useState(false)
   const [debugSession, setDebugSession] = useState<DebugSession | null>(null)
@@ -380,7 +382,8 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
         unstable_openOnRunStart={false}
       >
         {ready &&
-          (open || pathname !== '/premium') &&
+          // Strobi stays out of the Premium page and of the onboarding's story.
+          (open || (pathname !== '/premium' && !storyOpen)) &&
           createPortal(
             <Modal.Anchor className="bs-assistant-anchor" style={vars}>
               <Modal.Trigger

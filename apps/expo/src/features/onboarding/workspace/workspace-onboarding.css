@@ -1,0 +1,852 @@
+/*
+ * The onboarding of the Web and the desktop app. Colours come from the theme through the
+ * `--color-*` variables of `webThemeVariables`, set on each root; faces through `--onb-sans`
+ * (the interface) and `--onb-serif` (what is read).
+ */
+
+.bs-onb {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  display: flex;
+  /* A full-window surface of its own: the macOS window material never shows through it. */
+  background: var(--color-canvas);
+  color: var(--color-default);
+  font-family: var(--onb-sans);
+  outline: none;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * Everything in one column at the middle of the window, however wide or tall: on an
+ * ultrawide screen the eye never travels from one corner to the other.
+ */
+.bs-onb-frame {
+  --onb-frame-width: 1040px;
+  --onb-title-size: clamp(28px, 3.2vh, 38px);
+  width: min(var(--onb-frame-width), 100%);
+  height: min(100%, 940px);
+  margin: auto;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.bs-onb button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.bs-onb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 56px;
+  /* Clear of the macOS window buttons only where the column reaches the window's edge. */
+  padding: 10px 24px 0
+    max(24px, calc(var(--onb-controls-inset, 0px) - (100vw - var(--onb-frame-width)) / 2));
+}
+
+.bs-onb-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-grey);
+}
+
+.bs-onb-brand-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--color-primary);
+}
+
+.bs-onb-text-button {
+  border: 0;
+  background: transparent;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+  color: var(--color-grey) !important;
+  transition: background-color 180ms ease-out, color 180ms ease-out;
+}
+
+.bs-onb-text-button:hover {
+  background: var(--color-opacity5);
+  color: var(--color-default) !important;
+}
+
+.bs-onb-main {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 12px;
+  padding: 4px 24px 0;
+}
+
+.bs-onb-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.bs-onb-eyebrow {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-grey);
+}
+
+/* Two lines of the title, whichever the step: a one-line title sits on the lower one. */
+.bs-onb-title-slot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  min-height: calc(2 * 1.2 * var(--onb-title-size));
+}
+
+/* Two lines of instruction, or the end's sentence (its choices are in the footer). */
+.bs-onb-instruction-slot {
+  width: 100%;
+  min-height: calc(2 * 1.9 * 16px);
+}
+
+.bs-onb-title {
+  margin: 0;
+  font-family: var(--onb-serif);
+  font-weight: 400;
+  font-size: var(--onb-title-size);
+  line-height: 1.2;
+  white-space: pre-line;
+  text-wrap: balance;
+}
+
+.bs-onb-instruction {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--color-default);
+}
+
+.bs-onb-instruction-muted {
+  line-height: 1.6;
+  color: var(--color-grey);
+}
+
+/* The one solid element of the view. */
+.bs-onb-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: var(--color-reverse) !important;
+  font-size: 15px;
+  font-weight: 600;
+  transition: opacity 180ms ease-out, transform 180ms ease-out;
+}
+
+.bs-onb-button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.bs-onb-button:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+.bs-onb-button kbd {
+  font: inherit;
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.bs-onb-board-wrap {
+  position: relative;
+  align-self: stretch;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bs-onb-board {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center;
+}
+
+.bs-onb-footer {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px 22px;
+}
+
+.bs-onb-footer[data-finish='true'] .bs-onb-progress {
+  display: none;
+}
+
+.bs-onb-footer[data-finish='true'] .bs-onb-footer-end {
+  grid-column: 2 / 4;
+}
+
+.bs-onb-footer-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  /* The height of Continue, kept at the end when Continue leaves: the board does not grow. */
+  min-height: 44px;
+}
+
+.bs-onb-progress {
+  display: flex;
+  gap: 6px;
+}
+
+.bs-onb-progress span {
+  width: 28px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-separator);
+  transition: background-color 240ms ease-out;
+}
+
+.bs-onb-progress span[data-done='true'] {
+  background: var(--color-primary);
+}
+
+/* A key as printed on the keyboard: it can be clicked as well as pressed. */
+.bs-onb-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 28px;
+  height: 28px;
+  margin: 0 2px;
+  padding: 0 7px;
+  vertical-align: middle;
+  border: 1px solid var(--color-border);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-default) !important;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transition: border-color 180ms ease-out, background-color 180ms ease-out;
+}
+
+button.bs-onb-key:hover {
+  border-color: var(--color-primary);
+}
+
+.bs-onb-key[data-active='true'] {
+  border-color: var(--color-primary);
+  background: var(--color-light-primary);
+}
+
+.bs-onb-key-small {
+  min-width: 26px;
+  height: 26px;
+  padding: 0 5px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+/* Board pieces, in the board's own units. */
+.bs-onb-card {
+  position: absolute;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--color-surface);
+  box-shadow: 0 1px 2px rgba(16, 27, 53, 0.04);
+}
+
+.bs-onb-verse {
+  padding: 24px 26px 20px;
+}
+
+.bs-onb-verse-reference {
+  font-family: var(--onb-serif);
+  font-size: 27px;
+  color: var(--color-link);
+}
+
+.bs-onb-verse-text {
+  margin: 12px 0 14px;
+  font-family: var(--onb-serif);
+  font-size: 20px;
+  line-height: 1.8;
+}
+
+/* The verse number, set in the text but not the text (`verse-number` of the tokens). */
+.bs-onb-verse-number {
+  margin-right: 4px;
+  font-family: var(--onb-sans);
+  font-size: 0.72em;
+  font-weight: 600;
+  color: var(--color-grey);
+  vertical-align: 0.35em;
+}
+
+/* As in the Bible DOM: padding 4, radius 4, the fill cut at each line. */
+.bs-onb-verse-run {
+  padding: 4px;
+  border-radius: 4px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  transition: background-image 0.3s ease, color 0.3s ease;
+}
+
+.bs-onb-verse-word {
+  border-radius: 4px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.bs-onb-verse-word[data-studied='true'] {
+  text-decoration: underline;
+  text-decoration-color: var(--color-primary);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.bs-onb-verse-version {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-grey);
+}
+
+.bs-onb-swatches-row {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Radii nest: the bar's 16 is its items' 10 plus its padding of 6. */
+.bs-onb-swatches {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+
+/* A colour beside the key that gives it: the reader sees what to press. */
+.bs-onb-swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 7px 0 9px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  transition: background-color 180ms ease-out;
+}
+
+.bs-onb-swatch:hover {
+  background: var(--color-opacity5);
+}
+
+.bs-onb-swatch[data-active='true'] {
+  background: var(--color-light-primary);
+}
+
+.bs-onb-swatch-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px rgba(16, 27, 53, 0.08);
+}
+
+.bs-onb-swatch .bs-onb-key {
+  margin: 0;
+}
+
+.bs-onb-style {
+  padding: 0 12px 0 8px;
+  font-size: 14px;
+  color: var(--color-default) !important;
+}
+
+.bs-onb-style-sample {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-family: var(--onb-serif);
+  font-size: 16px;
+}
+
+.bs-onb-piece {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.bs-onb-tool {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px 0 12px;
+  border: 0;
+  text-align: left;
+  font-size: 18px;
+  transition: box-shadow 180ms ease-out;
+}
+
+.bs-onb-tool[data-active='true'] {
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+.bs-onb-tool-label {
+  flex: 1;
+}
+
+.bs-onb-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+}
+
+.bs-onb-strong {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bs-onb-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bs-onb-card-eyebrow {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-grey);
+}
+
+.bs-onb-code {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-link);
+  font-variant-numeric: tabular-nums;
+}
+
+.bs-onb-hebrew {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.bs-onb-hebrew-word {
+  font-family: 'SBL Hebrew', 'Times New Roman', serif;
+  font-size: 48px;
+  line-height: 1.1;
+}
+
+.bs-onb-transliteration {
+  font-family: var(--onb-serif);
+  font-size: 24px;
+  color: var(--color-grey);
+}
+
+.bs-onb-segments {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--color-canvas);
+  align-self: flex-start;
+}
+
+.bs-onb-segment {
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 14px;
+  background: transparent;
+  font-size: 16px;
+  color: var(--color-grey) !important;
+  transition: background-color 180ms ease-out, color 180ms ease-out;
+}
+
+.bs-onb-segment[aria-checked='true'] {
+  background: var(--color-surface);
+  color: var(--color-link) !important;
+  font-weight: 600;
+}
+
+.bs-onb-definition {
+  font-family: var(--onb-serif);
+  font-size: 21px;
+  line-height: 1.5;
+}
+
+.bs-onb-concordance {
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bs-onb-count {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.bs-onb-count strong {
+  font-size: 30px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.bs-onb-count span {
+  font-size: 16px;
+  color: var(--color-grey);
+}
+
+.bs-onb-filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.bs-onb-filter {
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: var(--color-canvas);
+  font-size: 15px;
+  color: var(--color-grey) !important;
+  transition: background-color 180ms ease-out, color 180ms ease-out;
+}
+
+.bs-onb-filter[aria-checked='true'] {
+  background: var(--color-light-primary);
+  color: var(--color-link) !important;
+  font-weight: 600;
+}
+
+.bs-onb-occurrence {
+  padding: 10px 0;
+  border-top: 1px solid var(--color-separator);
+}
+
+.bs-onb-occurrence-reference {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--color-grey);
+}
+
+.bs-onb-occurrence-text {
+  margin-top: 4px;
+  font-family: var(--onb-serif);
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.bs-onb-occurrence-text mark {
+  background: var(--color-light-secondary);
+  color: inherit;
+  border-radius: 4px;
+  padding: 0 2px;
+}
+
+.bs-onb-note {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bs-onb-note-text {
+  font-family: var(--onb-serif);
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.bs-onb-placeholder {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1.5px dashed var(--color-border);
+  border-radius: 16px;
+  background: transparent;
+  font-size: 17px;
+  color: var(--color-grey) !important;
+}
+
+.bs-onb-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bs-onb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 4px;
+  border-radius: 999px;
+  background: var(--color-canvas);
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.bs-onb-chip .bs-onb-tile {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+}
+
+.bs-onb-study {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bs-onb-study-title {
+  font-family: var(--onb-serif);
+  font-size: 22px;
+}
+
+.bs-onb-study-detail {
+  font-size: 15px;
+  color: var(--color-grey);
+}
+
+.bs-onb-lines {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.bs-onb-relation-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--color-canvas);
+  font-size: 15px;
+  color: var(--color-link);
+  white-space: nowrap;
+}
+
+.bs-onb-pill {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 6px;
+  border-radius: 999px;
+  background: var(--color-surface);
+  font-size: 17px;
+  white-space: nowrap;
+}
+
+/* The end of the story on the desktop: the Offline copies' selection over the whole window. */
+.bs-onb-offline {
+  position: fixed;
+  inset: 0;
+  z-index: 9501;
+  display: flex;
+  background: var(--color-canvas);
+}
+
+/* A narrow window plays the mobile story. */
+.bs-onb-narrow {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  display: flex;
+  background: var(--color-reverse);
+}
+
+@media (max-height: 700px) {
+  .bs-onb-copy {
+    gap: 10px;
+  }
+
+  .bs-onb-instruction {
+    line-height: 1.7;
+  }
+}
+
+/* The tour card and the invitation, beside the workspace. */
+.bs-tour {
+  position: fixed;
+  /* Over the palette's veil, so that the step stays in view while the palette is open. */
+  z-index: 10002;
+  left: 50%;
+  bottom: 20px;
+  width: min(400px, calc(100vw - 32px));
+  box-sizing: border-box;
+  padding: 16px 18px 14px;
+  border-radius: 16px;
+  background: var(--color-surface-raised);
+  color: var(--color-default);
+  font-family: var(--onb-sans);
+  box-shadow:
+    0 12px 32px rgba(16, 27, 53, 0.16),
+    0 2px 6px rgba(16, 27, 53, 0.08);
+}
+
+.bs-tour button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.bs-tour-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bs-tour-eyebrow {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-grey);
+}
+
+.bs-tour-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-grey);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.bs-tour-close:hover {
+  background: var(--color-opacity5);
+}
+
+.bs-tour-title {
+  margin: 6px 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.bs-tour-body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--color-default);
+}
+
+.bs-tour-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.bs-tour-dots {
+  display: flex;
+  gap: 5px;
+}
+
+.bs-tour-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-separator);
+}
+
+.bs-tour-dots span[data-done='true'] {
+  background: var(--color-primary);
+}
+
+.bs-tour-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.bs-tour-text-button {
+  border: 0;
+  background: transparent;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--color-grey);
+}
+
+.bs-tour-text-button:hover {
+  background: var(--color-opacity5);
+}
+
+.bs-tour-button {
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 16px;
+  background: var(--color-primary);
+  color: var(--color-reverse);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bs-onb *,
+  .bs-tour * {
+    transition: none !important;
+  }
+}

@@ -41,6 +41,7 @@ struct Labels {
     presentation: &'static str,
     compare: &'static str,
     shortcuts: &'static str,
+    tour: &'static str,
     website: &'static str,
     support: &'static str,
     check_updates: &'static str,
@@ -73,6 +74,7 @@ const FRENCH: Labels = Labels {
     presentation: "Texte, Strong ou interlinéaire",
     compare: "Comparer les versets sélectionnés",
     shortcuts: "Raccourcis clavier",
+    tour: "Revoir la découverte",
     website: "Site de Bible Strong",
     support: "Nous contacter",
     check_updates: "Rechercher les mises à jour…",
@@ -105,6 +107,7 @@ const ENGLISH: Labels = Labels {
     presentation: "Text, Strong or Interlinear",
     compare: "Compare Selected Verses",
     shortcuts: "Keyboard Shortcuts",
+    tour: "Replay the Introduction",
     website: "Bible Strong Website",
     support: "Contact Us",
     check_updates: "Check for Updates…",
@@ -229,6 +232,7 @@ pub fn build<R: Runtime>(app: &AppHandle<R>, language: &str) -> tauri::Result<Me
             labels.shortcuts,
             None,
         )?)
+        .item(&item("onboarding:replay", labels.tour, None)?)
         .separator()
         .item(&item(
             "open:https://bible-strong.app",

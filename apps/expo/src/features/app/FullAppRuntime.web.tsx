@@ -1,4 +1,5 @@
 import AssistantLauncher from '~features/study-assistant/AssistantLauncher.web'
+import WorkspaceOnboarding from '~features/onboarding/workspace/WorkspaceOnboarding.web'
 import { trackAnalyticsScreen } from '~helpers/analytics'
 import WorkspaceAnalytics from '~features/app-switcher/WorkspaceAnalytics.web'
 import ReferencePreviewHost from '~features/bibleReferencePreview/ReferencePreviewHost'
@@ -111,6 +112,7 @@ const FullAppRuntime = ({ theme, children }: { theme: Theme; children?: ReactNod
               <ReferencePreviewHost />
               <ColorPickerModal />
               <ColorChangeModal />
+              <WorkspaceOnboarding />
             </StrongAudioProvider>
           </BookSelectorSheetProvider>
         </SheetProvider>

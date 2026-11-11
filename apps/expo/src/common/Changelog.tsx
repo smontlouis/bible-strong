@@ -1,7 +1,7 @@
 import distanceInWords from 'date-fns/formatDistance'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
 import { useEffect, useRef } from 'react'
-import { Platform, View } from 'react-native'
+import { View } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
 import { SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
@@ -97,8 +97,8 @@ const Changelog = () => {
   const changelogIsLoading = useSelector((state: RootState) => state.user.changelog.isLoading)
 
   const hasAutomaticLogs = !changelogIsLoading && hasNewLogs(seenLogs, changelog)
-  const showModal =
-    (Platform.OS === 'web' || isOnboardingCompleted) && (hasAutomaticLogs || manualOpen)
+  // Every surface waits for its onboarding: the Web and the desktop app have theirs too.
+  const showModal = isOnboardingCompleted && (hasAutomaticLogs || manualOpen)
   const newLogs = hasAutomaticLogs ? findNewLogs(seenLogs, changelog) : []
   const visibleLogs = hasAutomaticLogs
     ? newLogs
