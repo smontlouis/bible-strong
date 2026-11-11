@@ -99,7 +99,9 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
   // A form sheet opened over a tab leaves the tab on screen and selected in the sidebar.
   const basePath = panel.basePath ?? pathname
   const showsReader = basePath === '/' || panel.showsStudy
-  const sheetOverReader = Platform.OS !== 'web' && basePath === '/' && !isWorkspace
+  // Only iOS presents these routes as sheets above the reader. Android pushes them as pages inside
+  // the stack (createFormSheetOptions), so lifting the reader would hide them (#531).
+  const sheetOverReader = Platform.OS === 'ios' && basePath === '/' && !isWorkspace
   const visitPage = (page: 'home' | 'settings') => {
     setOverlayOpen(false)
     if (pathname !== workspacePagePath[page])
