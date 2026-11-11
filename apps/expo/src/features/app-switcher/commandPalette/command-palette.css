@@ -421,3 +421,25 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.bs-command-help .bs-command-help-replay {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.bs-command-help-replay button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  padding: 8px 12px;
+  margin-left: -12px;
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  color: var(--command-link, var(--command-primary));
+  cursor: pointer;
+}
+.bs-command-help-replay button:hover {
+  background: var(--command-active);
+}

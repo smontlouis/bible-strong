@@ -1,10 +1,13 @@
+import { useSetAtom } from 'jotai/react'
 import { Fragment, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Platform } from 'react-native'
 
 import Header from '~common/Header'
 import SearchInput from '~common/SearchInput'
 import Box, { HStack, SafeAreaBox, usePageBottomInset } from '~common/ui/Box'
-import ListSection from '~common/ui/ListSection'
+import { FeatherIcon } from '~common/ui/Icon'
+import ListSection, { ListRow } from '~common/ui/ListSection'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
 import {
@@ -13,6 +16,7 @@ import {
   shortcutKeys,
   type ShortcutRow,
 } from '~features/keyboard-shortcuts/keymap'
+import { replayWorkspaceOnboardingAtom } from '~features/onboarding/workspace/state'
 import { normalizeSearchText } from '~features/search/shared/searchFuzzy'
 
 /** One key as printed on the keyboard: a mark set in the card, so radius 4 on the page's ground. */
@@ -42,6 +46,7 @@ const KeyboardShortcutsScreen = () => {
   const { t } = useTranslation()
   const bottomInset = usePageBottomInset()
   const [query, setQuery] = useState('')
+  const replay = useSetAtom(replayWorkspaceOnboardingAtom)
   const mac = isMacPlatform()
   const modifier = mac ? 'Ctrl' : 'Alt'
   const search = normalizeSearchText(query.trim())
@@ -87,6 +92,17 @@ const KeyboardShortcutsScreen = () => {
             ))}
           </ListSection>
         ))}
+        {/* The story of the Web and the desktop app teaches these keys; it can be played again. */}
+        {Platform.OS === 'web' && !search && (
+          <ListSection>
+            <ListRow
+              label={t('workspaceOnboarding.replay')}
+              icon={<FeatherIcon name="compass" size={17} color="primary" />}
+              iconTint="primary"
+              onPress={replay}
+            />
+          </ListSection>
+        )}
         {!sections.length && (
           <Text className="text-[15px] text-grey text-center mt-[32px]">
             {t('shortcutGuide.noMatch')}

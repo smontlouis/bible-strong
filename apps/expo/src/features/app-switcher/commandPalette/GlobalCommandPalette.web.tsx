@@ -11,6 +11,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai/react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { activeGroupAtom, activeTabIdAtom, appSwitcherModeAtom } from '~state/tabs'
+import { workspaceStoryOpenAtom } from '~features/onboarding/workspace/state'
 import CommandPalette from './CommandPalette.web'
 import { useTheme } from '~themes/ThemeProvider'
 import { webThemeVariables } from '~themes/webThemeVariables'
@@ -32,9 +33,12 @@ export default function GlobalCommandPalette() {
   const [initialScope, setInitialScope] = useAtom(commandPaletteScopeAtom)
   const [open, setOpen] = useAtom(commandPaletteOpenAtom)
   const [restoreFocus, setRestoreFocus] = useAtom(commandPaletteReturnFocusAtom)
+  const storyOpen = useAtomValue(workspaceStoryOpenAtom)
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
       if (
+        // The onboarding's story holds the keyboard: ⌘K opens the palette once it is done.
+        storyOpen ||
         event.isComposing ||
         event.altKey ||
         !(event.metaKey || event.ctrlKey) ||
@@ -60,7 +64,7 @@ export default function GlobalCommandPalette() {
     }
     document.addEventListener('keydown', handleKey, true)
     return () => document.removeEventListener('keydown', handleKey, true)
-  }, [pathname, activeId, mode, open, setOpen, setRestoreFocus, setInitialScope])
+  }, [pathname, activeId, mode, open, storyOpen, setOpen, setRestoreFocus, setInitialScope])
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Portal>

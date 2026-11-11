@@ -6,6 +6,9 @@ import { resolveFontFamily } from '~themes/styleValues'
 import { SHORTCUT_SECTIONS, isMacPlatform, shortcutKeys } from '~features/keyboard-shortcuts/keymap'
 import { paletteScopes } from './scopes'
 import { FeatherIcon } from '~common/ui/Icon'
+import { useSetAtom } from 'jotai/react'
+import { replayWorkspaceOnboardingAtom } from '~features/onboarding/workspace/state'
+import { commandPaletteOpenAtom } from './state'
 
 export default function ShortcutGuide({
   open,
@@ -21,6 +24,8 @@ export default function ShortcutGuide({
   const theme = useTheme()
   const mac = isMacPlatform()
   const modifier = mac ? 'Ctrl' : 'Alt'
+  const replay = useSetAtom(replayWorkspaceOnboardingAtom)
+  const setPaletteOpen = useSetAtom(commandPaletteOpenAtom)
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -53,6 +58,7 @@ export default function ShortcutGuide({
               '--command-border': theme.colors.border,
               '--command-active': theme.colors.lightPrimary,
               '--command-primary': theme.colors.primary,
+              '--command-link': theme.colors.link,
               fontFamily: resolveFontFamily(theme.fontFamily.text),
             } as CSSProperties
           }
@@ -141,6 +147,19 @@ export default function ShortcutGuide({
                   </dd>
                 </div>
               </dl>
+            </section>
+            <section className="bs-command-help-replay">
+              <button
+                type="button"
+                onClick={() => {
+                  onOpenChange(false)
+                  setPaletteOpen(false)
+                  replay()
+                }}
+              >
+                <FeatherIcon name="compass" size={16} color={theme.colors.link} />
+                {t('workspaceOnboarding.replay')}
+              </button>
             </section>
           </div>
         </Dialog.Content>

@@ -24,6 +24,7 @@ import Animated, {
 } from 'react-native-reanimated'
 import Box, { AnimatedBox, HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { supportsOfflineCopies } from '~desktop/isDesktop'
 import { OnboardingStage } from './abel/OnboardingStage'
 import { SceneGraph } from './abel/SceneGraph'
 import { ONBOARDING_SCENE_COUNT, ONBOARDING_SCENES } from './abel/sceneRegistry'
@@ -265,7 +266,12 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
   const confirmSkip = async () => {
     const confirmed = await confirm({
       title: t('onboarding.abel.skipConfirmTitle'),
-      message: t('onboarding.abel.skipConfirmMessage'),
+      // The browser has no Offline copies to choose: skipping leads straight into the app.
+      message: t(
+        supportsOfflineCopies
+          ? 'onboarding.abel.skipConfirmMessage'
+          : 'onboarding.abel.skipConfirmMessageOnline'
+      ),
       cancelLabel: t('onboarding.abel.keepDiscovering'),
       confirmLabel: t('onboarding.abel.skip'),
     })

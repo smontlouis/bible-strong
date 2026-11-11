@@ -2,10 +2,11 @@ import * as Sentry from '@sentry/react-native'
 import { listen } from '@tauri-apps/api/event'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import { useRouter } from 'expo-router'
-import { useAtomValue } from 'jotai/react'
+import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { replayWorkspaceOnboardingAtom } from '~features/onboarding/workspace/state'
 import { markForPrint } from '~features/print/markForPrint'
 import { appLogger } from '~helpers/agentObservability'
 import { flushStorage } from '~helpers/storage.desktop'
@@ -35,7 +36,8 @@ export const desktopLinkRoute = (url: string): string | undefined => {
 }
 
 /**
- * What only the desktop app does at runtime: the native menu, the window's appearance and title,
+ * What only the desktop app does at runtime: the native menu (its Help menu plays the
+ * onboarding's story again), the window's appearance and title,
  * the Offline copies' progress on the Dock icon, links handed over by the system, updates, and the
  * last key-value writes before the app quits.
  * Renders nothing.
@@ -49,6 +51,7 @@ const DesktopShell = () => {
   useDesktopFullscreen()
   useDesktopDownloadProgress()
   const changeTextSize = useTextSizeChange()
+  const replayOnboarding = useSetAtom(replayWorkspaceOnboardingAtom)
 
   // A hidden page must not freeze halfway through an installation. The shell turns WebKit's
   // throttling off on macOS 14+; Chromium (Windows) does not freeze a page holding a Web Lock.
@@ -87,6 +90,8 @@ const DesktopShell = () => {
           void checkDesktopUpdate({ announce: true })
         } else if (kind === 'text') {
           changeTextSize(value as TextSizeChange)
+        } else if (kind === 'onboarding') {
+          replayOnboarding()
         } else if (kind === 'print') {
           markForPrint(document)
           invoke('webview_print').catch(error =>
