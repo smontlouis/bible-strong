@@ -533,6 +533,10 @@ describe('Library search index', { skip: !runIntegration }, () => {
       assert.match(adventist?.text ?? '', /^The millennium begins at the second coming\./u, 'the first hit of a perspective carries its section')
       assert.match(adventist?.text ?? '', /desolate earth\.$/u)
       for (const hit of perspectiveHits) assert.equal(hit.perspective, perspectiveOf(hit.tradition, hit.tags))
+      // The distance tells a near hit from the best of a perspective that is far from the question.
+      const covenant = perspectiveHits.find(hit => hit.title === 'The Covenant')
+      assert.ok(adventist?.distance !== undefined && covenant?.distance !== undefined)
+      assert.ok(covenant!.distance! > adventist!.distance! + 0.5)
     } finally {
       await isolated.dispose()
     }

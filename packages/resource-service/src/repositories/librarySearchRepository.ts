@@ -72,8 +72,9 @@ const PERSPECTIVE_WORDS: readonly (readonly [LibraryPerspective, string])[] = [
   ['adventist', 'adventiste'],
   ['catholic', 'catholi|thomiste|scolastique'],
   ['patristic', 'christianisme ancien|patristique'],
-  ['orthodox', 'orthodox'],
+  // Before the Orthodox one: a Jewish work may be tagged Orthodox (modern Orthodox Judaism).
   ['jewish', 'judaisme|rabbinique'],
+  ['orthodox', 'orthodox'],
   // Critical and university exegesis, whatever the confession of its authors.
   ['academic', 'exegese critique|universitaire|moderniste'],
   ['evangelical', 'dispensational|freres|evangelique|baptiste|restaurationniste|pentecot'],
@@ -149,6 +150,11 @@ export type LibrarySearchHit = {
   target: Record<string, string | number>
   score: number
   matched: 'semantic' | 'lexical' | 'both'
+  /**
+   * Found by meaning: the cosine distance of the passage to the query (0 is the same meaning).
+   * Scores rank within one search; the distance says how near a hit is whatever its rank.
+   */
+  distance?: number
   perspective: LibraryPerspective
 }
 
@@ -413,17 +419,32 @@ const identityOf = (row: PassageRow) => {
   return `entity:${target.uniqueName}`
 }
 
-type Ranked = { candidate: Candidate; score: number; semantic: boolean; lexical: boolean }
+type Ranked = {
+  candidate: Candidate
+  score: number
+  semantic: boolean
+  lexical: boolean
+  distance?: number
+}
 
 /** Reciprocal rank fusion of lists by meaning (one per language, the reader's first) and by words. */
-function fuse(vectorLists: readonly Candidate[][], lexicalRows: readonly Candidate[]): Ranked[] {
+function fuse(
+  vectorLists: readonly (Candidate & { distance?: number })[][],
+  lexicalRows: readonly Candidate[]
+): Ranked[] {
   const fused = new Map<string, Ranked>()
-  const add = (rows: readonly Candidate[], kind: 'semantic' | 'lexical', weight = 1) =>
+  const add = (
+    rows: readonly (Candidate & { distance?: number })[],
+    kind: 'semantic' | 'lexical',
+    weight = 1
+  ) =>
     rows.forEach((candidate, rank) => {
       const key = `${candidate.publication_id}:${candidate.passage_key}`
       const entry = fused.get(key) ?? { candidate, score: 0, semantic: false, lexical: false }
       entry.score += weight / (RRF_K + rank + 1)
       entry[kind] = true
+      if (candidate.distance !== undefined)
+        entry.distance = Math.min(entry.distance ?? Infinity, Number(candidate.distance))
       fused.set(key, entry)
     })
   // The reader's language keeps an edge over the other one.
@@ -743,6 +764,7 @@ export async function searchLibrary(
       : {}),
     target: row.target,
     score: Math.round(entry.score * 10_000) / 10_000,
+    ...(entry.distance !== undefined ? { distance: Math.round(entry.distance * 10_000) / 10_000 } : {}),
     matched: entry.semantic && entry.lexical ? 'both' : entry.semantic ? 'semantic' : 'lexical',
     perspective: perspectiveOf(row.tradition, row.tags),
   })

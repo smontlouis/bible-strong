@@ -135,3 +135,8 @@ that wants every tradition heard needs each one searched on its own.
   tag naming Orthodoxy) and `academic` (critical, university or modernist exegesis, whatever its
   authors' confession), sorted before `protestant`. Until a work of theirs is indexed they have no
   list and no hit.
+- The Jewish perspective is tested before the Orthodox one: Malbim is tagged « Orthodoxe
+  moderne ».
+- A hit found by meaning carries `distance`, the cosine distance of its passage to the query.
+  Scores rank hits within one search; the best hit of a perspective always ranks first in its own
+  lists, however far it is, so a caller that wants a relevance floor reads the distance.

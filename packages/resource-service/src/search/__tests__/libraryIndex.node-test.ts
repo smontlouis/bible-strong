@@ -324,6 +324,7 @@ describe('library collections', () => {
     assert.equal(perspectiveOf('Judaïsme', ['Rabbinique']), 'jewish')
     assert.equal(perspectiveOf(null, []), 'reference')
     assert.equal(perspectiveOf('Orthodoxie', ['Orthodoxe']), 'orthodox')
+    assert.equal(perspectiveOf('Judaïsme', ['Rabbinique', 'Orthodoxe moderne']), 'jewish')
     assert.equal(perspectiveOf('Exégèse critique', ['Universitaire']), 'academic')
     assert.equal(perspectiveOf('Exégèse critique', ['Moderniste']), 'academic')
     assert.equal(parseLibrarySearchInput({ query: 'les langues', perspectives: true }).perspectives, true)
