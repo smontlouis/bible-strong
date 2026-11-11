@@ -2,9 +2,13 @@ import React, { act } from 'react'
 import { create, type ReactTestRenderer } from 'react-test-renderer'
 import WorkspaceLayout from '../WorkspaceLayout'
 import WorkspaceSidebar from '../WorkspaceSidebar'
+import { Platform } from 'react-native'
+
+const mockPlatform = Platform as { OS: string }
 
 let mockPath = '/note'
 let mockShowsStudy = true
+let mockBasePath: string | undefined
 jest.mock('expo-router', () => ({
   usePathname: () => mockPath,
   useRouter: () => ({ push: jest.fn() }),
@@ -29,6 +33,7 @@ jest.mock('~navigation/pageTransition', () => ({
 jest.mock('~navigation/useWorkspaceRoutePanel', () => ({
   useWorkspaceRoutePanel: () => ({
     open: true,
+    basePath: mockBasePath,
     showsStudy: mockShowsStudy,
     reservedWidth: 500,
     sidebarDocked: true,
@@ -56,7 +61,7 @@ jest.mock('../utils/useResponsiveWorkspace', () => ({
   workspaceSidebarVariant: 'inset',
 }))
 
-function sidebarIsActive() {
+function renderLayout() {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
   const originalDocument = Object.getOwnPropertyDescriptor(globalThis, 'document')
   Object.defineProperty(globalThis, 'document', {
@@ -71,12 +76,34 @@ function sidebarIsActive() {
       </WorkspaceLayout>
     )
   })
-  const active = view!.root.findByType(WorkspaceSidebar).props.isContentActive
-  act(() => view!.unmount())
-  if (originalDocument) Object.defineProperty(globalThis, 'document', originalDocument)
-  else Reflect.deleteProperty(globalThis, 'document')
+  return {
+    view: view!,
+    cleanup: () => {
+      act(() => view!.unmount())
+      if (originalDocument) Object.defineProperty(globalThis, 'document', originalDocument)
+      else Reflect.deleteProperty(globalThis, 'document')
+    },
+  }
+}
+
+function sidebarIsActive() {
+  const { view, cleanup } = renderLayout()
+  const active = view.root.findByType(WorkspaceSidebar).props.isContentActive
+  cleanup()
   return active
 }
+
+function readerZIndex() {
+  const { view, cleanup } = renderLayout()
+  const zIndex = view.root.findByProps({ testID: 'workspace-reader-motion' }).props.style.zIndex
+  cleanup()
+  return zIndex
+}
+
+afterEach(() => {
+  mockPlatform.OS = 'web'
+  mockBasePath = undefined
+})
 
 it('keeps the underlying tab active while an auxiliary panel is open', () => {
   mockPath = '/note'
@@ -87,4 +114,21 @@ it('does not highlight a tab when the panel belongs to a standalone page', () =>
   mockPath = '/note'
   mockShowsStudy = false
   expect(sidebarIsActive()).toBe(false)
+})
+
+// A route of the (explore) group pushed over the reader: UIKit presents it as a sheet above
+// both, Android pushes it as a page inside the stack.
+it('lifts the reader over the stack under an iPad form sheet', () => {
+  mockPlatform.OS = 'ios'
+  mockPath = '/note'
+  mockBasePath = '/'
+  mockShowsStudy = false
+  expect(readerZIndex()).toBe(1)
+})
+it('leaves an Android page pushed over the reader on top of it', () => {
+  mockPlatform.OS = 'android'
+  mockPath = '/note'
+  mockBasePath = '/'
+  mockShowsStudy = false
+  expect(readerZIndex()).toBeUndefined()
 })
