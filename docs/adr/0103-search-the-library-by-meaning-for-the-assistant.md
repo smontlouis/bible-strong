@@ -186,3 +186,8 @@ before it reached the perspective's works.
   each perspective took 1.95 s in the median from a laptop, against 1.7 s on the shared index: the
   indexes buy coverage, not speed.
 - The Neon file cache holds 2.2 GB; the new indexes compete with the shared one for it.
+- On the assistant's bench of 2026-11-12 (private repository, ADR-0107), answers built on the
+  family indexes were no better than on the shared index (−0.08 ± 0.15 on the debated points), and
+  the search within each perspective was slower (1.36 s in the median from a laptop, against
+  0.87 s). Whether to keep the indexes, or to drop them and search the shared index again, is left
+  open.
