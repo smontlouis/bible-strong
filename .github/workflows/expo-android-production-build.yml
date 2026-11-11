@@ -17,6 +17,11 @@ on:
         required: false
         type: boolean
         default: false
+      same_version:
+        description: Build again a version already built (a rebuild after a refused upload, say); never an older one
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: expo-android-production-build
@@ -24,6 +29,8 @@ concurrency:
 
 permissions:
   contents: read
+  # check-new-version.mjs reads the earlier runs of this workflow.
+  actions: read
 
 jobs:
   build:
@@ -69,6 +76,13 @@ jobs:
         with:
           node-version: 22
 
+      # Before anything long: a version already built goes out again only with same_version.
+      - name: Refuse a version already built
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SAME_VERSION: ${{ inputs.same_version }}
+        run: node apps/expo/scripts/check-new-version.mjs android
+
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
@@ -110,10 +124,14 @@ jobs:
       - name: Name the AAB
         id: aab
         working-directory: apps/expo
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           set -euo pipefail
           version=$(node -p "require('./package.json').version")
-          code=$(sed -n 's/^ *versionCode: \([0-9]*\),/\1/p' app.config.ts)
+          # EAS gave this build the next versionCode (eas.json, appVersionSource remote).
+          code=$(yarn dotenv -c production -- eas build:version:get -p android --json --non-interactive 2>/dev/null \
+            | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.parse(s).versionCode??''))")
           if [ -z "$version" ] || [ -z "$code" ]; then
             echo "::error::Could not read the version or the versionCode."
             exit 1

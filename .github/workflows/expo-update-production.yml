@@ -8,6 +8,11 @@ on:
         description: What the update changes (defaults to the last commit)
         required: false
         type: string
+      same_version:
+        description: Publish again the version of the update already served (a corrected update); never an older one
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: expo-update-production
@@ -15,6 +20,8 @@ concurrency:
 
 permissions:
   contents: read
+  # check-new-version.mjs reads the earlier runs of the production build workflows.
+  actions: read
 
 jobs:
   publish-update:
@@ -50,6 +57,8 @@ jobs:
           OTA_PUBLISH_TOKEN: ${{ secrets.OTA_PUBLISH_TOKEN }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           UPDATE_MESSAGE: ${{ inputs.message }}
+          GH_TOKEN: ${{ github.token }}
+          SAME_VERSION: ${{ inputs.same_version }}
         run: |
           message="${UPDATE_MESSAGE:-$(git log -1 --pretty=%s)} (${GITHUB_SHA::7})"
           yarn workspace @bible-strong/expo update:production --message "$message"

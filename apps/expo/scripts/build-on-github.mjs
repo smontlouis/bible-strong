@@ -3,17 +3,23 @@
 // ~/Builds/bible-strong. The runner builds the commit at the tip of master on GitHub, not this
 // checkout: push first.
 //
-//   node scripts/build-on-github.mjs <android|ios> [--submit] [--no-register]
+//   node scripts/build-on-github.mjs <android|ios> [--submit] [--no-register] [--same-version]
 //
 //   --submit        also send the build to the store from the runner (TestFlight, or the Play
 //                   production track with managed publishing)
 //   --no-register   do not declare the build to the update server (a trial, not a store build)
+//   --same-version  build again the version of the last production build of this platform (a
+//                   rebuild); without it, a version already built is refused before the run starts
+//
+// The build number comes from EAS (eas.json, appVersionSource remote), the version from
+// apps/expo/package.json: move it first with `yarn release:version`.
 //
 // Needs the `gh` CLI, signed in with access to the repository.
 import { spawnSync } from 'node:child_process'
 import { mkdirSync, mkdtempSync, readdirSync, renameSync, rmSync } from 'node:fs'
 import { homedir, tmpdir } from 'node:os'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const workflows = {
   android: { file: 'expo-android-production-build.yml', extension: 'aab' },
@@ -24,14 +30,17 @@ const buildsDirectory = path.join(homedir(), 'Builds', 'bible-strong')
 const args = process.argv.slice(2)
 const platform = args.find(arg => !arg.startsWith('--'))
 const unknown = args.filter(
-  arg => arg.startsWith('--') && !['--submit', '--no-register'].includes(arg)
+  arg => arg.startsWith('--') && !['--submit', '--no-register', '--same-version'].includes(arg)
 )
 if (!workflows[platform] || unknown.length > 0) {
-  fail('Usage: node scripts/build-on-github.mjs <android|ios> [--submit] [--no-register]')
+  fail(
+    'Usage: node scripts/build-on-github.mjs <android|ios> [--submit] [--no-register] [--same-version]'
+  )
 }
 const { file: workflow, extension } = workflows[platform]
 const submit = args.includes('--submit')
 const register = !args.includes('--no-register')
+const sameVersion = args.includes('--same-version')
 
 function fail(message) {
   console.error(message)
@@ -69,6 +78,20 @@ if (run('git', ['status', '--porcelain']).out) {
   console.warn('Warning: uncommitted changes here are not part of the build.')
 }
 
+// The workflow checks it too, but a refusal here costs no runner.
+const versionCheck = run(
+  'node',
+  [
+    path.join(path.dirname(fileURLToPath(import.meta.url)), 'check-new-version.mjs'),
+    platform,
+    '--ref',
+    remote,
+    ...(sameVersion ? ['--same-version'] : []),
+  ],
+  { inherit: true }
+)
+if (!versionCheck.ok) process.exit(1)
+
 const knownRuns = () =>
   JSON.parse(
     must('gh', [
@@ -96,6 +119,8 @@ must('gh', [
   `register=${register}`,
   '-f',
   `submit=${submit}`,
+  '-f',
+  `same_version=${sameVersion}`,
 ])
 
 let runId

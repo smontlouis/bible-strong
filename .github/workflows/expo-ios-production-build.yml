@@ -18,6 +18,11 @@ on:
         required: false
         type: boolean
         default: false
+      same_version:
+        description: Build again a version already built (a rebuild after a refused upload, say); never an older one
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: expo-ios-production-build
@@ -25,6 +30,8 @@ concurrency:
 
 permissions:
   contents: read
+  # check-new-version.mjs reads the earlier runs of this workflow.
+  actions: read
 
 jobs:
   build:
@@ -74,6 +81,13 @@ jobs:
         with:
           node-version: 22
 
+      # Before anything long: a version already built goes out again only with same_version.
+      - name: Refuse a version already built
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SAME_VERSION: ${{ inputs.same_version }}
+        run: node apps/expo/scripts/check-new-version.mjs ios
+
       - name: Enable Corepack
         run: corepack enable
 
@@ -114,7 +128,10 @@ jobs:
         run: |
           set -euo pipefail
           version=$(node -p "require('./package.json').version")
-          number=$(sed -n "s/^ *buildNumber: '\([0-9]*\)',/\1/p" app.config.ts)
+          # EAS gave this build the next buildNumber (eas.json, appVersionSource remote): read it in the IPA.
+          ipa=$(ls build-*.ipa)
+          plist=$(unzip -Z1 "$ipa" | grep -E '^Payload/[^/]+\.app/Info\.plist$' | head -1)
+          number=$(unzip -p "$ipa" "$plist" | plutil -extract CFBundleVersion raw -o - -)
           if [ -z "$version" ] || [ -z "$number" ]; then
             echo "::error::Could not read the version or the buildNumber."
             exit 1

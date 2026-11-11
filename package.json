@@ -15,6 +15,7 @@
     "dev:desktop:web": "yarn workspace @bible-strong/desktop web:dev",
     "dev:desktop": "yarn workspace @bible-strong/desktop dev",
     "desktop:release": "node apps/desktop/scripts/release.mjs",
+    "release:version": "yarn workspace @bible-strong/expo release:version",
     "clean:expo:ios": "yarn workspace @bible-strong/expo clean:ios",
     "dev:site": "yarn workspace @bible-strong/site dev",
     "dev:world": "yarn workspace @bible-strong/world dev",

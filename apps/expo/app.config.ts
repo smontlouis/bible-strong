@@ -2,7 +2,9 @@ import { ExpoConfig, ConfigContext } from 'expo/config'
 import app from './package.json'
 
 // One version for iOS, Android, the Web and the desktop app, kept in package.json: the desktop
-// app reads it there too (apps/desktop/src-tauri/tauri.conf.json).
+// app reads it there too (apps/desktop/src-tauri/tauri.conf.json). It moves only through
+// `yarn release:version`. The build numbers (versionCode, buildNumber) are not set here: EAS gives
+// the next one to each production build (eas.json, appVersionSource remote).
 const APP_VERSION = app.version
 // Patch releases share a runtime and receive the same OTA updates. Any native change must
 // ship in a new major or minor version, which creates a new runtime.
@@ -72,7 +74,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   userInterfaceStyle: 'automatic',
 
   android: {
-    versionCode: 516,
     package: 'com.smontlouis.biblestrong',
     googleServicesFile:
       process.env.ANDROID_GOOGLE_SERVICES_FILE ?? 'firebase/dev/google-services.json',
@@ -98,7 +99,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   ios: {
     bundleIdentifier: process.env.BUNDLE_IDENTIFIER ?? 'com.smontlouis.biblestrong.dev',
-    buildNumber: '303',
     googleServicesFile:
       process.env.IOS_GOOGLE_SERVICES_FILE ?? './firebase/dev/GoogleService-Info.plist',
     userInterfaceStyle: 'automatic',

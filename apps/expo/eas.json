@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 14.2.0"
+    "version": ">= 14.2.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -30,7 +31,8 @@
       "ios": { "simulator": true }
     },
     "production": {
-      "channel": "production"
+      "channel": "production",
+      "autoIncrement": true
     },
     "production-apk": {
       "channel": "production",

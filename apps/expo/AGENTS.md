@@ -24,8 +24,19 @@ Run them here, or from the root with `yarn workspace @bible-strong/expo <script>
 | Theme CSS after a palette edit | `yarn themes:generate`, then `yarn themes:check` |
 | i18n extraction | `yarn i18n` |
 | Style guard for UI changes (root) | `yarn agents:styles:check` |
+| New version, before a store build or a production update | `yarn release:version <patch\|minor\|major>` (root too) |
 
 Use `yarn expo …`, never `npx expo …`. A JavaScript change reaches the device through Metro; native builds (dev client, production) and OTA updates are the owner's call.
+
+## Versions
+
+- **One version** for iOS, Android, the Web and the desktop app: `version` in `package.json`. Its major and minor make the update runtime (`app.config.ts`): an update reaches every build of its runtime.
+- **It moves only through `yarn release:version <part>`**, which commits `package.json` alone. Never edit it by hand, never inside a feature commit.
+- **Before any store build or production update, ask the owner which part**, run the command, push:
+  - `patch` for an update, or a store build without native change. The runtime stays, so updates keep reaching the builds already out. An update is always a patch.
+  - `minor` for a native change (a native dependency, a config plugin, native code): a new runtime, so new store builds, and updates published afterwards no longer reach the older builds.
+- **The build numbers (`versionCode`, `buildNumber`) come from EAS** (`eas.json`: `appVersionSource: remote`, `autoIncrement` on the production profile): each production build takes the next one, from the Mac, the PC, a GitHub runner or EAS's servers. Never set them in `app.config.ts`. `yarn dotenv -c production -- eas build:version:get -p all` reads them, `eas build:version:set` corrects one.
+- **`scripts/check-new-version.mjs` refuses a version already out**, before any work: production builds (`build:*:github`, the workflows, `build:ios:prod`, `android-pc build-prod`) against the platform's last successful GitHub production build, production updates (`update:production` and its workflow) against the update the server serves on the runtime and the last production builds. Only what went out on the same runtime counts, so a fix for older binaries (a `release/28.0` branch) is not held back by master's builds. The same version again (a rebuild, a corrected update) needs `--same-version` (`build:*:github`), the `same_version` workflow input or `SAME_VERSION=1`; an older version never passes. A local production build leaves no trace for the check: GitHub is the default path.
 
 ## Code rules
 

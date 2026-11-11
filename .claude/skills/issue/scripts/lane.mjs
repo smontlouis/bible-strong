@@ -225,8 +225,8 @@ const nativeWarnings = (app, worktree) => {
   const match = app.name.match(/-(\d+)\.(\d+)\.\d+-simulator-([0-9a-f]{7,40})\.app$/)
   if (!match) return ['nom du .app inattendu : impossible de vérifier sa version']
   const [, major, minor, sha] = match
-  const config = fs.readFileSync(path.join(worktree, 'apps/expo/app.config.ts'), 'utf8')
-  const version = config.match(/APP_VERSION\s*=\s*'(\d+)\.(\d+)\.\d+'/)
+  const appPackage = fs.readFileSync(path.join(worktree, 'apps/expo/package.json'), 'utf8')
+  const version = JSON.parse(appPackage).version?.match(/^(\d+)\.(\d+)\.\d+$/)
   if (version && (version[1] !== major || version[2] !== minor)) {
     warnings.push(
       `runtime du .app ${major}.${minor} ≠ runtime du worktree ${version[1]}.${version[2]} : il faut un nouveau build`

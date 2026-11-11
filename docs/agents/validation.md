@@ -151,6 +151,8 @@ yarn workspace @bible-strong/expo build:ios:github       # about 75 min, against
 
 Each starts its workflow (`expo-android-production-build.yml`, `expo-ios-production-build.yml`), waits, and stores the file in `~/Builds/bible-strong`. Add `--no-register` for a trial, and `--submit` to send the build to the store from the runner. Logs and artifacts are public there: the workflows keep the build log off the page and the artifact for one day.
 
+A production build or update needs a new version first: `yarn release:version <patch|minor>`, then push (`apps/expo/AGENTS.md`, « Versions »). `scripts/check-new-version.mjs` refuses a version already built or served before the run starts; `--same-version` (or the `same_version` workflow input, or `SAME_VERSION=1` for `build:ios:prod`, `android-pc build-prod` and `update:production`) lets a rebuild of the same version through. EAS gives every production build the next `versionCode` or `buildNumber`, whichever path builds it.
+
 ## UI Validation Notes
 
 Argent is the preferred simulator tooling and should be verified against the target booted simulator before runtime validation. The existing `builds/biblestrong.dev.app` was installed and launched with bundle id `com.smontlouis.biblestrong.dev`.
