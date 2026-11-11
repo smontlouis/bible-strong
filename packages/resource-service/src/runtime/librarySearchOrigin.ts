@@ -6,6 +6,7 @@ import { searchLibrary } from '../repositories/librarySearchRepository'
 import {
   LIBRARY_EMBEDDING_CONTRACT,
   makeLibraryEmbeddingProvider,
+  withQueryEmbeddingCache,
 } from '../search/libraryEmbedding'
 import { parseLibraryDocumentInput, parseLibrarySearchInput } from '../search/librarySearchInput'
 import { makeMetadataOnlyAiGatewayOptions } from './searchRuntimeAnalytics'
@@ -20,7 +21,7 @@ export async function runLibrarySearch(bindings: Env, value: unknown) {
     input.perPerspective ? 5 : 2
   )
   try {
-    const provider = makeLibraryEmbeddingProvider({
+    const provider = withQueryEmbeddingCache(makeLibraryEmbeddingProvider({
       run: (model, payload) =>
         bindings.AI.run(
           model,
@@ -32,7 +33,7 @@ export async function runLibrarySearch(bindings: Env, value: unknown) {
             enabled: bindings.SEARCH_ANALYTICS_ENABLED === 'true',
           })
         ),
-    })
+    }))
     const started = Date.now()
     const result = await searchLibrary(database, provider, input)
     console.log(

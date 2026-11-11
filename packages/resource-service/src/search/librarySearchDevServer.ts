@@ -13,7 +13,7 @@ import { createServer } from 'node:http'
 import { makeLocalDatabase } from '../database/localDatabase'
 import { readLibraryDocument } from '../repositories/libraryDocumentRepository'
 import { searchLibrary } from '../repositories/librarySearchRepository'
-import { makeHttpLibraryEmbeddingProvider } from './libraryEmbedding'
+import { makeHttpLibraryEmbeddingProvider, withQueryEmbeddingCache } from './libraryEmbedding'
 import { makeRestLibraryEmbeddingProvider } from './libraryEmbeddingRest'
 import { parseLibraryDocumentInput, parseLibrarySearchInput } from './librarySearchInput'
 
@@ -25,12 +25,12 @@ const database = makeLocalDatabase({
   // As many as the Worker opens for a search by perspective, with room for the lexical one.
   maxConnections: 6,
 })
-const provider = process.env.CLOUDFLARE_ACCOUNT_ID
+const provider = withQueryEmbeddingCache(process.env.CLOUDFLARE_ACCOUNT_ID
   ? makeRestLibraryEmbeddingProvider(process.env.CLOUDFLARE_ACCOUNT_ID)
   : makeHttpLibraryEmbeddingProvider(
       process.env.RESOURCE_LIBRARY_EMBEDDING_URL ?? 'http://127.0.0.1:8791',
       { maxAttempts: 3 }
-    )
+    ))
 
 const server = createServer(async (request, response) => {
   const answer = (status: number, body: unknown) => {

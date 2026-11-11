@@ -140,3 +140,10 @@ that wants every tradition heard needs each one searched on its own.
 - A hit found by meaning carries `distance`, the cosine distance of its passage to the query.
   Scores rank hits within one search; the best hit of a perspective always ranks first in its own
   lists, however far it is, so a caller that wants a relevance floor reads the distance.
+- After 30 more works were imported the same day, the lists of a rare perspective in a language
+  (the Catholic works in English) walked pgvector's 20,000 tuples, about a second cold. Each list
+  by perspective now asks for 12 passages and stops after 5,000 tuples, keeping what it found;
+  from a laptop the vector part went from 1.1 s to 0.4 to 0.85 s in the median.
+- The entrypoint and the development server keep the vectors of the last 64 queries for ten
+  minutes in the isolate (`withQueryEmbeddingCache`): the assistant asks for the search within each
+  perspective after the wide search of the same question, and that call no longer embeds it again.

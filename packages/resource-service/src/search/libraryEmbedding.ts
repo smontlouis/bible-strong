@@ -109,3 +109,32 @@ export const makeHttpLibraryEmbeddingProvider = (
     },
   })
 
+
+const QUERY_CACHE_ENTRIES = 64
+const QUERY_CACHE_TTL_MS = 10 * 60_000
+const queryCache = new Map<string, { vector: Promise<number[]>; at: number }>()
+
+/**
+ * The same provider, remembering the vectors of the last queries in this isolate (amendment of
+ * 2026-11-11 to ADR-0103): the assistant searches the same question twice, the second time within
+ * each tradition once its router has called the point debated, and the second embedding then costs
+ * nothing. A query still being embedded is awaited, not embedded again; a failure is forgotten.
+ */
+export function withQueryEmbeddingCache(provider: LibraryEmbeddingProvider): LibraryEmbeddingProvider {
+  return {
+    model: provider.model,
+    contract: provider.contract,
+    embedDocuments: texts => provider.embedDocuments(texts),
+    embedQuery(text) {
+      const key = `${provider.model}\n${provider.contract}\n${libraryEmbeddingQuery(text)}`
+      const cached = queryCache.get(key)
+      if (cached && Date.now() - cached.at < QUERY_CACHE_TTL_MS) return cached.vector
+      const vector = provider.embedQuery(text)
+      queryCache.delete(key)
+      queryCache.set(key, { vector, at: Date.now() })
+      vector.catch(() => queryCache.delete(key))
+      while (queryCache.size > QUERY_CACHE_ENTRIES) queryCache.delete(queryCache.keys().next().value!)
+      return vector
+    },
+  }
+}

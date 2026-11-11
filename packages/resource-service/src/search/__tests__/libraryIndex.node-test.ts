@@ -9,7 +9,11 @@ import {
   passageReference,
   timelinePassages,
 } from '../libraryDocuments'
-import { libraryEmbeddingQuery, makeLibraryEmbeddingProvider } from '../libraryEmbedding'
+import {
+  libraryEmbeddingQuery,
+  makeLibraryEmbeddingProvider,
+  withQueryEmbeddingCache,
+} from '../libraryEmbedding'
 import { parseLibrarySearchInput } from '../librarySearchInput'
 import { LIBRARY_PASSAGE_MAX_CHARACTERS, htmlToPlainText, splitIntoPassages } from '../libraryText'
 
@@ -161,6 +165,28 @@ describe('library embedding and search input', () => {
     assert.match(libraryEmbeddingQuery('x'), /^Instruct: .+\nQuery: x$/u)
     const broken = makeLibraryEmbeddingProvider({ run: async () => ({ data: [[1, 2]] }) })
     await assert.rejects(() => broken.embedDocuments(['a']), /LIBRARY_EMBEDDING_INVALID_RESPONSE/)
+  })
+
+  it('embeds a query searched twice once, and forgets a failure', async () => {
+    let calls = 0
+    let fail = true
+    const provider = withQueryEmbeddingCache(
+      makeLibraryEmbeddingProvider({
+        run: async (_model, input) => {
+          calls++
+          if (input.text[0].includes('refusée') && fail) throw new Error('DOWN')
+          return { data: input.text.map(() => Array(1024).fill(0.2)) }
+        },
+      })
+    )
+    const [first, second] = await Promise.all([provider.embedQuery('le sabbat, deux fois'), provider.embedQuery('le sabbat, deux fois')])
+    assert.deepEqual(first, second)
+    await provider.embedQuery('le  sabbat, deux fois')
+    assert.equal(calls, 1, 'the same query is embedded once')
+    await assert.rejects(() => provider.embedQuery('une question refusée'), /DOWN/)
+    fail = false
+    await provider.embedQuery('une question refusée')
+    assert.equal(calls, 3, 'a failure is not kept')
   })
 
   it('accepts only known, bounded arguments', () => {

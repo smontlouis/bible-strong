@@ -172,7 +172,13 @@ const CANDIDATES = 100
 const PERSPECTIVE_CANDIDATES = 150
 const MAX_HITS_PER_WORK = 2
 /** Each perspective's own lists: nearest passages per language, and passages by words. */
-const PERSPECTIVE_LIST_CANDIDATES = 40
+const PERSPECTIVE_LIST_CANDIDATES = 12
+/**
+ * A rare perspective in a language (the Catholic works in English) makes the filtered walk of the
+ * vector index read up to pgvector's 20,000 tuples, about a second cold: it stops at this many
+ * and keeps the passages it found.
+ */
+const PERSPECTIVE_MAX_SCAN_TUPLES = 5000
 /** The best fused passages of a perspective among which its hits are chosen. */
 const PERSPECTIVE_POOL = 20
 export const LIBRARY_SEARCH_MAX_PER_PERSPECTIVE = 4
@@ -593,6 +599,8 @@ export async function searchLibrary(
       // Filters apply after the graph walk: iterative scans keep walking until enough rows pass.
       await sql`set local hnsw.ef_search = ${sql.lit(Math.max(100, candidates))}`.execute(transaction)
       await sql`set local hnsw.iterative_scan = relaxed_order`.execute(transaction)
+      if (statement.some(list => list.perspective))
+        await sql`set local hnsw.max_scan_tuples = ${sql.lit(PERSPECTIVE_MAX_SCAN_TUPLES)}`.execute(transaction)
       const vector = vectorLiteral(embedding!)
       const result = await sql<VectorRow>`
         ${sql.join(
