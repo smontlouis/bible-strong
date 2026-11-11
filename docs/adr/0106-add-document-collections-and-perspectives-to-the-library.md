@@ -33,6 +33,11 @@ tradition its place.
 - A document may carry short labels. They are stored in the target of its passages and returned
   with every hit. They stay out of the heading, which feeds both the search by meaning and the
   search by words.
+- A document may also label some of its passages only (`passageLabels`): each entry gives an
+  excerpt of the text and its labels, which go to every passage that contains the excerpt, spaces
+  collapsed. The prepared file need not know how the text is cut; the import reports the entries
+  whose excerpt no passage contains (`unmatchedPassageLabels`). A file without passage labels
+  keeps the revision it had before they existed.
 - A search may name works to leave out (`excludeWorks`), unless it also names them in `works`.
 - The index may cut part of each section of a commentary: the part that matches a pattern of the
   index policy (`--policy` or `RESOURCE_LIBRARY_POLICY`), a file kept with the assistant.

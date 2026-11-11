@@ -30,10 +30,15 @@ export type LibraryDocument = {
   text: string
   /** Short labels the prepared file gives the document, returned with each of its hits. */
   labels: string[]
+  /** Labels for the passages only that contain an excerpt of the text, spaces collapsed. */
+  passageLabels: PassageLabels[]
 }
+
+export type PassageLabels = { contains: string; labels: string[] }
 
 const text = (value: unknown, max = 100_000) =>
   typeof value === 'string' && value.trim().length <= max ? value.trim() : ''
+const spaced = (value: string) => value.replace(/\s+/gu, ' ').trim()
 const integer = (value: unknown, min: number, max: number) =>
   Number.isInteger(value) && (value as number) >= min && (value as number) <= max
     ? (value as number)
@@ -98,7 +103,34 @@ export function parseCollectionDocument(
     verseEnd: integer(record.verseEnd, 1, 176),
     text: body,
     labels: strings(record.labels, label => LABEL.test(label), 6),
+    passageLabels: Array.isArray(record.passageLabels)
+      ? record.passageLabels
+          .flatMap(entry => {
+            const value = (entry ?? {}) as Record<string, unknown>
+            const contains = spaced(text(value.contains, 1_000))
+            const labels = strings(value.labels, label => LABEL.test(label), 6)
+            return contains.length >= 20 && labels.length ? [{ contains, labels }] : []
+          })
+          .slice(0, 500)
+      : [],
   }
+}
+
+/** The labels of one passage: the document's, then those of the excerpts it contains. */
+const passageLabelsOf = (document: LibraryDocument, content: string) => {
+  const flat = spaced(content)
+  return [
+    ...new Set([
+      ...document.labels,
+      ...document.passageLabels.flatMap(entry => (flat.includes(entry.contains) ? entry.labels : [])),
+    ]),
+  ].slice(0, 6)
+}
+
+/** The passage labels of a document whose excerpt is in none of its passages. */
+export function unmatchedPassageLabels(document: LibraryDocument): PassageLabels[] {
+  const passages = splitIntoPassages(document.text).map(spaced)
+  return document.passageLabels.filter(entry => !passages.some(passage => passage.includes(entry.contains)))
 }
 
 export const collectionIdentity = (collection: string, language: LibraryLanguage) =>
@@ -131,7 +163,9 @@ export function documentPassages(
   ]
     .filter(Boolean)
     .join(', ')
-  return splitIntoPassages(document.text).map((content, part) => ({
+  return splitIntoPassages(document.text).map((content, part) => {
+    const labels = passageLabelsOf(document, content)
+    return {
     passageKey: `${document.key}#${part}`,
     corpus: 'document',
     language,
@@ -154,7 +188,8 @@ export function documentPassages(
       documentKey: document.key,
       part,
       ...(document.url ? { url: document.url } : {}),
-      ...(document.labels.length ? { labels: [...document.labels] } : {}),
+      ...(labels.length ? { labels } : {}),
     },
-  }))
+    }
+  })
 }

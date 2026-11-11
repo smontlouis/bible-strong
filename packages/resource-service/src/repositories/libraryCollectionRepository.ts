@@ -7,6 +7,7 @@ import {
   collectionIdentity,
   documentPassages,
   parseCollectionDocument,
+  unmatchedPassageLabels,
   type LibraryCollection,
   type LibraryDocument,
 } from '../search/libraryCollections'
@@ -51,6 +52,8 @@ export type LibraryCollectionImportReport = {
   passages: number
   embedded: number
   reused: number
+  /** Passage labels whose excerpt is in none of the passages of their document. */
+  unmatchedPassageLabels: number
   failed: string[]
 }
 
@@ -79,7 +82,14 @@ export async function importLibraryCollection(
       }
     })
   const identity = collectionIdentity(collection.id, collection.language)
-  const canonical = sha256(JSON.stringify(documents))
+  // Documents without passage labels hash as they did before passage labels existed.
+  const canonical = sha256(
+    JSON.stringify(
+      documents.map(({ passageLabels, ...document }) =>
+        passageLabels.length ? { ...document, passageLabels } : document
+      )
+    )
+  )
   const revision = `${collection.id}-${collection.language}-${canonical.slice(0, 20)}`
   const report: LibraryCollectionImportReport = {
     identity,
@@ -90,6 +100,10 @@ export async function importLibraryCollection(
     passages: drafts.length,
     embedded: 0,
     reused: 0,
+    unmatchedPassageLabels: documents.reduce(
+      (total, document) => total + unmatchedPassageLabels(document).length,
+      0
+    ),
     failed: [],
   }
 
