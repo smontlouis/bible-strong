@@ -62,3 +62,30 @@ binding, whose requests carry no client address and so share one rate-limit buck
   decided with the screen that needs it.
 - Other text corpora (books, articles) can join through a builder that yields passages with a
   `target` their own read route understands.
+
+## Amendment of 2026-11-11: whole passages and sections
+
+### Context
+
+A hit carried only the first 700 characters of its passage, and a passage is at most 1,800
+characters of a section that may hold several. On the production index, 17 % of the 491,281
+sections are cut into several passages, and they hold 44 % of the 721,133 passages: the long
+commentaries, articles and dictionary entries, where a hit is a fragment of an argument. A caller
+that wants to answer from the hits without opening each resource needs their whole text.
+
+### Decision
+
+- A search may ask for at most 25 hits (10 before).
+- `fullText: true` adds `text` to every hit: its whole passage. `snippet` is unchanged.
+- With it, `sections: n` (at most 10) gives the `n` best hits by score their whole section as
+  `text`: every passage of the same section in order, when the section holds at most 6,000
+  characters, otherwise the passage found with the one before and after it, an ellipsis marking
+  the cut. A section of one passage is that passage.
+- Without these fields, a search returns what it returned before.
+
+### Consequences
+
+- A search with sections makes one more query, on the primary keys of the sections it expands.
+- On the assistant's bench (private repository, 2026-11-11), 25 hits with 8 whole sections gave
+  answers at least as good as 5 snippets, faster and cheaper, because the model no longer opens
+  the resources one round at a time.

@@ -30,6 +30,14 @@ export type LibrarySearchInput = {
    * tradition, then one more per work, rather than the nearest passages of the largest one.
    */
   perspectives?: boolean
+  /** Each hit also carries `text`: its whole passage, not only the snippet. */
+  fullText?: boolean
+  /**
+   * With `fullText`, the best `sections` hits carry as `text` their whole section (every passage
+   * of the same commentary section, article or entry, in order) when it fits
+   * LIBRARY_SECTION_MAX_CHARACTERS, otherwise the passage with the one before and after it.
+   */
+  sections?: number
 }
 
 /** The broad family a passage speaks for; works without a tradition are reference works. */
@@ -78,6 +86,8 @@ export type LibrarySearchHit = {
     verseEnd: number | null
   } | null
   snippet: string
+  /** With `fullText`: the whole passage, or its section for the best `sections` hits. */
+  text?: string
   target: Record<string, string | number>
   score: number
   matched: 'semantic' | 'lexical' | 'both'
@@ -98,7 +108,65 @@ const MAX_HITS_PER_WORK = 2
 const OTHER_LANGUAGE_WEIGHT = 0.85
 const RRF_K = 60
 const SNIPPET_CHARACTERS = 700
-export const LIBRARY_SEARCH_MAX_LIMIT = 10
+/** The assistant preloads up to 25 hits before its first model call. */
+export const LIBRARY_SEARCH_MAX_LIMIT = 25
+export const LIBRARY_SEARCH_MAX_SECTIONS = 10
+/** A longer section is given as the passage found with the one before and after it. */
+export const LIBRARY_SECTION_MAX_CHARACTERS = 6000
+
+/** The key of a passage is its section's key followed by `#` and its part number. */
+const sectionOf = (passageKey: string) => passageKey.replace(/#\d+$/u, '')
+const snippetOf = (content: string) =>
+  content.length > SNIPPET_CHARACTERS
+    ? `${content.slice(0, content.lastIndexOf(' ', SNIPPET_CHARACTERS))} …`
+    : content
+
+/**
+ * The text of each of the best hits' sections: the whole section when it fits, otherwise the
+ * passage found with its neighbours, marked as cut with an ellipsis. Single-passage sections are
+ * left out: their passage is already the section.
+ */
+async function sectionTexts(
+  database: Kysely<ResourceDatabase>,
+  rows: readonly { publication_id: number; passage_key: string }[]
+) {
+  const texts = new Map<string, string>()
+  if (!rows.length) return texts
+  const siblings = await sql<{
+    publication_id: number
+    passage_key: string
+    part: number
+    content: string
+  }>`
+    select publication_id, passage_key, part, content from library_passages where ${sql.join(
+      rows.map(
+        row =>
+          sql`(publication_id = ${row.publication_id} and starts_with(passage_key, ${`${sectionOf(row.passage_key)}#`}))`
+      ),
+      sql` or `
+    )}`.execute(database)
+  for (const row of rows) {
+    const section = sectionOf(row.passage_key)
+    const parts = siblings.rows
+      .filter(
+        item =>
+          item.publication_id === row.publication_id && sectionOf(item.passage_key) === section
+      )
+      .sort((left, right) => left.part - right.part)
+    if (parts.length < 2) continue
+    const total = parts.reduce((sum, item) => sum + item.content.length, 0)
+    const index = parts.findIndex(item => item.passage_key === row.passage_key)
+    const kept =
+      total <= LIBRARY_SECTION_MAX_CHARACTERS
+        ? parts
+        : parts.slice(Math.max(0, index - 1), index + 2)
+    texts.set(
+      `${row.publication_id}:${row.passage_key}`,
+      `${kept[0] === parts[0] ? '' : '… '}${kept.map(item => item.content).join('\n')}${kept.at(-1) === parts.at(-1) ? '' : ' …'}`
+    )
+  }
+  return texts
+}
 
 type Candidate = { publication_id: number; passage_key: string }
 type PassageRow = {
@@ -398,6 +466,16 @@ export async function searchLibrary(
     }
     selected.sort((a, b) => b.entry.score - a.entry.score)
   }
+  // The best hits by score carry their whole section; the others their passage.
+  const sections = input.fullText
+    ? await sectionTexts(
+        database,
+        [...selected]
+          .sort((left, right) => right.entry.score - left.entry.score)
+          .slice(0, Math.min(LIBRARY_SEARCH_MAX_SECTIONS, Math.max(0, input.sections ?? 0)))
+          .map(({ row }) => row)
+      )
+    : new Map<string, string>()
   const hits = selected
     .map(
       ({ row, entry }): LibrarySearchHit => ({
@@ -417,10 +495,10 @@ export async function searchLibrary(
                 verseEnd: row.verse_end,
               }
             : null,
-        snippet:
-          row.content.length > SNIPPET_CHARACTERS
-            ? `${row.content.slice(0, row.content.lastIndexOf(' ', SNIPPET_CHARACTERS))} …`
-            : row.content,
+        snippet: snippetOf(row.content),
+        ...(input.fullText
+          ? { text: sections.get(`${row.publication_id}:${row.passage_key}`) ?? row.content }
+          : {}),
         target: row.target,
         score: Math.round(entry.score * 10_000) / 10_000,
         matched: entry.semantic && entry.lexical ? 'both' : entry.semantic ? 'semantic' : 'lexical',

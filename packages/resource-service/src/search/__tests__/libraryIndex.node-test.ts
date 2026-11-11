@@ -183,6 +183,25 @@ describe('library embedding and search input', () => {
         chapter: undefined,
         limit: 5,
         perspectives: undefined,
+        fullText: undefined,
+        sections: undefined,
+      }
+    )
+    assert.deepEqual(
+      parseLibrarySearchInput({ query: 'pardon', limit: 25, fullText: true, sections: 8 }),
+      {
+        query: 'pardon',
+        languages: undefined,
+        corpora: undefined,
+        traditions: undefined,
+        works: undefined,
+        excludeWorks: undefined,
+        book: undefined,
+        chapter: undefined,
+        limit: 25,
+        perspectives: undefined,
+        fullText: true,
+        sections: 8,
       }
     )
     for (const invalid of [
@@ -194,6 +213,9 @@ describe('library embedding and search input', () => {
       { query: 'pardon', traditions: ["x'; drop"] },
       { query: 'pardon', book: 67 },
       { query: 'pardon', limit: 50 },
+      { query: 'pardon', fullText: 'yes' },
+      { query: 'pardon', sections: 11 },
+      { query: 'pardon', sections: -1 },
     ])
       assert.throws(() => parseLibrarySearchInput(invalid), /LIBRARY_SEARCH_INVALID_INPUT/)
   })

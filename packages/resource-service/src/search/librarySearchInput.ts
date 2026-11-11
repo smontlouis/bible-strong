@@ -2,6 +2,7 @@
 // arguments come from a model: every field is checked and unknown fields are refused.
 import {
   LIBRARY_SEARCH_MAX_LIMIT,
+  LIBRARY_SEARCH_MAX_SECTIONS,
   type LibrarySearchInput,
 } from '../repositories/librarySearchRepository'
 import type { LibraryDocumentInput } from '../repositories/libraryDocumentRepository'
@@ -45,6 +46,8 @@ export const parseLibrarySearchInput = (value: unknown): LibrarySearchInput => {
     'chapter',
     'limit',
     'perspectives',
+    'fullText',
+    'sections',
   ]
   if (Object.keys(input).some(key => !known.includes(key)))
     throw new Error('LIBRARY_SEARCH_INVALID_INPUT')
@@ -65,6 +68,8 @@ export const parseLibrarySearchInput = (value: unknown): LibrarySearchInput => {
     chapter: integer(input.chapter, 1, 150),
     limit: integer(input.limit, 1, LIBRARY_SEARCH_MAX_LIMIT),
     perspectives: boolean(input.perspectives),
+    fullText: boolean(input.fullText),
+    sections: integer(input.sections, 0, LIBRARY_SEARCH_MAX_SECTIONS),
   }
 }
 

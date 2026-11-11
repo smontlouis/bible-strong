@@ -449,6 +449,22 @@ describe('Library search index', { skip: !runIntegration }, () => {
       const study = diverse.hits.find(hit => hit.corpus === 'document')
       assert.equal(study?.workTitle, 'Bible Studies')
       assert.equal(new Set(plain.hits.map(hit => `${hit.work}:${hit.title}`)).size, plain.hits.length, 'one hit per document')
+      assert.ok(plain.hits.every(hit => hit.text === undefined), 'no text unless asked')
+
+      // With fullText, a hit carries its whole passage, and the best hits their whole section:
+      // the long article is cut into several passages, and its section joins them in order.
+      const query = { query: 'Satan is bound on a desolate earth', limit: 3, works: ['studies'] }
+      const passages = await searchLibrary(database, provider, { ...query, fullText: true })
+      const sections = await searchLibrary(database, provider, { ...query, fullText: true, sections: 3 })
+      const long = (result: typeof sections) => result.hits.find(hit => hit.title === 'The Millennium')
+      assert.ok(long(passages) && long(sections))
+      assert.ok(long(passages)!.snippet.length <= 702, 'the snippet stays short')
+      assert.ok(long(passages)!.text!.length <= 1800, 'one passage only')
+      assert.match(long(sections)!.text!, /^The millennium begins at the second coming\./u)
+      assert.match(long(sections)!.text!, /desolate earth\.$/u)
+      assert.ok(long(sections)!.text!.length > long(passages)!.text!.length)
+      const short = sections.hits.find(hit => hit.title === 'Millennial Views')
+      if (short) assert.equal(short.text, 'The millennium is spent in heaven with Christ.', 'a one-passage section is its passage')
     } finally {
       await isolated.dispose()
     }
