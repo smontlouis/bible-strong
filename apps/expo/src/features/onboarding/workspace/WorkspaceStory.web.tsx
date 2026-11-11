@@ -3,6 +3,7 @@ import { useEffect, useReducer, useRef, useState, type CSSProperties, type React
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 
+import BrandMark from '~common/ui/BrandMark'
 import { IS_DESKTOP } from '~desktop/isDesktopBuild'
 import { useWindowControlsInset, sidebarDragRegion } from '~features/app-switcher/windowChrome'
 import { isEditingTarget } from '~features/keyboard-shortcuts/keyboardTargets'
@@ -215,7 +216,7 @@ export default function WorkspaceStory({ onEnd }: WorkspaceStoryProps) {
           {...(sidebarDragRegion ? { 'data-tauri-drag-region': 'deep' } : {})}
         >
           <span className="bs-onb-brand">
-            <span className="bs-onb-brand-dot" aria-hidden="true" />
+            <BrandMark size={24} />
             Bible Strong
           </span>
           {state.step !== 'finish' && (

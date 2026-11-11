@@ -131,7 +131,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   web: {
     bundler: 'metro',
     output: 'single',
-    favicon: './assets/images/icon-2.png',
+    favicon: './assets/images/mark.png',
   },
   plugins: [
     'expo-sharing',

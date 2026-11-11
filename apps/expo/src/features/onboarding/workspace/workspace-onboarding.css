@@ -49,20 +49,14 @@
     max(24px, calc(var(--onb-controls-inset, 0px) - (100vw - var(--onb-frame-width)) / 2));
 }
 
+/* The lockup of the mark: the name a quarter of the mark's diameter away, at weight 600. */
 .bs-onb-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 14px;
+  gap: 6px;
+  font-size: 15px;
   font-weight: 600;
-  color: var(--color-grey);
-}
-
-.bs-onb-brand-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: var(--color-primary);
+  color: var(--color-default);
 }
 
 .bs-onb-text-button {

@@ -1,6 +1,7 @@
 // Regenerates the desktop app's icons and installer images (`yarn icons`, macOS only).
 //
-// - Windows and Linux: Tauri's set, from the app's round icon (`apps/expo/assets/images/icon.png`).
+// - Windows and Linux: Tauri's set, from the mark (`apps/expo/assets/images/mark.png`, rendered from
+//   `design-system/project/assets/Logos/bible-strong-mark.svg`).
 // - macOS: the iOS app's Icon Composer file (`AppIcon.icon`) compiled by actool. `Assets.car`
 //   carries the icon of every macOS from 11, drawn to the macOS grid; `icon.icns` is the
 //   fallback the bundle names. tauri.conf.json copies `Assets.car` into the bundle and
@@ -28,7 +29,7 @@ const run = (command, args, options = {}) =>
 
 try {
   // Windows and Linux.
-  run('yarn', ['tauri', 'icon', '../expo/assets/images/icon.png'], { cwd: desktop })
+  run('yarn', ['tauri', 'icon', '../expo/assets/images/mark.png'], { cwd: desktop })
   // It also writes mobile icons, which this app has no use for.
   for (const mobile of ['android', 'ios'])
     rmSync(join(icons, mobile), { recursive: true, force: true })

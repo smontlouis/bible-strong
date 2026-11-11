@@ -14,10 +14,11 @@ import { collapsedWorkspaceGroupsAtom } from '~state/workspacePreferences'
 import { workspaceSidebarDockedAtom } from '~navigation/useWorkspaceRoutePanel'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Image, Platform, ScrollView, StyleSheet } from 'react-native'
+import { Platform, ScrollView, StyleSheet } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { SheetRef } from '~common/sheet'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
+import BrandMark from '~common/ui/BrandMark'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import SidebarHoverActions from '~common/ui/HoverActionsRow'
@@ -146,12 +147,8 @@ const WorkspaceSidebar = ({
                 accessibilityRole="button"
                 accessibilityLabel={`Bible Strong — ${t('accessibility.home')}`}
               >
-                <Image
-                  source={require('~assets/images/icon.png')}
-                  style={{ width: 24, height: 24, borderRadius: 12 }}
-                  accessible={false}
-                />
-                <Text className="flex-1 ml-[10px] font-bold text-[15px]">Bible Strong</Text>
+                <BrandMark size={24} />
+                <Text className="flex-1 ml-[6px] font-semibold text-[15px]">Bible Strong</Text>
               </TouchableBox>
             </HStack>
           )}

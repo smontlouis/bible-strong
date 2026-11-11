@@ -27,7 +27,7 @@ Bible Strong for macOS, Windows and Linux: a Tauri 2 shell (`src-tauri/`, Rust) 
 | Build the Mac App Store app | `yarn build:appstore` |
 | Rust tests | `yarn test` |
 | Archives the Rust tests decrypt | `yarn fixtures` |
-| Icons and installer images, from the app icon and the Icon Composer file (macOS) | `yarn icons` |
+| Icons and installer images, from the mark and the Icon Composer file (macOS) | `yarn icons` |
 
 `yarn dev` and `yarn build` read `BIBLE_STRONG_ARCHIVE_KEYS` from the environment or from `apps/expo/.env.local`; never print it. A build without keys cannot install any Offline copy, and `yarn build` refuses it unless `--allow-missing-keys`.
 

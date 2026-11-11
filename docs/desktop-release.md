@@ -86,7 +86,8 @@ fine to test, not to distribute.
 ## Icons and installer images
 
 `yarn workspace @bible-strong/desktop icons` (macOS) regenerates them all: Tauri's icons for
-Windows and Linux from the app's round icon, the macOS icon from the iOS app's Icon Composer file
+Windows and Linux from the mark (`apps/expo/assets/images/mark.png`, rendered from
+`design-system/project/assets/Logos/bible-strong-mark.svg`), the macOS icon from the iOS app's Icon Composer file
 (`Assets.car`, named by `CFBundleIconName` in `src-tauri/Info.plist`, drawn to the macOS grid),
 and the DMG background and NSIS images in `src-tauri/installer/` (`scripts/icons.mjs`).
 
