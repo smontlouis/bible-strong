@@ -147,3 +147,42 @@ that wants every tradition heard needs each one searched on its own.
 - The entrypoint and the development server keep the vectors of the last 64 queries for ten
   minutes in the isolate (`withQueryEmbeddingCache`): the assistant asks for the search within each
   perspective after the wide search of the same question, and that call no longer embeds it again.
+
+## Amendment of 2026-11-12: an index for each large perspective
+
+### Context
+
+After the imports of 2026-11-11 the library holds 1,009,757 passages, and the search within a
+perspective walked the shared vector index with a filter on the perspective's works, stopping after
+5,000 tuples. The perspectives are 82,000 (Adventist, 152,000 with the writings of Ellen G. White)
+to 307,000 passages (Protestant); in a language where a perspective is rare, the walk stopped
+before it reached the perspective's works.
+
+### Decision
+
+- `perspectiveOf` also exists in SQL (`LIBRARY_PERSPECTIVE_SQL` in `src/search/libraryPerspectives.ts`),
+  an immutable expression of `tradition` and `tags`. Migration 0041 creates one partial HNSW index
+  per large perspective with that expression as predicate: Adventist, Catholic, patristic, Jewish,
+  evangelical, academic and reference works. The Protestant perspective, a third of the library,
+  keeps the shared index; the Orthodox one, a few hundred passages, is read whole.
+- A list of an indexed perspective repeats the index's predicate, so the planner walks that index;
+  the other lists filter the shared index on their works, as before. No column is added: filling one
+  would have rewritten the million rows and the shared index, and a work imported later joins its
+  perspective's index by itself.
+- The integration test checks that the SQL rule places every catalog work where `perspectiveOf`
+  does, and that each index can serve its perspective's list. On production on 2026-11-12 it placed
+  the 99 works of the 106 active publications as `perspectiveOf` does.
+- `searchLibrary` takes `{ perspectiveIndexes: false }`, and the development server
+  `RESOURCE_LIBRARY_PERSPECTIVE_INDEXES=off`, to search as before for a bench.
+
+### Consequences
+
+- The seven indexes take 1.83 GB on Neon (the database went from 19 to 20 GB) and were built in
+  5 min 40 s with `maintenance_work_mem` at 1 GB; the table refused writes meanwhile. Every passage
+  written to the library is now also inserted in its perspective's index.
+- On production every list of an indexed perspective walks its own index and returns its 12
+  passages, where the Catholic list in English returned 6 and the patristic one in English 1. Cold,
+  a new index costs seconds on its first reads (9 s for the first search); warm, a search within
+  each perspective took 1.95 s in the median from a laptop, against 1.7 s on the shared index: the
+  indexes buy coverage, not speed.
+- The Neon file cache holds 2.2 GB; the new indexes compete with the shared one for it.

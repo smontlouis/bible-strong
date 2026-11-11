@@ -267,6 +267,13 @@
       "when": 1794032688073,
       "tag": "0040_library_lexemes",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1794437252132,
+      "tag": "0041_library_perspective_indexes",
+      "breakpoints": true
     }
   ]
 }

@@ -18,6 +18,9 @@ import { makeRestLibraryEmbeddingProvider } from './libraryEmbeddingRest'
 import { parseLibraryDocumentInput, parseLibrarySearchInput } from './librarySearchInput'
 
 const port = Number(process.env.RESOURCE_LIBRARY_SEARCH_PORT ?? 8792)
+// RESOURCE_LIBRARY_PERSPECTIVE_INDEXES=off searches within a perspective as before migration 0041,
+// for a bench to compare both ways on the same database.
+const perspectiveIndexes = process.env.RESOURCE_LIBRARY_PERSPECTIVE_INDEXES !== 'off'
 const database = makeLocalDatabase({
   connectionString:
     process.env.RESOURCE_DATABASE_URL ??
@@ -60,7 +63,7 @@ const server = createServer(async (request, response) => {
     } catch {
       return answer(400, { error: 'LIBRARY_SEARCH_INVALID_INPUT' })
     }
-    answer(200, await searchLibrary(database, provider, input))
+    answer(200, await searchLibrary(database, provider, input, { perspectiveIndexes }))
   } catch (error) {
     console.error(error)
     answer(500, { error: 'LIBRARY_SEARCH_FAILED' })

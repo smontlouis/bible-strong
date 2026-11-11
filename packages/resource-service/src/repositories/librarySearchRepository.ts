@@ -11,6 +11,13 @@ import {
   type LibraryLanguage,
 } from '../search/libraryDocuments'
 import { vectorLiteral, type LibraryEmbeddingProvider } from '../search/libraryEmbedding'
+import {
+  LIBRARY_INDEXED_PERSPECTIVES,
+  LIBRARY_PERSPECTIVES,
+  libraryPerspectivePredicate,
+  perspectiveOf,
+  type LibraryPerspective,
+} from '../search/libraryPerspectives'
 
 export type LibrarySearchInput = {
   query: string
@@ -53,48 +60,8 @@ export type LibrarySearchInput = {
   perspectiveExcludeWorks?: readonly string[]
 }
 
-/** The broad family a passage speaks for; works without a tradition are reference works. */
-export const LIBRARY_PERSPECTIVES = [
-  'adventist',
-  'catholic',
-  'orthodox',
-  'patristic',
-  'jewish',
-  'evangelical',
-  'protestant',
-  'academic',
-  'reference',
-] as const
-export type LibraryPerspective = (typeof LIBRARY_PERSPECTIVES)[number]
-
-/** The words that place a work in a perspective, accents removed, in this order (first match wins). */
-const PERSPECTIVE_WORDS: readonly (readonly [LibraryPerspective, string])[] = [
-  ['adventist', 'adventiste'],
-  ['catholic', 'catholi|thomiste|scolastique'],
-  ['patristic', 'christianisme ancien|patristique'],
-  // Before the Orthodox one: a Jewish work may be tagged Orthodox (modern Orthodox Judaism).
-  ['jewish', 'judaisme|rabbinique'],
-  ['orthodox', 'orthodox'],
-  // Critical and university exegesis, whatever the confession of its authors.
-  ['academic', 'exegese critique|universitaire|moderniste'],
-  ['evangelical', 'dispensational|freres|evangelique|baptiste|restaurationniste|pentecot'],
-]
-
-export function perspectiveOf(
-  tradition: string | null,
-  tags: readonly string[]
-): LibraryPerspective {
-  if (!tradition && !tags.length) return 'reference'
-  const words = [tradition ?? '', ...tags]
-    .join(' ')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/gu, '')
-    .toLowerCase()
-  return (
-    PERSPECTIVE_WORDS.find(([, pattern]) => new RegExp(pattern, 'u').test(words))?.[0] ??
-    'protestant'
-  )
-}
+export { LIBRARY_PERSPECTIVES, perspectiveOf } from '../search/libraryPerspectives'
+export type { LibraryPerspective } from '../search/libraryPerspectives'
 
 /** The works of each perspective in each language, read once per search by perspective. */
 type PerspectiveWorks = Map<LibraryPerspective, Map<LibraryLanguage, string[]>>
@@ -498,10 +465,19 @@ function perspectiveSelection(ordered: readonly Chosen[], count: number): Chosen
   return selected.sort((a, b) => b.entry.score - a.entry.score)
 }
 
+export type LibrarySearchOptions = {
+  /**
+   * Whether a search within a perspective uses that perspective's own index (migration 0041);
+   * false walks the shared index with a filter on its works, as before, for a bench to compare.
+   */
+  perspectiveIndexes?: boolean
+}
+
 export async function searchLibrary(
   database: Kysely<ResourceDatabase>,
   provider: LibraryEmbeddingProvider,
-  input: LibrarySearchInput
+  input: LibrarySearchInput,
+  options: LibrarySearchOptions = {}
 ): Promise<LibrarySearchResult> {
   const query = input.query.replace(/\s+/gu, ' ').trim().slice(0, 500)
   const limit = Math.min(LIBRARY_SEARCH_MAX_LIMIT, Math.max(1, input.limit ?? 6))
@@ -586,7 +562,13 @@ export async function searchLibrary(
             .map(language => ({
               language,
               perspective,
-              scope: sql`${perspectiveSearch.scope} and work in (${sql.join(perspectiveSearch.worksOf(perspective, language))})`,
+              // A perspective with its own index repeats that index's predicate, so the planner
+              // walks it; the others filter the shared index on their works.
+              scope:
+                options.perspectiveIndexes !== false &&
+                (LIBRARY_INDEXED_PERSPECTIVES as readonly string[]).includes(perspective)
+                  ? sql`${perspectiveSearch.scope} and ${sql.raw(libraryPerspectivePredicate(perspective))}`
+                  : sql`${perspectiveSearch.scope} and work in (${sql.join(perspectiveSearch.worksOf(perspective, language))})`,
               limit: PERSPECTIVE_LIST_CANDIDATES,
             }))
         )
