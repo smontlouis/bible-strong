@@ -24,6 +24,11 @@ import {
   sha256,
   writeBatch,
 } from './libraryIndexRepository'
+import {
+  libraryPassageKeysOf,
+  syncLibraryVectors,
+  type LibraryVectorStore,
+} from './libraryVectorSync'
 
 const LOCAL_DATABASE = 'postgresql://bible_strong:bible_strong@127.0.0.1:54329/bible_strong'
 export const LIBRARY_COLLECTION_KIND = 'library-collection'
@@ -40,6 +45,11 @@ export type LibraryCollectionImportOptions = {
   batchSize?: number
   concurrency?: number
   writers?: number
+  /**
+   * The Vectorize indexes to keep in step (amendment of 2026-11-12 to ADR-0103): the passages of
+   * the new revision are upserted and those of the revisions it replaces deleted.
+   */
+  vectors?: LibraryVectorStore
   onProgress?: (line: string) => void
 }
 
@@ -211,6 +221,18 @@ export async function importLibraryCollection(
       if (done % 1000 < batch.length) options.onProgress?.(`${identity}: ${done}/${pending.length} embedded`)
     })
 
+    // The passages of the revisions this one replaces, read before they go with them.
+    const replaced = options.vectors
+      ? await libraryPassageKeysOf(
+          client,
+          (
+            await client.query<{ id: number }>(
+              'select id from resource_publications where resource_identity = $1 and id <> $2',
+              [identity, publicationId]
+            )
+          ).rows.map(row => row.id)
+        )
+      : []
     // The new revision replaces the previous one, whose passages are deleted with it.
     await client.query('begin')
     try {
@@ -228,6 +250,14 @@ export async function importLibraryCollection(
       throw error
     }
     report.status = 'activated'
+    if (options.vectors) {
+      const synced = await syncLibraryVectors(client, options.vectors, {
+        upserted: drafts.map(draft => ({ publication_id: publicationId, passage_key: draft.passageKey })),
+        deleted: replaced,
+        onProgress: options.onProgress,
+      })
+      options.onProgress?.(`vectors: ${synced.upserted} upserted, ${synced.deleted} deleted`)
+    }
     options.onProgress?.('counting lexemes')
     await refreshLexemes(client)
     await client.query('analyze library_passages')

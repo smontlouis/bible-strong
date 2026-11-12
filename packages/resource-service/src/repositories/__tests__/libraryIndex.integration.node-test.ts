@@ -12,6 +12,17 @@ import { importLibraryCollection } from '../libraryCollectionRepository'
 import { readLibraryDocument } from '../libraryDocumentRepository'
 import { indexLibrary } from '../libraryIndexRepository'
 import { LIBRARY_PERSPECTIVES, perspectiveOf, searchLibrary } from '../librarySearchRepository'
+import {
+  libraryVectorId,
+  makeVectorizeLibrarySearch,
+  type LibraryVectorizeClient,
+  type LibraryVectorizeFilter,
+} from '../../search/libraryVectorIndex'
+import {
+  reconcileLibraryVectorIndexes,
+  type LibraryVectorStore,
+  type LibraryVectorUpsert,
+} from '../libraryVectorSync'
 
 const runIntegration = process.env.RESOURCE_INTEGRATION === '1'
 const connectionString =
@@ -31,6 +42,47 @@ const ideaOf = (text: string) =>
       : /patience/iu.test(text)
         ? 2
         : 3
+/**
+ * The Vectorize indexes in memory: a store the synchronisation writes, and clients that search it
+ * exactly with the same filters, so that a search through them can be compared with pgvector.
+ */
+function memoryVectorize() {
+  const indexes = { fr: new Map<string, LibraryVectorUpsert>(), en: new Map<string, LibraryVectorUpsert>() }
+  const store: LibraryVectorStore = {
+    async upsert(language, records) {
+      for (const record of records) indexes[language].set(record.id, record)
+    },
+    async delete(language, ids) {
+      for (const id of ids) indexes[language].delete(id)
+    },
+    async *listIds(language) {
+      yield [...indexes[language].keys()]
+    },
+  }
+  const matches = (metadata: LibraryVectorUpsert['metadata'], filter: LibraryVectorizeFilter = {}) =>
+    Object.entries(filter).every(([field, condition]) =>
+      (condition.$eq === undefined || metadata[field] === condition.$eq) &&
+      (!condition.$in || condition.$in.includes(String(metadata[field]))) &&
+      (!condition.$nin || !condition.$nin.includes(String(metadata[field])))
+    )
+  const client = (language: 'fr' | 'en'): LibraryVectorizeClient => ({
+    async query(vector, options) {
+      const norm = (values: readonly number[]) => Math.sqrt(values.reduce((sum, value) => sum + value * value, 0))
+      return {
+        matches: [...indexes[language].values()]
+          .filter(record => matches(record.metadata, options.filter))
+          .map(record => ({
+            id: record.id,
+            score: record.values.reduce((sum, value, index) => sum + value * vector[index]!, 0) / (norm(record.values) * norm(vector)),
+          }))
+          .sort((left, right) => right.score - left.score)
+          .slice(0, options.topK),
+      }
+    },
+  })
+  return { indexes, store, search: makeVectorizeLibrarySearch({ fr: client('fr'), en: client('en') }) }
+}
+
 const embedded: string[] = []
 const provider: LibraryEmbeddingProvider = {
   model: LIBRARY_EMBEDDING_MODEL,
@@ -142,7 +194,12 @@ describe('Library search index', { skip: !runIntegration }, () => {
         })
         .execute()
 
-      const first = await indexLibrary({ connectionString: isolated.connectionString, provider })
+      const vectors = memoryVectorize()
+      const first = await indexLibrary({
+        connectionString: isolated.connectionString,
+        provider,
+        vectors: vectors.store,
+      })
       assert.deepEqual(
         first.map(report => [report.identity, report.passages, report.embedded]),
         [
@@ -232,15 +289,30 @@ describe('Library search index', { skip: !runIntegration }, () => {
         connectionString: isolated.connectionString,
         provider,
         corpora: ['commentary'],
+        vectors: vectors.store,
+        reconcileVectors: false,
       })
       assert.equal(third.find(report => report.identity === 'commentary:barnes:fr')?.deleted, 1)
       await database.deleteFrom('resource_publications').where('id', '=', ids['nave:fr']).execute()
-      const remaining = await database.selectFrom('library_passages').select('corpus').execute()
+      const remaining = await database
+        .selectFrom('library_passages')
+        .select(['corpus', 'publication_id', 'passage_key', 'language'])
+        .execute()
       assert.deepEqual(remaining.map(row => row.corpus).sort(), [
         'commentary',
         'commentary',
         'dictionary',
       ])
+      // The index run deleted the removed section from Vectorize; the cascade of the Nave
+      // publication leaves its vectors until a reconciliation, which also keeps the others.
+      const held = () => [...vectors.indexes.fr.keys(), ...vectors.indexes.en.keys()].sort()
+      const expected = remaining
+        .map(row => libraryVectorId(row.publication_id, row.passage_key))
+        .sort()
+      assert.ok(!held().some(id => id.includes('barnes-fr-66-20-1')), 'the removed section is gone')
+      assert.ok(held().length > expected.length, 'the Nave passages are still there')
+      await reconcileLibraryVectorIndexes(vectors.store, { connectionString: isolated.connectionString })
+      assert.deepEqual(held(), expected)
     } finally {
       await isolated.dispose()
     }
@@ -496,14 +568,20 @@ describe('Library search index', { skip: !runIntegration }, () => {
         // Left out of every search, but not of the search by perspective.
         [collection('contested', 'Protestantisme', ['Évangélique']), [article('contested', 'Millennium Contested', 'The millennium against another view.', ['Millennium'])]],
         [collection('adventists', 'Protestantisme', ['Adventiste']), [
-          article('long', 'The Thousand Years', 'The millennium begins at the second coming.\n\n' + 'Satan is bound on a desolate earth. '.repeat(80)),
+          // A key too long for a Vectorize identifier.
+          article(`long-${'thousand-years-'.repeat(6)}`, 'The Thousand Years', 'The millennium begins at the second coming.\n\n' + 'Satan is bound on a desolate earth. '.repeat(80)),
         ]],
       ]
+      const vectors = memoryVectorize()
       for (const [header, records] of imports)
-        await importLibraryCollection({ connectionString: isolated.connectionString, provider, collection: header, records, source: `${header.id}.jsonl` })
+        await importLibraryCollection({ connectionString: isolated.connectionString, provider, collection: header, records, source: `${header.id}.jsonl`, vectors: vectors.store })
+      assert.ok([...vectors.indexes.en.keys()].some(id => id.includes('~')), 'a long key is hashed')
+      assert.equal(vectors.indexes.fr.size, 0)
 
       const plain = await searchLibrary(database, provider, { query: 'the millennium', limit: 3, excludeWorks: ['contested'] })
       assert.equal(plain.perspectiveHits, undefined, 'no search by perspective unless asked')
+      // The same search through Vectorize (in memory) gives the same hits, the long key found back.
+      for (const backend of [{}, { vectors: vectors.search }]) {
       const result = await searchLibrary(database, provider, {
         query: 'the millennium',
         limit: 3,
@@ -513,7 +591,7 @@ describe('Library search index', { skip: !runIntegration }, () => {
         labelledDocuments: ['evangelical'],
         fullText: true,
         perspectiveSections: 1,
-      })
+      }, backend)
       assert.ok(!result.hits.some(hit => hit.perspective === 'jewish'), 'the far tradition is not in the plain search')
       assert.ok(!result.hits.some(hit => hit.work === 'contested'))
       const perspectiveHits = result.perspectiveHits ?? []
@@ -537,6 +615,7 @@ describe('Library search index', { skip: !runIntegration }, () => {
       const covenant = perspectiveHits.find(hit => hit.title === 'The Covenant')
       assert.ok(adventist?.distance !== undefined && covenant?.distance !== undefined)
       assert.ok(covenant!.distance! > adventist!.distance! + 0.5)
+      }
     } finally {
       await isolated.dispose()
     }

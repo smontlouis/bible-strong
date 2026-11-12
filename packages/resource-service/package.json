@@ -40,6 +40,7 @@
     "library:index": "tsx src/search/libraryIndexCli.ts",
     "library:search:dev": "tsx src/search/librarySearchDevServer.ts",
     "library:collection": "tsx src/search/libraryCollectionCli.ts",
+    "library:vectors:sync": "tsx src/search/libraryVectorSyncCli.ts",
     "topics:benchmark": "tsx src/search/topicSearchBenchmarkCli.ts",
     "analytics:search": "tsx src/analytics/searchAnalyticsReportCli.ts",
     "topics:embeddings:dev": "wrangler dev --config wrangler.embedding.jsonc --port 8791"

@@ -10,6 +10,8 @@
 // to cut from the sections of a commentary). RESOURCE_DATABASE_URL picks the database (local by default);
 // RESOURCE_LIBRARY_EMBEDDING_URL the embedding endpoint (the development Worker by default);
 // with CLOUDFLARE_ACCOUNT_ID passages are embedded through the Workers AI REST API instead.
+// --vectors (keep the Vectorize indexes in step: needs CLOUDFLARE_ACCOUNT_ID; ends with a
+// reconciliation of both indexes, about 11 min, unless --no-reconcile).
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
@@ -17,6 +19,7 @@ import { indexLibrary } from '../repositories/libraryIndexRepository'
 import { LIBRARY_CORPORA, librarySectionCuts, type LibraryCorpus } from './libraryDocuments'
 import { makeHttpLibraryEmbeddingProvider } from './libraryEmbedding'
 import { makeRestLibraryEmbeddingProvider } from './libraryEmbeddingRest'
+import { makeRestLibraryVectorStore } from './libraryVectorizeRest'
 
 const option = (name: string) => {
   const index = process.argv.indexOf(`--${name}`)
@@ -29,6 +32,15 @@ const list = (value: string | undefined) =>
     .filter(Boolean)
 
 const main = async () => {
+  // The production Vectorize indexes follow only the database they mirror: never by default.
+  const vectors = process.argv.includes('--vectors')
+    ? makeRestLibraryVectorStore(
+        process.env.CLOUDFLARE_ACCOUNT_ID ??
+          (() => {
+            throw new Error('--vectors needs CLOUDFLARE_ACCOUNT_ID')
+          })()
+      )
+    : undefined
   // The index policy (ADR-0106) lives with the assistant: --policy, or RESOURCE_LIBRARY_POLICY.
   const policyFile = option('policy') ?? process.env.RESOURCE_LIBRARY_POLICY
   const sectionCuts = policyFile
@@ -56,6 +68,8 @@ const main = async () => {
     writers: Number(option('writers') ?? 4),
     refreshLexemes: process.argv.includes('--refresh-lexemes'),
     sectionCuts,
+    vectors,
+    reconcileVectors: !process.argv.includes('--no-reconcile'),
     onProgress: line => console.log(line),
   })
   const total = reports.reduce(

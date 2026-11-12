@@ -5,6 +5,7 @@
 // are embedded through the Workers AI REST API, otherwise through the development embedding Worker
 // (RESOURCE_LIBRARY_EMBEDDING_URL). Options: --concurrency 8, --batch 50, --writers 4. A file whose
 // documents did not change leaves the collection as it is.
+// --vectors keeps the Vectorize indexes in step (needs CLOUDFLARE_ACCOUNT_ID).
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
@@ -12,6 +13,7 @@ import { importLibraryCollection } from '../repositories/libraryCollectionReposi
 import { parseCollectionHeader } from './libraryCollections'
 import { makeHttpLibraryEmbeddingProvider } from './libraryEmbedding'
 import { makeRestLibraryEmbeddingProvider } from './libraryEmbeddingRest'
+import { makeRestLibraryVectorStore } from './libraryVectorizeRest'
 
 const option = (name: string) => {
   const index = process.argv.indexOf(`--${name}`)
@@ -19,6 +21,15 @@ const option = (name: string) => {
 }
 
 const main = async () => {
+  // The production Vectorize indexes follow only the database they mirror: never by default.
+  const vectors = process.argv.includes('--vectors')
+    ? makeRestLibraryVectorStore(
+        process.env.CLOUDFLARE_ACCOUNT_ID ??
+          (() => {
+            throw new Error('--vectors needs CLOUDFLARE_ACCOUNT_ID')
+          })()
+      )
+    : undefined
   const file = option('file')
   if (!file) throw new Error('--file <prepared JSON lines>')
   const [header, ...records] = (await readFile(file, 'utf8'))
@@ -40,6 +51,7 @@ const main = async () => {
     concurrency: Number(option('concurrency') ?? 8),
     batchSize: Number(option('batch') ?? 50),
     writers: Number(option('writers') ?? 4),
+    vectors,
     onProgress: line => console.log(line),
   })
   console.log(JSON.stringify({ ...report, durationMs: Date.now() - started }))

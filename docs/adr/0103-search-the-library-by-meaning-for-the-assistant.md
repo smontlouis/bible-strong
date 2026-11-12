@@ -198,3 +198,79 @@ Migration 0042 drops the seven partial indexes of 0041 (in 3 s on production, wh
 bounds of the first amendment. `perspectiveOf` stays in `src/search/libraryPerspectives.ts`; its
 SQL form and the `perspectiveIndexes` option are gone. What kept the new works out of the
 assistant's excerpts was its own filter on unlabelled documents (private ADR-0107), not the index.
+
+## Amendment of 2026-11-12: the vectors in Vectorize
+
+### Context
+
+With 1,009,757 passages the HNSW index takes 2.63 GB, more than the file cache of Neon (2.2 to
+3 GB). In production the search by meaning took 4.3 to 9.7 s on 2026-11-12, and both preloads of
+the assistant ran past its 4 s timeout. The vectors are only read by this search: the passages, the
+search by words and the publications stay in Neon.
+
+### Decision
+
+- The vectors are also kept in Cloudflare Vectorize, one index per language
+  (`bible-strong-library-fr`, `bible-strong-library-en`, 1,024 dimensions, cosine). Neon stays the
+  source of truth: `library_passages.embedding` is kept, and every vector of an index is a copy of
+  it, never embedded again.
+- In a shared index, the search lost the nearest passages of a list in the other language than
+  the question: the approximate search explores the regions nearest the query, which hold passages
+  of its language, and a namespace or filter only then keeps the others.
+- Each vector has an identifier and indexed metadata.
+  - Its identifier is `<publication id>:<passage key>`. A key that does not fit Vectorize's 64 bytes
+    becomes `<publication id>:<start of the key>~<11 characters of its SHA-256>` (3,877 passages);
+    the query that reads the passages finds it among the keys of its publication that start alike.
+  - Its indexed metadata are `work`, `corpus`, `perspective`, `book`, `chapter`, `labelled` (false
+    for a document passage without labels) and `bucket` (0 or 1, from a hash). A new filter field
+    needs its metadata index before any vector, so every vector would be written again.
+- `LIBRARY_VECTOR_BACKEND` (`pgvector` by default, or `vectorize`) chooses where `LibrarySearch`
+  takes the nearest passages; its input and output do not change.
+  - With Vectorize, the lists keep their filters. `traditions` becomes the works whose tradition or
+    tags match, which is exact, since every passage of a work shares them.
+  - The first 100 passages of a list are scored on the stored vectors (`returnValues`: two queries
+    of 50, one per bucket). A deeper list (the 150 candidates of `perspectives`) is completed with
+    Vectorize's scores on its compressed vectors, which are 0.03 to 0.1 farther than the exact
+    distance and only approximately ordered.
+  - The `distance` of a hit is read from Neon for the hits alone.
+- Vectorize follows Neon two ways.
+  - `library:index` and `library:collection` with `--vectors` write what they change: the passages
+    they wrote are upserted from their rows, the deleted ones and those of the revisions a
+    collection replaces are deleted.
+  - `library:vectors:sync` lists every identifier of both indexes, upserts the passages of active
+    publications that are missing, and deletes the others. A republication of a commentary or
+    dictionary deletes the passages of its previous publication by cascade, which no writer
+    reports, so `library:index --vectors` ends with this reconciliation unless `--no-reconcile`.
+  - A reconciliation that would delete more than a quarter of an index (and more than 1,000
+    vectors) stops unless `--allow-mass-delete`: compared with a local database, it would empty
+    the production indexes.
+  - The vector writers take the lock of the index runs. `--vectors` is never the default, so that
+    a local run does not write the production indexes.
+
+### Consequences
+
+- These figures come from the assistant's 292 bench questions on 2026-11-12, against exact
+  neighbours computed by brute force on the exported vectors.
+  - The 10 nearest passages of a wide list are found 98 % of the time in French and 99 % in
+    English, against 99 % and 95 % with pgvector.
+  - The 12 nearest of a perspective are found 93 % and 97 % of the time, against 86 % and 61 %:
+    pgvector's walk stops after 5,000 tuples.
+  - The final hits of `LibrarySearch` are those of an exact search 96 to 97 % of the time, against
+    92 to 94 % with pgvector.
+- Measured from a Worker on 98 questions:
+  - the wide preload took 0.94 s in the median and 3.8 s at the 95th percentile, against 2.27 s
+    and 6.8 s, and 4 searches ran past 4 s against 23. All 4 were waiting for the query embedding
+    of Workers AI (332 ms in the median, 3.6 s at the 95th percentile, up to 12 s, spread over the
+    run: not a cold start).
+  - The search within each perspective sends about 21 precise queries side by side: 1.29 s in the
+    median against 0.79 s, 1.8 s at the 95th percentile for both.
+- About 1.035 billion stored dimensions. Vectorize counts them each month as queried dimensions
+  as well: about $10.4 a month fixed, then about $0.00001 a query. An assistant question sends
+  about 20 queries, about $6 a month for 1,000 questions a day.
+- Vectorize applies writes seconds to minutes later; its REST API takes at most 5,000 vectors (or
+  100 MB, uncompressed) an upsert, 100 identifiers a deletion, 20 a read, and lists 1,000
+  identifiers a page in about 1.1 s. A reconciliation lists both indexes in about 11 min, side by
+  side.
+- The HNSW index stays until the switch has run in production for a while; dropping it is decided
+  then. Once it is gone, going back to pgvector needs the index built again, about 6 min with 1 GB
+  of `maintenance_work_mem`.

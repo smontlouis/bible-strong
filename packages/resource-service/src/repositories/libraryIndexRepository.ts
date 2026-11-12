@@ -25,6 +25,13 @@ import {
   type LibraryEmbeddingProvider,
 } from '../search/libraryEmbedding'
 import { LIBRARY_LEXEME_MINIMUM_PASSAGES } from './librarySearchRepository'
+import {
+  reconcileLibraryVectors,
+  syncLibraryVectors,
+  type LibraryLanguagePassageKey,
+  type LibraryPassageKey,
+  type LibraryVectorStore,
+} from './libraryVectorSync'
 
 export type LibraryIndexOptions = {
   connectionString?: string
@@ -44,8 +51,21 @@ export type LibraryIndexOptions = {
   refreshLexemes?: boolean
   /** What the index policy cuts from the sections of a commentary (ADR-0106). */
   sectionCuts?: LibrarySectionCuts
+  /**
+   * The Vectorize indexes to keep in step (amendment of 2026-11-12 to ADR-0103): the passages
+   * embedded again are upserted, the deleted ones deleted.
+   */
+  vectors?: LibraryVectorStore
+  /**
+   * With `vectors`, end with a reconciliation of every index (the default): it also removes the
+   * passages of publications deleted by cascade since the last run, which no run sees.
+   */
+  reconcileVectors?: boolean
   onProgress?: (line: string) => void
 }
+
+/** What an index run changed, for the Vectorize indexes. */
+type VectorChanges = { written: LibraryPassageKey[]; deleted: LibraryLanguagePassageKey[] }
 
 export type LibraryPublicationReport = {
   identity: string
@@ -311,26 +331,31 @@ async function indexPublication(
   client: PoolClient,
   writers: Pool,
   publication: Publication,
-  options: LibraryIndexOptions
+  options: LibraryIndexOptions,
+  changes: VectorChanges
 ): Promise<LibraryPublicationReport> {
   const started = Date.now()
   const { provider } = options
   const batchSize = options.batchSize ?? 50
   const concurrency = options.concurrency ?? 4
   const existing = new Map<string, string>()
+  const languages = new Map<string, LibraryLanguagePassageKey['language']>()
   if (!options.dryRun) {
     const { rows } = await client.query<{
       passage_key: string
       input_sha256: string
       model: string
       contract: string
+      language: LibraryLanguagePassageKey['language']
     }>(
-      'select passage_key, input_sha256, model, contract from library_passages where publication_id = $1',
+      'select passage_key, input_sha256, model, contract, language from library_passages where publication_id = $1',
       [publication.id]
     )
-    for (const row of rows)
+    for (const row of rows) {
+      languages.set(row.passage_key, row.language)
       if (row.model === provider.model && row.contract === provider.contract)
         existing.set(row.passage_key, row.input_sha256)
+    }
   }
   const seen = new Set<string>()
   const report: LibraryPublicationReport = {
@@ -372,6 +397,8 @@ async function indexPublication(
       )
       // A connection runs one query at a time: batches are written on several connections.
       await writeBatch(writers, JSON.stringify(rows))
+      for (const { draft } of embedded)
+        changes.written.push({ publication_id: publication.id, passage_key: draft.passageKey })
     })
     options.onProgress?.(
       `${publication.identity}: ${report.passages} passages, ${report.embedded} embedded`
@@ -379,6 +406,12 @@ async function indexPublication(
   }
   if (!options.dryRun) {
     const removed = [...existing.keys()].filter(key => !seen.has(key))
+    for (const key of removed)
+      changes.deleted.push({
+        publication_id: publication.id,
+        passage_key: key,
+        language: languages.get(key)!,
+      })
     for (let start = 0; start < removed.length; start += 5_000) {
       const result = await client.query(
         'delete from library_passages where publication_id = $1 and passage_key = any($2::text[])',
@@ -422,6 +455,7 @@ export async function indexLibrary(options: LibraryIndexOptions) {
   writers.on('error', () => undefined)
   const client = await pool.connect()
   const reports: LibraryPublicationReport[] = []
+  const changes: VectorChanges = { written: [], deleted: [] }
   let removedInactive = 0
   try {
     // One index run at a time; publications stay readable meanwhile.
@@ -431,6 +465,13 @@ export async function indexLibrary(options: LibraryIndexOptions) {
     if (!rows[0]?.locked) throw new Error('LIBRARY_INDEX_ALREADY_RUNNING')
     const publications = await activePublications(client, options)
     if (!options.dryRun) {
+      if (options.vectors) {
+        const { rows: inactive } = await client.query<LibraryLanguagePassageKey>(
+          `select p.publication_id, p.passage_key, p.language from library_passages p
+           join resource_publications r on r.id = p.publication_id where r.status <> 'active'`
+        )
+        changes.deleted.push(...inactive)
+      }
       // Rows of publications that are no longer active go with them by cascade; none should remain.
       removedInactive =
         (
@@ -443,7 +484,7 @@ export async function indexLibrary(options: LibraryIndexOptions) {
         await client.query('drop index if exists library_passages_cosine_hnsw')
     }
     for (const publication of publications) {
-      const report = await indexPublication(client, writers, publication, options)
+      const report = await indexPublication(client, writers, publication, options, changes)
       reports.push(report)
       options.onProgress?.(
         `${report.identity}: ${report.passages} passages, ${report.embedded} embedded, ${report.kept} kept, ${report.deleted} deleted${report.failed.length ? `, ${report.failed.length} refused` : ''} in ${Math.round(report.durationMs / 1000)} s`
@@ -460,6 +501,23 @@ export async function indexLibrary(options: LibraryIndexOptions) {
       await refreshLexemes(client)
     }
     if (!options.dryRun) await client.query('analyze library_passages')
+    if (!options.dryRun && options.vectors) {
+      if (options.reconcileVectors ?? true) {
+        options.onProgress?.('reconciling the Vectorize indexes')
+        const reconciliation = await reconcileLibraryVectors(client, options.vectors, {
+          refresh: changes.written,
+          onProgress: options.onProgress,
+        })
+        options.onProgress?.(`vectors: ${JSON.stringify(reconciliation)}`)
+      } else {
+        const synced = await syncLibraryVectors(client, options.vectors, {
+          upserted: changes.written,
+          deleted: changes.deleted,
+          onProgress: options.onProgress,
+        })
+        options.onProgress?.(`vectors: ${synced.upserted} upserted, ${synced.deleted} deleted`)
+      }
+    }
     return reports
   } finally {
     await client.query('select pg_advisory_unlock(3252027)').catch(() => undefined)
