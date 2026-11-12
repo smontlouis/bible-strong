@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import type { BookWidget as Descriptor } from '@bible-strong/ai-contract/contract'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
+import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { formatPassageMediaDuration, getPassageMediaForBook } from '~features/bible/passageMedia'
 import { useResourceAccess } from '~features/resources/resourceAccess'
@@ -70,7 +70,8 @@ export default function BookWidget({ widget }: { widget: Descriptor }) {
                 }
                 className="bg-light-grey flex-row items-center gap-3 rounded-[12px] p-3"
               >
-                <FeatherIcon name="play" size={18} color="primary" />
+                {/* The filled play of the Strong audio, so a play looks the same in every widget. */}
+                <IonIcon name="play" size={18} color="primary" style={{ marginLeft: 2 }} />
                 <Box className="flex-1">
                   <Text className="text-[14px] font-semibold" numberOfLines={2}>
                     {item.title}

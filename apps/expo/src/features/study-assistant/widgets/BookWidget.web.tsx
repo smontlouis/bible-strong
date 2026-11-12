@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { BookOpenIcon, ArrowUpRightIcon, PlayIcon } from 'lucide-react'
+import { BookOpenIcon, ArrowUpRightIcon } from 'lucide-react'
+import { IonIcon } from '~common/ui/Icon'
 import type { BookWidget as Descriptor } from '@bible-strong/ai-contract/contract'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { getBook } from '~helpers/bibleBookCatalog'
@@ -64,7 +65,8 @@ export default function BookWidget({ widget }: { widget: Descriptor }) {
                   })
                 }
               >
-                <PlayIcon size={18} />
+                {/* The filled play of the Strong audio, so a play looks the same in every widget. */}
+                <IonIcon name="play" size={18} color="primary" style={{ marginLeft: 2 }} />
                 <span>
                   {item.title}
                   <small>
