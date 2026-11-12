@@ -1,7 +1,8 @@
 # Briques Cloudflare utiles à la recherche Bible Strong
 
 _État de la recherche : 24 août 2026. Sources Cloudflare officielles uniquement. Aucun changement
-d'architecture ni déploiement effectué._
+d'architecture ni déploiement effectué. Mise à jour du 12 novembre 2026 : Vectorize mesuré en
+challenger pour la bibliothèque de l'assistant (§ 3), sans bascule._
 
 ## Décision
 
@@ -170,6 +171,86 @@ Créer un prototype Vectorize en lecture parallèle seulement si l'un de ces sig
 
 Le challenger doit retourner les mêmes `topic_id`, être exécuté en shadow traffic et gagner sur
 latence **et** qualité avant toute migration. Le coût seul ne doit pas déclencher le changement.
+
+### Mesure du 2026-11-12 : la bibliothèque de l'assistant
+
+Deux signaux sont apparus pour la bibliothèque de l'assistant (ADR-0103), qui n'est pas l'index
+des thèmes. Elle compte 1 009 757 passages. Son index HNSW de 2,63 Go ne tient plus dans le cache
+de Neon (2,2 à 3 Go), et la recherche par le sens y prenait de 4,3 à 9,7 s en production, au-delà
+du délai de 4 s du préchargement. Vectorize a donc été mesuré en challenger, derrière le réglage
+`LIBRARY_VECTOR_BACKEND`, avec les vecteurs de Neon copiés tels quels.
+
+Ce que la mesure a appris :
+
+- **Un index par langue.** Dans un index commun, la recherche approchée explore les régions les plus
+  proches de la question, donc celles de sa langue. Une liste dans l'autre langue perdait ainsi ses
+  vrais voisins, jusqu'à n'en garder aucun parmi les 10 premiers (meilleur trouvé à 0,45 au lieu de
+  0,32). Le filtre par namespace ou par métadonnée ne s'applique qu'ensuite.
+- **Le score exact.** Par défaut, Vectorize classe sur des vecteurs compressés : la distance
+  renvoyée est de 0,03 à 0,1 trop grande, et l'ordre est approché. `returnValues: true` classe sur
+  les vecteurs stockés, mais limite `topK` à 50 et coûte de 300 à 900 ms par requête au lieu de 200
+  à 250 ms. Le service note ainsi les 100 premiers passages d'une liste (deux requêtes de 50, une
+  par moitié de l'index, selon la métadonnée `bucket`). Une liste plus profonde est complétée par le
+  score compressé. Les distances rendues sont relues dans Neon pour les seuls hits.
+- **Les limites.** Un identifiant fait au plus 64 octets : les 3 877 clés plus longues deviennent
+  `<publication>:<début de clé>~<hachage>`, retrouvées dans Neon par un intervalle de la clé
+  primaire. `getByIds` accepte 20 identifiants, et la suppression 100. Le filtre `traditions`
+  (`ilike`) devient la liste des œuvres qu'il désigne, ce qui est exact puisque tous les passages
+  d'une œuvre partagent sa tradition et ses étiquettes.
+
+Rappel du top K, mesuré contre les vrais plus proches voisins calculés en force brute sur les
+vecteurs exportés. Les questions sont les 292 des benchs de l'assistant (146 pour pgvector, en
+production). Les listes sont celles des deux préchargements :
+
+| Liste | pgvector (production) | Vectorize, index commun, score compressé | Vectorize par langue, score compressé | Vectorize par langue, retenu |
+|---|---|---|---|---|
+| large fr, top 10 | 0,988 | 0,973 | 0,912 | 0,977 |
+| large en, top 10 | 0,946 | 0,832 | 0,937 | 0,993 |
+| large fr, top 100 | 0,949 | 0,940 | 0,851 | 0,925 |
+| large en, top 100 | 0,888 | 0,790 | 0,893 | 0,949 |
+| large fr, top 150 | 0,929 | 0,846 | 0,783 | 0,832 |
+| large en, top 150 | 0,863 | 0,723 | 0,810 | 0,843 |
+| par perspective fr, top 12 | 0,855 | 0,826 | 0,735 | 0,934 |
+| par perspective en, top 12 | 0,610 | 0,744 | 0,767 | 0,965 |
+
+Le faible rappel de pgvector par perspective en anglais vient de `hnsw.max_scan_tuples` (5 000).
+Sur les petites perspectives, il tombe à 0,20 (patristique), 0,32 (juive) et 0,48 (catholique).
+
+Hits finaux de `LibrarySearch`, comparés à ceux du même code avec des voisins exacts, sur 98
+questions :
+
+| Préchargement | pgvector | Vectorize |
+|---|---|---|
+| large (`perspectives`, 25 hits) : hits exacts retrouvés | 93,7 % | 96,3 % |
+| large : 5 premiers hits exacts retrouvés | 98,0 % | 97,1 % |
+| par tradition (`perPerspective: 2`) : hits exacts retrouvés | 92,5 % | 97,4 % |
+| par tradition : bon premier hit de chaque perspective | 93,9 % | 96,7 % |
+
+Latence depuis un Worker (Marseille, mêmes Hyperdrive et Workers AI, 98 questions, ordre des
+moteurs alterné) :
+
+| Préchargement | pgvector p50 / p95 | Vectorize p50 / p95 | Au-delà de 4 s |
+|---|---|---|---|
+| large, recherche entière | 2,27 s / 6,79 s | 0,94 s / 3,83 s | 23 contre 4 |
+| large, partie vectorielle | 1,70 s / 5,57 s | 0,61 s / 1,16 s | |
+| par tradition, recherche entière | 0,79 s / 1,86 s | 1,29 s / 1,81 s | 0 contre 0 |
+| par tradition, partie vectorielle | 0,64 s / 1,73 s | 1,10 s / 1,64 s | |
+
+Les recherches Vectorize au-delà de 4 s attendaient le vecteur de la question (Workers AI, de 2 à
+7 s), et non Vectorize. La recherche par tradition lance environ 21 requêtes précises en parallèle :
+elle est plus lente que pgvector en médiane, mais elle reste sous 2 s au p95.
+
+Coût : 1 009 757 vecteurs de 1 024 dimensions, soit 1,035 milliard de dimensions. Selon la formule
+publiée, elles comptent chaque mois aussi comme dimensions interrogées. Cela fait environ 10,4 $
+par mois fixes (9,85 $ d'interrogation et 0,51 $ de stockage, au-delà des quotas inclus), puis
+environ 0,00001 $ par requête. Une question de l'assistant lance environ 20 requêtes : 8 pour le
+préchargement large, 21 pour celui par tradition quand le point est débattu (environ 30 % des
+questions), et 4 par recherche du modèle. Il faut compter environ 6 $ par mois de plus pour 1 000
+questions par jour, et 62 $ pour 10 000. Le 2026-11-12, la production ne servait presque aucune
+recherche (l'assistant n'est pas ouvert).
+
+Les scripts de mesure, l'export et le Worker de bench, supprimé depuis, sont décrits dans les notes
+de la session, hors du dépôt.
 
 ## 4. AI Search : bon produit pour un futur corpus documentaire, mauvais remplacement actuel
 
