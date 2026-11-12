@@ -442,9 +442,9 @@
 .bs-assistant-context-restore > svg {
   flex-shrink: 0;
 }
+/* A block, not a flex box: a flex box cuts its text short without the ellipsis. */
 .bs-assistant-context-label {
-  display: flex;
-  align-items: center;
+  display: block;
   min-width: 0;
   padding: 4px 3px 4px 0;
   font-size: 11px !important;
