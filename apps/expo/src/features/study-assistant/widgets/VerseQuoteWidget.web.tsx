@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import type { PassageTarget, PassageWidget as Descriptor } from '@bible-strong/ai-contract/contract'
-import { getScaledStrongTextStyle } from '~features/lexique/strongEditorialHtmlStyles'
 import { useStrongReadingTypography } from '~features/lexique/useStrongReadingTypography'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import verseToReference from '~helpers/verseToReference'
@@ -62,13 +61,8 @@ function VerseQuote({ passage }: { passage: PassageTarget }) {
   const verses = query.data || []
   const shown = expanded ? verses : verses.slice(0, SHOWN_VERSES)
   const numbered = verses.length > 1
-  // A unitless line height is a multiple of the size in CSS, so both are given in pixels.
-  const scaled = getScaledStrongTextStyle(17, 27, reading)
-  const verseStyle = {
-    fontFamily: scaled.fontFamily,
-    fontSize: `${scaled.fontSize}px`,
-    lineHeight: `${scaled.lineHeight}px`,
-  }
+  // The reading font, at the size of the answer's paragraphs rather than the reader's Bible scale.
+  const verseStyle = { fontFamily: reading.fontFamily, fontSize: '16px', lineHeight: 1.75 }
   return (
     <QuoteBlock
       mark="bible"

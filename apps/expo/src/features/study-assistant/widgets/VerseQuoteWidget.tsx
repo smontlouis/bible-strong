@@ -6,7 +6,6 @@ import type { PassageTarget, PassageWidget as Descriptor } from '@bible-strong/a
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { getScaledStrongTextStyle } from '~features/lexique/strongEditorialHtmlStyles'
 import { useStrongReadingTypography } from '~features/lexique/useStrongReadingTypography'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import verseToReference from '~helpers/verseToReference'
@@ -66,7 +65,8 @@ function VerseQuote({ passage }: { passage: PassageTarget }) {
   const verses = query.data || []
   const shown = expanded ? verses : verses.slice(0, SHOWN_VERSES)
   const numbered = verses.length > 1
-  const verseStyle = getScaledStrongTextStyle(17, 27, reading)
+  // The reading font, at the size of the answer's paragraphs rather than the reader's Bible scale.
+  const verseStyle = { fontFamily: reading.fontFamily, fontSize: 16, lineHeight: 25 }
   return (
     <TouchableBox
       accessibilityRole="button"

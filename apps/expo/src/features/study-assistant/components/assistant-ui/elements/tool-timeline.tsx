@@ -70,13 +70,17 @@ export function ToolTimeline({
             return (
               <div
                 key={`${index}:${step.chip}`}
-                className="fade-in slide-in-from-bottom-1 animate-in fill-mode-both text-foreground/55 flex items-center gap-2 text-[13.5px] duration-300"
+                className="fade-in slide-in-from-bottom-1 animate-in fill-mode-both text-foreground/55 flex min-w-0 items-center gap-2 text-[13.5px] duration-300"
               >
                 <Icon className="text-foreground/35 size-3.5 shrink-0" />
-                <ShimmerLabel active={active} className="relative inline-block leading-none">
+                {/* One line per step: the verb stays whole, the chip ends in an ellipsis. */}
+                <ShimmerLabel
+                  active={active}
+                  className="relative inline-block shrink-0 leading-none whitespace-nowrap"
+                >
                   {step.verb}
                 </ShimmerLabel>
-                <span className="bg-foreground/[0.06] text-foreground/70 rounded-md px-1.5 py-0.5 font-mono text-[11px]">
+                <span className="bg-foreground/[0.06] text-foreground/70 min-w-0 truncate rounded-md px-1.5 py-0.5 font-mono text-[11px]">
                   {step.chip}
                 </span>
               </div>

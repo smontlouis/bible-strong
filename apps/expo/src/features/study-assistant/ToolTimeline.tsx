@@ -89,7 +89,8 @@ export default function ToolTimeline({
             return (
               <HStack key={tool.callId} className="items-center gap-2">
                 <FeatherIcon name={iconFor(tool)} size={13} color={failed ? 'quart' : 'grey'} />
-                <Text className="text-grey shrink text-[13px]" numberOfLines={1}>
+                {/* One line per step: the label stays whole, the target ends in an ellipsis. */}
+                <Text className="text-grey shrink-0 text-[13px]" numberOfLines={1}>
                   {t(`assistant.tools.${toolActivityKind(tool)}`)}
                   {failed ? ` · ${t(`assistant.tools.${tool.state}`)}` : ''}
                 </Text>
