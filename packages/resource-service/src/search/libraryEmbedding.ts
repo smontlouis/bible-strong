@@ -110,6 +110,74 @@ export const makeHttpLibraryEmbeddingProvider = (
   })
 
 
+/** A query embedding not back after this is asked again (amendment of 2026-11-12 to ADR-0103). */
+export const QUERY_EMBEDDING_HEDGE_MS = 600
+/** Past this the query has no vector: the search goes on by words alone. */
+export const QUERY_EMBEDDING_TIMEOUT_MS = 2000
+
+export type QueryEmbeddingReport = { attempts: number; timedOut: boolean }
+
+/**
+ * The same provider, asking for a query vector a second time when the first call is late, and
+ * giving up after a bound (amendment of 2026-11-12 to ADR-0103). Workers AI serves Qwen3 with a
+ * heavy tail that falls at random, call by call: 0.5 s median but 4 to 5.4 s at the 95th
+ * percentile, where BGE-M3 called alternately stayed under 0.7 s. A second identical call usually
+ * comes back in 0.3 to 0.5 s; the first answer serves, the other is ignored. A first call that fails
+ * early starts the second at once. Documents are embedded as before.
+ */
+export function withHedgedQueryEmbedding(
+  provider: LibraryEmbeddingProvider,
+  options: {
+    hedgeAfterMs?: number
+    timeoutMs?: number
+    onSettled?: (report: QueryEmbeddingReport) => void
+  } = {}
+): LibraryEmbeddingProvider {
+  const hedgeAfterMs = options.hedgeAfterMs ?? QUERY_EMBEDDING_HEDGE_MS
+  const timeoutMs = options.timeoutMs ?? QUERY_EMBEDDING_TIMEOUT_MS
+  return {
+    model: provider.model,
+    contract: provider.contract,
+    embedDocuments: texts => provider.embedDocuments(texts),
+    embedQuery(text) {
+      return new Promise<number[]>((resolve, reject) => {
+        let done = false,
+          attempts = 0,
+          running = 0
+        const finish = (outcome: () => void, timedOut = false) => {
+          done = true
+          clearTimeout(hedge)
+          clearTimeout(deadline)
+          options.onSettled?.({ attempts, timedOut })
+          outcome()
+        }
+        const launch = () => {
+          if (done || attempts >= 2) return
+          attempts += 1
+          running += 1
+          provider.embedQuery(text).then(
+            vector => {
+              if (!done) finish(() => resolve(vector))
+            },
+            error => {
+              running -= 1
+              if (done) return
+              if (attempts < 2) launch()
+              else if (running === 0) finish(() => reject(error))
+            }
+          )
+        }
+        const hedge = setTimeout(launch, hedgeAfterMs)
+        const deadline = setTimeout(
+          () => finish(() => reject(new Error('LIBRARY_EMBEDDING_TIMEOUT')), true),
+          timeoutMs
+        )
+        launch()
+      })
+    },
+  }
+}
+
 const QUERY_CACHE_ENTRIES = 64
 const QUERY_CACHE_TTL_MS = 10 * 60_000
 const queryCache = new Map<string, { vector: Promise<number[]>; at: number }>()

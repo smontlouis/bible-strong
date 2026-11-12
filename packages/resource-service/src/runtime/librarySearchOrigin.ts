@@ -6,7 +6,9 @@ import { searchLibrary } from '../repositories/librarySearchRepository'
 import {
   LIBRARY_EMBEDDING_CONTRACT,
   makeLibraryEmbeddingProvider,
+  withHedgedQueryEmbedding,
   withQueryEmbeddingCache,
+  type QueryEmbeddingReport,
 } from '../search/libraryEmbedding'
 import { parseLibraryDocumentInput, parseLibrarySearchInput } from '../search/librarySearchInput'
 import { makeVectorizeLibrarySearch } from '../search/libraryVectorIndex'
@@ -22,19 +24,27 @@ export async function runLibrarySearch(bindings: Env, value: unknown) {
     input.perPerspective ? 5 : 2
   )
   try {
-    const provider = withQueryEmbeddingCache(makeLibraryEmbeddingProvider({
-      run: (model, payload) =>
-        bindings.AI.run(
-          model,
-          payload,
-          makeMetadataOnlyAiGatewayOptions({
-            gatewayId: bindings.AI_GATEWAY_ID,
-            environment: bindings.RESOURCE_ENVIRONMENT,
-            contract: LIBRARY_EMBEDDING_CONTRACT,
-            enabled: bindings.SEARCH_ANALYTICS_ENABLED === 'true',
-          })
-        ),
-    }))
+    // A late query vector is asked twice, and given up after 2 s for the words alone (amendment of
+    // 2026-11-12 to ADR-0103). No report: the vector came from the isolate's cache.
+    let embeddingReport: QueryEmbeddingReport | undefined
+    const provider = withQueryEmbeddingCache(
+      withHedgedQueryEmbedding(
+        makeLibraryEmbeddingProvider({
+          run: (model, payload) =>
+            bindings.AI.run(
+              model,
+              payload,
+              makeMetadataOnlyAiGatewayOptions({
+                gatewayId: bindings.AI_GATEWAY_ID,
+                environment: bindings.RESOURCE_ENVIRONMENT,
+                contract: LIBRARY_EMBEDDING_CONTRACT,
+                enabled: bindings.SEARCH_ANALYTICS_ENABLED === 'true',
+              })
+            ),
+        }),
+        { onSettled: report => (embeddingReport = report) }
+      )
+    )
     // The nearest passages by meaning come from Vectorize or from Neon's HNSW index (amendment of
     // 2026-11-12 to ADR-0103); the rest of the search is the same.
     const vectorBackend = (bindings.LIBRARY_VECTOR_BACKEND as string) === 'vectorize' ? 'vectorize' : 'pgvector'
@@ -53,6 +63,7 @@ export async function runLibrarySearch(bindings: Env, value: unknown) {
       JSON.stringify({
         message: 'library search',
         vectorBackend,
+        ...(embeddingReport ? { embeddingAttempts: embeddingReport.attempts, embeddingTimedOut: embeddingReport.timedOut } : {}),
         hits: result.hits.length,
         ...(result.perspectiveHits ? { perspectiveHits: result.perspectiveHits.length } : {}),
         semantic: result.semantic,

@@ -16,7 +16,7 @@ import { createServer } from 'node:http'
 import { makeLocalDatabase } from '../database/localDatabase'
 import { readLibraryDocument } from '../repositories/libraryDocumentRepository'
 import { searchLibrary } from '../repositories/librarySearchRepository'
-import { makeHttpLibraryEmbeddingProvider, withQueryEmbeddingCache } from './libraryEmbedding'
+import { makeHttpLibraryEmbeddingProvider, withHedgedQueryEmbedding, withQueryEmbeddingCache } from './libraryEmbedding'
 import { makeRestLibraryEmbeddingProvider } from './libraryEmbeddingRest'
 import { makeVectorizeLibrarySearch } from './libraryVectorIndex'
 import { makeRestLibraryVectorizeClients } from './libraryVectorizeRest'
@@ -30,12 +30,19 @@ const database = makeLocalDatabase({
   // As many as the Worker opens for a search by perspective, with room for the lexical one.
   maxConnections: 6,
 })
-const provider = withQueryEmbeddingCache(process.env.CLOUDFLARE_ACCOUNT_ID
-  ? makeRestLibraryEmbeddingProvider(process.env.CLOUDFLARE_ACCOUNT_ID)
-  : makeHttpLibraryEmbeddingProvider(
-      process.env.RESOURCE_LIBRARY_EMBEDDING_URL ?? 'http://127.0.0.1:8791',
-      { maxAttempts: 3 }
-    ))
+// A late query vector is asked twice, as in the Worker. A bench measures answers, not speed: from a
+// laptop the vector is given 10 s before the words alone serve (RESOURCE_LIBRARY_EMBEDDING_TIMEOUT_MS).
+const provider = withQueryEmbeddingCache(
+  withHedgedQueryEmbedding(
+    process.env.CLOUDFLARE_ACCOUNT_ID
+      ? makeRestLibraryEmbeddingProvider(process.env.CLOUDFLARE_ACCOUNT_ID)
+      : makeHttpLibraryEmbeddingProvider(
+          process.env.RESOURCE_LIBRARY_EMBEDDING_URL ?? 'http://127.0.0.1:8791',
+          { maxAttempts: 3 }
+        ),
+    { timeoutMs: Number(process.env.RESOURCE_LIBRARY_EMBEDDING_TIMEOUT_MS ?? 10_000) }
+  )
+)
 
 if (process.env.RESOURCE_LIBRARY_VECTOR_BACKEND === 'vectorize' && !process.env.CLOUDFLARE_ACCOUNT_ID)
   throw new Error('RESOURCE_LIBRARY_VECTOR_BACKEND=vectorize needs CLOUDFLARE_ACCOUNT_ID')

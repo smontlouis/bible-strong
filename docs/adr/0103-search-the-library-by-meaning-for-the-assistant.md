@@ -274,3 +274,50 @@ search by words and the publications stay in Neon.
 - The HNSW index stays until the switch has run in production for a while; dropping it is decided
   then. Once it is gone, going back to pgvector needs the index built again, about 6 min with 1 GB
   of `maintenance_work_mem`.
+
+## Amendment of 2026-11-12: a late query vector is asked twice
+
+### Context
+
+The query vector is the slow part of a search that the vectors of Vectorize made fast. Workers
+AI serves `@cf/qwen/qwen3-embedding-0.6b` with a heavy tail: a question of at most 31 tokens took
+the following.
+
+| Measure | Median | p90 | p95 | Max | Over 1 s |
+|---|---|---|---|---|---|
+| AI Gateway logs, 200 calls | 0.48 s | 2.3 s | 4.0 s | 8.3 s | 24 % |
+| Called directly, 40 calls | 0.54 s | 3.7 s | 5.4 s | 8.1 s | 25 % |
+| `@cf/baai/bge-m3`, alternated with the above | 0.18 s | 0.54 s | 0.66 s | 0.67 s | 0 % |
+
+- **It is the Qwen3 model.** The tail is neither AI Gateway (direct calls have it too) nor our code
+  (BGE-M3 stays fast in the same minutes).
+- **It is not the capacity queue Cloudflare documents.** With `rejectIfBusy` no call was refused,
+  and the tail was the same.
+- **Slow calls fall at random.** Within a minute one call takes 0.1 s and the next 5 s. After a
+  slow call the next one was slow 3 times in 10.
+
+In production on 2026-11-12, a question's vector took 3.1 s, and its preload ran out of its 4 s.
+
+### Decision
+
+- **The second call.** A query vector not back after `QUERY_EMBEDDING_HEDGE_MS` (600 ms) is asked
+  again with the same text, without cancelling the first call. The first answer serves, and the
+  other is ignored. A first call that fails early starts the second at once.
+- **The bound.** After `QUERY_EMBEDDING_TIMEOUT_MS` (2 s) the query has no vector, and the search
+  goes on by words alone, as it already did when the embedding failed. The bound is 10 s on the
+  development server, whose benches measure answers, not speed.
+- **The log.** `library search` logs `embeddingAttempts` and `embeddingTimedOut`. When they are
+  absent, the vector came from the isolate's cache.
+- The model and the index are unchanged. Documents are embedded as before.
+
+### Consequences
+
+- About a third of the questions get a second embedding call, of 31 tokens at most: a negligible
+  cost.
+- A wait of several seconds should mostly become about one second. Our estimate is that 3 to 4 %
+  of the vectors stay above 1.5 s, against about 15 %; the logs will tell.
+- A search that reaches the bound gives excerpts found by words, which are weaker than by meaning
+  but better than a preload that runs out with none.
+- Moving to BGE-M3 would remove the cause. It needs the million passages embedded again and a
+  bench of their recall and relevance, since Qwen3-Embedding usually ranks above it on
+  multilingual retrieval. That is decided only if the tail stays after this change.
