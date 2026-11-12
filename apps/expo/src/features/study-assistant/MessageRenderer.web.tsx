@@ -63,7 +63,7 @@ export function UserMessage() {
               return (
                 <small>
                   <ContextMarkIcon context={part.data as ReadingContext} size={11} />
-                  {contextCaption(part.data as ReadingContext)}
+                  <span>{contextCaption(part.data as ReadingContext)}</span>
                 </small>
               )
             return null

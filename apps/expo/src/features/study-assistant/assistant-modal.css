@@ -257,6 +257,16 @@
   margin-top: 7px;
   white-space: normal;
 }
+.bs-assistant-message-user small > svg {
+  flex-shrink: 0;
+}
+/* The context a question went with stays on one line, as in the composer. */
+.bs-assistant-message-user small > span {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
 .bs-assistant-message-assistant .study-assistant-markdown {
   font-size: 14px;
   line-height: 1.8;
@@ -421,7 +431,8 @@
   align-items: center;
   gap: 5px;
   min-width: 0;
-  max-width: calc(100% - 42px);
+  /* A long name is cut short, leaving the composer's line to its buttons. */
+  max-width: min(220px, calc(100% - 42px));
   border-radius: 20px;
   background: var(--as-soft);
   padding: 2px 4px 2px 9px;
@@ -466,7 +477,7 @@
   align-items: center;
   gap: 4px;
   min-width: 0;
-  max-width: calc(100% - 42px);
+  max-width: min(220px, calc(100% - 42px));
   border: 1px dashed var(--as-border);
   border-radius: 20px;
   padding: 1px 10px 1px 7px;

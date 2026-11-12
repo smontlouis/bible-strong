@@ -36,7 +36,8 @@ function ContextChip() {
   if (context) {
     const caption = contextCaption(context)
     return (
-      <HStack className="bg-light-grey mr-2 h-[30px] shrink items-center gap-[6px] rounded-full pl-[10px] pr-[2px]">
+      // A long name is cut short, leaving the composer's line to its buttons.
+      <HStack className="bg-light-grey mr-2 h-[30px] max-w-[220px] shrink items-center gap-[6px] rounded-full pl-[10px] pr-[2px]">
         <ContextMarkIcon context={context} />
         <Text className="shrink text-[13px]" numberOfLines={1}>
           {caption}
@@ -60,7 +61,7 @@ function ContextChip() {
         accessibilityRole="button"
         accessibilityLabel={t('assistant.modal.attachContext', { context: caption })}
         onPress={session.attachContext}
-        className="border-border mr-2 h-[30px] shrink flex-row items-center gap-[6px] rounded-full border border-dashed px-[10px]"
+        className="border-border mr-2 h-[30px] max-w-[220px] shrink flex-row items-center gap-[6px] rounded-full border border-dashed px-[10px]"
       >
         <FeatherIcon name="plus" size={13} color="grey" />
         <Text className="text-grey shrink text-[13px]" numberOfLines={1}>
