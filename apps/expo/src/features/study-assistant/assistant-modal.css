@@ -145,12 +145,15 @@
   overscroll-behavior: contain;
   flex: 1;
   min-height: 0;
-  padding: 24px 26px 18px;
+  /* The bottom space belongs to the composer, so nothing scrolls under it (2026-11-12). */
+  --bs-assistant-viewport-bottom: 18px;
+  padding: 24px 26px 0;
   scrollbar-width: thin;
   scrollbar-color: var(--as-border) transparent;
 }
 .bs-assistant-thread-empty .bs-assistant-viewport {
   justify-content: center;
+  padding-bottom: var(--bs-assistant-viewport-bottom);
 }
 .bs-assistant-welcome {
   flex-shrink: 0;
@@ -300,9 +303,9 @@
 }
 .bs-assistant-compose-area {
   position: sticky;
-  bottom: -18px;
+  bottom: 0;
   flex-shrink: 0;
-  padding: 12px 0 0;
+  padding: 12px 0 var(--bs-assistant-viewport-bottom);
   background: var(--as-surface);
   margin-top: auto;
 }
@@ -620,7 +623,8 @@
     max-width: 140px;
   }
   .bs-assistant-viewport {
-    padding: 22px 20px;
+    --bs-assistant-viewport-bottom: 22px;
+    padding: 22px 20px 0;
   }
   .bs-assistant-welcome h2 {
     font-size: 21px;
