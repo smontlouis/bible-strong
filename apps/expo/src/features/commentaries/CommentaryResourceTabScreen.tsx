@@ -1,3 +1,7 @@
+import SplitColumns from '~common/ui/SplitColumns'
+import { SPLIT_SIDE_WIDTH, splitPageWidth } from '~common/ui/widePage'
+import WidePageFrame from '~common/ui/WidePageFrame'
+import { useWidePage } from '~common/ui/useWidePage'
 import { StudyRowsCard } from '~common/ui/StudySection'
 import CommentarySectionRow, { formatCommentarySectionRange } from './CommentarySectionRow'
 import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
@@ -65,6 +69,7 @@ const CommentaryResourceTabScreen = ({
   }
   const resources = useResourceAccess()
   const { t } = useTranslation()
+  const measured = useWidePage()
   const { openBookSelector } = useBookAndVersionSelector()
   const [selectorAtom] = React.useState(() => {
     const initial = getDefaultBibleTab()
@@ -203,121 +208,42 @@ const CommentaryResourceTabScreen = ({
   const passage = section
     ? `${bookLabel} ${chapter}:${formatRange(section.rangeStartVerse, section.rangeEndVerse)}`
     : undefined
+  // Only the list of a chapter's sections takes two columns: a section is one reading column.
+  const page = { ...measured, wide: measured.wide && !tab.data.sectionId }
   return (
     <FormSheetScreen className="bg-canvas" isFormSheet={false}>
       <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
-        <Header
-          title={entry.author}
-          subTitle={passage}
-          rightComponent={
-            section && passage ? (
-              <Box className="overflow-hidden border-continuous mr-[4px]">
-                <CommentaryResourceHeaderActions
-                  entry={entry}
-                  projectionId={projection.projectionId}
-                  language={projection.language}
-                  book={book}
-                  chapter={chapter}
-                  sectionId={tab.data.sectionId}
-                  showAvatar={false}
-                  canOpenInNewTab={false}
-                  share={getCommentaryShare({
-                    entry,
-                    passage,
-                    sections: [section],
-                    location: { language: projection.language, book, chapter },
-                  })}
-                />
-              </Box>
-            ) : undefined
-          }
-        />
+        <WidePageFrame page={page} width={splitPageWidth(600)}>
+          <Header
+            title={entry.author}
+            subTitle={passage}
+            rightComponent={
+              section && passage ? (
+                <Box className="overflow-hidden border-continuous mr-[4px]">
+                  <CommentaryResourceHeaderActions
+                    entry={entry}
+                    projectionId={projection.projectionId}
+                    language={projection.language}
+                    book={book}
+                    chapter={chapter}
+                    sectionId={tab.data.sectionId}
+                    showAvatar={false}
+                    canOpenInNewTab={false}
+                    share={getCommentaryShare({
+                      entry,
+                      passage,
+                      sections: [section],
+                      location: { language: projection.language, book, chapter },
+                    })}
+                  />
+                </Box>
+              ) : undefined
+            }
+          />
 
-        {tab.data.sectionId ? (
-          query.isPending ? (
-            <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center">
-              <Loading />
-            </Box>
-          ) : query.isError ? (
-            <ResourceUnavailableView
-              title={t('commentaries.resource.unavailable')}
-              failure={resourceFailureFromAccessError(query.error)}
-              onRetry={() => void query.refetch()}
-            />
-          ) : !section ? (
-            <ResourceUnavailableView
-              title={t('commentaries.resource.sectionMissing')}
-              failure={{ cause: 'not-found', recoveries: [] }}
-            />
-          ) : (
-            <ScrollView
-              ref={scrollRef}
-              backgroundColor="canvas"
-              contentContainerStyle={{
-                maxWidth: 600,
-                padding: 18,
-                paddingBottom: 32 + bottomInset,
-              }}
-            >
-              <CommentarySectionCard
-                entry={entry}
-                language={projection.language}
-                book={book}
-                chapter={chapter}
-                section={section}
-                onResourcePress={() =>
-                  pushRouteOnce({
-                    pathname: '/commentary-chapter',
-                    params: {
-                      projectionId: projection.projectionId,
-                      book: String(book),
-                      chapter: String(chapter),
-                    },
-                  })
-                }
-                onPrevious={previousSection ? () => selectSection(previousSection.id) : undefined}
-                onNext={nextSection ? () => selectSection(nextSection.id) : undefined}
-              />
-            </ScrollView>
-          )
-        ) : (
-          <ScrollView
-            stickyHeaderIndices={[1]}
-            backgroundColor="canvas"
-            contentContainerStyle={{ maxWidth: 600, padding: 18, paddingBottom: 32 + bottomInset }}
-          >
-            <CommentaryRoomIntro entry={entry} language={projection.language} />
-
-            <Box className="overflow-hidden border-continuous flex-row items-center justify-between mx-[-18px] px-[18px] py-[8px] bg-canvas z-[10]">
-              <TouchableBox
-                className="overflow-hidden border-continuous bg-surface rounded-full h-[32px] px-[12px] flex-row items-center"
-                onPress={() => {
-                  openCommentaryBookSelector({
-                    openBookSelector,
-                    actions: selectorActions,
-                    data: selectorTab.data,
-                    coverage: coverageQuery.data,
-                  })
-                }}
-                accessibilityRole="button"
-                accessibilityLabel={t('commentaries.resource.chooseChapter')}
-              >
-                <Text className="font-bold text-[14px]">
-                  {bookLabel} {chapter}
-                </Text>
-                <FeatherIcon name="chevron-down" size={14} color="grey" style={{ marginLeft: 6 }} />
-              </TouchableBox>
-              {query.data ? (
-                <Text className="text-grey text-[13px]">
-                  {t('commentaries.resource.sectionCount', {
-                    count: query.data.sections.length,
-                  })}
-                </Text>
-              ) : null}
-            </Box>
-
-            {query.isPending ? (
-              <Box className="overflow-hidden border-continuous py-[40px] items-center justify-center">
+          {tab.data.sectionId ? (
+            query.isPending ? (
+              <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center">
                 <Loading />
               </Box>
             ) : query.isError ? (
@@ -326,41 +252,231 @@ const CommentaryResourceTabScreen = ({
                 failure={resourceFailureFromAccessError(query.error)}
                 onRetry={() => void query.refetch()}
               />
-            ) : query.data.sections.length === 0 ? (
-              <Empty
-                iconElement={<CommentIcon size={36} />}
-                message={t('commentaries.resource.emptyChapter')}
+            ) : !section ? (
+              <ResourceUnavailableView
+                title={t('commentaries.resource.sectionMissing')}
+                failure={{ cause: 'not-found', recoveries: [] }}
               />
             ) : (
-              <Box className="overflow-hidden border-continuous mt-[16px]">
-                <StudyRowsCard>
-                  {query.data.sections.map(candidate => (
-                    <CommentarySectionRow
-                      key={candidate.id}
-                      rangeLabel={formatCommentarySectionRange(
-                        t,
-                        candidate.rangeStartVerse,
-                        candidate.rangeEndVerse
+              <ScrollView
+                ref={scrollRef}
+                backgroundColor="canvas"
+                contentContainerStyle={{
+                  maxWidth: 600,
+                  padding: 18,
+                  paddingBottom: 32 + bottomInset,
+                }}
+              >
+                <CommentarySectionCard
+                  entry={entry}
+                  language={projection.language}
+                  book={book}
+                  chapter={chapter}
+                  section={section}
+                  onResourcePress={() =>
+                    pushRouteOnce({
+                      pathname: '/commentary-chapter',
+                      params: {
+                        projectionId: projection.projectionId,
+                        book: String(book),
+                        chapter: String(chapter),
+                      },
+                    })
+                  }
+                  onPrevious={previousSection ? () => selectSection(previousSection.id) : undefined}
+                  onNext={nextSection ? () => selectSection(nextSection.id) : undefined}
+                />
+              </ScrollView>
+            )
+          ) : (
+            <ScrollView
+              // The chapter selector only sticks under the header while the page is one column.
+              stickyHeaderIndices={page.wide ? [] : [1]}
+              backgroundColor="canvas"
+              contentContainerStyle={{
+                maxWidth: page.wide ? splitPageWidth(600) : 600,
+                padding: 18,
+                paddingBottom: 32 + bottomInset,
+              }}
+            >
+              {page.wide ? (
+                <SplitColumns
+                  height={page.height}
+                  top={18}
+                  startWidth={SPLIT_SIDE_WIDTH}
+                  endMaxWidth={600}
+                  start={
+                    <>
+                      <CommentaryRoomIntro entry={entry} language={projection.language} />
+                      <Box className="overflow-hidden border-continuous flex-row items-center justify-between mx-[-18px] px-[18px] py-[8px] bg-canvas z-[10]">
+                        <TouchableBox
+                          className="overflow-hidden border-continuous bg-surface rounded-full h-[32px] px-[12px] flex-row items-center"
+                          onPress={() => {
+                            openCommentaryBookSelector({
+                              openBookSelector,
+                              actions: selectorActions,
+                              data: selectorTab.data,
+                              coverage: coverageQuery.data,
+                            })
+                          }}
+                          accessibilityRole="button"
+                          accessibilityLabel={t('commentaries.resource.chooseChapter')}
+                        >
+                          <Text className="font-bold text-[14px]">
+                            {bookLabel} {chapter}
+                          </Text>
+                          <FeatherIcon
+                            name="chevron-down"
+                            size={14}
+                            color="grey"
+                            style={{ marginLeft: 6 }}
+                          />
+                        </TouchableBox>
+                        {query.data ? (
+                          <Text className="text-grey text-[13px]">
+                            {t('commentaries.resource.sectionCount', {
+                              count: query.data.sections.length,
+                            })}
+                          </Text>
+                        ) : null}
+                      </Box>
+                    </>
+                  }
+                  end={
+                    <>
+                      {query.isPending ? (
+                        <Box className="overflow-hidden border-continuous py-[40px] items-center justify-center">
+                          <Loading />
+                        </Box>
+                      ) : query.isError ? (
+                        <ResourceUnavailableView
+                          title={t('commentaries.resource.unavailable')}
+                          failure={resourceFailureFromAccessError(query.error)}
+                          onRetry={() => void query.refetch()}
+                        />
+                      ) : query.data.sections.length === 0 ? (
+                        <Empty
+                          iconElement={<CommentIcon size={36} />}
+                          message={t('commentaries.resource.emptyChapter')}
+                        />
+                      ) : (
+                        <Box className="overflow-hidden border-continuous mt-[16px]">
+                          <StudyRowsCard>
+                            {query.data.sections.map(candidate => (
+                              <CommentarySectionRow
+                                key={candidate.id}
+                                rangeLabel={formatCommentarySectionRange(
+                                  t,
+                                  candidate.rangeStartVerse,
+                                  candidate.rangeEndVerse
+                                )}
+                                preview={candidate.preview}
+                                onPress={() =>
+                                  pushRouteOnce({
+                                    pathname: '/commentary-entry',
+                                    params: {
+                                      projectionId: tab.data.projectionId,
+                                      book: String(tab.data.book),
+                                      chapter: String(tab.data.chapter),
+                                      sectionId: candidate.id,
+                                    },
+                                  })
+                                }
+                              />
+                            ))}
+                          </StudyRowsCard>
+                        </Box>
                       )}
-                      preview={candidate.preview}
-                      onPress={() =>
-                        pushRouteOnce({
-                          pathname: '/commentary-entry',
-                          params: {
-                            projectionId: tab.data.projectionId,
-                            book: String(tab.data.book),
-                            chapter: String(tab.data.chapter),
-                            sectionId: candidate.id,
-                          },
-                        })
-                      }
+                    </>
+                  }
+                />
+              ) : (
+                <CommentaryRoomIntro entry={entry} language={projection.language} />
+              )}
+              {page.wide ? null : (
+                <Box className="overflow-hidden border-continuous flex-row items-center justify-between mx-[-18px] px-[18px] py-[8px] bg-canvas z-[10]">
+                  <TouchableBox
+                    className="overflow-hidden border-continuous bg-surface rounded-full h-[32px] px-[12px] flex-row items-center"
+                    onPress={() => {
+                      openCommentaryBookSelector({
+                        openBookSelector,
+                        actions: selectorActions,
+                        data: selectorTab.data,
+                        coverage: coverageQuery.data,
+                      })
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('commentaries.resource.chooseChapter')}
+                  >
+                    <Text className="font-bold text-[14px]">
+                      {bookLabel} {chapter}
+                    </Text>
+                    <FeatherIcon
+                      name="chevron-down"
+                      size={14}
+                      color="grey"
+                      style={{ marginLeft: 6 }}
                     />
-                  ))}
-                </StudyRowsCard>
-              </Box>
-            )}
-          </ScrollView>
-        )}
+                  </TouchableBox>
+                  {query.data ? (
+                    <Text className="text-grey text-[13px]">
+                      {t('commentaries.resource.sectionCount', {
+                        count: query.data.sections.length,
+                      })}
+                    </Text>
+                  ) : null}
+                </Box>
+              )}
+              {page.wide ? null : (
+                <>
+                  {query.isPending ? (
+                    <Box className="overflow-hidden border-continuous py-[40px] items-center justify-center">
+                      <Loading />
+                    </Box>
+                  ) : query.isError ? (
+                    <ResourceUnavailableView
+                      title={t('commentaries.resource.unavailable')}
+                      failure={resourceFailureFromAccessError(query.error)}
+                      onRetry={() => void query.refetch()}
+                    />
+                  ) : query.data.sections.length === 0 ? (
+                    <Empty
+                      iconElement={<CommentIcon size={36} />}
+                      message={t('commentaries.resource.emptyChapter')}
+                    />
+                  ) : (
+                    <Box className="overflow-hidden border-continuous mt-[16px]">
+                      <StudyRowsCard>
+                        {query.data.sections.map(candidate => (
+                          <CommentarySectionRow
+                            key={candidate.id}
+                            rangeLabel={formatCommentarySectionRange(
+                              t,
+                              candidate.rangeStartVerse,
+                              candidate.rangeEndVerse
+                            )}
+                            preview={candidate.preview}
+                            onPress={() =>
+                              pushRouteOnce({
+                                pathname: '/commentary-entry',
+                                params: {
+                                  projectionId: tab.data.projectionId,
+                                  book: String(tab.data.book),
+                                  chapter: String(tab.data.chapter),
+                                  sectionId: candidate.id,
+                                },
+                              })
+                            }
+                          />
+                        ))}
+                      </StudyRowsCard>
+                    </Box>
+                  )}
+                </>
+              )}
+            </ScrollView>
+          )}
+        </WidePageFrame>
       </Box>
     </FormSheetScreen>
   )

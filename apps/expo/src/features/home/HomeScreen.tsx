@@ -6,8 +6,9 @@ import {
   WORKSPACE_SIDEBAR_BUTTON_HEIGHT,
 } from '~features/app-switcher/workspaceHeaderInset'
 import Color from 'color'
-import React, { useLayoutEffect, useRef, useState } from 'react'
-import { Platform, type View, type ViewStyle } from 'react-native'
+import React, { useState } from 'react'
+import type { ViewStyle } from 'react-native'
+import { useWidePage } from '~common/ui/useWidePage'
 import Box, { RightInsetCleared, TouchableBox, useRightInsetToClear } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HomeScrollView } from '~common/ui/ScrollView'
@@ -62,26 +63,13 @@ export const Home = ({ closeHome, inWorkspace = false }: HomeProps) => {
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   const rightInset = useRightInsetToClear()
-  const rootRef = useRef<View>(null)
-  const [frame, setFrame] = useState({ width: 0, height: 0 })
+  // The home's own measure, which follows the window, the sidebar and any panel beside it.
+  const page = useWidePage(HOME_SIDE_WIDTH + HOME_MAX_WIDTH)
   const [sideHeight, setSideHeight] = useState(0)
-  const measure = (width: number, height: number) =>
-    setFrame(current =>
-      current.width === width && current.height === height ? current : { width, height }
-    )
-  // On Web the DOM can be read before the first paint, so the home never flashes as one column.
-  useLayoutEffect(() => {
-    if (Platform.OS !== 'web') return
-    const node = rootRef.current as unknown as HTMLElement | null
-    const rect = node?.getBoundingClientRect?.()
-    if (rect) measure(Math.round(rect.width), Math.round(rect.height))
-  }, [])
-  const split =
-    Platform.OS === 'web' && inWorkspace && frame.width >= HOME_SIDE_WIDTH + HOME_MAX_WIDTH
-  // A side column taller than the window scrolls with the page, or its end could not be reached.
+  const split = inWorkspace && page.wide
   // Same clearance as HomeHeader: its greeting starts below the sidebar button.
   const headerClearance = useWorkspaceHeaderInset() ? WORKSPACE_SIDEBAR_BUTTON_HEIGHT : 20
-  const sideStays = sideHeight > 0 && sideHeight <= frame.height
+  const sideStays = sideHeight > 0 && sideHeight <= page.height
 
   const side = (
     <>
@@ -113,10 +101,7 @@ export const Home = ({ closeHome, inWorkspace = false }: HomeProps) => {
 
   return (
     <Box
-      ref={rootRef}
-      onLayout={({ nativeEvent }) =>
-        measure(Math.round(nativeEvent.layout.width), Math.round(nativeEvent.layout.height))
-      }
+      ref={page.ref}
       className="overflow-hidden border-continuous bg-canvas flex-[1]"
       // Clear a landscape iPhone's camera, as SafeAreaBox does for other pages.
       style={{ paddingRight: rightInset }}

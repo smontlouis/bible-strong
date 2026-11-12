@@ -10,6 +10,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import PageContent from '~common/ui/PageContent'
+import { usePageHeaderWidth } from '~common/ui/pageHeaderWidth'
 import Back from './Back'
 import ContextualPanel from './ContextualPanel'
 import type { PanelScreen } from './ContextualPanel/types'
@@ -52,6 +53,8 @@ export default function FiltersHeader({
   const { t } = useTranslation()
   const theme = useTheme()
   const workspaceHeaderInset = useWorkspaceHeaderInset()
+  // A page laid out in two columns gives its header their width.
+  const pageWidth = usePageHeaderWidth()
   const [searches, setSearches] = useState<Record<string, string>>({})
   const isWeb = Platform.OS === 'web'
   const activeCount = filters.filter(filter => filter.active).length
@@ -162,6 +165,7 @@ export default function FiltersHeader({
     />
   )
   if (buttonOnly) return filterButton
+  const widthStyle = pageWidth ? { maxWidth: pageWidth } : undefined
   return (
     <Box
       className="border-separator"
@@ -169,7 +173,7 @@ export default function FiltersHeader({
       testID="workspace-page-header"
       dataSet={windowDragRegion(workspaceHeaderInset)}
     >
-      <PageContent className="min-h-[54px] items-center flex-row">
+      <PageContent className="min-h-[54px] items-center flex-row" style={widthStyle}>
         {hasBackButton ? (
           <Back padding>
             <FeatherIcon name="arrow-left" size={20} />
@@ -180,7 +184,7 @@ export default function FiltersHeader({
         <Text className="flex-1 text-[14px] font-bold">{title}</Text>
         {filterButton}
       </PageContent>
-      {children && <PageContent>{children}</PageContent>}
+      {children && <PageContent style={widthStyle}>{children}</PageContent>}
     </Box>
   )
 }

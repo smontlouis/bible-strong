@@ -22,7 +22,7 @@ import { filterReadingPlans, type ReadingPlanFilters } from './readingPlanFilter
 import PlanContinuePill from './PlanContinuePill'
 import ReadingPlansWide from './ReadingPlansWide'
 import { useReadingPlanRow, type ReadingPlanRowKind } from './useReadingPlanRow'
-import { useWidePlansLayout } from './useWidePlansLayout'
+import type { WidePage } from '~common/ui/useWidePage'
 import PlanStreak from './PlanStreak'
 
 // The padding and gap of a settings row, so the plans read as the same list
@@ -84,7 +84,14 @@ export const ReadingPlanRow = ({ plan, kind }: { plan: OnlinePlan; kind: Reading
   )
 }
 
-const ReadingPlansScreen = ({ filters }: { filters: ReadingPlanFilters }) => {
+const ReadingPlansScreen = ({
+  filters,
+  page,
+}: {
+  filters: ReadingPlanFilters
+  /** The page as its screen measured it: wide, it sets the plans in two columns. */
+  page?: WidePage
+}) => {
   const { t } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
   const bottomInset = usePageBottomInset()
@@ -136,16 +143,15 @@ const ReadingPlansScreen = ({ filters }: { filters: ReadingPlanFilters }) => {
       )}
     </>
   )
-  const layout = useWidePlansLayout()
-  if (layout.wide)
+  if (page?.wide)
     return (
-      <Box ref={layout.ref} onLayout={layout.onLayout} className="flex-1">
+      <>
         <ReadingPlansWide
           active={active}
           completed={completed}
           discoverable={discoverable}
           notices={notices}
-          height={layout.height}
+          height={page.height}
           missed={active.reduce((count, plan) => {
             const content = local.find(item => item.id === plan.id)
             const readings = content?.sections.flatMap(section => section.readingSlices) ?? []
@@ -154,10 +160,10 @@ const ReadingPlansScreen = ({ filters }: { filters: ReadingPlanFilters }) => {
             )
           }, 0)}
         />
-      </Box>
+      </>
     )
   return (
-    <Box ref={layout.ref} onLayout={layout.onLayout} className="flex-1">
+    <>
       <ScrollView
         contentContainerStyle={[
           pageContentStyle,
@@ -209,7 +215,7 @@ const ReadingPlansScreen = ({ filters }: { filters: ReadingPlanFilters }) => {
           </>
         )}
       </ScrollView>
-    </Box>
+    </>
   )
 }
 export default ReadingPlansScreen

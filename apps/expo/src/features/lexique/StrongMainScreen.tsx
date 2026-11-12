@@ -14,7 +14,9 @@ import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { RootState } from '~redux/modules/reducer'
 import { historyAtom } from '~state/app'
 import { resolveStrongBibleVersionId } from './resolveStrongBibleVersionId'
-import StrongDetailMainPage from './StrongDetailMainPage'
+import StrongDetailMainPage, { STRONG_WIDE_PAGE_WIDTH } from './StrongDetailMainPage'
+import WidePageFrame from '~common/ui/WidePageFrame'
+import { useWidePage } from '~common/ui/useWidePage'
 import StrongEntryRouteScaffold from './StrongEntryRouteScaffold'
 import type { StrongDetailRouteContext } from './strongDetailRoutes'
 import { createStrongDetailRoute } from './strongDetailRoutes'
@@ -58,6 +60,7 @@ const StrongMainScreen = ({
   const routeNavigation = useStrongRouteNavigation(activeContext)
   const addHistory = useSetAtom(historyAtom)
   const { t } = useTranslation()
+  const page = useWidePage()
   const recordedHistoryReferenceRef = useRef<string | undefined>(undefined)
   const defaultStrongBibleVersionId = useSelector(
     (state: RootState) => state.user.bible.settings.defaultStrongBibleVersionId ?? 'LSG'
@@ -247,69 +250,72 @@ const StrongMainScreen = ({
     ? getPassageMediaForStrong({ strongCode: entry.stepCode, language: resourceLanguage })
     : []
   return (
-    <StrongEntryRouteScaffold
-      className="bg-canvas"
-      context={activeContext}
-      entryState={entryState}
-      hasBackButton={hasBackButton}
-      isFormSheet={isFormSheet}
-      onBack={onBack}
-      showEntryMenu
-      subTitle={
-        entry
-          ? `${t(entry.language === 'greek' ? 'Grec' : 'Hébreu')} · ${formatStrongDisplayCode(entry.stepCode)}`
-          : undefined
-      }
-      title={t('strongDetail.title')}
-    >
-      {entry && (
-        <StrongDetailMainPage
-          entry={entry}
-          extrasLoading={entryState.extrasLoading}
-          extrasError={entryState.extrasError}
-          onRetryExtras={() => void entryState.retryExtras()}
-          passageMedia={passageMedia}
-          contextVerse={contextVerse}
-          contextLoading={contextVerseQuery.isPending}
-          contextError={
-            contextVerseQuery.isError || Boolean(contextVerseQuery.data && !contextVerse)
-          }
-          onRetryContext={() => void contextVerseQuery.refetch()}
-          contextReference={contextReference}
-          contextVersion={
-            contextVerseQuery.data?.status === 'available'
-              ? contextVerseQuery.data.provenance.versionId
-              : activeContext.bibleVersion
-          }
-          clickedWord={activeContext.clickedWord}
-          contextMorphologies={contextMorphologiesQuery.data}
-          concordanceCount={concordanceCount}
-          concordanceTotalCount={concordanceTotalCount}
-          concordanceVersion={concordanceVersion}
-          concordanceVerses={previewMatchesVersion ? (availablePreview?.verses ?? []) : []}
-          concordanceLoading={concordanceLoading}
-          concordanceError={concordanceError}
-          concordanceRetrying={concordanceQuery.isFetching || concordanceTotalQuery.isFetching}
-          onRetryConcordance={retryConcordance}
-          lemmaStats={lemmaStats}
-          selectedLemmaId={selectedLemmaId}
-          readingTypography={readingTypography}
-          onSelectLemma={lemmaId => setLemmaSelection({ navigationKey, lemmaId })}
-          onOpenPage={page =>
-            pushRouteOnce(
-              createStrongDetailRoute(page, activeContext, {
-                entityKey: page === 'entity' ? entry.entity?.uniqueName : undefined,
-              })
-            )
-          }
-          onOpenStrong={routeNavigation.openStrong}
-          onOpenBibleReference={routeNavigation.openBibleReference}
-          onOpenConcordanceVerse={openConcordanceVerse}
-          onOpenEntityProfile={routeNavigation.openEntity}
-          onOpenEntityRelation={routeNavigation.openEntityRelation}
-        />
-      )}
-    </StrongEntryRouteScaffold>
+    <WidePageFrame page={page} width={STRONG_WIDE_PAGE_WIDTH}>
+      <StrongEntryRouteScaffold
+        className="bg-canvas"
+        context={activeContext}
+        entryState={entryState}
+        hasBackButton={hasBackButton}
+        isFormSheet={isFormSheet}
+        onBack={onBack}
+        showEntryMenu
+        subTitle={
+          entry
+            ? `${t(entry.language === 'greek' ? 'Grec' : 'Hébreu')} · ${formatStrongDisplayCode(entry.stepCode)}`
+            : undefined
+        }
+        title={t('strongDetail.title')}
+      >
+        {entry && (
+          <StrongDetailMainPage
+            page={page}
+            entry={entry}
+            extrasLoading={entryState.extrasLoading}
+            extrasError={entryState.extrasError}
+            onRetryExtras={() => void entryState.retryExtras()}
+            passageMedia={passageMedia}
+            contextVerse={contextVerse}
+            contextLoading={contextVerseQuery.isPending}
+            contextError={
+              contextVerseQuery.isError || Boolean(contextVerseQuery.data && !contextVerse)
+            }
+            onRetryContext={() => void contextVerseQuery.refetch()}
+            contextReference={contextReference}
+            contextVersion={
+              contextVerseQuery.data?.status === 'available'
+                ? contextVerseQuery.data.provenance.versionId
+                : activeContext.bibleVersion
+            }
+            clickedWord={activeContext.clickedWord}
+            contextMorphologies={contextMorphologiesQuery.data}
+            concordanceCount={concordanceCount}
+            concordanceTotalCount={concordanceTotalCount}
+            concordanceVersion={concordanceVersion}
+            concordanceVerses={previewMatchesVersion ? (availablePreview?.verses ?? []) : []}
+            concordanceLoading={concordanceLoading}
+            concordanceError={concordanceError}
+            concordanceRetrying={concordanceQuery.isFetching || concordanceTotalQuery.isFetching}
+            onRetryConcordance={retryConcordance}
+            lemmaStats={lemmaStats}
+            selectedLemmaId={selectedLemmaId}
+            readingTypography={readingTypography}
+            onSelectLemma={lemmaId => setLemmaSelection({ navigationKey, lemmaId })}
+            onOpenPage={page =>
+              pushRouteOnce(
+                createStrongDetailRoute(page, activeContext, {
+                  entityKey: page === 'entity' ? entry.entity?.uniqueName : undefined,
+                })
+              )
+            }
+            onOpenStrong={routeNavigation.openStrong}
+            onOpenBibleReference={routeNavigation.openBibleReference}
+            onOpenConcordanceVerse={openConcordanceVerse}
+            onOpenEntityProfile={routeNavigation.openEntity}
+            onOpenEntityRelation={routeNavigation.openEntityRelation}
+          />
+        )}
+      </StrongEntryRouteScaffold>
+    </WidePageFrame>
   )
 }
 

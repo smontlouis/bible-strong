@@ -49,6 +49,7 @@ jest.mock('react-i18next', () => ({
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: () => {} }) }))
 jest.mock('expo-image', () => ({ Image: () => null }))
 jest.mock('../plan.hooks', () => ({ useFireStorage: () => undefined }))
+jest.mock('../ReadingPlansWide', () => ({ __esModule: true, default: () => null }))
 jest.mock('react-native', () => ({
   ActivityIndicator: () => null,
   ScrollView: ({ children }: React.PropsWithChildren) => children,

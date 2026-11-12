@@ -1,3 +1,6 @@
+import { STUDY_SPLIT_PAGE_WIDTH } from '~common/ui/widePage'
+import WidePageFrame from '~common/ui/WidePageFrame'
+import { useWidePage } from '~common/ui/useWidePage'
 import { useLocalSearchParams } from 'expo-router'
 import { entityContext } from '~features/study-assistant/referenceContext'
 import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
@@ -22,6 +25,7 @@ type Props = {
 
 const StrongEntityRouteScreen = ({ context, entityKey, isFormSheet = false }: Props) => {
   const { t } = useTranslation()
+  const page = useWidePage()
   const resources = useResourceAccess()
   const readingTypography = useStrongReadingTypography()
   const { language: preferredLanguage } = useStrongLexiconLanguage()
@@ -50,29 +54,32 @@ const StrongEntityRouteScreen = ({ context, entityKey, isFormSheet = false }: Pr
   }
 
   return (
-    <StrongEntryRouteScaffold
-      className="bg-canvas"
-      context={context}
-      entryState={entryState}
-      isFormSheet={isFormSheet}
-      requireEntry={false}
-      title={entityQuery.data?.name ?? t('strongDetail.entity.title')}
-    >
-      <StrongEntityPage
-        language={language}
-        entity={entityQuery.data}
-        readingTypography={readingTypography}
-        loading={
-          availabilityQuery.isPending ||
-          (Boolean(entityKey) && availability.status === 'available' && entityQuery.isPending)
-        }
-        onOpenBibleReference={navigation.openBibleReference}
-        onOpenStrong={navigation.openStrong}
-        onOpenEntityProfile={navigation.openEntity}
-        onOpenEntityRelation={navigation.openEntityRelation}
-        onOpenMap={focus => navigation.openMap({ focus })}
-      />
-    </StrongEntryRouteScaffold>
+    <WidePageFrame page={page} width={STUDY_SPLIT_PAGE_WIDTH}>
+      <StrongEntryRouteScaffold
+        className="bg-canvas"
+        context={context}
+        entryState={entryState}
+        isFormSheet={isFormSheet}
+        requireEntry={false}
+        title={entityQuery.data?.name ?? t('strongDetail.entity.title')}
+      >
+        <StrongEntityPage
+          page={page}
+          language={language}
+          entity={entityQuery.data}
+          readingTypography={readingTypography}
+          loading={
+            availabilityQuery.isPending ||
+            (Boolean(entityKey) && availability.status === 'available' && entityQuery.isPending)
+          }
+          onOpenBibleReference={navigation.openBibleReference}
+          onOpenStrong={navigation.openStrong}
+          onOpenEntityProfile={navigation.openEntity}
+          onOpenEntityRelation={navigation.openEntityRelation}
+          onOpenMap={focus => navigation.openMap({ focus })}
+        />
+      </StrongEntryRouteScaffold>
+    </WidePageFrame>
   )
 }
 

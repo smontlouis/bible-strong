@@ -72,7 +72,7 @@ La liste des plans range les plans suivis en « Vos parcours » et « Terminés 
 
 ### La liste sur une grande fenêtre Web
 
-À partir de 1000 points de large sur le Web (`useWidePlansLayout.web.ts`), la liste devient deux
+À partir de 1000 points de large sur le Web (`useWidePage` de `~common/ui`, mesuré par `PlanSelectScreen`), la liste devient deux
 colonnes (`ReadingPlansWide.tsx`), comme l'accueil : à gauche, « Vos parcours » reste en place
 (trois chiffres, une tuile par plan suivi avec sa couverture, sa progression et son bouton, puis
 « Terminés ») ; à droite, « À découvrir » défile en cartes à couverture, rangées par durée

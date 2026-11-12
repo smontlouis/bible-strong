@@ -1,6 +1,7 @@
 import { Image } from 'expo-image'
 import { useState, type ReactNode } from 'react'
 import { ScrollView, type ViewStyle } from 'react-native'
+import { WIDE_PAGE_HEADER_HEIGHT, WIDE_PAGE_MAX_WIDTH } from '~common/ui/useWidePage'
 import { useTranslation } from 'react-i18next'
 import Link from '~common/Link'
 import type { OnlinePlan } from '~common/types'
@@ -9,12 +10,14 @@ import Card from '~common/ui/Card'
 import { FeatherIcon } from '~common/ui/Icon'
 import ListSection from '~common/ui/ListSection'
 import Text from '~common/ui/Text'
+import { useTheme } from '~themes/ThemeProvider'
+import { titleFontStyle } from '~themes/styleValues'
 import PlanContinuePill from './PlanContinuePill'
 import PlanStreak from './PlanStreak'
 import { ReadingPlanRow } from './ReadingPlansScreen'
 import { useReadingPlanRow } from './useReadingPlanRow'
 
-const PAGE_MAX_WIDTH = 1140
+const PAGE_MAX_WIDTH = WIDE_PAGE_MAX_WIDTH
 const SIDE_WIDTH = 400
 const COLUMN_GAP = 36
 const PAGE_PADDING = 20
@@ -139,11 +142,12 @@ const ReadingPlansWide = ({
   height: number
 }) => {
   const { t } = useTranslation()
+  const theme = useTheme()
   const [catalogueWidth, setCatalogueWidth] = useState(0)
   const [sideHeight, setSideHeight] = useState(0)
   const hasSide = active.length + completed.length > 0
   // A side column taller than the window scrolls with the page, or its end could not be reached.
-  const sideStays = sideHeight > 0 && sideHeight + PAGE_PADDING <= height
+  const sideStays = sideHeight > 0 && sideHeight <= height - WIDE_PAGE_HEADER_HEIGHT
   const columns = Math.max(1, Math.floor((catalogueWidth + CARD_GAP) / (CARD_MIN_WIDTH + CARD_GAP)))
   const cardWidth = Math.floor((catalogueWidth - CARD_GAP * (columns - 1)) / columns)
 
@@ -169,7 +173,9 @@ const ReadingPlansWide = ({
             sideStays && ({ position: 'sticky', top: 0 } as unknown as ViewStyle),
           ]}
         >
-          <Text className="text-default font-bold text-[18px]">{t('readingPlans.yours')}</Text>
+          <Text accessibilityRole="header" className="text-[23px]" style={titleFontStyle(theme)}>
+            {t('readingPlans.yours')}
+          </Text>
           <Card className="flex-row">
             <Stat value={active.length} label={t('readingPlans.stats.active')} />
             <Stat value={completed.length} label={t('readingPlans.stats.completed')} />
@@ -192,7 +198,9 @@ const ReadingPlansWide = ({
         style={{ paddingTop: PAGE_PADDING }}
         onLayout={({ nativeEvent }) => setCatalogueWidth(Math.round(nativeEvent.layout.width))}
       >
-        <Text className="text-default font-bold text-[18px]">{t('readingPlans.explore')}</Text>
+        <Text accessibilityRole="header" className="text-[23px]" style={titleFontStyle(theme)}>
+          {t('readingPlans.explore')}
+        </Text>
         {notices}
         {catalogueWidth > 0 &&
           SHELVES.map(shelf => {

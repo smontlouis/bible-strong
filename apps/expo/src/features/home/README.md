@@ -56,6 +56,8 @@ light tint they were drawn on.
 ## Two columns on a large Web window
 
 When the home gets 1080 points or more on the Web (`HomeScreen.tsx`), it sets two columns. The
+width is the home's own, watched by `useWidePage`, so a panel opening beside it brings back the
+single column. The
 left one, 440 points, holds what is the reader's own: the header with the search under the
 greeting, the day, « Ma bibliothèque ». It stays in place (`position: sticky`) while the right
 one, the 640-point column, scrolls « Reprendre », « Explorer » and « Aller plus loin ». A left

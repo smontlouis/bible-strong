@@ -1,3 +1,6 @@
+import { splitPageWidth } from '~common/ui/widePage'
+import WidePageFrame from '~common/ui/WidePageFrame'
+import { useWidePage } from '~common/ui/useWidePage'
 import React from 'react'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { useTranslation } from 'react-i18next'
@@ -58,6 +61,7 @@ const TimelineEventDetailContent = ({
   menuItems,
 }: Props) => {
   const { t } = useTranslation()
+  const page = useWidePage()
   const preferredLanguage = useTimelineLanguage()
   const lang = languageOverride || preferredLanguage
   const canGoBackInStack = useCanGoBackInStack()
@@ -118,36 +122,44 @@ const TimelineEventDetailContent = ({
     // A form sheet has no container of its own: the box inside carries the ground there.
     <FormSheetScreen className="bg-canvas" isFormSheet={isFormSheet}>
       <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
-        <Header
-          title={t('Chronologie de la Bible')}
-          hasBackButton={hasBackButton}
-          onCustomBackPress={onBack}
-          rightComponent={
-            <MenuView
-              tabActions
-              actions={menuActions}
-              onPressAction={({ nativeEvent }) => {
-                if (runResourceShareAction(nativeEvent.event, share)) return
-                menuItems?.find(item => item.label === nativeEvent.event)?.onSelect()
-              }}
-            >
-              <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[54px]">
-                <FeatherIcon name="more-vertical" size={18} />
-              </Box>
-            </MenuView>
-          }
-        />
-        <ScrollView
-          backgroundColor="canvas"
-          contentContainerStyle={{ maxWidth: STUDY_COLUMN_MAX_WIDTH + 40, paddingHorizontal: 20 }}
-        >
-          <EventDetailsContent
-            languageOverride={languageOverride}
-            assistantScope={assistantScope}
-            {...event}
-            onOpenEvent={onOpenEvent}
+        <WidePageFrame page={page} width={splitPageWidth(STUDY_COLUMN_MAX_WIDTH)}>
+          <Header
+            title={t('Chronologie de la Bible')}
+            hasBackButton={hasBackButton}
+            onCustomBackPress={onBack}
+            rightComponent={
+              <MenuView
+                tabActions
+                actions={menuActions}
+                onPressAction={({ nativeEvent }) => {
+                  if (runResourceShareAction(nativeEvent.event, share)) return
+                  menuItems?.find(item => item.label === nativeEvent.event)?.onSelect()
+                }}
+              >
+                <Box className="overflow-hidden border-continuous flex-row items-center justify-center h-[54px] w-[54px]">
+                  <FeatherIcon name="more-vertical" size={18} />
+                </Box>
+              </MenuView>
+            }
           />
-        </ScrollView>
+          <ScrollView
+            backgroundColor="canvas"
+            contentContainerStyle={{
+              maxWidth: page.wide
+                ? splitPageWidth(STUDY_COLUMN_MAX_WIDTH)
+                : STUDY_COLUMN_MAX_WIDTH + 40,
+              paddingHorizontal: 20,
+            }}
+          >
+            <EventDetailsContent
+              page={page}
+              languageOverride={languageOverride}
+              assistantScope={assistantScope}
+              {...event}
+              onOpenEvent={onOpenEvent}
+            />
+          </ScrollView>
+        </WidePageFrame>
       </Box>
     </FormSheetScreen>
   )

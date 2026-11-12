@@ -1,3 +1,7 @@
+import SplitColumns from '~common/ui/SplitColumns'
+import { SPLIT_SIDE_WIDTH, splitPageWidth } from '~common/ui/widePage'
+import WidePageFrame from '~common/ui/WidePageFrame'
+import { useWidePage } from '~common/ui/useWidePage'
 import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import { titleFontStyle } from '~themes/styleValues'
 import { naveContext } from '~features/study-assistant/resourceContext'
@@ -131,6 +135,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     })
   )
   const { t } = useTranslation()
+  const page = useWidePage()
   const stylingTheme = useStylingTheme()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const selectNaveTags = makeNaveTagsSelector()
@@ -289,7 +294,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
   }
 
   return screen(
-    <>
+    <WidePageFrame page={page} width={splitPageWidth(STUDY_COLUMN_MAX_WIDTH)}>
       <Header
         hasBackButton={hasBackButton}
         title={t('Thématique Nave')}
@@ -352,37 +357,93 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
       />
       <ScrollView
         backgroundColor="canvas"
-        contentContainerStyle={{ maxWidth: STUDY_COLUMN_MAX_WIDTH + 40, paddingHorizontal: 20 }}
+        contentContainerStyle={{
+          maxWidth: page.wide
+            ? splitPageWidth(STUDY_COLUMN_MAX_WIDTH)
+            : STUDY_COLUMN_MAX_WIDTH + 40,
+          paddingHorizontal: 20,
+        }}
       >
-        <VStack className="gap-[10px] pt-[2px] pb-[4px]">
-          {(tags || relationCount > 0) && (
-            <EntityChipList
-              tags={tags}
-              relationCount={relationCount}
-              onRelationPress={() => naveEndpoint && openEntityRelations(naveEndpoint)}
+        {page.wide ? (
+          <SplitColumns
+            height={page.height}
+            startMaxWidth={STUDY_COLUMN_MAX_WIDTH}
+            endWidth={SPLIT_SIDE_WIDTH}
+            start={
+              <>
+                <VStack className="gap-[10px] pt-[2px] pb-[4px]">
+                  {(tags || relationCount > 0) && (
+                    <EntityChipList
+                      tags={tags}
+                      relationCount={relationCount}
+                      onRelationPress={() => naveEndpoint && openEntityRelations(naveEndpoint)}
+                    />
+                  )}
+                  <HStack className="items-center gap-[10px]">
+                    <ResourceTile kind="nave" />
+                    <Text className="text-[15px] text-grey">{t('nave.topic.kind')}</Text>
+                  </HStack>
+                  <Text className="text-[34px] leading-[42px]" style={titleFontStyle(stylingTheme)}>
+                    {naveItem.name || name}
+                  </Text>
+                </VStack>
+                {naveItem.description ? (
+                  <StudySection title={t('Références')}>
+                    <SwitchableHTMLView
+                      selectable
+                      previewSource={{ kind: 'nave', language: naveResourceLanguage }}
+                      value={naveItem.description}
+                      onLinkClicked={openLink}
+                    />
+                  </StudySection>
+                ) : null}
+              </>
+            }
+            end={
+              <StudyLinksSections
+                kind="nave"
+                subjectKey={name_lower}
+                language={naveResourceLanguage}
+              />
+            }
+          />
+        ) : (
+          <>
+            <VStack className="gap-[10px] pt-[2px] pb-[4px]">
+              {(tags || relationCount > 0) && (
+                <EntityChipList
+                  tags={tags}
+                  relationCount={relationCount}
+                  onRelationPress={() => naveEndpoint && openEntityRelations(naveEndpoint)}
+                />
+              )}
+              <HStack className="items-center gap-[10px]">
+                <ResourceTile kind="nave" />
+                <Text className="text-[15px] text-grey">{t('nave.topic.kind')}</Text>
+              </HStack>
+              <Text className="text-[34px] leading-[42px]" style={titleFontStyle(stylingTheme)}>
+                {naveItem.name || name}
+              </Text>
+            </VStack>
+            {naveItem.description ? (
+              <StudySection title={t('Références')}>
+                <SwitchableHTMLView
+                  selectable
+                  previewSource={{ kind: 'nave', language: naveResourceLanguage }}
+                  value={naveItem.description}
+                  onLinkClicked={openLink}
+                />
+              </StudySection>
+            ) : null}
+            <StudyLinksSections
+              kind="nave"
+              subjectKey={name_lower}
+              language={naveResourceLanguage}
             />
-          )}
-          <HStack className="items-center gap-[10px]">
-            <ResourceTile kind="nave" />
-            <Text className="text-[15px] text-grey">{t('nave.topic.kind')}</Text>
-          </HStack>
-          <Text className="text-[34px] leading-[42px]" style={titleFontStyle(stylingTheme)}>
-            {naveItem.name || name}
-          </Text>
-        </VStack>
-        {naveItem.description ? (
-          <StudySection title={t('Références')}>
-            <SwitchableHTMLView
-              selectable
-              previewSource={{ kind: 'nave', language: naveResourceLanguage }}
-              value={naveItem.description}
-              onLinkClicked={openLink}
-            />
-          </StudySection>
-        ) : null}
-        <StudyLinksSections kind="nave" subjectKey={name_lower} language={naveResourceLanguage} />
+          </>
+        )}
       </ScrollView>
-    </>
+    </WidePageFrame>
   )
 }
 

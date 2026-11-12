@@ -1,3 +1,6 @@
+import SplitColumns from '~common/ui/SplitColumns'
+import { SPLIT_SIDE_WIDTH, splitPageWidth } from '~common/ui/widePage'
+import type { WidePage } from '~common/ui/useWidePage'
 import { pageContentStyle } from '~common/ui/PageContent'
 import React from 'react'
 import { ScrollView } from 'react-native'
@@ -21,6 +24,8 @@ import { useEntityPortraitCatalog } from './entityPortraitManifest'
 import { splitStrongEntityRelations } from './strongEntityPresentation'
 import type { StrongReadingTypography } from './strongEditorialHtmlStyles'
 type Props = {
+  /** The page as its screen measured it: wide, the portrait stays beside what follows it. */
+  page?: WidePage
   language?: 'fr' | 'en'
   entity?: StrongLexiconEntity
   loading: boolean
@@ -34,6 +39,7 @@ type Props = {
 }
 
 const StrongEntityPage = ({
+  page,
   language,
   entity,
   loading,
@@ -64,86 +70,182 @@ const StrongEntityPage = ({
       contentContainerStyle={[
         pageContentStyle,
         {
-          maxWidth: STUDY_COLUMN_MAX_WIDTH + 40,
+          maxWidth: page?.wide
+            ? splitPageWidth(STUDY_COLUMN_MAX_WIDTH)
+            : STUDY_COLUMN_MAX_WIDTH + 40,
           paddingHorizontal: 20,
           paddingTop: 22,
           paddingBottom: 90 + bottomInset,
         },
       ]}
     >
-      {catalog && portrait && (
-        <StrongEntityPortraitHeader
-          entity={entity}
-          entry={portrait}
-          catalog={catalog}
-          language={language ?? i18n.language}
-          onOpenStrong={onOpenStrong}
+      {page?.wide ? (
+        <SplitColumns
+          height={page.height}
+          top={22}
+          startWidth={SPLIT_SIDE_WIDTH}
+          endMaxWidth={STUDY_COLUMN_MAX_WIDTH}
+          start={
+            <>
+              {catalog && portrait && (
+                <StrongEntityPortraitHeader
+                  entity={entity}
+                  entry={portrait}
+                  catalog={catalog}
+                  language={language ?? i18n.language}
+                  onOpenStrong={onOpenStrong}
+                />
+              )}
+              {portrait ? (
+                <StudySection title={t('strongDetail.entity.presentation')}>
+                  <StrongEntitySummaryCard
+                    entity={entity}
+                    expanded
+                    hidesHeader
+                    readingTypography={readingTypography}
+                    onOpenBibleReference={onOpenBibleReference}
+                    onOpenStrong={onOpenStrong}
+                  />
+                </StudySection>
+              ) : (
+                <Card>
+                  <StudyCardBody>
+                    <StrongEntitySummaryCard
+                      entity={entity}
+                      expanded
+                      readingTypography={readingTypography}
+                      onOpenBibleReference={onOpenBibleReference}
+                      onOpenStrong={onOpenStrong}
+                    />
+                  </StudyCardBody>
+                </Card>
+              )}
+            </>
+          }
+          end={
+            <>
+              <EntityChronologySection subjectKey={entity.uniqueName} language={studyLanguage} />
+
+              {entity.category === 'place' && !!place && onOpenMap && (
+                <StudySection title={t('strongDetail.entity.location')}>
+                  <StrongEntityPlaceMap entity={entity} onOpenMap={onOpenMap} />
+                </StudySection>
+              )}
+
+              {graph.length > 0 && (
+                <StudySection title={t('strongDetail.entity.relationships')} surface="none">
+                  <StrongEntityRelationGraph
+                    languageOverride={language}
+                    entity={entity}
+                    currentProfileEntityKey={entity.uniqueName}
+                    onOpenProfile={onOpenEntityProfile}
+                    onOpenEntity={onOpenEntityRelation}
+                  />
+                </StudySection>
+              )}
+
+              {remaining.length > 0 && (
+                <StudySection
+                  title={
+                    graph.length > 0
+                      ? t('strongDetail.entity.allRelationships')
+                      : t('strongDetail.entity.relationships')
+                  }
+                  surface="none"
+                >
+                  <StrongEntityRelationList
+                    relations={remaining}
+                    onOpenEntity={onOpenEntityRelation}
+                  />
+                </StudySection>
+              )}
+
+              <StudyLinksSections
+                kind="entity"
+                subjectKey={entity.uniqueName}
+                language={studyLanguage}
+                without="timeline"
+              />
+            </>
+          }
         />
-      )}
-      {portrait ? (
-        <StudySection title={t('strongDetail.entity.presentation')}>
-          <StrongEntitySummaryCard
-            entity={entity}
-            expanded
-            hidesHeader
-            readingTypography={readingTypography}
-            onOpenBibleReference={onOpenBibleReference}
-            onOpenStrong={onOpenStrong}
-          />
-        </StudySection>
       ) : (
-        <Card>
-          <StudyCardBody>
-            <StrongEntitySummaryCard
+        <>
+          {catalog && portrait && (
+            <StrongEntityPortraitHeader
               entity={entity}
-              expanded
-              readingTypography={readingTypography}
-              onOpenBibleReference={onOpenBibleReference}
+              entry={portrait}
+              catalog={catalog}
+              language={language ?? i18n.language}
               onOpenStrong={onOpenStrong}
             />
-          </StudyCardBody>
-        </Card>
-      )}
+          )}
+          {portrait ? (
+            <StudySection title={t('strongDetail.entity.presentation')}>
+              <StrongEntitySummaryCard
+                entity={entity}
+                expanded
+                hidesHeader
+                readingTypography={readingTypography}
+                onOpenBibleReference={onOpenBibleReference}
+                onOpenStrong={onOpenStrong}
+              />
+            </StudySection>
+          ) : (
+            <Card>
+              <StudyCardBody>
+                <StrongEntitySummaryCard
+                  entity={entity}
+                  expanded
+                  readingTypography={readingTypography}
+                  onOpenBibleReference={onOpenBibleReference}
+                  onOpenStrong={onOpenStrong}
+                />
+              </StudyCardBody>
+            </Card>
+          )}
 
-      <EntityChronologySection subjectKey={entity.uniqueName} language={studyLanguage} />
+          <EntityChronologySection subjectKey={entity.uniqueName} language={studyLanguage} />
 
-      {entity.category === 'place' && !!place && onOpenMap && (
-        <StudySection title={t('strongDetail.entity.location')}>
-          <StrongEntityPlaceMap entity={entity} onOpenMap={onOpenMap} />
-        </StudySection>
-      )}
+          {entity.category === 'place' && !!place && onOpenMap && (
+            <StudySection title={t('strongDetail.entity.location')}>
+              <StrongEntityPlaceMap entity={entity} onOpenMap={onOpenMap} />
+            </StudySection>
+          )}
 
-      {graph.length > 0 && (
-        <StudySection title={t('strongDetail.entity.relationships')} surface="none">
-          <StrongEntityRelationGraph
-            languageOverride={language}
-            entity={entity}
-            currentProfileEntityKey={entity.uniqueName}
-            onOpenProfile={onOpenEntityProfile}
-            onOpenEntity={onOpenEntityRelation}
+          {graph.length > 0 && (
+            <StudySection title={t('strongDetail.entity.relationships')} surface="none">
+              <StrongEntityRelationGraph
+                languageOverride={language}
+                entity={entity}
+                currentProfileEntityKey={entity.uniqueName}
+                onOpenProfile={onOpenEntityProfile}
+                onOpenEntity={onOpenEntityRelation}
+              />
+            </StudySection>
+          )}
+
+          {remaining.length > 0 && (
+            <StudySection
+              title={
+                graph.length > 0
+                  ? t('strongDetail.entity.allRelationships')
+                  : t('strongDetail.entity.relationships')
+              }
+              surface="none"
+            >
+              <StrongEntityRelationList relations={remaining} onOpenEntity={onOpenEntityRelation} />
+            </StudySection>
+          )}
+
+          <StudyLinksSections
+            kind="entity"
+            subjectKey={entity.uniqueName}
+            language={studyLanguage}
+            without="timeline"
           />
-        </StudySection>
+        </>
       )}
-
-      {remaining.length > 0 && (
-        <StudySection
-          title={
-            graph.length > 0
-              ? t('strongDetail.entity.allRelationships')
-              : t('strongDetail.entity.relationships')
-          }
-          surface="none"
-        >
-          <StrongEntityRelationList relations={remaining} onOpenEntity={onOpenEntityRelation} />
-        </StudySection>
-      )}
-
-      <StudyLinksSections
-        kind="entity"
-        subjectKey={entity.uniqueName}
-        language={studyLanguage}
-        without="timeline"
-      />
     </ScrollView>
   )
 }

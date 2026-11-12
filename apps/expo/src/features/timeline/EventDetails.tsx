@@ -1,3 +1,6 @@
+import SplitColumns from '~common/ui/SplitColumns'
+import { SPLIT_SIDE_WIDTH } from '~common/ui/widePage'
+import type { WidePage } from '~common/ui/useWidePage'
 import { formatTimelineDates, timelineYearSpan } from '@bible-strong/resource-domain/timeline-dates'
 import { TIMELINE_LAYOUT } from '@bible-strong/resource-domain/timeline-stage'
 import { timelineContext } from '~features/study-assistant/referenceContext'
@@ -14,7 +17,7 @@ import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import IconTile from '~common/ui/IconTile'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { StudySection } from '~common/ui/StudySection'
+import { STUDY_COLUMN_MAX_WIDTH, StudySection } from '~common/ui/StudySection'
 import { useTranslation } from 'react-i18next'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { resolveUniverseColors } from '~themes/universeColors'
@@ -122,7 +125,10 @@ export const EventDetailsContent = ({
   start,
   end,
   onOpenEvent,
+  page,
 }: EventDetailsProps & {
+  /** The page as its screen measured it: wide, the links sit beside the event. */
+  page?: WidePage
   languageOverride?: 'fr' | 'en'
   assistantScope?: string
   onOpenEvent?: (event: TimelineEventProps) => void
@@ -177,6 +183,59 @@ export const EventDetailsContent = ({
   const [cover, ...otherPictures] =
     pictures.length || !fallbackPicture ? pictures : [{ uri: fallbackPicture, caption: '' }]
   const painted = Boolean(paintings?.[slug])
+
+  // Nothing may clip the columns of a wide page, or the one that stays in place would scroll away.
+  if (page?.wide)
+    return (
+      <SplitColumns
+        height={page.height}
+        startMaxWidth={STUDY_COLUMN_MAX_WIDTH}
+        endWidth={SPLIT_SIDE_WIDTH}
+        start={
+          <>
+            <VStack className="gap-[10px] pt-[2px] pb-[4px]">
+              <HStack className="items-center gap-[10px]">
+                <IconTile bg={timelineUniverse.background}>
+                  <FeatherIcon name="clock" size={18} color={timelineUniverse.foreground} />
+                </IconTile>
+                <Text className="flex-[1] text-[15px] text-grey">
+                  {/* Written from the dating of the publication, as on the timeline and the site. */}
+                  {event.dates ? formatTimelineDates(event.dates, resourceLanguage) : date}
+                </Text>
+              </HStack>
+              <Text className="text-[30px] leading-[38px]" style={titleFontStyle(stylingTheme)}>
+                {getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
+              </Text>
+              {!underTimeline && (TIMELINE_LAYOUT[slug] || timelineYearSpan(event.dates)) && (
+                <LocateOnTimeline slug={slug} language={resourceLanguage} />
+              )}
+              {cover && (
+                <VStack className="mt-[6px] gap-[8px]">
+                  <Image
+                    style={{ width: '100%', aspectRatio: 1, borderRadius: radii.card }}
+                    source={{ uri: cover.uri }}
+                    // A painting fills its square; a picture of the publication keeps its own shape.
+                    contentFit={painted ? 'cover' : 'contain'}
+                    accessibilityLabel={getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
+                  />
+                  {!!cover.caption && (
+                    <Text className="text-center text-[13px] text-grey">{cover.caption}</Text>
+                  )}
+                </VStack>
+              )}
+            </VStack>
+            <Description {...event} />
+          </>
+        }
+        end={
+          <>
+            <Media {...event} pictures={otherPictures} onOpenEvent={onOpenEvent} />
+            <StudyLinksSections kind="timeline" subjectKey={slug} language={resourceLanguage} />
+            <Neighbours slug={slug} language={resourceLanguage} />
+          </>
+        }
+      />
+    )
 
   return (
     <Box className="overflow-hidden border-continuous">

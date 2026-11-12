@@ -1,3 +1,7 @@
+import SplitColumns from '~common/ui/SplitColumns'
+import { SPLIT_SIDE_WIDTH, splitPageWidth } from '~common/ui/widePage'
+import WidePageFrame from '~common/ui/WidePageFrame'
+import { useWidePage } from '~common/ui/useWidePage'
 import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import { commentaryCollectionContext } from '~features/study-assistant/resourceContext'
 import CommentIcon from '~common/CommentIcon'
@@ -44,6 +48,9 @@ import { useRecordHistory } from '~features/history/useRecordHistory'
 import ResourceVerseContext, {
   useResourceVerseContext,
 } from '~features/bible/resources/ResourceVerseContext'
+/** Width of the column of a commentary. */
+const COMMENTARY_COLUMN_WIDTH = 600
+
 const useComments = (verse: string) => {
   const resources = useResourceAccess()
   const selectedProjectionIds = useSelector(
@@ -94,6 +101,7 @@ const CommentariesTabScreen = ({
   commentarySelectorRef: externalCommentarySelectorRef,
 }: CommentariesScreenProps) => {
   const { t } = useTranslation()
+  const page = useWidePage()
   const theme: Theme = useTheme()
 
   const [commentaryTab, setCommentaryTab] = useAtom(commentaryAtom)
@@ -189,7 +197,7 @@ const CommentariesTabScreen = ({
     updateTitle(displayedContent.headerTitle)
   }, [displayedContent.headerTitle])
   return (
-    <>
+    <WidePageFrame page={page} width={splitPageWidth(COMMENTARY_COLUMN_WIDTH)}>
       {hasHeader && (
         <Box className="bg-canvas" style={{ paddingTop: insets.top }}>
           <Header
@@ -239,61 +247,126 @@ const CommentariesTabScreen = ({
         style={{ backgroundColor: theme.colors.canvas }}
         contentContainerStyle={[
           pageContentStyle,
-          { maxWidth: 600, paddingBottom: scrollBottomInset },
+          {
+            maxWidth: page.wide ? splitPageWidth(COMMENTARY_COLUMN_WIDTH) : COMMENTARY_COLUMN_WIDTH,
+            paddingBottom: scrollBottomInset,
+          },
         ]}
         scrollIndicatorInsets={{ right: 1 }}
       >
-        <>
-          <ResourceVerseContext
-            verse={displayedContent.verse}
-            verseText={displayedContent.verseText}
-            versesInCurrentChapter={displayedContent.versesInCurrentChapter}
-            requestedVersion={displayedContent.requestedVersion}
-            unavailableBibleVersion={displayedContent.unavailableBibleVersion}
-            bibleTemporarilyUnavailable={displayedContent.bibleTemporarilyUnavailable}
-            retryBible={displayedContent.retryBible}
-            navigationDirection={navigationDirection}
-            updateVerse={updateVerse}
-          />
-          {displayedContent.isPending ? (
-            <Box className="overflow-hidden border-continuous h-[100px] items-center justify-center">
-              <Loading />
-            </Box>
-          ) : displayedContent.isError ? (
-            <ResourceUnavailableView
-              title={t('resource.commentaries.temporarilyUnavailable')}
-              failure={resourceFailureFromAccessError(displayedContent.error)}
-              onRetry={() => void displayedContent.retryCommentaries()}
-            />
-          ) : displayedContent.selectedResourceIds.length === 0 ? (
-            <Empty
-              iconElement={<CommentIcon size={36} />}
-              message={t('commentaries.selector.noneSelected')}
-            />
-          ) : (
-            <>
-              <CommentaryAvailabilityList
-                items={displayedContent.commentaryAvailability}
-                headerTitle={displayedContent.headerTitle}
-                onManage={() => commentarySelectorRef.current?.present()}
-                onOpen={item => {
-                  const [book, chapter, verseNumber] = displayedContent.verse.split('-').map(Number)
-                  const route = getCommentaryResourceRoute(item, {
-                    book,
-                    chapter,
-                    verse: verseNumber,
-                  })
-                  if (route) pushRouteOnce(route)
-                }}
+        {page.wide ? (
+          <SplitColumns
+            height={page.height}
+            startWidth={SPLIT_SIDE_WIDTH}
+            endMaxWidth={COMMENTARY_COLUMN_WIDTH}
+            start={
+              <ResourceVerseContext
+                verse={displayedContent.verse}
+                verseText={displayedContent.verseText}
+                versesInCurrentChapter={displayedContent.versesInCurrentChapter}
+                requestedVersion={displayedContent.requestedVersion}
+                unavailableBibleVersion={displayedContent.unavailableBibleVersion}
+                bibleTemporarilyUnavailable={displayedContent.bibleTemporarilyUnavailable}
+                retryBible={displayedContent.retryBible}
+                navigationDirection={navigationDirection}
+                updateVerse={updateVerse}
               />
-            </>
-          )}
-        </>
+            }
+            end={
+              <>
+                {displayedContent.isPending ? (
+                  <Box className="overflow-hidden border-continuous h-[100px] items-center justify-center">
+                    <Loading />
+                  </Box>
+                ) : displayedContent.isError ? (
+                  <ResourceUnavailableView
+                    title={t('resource.commentaries.temporarilyUnavailable')}
+                    failure={resourceFailureFromAccessError(displayedContent.error)}
+                    onRetry={() => void displayedContent.retryCommentaries()}
+                  />
+                ) : displayedContent.selectedResourceIds.length === 0 ? (
+                  <Empty
+                    iconElement={<CommentIcon size={36} />}
+                    message={t('commentaries.selector.noneSelected')}
+                  />
+                ) : (
+                  <>
+                    <CommentaryAvailabilityList
+                      items={displayedContent.commentaryAvailability}
+                      headerTitle={displayedContent.headerTitle}
+                      onManage={() => commentarySelectorRef.current?.present()}
+                      onOpen={item => {
+                        const [book, chapter, verseNumber] = displayedContent.verse
+                          .split('-')
+                          .map(Number)
+                        const route = getCommentaryResourceRoute(item, {
+                          book,
+                          chapter,
+                          verse: verseNumber,
+                        })
+                        if (route) pushRouteOnce(route)
+                      }}
+                    />
+                  </>
+                )}
+              </>
+            }
+          />
+        ) : (
+          <>
+            <ResourceVerseContext
+              verse={displayedContent.verse}
+              verseText={displayedContent.verseText}
+              versesInCurrentChapter={displayedContent.versesInCurrentChapter}
+              requestedVersion={displayedContent.requestedVersion}
+              unavailableBibleVersion={displayedContent.unavailableBibleVersion}
+              bibleTemporarilyUnavailable={displayedContent.bibleTemporarilyUnavailable}
+              retryBible={displayedContent.retryBible}
+              navigationDirection={navigationDirection}
+              updateVerse={updateVerse}
+            />
+            {displayedContent.isPending ? (
+              <Box className="overflow-hidden border-continuous h-[100px] items-center justify-center">
+                <Loading />
+              </Box>
+            ) : displayedContent.isError ? (
+              <ResourceUnavailableView
+                title={t('resource.commentaries.temporarilyUnavailable')}
+                failure={resourceFailureFromAccessError(displayedContent.error)}
+                onRetry={() => void displayedContent.retryCommentaries()}
+              />
+            ) : displayedContent.selectedResourceIds.length === 0 ? (
+              <Empty
+                iconElement={<CommentIcon size={36} />}
+                message={t('commentaries.selector.noneSelected')}
+              />
+            ) : (
+              <>
+                <CommentaryAvailabilityList
+                  items={displayedContent.commentaryAvailability}
+                  headerTitle={displayedContent.headerTitle}
+                  onManage={() => commentarySelectorRef.current?.present()}
+                  onOpen={item => {
+                    const [book, chapter, verseNumber] = displayedContent.verse
+                      .split('-')
+                      .map(Number)
+                    const route = getCommentaryResourceRoute(item, {
+                      book,
+                      chapter,
+                      verse: verseNumber,
+                    })
+                    if (route) pushRouteOnce(route)
+                  }}
+                />
+              </>
+            )}
+          </>
+        )}
       </ScrollView>
       {!externalCommentarySelectorRef ? (
         <CommentarySelectorSheet sheetRef={localCommentarySelectorRef} />
       ) : null}
-    </>
+    </WidePageFrame>
   )
 }
 

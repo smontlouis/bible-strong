@@ -3,6 +3,7 @@ import { twMerge } from '~common/ui/classNames'
 import React from 'react'
 import { StyleSheet } from 'react-native'
 import PageContent from '~common/ui/PageContent'
+import { usePageHeaderWidth } from '~common/ui/pageHeaderWidth'
 import Back from '~common/Back'
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -25,7 +26,7 @@ interface Props {
 }
 
 const Header = ({
-  maxWidth,
+  maxWidth: ownMaxWidth,
   background,
   hasBackButton,
   isModal,
@@ -40,6 +41,9 @@ const Header = ({
   ...props
 }: Props) => {
   const workspaceHeaderInset = useWorkspaceHeaderInset()
+  // A page laid out in two columns gives its header their width.
+  const pageWidth = usePageHeaderWidth()
+  const maxWidth = ownMaxWidth ?? pageWidth
   return (
     <Box
       {...props}

@@ -40,6 +40,9 @@ import {
   StudySection,
 } from '~common/ui/StudySection'
 import SegmentedControl from '~common/ui/SegmentedControl'
+import SplitColumns from '~common/ui/SplitColumns'
+import { SPLIT_COLUMNS_GAP } from '~common/ui/widePage'
+import type { WidePage } from '~common/ui/useWidePage'
 import { strongDefinitionLevelAtom } from './atoms'
 import { StrongEntityRelationGraph } from './StrongEntityRelationGraph'
 import {
@@ -61,7 +64,15 @@ import {
 } from '@bible-strong/resource-domain/strong-definition-presentation'
 type Anchor = 'context' | 'definition' | 'media' | 'entity' | 'related' | 'concordance'
 
+/** Width of the column of the concordance beside the entry, on a wide page. */
+export const STRONG_CONCORDANCE_WIDTH = 460
+/** Width of the entry and its concordance side by side, gutters included. */
+export const STRONG_WIDE_PAGE_WIDTH =
+  STUDY_COLUMN_MAX_WIDTH + SPLIT_COLUMNS_GAP + STRONG_CONCORDANCE_WIDTH + 40
+
 type Props = {
+  /** The page as its screen measured it: wide, the concordance sits beside the entry. */
+  page?: WidePage
   entry: StrongLexiconEntry
   extrasLoading?: boolean
   extrasError?: boolean
@@ -215,6 +226,7 @@ const LemmaChip = ({
 )
 
 const StrongDetailMainPage = ({
+  page,
   entry,
   passageMedia,
   extrasLoading = false,
@@ -320,97 +332,91 @@ const StrongDetailMainPage = ({
     dictionaryPreview?.resourceId === dictionaryResource.id &&
     dictionaryPreview.overflows
 
-  return (
-    <ScrollView
-      ref={scrollRef}
-      style={{ flex: 1 }}
-      stickyHeaderIndices={[1]}
-      contentContainerStyle={{
-        paddingHorizontal: 20,
-        paddingTop: 0,
-        paddingBottom: 90 + bottomInset,
-      }}
+  const wide = Boolean(page?.wide)
+  const header = (
+    <PageContent
+      className="pt-[22px] pb-[18px] gap-[10px]"
+      style={{ maxWidth: STUDY_COLUMN_MAX_WIDTH }}
     >
-      <PageContent
-        className="pt-[22px] pb-[18px] gap-[10px]"
-        style={{ maxWidth: STUDY_COLUMN_MAX_WIDTH }}
-      >
-        <StrongEntryMetadata entry={entry} />
-        <HStack className="items-center gap-[10px]">
-          <IconTile bg={strongUniverse.background}>
-            <LexiqueIcon size={18} color={strongUniverse.foreground} />
-          </IconTile>
-          <Text className="text-[15px] text-grey">{formatStrongDisplayCode(entry.stepCode)}</Text>
-        </HStack>
-        <HStack className="overflow-hidden border-continuous items-end gap-[16px]">
-          <VStack className="overflow-hidden border-continuous flex-[1] gap-[4px]">
-            <Text
-              accessibilityLanguage={entry.language === 'hebrew' ? 'he-IL' : 'el-GR'}
-              style={[
-                { fontWeight: '400' },
-                getScaledStrongTextStyle(
-                  isOriginalUnnamed ? 32 : 40,
-                  isOriginalUnnamed ? 38 : 45,
-                  readingTypography
-                ),
-              ]}
-            >
-              {originalLabel}
-            </Text>
-            <Text className="font-medium text-[24px]">{entry.gloss}</Text>
-            {!isOriginalUnnamed && (entry.transliteration || entry.pronunciation) && (
-              <Text className="text-grey text-[14px]" style={transliterationTextStyle}>
-                {[entry.transliteration, entry.pronunciation].filter(Boolean).join(' · ')}
-              </Text>
-            )}
-          </VStack>
-          {!isOriginalUnnamed &&
-            hasStrongAudio(entry.language === 'hebrew' ? 'hebreu' : 'grec', entry.baseCode) && (
-              <Box
-                className="overflow-hidden border-continuous rounded-full items-center justify-center"
-                style={{ backgroundColor: strongUniverse.background, width: 48, height: 48 }}
-              >
-                <ListenToStrong
-                  type={entry.language === 'hebrew' ? 'hebreu' : 'grec'}
-                  code={entry.baseCode}
-                />
-              </Box>
-            )}
-        </HStack>
-      </PageContent>
-
-      <Box className="overflow-hidden border-continuous mx-[-20px] py-[8px] bg-canvas z-[10]">
-        <PageContent style={{ maxWidth: STUDY_COLUMN_MAX_WIDTH + 40 }}>
-          <JumpNavigationContent
-            anchors={[
-              {
-                id: 'context',
-                label: t('strongDetail.jump.context'),
-                visible: Boolean(contextVerse),
-              },
-              { id: 'definition', label: t('strongDetail.jump.definition'), visible: true },
-              {
-                id: 'media',
-                label: t('strongDetail.jump.media'),
-                visible: passageMedia.length > 0,
-              },
-              { id: 'entity', label: entityLabel, visible: Boolean(entry.entity) },
-              {
-                id: 'related',
-                label: t('strongDetail.jump.related'),
-                visible: lexicalRelations.relatedWords.length > 0,
-              },
-              {
-                id: 'concordance',
-                label: t('Concordance'),
-                visible: true,
-              },
+      <StrongEntryMetadata entry={entry} />
+      <HStack className="items-center gap-[10px]">
+        <IconTile bg={strongUniverse.background}>
+          <LexiqueIcon size={18} color={strongUniverse.foreground} />
+        </IconTile>
+        <Text className="text-[15px] text-grey">{formatStrongDisplayCode(entry.stepCode)}</Text>
+      </HStack>
+      <HStack className="overflow-hidden border-continuous items-end gap-[16px]">
+        <VStack className="overflow-hidden border-continuous flex-[1] gap-[4px]">
+          <Text
+            accessibilityLanguage={entry.language === 'hebrew' ? 'he-IL' : 'el-GR'}
+            style={[
+              { fontWeight: '400' },
+              getScaledStrongTextStyle(
+                isOriginalUnnamed ? 32 : 40,
+                isOriginalUnnamed ? 38 : 45,
+                readingTypography
+              ),
             ]}
-            onPress={scrollToAnchor}
-          />
-        </PageContent>
-      </Box>
-
+          >
+            {originalLabel}
+          </Text>
+          <Text className="font-medium text-[24px]">{entry.gloss}</Text>
+          {!isOriginalUnnamed && (entry.transliteration || entry.pronunciation) && (
+            <Text className="text-grey text-[14px]" style={transliterationTextStyle}>
+              {[entry.transliteration, entry.pronunciation].filter(Boolean).join(' · ')}
+            </Text>
+          )}
+        </VStack>
+        {!isOriginalUnnamed &&
+          hasStrongAudio(entry.language === 'hebrew' ? 'hebreu' : 'grec', entry.baseCode) && (
+            <Box
+              className="overflow-hidden border-continuous rounded-full items-center justify-center"
+              style={{ backgroundColor: strongUniverse.background, width: 48, height: 48 }}
+            >
+              <ListenToStrong
+                type={entry.language === 'hebrew' ? 'hebreu' : 'grec'}
+                code={entry.baseCode}
+              />
+            </Box>
+          )}
+      </HStack>
+    </PageContent>
+  )
+  const jumpBar = (
+    <Box className="overflow-hidden border-continuous mx-[-20px] py-[8px] bg-canvas z-[10]">
+      <PageContent style={{ maxWidth: STUDY_COLUMN_MAX_WIDTH + 40 }}>
+        <JumpNavigationContent
+          anchors={[
+            {
+              id: 'context',
+              label: t('strongDetail.jump.context'),
+              visible: Boolean(contextVerse),
+            },
+            { id: 'definition', label: t('strongDetail.jump.definition'), visible: true },
+            {
+              id: 'media',
+              label: t('strongDetail.jump.media'),
+              visible: passageMedia.length > 0,
+            },
+            { id: 'entity', label: entityLabel, visible: Boolean(entry.entity) },
+            {
+              id: 'related',
+              label: t('strongDetail.jump.related'),
+              visible: lexicalRelations.relatedWords.length > 0,
+            },
+            {
+              id: 'concordance',
+              label: t('Concordance'),
+              visible: true,
+            },
+          ]}
+          onPress={scrollToAnchor}
+        />
+      </PageContent>
+    </Box>
+  )
+  const study = (
+    <>
       {hasLevelChoice && (
         <PageContent className="mt-[10px]" style={{ maxWidth: STUDY_COLUMN_MAX_WIDTH }}>
           <SegmentedControl
@@ -626,88 +632,138 @@ const StrongDetailMainPage = ({
           )}
         </StudySection>
       )}
-
-      <StudySection
-        title={t('Concordance')}
-        surface="none"
-        onLayout={event => setAnchor('concordance', event.nativeEvent.layout.y)}
-      >
-        <HStack className="overflow-hidden border-continuous items-baseline gap-[8px] px-[4px]">
-          <Text className="font-semibold text-[26px]">{concordanceCount ?? '—'}</Text>
-          <Text className="text-grey text-[14px]">
-            {t('strongDetail.concordance.usesIn', { version: concordanceVersion })}
-          </Text>
-        </HStack>
-        {lemmaStats.length > 0 && (
-          <HorizontalControlScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={{ marginHorizontal: -20 }}
-            contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }}
-          >
+    </>
+  )
+  const concordance = (
+    <StudySection
+      title={t('Concordance')}
+      surface="none"
+      onLayout={event => setAnchor('concordance', event.nativeEvent.layout.y)}
+    >
+      <HStack className="overflow-hidden border-continuous items-baseline gap-[8px] px-[4px]">
+        <Text className="font-semibold text-[26px]">{concordanceCount ?? '—'}</Text>
+        <Text className="text-grey text-[14px]">
+          {t('strongDetail.concordance.usesIn', { version: concordanceVersion })}
+        </Text>
+      </HStack>
+      {lemmaStats.length > 0 && (
+        <HorizontalControlScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          // In a column of its own the chips stop at its edges instead of the page's.
+          style={wide ? undefined : { marginHorizontal: -20 }}
+          contentContainerStyle={{ paddingHorizontal: wide ? 0 : 20, gap: 8 }}
+        >
+          <LemmaChip
+            label={`${t('Tous')} · ${concordanceTotalCount ?? '—'}`}
+            selected={selectedLemmaId == null}
+            onPress={() => onSelectLemma(undefined)}
+          />
+          {lemmaStats.map(lemma => (
             <LemmaChip
-              label={`${t('Tous')} · ${concordanceTotalCount ?? '—'}`}
-              selected={selectedLemmaId == null}
-              onPress={() => onSelectLemma(undefined)}
-            />
-            {lemmaStats.map(lemma => (
-              <LemmaChip
-                key={lemma.id}
-                label={`${lemma.lemma} ${formatStrongLemmaPartOfSpeech(lemma.partOfSpeech, i18n.language)} · ${lemma.occurrenceCount}`}
-                selected={selectedLemmaId === lemma.id}
-                onPress={() => onSelectLemma(lemma.id)}
-              />
-            ))}
-          </HorizontalControlScrollView>
-        )}
-        <StudyRowsCard>
-          {concordanceLoading && (
-            <StudyCardBody>
-              <Loading />
-            </StudyCardBody>
-          )}
-          {concordanceError && (
-            <StudyCardBody className="gap-[8px]">
-              <Text accessibilityRole="alert" className="text-grey">
-                {t('strongDetail.concordance.loadError')}
-              </Text>
-              <TouchableBox
-                accessibilityRole="button"
-                disabled={concordanceRetrying}
-                onPress={onRetryConcordance}
-              >
-                <Text className="text-link font-semibold">
-                  {t(concordanceRetrying ? 'Chargement...' : 'bible.error.retry')}
-                </Text>
-              </TouchableBox>
-            </StudyCardBody>
-          )}
-          {!concordanceLoading && !concordanceError && concordanceCount === 0 && (
-            <StudyCardBody>
-              <Text className="text-grey">{t('strongDetail.concordance.empty')}</Text>
-            </StudyCardBody>
-          )}
-          {concordanceVerses.slice(0, displayedConcordanceCount).map(verse => (
-            <ConcordanceVerse
-              key={`${verse.Livre}-${verse.Chapitre}-${verse.Verset}`}
-              className="px-[16px] py-[12px]"
-              separated={false}
-              onOpenVerse={onOpenConcordanceVerse}
-              t={t}
-              concordanceFor={String(entry.baseCode)}
-              verse={verse}
+              key={lemma.id}
+              label={`${lemma.lemma} ${formatStrongLemmaPartOfSpeech(lemma.partOfSpeech, i18n.language)} · ${lemma.occurrenceCount}`}
+              selected={selectedLemmaId === lemma.id}
+              onPress={() => onSelectLemma(lemma.id)}
             />
           ))}
-          {(concordanceTotalCount == null ||
-            concordanceError ||
-            hasHiddenStrongPreviewItems(concordanceTotalCount, displayedConcordanceCount)) && (
-            <StudyMoreRow
-              label={t('strongDetail.concordance.open')}
-              onPress={() => onOpenPage('concordance')}
-            />
-          )}
-        </StudyRowsCard>
-      </StudySection>
+        </HorizontalControlScrollView>
+      )}
+      <StudyRowsCard>
+        {concordanceLoading && (
+          <StudyCardBody>
+            <Loading />
+          </StudyCardBody>
+        )}
+        {concordanceError && (
+          <StudyCardBody className="gap-[8px]">
+            <Text accessibilityRole="alert" className="text-grey">
+              {t('strongDetail.concordance.loadError')}
+            </Text>
+            <TouchableBox
+              accessibilityRole="button"
+              disabled={concordanceRetrying}
+              onPress={onRetryConcordance}
+            >
+              <Text className="text-link font-semibold">
+                {t(concordanceRetrying ? 'Chargement...' : 'bible.error.retry')}
+              </Text>
+            </TouchableBox>
+          </StudyCardBody>
+        )}
+        {!concordanceLoading && !concordanceError && concordanceCount === 0 && (
+          <StudyCardBody>
+            <Text className="text-grey">{t('strongDetail.concordance.empty')}</Text>
+          </StudyCardBody>
+        )}
+        {concordanceVerses.slice(0, displayedConcordanceCount).map(verse => (
+          <ConcordanceVerse
+            key={`${verse.Livre}-${verse.Chapitre}-${verse.Verset}`}
+            className="px-[16px] py-[12px]"
+            separated={false}
+            onOpenVerse={onOpenConcordanceVerse}
+            t={t}
+            concordanceFor={String(entry.baseCode)}
+            verse={verse}
+          />
+        ))}
+        {(concordanceTotalCount == null ||
+          concordanceError ||
+          hasHiddenStrongPreviewItems(concordanceTotalCount, displayedConcordanceCount)) && (
+          <StudyMoreRow
+            label={t('strongDetail.concordance.open')}
+            onPress={() => onOpenPage('concordance')}
+          />
+        )}
+      </StudyRowsCard>
+    </StudySection>
+  )
+
+  // A wide page reads the entry on the left and its uses on the right: the jump bar, which only
+  // exists to reach the end of one long column, is not needed.
+  if (page?.wide)
+    return (
+      <ScrollView
+        ref={scrollRef}
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          width: '100%',
+          maxWidth: STRONG_WIDE_PAGE_WIDTH,
+          alignSelf: 'center',
+          paddingHorizontal: 20,
+          paddingBottom: 90 + bottomInset,
+        }}
+      >
+        <SplitColumns
+          height={page.height}
+          startMaxWidth={STUDY_COLUMN_MAX_WIDTH}
+          endWidth={STRONG_CONCORDANCE_WIDTH}
+          start={
+            <>
+              {header}
+              {study}
+            </>
+          }
+          end={concordance}
+        />
+      </ScrollView>
+    )
+
+  return (
+    <ScrollView
+      ref={scrollRef}
+      style={{ flex: 1 }}
+      stickyHeaderIndices={[1]}
+      contentContainerStyle={{
+        paddingHorizontal: 20,
+        paddingTop: 0,
+        paddingBottom: 90 + bottomInset,
+      }}
+    >
+      {header}
+      {jumpBar}
+      {study}
+      {concordance}
     </ScrollView>
   )
 }

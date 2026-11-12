@@ -1,3 +1,7 @@
+import SplitColumns from '~common/ui/SplitColumns'
+import { SPLIT_SIDE_WIDTH, splitPageWidth } from '~common/ui/widePage'
+import WidePageFrame from '~common/ui/WidePageFrame'
+import { useWidePage } from '~common/ui/useWidePage'
 import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import { titleFontStyle } from '~themes/styleValues'
 import { dictionaryContext } from '~features/study-assistant/resourceContext'
@@ -111,6 +115,7 @@ const DictionnaryDetailScreen = ({
 
   const openInNewTab = useOpenInNewTab()
   const { t } = useTranslation()
+  const page = useWidePage()
   const preferredDictionaryLanguage = useAtomValue(resourcesLanguageAtom).DICTIONNAIRE
   const dictionaryResourceLanguage = storedLanguage ?? preferredDictionaryLanguage
   const work = storedWork ?? getDefaultDictionaryWork(dictionaryResourceLanguage)
@@ -452,7 +457,7 @@ const DictionnaryDetailScreen = ({
   }
 
   return screen(
-    <>
+    <WidePageFrame page={page} width={splitPageWidth(STUDY_COLUMN_MAX_WIDTH)}>
       <Header
         hasBackButton={hasBackButton}
         title={t('Dictionnaire')}
@@ -521,91 +526,219 @@ const DictionnaryDetailScreen = ({
       />
       <AppScrollView
         backgroundColor="canvas"
-        contentContainerStyle={{ maxWidth: STUDY_COLUMN_MAX_WIDTH + 40, paddingHorizontal: 20 }}
+        contentContainerStyle={{
+          maxWidth: page.wide
+            ? splitPageWidth(STUDY_COLUMN_MAX_WIDTH)
+            : STUDY_COLUMN_MAX_WIDTH + 40,
+          paddingHorizontal: 20,
+        }}
       >
-        <VStack className="gap-[10px] pt-[2px] pb-[4px]">
-          {(tags || relationCount > 0) && (
-            <EntityChipList
-              tags={tags}
-              relationCount={relationCount}
-              onRelationPress={() => dictionaryEndpoint && openEntityRelations(dictionaryEndpoint)}
-            />
-          )}
-          <HStack className="items-center gap-[10px]">
-            <ResourceTile kind="dictionary" />
-            <Text className="text-[15px] text-grey">
-              {capitalizeFirst(resolvedDictionaryTitle)}
-            </Text>
-          </HStack>
-          <Text className="text-[34px] leading-[42px]" style={titleFontStyle(stylingTheme)}>
-            {capitalizeFirst(word)}
-          </Text>
-        </VStack>
-        {correspondenceSources.length > 1 && (
-          <StudySection
-            title={t('Aussi dans {{count}} dictionnaires', {
-              count: correspondenceSources.length,
-            })}
-            surface="none"
-            className="mt-[20px]"
-          >
-            <HorizontalControlScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={{ marginHorizontal: -20 }}
-              contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }}
-            >
-              {correspondenceSources.map(source => {
-                const selected = isCurrentSource(source)
-                return (
-                  <TouchableBox
-                    className={twMerge(
-                      'overflow-hidden border-continuous rounded-full px-[12px] py-[6px]',
-                      selected ? 'bg-primary' : 'bg-surface'
-                    )}
-                    key={`${source.resource.work}:${source.resource.language}:${source.id}`}
-                    disabled={selected}
-                    accessibilityState={{ selected }}
-                    onPress={() => openSource(source, correspondenceQuery.data?.correspondenceId)}
-                  >
-                    <Text
-                      className={twMerge('text-[13px]', selected && 'text-reverse font-semibold')}
-                    >
-                      {source.abbreviation}
+        {page.wide ? (
+          <SplitColumns
+            height={page.height}
+            startMaxWidth={STUDY_COLUMN_MAX_WIDTH}
+            endWidth={SPLIT_SIDE_WIDTH}
+            start={
+              <>
+                <VStack className="gap-[10px] pt-[2px] pb-[4px]">
+                  {(tags || relationCount > 0) && (
+                    <EntityChipList
+                      tags={tags}
+                      relationCount={relationCount}
+                      onRelationPress={() =>
+                        dictionaryEndpoint && openEntityRelations(dictionaryEndpoint)
+                      }
+                    />
+                  )}
+                  <HStack className="items-center gap-[10px]">
+                    <ResourceTile kind="dictionary" />
+                    <Text className="text-[15px] text-grey">
+                      {capitalizeFirst(resolvedDictionaryTitle)}
                     </Text>
-                  </TouchableBox>
+                  </HStack>
+                  <Text className="text-[34px] leading-[42px]" style={titleFontStyle(stylingTheme)}>
+                    {capitalizeFirst(word)}
+                  </Text>
+                </VStack>
+                <StudySection title={t('Définition')}>
+                  {dictionaryQuery.isPending ? (
+                    <Loading message={t('Chargement...')} />
+                  ) : (
+                    dictionnaireItem?.definition && (
+                      <SwitchableHTMLView
+                        selectable
+                        previewSource={{
+                          kind: 'dictionary',
+                          work,
+                          resourceId,
+                          dictionaryTitle: resolvedDictionaryTitle,
+                          language: dictionaryResourceLanguage,
+                        }}
+                        value={dictionnaireItem.definition.replace(/\n/gi, '')}
+                        onLinkClicked={openLink}
+                      />
+                    )
+                  )}
+                </StudySection>
+              </>
+            }
+            end={
+              <>
+                {correspondenceSources.length > 1 && (
+                  <StudySection
+                    title={t('Aussi dans {{count}} dictionnaires', {
+                      count: correspondenceSources.length,
+                    })}
+                    surface="none"
+                    className="mt-[20px]"
+                  >
+                    <HorizontalControlScrollView
+                      horizontal={!page.wide}
+                      showsHorizontalScrollIndicator={false}
+                      // In the side column the dictionaries wrap instead of scrolling past its edge.
+                      style={page.wide ? undefined : { marginHorizontal: -20 }}
+                      contentContainerStyle={
+                        page.wide
+                          ? { flexDirection: 'row', flexWrap: 'wrap', gap: 8 }
+                          : { paddingHorizontal: 20, gap: 8 }
+                      }
+                    >
+                      {correspondenceSources.map(source => {
+                        const selected = isCurrentSource(source)
+                        return (
+                          <TouchableBox
+                            className={twMerge(
+                              'overflow-hidden border-continuous rounded-full px-[12px] py-[6px]',
+                              selected ? 'bg-primary' : 'bg-surface'
+                            )}
+                            key={`${source.resource.work}:${source.resource.language}:${source.id}`}
+                            disabled={selected}
+                            accessibilityState={{ selected }}
+                            onPress={() =>
+                              openSource(source, correspondenceQuery.data?.correspondenceId)
+                            }
+                          >
+                            <Text
+                              className={twMerge(
+                                'text-[13px]',
+                                selected && 'text-reverse font-semibold'
+                              )}
+                            >
+                              {source.abbreviation}
+                            </Text>
+                          </TouchableBox>
+                        )
+                      })}
+                    </HorizontalControlScrollView>
+                  </StudySection>
+                )}
+                <StudyLinksSections
+                  kind="dictionary"
+                  subjectKey={dictionnaireItem?.id ? `${work}:${dictionnaireItem.id}` : undefined}
+                  language={dictionaryResourceLanguage}
+                />
+              </>
+            }
+          />
+        ) : (
+          <>
+            <VStack className="gap-[10px] pt-[2px] pb-[4px]">
+              {(tags || relationCount > 0) && (
+                <EntityChipList
+                  tags={tags}
+                  relationCount={relationCount}
+                  onRelationPress={() =>
+                    dictionaryEndpoint && openEntityRelations(dictionaryEndpoint)
+                  }
+                />
+              )}
+              <HStack className="items-center gap-[10px]">
+                <ResourceTile kind="dictionary" />
+                <Text className="text-[15px] text-grey">
+                  {capitalizeFirst(resolvedDictionaryTitle)}
+                </Text>
+              </HStack>
+              <Text className="text-[34px] leading-[42px]" style={titleFontStyle(stylingTheme)}>
+                {capitalizeFirst(word)}
+              </Text>
+            </VStack>
+            {correspondenceSources.length > 1 && (
+              <StudySection
+                title={t('Aussi dans {{count}} dictionnaires', {
+                  count: correspondenceSources.length,
+                })}
+                surface="none"
+                className="mt-[20px]"
+              >
+                <HorizontalControlScrollView
+                  horizontal={!page.wide}
+                  showsHorizontalScrollIndicator={false}
+                  // In the side column the dictionaries wrap instead of scrolling past its edge.
+                  style={page.wide ? undefined : { marginHorizontal: -20 }}
+                  contentContainerStyle={
+                    page.wide
+                      ? { flexDirection: 'row', flexWrap: 'wrap', gap: 8 }
+                      : { paddingHorizontal: 20, gap: 8 }
+                  }
+                >
+                  {correspondenceSources.map(source => {
+                    const selected = isCurrentSource(source)
+                    return (
+                      <TouchableBox
+                        className={twMerge(
+                          'overflow-hidden border-continuous rounded-full px-[12px] py-[6px]',
+                          selected ? 'bg-primary' : 'bg-surface'
+                        )}
+                        key={`${source.resource.work}:${source.resource.language}:${source.id}`}
+                        disabled={selected}
+                        accessibilityState={{ selected }}
+                        onPress={() =>
+                          openSource(source, correspondenceQuery.data?.correspondenceId)
+                        }
+                      >
+                        <Text
+                          className={twMerge(
+                            'text-[13px]',
+                            selected && 'text-reverse font-semibold'
+                          )}
+                        >
+                          {source.abbreviation}
+                        </Text>
+                      </TouchableBox>
+                    )
+                  })}
+                </HorizontalControlScrollView>
+              </StudySection>
+            )}
+            <StudySection title={t('Définition')}>
+              {dictionaryQuery.isPending ? (
+                <Loading message={t('Chargement...')} />
+              ) : (
+                dictionnaireItem?.definition && (
+                  <SwitchableHTMLView
+                    selectable
+                    previewSource={{
+                      kind: 'dictionary',
+                      work,
+                      resourceId,
+                      dictionaryTitle: resolvedDictionaryTitle,
+                      language: dictionaryResourceLanguage,
+                    }}
+                    value={dictionnaireItem.definition.replace(/\n/gi, '')}
+                    onLinkClicked={openLink}
+                  />
                 )
-              })}
-            </HorizontalControlScrollView>
-          </StudySection>
+              )}
+            </StudySection>
+            <StudyLinksSections
+              kind="dictionary"
+              subjectKey={dictionnaireItem?.id ? `${work}:${dictionnaireItem.id}` : undefined}
+              language={dictionaryResourceLanguage}
+            />
+          </>
         )}
-        <StudySection title={t('Définition')}>
-          {dictionaryQuery.isPending ? (
-            <Loading message={t('Chargement...')} />
-          ) : (
-            dictionnaireItem?.definition && (
-              <SwitchableHTMLView
-                selectable
-                previewSource={{
-                  kind: 'dictionary',
-                  work,
-                  resourceId,
-                  dictionaryTitle: resolvedDictionaryTitle,
-                  language: dictionaryResourceLanguage,
-                }}
-                value={dictionnaireItem.definition.replace(/\n/gi, '')}
-                onLinkClicked={openLink}
-              />
-            )
-          )}
-        </StudySection>
-        <StudyLinksSections
-          kind="dictionary"
-          subjectKey={dictionnaireItem?.id ? `${work}:${dictionnaireItem.id}` : undefined}
-          language={dictionaryResourceLanguage}
-        />
       </AppScrollView>
-    </>
+    </WidePageFrame>
   )
 }
 
