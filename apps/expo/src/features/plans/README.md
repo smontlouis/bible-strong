@@ -70,6 +70,17 @@ rappel passent dans une colonne à droite du jour.
 La liste des plans range les plans suivis en « Vos parcours » et « Terminés » (avec
 « Recommencer »), et ne montre dans « À découvrir » que les plans pas encore suivis.
 
+### La liste sur une grande fenêtre Web
+
+À partir de 1000 points de large sur le Web (`useWidePlansLayout.web.ts`), la liste devient deux
+colonnes (`ReadingPlansWide.tsx`), comme l'accueil : à gauche, « Vos parcours » reste en place
+(trois chiffres, une tuile par plan suivi avec sa couverture, sa progression et son bouton, puis
+« Terminés ») ; à droite, « À découvrir » défile en cartes à couverture, rangées par durée
+(jusqu'à 10 jours, jusqu'à 31, au-delà). Une colonne de gauche plus haute que la fenêtre défile
+avec la page ; sans plan suivi, le catalogue prend toute la largeur. Les apps natives et les
+fenêtres étroites gardent la liste. Les trois formes d'un plan (ligne, tuile, carte) lisent le
+même `useReadingPlanRow`.
+
 ### Éléments d'un jour
 
 Un jour de plan n'a pas de page à lui. La page du plan liste les éléments du jour

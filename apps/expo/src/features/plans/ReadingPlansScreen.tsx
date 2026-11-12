@@ -1,10 +1,8 @@
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
 import { useEffect } from 'react'
 import { ActivityIndicator, ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
-import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import Link from '~common/Link'
 import type { OnlinePlan } from '~common/types'
 import Box, { usePageBottomInset } from '~common/ui/Box'
@@ -14,16 +12,17 @@ import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { pageContentStyle } from '~common/ui/PageContent'
 import { useLocalReadingDate } from '~features/daily-reading/useDailyMeditation'
-import { fetchPlans, resetPlan, startPlan } from '~redux/modules/plan'
+import { fetchPlans } from '~redux/modules/plan'
 import type { RootState } from '~redux/modules/reducer'
 import type { AppDispatch } from '~redux/store'
-import { useFireStorage } from './plan.hooks'
 import { getEditorialKind } from './readingCalendar'
 import { hasPlanParticipation } from './planProgress'
 import { getParticipationJourney } from './planSchedule'
-import { getJourneyDetail } from './planJourneyLabel'
 import { filterReadingPlans, type ReadingPlanFilters } from './readingPlanFilters'
-import PlanContinuePill, { getContinueLabel, useContinuePlan } from './PlanContinuePill'
+import PlanContinuePill from './PlanContinuePill'
+import ReadingPlansWide from './ReadingPlansWide'
+import { useReadingPlanRow, type ReadingPlanRowKind } from './useReadingPlanRow'
+import { useWidePlansLayout } from './useWidePlansLayout'
 import PlanStreak from './PlanStreak'
 
 // The padding and gap of a settings row, so the plans read as the same list
@@ -32,52 +31,11 @@ const ROW_GAP = 12
 const THUMBNAIL_WIDTH = 72
 const TEXT_INSET = ROW_PADDING + THUMBNAIL_WIDTH + ROW_GAP
 
-type RowKind = 'active' | 'completed' | 'discover'
-
-const ReadingPlanRow = ({ plan, kind }: { plan: OnlinePlan; kind: RowKind }) => {
-  const { t, i18n } = useTranslation()
-  const router = useRouter()
-  const dispatch = useDispatch()
-  const confirm = useConfirmDialog()
-  const continuePlan = useContinuePlan()
-  const today = useLocalReadingDate()
-  const image = useFireStorage(plan.image)
-  const cached = useSelector((state: RootState) =>
-    state.plan.myPlans.find(item => item.id === plan.id)
+export const ReadingPlanRow = ({ plan, kind }: { plan: OnlinePlan; kind: ReadingPlanRowKind }) => {
+  const { image, journey, progress, hasReadings, detail, pill, open, onPill } = useReadingPlanRow(
+    plan,
+    kind
   )
-  const progress = useSelector((state: RootState) =>
-    state.plan.ongoingPlans.find(item => item.id === plan.id)
-  )
-  const readings = cached?.sections.flatMap(section => section.readingSlices) ?? []
-  const journey = getParticipationJourney(readings, progress, today)
-  const total = readings.length || plan.duration
-  const open = () => router.push({ pathname: '/plan', params: { planId: plan.id } })
-  const restart = async () => {
-    if (
-      await confirm({
-        title: t('readingPlans.restart'),
-        message: t('readingPlans.restartMessage'),
-        cancelLabel: t('Annuler'),
-        confirmLabel: t('readingPlans.restart'),
-      })
-    ) {
-      dispatch(resetPlan(plan.id))
-      dispatch(startPlan({ planId: plan.id, startDate: today }))
-      open()
-    }
-  }
-  const pill =
-    kind === 'active' && readings.length
-      ? getContinueLabel(journey)
-      : kind === 'completed' && cached
-        ? 'readingPlans.restart'
-        : undefined
-  const detail =
-    kind !== 'discover' && readings.length
-      ? getJourneyDetail(journey, t, { startDate: progress?.startDate, language: i18n.language })
-      : total
-        ? t('readingPlans.duration', { count: total })
-        : t('readingPlans.journey')
   return (
     <Box className="flex-row items-center" style={{ gap: ROW_GAP, paddingRight: ROW_PADDING }}>
       <Link
@@ -107,11 +65,11 @@ const ReadingPlanRow = ({ plan, kind }: { plan: OnlinePlan; kind: RowKind }) => 
             {plan.title}
           </Text>
           <Box className="flex-row flex-wrap items-center gap-[8px]">
-            {kind === 'active' && !!readings.length && (
+            {kind === 'active' && hasReadings && (
               <Box className="w-[50px] h-[6px] bg-canvas rounded-full overflow-hidden">
                 <Box
                   className="h-full bg-primary rounded-full"
-                  style={{ width: `${(journey.completed / readings.length) * 100}%` }}
+                  style={{ width: `${progress * 100}%` }}
                 />
               </Box>
             )}
@@ -121,13 +79,7 @@ const ReadingPlanRow = ({ plan, kind }: { plan: OnlinePlan; kind: RowKind }) => 
         </Box>
         {!pill && <FeatherIcon name="chevron-right" color="grey" size={18} />}
       </Link>
-      {pill && (
-        <PlanContinuePill
-          label={pill}
-          hint={plan.title}
-          onPress={() => (kind === 'completed' ? void restart() : continuePlan(plan.id))}
-        />
-      )}
+      {pill && <PlanContinuePill label={pill} hint={plan.title} onPress={onPill} />}
     </Box>
   )
 }
@@ -164,28 +116,8 @@ const ReadingPlansScreen = ({ filters }: { filters: ReadingPlanFilters }) => {
   useEffect(() => {
     dispatch(fetchPlans({ reuseRecent: true }))
   }, [dispatch])
-  return (
-    <ScrollView
-      contentContainerStyle={[
-        pageContentStyle,
-        { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 48 + bottomInset },
-      ]}
-    >
-      {!!active.length && (
-        <>
-          <Text className="text-default font-bold text-[18px] mb-[16px]">
-            {t('readingPlans.yours')}
-          </Text>
-          <ListSection className="mx-0" separatorInset={TEXT_INSET}>
-            {active.map(plan => (
-              <ReadingPlanRow key={plan.id} plan={plan} kind="active" />
-            ))}
-          </ListSection>
-        </>
-      )}
-      <Text className="text-default font-bold text-[18px] mb-[16px]">
-        {t('readingPlans.explore')}
-      </Text>
+  const notices = (
+    <>
       {status === 'Pending' && !plans.length && (
         <ActivityIndicator accessibilityLabel={t('Chargement...')} />
       )}
@@ -202,35 +134,82 @@ const ReadingPlansScreen = ({ filters }: { filters: ReadingPlanFilters }) => {
           {t(plans.length ? 'readingPlans.noMatchingPlans' : 'readingPlans.noAvailablePlans')}
         </Text>
       )}
-      {(['fr', 'en'] as const).map(language => {
-        const entries = discoverable.filter(plan => plan.lang === language)
-        if (!entries.length) return null
-        return (
-          <ListSection
-            key={language}
-            title={t(language === 'fr' ? 'Français' : 'Anglais')}
-            className="mx-0"
-            separatorInset={TEXT_INSET}
-          >
-            {entries.map(plan => (
-              <ReadingPlanRow key={plan.id} plan={plan} kind="discover" />
-            ))}
-          </ListSection>
-        )
-      })}
-      {!!completed.length && (
-        <>
-          <Text className="text-default font-bold text-[18px] mb-[16px]">
-            {t('readingPlans.completedPlans')}
-          </Text>
-          <ListSection className="mx-0" separatorInset={TEXT_INSET}>
-            {completed.map(plan => (
-              <ReadingPlanRow key={plan.id} plan={plan} kind="completed" />
-            ))}
-          </ListSection>
-        </>
-      )}
-    </ScrollView>
+    </>
+  )
+  const layout = useWidePlansLayout()
+  if (layout.wide)
+    return (
+      <Box ref={layout.ref} onLayout={layout.onLayout} className="flex-1">
+        <ReadingPlansWide
+          active={active}
+          completed={completed}
+          discoverable={discoverable}
+          notices={notices}
+          height={layout.height}
+          missed={active.reduce((count, plan) => {
+            const content = local.find(item => item.id === plan.id)
+            const readings = content?.sections.flatMap(section => section.readingSlices) ?? []
+            return (
+              count + getParticipationJourney(readings, participation(plan.id), today).missed.length
+            )
+          }, 0)}
+        />
+      </Box>
+    )
+  return (
+    <Box ref={layout.ref} onLayout={layout.onLayout} className="flex-1">
+      <ScrollView
+        contentContainerStyle={[
+          pageContentStyle,
+          { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 48 + bottomInset },
+        ]}
+      >
+        {!!active.length && (
+          <>
+            <Text className="text-default font-bold text-[18px] mb-[16px]">
+              {t('readingPlans.yours')}
+            </Text>
+            <ListSection className="mx-0" separatorInset={TEXT_INSET}>
+              {active.map(plan => (
+                <ReadingPlanRow key={plan.id} plan={plan} kind="active" />
+              ))}
+            </ListSection>
+          </>
+        )}
+        <Text className="text-default font-bold text-[18px] mb-[16px]">
+          {t('readingPlans.explore')}
+        </Text>
+        {notices}
+        {(['fr', 'en'] as const).map(language => {
+          const entries = discoverable.filter(plan => plan.lang === language)
+          if (!entries.length) return null
+          return (
+            <ListSection
+              key={language}
+              title={t(language === 'fr' ? 'Français' : 'Anglais')}
+              className="mx-0"
+              separatorInset={TEXT_INSET}
+            >
+              {entries.map(plan => (
+                <ReadingPlanRow key={plan.id} plan={plan} kind="discover" />
+              ))}
+            </ListSection>
+          )
+        })}
+        {!!completed.length && (
+          <>
+            <Text className="text-default font-bold text-[18px] mb-[16px]">
+              {t('readingPlans.completedPlans')}
+            </Text>
+            <ListSection className="mx-0" separatorInset={TEXT_INSET}>
+              {completed.map(plan => (
+                <ReadingPlanRow key={plan.id} plan={plan} kind="completed" />
+              ))}
+            </ListSection>
+          </>
+        )}
+      </ScrollView>
+    </Box>
   )
 }
 export default ReadingPlansScreen
