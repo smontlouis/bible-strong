@@ -61,8 +61,9 @@ function VerseQuote({ passage }: { passage: PassageTarget }) {
   const verses = query.data || []
   const shown = expanded ? verses : verses.slice(0, SHOWN_VERSES)
   const numbered = verses.length > 1
-  // The reading font, at the size of the answer's paragraphs rather than the reader's Bible scale.
-  const verseStyle = { fontFamily: reading.fontFamily, fontSize: '16px', lineHeight: 1.75 }
+  // The reading font, at the size of the answer's paragraphs rather than the reader's Bible scale
+  // (`.bs-assistant-message-assistant .study-assistant-markdown` in assistant-modal.css).
+  const verseStyle = { fontFamily: reading.fontFamily, fontSize: '14px', lineHeight: 1.8 }
   return (
     <QuoteBlock
       mark="bible"
