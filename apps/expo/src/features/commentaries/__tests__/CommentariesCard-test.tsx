@@ -10,6 +10,12 @@ jest.mock('../CommentariesTabScreen', () => ({
   default: (props: Record<string, unknown>) => mockCommentariesTabScreen(props),
 }))
 
+// The card names its tab with i18n, whose module loads a polyfill Jest cannot run.
+jest.mock('~i18n', () => ({
+  __esModule: true,
+  default: { t: (key: string) => key },
+}))
+
 jest.mock('~helpers/generateUUID', () => ({
   __esModule: true,
   default: () => 'commentary-card-test',
