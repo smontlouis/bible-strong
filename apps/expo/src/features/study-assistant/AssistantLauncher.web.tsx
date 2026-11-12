@@ -27,6 +27,7 @@ import { resolveFontFamily } from '~themes/styleValues'
 import { toast } from '~helpers/toast'
 import i18n from '~i18n'
 import { useTheme } from '~themes/ThemeProvider'
+import { webThemeVariables } from '~themes/webThemeVariables'
 import { askAssistant, compactAssistant, connectAssistantDictation } from './client'
 import { assistantAccessible, assistantAvailable } from './assistantConfig'
 import {
@@ -361,6 +362,9 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     },
   })
   const vars = {
+    // The panel is portaled outside ScopedTheme: shared components drawn in it (`text-default`,
+    // `border-b-separator`) need the app's palette here, or they take the root's.
+    ...webThemeVariables(colors),
     fontFamily: resolveFontFamily(fontFamily.text),
     // The panel floats above the page: the raised level and the one floating shadow.
     '--as-surface': colors.surfaceRaised,
