@@ -78,6 +78,15 @@ jest.mock(
   { virtual: true }
 )
 jest.mock('~common/ui/Icon', () => ({ FeatherIcon: mockHostComponent('FeatherIcon') }))
+jest.mock('~features/app-switcher/context/TabContext', () => ({
+  useTabContext: () => ({ isInTab: true }),
+}))
+jest.mock('~features/study-assistant/resourceContext', () => ({
+  passageContext: () => null,
+}))
+jest.mock('~features/study-assistant/useAssistantResourceContext', () => ({
+  useAssistantResourceContext: jest.fn(),
+}))
 
 describe('CompareVersesTabScreen', () => {
   let renderer: ReactTestRenderer

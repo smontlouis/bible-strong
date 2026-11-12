@@ -11,6 +11,9 @@ import StandaloneVerseOfTheDay from '~features/home/StandaloneVerseOfTheDay'
 import { getScheduledPlanDay, isCivilDate } from '~features/plans/readingCalendar'
 import ReadingDatePicker from './ReadingDatePicker'
 import { useLocalReadingDate } from './useDailyMeditation'
+import { useVerseOfTheDay } from '~features/home/useVerseOfTheDay'
+import { passageContext } from '~features/study-assistant/resourceContext'
+import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 
 /** Dated standalone-verse notifications must not open a subsequently selected collection. */
 const DailyVerseScreen = () => {
@@ -18,6 +21,18 @@ const DailyVerseScreen = () => {
   const today = useLocalReadingDate()
   const date = requestedDate && isCivilDate(requestedDate) ? requestedDate : today
   const offset = (getScheduledPlanDay(today, date) ?? 1) - 1
+  // The same query as the card below, so the assistant sees the verse it shows.
+  const verseOfTheDay = useVerseOfTheDay(offset)
+  useAssistantResourceContext(
+    'panel',
+    verseOfTheDay && !('error' in verseOfTheDay)
+      ? passageContext({
+          verses: [`${verseOfTheDay.book}-${verseOfTheDay.chapter}-${verseOfTheDay.verse}`],
+          version: verseOfTheDay.version,
+          surface: 'Verset du jour',
+        })
+      : null
+  )
   const router = useRouter()
   const { t } = useTranslation()
   const bottomInset = usePageBottomInset()

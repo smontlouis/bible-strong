@@ -20,6 +20,8 @@ import { getPublicSiteUrl } from '~helpers/publicSiteLinks'
 import { toast } from '~helpers/toast'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { useResourceLanguage } from 'src/state/resourcesLanguage'
+import { timelineStageContext } from '~features/study-assistant/resourceContext'
+import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import TimelineHomeDetailModal from './TimelineHomeDetailModal'
 import TimelineResourceBoundary from './TimelineResourceBoundary'
 import TimelineStage, { type TimelineStagePosition, type TimelineStageStart } from './TimelineStage'
@@ -33,6 +35,8 @@ type Props = {
   start?: TimelineStageStart
   hasBackButton?: boolean
   onPositionChange?: (position: TimelineStagePosition) => void
+  /** Where the assistant finds this page: its tab, or the route opened over the reader. */
+  assistantScope?: string
 }
 
 /** The timeline page: its header, and the stage under it. */
@@ -42,6 +46,7 @@ const TimelineStageScreen = ({
   start,
   hasBackButton = true,
   onPositionChange,
+  assistantScope = 'panel',
 }: Props) => {
   const { t } = useTranslation()
   const detailsRef = useRef<SheetRef>(null)
@@ -51,6 +56,7 @@ const TimelineStageScreen = ({
   const setUnderSheet = useSetAtom(timelineUnderSheetAtom)
   const [preferredLanguage, setPreferredLanguage] = useResourceLanguage('TIMELINE')
   const language = languageOverride ?? preferredLanguage
+  useAssistantResourceContext(assistantScope, timelineStageContext(language))
 
   const share: ResourceShare = {
     url: getPublicSiteUrl(() => buildPublicTimelineIndexPath(language)),

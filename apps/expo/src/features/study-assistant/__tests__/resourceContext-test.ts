@@ -3,9 +3,12 @@ import {
   commentaryCollectionContext,
   dictionaryContext,
   naveContext,
+  bookContext,
+  passageContext,
   pickReadingContext,
 } from '../resourceContext'
 import { parsePersistedMessage, type ReadingContext } from '../conversations'
+import { parseStudySurfaceContext } from '@bible-strong/ai-contract/contract'
 jest.mock('~i18n', () => ({
   getLanguage: () => 'fr',
   __esModule: true,
@@ -116,5 +119,32 @@ describe('assistant resource context', () => {
       context,
     })
     expect(restored.context?.kind).toBe('dictionary')
+  })
+
+  it('names the verses a screen shows outside the reader, within what the contract accepts', () => {
+    const c = passageContext({
+      verses: ['43-3-17', '43-3-16', 'not-a-verse'],
+      version: 'LSG',
+      surface: 'Comparaison des versions',
+    })!
+    expect(c.kind).toBe('passage')
+    expect(c.bibleVersion).toBe('LSG')
+    expect(c.detail).toContain('Comparaison des versions')
+    expect(c.activeContext).toEqual({
+      kind: 'passage',
+      bibleVersion: 'LSG',
+      book: 43,
+      chapter: 3,
+      startVerse: 16,
+      endVerse: 17,
+    })
+    expect(parseStudySurfaceContext(c.activeContext)).toEqual(c.activeContext)
+    expect(passageContext({ verses: ['67-1-1'], surface: 'x' })).toBeNull()
+    expect(
+      bookContext({ book: 1, bookName: 'Genèse', surface: 'Péricopes' })?.activeContext
+    ).toEqual({
+      kind: 'passage',
+      book: 1,
+    })
   })
 })

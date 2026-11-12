@@ -8,6 +8,8 @@ import type { Theme as AppTheme } from '~themes'
 
 import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
+import { bookContext } from '~features/study-assistant/resourceContext'
+import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { Book } from '~assets/bible_versions/books-desc'
@@ -123,6 +125,15 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
 
   const initialBookNumber = params.book ? Number(params.book) : 1
   const [book, setBook] = useState<Book>(() => getBook(initialBookNumber) || getBook(1)!)
+  useAssistantResourceContext(
+    'panel',
+    bookContext({
+      book: book.Numero,
+      bookName: getReadingBookName(book, version),
+      version,
+      surface: t('Péricopes'),
+    })
+  )
 
   const availabilityQuery = useQuery({
     queryKey: [

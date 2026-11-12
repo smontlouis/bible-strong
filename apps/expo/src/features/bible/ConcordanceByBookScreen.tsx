@@ -2,6 +2,9 @@ import React, { useEffect } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { MenuView } from '~common/ui/MenuView'
 import { useLocalSearchParams } from 'expo-router'
+import { normalizeStrongRouteIdentity } from '~features/lexique/strongRouteIdentity'
+import { wordContext } from '~features/study-assistant/resourceContext'
+import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import { useTranslation } from 'react-i18next'
 import Box, { usePageBottomInset } from '~common/ui/Box'
 import FlatList from '~common/ui/FlatList'
@@ -51,6 +54,17 @@ const ConcordanceByBook = () => {
     ? JSON.parse(params.strongReference)
     : { Code: 0, Mot: '' }
   const { Code, Mot } = strongReference
+  useAssistantResourceContext(
+    'panel',
+    wordContext(
+      Mot || undefined,
+      Code
+        ? normalizeStrongRouteIdentity({ strongReference, book: book || undefined })?.code
+        : undefined,
+      requestedStrongBibleVersionId,
+      `Concordance de ce mot dans ${getBook(book)?.Nom || `le livre ${book}`}`
+    )
+  )
   const occurrencesQuery = useInfiniteQuery({
     queryKey: resourceQueryKeys.strongBibleOccurrences({
       currentVersionId: requestedStrongBibleVersionId,

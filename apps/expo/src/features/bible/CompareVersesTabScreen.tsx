@@ -24,6 +24,9 @@ import CompareVersionSelectorSheet from './CompareVersionSelectorSheet'
 import type { SheetRef } from '~common/sheet'
 import CompareCard from './resources/CompareCard'
 import CompareStrongModeButton from './CompareStrongModeButton'
+import { useTabContext } from '~features/app-switcher/context/TabContext'
+import { passageContext } from '~features/study-assistant/resourceContext'
+import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 interface CompareVersesTabScreenProps {
   compareAtom: PrimitiveAtom<CompareTab>
 }
@@ -58,6 +61,14 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
   } = compareTab
 
   const title = verseToReference(selectedVerses)
+  const { isInTab } = useTabContext()
+  useAssistantResourceContext(
+    isInTab ? `tab:${compareTab.id}` : 'panel',
+    passageContext({
+      verses: Object.keys(selectedVerses || {}),
+      surface: 'Comparaison des versions',
+    })
+  )
   const openInNewTab = useOpenInNewTab()
   // The site compares versions on the page of a verse; the reader's own version names it.
   const shareUrl = getVersesShareUrl(Object.keys(selectedVerses), useDefaultBibleVersion())

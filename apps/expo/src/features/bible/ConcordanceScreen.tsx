@@ -8,6 +8,9 @@ import { pageContentStyle } from '~common/ui/PageContent'
 import type { Theme as AppTheme } from '~themes'
 
 import { useLocalSearchParams } from 'expo-router'
+import { normalizeStrongRouteIdentity } from '~features/lexique/strongRouteIdentity'
+import { wordContext } from '~features/study-assistant/resourceContext'
+import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 import { useSelector } from 'react-redux'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
@@ -107,6 +110,15 @@ const ConcordanceScreen = () => {
   )
   const requestedStrongBibleVersionId =
     (params.strongBibleVersionId as StrongBibleVersionId | undefined) ?? defaultStrongBibleVersionId
+  useAssistantResourceContext(
+    'panel',
+    wordContext(
+      strongReference.Mot,
+      normalizeStrongRouteIdentity({ strongReference, book: book || undefined })?.code,
+      requestedStrongBibleVersionId,
+      'Concordance de ce mot dans toute la Bible'
+    )
+  )
 
   const {
     data: result,

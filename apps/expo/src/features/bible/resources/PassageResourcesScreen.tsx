@@ -12,6 +12,8 @@ import { getDefaultBibleTab, type VersionCode } from '~state/tabs'
 import ResourcesContent from './ResourceModalContent'
 import { resourceSidebarSources } from './resourceSidebarRegistry'
 import { parseResourceSidebarParams } from './resourceSidebarParams'
+import { passageContext } from '~features/study-assistant/resourceContext'
+import { useAssistantResourceContext } from '~features/study-assistant/useAssistantResourceContext'
 
 export default function PassageResourcesScreen() {
   const params = useLocalSearchParams<{
@@ -27,6 +29,14 @@ export default function PassageResourcesScreen() {
   const version = (
     params.version && versions[params.version] ? params.version : 'LSG'
   ) as VersionCode
+  useAssistantResourceContext(
+    'panel',
+    passageContext({
+      verses: Object.keys(selection.selectedVerses),
+      version,
+      surface: 'Ressources du passage',
+    })
+  )
   const [fallbackAtom] = useState(() => {
     const bible = getDefaultBibleTab()
     return atom({

@@ -14,6 +14,14 @@ jest.mock('~features/lexique/strongRouteIdentity', () => ({
   normalizeStrongRouteIdentity: (data: { identityCode?: string }) =>
     data.identityCode ? { code: data.identityCode } : undefined,
 }))
+jest.mock('~features/lexique/publicStrongRoutes', () => ({
+  parsePublicStrongCode: (value?: string) =>
+    value && /^[hg]\d+$/i.test(value) ? { kind: 'strong', code: value.toUpperCase() } : undefined,
+  resolvePublicStrongContext: (identity: { code: string }, context: object) => ({
+    ...context,
+    identityCode: identity.code,
+  }),
+}))
 jest.mock('~features/lexique/strongDetailRoutes', () => ({
   parseStrongDetailRouteParams: (params: Record<string, unknown>) => ({ context: params }),
 }))
@@ -64,6 +72,17 @@ describe('reading contexts offered to the assistant', () => {
     expect(panel?.label).toBe('aimé · G25')
     expect(panel?.bibleVersion).toBe('LSG')
     expect(panel?.activeContext).toEqual({ kind: 'word', bibleVersion: 'LSG', reference: 'G25' })
+  })
+
+  it('reads the entry of a public Strong address from its path', () => {
+    const { panel } = resolveReadingContexts({
+      tab,
+      pathname: '/strong/h157/concordance',
+      params: { code: 'h157', clickedWord: 'aimer', bibleVersion: 'LSG' },
+      registry: {},
+    })
+    expect(panel?.label).toBe('aimer · H157')
+    expect(panel?.activeContext).toEqual({ kind: 'word', bibleVersion: 'LSG', reference: 'H157' })
   })
 
   it('offers nothing for a tab with no study surface', () => {

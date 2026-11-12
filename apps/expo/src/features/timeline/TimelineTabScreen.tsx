@@ -75,6 +75,7 @@ const TimelineTabScreen = ({ timelineAtom }: Props) => {
       hasBackButton={false}
       start={start}
       onPositionChange={remember}
+      assistantScope={`tab:${timelineTab.id}`}
     />
   )
 }

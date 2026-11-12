@@ -184,3 +184,109 @@ export function commentaryCollectionContext(
     { kind: 'commentary', book, chapter }
   )
 }
+
+/** A Strong word: what the reader opened, its code and where it was met. */
+export const wordContext = (
+  word?: string,
+  reference?: string,
+  version?: string,
+  location?: string
+): ReadingContext | null => {
+  if (!word && !reference) return null
+  const label = [word, reference].filter(Boolean).join(' · ')
+  const detail = [label, location, version].filter(Boolean).join(' · ').slice(0, 500)
+  return {
+    key: detail,
+    label: label.slice(0, 500),
+    detail,
+    kind: 'word',
+    ...(version ? { bibleVersion: version } : {}),
+    activeContext: {
+      kind: 'word',
+      ...(version ? { bibleVersion: version } : {}),
+      ...(reference ? { reference } : {}),
+    },
+  }
+}
+
+const verseKey = /^(\d+)-(\d+)-(\d+)$/
+const bibleVersionPattern = /^[A-Za-z0-9_-]{1,40}$/
+
+/**
+ * Verses shown outside the reader (versions compared, the resources of a passage, the verse of
+ * the day): their reference, and what the screen does with them.
+ */
+export function passageContext({
+  verses,
+  version,
+  surface,
+}: {
+  /** Verse keys, `book-chapter-verse`. */
+  verses: string[]
+  version?: string
+  /** What the screen shows, such as « Comparaison des versions ». */
+  surface: string
+}): ReadingContext | null {
+  const parsed = verses.flatMap(key => {
+    const match = verseKey.exec(key)
+    if (!match) return []
+    const [book, chapter, verse] = match.slice(1).map(Number)
+    return book >= 1 && book <= 66 && chapter >= 1 && chapter <= 150 && verse >= 1 && verse <= 176
+      ? [{ key, book, chapter, verse }]
+      : []
+  })
+  if (!parsed.length) return null
+  const { book, chapter } = parsed[0]
+  const inChapter = parsed.filter(item => item.book === book && item.chapter === chapter)
+  const numbers = inChapter.map(item => item.verse)
+  const reference = verseToReference(parsed.map(item => item.key))
+  const bibleVersion = version && bibleVersionPattern.test(version) ? version : undefined
+  return {
+    ...context('passage', reference, [`${surface} : ${reference}`, bibleVersion || ''], {
+      kind: 'passage',
+      ...(bibleVersion ? { bibleVersion } : {}),
+      book,
+      chapter,
+      startVerse: Math.min(...numbers),
+      endVerse: Math.max(...numbers),
+    }),
+    ...(bibleVersion ? { bibleVersion } : {}),
+  }
+}
+
+/** A whole book seen through one of its outlines, such as its pericopes. */
+export function bookContext({
+  book,
+  bookName,
+  version,
+  surface,
+}: {
+  book: number
+  bookName: string
+  version?: string
+  surface: string
+}): ReadingContext | null {
+  if (!Number.isInteger(book) || book < 1 || book > 66) return null
+  const bibleVersion = version && bibleVersionPattern.test(version) ? version : undefined
+  return {
+    ...context(
+      'passage',
+      `${surface} · ${bookName}`,
+      [`${surface} : ${bookName}`, bibleVersion || ''],
+      {
+        kind: 'passage',
+        ...(bibleVersion ? { bibleVersion } : {}),
+        book,
+      }
+    ),
+    ...(bibleVersion ? { bibleVersion } : {}),
+  }
+}
+
+/** The timeline itself, before any event is opened. */
+export function timelineStageContext(language: string): ReadingContext {
+  return context('timeline', i18n.t('tabs.timeline'), [
+    'Frise chronologique ouverte, aucun événement sélectionné',
+    `langue=${language}`,
+  ])
+}

@@ -1,5 +1,9 @@
 import { normalizeStrongRouteIdentity } from '~features/lexique/strongRouteIdentity'
 import {
+  parsePublicStrongCode,
+  resolvePublicStrongContext,
+} from '~features/lexique/publicStrongRoutes'
+import {
   parseStrongDetailRouteParams,
   type StrongDetailRouteContext,
 } from '~features/lexique/strongDetailRoutes'
@@ -12,32 +16,10 @@ import {
   commentaryContext,
   dictionaryContext,
   naveContext,
+  wordContext,
 } from './resourceContext'
 
 type PublishedContexts = Record<string, { scope: string; path: string; context: ReadingContext }>
-
-const wordContext = (
-  word?: string,
-  reference?: string,
-  version?: string,
-  location?: string
-): ReadingContext | null => {
-  if (!word && !reference) return null
-  const label = [word, reference].filter(Boolean).join(' · ')
-  const detail = [label, location, version].filter(Boolean).join(' · ').slice(0, 500)
-  return {
-    key: detail,
-    label: label.slice(0, 500),
-    detail,
-    kind: 'word',
-    ...(version ? { bibleVersion: version } : {}),
-    activeContext: {
-      kind: 'word',
-      ...(version ? { bibleVersion: version } : {}),
-      ...(reference ? { reference } : {}),
-    },
-  }
-}
 
 const fromWord = (data: StrongDetailRouteContext) => {
   let identity
@@ -87,8 +69,13 @@ export function resolveReadingContexts({
                 : null)
   const scalar = (value: unknown) => (typeof value === 'string' ? value : undefined)
   let panel = entries.find(e => e.scope === 'panel' && e.path === pathname)?.context || null
-  if (!panel && pathname.startsWith('/strong'))
-    panel = fromWord(parseStrongDetailRouteParams(params).context)
+  if (!panel && pathname.startsWith('/strong')) {
+    const { context } = parseStrongDetailRouteParams(params)
+    // A public address (`/strong/h25`) carries the entry in its path, not in its parameters,
+    // as the screen itself reads it (PublicStrongRouteScreen).
+    const identity = parsePublicStrongCode(scalar(params.code))
+    panel = fromWord(identity ? resolvePublicStrongContext(identity, context) : context)
+  }
   if (!panel && ['/commentary-entry', '/commentary-chapter'].includes(pathname))
     panel = commentaryContext({
       projectionId: scalar(params.projectionId),
