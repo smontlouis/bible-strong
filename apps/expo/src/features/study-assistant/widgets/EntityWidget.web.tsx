@@ -203,7 +203,7 @@ function EntityQuote({ widget }: { widget: Descriptor }) {
   )
 }
 
-/** Profiles are quotations in the answer, as on the phone; the relation graph keeps its card. */
+/** Profiles are quotations in the answer, as on the phone; the relation graph is a bare panel. */
 export default function EntityWidget({ widget }: { widget: Descriptor }) {
   const { t } = useTranslation()
   if (widget.kind !== 'entity_relations') return <EntityQuote widget={widget} />
@@ -212,6 +212,7 @@ export default function EntityWidget({ widget }: { widget: Descriptor }) {
       icon={<NetworkIcon size={17} />}
       title={widget.title}
       eyebrow={t(`assistant.widgets.${widget.kind}`)}
+      tone="word"
       expanded={<EntityBody widget={widget} expanded />}
     >
       <EntityBody widget={widget} />

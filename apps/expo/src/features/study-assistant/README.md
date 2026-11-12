@@ -280,6 +280,8 @@ Widgets persist per message. Subsequent model memory includes only ordered resou
 
 All cards use the shared theme tokens and sans-serif assistant typography. Wide content uses a Radix dialog; resource references use the existing click previews and exact internal routes. Successful source reads supply attributed excerpts. Missing resources, coverage or morphology are explicit; no generated text replaces unavailable source content. Only source-provided valid coordinates generate map links.
 
+Since 2026-11-12 no widget sits in a card. A resource that only opens is a quote (`QuoteBlock`: rule, preview, foot line with its mark and name, the whole block a link). A widget with controls (concordance, book overview, reading, further resources, word analysis, translation comparison, relation graph) is a bare panel (`WidgetFrame`): the same rule in its resource's colour (`tone`; passages take `primary` like quoted verses), a head line with the icon, the kind in 13 px grey and the title, then its content with no fill and no side padding. Wells inside it (media, chapters, a word's analysis) are light grey at radius 12. On the web the enlarged dialog gives the blocks their padding back.
+
 Reading widgets resolve public editorial content through `useReadingContent` without enrolling or updating progress. Candidate resources are explicitly distinguished from documents actually read. Private orchestration, prompts, provider credentials and editorial tools remain in the private API repository. See `plans/assistant-study-widgets.md` for validation evidence and source limitations.
 
 ### Widget playground (development, web)

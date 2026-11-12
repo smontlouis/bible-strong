@@ -13,6 +13,7 @@ export default function FurtherResourcesWidget({ widget }: { widget: Descriptor 
     <WidgetFrame
       title={widget.title}
       eyebrow={t('assistant.widgets.furtherResources')}
+      tone="references"
       icon={<LibraryIcon size={17} />}
     >
       {!!widget.unavailable?.length && (

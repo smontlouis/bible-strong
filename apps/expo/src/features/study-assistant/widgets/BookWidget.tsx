@@ -48,8 +48,8 @@ export default function BookWidget({ widget }: { widget: Descriptor }) {
     )
     .sort((a, b) => a.chapter - b.chapter || a.verse - b.verse)
   return (
-    <WidgetFrame title={widget.title} eyebrow={t('assistant.widgets.bookOverview')}>
-      <Box className="px-3 py-[10px]">
+    <WidgetFrame title={widget.title} eyebrow={t('assistant.widgets.bookOverview')} tone="bible">
+      <Box className="py-1">
         <HStack className="items-baseline justify-between">
           <Text className="text-[16px] font-bold">{book?.Nom}</Text>
           <Text className="text-grey text-[12px]">
@@ -68,7 +68,7 @@ export default function BookWidget({ widget }: { widget: Descriptor }) {
                     params: { workId: item.workId, language: widget.language },
                   })
                 }
-                className="bg-reverse flex-row items-center gap-3 rounded-[12px] p-3"
+                className="bg-light-grey flex-row items-center gap-3 rounded-[12px] p-3"
               >
                 <FeatherIcon name="play" size={18} color="primary" />
                 <Box className="flex-1">
@@ -150,7 +150,7 @@ export default function BookWidget({ widget }: { widget: Descriptor }) {
                     },
                   })
                 }
-                className="bg-reverse h-[36px] w-[36px] items-center justify-center rounded-[8px]"
+                className="bg-light-grey h-[36px] w-[36px] items-center justify-center rounded-[8px]"
               >
                 <Text className="text-[13px]">{i + 1}</Text>
               </TouchableBox>

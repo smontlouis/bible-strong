@@ -43,6 +43,7 @@ export default function BookWidget({ widget }: { widget: Descriptor }) {
     <WidgetFrame
       title={widget.title}
       eyebrow={t('assistant.widgets.bookOverview')}
+      tone="bible"
       icon={<BookOpenIcon size={17} />}
     >
       <div className="bs-widget-book">

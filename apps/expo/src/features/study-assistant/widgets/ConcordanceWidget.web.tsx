@@ -164,7 +164,11 @@ export default function ConcordanceWidget({ widget }: { widget: LexicalWidget })
     </div>
   )
   return (
-    <WidgetFrame title={widget.reference} eyebrow={t('assistant.widgets.concordance')}>
+    <WidgetFrame
+      title={widget.reference}
+      eyebrow={t('assistant.widgets.concordance')}
+      tone="strong"
+    >
       {body}
     </WidgetFrame>
   )

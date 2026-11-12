@@ -128,6 +128,7 @@ export default function VerseAnalysisWidget({ widget }: { widget: PassageWidget 
     <WidgetFrame
       title={occurrence ? occurrence.clickedWord || occurrence.identity.code : widget.title}
       eyebrow={t(occurrence ? 'assistant.widgets.strong' : 'assistant.widgets.wordAnalysis')}
+      tone="strong"
       icon={
         occurrence ? (
           <button

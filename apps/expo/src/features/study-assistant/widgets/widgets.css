@@ -1,7 +1,11 @@
+/*
+ * A widget with controls sits in the flow of the answer like a quote (2026-11-12): no card and
+ * no fill, a rule in the resource's colour, a head line naming it, then its content.
+ */
 .bs-study-widget {
-  margin: 18px 0;
-  border-radius: 16px;
-  overflow: hidden;
+  margin: 12px 0;
+  padding-left: 14px;
+  border-left: 2px solid var(--sw-rule);
   background: var(--sw-surface);
   color: var(--sw-ink);
   font-size: 13px;
@@ -9,12 +13,13 @@
 .bs-widget-heading {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--sw-line);
+  gap: 8px;
+  padding: 0 0 6px;
 }
 .bs-widget-heading > svg {
-  color: var(--sw-accent);
+  width: 14px;
+  height: 14px;
+  color: var(--sw-muted);
   flex-shrink: 0;
 }
 .bs-widget-heading > div {
@@ -23,12 +28,12 @@
 }
 .bs-widget-heading small,
 .bs-widget-dialog small {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--sw-muted);
 }
 .bs-widget-heading h3 {
-  margin: 3px 0 0;
-  font-size: 14px;
+  margin: 1px 0 0;
+  font-size: 15px;
   font-weight: 600;
   line-height: 1.4;
 }
@@ -54,7 +59,7 @@
   cursor: default;
 }
 .bs-widget-passage {
-  padding: 14px 16px;
+  padding: 10px 0;
   border-bottom: 1px solid var(--sw-line);
   min-width: 0;
 }
@@ -104,9 +109,10 @@
   margin-right: 6px;
 }
 .bs-widget-analysis {
-  padding: 14px 16px;
+  margin-top: 8px;
+  padding: 12px 14px;
   background: var(--sw-soft);
-  border-top: 1px solid var(--sw-line);
+  border-radius: 12px;
 }
 .bs-widget-analysis small {
   font-size: 12px;
@@ -179,11 +185,18 @@
 .bs-widget-dialog-body {
   overflow: auto;
 }
+/* Bare in the thread, the blocks get their room back in the raised dialog. */
+.bs-widget-dialog .bs-widget-passage,
+.bs-widget-dialog .bs-widget-entity,
+.bs-widget-dialog .bs-widget-translation-controls {
+  padding: 16px 24px;
+}
 .bs-widget-comparison {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 .bs-widget-comparison .bs-widget-passage {
+  padding: 14px 16px;
   border-right: 1px solid var(--sw-line);
   border-bottom: 0;
 }
@@ -202,16 +215,13 @@
   }
 }
 .bs-widget-concordance {
-  padding: 16px;
+  padding: 4px 0;
 }
 .bs-widget-notice {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.5;
   color: var(--sw-muted);
-  background: var(--sw-soft);
-  padding: 10px;
-  border-radius: 8px;
-  margin: 12px 0;
+  margin: 8px 0;
 }
 .bs-widget-concordance-toolbar {
   display: flex;
@@ -227,17 +237,20 @@
 }
 .bs-widget-load-more {
   display: block;
-  width: 100%;
-  border: 1px solid var(--sw-line);
-  border-radius: 9px;
-  background: var(--sw-soft);
+  border: 0;
+  background: none;
   color: var(--sw-accent);
   font: inherit;
-  padding: 9px;
+  font-size: 14px;
+  padding: 6px 0;
   cursor: pointer;
 }
+.bs-widget-load-more:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .bs-widget-word-analysis {
-  padding: 16px;
+  padding: 4px 0;
 }
 .bs-widget-word-analysis > header {
   display: flex;
@@ -300,7 +313,7 @@
   outline: 1px solid var(--sw-accent);
 }
 .bs-widget-entity {
-  padding: 16px;
+  padding: 4px 0;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -361,7 +374,7 @@
 }
 .bs-widget-book,
 .bs-widget-reading {
-  padding: 16px;
+  padding: 4px 0;
 }
 .bs-widget-book-heading {
   display: flex;
@@ -393,9 +406,9 @@
   align-items: center;
   gap: 10px;
   padding: 12px;
-  border: 1px solid var(--sw-line);
+  border: 0;
   background: var(--sw-soft);
-  border-radius: 10px;
+  border-radius: 12px;
   text-align: left;
   color: var(--sw-accent);
   font: inherit;
@@ -444,9 +457,9 @@
   margin-top: 10px;
 }
 .bs-widget-chapters button {
-  border: 1px solid var(--sw-line);
+  border: 0;
   background: var(--sw-soft);
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 7px;
   color: var(--sw-accent);
   cursor: pointer;
@@ -470,7 +483,7 @@
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 14px 16px;
+  padding: 10px 0;
   background: none;
   border: 0;
   color: var(--sw-accent);
@@ -496,7 +509,7 @@
   margin-top: 4px;
 }
 .bs-widget-resource-empty {
-  padding: 16px;
+  padding: 4px 0;
   color: var(--sw-muted);
   font-size: 13px;
 }
@@ -590,7 +603,7 @@
   margin-left: 0;
 }
 .bs-widget-translation-controls {
-  padding: 12px 16px;
+  padding: 8px 0;
   border-bottom: 1px solid var(--sw-line);
   font-size: 11px;
 }

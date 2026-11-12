@@ -29,7 +29,7 @@ export default function WidgetSelect({
         accessibilityLabel={label}
         accessibilityValue={{ text: selected?.label || value }}
         onPress={() => sheet.current?.present()}
-        className="bg-reverse h-[28px] max-w-[190px] flex-row items-center gap-1 rounded-full pl-3 pr-2"
+        className="bg-light-grey h-[28px] max-w-[190px] flex-row items-center gap-1 rounded-full pl-3 pr-2"
       >
         <Text className="shrink text-[13px] font-semibold" numberOfLines={1}>
           {selected?.label || value}

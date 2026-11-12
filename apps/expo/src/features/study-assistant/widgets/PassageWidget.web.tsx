@@ -218,6 +218,7 @@ export default function PassageWidget({ widget }: { widget: Descriptor }) {
     <WidgetFrame
       title={widget.title}
       eyebrow={t(`assistant.widgets.${translation ? widget.kind : 'passages'}`)}
+      tone="bible"
       expanded={body()}
     >
       {body()}

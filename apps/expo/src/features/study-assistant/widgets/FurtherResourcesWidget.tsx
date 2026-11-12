@@ -17,14 +17,15 @@ export default function FurtherResourcesWidget({ widget }: { widget: Descriptor 
       title={widget.title}
       eyebrow={t('assistant.widgets.furtherResources')}
       icon="bookmark"
+      tone="references"
     >
       {!!widget.unavailable?.length && (
-        <Box className="px-3 pt-[10px]">
+        <Box className="pt-1">
           <WidgetNotice>{t('assistant.widgets.partialResources')}</WidgetNotice>
         </Box>
       )}
       {!widget.items.length ? (
-        <Box className="px-3 py-[10px]">
+        <Box className="py-1">
           <WidgetNotice>
             {t(
               widget.unavailable?.length
@@ -44,8 +45,11 @@ export default function FurtherResourcesWidget({ widget }: { widget: Descriptor 
               accessibilityRole="button"
               disabled={missing}
               onPress={() => navigate(suggestionRoute(item))}
-              className="border-separator flex-row items-center gap-3 px-3 py-[10px]"
-              style={{ borderBottomWidth: StyleSheet.hairlineWidth, opacity: missing ? 0.5 : 1 }}
+              className="border-separator flex-row items-center gap-3 py-[10px]"
+              style={{
+                borderTopWidth: index ? StyleSheet.hairlineWidth : 0,
+                opacity: missing ? 0.5 : 1,
+              }}
             >
               <FeatherIcon
                 name={item.kind === 'media' ? 'video' : 'book-open'}

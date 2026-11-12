@@ -74,8 +74,13 @@ export default function ConcordanceWidget({ widget }: { widget: LexicalWidget })
     })) || []),
   ]
   return (
-    <WidgetFrame title={widget.reference} eyebrow={t('assistant.widgets.concordance')} icon="list">
-      <Box className="px-3 py-[10px]">
+    <WidgetFrame
+      title={widget.reference}
+      eyebrow={t('assistant.widgets.concordance')}
+      icon="list"
+      tone="strong"
+    >
+      <Box className="py-1">
         <HStack className="items-center justify-between gap-2 pb-1">
           <Text className="text-grey shrink text-[12px]">
             {version} ·{' '}

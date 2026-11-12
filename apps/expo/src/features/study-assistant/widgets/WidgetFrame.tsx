@@ -5,16 +5,25 @@ import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useTheme } from '~themes/ThemeProvider'
+import { resolveUniverseColors, type UniverseItem } from '~themes/universeColors'
 
 type IconName = ComponentProps<typeof FeatherIcon>['name']
 
-/** The card every study widget sits in. The sheet is already full width: no enlarged view. */
+/** The resource a panel holds: its colour draws the rule, as on a quote. */
+export type WidgetTone = UniverseItem
+
+/**
+ * A study widget with controls, set in the flow of the answer like a quote (2026-11-12): no
+ * card and no fill, a rule in the resource's colour, a head line naming it, then its content.
+ * The sheet is already full width: no enlarged view.
+ */
 export default function WidgetFrame({
   title,
   eyebrow,
   children,
   icon = 'book-open',
   leading,
+  tone = 'bible',
 }: {
   title: string
   eyebrow: string
@@ -22,17 +31,19 @@ export default function WidgetFrame({
   icon?: IconName
   /** Replaces the icon, for a control such as a way back. */
   leading?: ReactNode
+  tone?: WidgetTone
 }) {
+  const { colors } = useTheme()
+  // Passages take the accent, as the verses quoted in an answer do.
+  const rule = tone === 'bible' ? colors.primary : resolveUniverseColors(colors, tone).foreground
   return (
-    // On the opaque sheet, a widget is set off by its light grey fill alone: no outline.
-    <Box className="bg-light-grey my-2 overflow-hidden rounded-[16px]">
-      <HStack
-        className="border-separator items-center gap-[10px] px-3 py-[10px]"
-        style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
-      >
-        {leading || <FeatherIcon name={icon} size={17} color="primary" />}
+    <Box className="my-3 pl-[14px]" style={{ borderLeftWidth: 2, borderLeftColor: rule }}>
+      <HStack className="items-center gap-2 pb-1">
+        {leading || <FeatherIcon name={icon} size={14} color="grey" />}
         <Box className="flex-1">
-          <Text className="text-grey text-[12px]">{eyebrow}</Text>
+          <Text className="text-grey text-[13px]" numberOfLines={1}>
+            {eyebrow}
+          </Text>
           <Text className="text-[15px] font-semibold" numberOfLines={2}>
             {title}
           </Text>

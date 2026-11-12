@@ -202,7 +202,7 @@ function EntityQuote({ widget }: { widget: Descriptor }) {
   )
 }
 
-/** Profiles are quotations in the answer (2026-11-08); the relation graph keeps its card. */
+/** Profiles are quotations in the answer (2026-11-08); the relation graph is a bare panel. */
 export default function EntityWidget({ widget }: { widget: Descriptor }) {
   const { t } = useTranslation()
   if (widget.kind !== 'entity_relations') return <EntityQuote widget={widget} />
@@ -217,8 +217,9 @@ export default function EntityWidget({ widget }: { widget: Descriptor }) {
       }
       title={widget.title}
       eyebrow={t(`assistant.widgets.${widget.kind}`)}
+      tone="word"
     >
-      <Box className="px-3 py-[10px]">
+      <Box className="py-1">
         <EntityBody widget={widget} />
       </Box>
     </WidgetFrame>

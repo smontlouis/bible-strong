@@ -26,7 +26,7 @@ export default function StudyWidget({ widget }: { widget: Descriptor }) {
   if (widget.kind === 'concordance') return <ConcordanceWidget widget={widget} />
   if (widget.kind === 'strong_entry') return <StrongWidget widget={widget} />
   if (!('passages' in widget)) return null
-  // A translation comparison keeps its card; other passages are quotes in the text.
+  // A translation comparison keeps its controls in a bare panel; other passages are quotes.
   return widget.kind === 'translation_comparison' ? (
     <PassageWidget widget={widget} />
   ) : (

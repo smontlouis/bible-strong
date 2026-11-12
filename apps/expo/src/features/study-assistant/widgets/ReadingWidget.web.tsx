@@ -25,6 +25,7 @@ export default function ReadingWidget({ widget }: { widget: Descriptor }) {
     <WidgetFrame
       title={reading ? getMeditationTitle(reading) || widget.title : widget.title}
       eyebrow={t(`assistant.widgets.${widget.kind}`)}
+      tone="plan"
       icon={<CalendarDaysIcon size={17} />}
     >
       <div className="bs-widget-reading">

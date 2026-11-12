@@ -28,8 +28,9 @@ export default function ReadingWidget({ widget }: { widget: Descriptor }) {
       title={reading ? getMeditationTitle(reading) || widget.title : widget.title}
       eyebrow={t(`assistant.widgets.${widget.kind}`)}
       icon="calendar"
+      tone="plan"
     >
-      <Box className="px-3 py-[10px]">
+      <Box className="py-1">
         {!collection && !isError ? (
           <WidgetLoading />
         ) : !reading || !compatible ? (

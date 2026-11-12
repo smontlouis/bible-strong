@@ -111,6 +111,7 @@ export default function VerseAnalysisWidget({ widget }: { widget: PassageWidget 
       title={occurrence ? occurrence.clickedWord || occurrence.identity.code : widget.title}
       eyebrow={t(occurrence ? 'assistant.widgets.strong' : 'assistant.widgets.wordAnalysis')}
       icon="type"
+      tone="strong"
       leading={
         occurrence ? (
           <WidgetIconButton
@@ -121,7 +122,7 @@ export default function VerseAnalysisWidget({ widget }: { widget: PassageWidget 
         ) : undefined
       }
     >
-      <Box className="px-3 py-[10px]">
+      <Box className="py-1">
         {!occurrence && (
           <HStack className="items-center gap-2 pb-1">
             <TouchableBox accessibilityRole="button" onPress={openPassage} className="shrink">

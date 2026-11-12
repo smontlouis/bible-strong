@@ -4,21 +4,29 @@ import { ExpandIcon, XIcon, BookOpenIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '~themes/ThemeProvider'
 import { resolveFontFamily } from '~themes/styleValues'
+import { resolveUniverseColors, type UniverseItem } from '~themes/universeColors'
 import './widgets.css'
 const WidgetCloseContext = createContext<() => void>(() => {})
 export const useCloseExpandedWidget = () => useContext(WidgetCloseContext)
+/**
+ * A study widget with controls, set in the flow of the answer like a quote (2026-11-12): no
+ * card and no fill, a rule in the resource's colour, a head line naming it, then its content.
+ */
 export default function WidgetFrame({
   title,
   eyebrow,
   children,
   expanded,
   icon,
+  tone = 'bible',
 }: {
   title: string
   eyebrow: string
   children: ReactNode
   icon?: ReactNode
   expanded?: ReactNode
+  /** The resource it holds: its colour draws the rule. */
+  tone?: UniverseItem
 }) {
   const [open, setOpen] = useState(false)
   const { t } = useTranslation(),
@@ -30,12 +38,14 @@ export default function WidgetFrame({
     '--sw-line': colors.separator,
     '--sw-accent': colors.link,
   }
-  // In the thread a widget is set off by its light grey fill, its inner panels are white;
-  // expanded, it is a raised dialog whose panels are grey.
+  // In the thread a widget sits on the page with no fill, its few wells light grey; expanded,
+  // it is a raised dialog whose panels are grey.
   const style = {
     ...palette,
-    '--sw-surface': colors.lightGrey,
-    '--sw-soft': colors.reverse,
+    '--sw-surface': 'transparent',
+    '--sw-soft': colors.lightGrey,
+    // Passages take the accent, as the verses quoted in an answer do.
+    '--sw-rule': tone === 'bible' ? colors.primary : resolveUniverseColors(colors, tone).foreground,
   } as CSSProperties
   const dialogStyle = {
     ...palette,

@@ -71,7 +71,7 @@ function PassageCard({
     })
   return (
     <Box
-      className="border-separator px-3 py-[10px]"
+      className="border-separator py-[10px]"
       style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
     >
       <HStack className="items-center gap-2">
@@ -145,10 +145,11 @@ export default function PassageWidget({ widget }: { widget: Descriptor }) {
     <WidgetFrame
       title={widget.title}
       eyebrow={t(`assistant.widgets.${translation ? widget.kind : 'passages'}`)}
+      tone="bible"
     >
       {translation && (
         <Box
-          className="border-separator gap-1 px-3 py-2"
+          className="border-separator gap-1 py-2"
           style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
         >
           <TouchableBox
@@ -199,7 +200,7 @@ export default function PassageWidget({ widget }: { widget: Descriptor }) {
         />
       ))}
       {!!widget.analysis && (
-        <Box className="px-3 pb-2">
+        <Box className="pb-2">
           <WidgetDisclosure title={t('assistant.widgets.analysis')}>
             <AssistantMessageMarkdown
               text={widget.analysis}
