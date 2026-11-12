@@ -20,10 +20,6 @@ import Text from '~common/ui/Text'
 import { toast } from '~helpers/toast'
 import useLogin from '~helpers/useLogin'
 import { RootState } from '~redux/modules/reducer'
-import { useHomeLayout } from '~features/home/homeLayout'
-
-/** Home content width from which the six counts share a single row. */
-const HOME_SINGLE_ROW_CONTENT = 680
 
 type StatLink = Pick<UIComponentProps<typeof Link>, 'route' | 'onPress'>
 
@@ -125,17 +121,15 @@ const StatLock = () => {
 
 /**
  * The six counts. Profile: a titled group of six cards, each with its colored icon above the
- * count, on two rows of three. Home (`home`): one card of six cells, two rows of three, or a single
- * row when the home is wide enough, aligned with the home section titles.
+ * count, on two rows of three. Home (`home`): one card of six cells, two rows of three, aligned with the home section titles.
  */
 const ProfileStats = ({ home = false }: { home?: boolean }) => {
   const { t } = useTranslation()
   const stats = useStats()
   const isSyncing = useSelector((state: RootState) => Boolean(state.user.sync?.isLoading))
-  const singleRow = useHomeLayout().content >= HOME_SINGLE_ROW_CONTENT
 
   if (home) {
-    const rows = singleRow ? [stats] : [stats.slice(0, 3), stats.slice(3)]
+    const rows = [stats.slice(0, 3), stats.slice(3)]
     return (
       <VStack className="px-[20px] gap-[10px]">
         {isSyncing && <SyncingNotice />}

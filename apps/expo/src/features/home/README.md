@@ -1,8 +1,9 @@
 # Home
 
 One composition (`HomeScreen.tsx`) for every platform and size. A phone, an iPad and a
-desktop browser show the same sections in the same order; a wider column only lays their rows
-out differently. There is no separate desktop home.
+desktop browser show the same sections in the same order, in one column: the phone's home, only
+a little wider on a large screen. Nothing sits side by side, and the daily verse keeps the
+phone's size. There is no separate desktop home.
 
 ## Groups and parts
 
@@ -34,7 +35,7 @@ light tint they were drawn on.
 3. **Reprendre**, the work in progress, right after the day (`HomeResumeSection`): the latest
    History entries (« Tout voir » on the title opens the full History), then the **Mes plans**
    part (followed reading plans, or an invitation to the catalogue). While the history is
-   empty, the group is « Mes plans » alone. A plan row ends in a round filled button with a
+   empty, the group is « Mes plans » alone. The two parts stack at every width. A plan row ends in a round filled button with a
    chevron (`PlanContinueButton`), which reads « Continuer » or « Rattraper » aloud and opens
    the next reading; the row's detail already says how many days are behind. « À découvrir »
    leads to the catalogue, not to all the reader's plans, so it keeps its own wording; it only
@@ -48,9 +49,19 @@ light tint they were drawn on.
    shortcut per tab type: the new tab and the search already open each scoped search
    (ADR-0045).
 6. **Aller plus loin**: Audibible, donation, Follow and FAQ, one line each with no description
-   (`HomeGoFurther`), grouped in one card on a phone and set two by two on a wide home.
+   (`HomeGoFurther`), grouped in one card at every width.
 7. **Footer** (`HomeFooter`): room for the floating close button on touch layouts; the app
    download as a link under a hairline on the wide Web home.
+
+## Two columns on a large Web window
+
+When the home gets 1080 points or more on the Web (`HomeScreen.tsx`), it sets two columns. The
+left one, 440 points, holds what is the reader's own: the header with the search under the
+greeting, the day, « Ma bibliothèque ». It stays in place (`position: sticky`) while the right
+one, the 640-point column, scrolls « Reprendre », « Explorer » and « Aller plus loin ». A left
+column taller than the window scrolls with the page instead, so its end can always be reached.
+Below 1080 points, and on every native app, the home is the single column. Each column is its
+own `HomeLayout`, so sections still choose their rows from the width they get.
 
 ## Width-driven layout
 
@@ -59,17 +70,22 @@ the gutters of 20 points. Sections choose their columns from that width, so the 
 route panel, an iPad split view or a rotation are all handled the same way. On Web the column
 is read before the first paint, so grids never flash at the wrong count.
 
-The column is capped at the general page width (`PAGE_CONTENT_MAX_WIDTH`, 830 points), like
-the other pages of the workspace. A wider column left a large empty band beside the daily
-verse, whose text stops at a reading width.
+The column is capped at 640 points (`HOME_MAX_WIDTH`), narrower than the other pages of the
+workspace. At 830 every section changed shape (the verse set larger, the history beside the
+plans, single rows of four or six), and the home no longer read like the phone's, which is the
+one that works. The space left on each side of a large window is deliberate.
 
-| Content width | Change                                                                                |
-| ------------- | ------------------------------------------------------------------------------------- |
-| < 620         | Phone layout: history entries and random words scroll horizontally                    |
-| ≥ 620         | Random words in two columns, partner rows two by two                                  |
-| ≥ 680         | The six counts on a single row of their card                                          |
-| ≥ 720         | The four Explorer cards and the four random words on a single row each                |
-| ≥ 760         | History and Mes plans side by side under part titles, the history as a two-column grid |
+| Content width | Change                                                                          |
+| ------------- | ------------------------------------------------------------------------------- |
+| < 520         | Phone layout: history entries and random words scroll horizontally              |
+| ≥ 520         | History entries and random words two by two, since a mouse cannot swipe the row |
+
+The six counts stay on two rows of three and the Explorer cards two by two at every width. From
+520 the Explorer card changes form: the tint fills the whole card (96 points), the illustration
+sits on its left and the title in its bottom right corner, in the light themes' ink since the
+tints stay light in every theme. A phone keeps the title under the tint, on the card's surface. The random words change form
+at the same width: low cards of 76 points, the resource mark on the left, the word above its
+category and gloss, the shuffle button on the right, where a phone keeps cards of 148 points.
 
 `HomeGrid` lays out equal cells inside the gutters; cells stay in one parent, so a column
 change re-wraps them without remounting their content (random words keep their entry).
@@ -87,10 +103,13 @@ change re-wraps them without remounting their content (random words keep their e
 
 Browser regression scenario (the measured layout needs a real browser, not Jest):
 
-1. At a 1440px viewport, open Home: one centred column of 830px, the history beside Mes plans
-   when it has entries, the six counts on one row, four Explorer cards and four random words.
-2. Narrow the window to 1024px: the history and Mes plans stack, random words and the selected
-   day stay unchanged.
-3. Open a route panel or hide the sidebar: the sections follow the new column width.
+0. At a 1600px viewport, open Home: the greeting, the day and the library on the left, the rest
+   on the right. Scroll: the left column stays, the right one moves. At 1250px the home is one
+   column again.
+1. At a 1250px viewport, open Home: one centred column of 640px, the verse at the phone's size,
+   the history two by two above Mes plans, the six counts on two rows, Explorer and the random
+   words two by two, « Aller plus loin » in one card.
+2. Narrow the window to 1024px: nothing changes but the margins.
+3. Open a route panel or hide the sidebar: the column stays centred in the space it gets.
 4. Below the 768px viewport gate, the carousel replaces the day buttons and the download link
    leaves the footer.

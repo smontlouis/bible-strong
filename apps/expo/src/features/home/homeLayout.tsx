@@ -15,17 +15,17 @@ import {
   type ViewStyle,
 } from 'react-native'
 import Box from '~common/ui/Box'
-import { PAGE_CONTENT_MAX_WIDTH } from '~common/ui/PageContent'
 
 /**
- * Widest home column, gutters included: the general page width, which HomeScrollView applies.
- * Narrower allocations use their whole width.
+ * Widest home column, gutters included. The home is the phone's single column, only a little
+ * wider on a large screen: a wider one stretched every section out of its shape. Narrower
+ * allocations use their whole width.
  */
-const HOME_MAX_WIDTH = PAGE_CONTENT_MAX_WIDTH
+export const HOME_MAX_WIDTH = 640
 /** Side gutter shared by every home section. */
 export const HOME_GUTTER = 20
-/** Content width from which the rows that scroll on a phone lay out flat or as grids. */
-const HOME_WIDE_CONTENT = 620
+/** Content width from which the rows that scroll on a phone lay out as grids of two. */
+const HOME_WIDE_CONTENT = 520
 
 const HomeWidthContext = createContext<number | undefined>(undefined)
 

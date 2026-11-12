@@ -13,6 +13,9 @@ export const itemHeight = 120
 
 export const WidgetWidthContext = createContext<number | '100%' | undefined>(undefined)
 
+/** Height of a widget while it loads, when its card is lower than the widget's own height. */
+export const WidgetLoadingHeightContext = createContext<number | undefined>(undefined)
+
 export const WidgetContainer = (props: BoxProps) => {
   const width = useContext(WidgetWidthContext)
   return (
@@ -35,8 +38,9 @@ export const WidgetContainer = (props: BoxProps) => {
 }
 
 export const WidgetLoading = () => {
+  const height = useContext(WidgetLoadingHeightContext)
   return (
-    <WidgetContainer>
+    <WidgetContainer style={height === undefined ? undefined : { height }}>
       <Loading />
     </WidgetContainer>
   )

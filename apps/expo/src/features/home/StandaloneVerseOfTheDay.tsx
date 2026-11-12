@@ -197,21 +197,22 @@ const StandaloneVerseOfTheDay = ({
             version,
             focusVerses: [verse],
           }}
-          style={{ marginTop: desktop ? 22 : 10 }}
+          style={{ marginTop: desktop ? 14 : 10 }}
         >
           <Paragraph
             scaleLineHeight={-1}
             style={{
               fontFamily: resolveFontFamily(bibleFont),
               fontWeight: 'normal',
-              ...(desktop ? { fontSize: 23, lineHeight: 34, maxWidth: 600 } : {}),
+              // Beside the other cards of the wide Web home, the verse is set at their text size.
+              ...(desktop ? { fontSize: 16, lineHeight: 26 } : {}),
             }}
           >
             {removeBreakLines(content)}
           </Paragraph>
           <Text
             className={
-              desktop ? 'text-grey text-[14px] mt-[16px]' : 'text-grey text-[12px] mt-[5px]'
+              desktop ? 'text-grey text-[13px] mt-[10px]' : 'text-grey text-[12px] mt-[5px]'
             }
             numberOfLines={2}
           >

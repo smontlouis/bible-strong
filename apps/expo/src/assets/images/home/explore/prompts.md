@@ -17,3 +17,8 @@ A SAGE GREEN reader with dark green hair in a low ponytail and round glasses tra
 
 ## meditations
 A WARM AMBER reader with a soft grey-white short bob and round glasses holds a small open cream booklet in both hands close to the chest, eyes gently closed, peaceful smile; a pale yellow rounded sun disk rises just behind one shoulder as the only other shape.
+
+## bible-project (2026-11-12, `codex-imagegen edit`)
+Shared block with the transparent background replaced by: « Background: one perfectly flat, uniform pure chroma green #00FF00 filling the whole canvas edge to edge, used only as a key to be removed afterwards: no shadow, no gradient, no texture, no green anywhere in the subject, crisp subject edges, » (keyed out afterwards).
+
+A WARM CORAL (terracotta-leaning) reader with short wavy dark-rust hair and round glasses holds a thick open cream book against the chest with one hand, a thin coral ribbon bookmark hanging from it. The other hand holds up, beside the head, a small cream card showing a reading plan: three short rows, each a small rounded check mark followed by one plain stroke, no writing. Encouraged, quietly happy expression looking at the card. The character leans slightly so the raised card sits on the right side of the frame, like a held-up tablet.

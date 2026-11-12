@@ -1,21 +1,18 @@
 import { Image } from 'expo-image'
 import { useTranslation } from 'react-i18next'
-import Card from '~common/ui/Card'
 import { FeatherIcon } from '~common/ui/Icon'
 import { ICON_TILE_SIZE } from '~common/ui/IconTile'
 import ListSection, { ListRow } from '~common/ui/ListSection'
 import { getAppleReviewing } from '~helpers/getAppleReviewing'
 import useLanguage from '~helpers/useLanguage'
-import { HomeGrid, useHomeLayout } from './homeLayout'
 
 /**
- * « Aller plus loin »: Audibible, donation, Follow and FAQ, one line each. A phone groups them in
- * one card; a wide home sets them two by two, each in its own card.
+ * « Aller plus loin »: Audibible, donation, Follow and FAQ, one line each, grouped in
+ * one card at every width.
  */
 const HomeGoFurther = () => {
   const { t } = useTranslation()
   const lang = useLanguage()
-  const { wide } = useHomeLayout()
   const appleIsReviewing = getAppleReviewing()
 
   const rows = [
@@ -59,15 +56,6 @@ const HomeGoFurther = () => {
       icon={<FeatherIcon name="help-circle" size={18} color="grey" />}
     />,
   ]
-
-  if (wide)
-    return (
-      <HomeGrid columns={2} rowGap={10} style={{ paddingBottom: 32 }}>
-        {rows.map(row => (
-          <Card key={row.key}>{row}</Card>
-        ))}
-      </HomeGrid>
-    )
 
   return <ListSection className="mb-[32px]">{rows}</ListSection>
 }

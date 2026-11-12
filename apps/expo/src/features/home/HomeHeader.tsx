@@ -58,7 +58,7 @@ const HomeHeader = () => {
         </Text>
       </Box>
       {search ? (
-        <Box style={{ width: 340, maxWidth: '100%' }}>
+        <Box style={{ flexGrow: 1, flexBasis: 340, maxWidth: '100%' }}>
           <HomeSearch />
         </Box>
       ) : (
