@@ -132,9 +132,17 @@ const JUMP_THRESHOLD = 80
 /** Opening a conversation: its last question is held in place while the cards above load. */
 const SETTLE_MS = 1500
 
+/**
+ * Where the reader left each conversation, kept while the app runs: reopening one that has not
+ * changed since comes back to that place rather than to its last question (2026-11-12).
+ */
+const readPositions = new Map<string, { offset: number; last?: string }>()
+
 type Anchor = {
   /** The question the page settles on. */
   question: string
+  /** A conversation reopened unchanged settles where the reader left it instead. */
+  offset?: number
   /** A question just asked: room is kept under its answer so it can reach the top. */
   run: boolean
   pending: boolean
@@ -246,6 +254,10 @@ export default function AssistantThread() {
     if (!target || (!target.pending && target.holdFrom === undefined) || !viewport || !content)
       return
     const max = Math.max(0, content - viewport)
+    if (target.offset !== undefined) {
+      if (target.pending) scrollTo({ offset: Math.min(target.offset, max), animated: false })
+      return
+    }
     const question = cells.current.get(target.question)
     if (!question) {
       // A long conversation has not laid its last question out yet: the end brings it in.
@@ -318,8 +330,10 @@ export default function AssistantThread() {
     }
     // A question asked here rises with an animation; one found on opening is simply there.
     const asked = previous?.conversation === current.id && busy
+    const left = previous ? undefined : readPositions.get(current.id)
     anchor.current = {
       question: questionId,
+      offset: !busy && left?.last === lastId ? left?.offset : undefined,
       run: busy && messages.at(-1)?.role === 'assistant',
       pending: true,
       animated: asked,
@@ -361,6 +375,9 @@ export default function AssistantThread() {
           }}
           onScroll={event => {
             metrics.current.scrollY = event.nativeEvent.contentOffset.y
+            // A place being settled on is not one the reader chose.
+            if (!anchor.current?.pending)
+              readPositions.set(current.id, { offset: metrics.current.scrollY, last: lastId })
             updateJump()
           }}
           // The reader took over (a drag, or a tap on the status bar): the page stays put.

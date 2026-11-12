@@ -273,15 +273,31 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
   useEmailVerificationWatch(open && verification)
   const [sendingVerification, setSendingVerification] = useState(false)
   // Opening a conversation shows its last question at the top, not the end of its last
-  // answer (2026-11-08). A question asked here rises on its own (`turnAnchor` below).
-  const viewportRef = useRef<HTMLDivElement | null>(null)
+  // answer (2026-11-08); reopening one already read here comes back where the reader left it
+  // (2026-11-12). A question asked here rises on its own (`turnAnchor` below).
+  // The viewport is followed as state: the panel's content mounts a render after `open`, so a
+  // ref read when `open` changes is still empty.
+  const [viewport, setViewport] = useState<HTMLDivElement | null>(null)
+  const readPositions = useRef(new Map<string, number>())
   const hasMessages = current.messages.length > 0
   useEffect(() => {
-    const viewport = viewportRef.current
+    if (!viewport) return
+    const conversation = current.id
+    const remember = () => readPositions.current.set(conversation, viewport.scrollTop)
+    viewport.addEventListener('scroll', remember, { passive: true })
+    return () => viewport.removeEventListener('scroll', remember)
+  }, [viewport, current.id])
+  useEffect(() => {
     if (!open || historyOpen || !hasMessages || busy || !viewport) return
+    // Read once: a restore clamped while the cards load must not overwrite it.
+    const saved = readPositions.current.get(current.id)
     let stopped = false
     const settle = () => {
       if (stopped) return
+      if (saved !== undefined) {
+        viewport.scrollTop = saved
+        return
+      }
       const questions = viewport.querySelectorAll('.bs-assistant-message-user')
       const question = questions[questions.length - 1]
       if (!question) return
@@ -303,7 +319,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
       events.forEach(name => viewport.removeEventListener(name, stop))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, historyOpen, current.id, hasMessages])
+  }, [open, historyOpen, current.id, hasMessages, viewport])
   useEffect(() => {
     if (open || !ready) return
     const sleepTimer = window.setTimeout(() => setAvatarSleeping(true), 10_000)
@@ -519,7 +535,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
               className={`bs-assistant-thread ${!current.messages.length ? 'bs-assistant-thread-empty' : ''}`}
             >
               <ThreadPrimitive.Viewport
-                ref={viewportRef}
+                ref={setViewport}
                 className="bs-assistant-viewport"
                 // A question asked rises to the top and its answer is written below it; the
                 // page never follows the text, so the reader keeps their place.
