@@ -20,7 +20,7 @@
     "AI_GATEWAY_ID": "default",
     // Where the library search finds the nearest passages by meaning: "pgvector" (Neon's HNSW
     // index) or "vectorize" (LIBRARY_VECTORS_FR and _EN), amendment of 2026-11-12 to ADR-0103.
-    "LIBRARY_VECTOR_BACKEND": "pgvector",
+    "LIBRARY_VECTOR_BACKEND": "vectorize",
   },
   "ratelimits": [
     // Every Online read of one address, counted before the edge cache. It bounds what one
