@@ -11,6 +11,7 @@ import Header from '~common/Header'
 import { useTheme } from '~themes/ThemeProvider'
 import AssistantMarkdown from './AssistantMarkdown.web'
 import { askAssistant } from './client'
+import { statusProgressKey } from './studySteps'
 import { assistantAccessible, assistantAvailable } from './assistantConfig'
 import type { HistoryMessage } from '@bible-strong/ai-contract/contract'
 
@@ -80,7 +81,7 @@ export default function StudyAssistantScreen() {
         controller.signal,
         event => {
           if (controller.signal.aborted || active.current !== controller) return
-          if (event.type === 'status') setProgress(t('assistant.searching'))
+          if (event.type === 'status') setProgress(t(statusProgressKey(event.message)))
           if (event.type === 'reset') {
             generated = ''
             setAnswer('')

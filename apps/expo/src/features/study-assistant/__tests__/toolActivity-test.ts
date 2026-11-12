@@ -1,10 +1,13 @@
 import type { ToolActivity } from '@bible-strong/ai-contract/contract'
 import {
+  toolActivityChip,
+  toolActivityDetail,
   toolActivityFailed,
   toolActivityIsSearch,
   toolActivityKind,
   toolActivityTarget,
 } from '../toolActivity'
+import { statusProgressKey } from '../studySteps'
 
 jest.mock('~helpers/verseToReference', () => ({
   __esModule: true,
@@ -64,5 +67,71 @@ describe('tool activity shown to the reader', () => {
     expect(toolActivityFailed(tool('read_passage', {}, 'interrupted'))).toBe(true)
     expect(toolActivityFailed(tool('read_passage', {}, 'error'))).toBe(true)
     expect(toolActivityFailed(tool('read_passage', {}, 'running'))).toBe(false)
+  })
+
+  it('names the tools whose names say nothing a general rule could read', () => {
+    expect(toolActivityKind(tool('search_library', {}))).toBe('library')
+    expect(toolActivityKind(tool('read_library_document', {}))).toBe('document')
+    expect(toolActivityKind(tool('read_reference_resource', {}))).toBe('reference')
+    expect(toolActivityKind(tool('list_reading_steps', {}))).toBe('editorial')
+    expect(toolActivityKind(tool('search_bible_text', {}))).toBe('verses')
+    expect(toolActivityKind(tool('compare_translations', {}))).toBe('passage')
+    expect(toolActivityKind(tool('list_passage_commentaries', {}))).toBe('commentary')
+  })
+
+  // A translation that shows its key and options, so the test reads what was asked for.
+  const t = (key: string, options?: Record<string, unknown>) =>
+    options
+      ? `${key}(${Object.entries(options)
+          .map(([k, v]) => `${k}=${v}`)
+          .join(';')})`
+      : key
+
+  it('says what a library search found: how many texts, from which traditions', () => {
+    const search = {
+      ...tool('search_library', { query: 'le sabbat' }),
+      summary: { count: 17, perspectives: ['adventist', 'catholic', 'unknown'], items: ['SDABC'] },
+    }
+    expect(toolActivityChip(search, t)).toBe('le sabbat')
+    expect(toolActivityDetail(search, t)).toBe(
+      'assistant.tools.count.texts(count=17) · assistant.tools.traditions(count=2;list=assistant.perspectives.adventist, assistant.perspectives.catholic)'
+    )
+    const works = { ...search, summary: { count: 3, items: ['Westphal', 'Calmet'] } }
+    expect(toolActivityDetail(works, t)).toBe(
+      'assistant.tools.count.texts(count=3) · Westphal, Calmet'
+    )
+    expect(toolActivityDetail({ ...search, summary: { count: 0 } }, t)).toBe(
+      'assistant.tools.nothingFound'
+    )
+  })
+
+  it('shows what was read when the request names nothing readable', () => {
+    const verses = { ...tool('read_passage', { ranges: 8 }), summary: { count: 8 } }
+    expect(toolActivityChip(verses, t)).toBe('assistant.tools.count.passages(count=8)')
+    expect(toolActivityDetail(verses, t)).toBeUndefined()
+    const document = {
+      ...tool('read_library_document', { collection: 'c', documentKey: 'k' }),
+      summary: { items: ['Le sabbat dans le Nouveau Testament'] },
+    }
+    expect(toolActivityChip(document, t)).toBe('Le sabbat dans le Nouveau Testament')
+    expect(toolActivityDetail(document, t)).toBeUndefined()
+  })
+
+  it('says nothing more for a call still running, failed, or from a service without summaries', () => {
+    const summary = { count: 4 }
+    expect(
+      toolActivityDetail({ ...tool('search_library', {}, 'running'), summary }, t)
+    ).toBeUndefined()
+    expect(
+      toolActivityDetail({ ...tool('search_library', {}, 'error'), summary }, t)
+    ).toBeUndefined()
+    expect(toolActivityDetail(tool('search_library', { query: 'x' }), t)).toBeUndefined()
+  })
+
+  it('shows the step the service is at, and resources being read for an older service', () => {
+    expect(statusProgressKey('searching')).toBe('assistant.steps.searching')
+    expect(statusProgressKey('composing')).toBe('assistant.steps.composing')
+    expect(statusProgressKey('resources')).toBe('assistant.searching')
+    expect(statusProgressKey('anything')).toBe('assistant.searching')
   })
 })

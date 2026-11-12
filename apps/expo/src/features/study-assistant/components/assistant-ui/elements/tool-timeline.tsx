@@ -14,6 +14,8 @@ export interface TimelineStep {
   verb: string
   chip: string
   icon: LucideIcon
+  /** What the step found, on a second line under its verb. */
+  detail?: string
 }
 
 export interface TimelineStat {
@@ -70,19 +72,27 @@ export function ToolTimeline({
             return (
               <div
                 key={`${index}:${step.chip}`}
-                className="fade-in slide-in-from-bottom-1 animate-in fill-mode-both text-foreground/55 flex min-w-0 items-center gap-2 text-[13.5px] duration-300"
+                className="fade-in slide-in-from-bottom-1 animate-in fill-mode-both flex min-w-0 flex-col gap-1 duration-300"
               >
-                <Icon className="text-foreground/35 size-3.5 shrink-0" />
-                {/* One line per step: the verb stays whole, the chip ends in an ellipsis. */}
-                <ShimmerLabel
-                  active={active}
-                  className="relative inline-block shrink-0 leading-none whitespace-nowrap"
-                >
-                  {step.verb}
-                </ShimmerLabel>
-                <span className="bg-foreground/[0.06] text-foreground/70 min-w-0 truncate rounded-md px-1.5 py-0.5 font-mono text-[11px]">
-                  {step.chip}
-                </span>
+                <div className="text-foreground/55 flex min-w-0 items-center gap-2 text-[13.5px]">
+                  <Icon className="text-foreground/35 size-3.5 shrink-0" />
+                  {/* One line per step: the verb stays whole, the chip ends in an ellipsis. */}
+                  <ShimmerLabel
+                    active={active}
+                    className="relative inline-block shrink-0 leading-none whitespace-nowrap"
+                  >
+                    {step.verb}
+                  </ShimmerLabel>
+                  <span className="bg-foreground/[0.06] text-foreground/70 min-w-0 truncate rounded-md px-1.5 py-0.5 font-mono text-[11px]">
+                    {step.chip}
+                  </span>
+                </div>
+                {/* Under the verb: the icon (0.875rem) and its gap (0.5rem). */}
+                {step.detail && (
+                  <p className="text-foreground/45 ms-[1.375rem] line-clamp-2 text-[12.5px] leading-snug">
+                    {step.detail}
+                  </p>
+                )}
               </div>
             )
           })}

@@ -21,7 +21,7 @@ import { messageSegments, placedWidgetIds } from './widgetSegments'
 import { type ReadingContext } from './conversations'
 import { contextCaption } from './contextDisplay'
 import ContextMarkIcon from './ContextMarkIcon'
-import { messagePartNames } from './messageRuntime'
+import { messagePartNames, savedToolSummary } from './messageRuntime'
 
 type MessagePart = ThreadAssistantMessagePart | ThreadUserMessagePart
 
@@ -50,6 +50,7 @@ const toolActivities = (parts: readonly MessagePart[]): ToolActivity[] =>
         request: part.argsText,
         result: typeof part.result === 'string' ? part.result : '',
         state,
+        ...(savedToolSummary(part.artifact) ? { summary: savedToolSummary(part.artifact) } : {}),
       },
     ]
   })

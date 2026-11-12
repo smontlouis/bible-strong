@@ -1,5 +1,9 @@
 import { atom, getDefaultStore } from 'jotai'
-import type { StudyWidget } from '@bible-strong/ai-contract/contract'
+import type {
+  StudyStep,
+  StudyWidget,
+  ToolActivitySummary,
+} from '@bible-strong/ai-contract/contract'
 import type { ConversationRequest } from '../conversationRun'
 
 export type ScriptedAnswer = { answer: string; widgets: StudyWidget[]; followUps?: string[] }
@@ -21,7 +25,10 @@ if (__DEV__) {
 
 let played = 0
 
-/** Streams the next answer about as the model does: two resources read, then fast, uneven chunks. */
+/**
+ * Streams the next answer about as the service does: its steps, two resources read with what they
+ * found, then fast, uneven chunks.
+ */
 export const scriptedRequest =
   (answers: ScriptedAnswer[]): ConversationRequest =>
   async (_request, signal, emit) => {
@@ -39,16 +46,42 @@ export const scriptedRequest =
           { once: true }
         )
       })
-    emit({ type: 'status', message: 'resources' })
-    // The resources it reads first, as the tool list shows them.
-    for (const [name, target] of [
-      ['search_library', { query: 'réponse scriptée' }],
-      ['read_passage', { reference: 'Philippiens 4:6-7' }],
-    ] as const) {
+    // The steps and the reads of a real answer (2026-11-12): the library first, then a passage.
+    emit({ type: 'status', message: 'analyzing' })
+    await wait(700)
+    emit({ type: 'status', message: 'searching' })
+    const reads: {
+      name: string
+      target: object
+      summary?: ToolActivitySummary
+      then: StudyStep
+    }[] = [
+      {
+        name: 'search_library',
+        target: { query: 'réponse scriptée' },
+        summary: {
+          count: 17,
+          perspectives: ['adventist', 'catholic', 'orthodox', 'protestant'],
+          items: ['Commentaire biblique adventiste', 'Dictionnaire Westphal'],
+        },
+        then: 'thinking',
+      },
+      { name: 'read_passage', target: { reference: 'Philippiens 4:6-7' }, then: 'composing' },
+    ]
+    for (const { name, target, summary, then } of reads) {
       const tool = { callId: `scripted-${name}`, name, request: JSON.stringify(target) }
+      if (name === 'read_passage') emit({ type: 'status', message: 'reading' })
       emit({ type: 'tool', ...tool, result: '', state: 'running' })
-      await wait(500)
-      emit({ type: 'tool', ...tool, result: 'ok', state: 'complete' })
+      await wait(900)
+      emit({
+        type: 'tool',
+        ...tool,
+        result: 'ok',
+        state: 'complete',
+        ...(summary ? { summary } : {}),
+      })
+      emit({ type: 'status', message: then })
+      await wait(900)
     }
     widgets.forEach(widget => emit({ type: 'widget', widget }))
     for (let index = 0; index < answer.length; ) {

@@ -1,5 +1,6 @@
 import generateUUID from '~helpers/generateUUID'
 import { prepareMemory, type Compactor } from './conversationMemory'
+import { statusProgressKey } from './studySteps'
 import type {
   StudyWidget,
   StudySource,
@@ -199,7 +200,7 @@ export async function runConversation({
           onAction?.(event.action)
         }
         if (event.type === 'follow_ups') onFollowUps?.(answer.id, event.questions)
-        if (event.type === 'status') onProgress('assistant.searching')
+        if (event.type === 'status') onProgress(statusProgressKey(event.message))
         if (event.type === 'reset') {
           output = ''
           update(output, 'streaming')

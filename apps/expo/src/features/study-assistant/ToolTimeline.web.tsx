@@ -2,25 +2,31 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   BookOpenIcon,
+  CalendarDaysIcon,
+  ExternalLinkIcon,
   FileSearchIcon,
   SearchIcon,
   LanguagesIcon,
   FileTextIcon,
+  LibraryIcon,
+  UserRoundIcon,
   WrenchIcon,
   CircleAlertIcon,
 } from 'lucide-react'
 import type { ToolActivity } from '@bible-strong/ai-contract/contract'
 import { ToolTimeline as OfficialToolTimeline } from './components/assistant-ui/elements/tool-timeline'
 import {
+  toolActivityChip,
+  toolActivityDetail,
   toolActivityFailed,
   toolActivityIsSearch,
   toolActivityKind,
-  toolActivityTarget,
 } from './toolActivity'
 
 /**
  * Resources the assistant consulted: open while it searches, folded as soon as its answer
- * starts (2026-11-08), and open again on a click.
+ * starts (2026-11-08), and open again on a click. Each line says what it found when the service
+ * tells (2026-11-12); the step the assistant is at shows in the thread's progress line.
  */
 export default function ToolTimeline({
   tools,
@@ -41,20 +47,31 @@ export default function ToolTimeline({
     const failed = toolActivityFailed(tool)
     const icon = failed
       ? CircleAlertIcon
-      : search
-        ? FileSearchIcon
-        : label === 'passage'
-          ? BookOpenIcon
-          : label === 'strong'
-            ? LanguagesIcon
-            : label === 'commentary' || label === 'dictionary'
-              ? FileTextIcon
-              : label === 'nave'
-                ? SearchIcon
-                : WrenchIcon
+      : label === 'library'
+        ? LibraryIcon
+        : label === 'document'
+          ? FileTextIcon
+          : label === 'reference'
+            ? UserRoundIcon
+            : label === 'editorial'
+              ? CalendarDaysIcon
+              : label === 'tab'
+                ? ExternalLinkIcon
+                : search
+                  ? FileSearchIcon
+                  : label === 'passage'
+                    ? BookOpenIcon
+                    : label === 'strong'
+                      ? LanguagesIcon
+                      : label === 'commentary' || label === 'dictionary'
+                        ? FileTextIcon
+                        : label === 'nave'
+                          ? SearchIcon
+                          : WrenchIcon
     return {
       verb: `${t(`assistant.tools.${label}`)}${failed ? ` · ${t(`assistant.tools.${tool.state}`)}` : ''}`,
-      chip: toolActivityTarget(tool),
+      chip: toolActivityChip(tool, t),
+      detail: toolActivityDetail(tool, t),
       icon,
     }
   })
@@ -66,7 +83,7 @@ export default function ToolTimeline({
       open={(running && !writing) || expanded}
       onOpenChange={setExpanded}
       restingLabel={t('assistant.tools.title', { count: tools.length })}
-      activeLabel={t('assistant.searching')}
+      activeLabel={t('assistant.tools.title', { count: tools.length })}
       stats={[]}
       className="bs-assistant-official-tools mb-3 max-w-none"
     />

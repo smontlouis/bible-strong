@@ -30,6 +30,12 @@ const status = (state: LocalMessage['state']): ThreadMessageLike['status'] => {
   }
 }
 
+/** What a saved call found (2026-11-12), carried through the runtime beside its state. */
+export const savedToolSummary = (artifact: unknown): ToolActivity['summary'] =>
+  artifact && typeof artifact === 'object' && 'bibleStrongSummary' in artifact
+    ? (artifact.bibleStrongSummary as ToolActivity['summary'])
+    : undefined
+
 export function convertMessage(message: LocalMessage): ThreadMessageLike {
   const content: Exclude<ThreadMessageLike['content'], string> = [
     ...(message.tools || []).map(tool => ({
@@ -40,7 +46,10 @@ export function convertMessage(message: LocalMessage): ThreadMessageLike {
       argsText: tool.request,
       ...(tool.state === 'running' ? {} : { result: tool.result }),
       ...(tool.state === 'error' || tool.state === 'interrupted' ? { isError: true } : {}),
-      artifact: { bibleStrongState: tool.state },
+      artifact: {
+        bibleStrongState: tool.state,
+        ...(tool.summary ? { bibleStrongSummary: tool.summary } : {}),
+      },
     })),
     ...(message.routing || []).map(data => ({
       type: 'data' as const,

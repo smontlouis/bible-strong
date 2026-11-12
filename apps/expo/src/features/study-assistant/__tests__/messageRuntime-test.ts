@@ -1,5 +1,5 @@
 import type { ReadingContext, LocalMessage } from '../conversations'
-import { convertMessage, messagePartNames } from '../messageRuntime'
+import { convertMessage, messagePartNames, savedToolSummary } from '../messageRuntime'
 
 const context: ReadingContext = {
   key: 'passage:john-3',
@@ -101,4 +101,29 @@ it('omits status from user messages while preserving their reading context part'
     { type: 'text', text: 'Question' },
     { type: 'data', name: messagePartNames.context, data: context },
   ])
+})
+
+it('carries what a call found through the runtime, beside its state', () => {
+  const summary = { count: 17, perspectives: ['adventist', 'catholic'] }
+  const parts = convertMessage({
+    id: 'assistant-2',
+    role: 'assistant',
+    text: '',
+    state: 'complete',
+    createdAt: 1,
+    tools: [
+      {
+        callId: 'c1',
+        name: 'search_library',
+        request: '{}',
+        result: '',
+        state: 'complete',
+        summary,
+      },
+      { callId: 'c2', name: 'read_passage', request: '{}', result: '', state: 'complete' },
+    ],
+  }).content as { type: string; artifact?: unknown }[]
+  const calls = parts.filter(part => part.type === 'tool-call')
+  expect(savedToolSummary(calls[0].artifact)).toEqual(summary)
+  expect(savedToolSummary(calls[1].artifact)).toBeUndefined()
 })

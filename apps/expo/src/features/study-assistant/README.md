@@ -58,6 +58,13 @@ a new question; an error or an interruption shows what was received without wait
 motion turns the pace off. Tune it in `answerPace` only. The tool activity is open while the
 assistant searches and folds as soon as the first word shows; a tap opens it again.
 
+Progress (2026-11-12, both presentations). The thread's progress line names the step the service
+is at (`studySteps.ts`): reading the question, searching the library, thinking, reading, going over
+what it read, preparing the answer; a service that names no step shows resources being read. Each
+activity line says what its read found when the service sends a summary (`toolActivityDetail`):
+how many texts and from which traditions for a library search, otherwise the work or entry read.
+The summary is saved with the call; older versions of the app ignore it.
+
 Scrolling (2026-11-08, both presentations). The page never follows the text being written. A
 question just asked rises to the top of the page and its answer is written below it: on the web
 with assistant-ui's `turnAnchor="top"`, on native in `AssistantThread.tsx`, which measures its

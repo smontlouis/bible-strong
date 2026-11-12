@@ -76,13 +76,40 @@ export type StudyRequest = {
   activeContext?: StudySurfaceContext
   memorySummary?: string
 }
+/**
+ * What a tool call found or read, for the reader: how many texts or passages, the traditions the
+ * texts speak for, and the titles of what was read (2026-11-12). Optional: older services send none.
+ */
+export type ToolActivitySummary = {
+  count?: number
+  perspectives?: string[]
+  items?: string[]
+}
 export type ToolActivity = {
   callId: string
   name: string
   request: string
   result: string
   state: 'running' | 'complete' | 'error' | 'interrupted'
+  summary?: ToolActivitySummary
 }
+/**
+ * The step the assistant is at, sent as the message of a status event (2026-11-12): reading the
+ * question, searching the library, thinking about what to read, reading, going over what it read,
+ * preparing the answer. Older services send 'resources' for all of them; a client shows any other
+ * message as resources being read.
+ */
+export const STUDY_STEPS = [
+  'analyzing',
+  'searching',
+  'thinking',
+  'reading',
+  'reviewing',
+  'composing',
+] as const
+export type StudyStep = (typeof STUDY_STEPS)[number]
+export const isStudyStep = (value: unknown): value is StudyStep =>
+  STUDY_STEPS.includes(value as StudyStep)
 export type RoutingDecision = {
   sequence: number
   selectedFamilies: string[]
@@ -475,12 +502,38 @@ export function parseToolActivity(value: unknown): ToolActivity {
     throw new Error('INVALID_TOOL_EVENT')
   if (!['running', 'complete', 'error', 'interrupted'].includes(String(v.state)))
     throw new Error('INVALID_TOOL_EVENT')
+  const summary = parseToolActivitySummary(v.summary)
   return {
     callId: v.callId as string,
     name: v.name as string,
     request: v.request as string,
     result: v.result as string,
     state: v.state as ToolActivity['state'],
+    ...(summary ? { summary } : {}),
+  }
+}
+
+/** A malformed summary is left out: it only adds to the display, never fails the stream. */
+function parseToolActivitySummary(value: unknown): ToolActivitySummary | undefined {
+  if (!value || typeof value !== 'object') return undefined
+  const v = value as Record<string, unknown>
+  const strings = (items: unknown, max: number, length: number) =>
+    Array.isArray(items) &&
+    items.length <= max &&
+    items.every(item => typeof item === 'string' && item.length > 0 && item.length <= length)
+      ? (items as string[])
+      : undefined
+  const count =
+    Number.isInteger(v.count) && Number(v.count) >= 0 && Number(v.count) <= 10000
+      ? Number(v.count)
+      : undefined
+  const perspectives = strings(v.perspectives, 12, 40)
+  const items = strings(v.items, 6, 120)
+  if (count === undefined && !perspectives?.length && !items?.length) return undefined
+  return {
+    ...(count !== undefined ? { count } : {}),
+    ...(perspectives?.length ? { perspectives } : {}),
+    ...(items?.length ? { items } : {}),
   }
 }
 
