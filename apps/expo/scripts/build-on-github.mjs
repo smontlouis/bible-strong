@@ -16,7 +16,7 @@
 //
 // Needs the `gh` CLI, signed in with access to the repository.
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readdirSync, renameSync, rmSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readdirSync, renameSync, rmSync, statSync } from 'node:fs'
 import { homedir, tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -143,9 +143,11 @@ const watched = run('gh', ['run', 'watch', String(runId), '--interval', '60', '-
 const downloadDirectory = mkdtempSync(path.join(tmpdir(), 'bible-strong-github-build-'))
 try {
   const download = run('gh', ['run', 'download', String(runId), '--dir', downloadDirectory])
+  // gh puts each artifact in a folder named after it, so ending in .aab or .ipa too: take the file.
   const found = download.ok
-    ? readdirSync(downloadDirectory, { recursive: true }).find(name =>
-        name.endsWith(`.${extension}`)
+    ? readdirSync(downloadDirectory, { recursive: true }).find(
+        name =>
+          name.endsWith(`.${extension}`) && statSync(path.join(downloadDirectory, name)).isFile()
       )
     : undefined
   if (found) {
