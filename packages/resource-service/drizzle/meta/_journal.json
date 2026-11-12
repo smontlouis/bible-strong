@@ -274,6 +274,13 @@
       "when": 1794437252132,
       "tag": "0041_library_perspective_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1794458805793,
+      "tag": "0042_drop_library_perspective_indexes",
+      "breakpoints": true
     }
   ]
 }

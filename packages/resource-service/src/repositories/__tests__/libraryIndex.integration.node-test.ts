@@ -11,14 +11,6 @@ import {
 import { importLibraryCollection } from '../libraryCollectionRepository'
 import { readLibraryDocument } from '../libraryDocumentRepository'
 import { indexLibrary } from '../libraryIndexRepository'
-import { COMMENTARY_CATALOG } from '@bible-strong/resource-catalog/commentaries'
-import { sql } from 'kysely'
-
-import {
-  LIBRARY_INDEXED_PERSPECTIVES,
-  LIBRARY_PERSPECTIVE_SQL,
-  libraryPerspectivePredicate,
-} from '../../search/libraryPerspectives'
 import { LIBRARY_PERSPECTIVES, perspectiveOf, searchLibrary } from '../librarySearchRepository'
 
 const runIntegration = process.env.RESOURCE_INTEGRATION === '1'
@@ -481,28 +473,6 @@ describe('Library search index', { skip: !runIntegration }, () => {
     const isolated = await createIsolatedPostgres(connectionString, 'library_perspective')
     const { database } = isolated
     try {
-      // The SQL rule of the partial indexes places every catalog work, and the edge cases, where
-      // perspectiveOf does.
-      const traditions: [string | null, string[]][] = [
-        ...COMMENTARY_CATALOG.map(entry => [entry.tradition ?? null, [...(entry.tags ?? [])]] as [string | null, string[]]),
-        [null, []],
-        ['', []],
-        [null, ['Adventiste']],
-        ['Protestantisme', ['Pentecôtiste']],
-        ['Protestantisme', ['Frères de Plymouth']],
-        ['Christianisme ancien', []],
-        ['Judaïsme', ['Rabbinique', 'Orthodoxe moderne']],
-        ['Orthodoxie', ['Orthodoxe']],
-        ['Exégèse critique', ['Universitaire']],
-        ['Catholicisme', ['Moderniste']],
-      ]
-      for (const [tradition, tags] of traditions) {
-        const { rows } = await sql<{ perspective: string }>`
-          select ${sql.raw(LIBRARY_PERSPECTIVE_SQL)} as perspective
-          from (values (${tradition}::text, ${JSON.stringify(tags)}::jsonb)) as passages(tradition, tags)`.execute(database)
-        assert.equal(rows[0]?.perspective, perspectiveOf(tradition, tags), `${tradition} ${tags.join(', ')}`)
-      }
-
       const rights = { holder: 'integration-test', terms_reference: 'integration-test' }
       const collection = (id: string, tradition: string, tags: string[]) => ({ id, title: id, tradition, tags, language: 'en' as const, rights })
       const article = (key: string, title: string, body: string, labels?: string[]) => ({
@@ -563,20 +533,6 @@ describe('Library search index', { skip: !runIntegration }, () => {
       assert.match(adventist?.text ?? '', /^The millennium begins at the second coming\./u, 'the first hit of a perspective carries its section')
       assert.match(adventist?.text ?? '', /desolate earth\.$/u)
       for (const hit of perspectiveHits) assert.equal(hit.perspective, perspectiveOf(hit.tradition, hit.tags))
-      // A list of an indexed perspective can walk that perspective's own index (migration 0041).
-      for (const perspective of LIBRARY_INDEXED_PERSPECTIVES) {
-        const plan = await database.transaction().execute(async transaction => {
-          await sql`set local enable_seqscan = off`.execute(transaction)
-          return sql<{ 'QUERY PLAN': string }>`explain select passage_key from library_passages
-            where language = 'en' and ${sql.raw(libraryPerspectivePredicate(perspective))}
-            order by embedding <=> ${`[${Array(1024).fill(0.1).join(',')}]`}::halfvec limit 12`.execute(transaction)
-        })
-        assert.match(plan.rows.map(row => row['QUERY PLAN']).join('\n'), new RegExp(`library_passages_${perspective}_hnsw`, 'u'))
-      }
-      // Both ways find the same hits on this small library.
-      const shared = await searchLibrary(database, provider, { query: 'the millennium', limit: 3, perPerspective: 2, labelledDocuments: ['evangelical'], perspectiveExcludeWorks: [] }, { perspectiveIndexes: false })
-      const own = await searchLibrary(database, provider, { query: 'the millennium', limit: 3, perPerspective: 2, labelledDocuments: ['evangelical'], perspectiveExcludeWorks: [] })
-      assert.deepEqual(own.perspectiveHits?.map(hit => hit.title).sort(), shared.perspectiveHits?.map(hit => hit.title).sort())
       // The distance tells a near hit from the best of a perspective that is far from the question.
       const covenant = perspectiveHits.find(hit => hit.title === 'The Covenant')
       assert.ok(adventist?.distance !== undefined && covenant?.distance !== undefined)

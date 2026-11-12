@@ -17,11 +17,6 @@ import {
 
 import type { BibleVersePresentation } from '@bible-strong/resource-domain/contracts/bibleChapterContract'
 
-import {
-  LIBRARY_INDEXED_PERSPECTIVES,
-  libraryPerspectivePredicate,
-} from '../search/libraryPerspectives'
-
 const vector = customType<{ data: number[]; driverData: string; config: { dimensions: number } }>({
   dataType: config => `vector(${config!.dimensions})`,
   toDriver: value => `[${value.join(',')}]`,
@@ -398,14 +393,6 @@ export const libraryPassages = pgTable(
     index('library_passages_cosine_hnsw')
       .using('hnsw', table.embedding.op('halfvec_cosine_ops'))
       .with({ m: 16, ef_construction: 64 }),
-    // One partial index per large perspective (ADR-0103, amendment of 2026-11-11): a search within
-    // a perspective walks only its passages instead of filtering the shared index.
-    ...LIBRARY_INDEXED_PERSPECTIVES.map(perspective =>
-      index(`library_passages_${perspective}_hnsw`)
-        .using('hnsw', table.embedding.op('halfvec_cosine_ops'))
-        .with({ m: 16, ef_construction: 64 })
-        .where(sql.raw(libraryPerspectivePredicate(perspective)))
-    ),
     index('library_passages_search_vector').using('gin', table.search_vector),
     index('library_passages_scope').on(table.corpus, table.language, table.work),
     index('library_passages_chapter').on(table.book, table.chapter),

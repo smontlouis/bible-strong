@@ -12,9 +12,7 @@ import {
 } from '../search/libraryDocuments'
 import { vectorLiteral, type LibraryEmbeddingProvider } from '../search/libraryEmbedding'
 import {
-  LIBRARY_INDEXED_PERSPECTIVES,
   LIBRARY_PERSPECTIVES,
-  libraryPerspectivePredicate,
   perspectiveOf,
   type LibraryPerspective,
 } from '../search/libraryPerspectives'
@@ -465,19 +463,10 @@ function perspectiveSelection(ordered: readonly Chosen[], count: number): Chosen
   return selected.sort((a, b) => b.entry.score - a.entry.score)
 }
 
-export type LibrarySearchOptions = {
-  /**
-   * Whether a search within a perspective uses that perspective's own index (migration 0041);
-   * false walks the shared index with a filter on its works, as before, for a bench to compare.
-   */
-  perspectiveIndexes?: boolean
-}
-
 export async function searchLibrary(
   database: Kysely<ResourceDatabase>,
   provider: LibraryEmbeddingProvider,
-  input: LibrarySearchInput,
-  options: LibrarySearchOptions = {}
+  input: LibrarySearchInput
 ): Promise<LibrarySearchResult> {
   const query = input.query.replace(/\s+/gu, ' ').trim().slice(0, 500)
   const limit = Math.min(LIBRARY_SEARCH_MAX_LIMIT, Math.max(1, input.limit ?? 6))
@@ -562,13 +551,7 @@ export async function searchLibrary(
             .map(language => ({
               language,
               perspective,
-              // A perspective with its own index repeats that index's predicate, so the planner
-              // walks it; the others filter the shared index on their works.
-              scope:
-                options.perspectiveIndexes !== false &&
-                (LIBRARY_INDEXED_PERSPECTIVES as readonly string[]).includes(perspective)
-                  ? sql`${perspectiveSearch.scope} and ${sql.raw(libraryPerspectivePredicate(perspective))}`
-                  : sql`${perspectiveSearch.scope} and work in (${sql.join(perspectiveSearch.worksOf(perspective, language))})`,
+              scope: sql`${perspectiveSearch.scope} and work in (${sql.join(perspectiveSearch.worksOf(perspective, language))})`,
               limit: PERSPECTIVE_LIST_CANDIDATES,
             }))
         )

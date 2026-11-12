@@ -189,5 +189,12 @@ before it reached the perspective's works.
 - On the assistant's bench of 2026-11-12 (private repository, ADR-0107), answers built on the
   family indexes were no better than on the shared index (−0.08 ± 0.15 on the debated points), and
   the search within each perspective was slower (1.36 s in the median from a laptop, against
-  0.87 s). Whether to keep the indexes, or to drop them and search the shared index again, is left
-  open.
+  0.87 s).
+
+## Amendment of 2026-11-12: the family indexes dropped
+
+Migration 0042 drops the seven partial indexes of 0041 (in 3 s on production, which went back to
+19 GB), and the search within a perspective filters the shared index on its works again, with the
+bounds of the first amendment. `perspectiveOf` stays in `src/search/libraryPerspectives.ts`; its
+SQL form and the `perspectiveIndexes` option are gone. What kept the new works out of the
+assistant's excerpts was its own filter on unlabelled documents (private ADR-0107), not the index.
