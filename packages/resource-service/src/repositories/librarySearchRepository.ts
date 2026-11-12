@@ -2,7 +2,7 @@
 // half-precision vectors) and by words (the lexical vector of each passage's language), fused
 // by reciprocal rank. One hit per resource: the best passage of a commentary section, a
 // dictionary article or a profile, in the first requested language when both exist.
-import { sql, type Kysely, type RawBuilder } from 'kysely'
+import { sql, type Kysely, type RawBuilder, type SqlBool } from 'kysely'
 
 import type { ResourceDatabase } from '../database/types'
 import {
@@ -16,6 +16,13 @@ import {
   perspectiveOf,
   type LibraryPerspective,
 } from '../search/libraryPerspectives'
+import {
+  LIBRARY_VECTOR_KEY_HASH_CHARACTERS,
+  libraryVectorKey,
+  parseLibraryVectorKey,
+  type LibraryVectorFilter,
+  type LibraryVectorSearch,
+} from '../search/libraryVectorIndex'
 
 export type LibrarySearchInput = {
   query: string
@@ -63,19 +70,21 @@ export type { LibraryPerspective } from '../search/libraryPerspectives'
 
 /** The works of each perspective in each language, read once per search by perspective. */
 type PerspectiveWorks = Map<LibraryPerspective, Map<LibraryLanguage, string[]>>
+/** A work of an active publication in one language; its passages share its tradition and tags. */
+type ActiveWork = {
+  work: string
+  language: LibraryLanguage
+  tradition: string | null
+  tags: string[]
+}
 
 /**
  * One passage of every active publication, by its primary key (22 ms on 2026-11-11 for 123
  * publications): a filter by work lets the planner walk the vector index or read a small work
  * whole, where a filter on tradition and tags read most of the index.
  */
-async function perspectiveWorks(database: Kysely<ResourceDatabase>): Promise<PerspectiveWorks> {
-  const { rows } = await sql<{
-    work: string
-    language: LibraryLanguage
-    tradition: string | null
-    tags: string[]
-  }>`
+async function activeWorks(database: Kysely<ResourceDatabase>): Promise<ActiveWork[]> {
+  const { rows } = await sql<ActiveWork>`
     select passage.work, passage.language, passage.tradition, passage.tags
     from resource_publications publication
     cross join lateral (
@@ -83,6 +92,10 @@ async function perspectiveWorks(database: Kysely<ResourceDatabase>): Promise<Per
       where publication_id = publication.id limit 1
     ) passage
     where publication.status = 'active'`.execute(database)
+  return rows
+}
+
+function perspectiveWorks(rows: readonly ActiveWork[]): PerspectiveWorks {
   const works: PerspectiveWorks = new Map()
   for (const row of rows) {
     const perspective = perspectiveOf(row.tradition, row.tags)
@@ -212,6 +225,32 @@ async function sectionTexts(
   return texts
 }
 
+/**
+ * The cosine distance of each passage to the query, as pgvector computes it. Vectorize scores on
+ * compressed vectors, 0.03 to 0.1 farther than the exact distance on 2026-11-12, and a caller
+ * compares the distances of hits found apart: the hits of a search through Vectorize get the
+ * exact one, read for them alone.
+ */
+async function exactDistances(
+  database: Kysely<ResourceDatabase>,
+  vector: readonly number[],
+  rows: readonly { publication_id: number; passage_key: string }[]
+) {
+  const distances = new Map<string, number>()
+  if (!rows.length) return distances
+  const result = await sql<{ publication_id: number; passage_key: string; distance: number }>`
+    select publication_id, passage_key, embedding <=> ${vectorLiteral(vector)}::halfvec as distance
+    from library_passages where ${sql.join(
+      rows.map(
+        row => sql`(publication_id = ${row.publication_id} and passage_key = ${row.passage_key})`
+      ),
+      sql` or `
+    )}`.execute(database)
+  for (const row of result.rows)
+    distances.set(`${row.publication_id}:${row.passage_key}`, Number(row.distance))
+  return distances
+}
+
 type Candidate = { publication_id: number; passage_key: string }
 type PassageRow = {
   publication_id: number
@@ -231,6 +270,32 @@ type PassageRow = {
   target: Record<string, string | number>
 }
 
+/** The words of `traditions`, matched anywhere in a work's tradition or one of its tags. */
+const traditionPatterns = (traditions: readonly string[]) =>
+  traditions.map(tradition => tradition.replace(/[%_\\]/gu, ''))
+
+/**
+ * The works of each language whose tradition or tags hold one of `traditions`, as the SQL filter
+ * matches them (`ilike`, case aside): every passage of a work shares its tradition and tags, so
+ * the list is exact. Vectorize cannot match substrings, it filters on these works.
+ */
+function traditionWorks(rows: readonly ActiveWork[], traditions: readonly string[]) {
+  const patterns = traditionPatterns(traditions).map(pattern => pattern.toLowerCase())
+  const works = new Map<LibraryLanguage, string[]>()
+  for (const row of rows) {
+    const fields = [row.tradition ?? '', ...row.tags].map(field => field.toLowerCase())
+    if (!patterns.some(pattern => fields.some(field => field.includes(pattern)))) continue
+    const list = works.get(row.language) ?? []
+    if (!list.includes(row.work)) list.push(row.work)
+    works.set(row.language, list)
+  }
+  return works
+}
+
+/** The works both lists allow; a list left undefined allows every work. */
+const intersect = (left: readonly string[] | undefined, right: readonly string[] | undefined) =>
+  left && right ? left.filter(work => right.includes(work)) : (left ?? right)
+
 const scopeFilter = (input: LibrarySearchInput) => {
   const conditions = [sql`true`]
   const corpora = input.corpora?.filter(corpus => LIBRARY_CORPORA.includes(corpus))
@@ -240,7 +305,7 @@ const scopeFilter = (input: LibrarySearchInput) => {
   const unnamed = (input.excludeWorks ?? []).filter(work => !input.works?.includes(work))
   if (unnamed.length) conditions.push(sql`work not in (${sql.join(unnamed)})`)
   if (input.traditions?.length) {
-    const patterns = input.traditions.map(tradition => `%${tradition.replace(/[%_\\]/gu, '')}%`)
+    const patterns = traditionPatterns(input.traditions).map(pattern => `%${pattern}%`)
     conditions.push(
       sql`(tradition ilike any(${sql.val(patterns)}::text[]) or exists (
         select 1 from jsonb_array_elements_text(tags) tag where tag ilike any(${sql.val(patterns)}::text[])))`
@@ -463,10 +528,19 @@ function perspectiveSelection(ordered: readonly Chosen[], count: number): Chosen
   return selected.sort((a, b) => b.entry.score - a.entry.score)
 }
 
+export type LibrarySearchOptions = {
+  /**
+   * Where the nearest passages by meaning come from: Vectorize (amendment of 2026-11-12 to
+   * ADR-0103) when given, otherwise the HNSW index of `library_passages`.
+   */
+  vectors?: LibraryVectorSearch
+}
+
 export async function searchLibrary(
   database: Kysely<ResourceDatabase>,
   provider: LibraryEmbeddingProvider,
-  input: LibrarySearchInput
+  input: LibrarySearchInput,
+  options: LibrarySearchOptions = {}
 ): Promise<LibrarySearchResult> {
   const query = input.query.replace(/\s+/gu, ' ').trim().slice(0, 500)
   const limit = Math.min(LIBRARY_SEARCH_MAX_LIMIT, Math.max(1, input.limit ?? 6))
@@ -483,8 +557,13 @@ export async function searchLibrary(
   // The search by perspective: the works of each one, its own exclusions, and only labelled
   // documents where asked. The works are read while the query is embedded.
   const labelled = (input.labelledDocuments ?? []).filter(item => LIBRARY_PERSPECTIVES.includes(item))
+  // Vectorize filters on works where SQL matches traditions, and the search by perspective lists
+  // the works of each perspective.
+  const catalog =
+    perPerspective || (options.vectors && input.traditions?.length) ? activeWorks(database) : null
+  catalog?.catch(() => undefined)
   const byPerspectiveScope = perPerspective
-    ? perspectiveWorks(database).then(works => {
+    ? catalog!.then(perspectiveWorks).then(works => {
         const worksOf = (perspective: LibraryPerspective, language?: LibraryLanguage) =>
           language
             ? (works.get(perspective)?.get(language) ?? [])
@@ -495,6 +574,7 @@ export async function searchLibrary(
         return {
           worksOf,
           present,
+          labelledOnly: (perspective: LibraryPerspective) => labelled.includes(perspective),
           scope: sql`${scopeFilter({ ...input, excludeWorks: input.perspectiveExcludeWorks ?? input.excludeWorks })} and ${
             labelledWorks.length
               ? sql`(corpus <> 'document' or target ? 'labels' or work not in (${sql.join(labelledWorks)}))`
@@ -510,18 +590,26 @@ export async function searchLibrary(
   byPerspectiveScope.catch(() => undefined)
 
   let embedding: number[] | undefined
+  // With Vectorize, a passage is named as in its identifier: a long key by its start and a hash.
+  const keyOf = (publicationId: number, passageKey: string) =>
+    options.vectors ? libraryVectorKey(publicationId, passageKey) : passageKey
+  const keyed = <Row extends Candidate>(rows: Row[]) =>
+    options.vectors
+      ? rows.map(row => ({ ...row, passage_key: keyOf(row.publication_id, row.passage_key) }))
+      : rows
   // The search by words does not wait for the query embedding.
   const lexicalStarted = Date.now()
   const stems = lexicalQueries(database, query, languages)
   const lexical = stems
     .then(queries => (queries ? searchByWords(database, queries, scope, candidates) : []))
+    .then(keyed)
     .then(rows => {
       timings.lexicalMs = Date.now() - lexicalStarted
       return rows
     })
   const perspectiveLexical = Promise.all([stems, byPerspectiveScope]).then(([queries, search]) =>
     queries && search
-      ? searchByWordsPerPerspective(database, queries, search.scope, PERSPECTIVE_LIST_CANDIDATES, search.perspective)
+      ? searchByWordsPerPerspective(database, queries, search.scope, PERSPECTIVE_LIST_CANDIDATES, search.perspective).then(keyed)
       : []
   )
   // Their failure is thrown where they are awaited, after the search by meaning.
@@ -535,13 +623,37 @@ export async function searchLibrary(
   }
   timings.embeddingMs = Date.now() - embeddingStarted
   const perspectiveSearch = await byPerspectiveScope
+  const traditionWorksOf = options.vectors && input.traditions?.length
+    ? traditionWorks(await catalog!, input.traditions)
+    : null
+  // The same scope for Vectorize: the works a list allows, in the terms of the passage fields.
+  const vectorFilter = (
+    language: LibraryLanguage,
+    excludeWorks: readonly string[] | undefined,
+    works?: readonly string[]
+  ): LibraryVectorFilter => ({
+    works: intersect(
+      intersect(input.works, traditionWorksOf ? (traditionWorksOf.get(language) ?? []) : undefined),
+      works
+    ),
+    excludeWorks: (excludeWorks ?? []).filter(work => !input.works?.includes(work)),
+    corpora: input.corpora?.filter(corpus => LIBRARY_CORPORA.includes(corpus)),
+    book: input.book,
+    chapter: input.chapter,
+  })
 
   const vectorStarted = Date.now()
   // One list per language: a question is nearer to passages in its own language, and the works
   // published in the other language only (the BRI articles, Calvin) would never reach the pool.
   // The search by perspective adds one list per perspective and language, in the same statement.
   const lists = [
-    ...languages.map(language => ({ language, perspective: '', scope, limit: candidates })),
+    ...languages.map(language => ({
+      language,
+      perspective: '',
+      scope,
+      filter: vectorFilter(language, input.excludeWorks),
+      limit: candidates,
+    })),
     // A perspective without a work in a language has no list in it: an empty filter would walk
     // the whole index.
     ...(perspectiveSearch
@@ -552,6 +664,14 @@ export async function searchLibrary(
               language,
               perspective,
               scope: sql`${perspectiveSearch.scope} and work in (${sql.join(perspectiveSearch.worksOf(perspective, language))})`,
+              filter: {
+                ...vectorFilter(
+                  language,
+                  input.perspectiveExcludeWorks ?? input.excludeWorks,
+                  perspectiveSearch.worksOf(perspective, language)
+                ),
+                labelledOnly: perspectiveSearch.labelledOnly(perspective),
+              },
               limit: PERSPECTIVE_LIST_CANDIDATES,
             }))
         )
@@ -590,9 +710,21 @@ export async function searchLibrary(
       perspectiveLists.filter((_, position) => position % PERSPECTIVE_STATEMENTS === index)
     ),
   ].filter(statement => statement.length)
-  const vectorRows: VectorRow[] = embedding
-    ? (await Promise.all(statements.map(vectorStatement))).flat()
-    : []
+  const vectorsInIndex = async (vector: number[], index: LibraryVectorSearch) =>
+    (await index.nearest(vector, lists)).flatMap((rows, position) =>
+      rows.map(row => ({
+        publication_id: row.publication_id,
+        passage_key: row.key,
+        distance: row.distance,
+        language: lists[position]!.language,
+        list: lists[position]!.perspective,
+      }))
+    )
+  const vectorRows: VectorRow[] = !embedding
+    ? []
+    : options.vectors
+      ? await vectorsInIndex(embedding, options.vectors)
+      : (await Promise.all(statements.map(vectorStatement))).flat()
   timings.vectorMs = Date.now() - vectorStarted
   // Relaxed order may return neighbours slightly out of order.
   const vectorLists = (perspective: string) =>
@@ -643,16 +775,28 @@ export async function searchLibrary(
     ])
     .where(eb =>
       eb.or(
-        [...new Map(wanted.map(entry => [`${entry.candidate.publication_id}:${entry.candidate.passage_key}`, entry])).values()].map(entry =>
-          eb.and([
+        [...new Map(wanted.map(entry => [`${entry.candidate.publication_id}:${entry.candidate.passage_key}`, entry])).values()].map(entry => {
+          const key = options.vectors
+            ? parseLibraryVectorKey(entry.candidate.passage_key)
+            : { passageKey: entry.candidate.passage_key }
+          // A long key from Vectorize: among the keys of its publication that start alike (a
+          // range of the primary key), the one whose hash it carries.
+          if (key.passageKey === undefined)
+            return sql<SqlBool>`(publication_id = ${entry.candidate.publication_id}
+              and starts_with(passage_key, ${key.start})
+              and translate(left(encode(sha256(convert_to(passage_key, 'UTF8')), 'base64'),
+                ${sql.lit(LIBRARY_VECTOR_KEY_HASH_CHARACTERS)}), '+/', '-_') = ${key.hash})`
+          return eb.and([
             eb('publication_id', '=', entry.candidate.publication_id),
-            eb('passage_key', '=', entry.candidate.passage_key),
+            eb('passage_key', '=', key.passageKey),
           ])
-        )
+        })
       )
     )
     .execute()) as PassageRow[]
-  const rows = new Map(passages.map(row => [`${row.publication_id}:${row.passage_key}`, row]))
+  const rows = new Map(
+    passages.map(row => [`${row.publication_id}:${keyOf(row.publication_id, row.passage_key)}`, row])
+  )
 
   const ordered = byResource(ranked, rows, languages)
   // At most two hits a work: a large work (tens of thousands of passages) does
@@ -688,6 +832,18 @@ export async function searchLibrary(
   const byPerspective = pools.map(pool =>
     perspectiveSelection(byResource(pool.ranked, rows, languages), perPerspective)
   )
+  // The hits found by meaning in Vectorize get their exact distance, beside the sections.
+  const distances =
+    options.vectors && embedding
+      ? exactDistances(
+          database,
+          embedding,
+          [...selected, ...byPerspective.flat()]
+            .filter(item => item.entry.distance !== undefined)
+            .map(item => item.row)
+        )
+      : Promise.resolve(new Map<string, number>())
+  distances.catch(() => undefined)
   // The best hits by score carry their whole section, and the first ones of each perspective.
   const sections = input.fullText
     ? await sectionTexts(database, [
@@ -699,6 +855,7 @@ export async function searchLibrary(
         ),
       ].map(({ row }) => row))
     : new Map<string, string>()
+  const exact = await distances
   const sectioned = new Set(
     byPerspective.flatMap(items =>
       items.slice(0, Math.max(0, input.perspectiveSections ?? 0)).map(item => item.row)
@@ -737,7 +894,14 @@ export async function searchLibrary(
       : {}),
     target: row.target,
     score: Math.round(entry.score * 10_000) / 10_000,
-    ...(entry.distance !== undefined ? { distance: Math.round(entry.distance * 10_000) / 10_000 } : {}),
+    ...(entry.distance !== undefined
+      ? {
+          distance:
+            Math.round(
+              (exact.get(`${row.publication_id}:${row.passage_key}`) ?? entry.distance) * 10_000
+            ) / 10_000,
+        }
+      : {}),
     matched: entry.semantic && entry.lexical ? 'both' : entry.semantic ? 'semantic' : 'lexical',
     perspective: perspectiveOf(row.tradition, row.tags),
   })

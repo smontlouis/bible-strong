@@ -5,7 +5,8 @@ import { execFileSync } from 'node:child_process'
 
 import { makeLibraryEmbeddingProvider } from './libraryEmbedding'
 
-const wranglerToken = () =>
+/** The bearer token of the logged-in Wrangler session, valid for about an hour. */
+export const wranglerToken = () =>
   execFileSync('npx', ['wrangler', 'auth', 'token'], {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'ignore'],

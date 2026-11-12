@@ -18,6 +18,9 @@
     "RESOURCE_ENVIRONMENT": "production",
     "RESOURCE_WEB_ORIGINS": "https://bible-strong.app,https://web.bible-strong.app,http://localhost:9090,tauri://localhost,https://tauri.localhost",
     "AI_GATEWAY_ID": "default",
+    // Where the library search finds the nearest passages by meaning: "pgvector" (Neon's HNSW
+    // index) or "vectorize" (LIBRARY_VECTORS_FR and _EN), amendment of 2026-11-12 to ADR-0103.
+    "LIBRARY_VECTOR_BACKEND": "pgvector",
   },
   "ratelimits": [
     // Every Online read of one address, counted before the edge cache. It bounds what one
@@ -80,6 +83,17 @@
     {
       "binding": "SEARCH_RUNTIME_ANALYTICS",
       "dataset": "bible_search_runtime_v1",
+    },
+  ],
+  // The library passages by meaning, one index per language (amendment of 2026-11-12 to ADR-0103).
+  "vectorize": [
+    {
+      "binding": "LIBRARY_VECTORS_FR",
+      "index_name": "bible-strong-library-fr",
+    },
+    {
+      "binding": "LIBRARY_VECTORS_EN",
+      "index_name": "bible-strong-library-en",
     },
   ],
   "hyperdrive": [

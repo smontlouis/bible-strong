@@ -8,6 +8,9 @@
 // With CLOUDFLARE_ACCOUNT_ID, queries are embedded through the Workers AI REST API instead
 // (0.2 to 0.7 s, against several seconds through `wrangler dev`), with CLOUDFLARE_API_TOKEN or
 // the logged-in Wrangler session; terminal 1 is then not needed.
+// With RESOURCE_LIBRARY_VECTOR_BACKEND=vectorize as well, the nearest passages by meaning come from
+// the production Vectorize indexes through their REST API, as the Worker's bindings read them;
+// RESOURCE_LIBRARY_VECTORIZE_PRECISE=off keeps Vectorize's compressed scores.
 import { createServer } from 'node:http'
 
 import { makeLocalDatabase } from '../database/localDatabase'
@@ -15,6 +18,8 @@ import { readLibraryDocument } from '../repositories/libraryDocumentRepository'
 import { searchLibrary } from '../repositories/librarySearchRepository'
 import { makeHttpLibraryEmbeddingProvider, withQueryEmbeddingCache } from './libraryEmbedding'
 import { makeRestLibraryEmbeddingProvider } from './libraryEmbeddingRest'
+import { makeVectorizeLibrarySearch } from './libraryVectorIndex'
+import { makeRestLibraryVectorizeClients } from './libraryVectorizeRest'
 import { parseLibraryDocumentInput, parseLibrarySearchInput } from './librarySearchInput'
 
 const port = Number(process.env.RESOURCE_LIBRARY_SEARCH_PORT ?? 8792)
@@ -31,6 +36,15 @@ const provider = withQueryEmbeddingCache(process.env.CLOUDFLARE_ACCOUNT_ID
       process.env.RESOURCE_LIBRARY_EMBEDDING_URL ?? 'http://127.0.0.1:8791',
       { maxAttempts: 3 }
     ))
+
+if (process.env.RESOURCE_LIBRARY_VECTOR_BACKEND === 'vectorize' && !process.env.CLOUDFLARE_ACCOUNT_ID)
+  throw new Error('RESOURCE_LIBRARY_VECTOR_BACKEND=vectorize needs CLOUDFLARE_ACCOUNT_ID')
+const vectors =
+  process.env.RESOURCE_LIBRARY_VECTOR_BACKEND === 'vectorize'
+    ? makeVectorizeLibrarySearch(makeRestLibraryVectorizeClients(process.env.CLOUDFLARE_ACCOUNT_ID!), {
+        precise: process.env.RESOURCE_LIBRARY_VECTORIZE_PRECISE !== 'off',
+      })
+    : undefined
 
 const server = createServer(async (request, response) => {
   const answer = (status: number, body: unknown) => {
@@ -60,7 +74,7 @@ const server = createServer(async (request, response) => {
     } catch {
       return answer(400, { error: 'LIBRARY_SEARCH_INVALID_INPUT' })
     }
-    answer(200, await searchLibrary(database, provider, input))
+    answer(200, await searchLibrary(database, provider, input, { vectors }))
   } catch (error) {
     console.error(error)
     answer(500, { error: 'LIBRARY_SEARCH_FAILED' })

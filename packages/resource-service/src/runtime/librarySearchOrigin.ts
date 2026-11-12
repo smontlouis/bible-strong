@@ -9,6 +9,7 @@ import {
   withQueryEmbeddingCache,
 } from '../search/libraryEmbedding'
 import { parseLibraryDocumentInput, parseLibrarySearchInput } from '../search/librarySearchInput'
+import { makeVectorizeLibrarySearch } from '../search/libraryVectorIndex'
 import { makeMetadataOnlyAiGatewayOptions } from './searchRuntimeAnalytics'
 
 export async function runLibrarySearch(bindings: Env, value: unknown) {
@@ -34,11 +35,24 @@ export async function runLibrarySearch(bindings: Env, value: unknown) {
           })
         ),
     }))
+    // The nearest passages by meaning come from Vectorize or from Neon's HNSW index (amendment of
+    // 2026-11-12 to ADR-0103); the rest of the search is the same.
+    const vectorBackend = (bindings.LIBRARY_VECTOR_BACKEND as string) === 'vectorize' ? 'vectorize' : 'pgvector'
     const started = Date.now()
-    const result = await searchLibrary(database, provider, input)
+    const result = await searchLibrary(database, provider, input, {
+      ...(vectorBackend === 'vectorize'
+        ? {
+            vectors: makeVectorizeLibrarySearch({
+              fr: bindings.LIBRARY_VECTORS_FR,
+              en: bindings.LIBRARY_VECTORS_EN,
+            }),
+          }
+        : {}),
+    })
     console.log(
       JSON.stringify({
         message: 'library search',
+        vectorBackend,
         hits: result.hits.length,
         ...(result.perspectiveHits ? { perspectiveHits: result.perspectiveHits.length } : {}),
         semantic: result.semantic,
