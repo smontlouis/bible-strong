@@ -104,7 +104,7 @@ it('omits status from user messages while preserving their reading context part'
 })
 
 it('carries what a call found through the runtime, beside its state', () => {
-  const summary = { count: 17, perspectives: ['adventist', 'catholic'] }
+  const summary = { count: 17 }
   const parts = convertMessage({
     id: 'assistant-2',
     role: 'assistant',
@@ -122,7 +122,7 @@ it('carries what a call found through the runtime, beside its state', () => {
       },
       { callId: 'c2', name: 'read_passage', request: '{}', result: '', state: 'complete' },
     ],
-  }).content as { type: string; artifact?: unknown }[]
+  }).content as unknown as { type: string; artifact?: unknown }[]
   const calls = parts.filter(part => part.type === 'tool-call')
   expect(savedToolSummary(calls[0].artifact)).toEqual(summary)
   expect(savedToolSummary(calls[1].artifact)).toBeUndefined()

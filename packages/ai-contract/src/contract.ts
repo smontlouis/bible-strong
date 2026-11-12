@@ -77,12 +77,12 @@ export type StudyRequest = {
   memorySummary?: string
 }
 /**
- * What a tool call found or read, for the reader: how many texts or passages, the traditions the
- * texts speak for, and the titles of what was read (2026-11-12). Optional: older services send none.
+ * What a tool call found or read, for the reader: how many texts or passages, and the titles of
+ * what was read (2026-11-12). Never the traditions of a search: a debated point is arranged by
+ * understanding, not by church. Optional: older services send none.
  */
 export type ToolActivitySummary = {
   count?: number
-  perspectives?: string[]
   items?: string[]
 }
 export type ToolActivity = {
@@ -527,12 +527,10 @@ function parseToolActivitySummary(value: unknown): ToolActivitySummary | undefin
     Number.isInteger(v.count) && Number(v.count) >= 0 && Number(v.count) <= 10000
       ? Number(v.count)
       : undefined
-  const perspectives = strings(v.perspectives, 12, 40)
   const items = strings(v.items, 6, 120)
-  if (count === undefined && !perspectives?.length && !items?.length) return undefined
+  if (count === undefined && !items?.length) return undefined
   return {
     ...(count !== undefined ? { count } : {}),
-    ...(perspectives?.length ? { perspectives } : {}),
     ...(items?.length ? { items } : {}),
   }
 }

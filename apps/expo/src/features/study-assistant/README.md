@@ -62,7 +62,8 @@ Progress (2026-11-12, both presentations). The thread's progress line names the 
 is at (`studySteps.ts`): reading the question, searching the library, thinking, reading, going over
 what it read, preparing the answer; a service that names no step shows resources being read. Each
 activity line says what its read found when the service sends a summary (`toolActivityDetail`):
-how many texts and from which traditions for a library search, otherwise the work or entry read.
+how many texts for a library search, never their works or traditions (a debated point is arranged
+by understanding, not by church), otherwise the work or entry read.
 The summary is saved with the call; older versions of the app ignore it.
 
 Scrolling (2026-11-08, both presentations). The page never follows the text being written. A

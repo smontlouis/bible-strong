@@ -102,17 +102,6 @@ const countKey = (kind: ToolActivityKind) =>
           ? 'assistant.tools.count.commentaries'
           : 'assistant.tools.count.results'
 
-const KNOWN_PERSPECTIVES = [
-  'adventist',
-  'catholic',
-  'orthodox',
-  'patristic',
-  'jewish',
-  'evangelical',
-  'protestant',
-  'academic',
-]
-
 /**
  * The chip of a call: what it was aimed at, or, when its request names nothing readable (a
  * document opened by key, the passages the server read at once), what it read.
@@ -128,9 +117,11 @@ export function toolActivityChip(tool: ToolActivity, t: Translate): string {
 }
 
 /**
- * The line under a call, from what the service says it found (2026-11-12): how many texts and
- * from which traditions for a library search, otherwise the works or entry it read. Nothing for a
- * call still running or failed, or from a service that sends no summary.
+ * The line under a call, from what the service says it found (2026-11-12): how many texts for a
+ * library search, otherwise the work or entry it read. Never the works or traditions of a search,
+ * even from a summary saved before the service stopped sending them: a debated point is arranged by
+ * understanding, not by church (ADR-0107 of the service). Nothing for a call still running or
+ * failed, or from a service that sends no summary.
  */
 export function toolActivityDetail(tool: ToolActivity, t: Translate): string | undefined {
   const summary = tool.summary
@@ -144,19 +135,7 @@ export function toolActivityDetail(tool: ToolActivity, t: Translate): string | u
         ? t('assistant.tools.nothingFound')
         : t(countKey(kind), { count: summary.count })
     )
-  const perspectives = (summary.perspectives || []).filter(perspective =>
-    KNOWN_PERSPECTIVES.includes(perspective)
-  )
-  if (perspectives.length)
-    parts.push(
-      t('assistant.tools.traditions', {
-        count: perspectives.length,
-        list: perspectives
-          .map(perspective => t(`assistant.perspectives.${perspective}`))
-          .join(', '),
-      })
-    )
-  else {
+  if (kind !== 'library') {
     const items = (summary.items || []).filter(item => item !== chip).slice(0, 3)
     if (items.length) parts.push(items.join(', '))
   }

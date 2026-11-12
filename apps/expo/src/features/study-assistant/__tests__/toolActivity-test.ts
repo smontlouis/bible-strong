@@ -87,22 +87,33 @@ describe('tool activity shown to the reader', () => {
           .join(';')})`
       : key
 
-  it('says what a library search found: how many texts, from which traditions', () => {
+  it('says how many texts a library search found, never their works or traditions', () => {
     const search = {
       ...tool('search_library', { query: 'le sabbat' }),
-      summary: { count: 17, perspectives: ['adventist', 'catholic', 'unknown'], items: ['SDABC'] },
+      summary: { count: 17 },
     }
     expect(toolActivityChip(search, t)).toBe('le sabbat')
-    expect(toolActivityDetail(search, t)).toBe(
-      'assistant.tools.count.texts(count=17) · assistant.tools.traditions(count=2;list=assistant.perspectives.adventist, assistant.perspectives.catholic)'
-    )
-    const works = { ...search, summary: { count: 3, items: ['Westphal', 'Calmet'] } }
-    expect(toolActivityDetail(works, t)).toBe(
-      'assistant.tools.count.texts(count=3) · Westphal, Calmet'
-    )
+    expect(toolActivityDetail(search, t)).toBe('assistant.tools.count.texts(count=17)')
+    // A summary saved while the service still sent the works.
+    const saved = { ...search, summary: { count: 3, items: ['Westphal', 'Calmet'] } }
+    expect(toolActivityDetail(saved, t)).toBe('assistant.tools.count.texts(count=3)')
     expect(toolActivityDetail({ ...search, summary: { count: 0 } }, t)).toBe(
       'assistant.tools.nothingFound'
     )
+  })
+
+  it('names the work or entry a precise read opened', () => {
+    const entry = {
+      ...tool('get_dictionary_entry', { work: 'westphal', entryId: 4242 }),
+      summary: { items: ['Melchisédek · Dictionnaire Westphal'] },
+    }
+    expect(toolActivityChip(entry, t)).toBe('Melchisédek · Dictionnaire Westphal')
+    const strong = {
+      ...tool('get_strong_entry', { reference: 'G5485' }),
+      summary: { items: ['χάρις · charis'] },
+    }
+    expect(toolActivityChip(strong, t)).toBe('G5485')
+    expect(toolActivityDetail(strong, t)).toBe('χάρις · charis')
   })
 
   it('shows what was read when the request names nothing readable', () => {

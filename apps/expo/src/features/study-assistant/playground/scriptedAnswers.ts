@@ -59,11 +59,7 @@ export const scriptedRequest =
       {
         name: 'search_library',
         target: { query: 'réponse scriptée' },
-        summary: {
-          count: 17,
-          perspectives: ['adventist', 'catholic', 'orthodox', 'protestant'],
-          items: ['Commentaire biblique adventiste', 'Dictionnaire Westphal'],
-        },
+        summary: { count: 17 },
         then: 'thinking',
       },
       { name: 'read_passage', target: { reference: 'Philippiens 4:6-7' }, then: 'composing' },
