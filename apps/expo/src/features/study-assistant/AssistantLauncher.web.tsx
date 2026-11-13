@@ -18,7 +18,6 @@ import {
   type AppendMessage,
 } from '@assistant-ui/react'
 import { createAvatar } from '@bible-strong/avatar-react'
-import '@bible-strong/avatar-react/styles.css'
 import { premiumStatusAtom } from '~features/premium/premiumStatus'
 import { usePremiumVisible } from '~features/premium/premiumVisibility'
 import { selectUserLoginInfo } from '~redux/selectors/user'
@@ -417,7 +416,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                 onMouseLeave={() => setAvatarHovered(false)}
               >
                 <StrobiAvatar
-                  animation={avatarAnimation}
+                  state={avatarAnimation}
                   size="var(--bs-assistant-avatar-size)"
                   ariaLabel="Strobi"
                 />

@@ -1,6 +1,4 @@
-import { useEffect, useRef } from 'react'
-import { createAvatar, type AvatarController } from '@bible-strong/avatar-react'
-import '@bible-strong/avatar-react/styles.css'
+import { createAvatar } from '@bible-strong/avatar-react'
 import strobiDefinition from './strobi.avatar.json'
 import type { StrobiAnimation } from './StrobiAvatar'
 
@@ -9,8 +7,8 @@ export type { StrobiAnimation }
 const Avatar = createAvatar(strobiDefinition)
 
 /**
- * The web renderer of Strobi, with the props of the native one: the web package draws the same
- * definition in the DOM. A settling avatar pauses on its current frame.
+ * The web renderer of Strobi, with the props of the native one: `@bible-strong/avatar-react`
+ * draws the same character in the DOM, greys it and settles it the same way.
  */
 export default function StrobiAvatar({
   animation,
@@ -23,22 +21,14 @@ export default function StrobiAvatar({
   muted?: boolean
   settleAfterMs?: number
 }) {
-  const avatar = useRef<AvatarController>(null)
-  useEffect(() => {
-    if (!settleAfterMs) return
-    const timer = setTimeout(() => avatar.current?.pause(), settleAfterMs)
-    return () => clearTimeout(timer)
-  }, [animation, settleAfterMs])
   return (
     <Avatar
-      ref={avatar}
-      animation={animation}
+      state={animation}
       size={size}
-      style={{
-        pointerEvents: 'none',
-        filter: muted ? 'grayscale(1)' : undefined,
-        transition: 'filter 300ms ease-out',
-      }}
+      ariaLabel="Strobi"
+      muted={muted}
+      settleAfterMs={muted ? 1 : settleAfterMs}
+      style={{ pointerEvents: 'none' }}
     />
   )
 }

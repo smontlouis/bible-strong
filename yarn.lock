@@ -2471,39 +2471,39 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@bible-strong/avatar-core@npm:^0.2.0":
-  version: 0.2.0
-  resolution: "@bible-strong/avatar-core@npm:0.2.0"
+"@bible-strong/avatar-core@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@bible-strong/avatar-core@npm:1.0.0"
   dependencies:
     ajv: "npm:^8.20.0"
-  checksum: 10c0/08c73f36416bfd990307e838d465b79d78e5b669e3bae53a3bd9b6d06f621af00345304bfeddb450a91da79c4a9574c3fb88f808c47b0bb371a3f96c147d8994
+  checksum: 10c0/398257a16f9c1ef99a6a8c9d16a975399ac392a3790603dc2f00f9ac224bb591dcb0a8cd1d74b766f895e537ed23f526967b124ae38327b7bfc505afdbbb6058
   languageName: node
   linkType: hard
 
-"@bible-strong/avatar-react-native@npm:0.2.0":
-  version: 0.2.0
-  resolution: "@bible-strong/avatar-react-native@npm:0.2.0"
+"@bible-strong/avatar-react-native@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@bible-strong/avatar-react-native@npm:1.0.0"
   dependencies:
-    "@bible-strong/avatar-core": "npm:^0.2.0"
+    "@bible-strong/avatar-core": "npm:^1.0.0"
   peerDependencies:
     react: ^19.0.0
     react-native: "*"
     react-native-reanimated: ">=4.7.0"
     react-native-svg: ">=15.0.0"
     react-native-worklets: ">=0.13.0"
-  checksum: 10c0/cf3f13de66aa5630e8fee83d95c64177460235fca5d83fbcca69c5fd3836fff6a8a816a6bea065c82b182bd00a2e0bc258f446c7adad685af0498454dbb9da32
+  checksum: 10c0/4c7dfd13cbeea26d1ed5cd9054ae11101ecc1907b08328d8de8d456022c83c39f613ea379edd3a71bbff78289eaaf6ea3fd9511f63b3f691bdfbd6b93bd9a825
   languageName: node
   linkType: hard
 
-"@bible-strong/avatar-react@npm:0.2.0":
-  version: 0.2.0
-  resolution: "@bible-strong/avatar-react@npm:0.2.0"
+"@bible-strong/avatar-react@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@bible-strong/avatar-react@npm:1.0.0"
   dependencies:
-    "@bible-strong/avatar-core": "npm:^0.2.0"
+    "@bible-strong/avatar-core": "npm:^1.0.0"
   peerDependencies:
     react: ^19.0.0
     react-dom: ^19.0.0
-  checksum: 10c0/e0f5476d35c35fbdb1c8adaee3e928a47881705d73960ffda76b1a0cf4c453ff7a84b031364f643fd5f4609ff97deeb4fe76b34f969a92e01f1e994be4f47442
+  checksum: 10c0/6ea7245351cc0aa9348a0dcab364523760d9c008afc0ffcbe8c192efd57d05c03d38d4450e4480985a6a075322950c67403868381e6ad5053b65a11d9e34dbcd
   languageName: node
   linkType: hard
 
@@ -2549,8 +2549,8 @@ __metadata:
     "@babel/preset-env": "npm:^7.26.9"
     "@babel/runtime": "npm:^7.28.4"
     "@bible-strong/ai-contract": "workspace:*"
-    "@bible-strong/avatar-react": "npm:0.2.0"
-    "@bible-strong/avatar-react-native": "npm:0.2.0"
+    "@bible-strong/avatar-react": "npm:1.0.0"
+    "@bible-strong/avatar-react-native": "npm:1.0.0"
     "@bible-strong/bible-reference-parser": "workspace:*"
     "@bible-strong/biblical-map": "workspace:*"
     "@bible-strong/resource-catalog": "workspace:*"

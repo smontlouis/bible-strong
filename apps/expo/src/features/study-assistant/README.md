@@ -95,19 +95,21 @@ route pushed over it elsewhere. Native screens publish their context through the
 `useAssistantResourceContext` registry as the web. The preference to follow the reading is
 stored in MMKV under the web's per-account key.
 
-Avatar. `StrobiAvatar.tsx` draws `strobi.avatar.json` with `@bible-strong/avatar-react-native`,
-which renders with `react-native-svg` and samples the frames on the UI thread, in a Reanimated
-frame callback (Bundle Mode forwards `@bible-strong/avatar-core` there, see `babel.config.js`).
-A pose held between two blinks is sampled once; the callback pauses while the app is not active
-and stops once nothing moves. The greyed floating button passes `settleAfterMs` as soon as it is
-muted, so that it stops in its sleeping pose. Do not sample the avatar on the JS thread again: a
-`requestAnimationFrame` loop there cost 12–19 % CPU at rest and, with the app in background where
-nothing paces `requestAnimationFrame`, spun at 100 % CPU while the heap grew by about 40 MB a
-minute until taps no longer reached JavaScript (2026-10-21). A Strobi set in a row or a card
-(More's Premium row, the Premium pages, the card of the daily limit) passes `settleAfterMs`: it
-holds its pose that long after an animation starts, eyes open, and its frame callback stops; a
-new animation plays again. `StrobiAvatar.web.tsx` draws the same definition with
-`@bible-strong/avatar-react`, under the same props.
+Avatar. `StrobiAvatar.tsx` draws `strobi.avatar.json` with `@bible-strong/avatar-react-native`
+1.x, which renders with `react-native-svg` and runs the avatar's engine on the UI thread, in a
+Reanimated frame callback (Bundle Mode forwards `@bible-strong/avatar-core` there, see
+`babel.config.js`). The file is of the first format: the package keeps only its character, and
+each of its animation names is a state of the shared catalogue, passed as `state`. The avatar
+always moves (`idle` plays its clips round and round); the callback stops while the app is not
+active, and once `settleAfterMs` has passed with the eyes open. The greyed floating button passes
+`settleAfterMs` as soon as it is muted, so that it stops in its sleeping pose. Do not run the
+avatar on the JS thread again: a `requestAnimationFrame` loop there cost 12–19 % CPU at rest and,
+with the app in background where nothing paces `requestAnimationFrame`, spun at 100 % CPU while
+the heap grew by about 40 MB a minute until taps no longer reached JavaScript (2026-10-21). A
+Strobi set in a row or a card (More's Premium row, the Premium pages, the card of the daily limit)
+passes `settleAfterMs`: it holds its pose that long after a change, eyes open, and its frame
+callback stops; a new animation plays again. `StrobiAvatar.web.tsx` draws the same character with
+`@bible-strong/avatar-react`, under the same props, `muted` and `settleAfterMs` included.
 
 Dictation. `dictationAudio.ts` captures mono PCM16 with `expo-audio`'s native audio stream and
 feeds the same `LiveDictationAdapter` as the web. The microphone is requested on first use and
