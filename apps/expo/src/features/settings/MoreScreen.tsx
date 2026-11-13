@@ -8,6 +8,8 @@ import { useAtomValue, useSetAtom } from 'jotai/react'
 import { premiumStatusAtom } from '~features/premium/premiumStatus'
 import { usePremiumVisible } from '~features/premium/premiumVisibility'
 import StrobiAvatar from '~features/study-assistant/StrobiAvatar'
+import { useAiConsent } from '~features/study-assistant/aiConsent'
+import { assistantAccessible } from '~features/study-assistant/assistantConfig'
 import { memo, useRef, type ComponentPropsWithRef as UIComponentProps } from 'react'
 import { supportsOfflineCopies } from '~desktop/isDesktop'
 import { useTranslation } from 'react-i18next'
@@ -110,6 +112,19 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
       destructive: true,
     })
     if (confirmed) await logout()
+  }
+
+  // The agreement to share questions with AI providers can be taken back here (5.1.2(i)).
+  const aiConsent = useAiConsent(isLogged && assistantAccessible(user?.id) ? user?.id : null)
+  const promptWithdrawAiConsent = async () => {
+    const confirmed = await confirm({
+      title: t('assistant.consent.withdrawTitle'),
+      message: t('assistant.consent.withdrawDetail'),
+      cancelLabel: t('Non'),
+      confirmLabel: t('assistant.consent.withdraw'),
+      destructive: true,
+    })
+    if (confirmed) await aiConsent.withdraw().catch(() => {})
   }
 
   const appleIsReviewing = getAppleReviewing()
@@ -255,6 +270,14 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
             icon={<FeatherIcon name="book-open" size={18} color="grey" />}
             label={t('bibleDefaults.title')}
           />
+          {aiConsent.status === 'granted' && (
+            <ListRow
+              onPress={promptWithdrawAiConsent}
+              icon={<FeatherIcon name="shield" size={18} color="grey" />}
+              label={t('assistant.consent.settingsLabel')}
+              description={t('assistant.consent.settingsDetail')}
+            />
+          )}
           {Platform.OS === 'web' && (
             <ListRow
               route="KeyboardShortcuts"

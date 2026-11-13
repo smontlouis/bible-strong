@@ -4,6 +4,7 @@ import type { AssistantAction } from '@bible-strong/ai-contract/contract'
 import { getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
 import { askAssistant, captureAssistantPreferences, compactAssistant } from './client'
 import { AnswerReveal } from './answerReveal'
+import { useAiConsent } from './aiConsent'
 import { assistantAvailable } from './assistantConfig'
 import { runConversation, type ConversationRequest } from './conversationRun'
 import type { Compactor } from './conversationMemory'
@@ -82,6 +83,8 @@ export function useAssistantSession({
   // A run is over once its answer is fully shown.
   const working = busy || revealing
   const receivedInitialIndex = useRef(false)
+  // Nothing is sent before the account agreed to share it with third-party AI providers.
+  const consent = useAiConsent(signedIn ? account : null)
   // What the reader is looking at goes with each question, like an attachment, unless they
   // took it off (2026-11-08): it replaced a « follow my reading » setting and a pin.
   const context = liveContext && liveContext.key !== detachedKey ? liveContext : null
@@ -176,6 +179,7 @@ export function useAssistantSession({
     const question = text.trim()
     if (!question || active.current || !ready || (currentIsCloud && !current.messages.length))
       return
+    if (consent.status !== 'granted') return
     if (!signedIn || getCurrentAuthUser()?.uid !== account) {
       setError('assistant.signIn')
       return
@@ -302,6 +306,8 @@ export function useAssistantSession({
     error,
     retrying,
     progress,
+    /** The account's agreement to send its questions to third-party AI providers. */
+    consent,
     context,
     /** Takes the current context off the next questions, until the reader is somewhere else. */
     detachContext: () => setDetachedKey(liveContext?.key ?? null),

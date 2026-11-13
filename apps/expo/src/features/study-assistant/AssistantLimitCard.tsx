@@ -1,5 +1,6 @@
 import { useAtomValue } from 'jotai'
-import { useState } from 'react'
+import { use, useState } from 'react'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 
 import Box from '~common/ui/Box'
@@ -9,7 +10,7 @@ import { premiumStatusAtom } from '~features/premium/premiumStatus'
 import { usePremiumVisible } from '~features/premium/premiumVisibility'
 import useLanguage from '~helpers/useLanguage'
 
-import { useAssistantSheet } from './assistantSheetContext'
+import { ComposerInsetContext, useAssistantSheet } from './assistantSheetContext'
 import { quotaReturn, resumeDate } from './assistantQuota'
 import { useAssistantQuota } from './useAssistantQuota'
 import StrobiAvatar from './StrobiAvatar'
@@ -19,8 +20,16 @@ import { useStrobiReaction } from './useStrobiReaction'
  * The daily quota is used up: Strobi grows drowsy and falls asleep until the questions come
  * back, at the hour said in the reader's own time. Where Premium is sold, it is offered here,
  * the one place where its value is plain.
+ *
+ * Docked, it takes the composer's place at the bottom of the page: nothing can be asked then.
  */
-export default function AssistantLimitCard({ paused = false }: { paused?: boolean }) {
+export default function AssistantLimitCard({
+  paused = false,
+  docked = false,
+}: {
+  paused?: boolean
+  docked?: boolean
+}) {
   const { t } = useTranslation()
   const lang = useLanguage()
   const { navigate } = useAssistantSheet()
@@ -36,13 +45,15 @@ export default function AssistantLimitCard({ paused = false }: { paused?: boolea
   )
   const [animation] = useStrobiReaction('sleeping', { animation: 'drowsy', ms: 2800 })
   const offersPremium = premium.kind === 'none' && premiumVisible
-  return (
+  const insets = useSafeAreaInsets()
+  const inset = use(ComposerInsetContext)
+  const card = (
     <Box
       accessibilityRole="alert"
       accessibilityLiveRegion="polite"
-      className="bg-light-grey my-3 items-center rounded-[12px] px-5 pb-5 pt-3"
+      className={`bg-light-grey items-center px-5 pb-5 pt-3 ${docked ? 'rounded-[16px]' : 'my-3 rounded-[12px]'}`}
     >
-      <StrobiAvatar animation={animation} size={96} settleAfterMs={5000} />
+      <StrobiAvatar animation={animation} size={docked ? 64 : 96} settleAfterMs={5000} />
       <Text className="mt-1 text-center text-[16px] font-semibold">
         {t('assistant.limitCard.title')}
       </Text>
@@ -71,6 +82,16 @@ export default function AssistantLimitCard({ paused = false }: { paused?: boolea
           </Box>
         </>
       ) : null}
+    </Box>
+  )
+  if (!docked) return card
+  return (
+    <Box
+      className="bg-reverse px-3 pt-1"
+      onLayout={event => inset.setHeight(Math.ceil(event.nativeEvent.layout.height))}
+      style={{ paddingBottom: insets.bottom + 4 }}
+    >
+      {card}
     </Box>
   )
 }

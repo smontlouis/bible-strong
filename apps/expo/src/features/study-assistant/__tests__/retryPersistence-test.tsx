@@ -98,6 +98,9 @@ jest.mock('../client', () => ({
   captureAssistantPreferences: () => ({}),
 }))
 jest.mock('../assistantConfig', () => ({ assistantAvailable: true }))
+jest.mock('../aiConsent', () => ({
+  useAiConsent: () => ({ status: 'granted', accept: async () => {}, withdraw: async () => {} }),
+}))
 jest.mock('~helpers/firebaseAuthRuntime', () => ({
   getCurrentAuthUser: () => ({ uid: 'reader' }),
 }))

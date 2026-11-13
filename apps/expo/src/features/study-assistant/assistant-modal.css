@@ -402,6 +402,18 @@
   font-size: 13px;
   cursor: pointer;
 }
+.bs-assistant-consent a {
+  color: var(--as-accent);
+}
+.bs-assistant-consent-actions {
+  display: flex;
+  gap: 8px;
+}
+.bs-assistant-verify .bs-assistant-consent-decline {
+  background: transparent;
+  color: var(--as-ink) !important;
+  box-shadow: inset 0 0 0 1px var(--as-border);
+}
 .bs-assistant-verify button:disabled {
   opacity: 0.6;
   cursor: default;

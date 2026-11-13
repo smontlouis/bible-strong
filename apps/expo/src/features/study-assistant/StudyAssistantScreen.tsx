@@ -12,7 +12,10 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import ModalRouteFrame from '~navigation/ModalRouteFrame'
 import AssistantComposer from './AssistantComposer'
+import AssistantConsentCard from './AssistantConsentCard'
 import AssistantHistory from './AssistantHistory'
+import AssistantLimitCard from './AssistantLimitCard'
+import { questionsSpent } from './assistantQuota'
 import {
   AssistantSheetContext,
   ComposerInsetContext,
@@ -21,6 +24,7 @@ import {
 } from './assistantSheetContext'
 import AssistantThread from './AssistantThread'
 import SourceExcerptSheet from './SourceExcerptSheet'
+import { useAssistantQuota } from './useAssistantQuota'
 import StrobiAvatar from './StrobiAvatar'
 
 // Strobi lands in the page's header: it grows in with the bounce its button comes back with.
@@ -117,6 +121,7 @@ export default function StudyAssistantScreen() {
   const router = useRouter()
   const page = useAtomValue(assistantPageAtom)
   const [composerHeight, setComposerHeight] = useState(0)
+  const quota = useAssistantQuota()
   // Signed out, or the assistant is not offered to this account: nothing to show here.
   useEffect(() => {
     if (page) return
@@ -137,10 +142,25 @@ export default function StudyAssistantScreen() {
               <Box className="flex-1 overflow-hidden">
                 {sheet.historyOpen ? <AssistantHistory /> : <AssistantThread />}
               </Box>
-              {!sheet.historyOpen && (
-                <KeyboardStickyView style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
-                  <AssistantComposer />
-                </KeyboardStickyView>
+              {!sheet.historyOpen &&
+                sheet.session.consent.status === 'granted' &&
+                // Nothing left to ask today: the limit card takes the composer's place.
+                (questionsSpent(quota) && !sheet.session.busy ? (
+                  <Box style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+                    <AssistantLimitCard paused={quota?.kind === 'paused'} docked />
+                  </Box>
+                ) : (
+                  <KeyboardStickyView
+                    style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}
+                  >
+                    <AssistantComposer />
+                  </KeyboardStickyView>
+                ))}
+              {/* Nothing is sent before the account agrees to share it with AI providers. */}
+              {!sheet.historyOpen && sheet.session.consent.status === 'missing' && (
+                <Box style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+                  <AssistantConsentCard />
+                </Box>
               )}
             </Box>
           </ModalRouteFrame>

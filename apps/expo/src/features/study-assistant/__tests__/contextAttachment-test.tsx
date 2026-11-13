@@ -15,8 +15,13 @@ jest.mock('../conversationRepository', () => ({
   deleteConversation: async () => {},
   renameConversation: async () => {},
 }))
+const mockAsk = jest.fn(async () => {})
+let mockConsent: 'granted' | 'missing' = 'granted'
+jest.mock('../aiConsent', () => ({
+  useAiConsent: () => ({ status: mockConsent, accept: async () => {}, withdraw: async () => {} }),
+}))
 jest.mock('../client', () => ({
-  askAssistant: async () => {},
+  askAssistant: (...args: unknown[]) => mockAsk(...(args as [])),
   compactAssistant: async () => '',
   captureAssistantPreferences: () => ({}),
 }))
@@ -66,4 +71,16 @@ it('joins what the reader is looking at, until they take it off, and joins a new
   await act(async () => session.detachContext())
   await act(async () => session.attachContext())
   expect(session.context?.detail).toBe('Jean 3')
+})
+
+it('sends nothing before the account agrees to share it with AI providers', async () => {
+  mockConsent = 'missing'
+  mockAsk.mockClear()
+  await act(async () => {
+    create(<Assistant liveContext={null} />)
+  })
+  await act(async () => session.send('Qui était Melchisédek ?'))
+  expect(mockAsk).not.toHaveBeenCalled()
+  expect(session.busy).toBe(false)
+  mockConsent = 'granted'
 })

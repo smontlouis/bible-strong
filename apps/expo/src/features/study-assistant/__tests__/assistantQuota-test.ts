@@ -6,6 +6,7 @@ import {
   currentQuota,
   nextQuotaReset,
   quotaLine,
+  questionsSpent,
   quotaReturn,
   recordAssistantQuota,
 } from '../assistantQuota'
@@ -112,5 +113,19 @@ describe('a pause of the free questions', () => {
     expect(freeQuestionsPaused('assistant.freePaused', null)).toBe(true)
     expect(freeQuestionsPaused('assistant.freePaused', daily(3))).toBe(false)
     expect(freeQuestionsPaused('assistant.limit', daily(0))).toBe(false)
+  })
+})
+
+describe('questionsSpent', () => {
+  it('holds while the day is used up or the free questions are paused', () => {
+    expect(questionsSpent(daily(0))).toBe(true)
+    expect(questionsSpent({ kind: 'paused', resumesAt: '2026-12-01T00:00:00.000Z' })).toBe(true)
+  })
+
+  it('lets the reader ask otherwise, a past refusal included once the quota has ended', () => {
+    expect(questionsSpent(daily(1))).toBe(false)
+    expect(questionsSpent({ kind: 'unlimited' })).toBe(false)
+    expect(questionsSpent({ kind: 'verify_email', limit: 3 })).toBe(false)
+    expect(questionsSpent(null)).toBe(false)
   })
 })

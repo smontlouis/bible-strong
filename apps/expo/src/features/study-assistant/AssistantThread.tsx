@@ -17,7 +17,7 @@ import { floatingShadow, radii } from '~common/ui/surfaces'
 import { useTheme } from '~themes/ThemeProvider'
 import AssistantLimitCard from './AssistantLimitCard'
 import AssistantVerifyEmailCard from './AssistantVerifyEmailCard'
-import { asksEmailVerification, freeQuestionsPaused } from './assistantQuota'
+import { asksEmailVerification, freeQuestionsPaused, questionsSpent } from './assistantQuota'
 import { useAssistantQuota } from './useAssistantQuota'
 import { ComposerInsetContext, useAssistantSheet } from './assistantSheetContext'
 import type { ReadingContext } from './conversations'
@@ -50,6 +50,8 @@ function ThreadStatus() {
   const quota = useAssistantQuota()
   const verification = asksEmailVerification(error, quota)
   const paused = freeQuestionsPaused(error, quota)
+  // Nothing left to ask today: the limit card stands in the composer's place, not here.
+  const limitDocked = questionsSpent(quota) && !busy
   return (
     <Box>
       {!!progress && (
@@ -60,7 +62,7 @@ function ThreadStatus() {
       )}
       {verification && !busy ? (
         <AssistantVerifyEmailCard limit={quota?.kind === 'verify_email' ? quota.limit : null} />
-      ) : paused && !busy ? (
+      ) : limitDocked ? null : paused && !busy ? (
         <AssistantLimitCard paused />
       ) : error === 'assistant.limit' && !retrying ? (
         <AssistantLimitCard />
@@ -89,10 +91,10 @@ function ThreadStatus() {
           detail={t('assistant.modal.storageError')}
         />
       )}
-      {!!followUps.length && !error && (
+      {!!followUps.length && !error && !limitDocked && (
         <FollowUpQuestions questions={followUps} disabled={busy || !ready} />
       )}
-      {!current.messages.length && (
+      {!current.messages.length && session.consent.status === 'granted' && !limitDocked && (
         <Box className="mt-2 gap-2">
           {shortcutsFor(context).map(key => (
             <ThreadPrimitive.Suggestion

@@ -69,6 +69,15 @@ export const freeQuestionsPaused = (error: string, quota: StudyQuota | null) =>
   quota?.kind === 'paused' ||
   (error === 'assistant.freePaused' && quota?.kind !== 'daily' && quota?.kind !== 'unlimited')
 
+/**
+ * Whether the account has nothing left to ask until its questions come back: the day's are
+ * used up, or the free questions are paused. The limit card then takes the composer's place.
+ * Read from the quota alone, never from a refusal: the quota ends at the reset or at the end of
+ * the pause, so the composer comes back on its own.
+ */
+export const questionsSpent = (quota: StudyQuota | null) =>
+  quota?.kind === 'paused' || (quota?.kind === 'daily' && quota.remaining <= 0)
+
 /** What the line above the composer says, or null when it says nothing. */
 export type QuotaLine =
   | { kind: 'remaining'; count: number }

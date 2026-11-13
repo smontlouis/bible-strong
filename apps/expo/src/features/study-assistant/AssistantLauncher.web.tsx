@@ -26,6 +26,7 @@ import { floatingShadow } from '~common/ui/surfaces'
 import { resolveFontFamily } from '~themes/styleValues'
 import { toast } from '~helpers/toast'
 import i18n from '~i18n'
+import { premiumPrivacyUrl } from '~features/premium/premiumConfig'
 import { useTheme } from '~themes/ThemeProvider'
 import { webThemeVariables } from '~themes/webThemeVariables'
 import { askAssistant, compactAssistant, connectAssistantDictation } from './client'
@@ -33,6 +34,7 @@ import { assistantAccessible, assistantAvailable } from './assistantConfig'
 import {
   asksEmailVerification,
   freeQuestionsPaused,
+  questionsSpent,
   quotaLine,
   quotaReturn,
   resumeDate,
@@ -271,6 +273,8 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
   // The free questions are paused until the first of next month: shown as the daily limit is.
   const paused = freeQuestionsPaused(error, quota) && !busy
   const limited = paused || error === 'assistant.limit'
+  // Nothing left to ask today: the limit card takes the composer's place, not the thread's.
+  const spent = signedIn && questionsSpent(quota) && !busy
   useEmailVerificationWatch(open && verification)
   const [sendingVerification, setSendingVerification] = useState(false)
   // Opening a conversation shows its last question at the top, not the end of its last
@@ -592,7 +596,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                       {t('assistant.verifyCard.resend')}
                     </button>
                   </div>
-                ) : (
+                ) : spent ? null : (
                   (error || retrying || paused) &&
                   // A refusal for the address says nothing more once the address is verified.
                   error !== 'assistant.verifyEmail' &&
@@ -624,7 +628,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                     />
                   )
                 )}
-                {limited && offersPremium && (
+                {limited && offersPremium && !spent && (
                   <div className="bs-assistant-verify">
                     <p>{t('assistant.limitCard.premiumHint')}</p>
                     <button type="button" onClick={discoverPremium}>
@@ -632,7 +636,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                     </button>
                   </div>
                 )}
-                {!!followUps.length && !error && (
+                {!!followUps.length && !error && !spent && (
                   // A question picked is asked at once, like the starting points.
                   <div
                     className="bs-assistant-follow-ups"
@@ -664,7 +668,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                       <Icon name="down" />
                     </ThreadPrimitive.ScrollToBottom>
                   )}
-                  {signedIn && quotaText && (
+                  {signedIn && quotaText && !spent && (
                     // Sending stays open at zero: the service checks Premium before it refuses.
                     <p className="bs-assistant-quota" aria-live="polite">
                       {quotaText.kind === 'remaining'
@@ -683,7 +687,61 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                       )}
                     </p>
                   )}
-                  {signedIn ? (
+                  {signedIn && session.consent.status !== 'granted' ? (
+                    // Nothing is sent before the account agrees to share it with AI providers.
+                    session.consent.status === 'missing' && (
+                      <div className="bs-assistant-verify bs-assistant-consent" role="region">
+                        <p className="bs-assistant-verify-title">{t('assistant.consent.title')}</p>
+                        <p>{t('assistant.consent.detail')}</p>
+                        <p>
+                          <a
+                            href={premiumPrivacyUrl(i18n.language)}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {t('Politique de confidentialité')}
+                          </a>
+                        </p>
+                        <div className="bs-assistant-consent-actions">
+                          <button
+                            type="button"
+                            onClick={() => void session.consent.accept().catch(() => {})}
+                          >
+                            {t('assistant.consent.accept')}
+                          </button>
+                          <button
+                            type="button"
+                            className="bs-assistant-consent-decline"
+                            onClick={() => changeOpen(false)}
+                          >
+                            {t('assistant.consent.decline')}
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  ) : spent ? (
+                    <div className="bs-assistant-verify" role="alert" aria-live="polite">
+                      <p className="bs-assistant-verify-title">{t('assistant.limitCard.title')}</p>
+                      <p>
+                        {quota?.kind === 'paused'
+                          ? t('assistant.limitCard.paused', {
+                              date: resumeDate(quota.resumesAt, i18n.language),
+                            })
+                          : t(limitReturn.key, {
+                              time: limitReturn.time,
+                              count: limitReturn.count,
+                            })}
+                      </p>
+                      {offersPremium && (
+                        <>
+                          <p style={{ marginTop: 8 }}>{t('assistant.limitCard.premiumHint')}</p>
+                          <button type="button" onClick={discoverPremium}>
+                            {t('assistant.limitCard.premium')}
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  ) : signedIn ? (
                     <ComposerPrimitive.Root className="bs-assistant-composer">
                       <ComposerPrimitive.Input
                         submitMode={dictationActive ? 'none' : 'enter'}
@@ -821,21 +879,23 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                       {t('assistant.modal.login')}
                     </button>
                   )}
-                  {!current.messages.length && (
-                    <div className="bs-assistant-suggestions">
-                      {shortcuts.map(key => (
-                        <ThreadPrimitive.Suggestion
-                          key={key}
-                          prompt={t(`assistant.modal.prompt.${key}`)}
-                          send
-                          disabled={busy || !ready}
-                        >
-                          <span aria-hidden="true">›</span>
-                          <span>{t(`assistant.modal.action.${key}`)}</span>
-                        </ThreadPrimitive.Suggestion>
-                      ))}
-                    </div>
-                  )}
+                  {!current.messages.length &&
+                    !spent &&
+                    (!signedIn || session.consent.status === 'granted') && (
+                      <div className="bs-assistant-suggestions">
+                        {shortcuts.map(key => (
+                          <ThreadPrimitive.Suggestion
+                            key={key}
+                            prompt={t(`assistant.modal.prompt.${key}`)}
+                            send
+                            disabled={busy || !ready}
+                          >
+                            <span aria-hidden="true">›</span>
+                            <span>{t(`assistant.modal.action.${key}`)}</span>
+                          </ThreadPrimitive.Suggestion>
+                        ))}
+                      </div>
+                    )}
                 </ThreadPrimitive.ViewportFooter>
               </ThreadPrimitive.Viewport>
             </ThreadPrimitive.Root>
