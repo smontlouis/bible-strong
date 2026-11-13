@@ -7,6 +7,7 @@ import { useAccountMigrations } from '~helpers/useAccountMigrations'
 import useInitFireAuth from '~helpers/useInitFireAuth'
 import useLiveUpdates from '~helpers/useLiveUpdates'
 import useLogin from '~helpers/useLogin'
+import { useRemoteConfig } from '~helpers/useRemoteConfig'
 import type { RootState } from '~redux/modules/reducer'
 import { useTabGroupsSync } from '~state/useTabGroupsSync'
 
@@ -31,6 +32,7 @@ const InitHooks = () => {
     outgoingEnabled: (hydrationEnabled && accountMigrations.isAccountWriteReady) || isSessionLost,
   })
   usePremiumIdentity()
+  useRemoteConfig()
 
   return (
     <AccountMigrationModal

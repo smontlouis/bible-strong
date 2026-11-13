@@ -30,7 +30,7 @@ import { premiumPrivacyUrl } from '~features/premium/premiumConfig'
 import { useTheme } from '~themes/ThemeProvider'
 import { webThemeVariables } from '~themes/webThemeVariables'
 import { askAssistant, compactAssistant, connectAssistantDictation } from './client'
-import { assistantAccessible, assistantAvailable } from './assistantConfig'
+import { assistantAvailable, useAssistantAccessible } from './assistantConfig'
 import {
   asksEmailVerification,
   freeQuestionsPaused,
@@ -118,7 +118,7 @@ function Icon({
 }
 export default function AssistantLauncher() {
   const { id } = useSelector(selectUserLoginInfo)
-  if (!assistantAccessible(id)) return null
+  if (!useAssistantAccessible(id)) return null
   return <AccountAssistant key={id || 'guest'} account={id || 'guest'} signedIn={Boolean(id)} />
 }
 function AccountAssistant({ account, signedIn }: { account: string; signedIn: boolean }) {

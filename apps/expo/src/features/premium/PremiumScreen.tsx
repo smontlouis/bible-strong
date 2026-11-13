@@ -15,7 +15,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import ListSection, { ListRow } from '~common/ui/ListSection'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
-import { assistantAccessible } from '~features/study-assistant/assistantConfig'
+import { useAssistantAccessible } from '~features/study-assistant/assistantConfig'
 import { returnToAssistant } from '~features/study-assistant/returnToAssistant'
 import type { StrobiAnimation } from '~features/study-assistant/StrobiAvatar'
 import { useStrobiReaction } from '~features/study-assistant/useStrobiReaction'
@@ -189,7 +189,7 @@ const PremiumScreen = () => {
 
   const offerReady =
     !active && isLogged && canSell && !!offer && !!(offer.annual || offer.monthly) && !offerFailed
-  const canAsk = assistantAccessible(user?.id)
+  const canAsk = useAssistantAccessible(user?.id)
 
   const benefits = (
     <ListSection title={t('premiumPlan.includes')}>

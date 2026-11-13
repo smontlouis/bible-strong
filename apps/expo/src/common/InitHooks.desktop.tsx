@@ -10,6 +10,7 @@ import { appLogger } from '~helpers/agentObservability'
 import { resumePendingAnnotationMigration } from '~helpers/annotationMigrationJournal'
 import { checkBiblesDbHealth, openBiblesDb, resetBiblesDb } from '~helpers/biblesDb'
 import { storage } from '~helpers/storage'
+import { useRemoteConfig } from '~helpers/useRemoteConfig'
 import { toast } from '~helpers/toast'
 import { useAccountMigrations } from '~helpers/useAccountMigrations'
 import useInitFireAuth from '~helpers/useInitFireAuth'
@@ -81,6 +82,7 @@ const InitHooks = () => {
     outgoingEnabled: (hydrationEnabled && accountMigrations.isAccountWriteReady) || isSessionLost,
   })
   usePremiumIdentity()
+  useRemoteConfig()
   useStudyLinksOfflineCopy()
 
   return (

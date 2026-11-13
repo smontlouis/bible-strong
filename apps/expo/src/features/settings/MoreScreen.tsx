@@ -9,7 +9,7 @@ import { premiumStatusAtom } from '~features/premium/premiumStatus'
 import { usePremiumVisible } from '~features/premium/premiumVisibility'
 import StrobiAvatar from '~features/study-assistant/StrobiAvatar'
 import { useAiConsent } from '~features/study-assistant/aiConsent'
-import { assistantAccessible } from '~features/study-assistant/assistantConfig'
+import { useAssistantAccessible } from '~features/study-assistant/assistantConfig'
 import { memo, useRef, type ComponentPropsWithRef as UIComponentProps } from 'react'
 import { supportsOfflineCopies } from '~desktop/isDesktop'
 import { useTranslation } from 'react-i18next'
@@ -115,7 +115,8 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
   }
 
   // The agreement to share questions with AI providers can be taken back here (5.1.2(i)).
-  const aiConsent = useAiConsent(isLogged && assistantAccessible(user?.id) ? user?.id : null)
+  const assistantShown = useAssistantAccessible(user?.id)
+  const aiConsent = useAiConsent(isLogged && assistantShown ? user?.id : null)
   const promptWithdrawAiConsent = async () => {
     const confirmed = await confirm({
       title: t('assistant.consent.withdrawTitle'),

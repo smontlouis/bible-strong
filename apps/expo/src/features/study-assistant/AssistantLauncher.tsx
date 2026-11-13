@@ -16,7 +16,7 @@ import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { selectUserLoginInfo } from '~redux/selectors/user'
 import { premiumStatusAtom } from '~features/premium/premiumStatus'
 import { createTabForAssistantAction } from './assistantActions'
-import { assistantAccessible } from './assistantConfig'
+import { useAssistantAccessible } from './assistantConfig'
 import { nextQuotaReset } from './assistantQuota'
 import AssistantLauncherButton from './AssistantLauncherButton'
 import {
@@ -39,7 +39,7 @@ const PREMIUM_PATH = '/premium'
 
 export default function AssistantLauncher() {
   const { id } = useSelector(selectUserLoginInfo)
-  if (!assistantAccessible(id)) return null
+  if (!useAssistantAccessible(id)) return null
   return <AccountAssistant key={id} account={id} />
 }
 

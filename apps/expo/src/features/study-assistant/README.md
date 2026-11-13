@@ -160,11 +160,13 @@ through the authenticated app remains a manual check after backend rollout.
 
 Entry: `AssistantLauncher.web.tsx`, mounted in `FullAppRuntime.web.tsx`. Uses `@assistant-ui/react` 0.15.21 AssistantModal/Thread/Composer primitives with a custom external-store runtime and the existing authenticated Worker SSE client.
 
-Production activation requires both `EXPO_PUBLIC_AI_API_URL` and exact membership in
-`EXPO_PUBLIC_AI_BETA_UIDS`. This public UID list only hides the launcher, settings entry
-and direct-screen composer for accounts outside the beta. It is bundled client metadata,
-not an authorization boundary. The Worker independently authenticates Firebase Auth and
-App Check, then enforces its server-owned `AI_ALLOWED_UIDS` on every endpoint.
+The assistant shows when `EXPO_PUBLIC_AI_API_URL` is set and Firebase Remote Config lets the
+account in (`~helpers/assistantOpening`): `assistant_open` shows it, with Premium, to every
+signed-in account; while it is `false`, only the uids of `beta_uids` (comma-separated) see
+them. Both are edited in the Firebase console and reach a running app at once, with no build;
+until Remote Config answers on a first start, they are hidden. This only hides the launcher,
+the settings entry and Premium: it is not an authorization boundary. The Worker independently
+authenticates Firebase Auth and App Check and counts each account's questions.
 
 Daily quota (2026-11-10): the Worker counts the questions of an account without Premium per UTC
 day, checks Premium itself (ADR-0110) and asks for a verified address before the free questions.

@@ -1,6 +1,7 @@
 import { useSetAtom } from 'jotai/react'
 import { useEffect } from 'react'
 
+import { useAssistantOpening } from '~helpers/assistantOpening'
 import useLogin from '~helpers/useLogin'
 
 import { premiumStatusAtom } from './premiumStatus'
@@ -20,7 +21,7 @@ export const usePremiumIdentity = () => {
   const setStatus = useSetAtom(premiumStatusAtom)
   const userId = isLogged && user.id ? user.id : null
   // Until sales open, only the beta list reaches RevenueCat (ADR-0110).
-  const visible = premiumVisible(userId)
+  const visible = premiumVisible(useAssistantOpening(), userId)
 
   useEffect(() => setPremiumListener(setStatus), [setStatus])
 
