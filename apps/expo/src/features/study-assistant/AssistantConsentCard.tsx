@@ -35,21 +35,16 @@ export default function AssistantConsentCard() {
         <Link href={premiumPrivacyUrl(lang)} className="mt-2 self-start">
           <Text className="text-link text-[14px]">{t('Politique de confidentialité')}</Text>
         </Link>
-        <HStack className="mt-4 items-center gap-2">
-          <Box className="flex-1">
-            <Button
-              fullWidth
-              // The composer shows at once; a write the server refuses brings the card back.
-              onPress={() => void session.consent.accept().catch(() => {})}
-            >
-              {t('assistant.consent.accept')}
-            </Button>
-          </Box>
-          <Box className="flex-1">
-            <Button fullWidth secondary onPress={close}>
-              {t('assistant.consent.decline')}
-            </Button>
-          </Box>
+        <HStack className="mt-4 items-center justify-end gap-2">
+          <Button reverse onPress={close}>
+            {t('assistant.consent.decline')}
+          </Button>
+          <Button
+            // The composer shows at once; a write the server refuses brings the card back.
+            onPress={() => void session.consent.accept().catch(() => {})}
+          >
+            {t('assistant.consent.accept')}
+          </Button>
         </HStack>
       </Box>
     </Box>

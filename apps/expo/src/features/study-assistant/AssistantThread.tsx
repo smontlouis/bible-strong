@@ -16,7 +16,6 @@ import Text from '~common/ui/Text'
 import { floatingShadow, radii } from '~common/ui/surfaces'
 import { useTheme } from '~themes/ThemeProvider'
 import AssistantLimitCard from './AssistantLimitCard'
-import AssistantVerifyEmailCard from './AssistantVerifyEmailCard'
 import { asksEmailVerification, freeQuestionsPaused, questionsSpent } from './assistantQuota'
 import { useAssistantQuota } from './useAssistantQuota'
 import { ComposerInsetContext, useAssistantSheet } from './assistantSheetContext'
@@ -50,8 +49,8 @@ function ThreadStatus() {
   const quota = useAssistantQuota()
   const verification = asksEmailVerification(error, quota)
   const paused = freeQuestionsPaused(error, quota)
-  // Nothing left to ask today: the limit card stands in the composer's place, not here.
-  const limitDocked = questionsSpent(quota) && !busy
+  // Nothing can be asked: the card that says why stands in the composer's place, not here.
+  const composerDocked = (verification || questionsSpent(quota)) && !busy
   return (
     <Box>
       {!!progress && (
@@ -60,9 +59,7 @@ function ThreadStatus() {
           <Text className="text-grey text-[13px]">{progress}</Text>
         </HStack>
       )}
-      {verification && !busy ? (
-        <AssistantVerifyEmailCard limit={quota?.kind === 'verify_email' ? quota.limit : null} />
-      ) : limitDocked ? null : paused && !busy ? (
+      {composerDocked ? null : paused && !busy ? (
         <AssistantLimitCard paused />
       ) : error === 'assistant.limit' && !retrying ? (
         <AssistantLimitCard />
@@ -91,10 +88,10 @@ function ThreadStatus() {
           detail={t('assistant.modal.storageError')}
         />
       )}
-      {!!followUps.length && !error && !limitDocked && (
+      {!!followUps.length && !error && !composerDocked && (
         <FollowUpQuestions questions={followUps} disabled={busy || !ready} />
       )}
-      {!current.messages.length && session.consent.status === 'granted' && !limitDocked && (
+      {!current.messages.length && session.consent.status === 'granted' && !composerDocked && (
         <Box className="mt-2 gap-2">
           {shortcutsFor(context).map(key => (
             <ThreadPrimitive.Suggestion

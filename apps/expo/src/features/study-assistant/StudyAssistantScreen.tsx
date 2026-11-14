@@ -15,7 +15,7 @@ import AssistantComposer from './AssistantComposer'
 import AssistantConsentCard from './AssistantConsentCard'
 import AssistantHistory from './AssistantHistory'
 import AssistantLimitCard from './AssistantLimitCard'
-import { questionsSpent } from './assistantQuota'
+import { asksEmailVerification, questionsSpent } from './assistantQuota'
 import {
   AssistantSheetContext,
   ComposerInsetContext,
@@ -23,6 +23,7 @@ import {
   useAssistantSheet,
 } from './assistantSheetContext'
 import AssistantThread from './AssistantThread'
+import AssistantVerifyEmailCard from './AssistantVerifyEmailCard'
 import SourceExcerptSheet from './SourceExcerptSheet'
 import { useAssistantQuota } from './useAssistantQuota'
 import StrobiAvatar from './StrobiAvatar'
@@ -144,8 +145,16 @@ export default function StudyAssistantScreen() {
               </Box>
               {!sheet.historyOpen &&
                 sheet.session.consent.status === 'granted' &&
-                // Nothing left to ask today: the limit card takes the composer's place.
-                (questionsSpent(quota) && !sheet.session.busy ? (
+                // Nothing can be asked before the address is verified, nor once today's questions
+                // are spent: the card that says why takes the composer's place.
+                (asksEmailVerification(sheet.session.error, quota) && !sheet.session.busy ? (
+                  <Box style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+                    <AssistantVerifyEmailCard
+                      limit={quota?.kind === 'verify_email' ? quota.limit : null}
+                      docked
+                    />
+                  </Box>
+                ) : questionsSpent(quota) && !sheet.session.busy ? (
                   <Box style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
                     <AssistantLimitCard paused={quota?.kind === 'paused'} docked />
                   </Box>

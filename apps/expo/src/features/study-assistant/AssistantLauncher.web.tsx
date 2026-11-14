@@ -274,6 +274,8 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
   const limited = paused || error === 'assistant.limit'
   // Nothing left to ask today: the limit card takes the composer's place, not the thread's.
   const spent = signedIn && questionsSpent(quota) && !busy
+  // Nothing can be asked: the card that says why stands in the composer's place.
+  const docked = spent || verification
   useEmailVerificationWatch(open && verification)
   const [sendingVerification, setSendingVerification] = useState(false)
   // Opening a conversation shows its last question at the top, not the end of its last
@@ -574,59 +576,38 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                     {progress}
                   </div>
                 )}
-                {verification ? (
-                  <div className="bs-assistant-verify" role="alert">
-                    <p className="bs-assistant-verify-title">{t('assistant.verifyCard.title')}</p>
-                    <p>
-                      {quota?.kind === 'verify_email'
-                        ? t('assistant.verifyCard.detail', { count: quota.limit })
-                        : t('assistant.verifyEmail')}
-                    </p>
-                    <button
-                      type="button"
-                      disabled={sendingVerification}
-                      onClick={() => {
-                        setSendingVerification(true)
-                        void FireAuth.sendEmailVerification().finally(() =>
-                          setSendingVerification(false)
-                        )
-                      }}
-                    >
-                      {t('assistant.verifyCard.resend')}
-                    </button>
-                  </div>
-                ) : spent ? null : (
-                  (error || retrying || paused) &&
-                  // A refusal for the address says nothing more once the address is verified.
-                  error !== 'assistant.verifyEmail' &&
-                  (paused || error !== 'assistant.freePaused') && (
-                    <ErrorState
-                      retrying={retrying}
-                      title={t(
-                        limited
-                          ? 'assistant.limitCard.title'
-                          : error === 'assistant.signIn'
-                            ? 'assistant.errors.signInTitle'
-                            : 'assistant.errors.title'
-                      )}
-                      detail={
-                        paused
-                          ? quota?.kind === 'paused'
-                            ? t('assistant.limitCard.paused', {
-                                date: resumeDate(quota.resumesAt, i18n.language),
-                              })
-                            : t('assistant.freePausedUndated')
-                          : error === 'assistant.limit'
-                            ? t(limitReturn.key, {
-                                time: limitReturn.time,
-                                count: limitReturn.count,
-                              })
-                            : t(error ?? '')
-                      }
-                      onRetry={limited ? undefined : session.retry}
-                    />
-                  )
-                )}
+                {docked
+                  ? null
+                  : (error || retrying || paused) &&
+                    // A refusal for the address says nothing more once the address is verified.
+                    error !== 'assistant.verifyEmail' &&
+                    (paused || error !== 'assistant.freePaused') && (
+                      <ErrorState
+                        retrying={retrying}
+                        title={t(
+                          limited
+                            ? 'assistant.limitCard.title'
+                            : error === 'assistant.signIn'
+                              ? 'assistant.errors.signInTitle'
+                              : 'assistant.errors.title'
+                        )}
+                        detail={
+                          paused
+                            ? quota?.kind === 'paused'
+                              ? t('assistant.limitCard.paused', {
+                                  date: resumeDate(quota.resumesAt, i18n.language),
+                                })
+                              : t('assistant.freePausedUndated')
+                            : error === 'assistant.limit'
+                              ? t(limitReturn.key, {
+                                  time: limitReturn.time,
+                                  count: limitReturn.count,
+                                })
+                              : t(error ?? '')
+                        }
+                        onRetry={limited ? undefined : session.retry}
+                      />
+                    )}
                 {limited && offersPremium && !spent && (
                   <div className="bs-assistant-verify">
                     <p>{t('assistant.limitCard.premiumHint')}</p>
@@ -635,7 +616,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                     </button>
                   </div>
                 )}
-                {!!followUps.length && !error && !spent && (
+                {!!followUps.length && !error && !docked && (
                   // A question picked is asked at once, like the starting points.
                   <div
                     className="bs-assistant-follow-ups"
@@ -667,7 +648,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                       <Icon name="down" />
                     </ThreadPrimitive.ScrollToBottom>
                   )}
-                  {signedIn && quotaText && !spent && (
+                  {signedIn && quotaText && !docked && (
                     // Sending stays open at zero: the service checks Premium before it refuses.
                     <p className="bs-assistant-quota" aria-live="polite">
                       {quotaText.kind === 'remaining'
@@ -718,6 +699,27 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                         </div>
                       </div>
                     )
+                  ) : verification ? (
+                    <div className="bs-assistant-verify" role="alert" aria-live="polite">
+                      <p className="bs-assistant-verify-title">{t('assistant.verifyCard.title')}</p>
+                      <p>
+                        {quota?.kind === 'verify_email'
+                          ? t('assistant.verifyCard.detail', { count: quota.limit })
+                          : t('assistant.verifyEmail')}
+                      </p>
+                      <button
+                        type="button"
+                        disabled={sendingVerification}
+                        onClick={() => {
+                          setSendingVerification(true)
+                          void FireAuth.sendEmailVerification().finally(() =>
+                            setSendingVerification(false)
+                          )
+                        }}
+                      >
+                        {t('assistant.verifyCard.resend')}
+                      </button>
+                    </div>
                   ) : spent ? (
                     <div className="bs-assistant-verify" role="alert" aria-live="polite">
                       <p className="bs-assistant-verify-title">{t('assistant.limitCard.title')}</p>
@@ -879,7 +881,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                     </button>
                   )}
                   {!current.messages.length &&
-                    !spent &&
+                    !docked &&
                     (!signedIn || session.consent.status === 'granted') && (
                       <div className="bs-assistant-suggestions">
                         {shortcuts.map(key => (
