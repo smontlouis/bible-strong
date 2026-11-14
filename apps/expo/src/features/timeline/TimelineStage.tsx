@@ -296,10 +296,14 @@ const Stage = ({
       letGo(lift, event.velocityY, liftFloor.get(), maxLift)
     })
     .onFinalize((_event, dragged) => {
-      // A touch that stopped the stage on its way back from an edge lets it go on back.
+      // A touch that stopped the stage on its way back from an edge lets it go on back. Within
+      // the edges it leaves the stage alone: a button under the finger (« Commencer le voyage »)
+      // may have sent it on a journey that a glide from rest would cut short.
       if (dragged) return
-      letGo(scrollX, 0, 0, maxScroll)
-      letGo(lift, 0, liftFloor.get(), maxLift)
+      const scroll = scrollX.get()
+      if (scroll < 0 || scroll > maxScroll) letGo(scrollX, 0, 0, maxScroll)
+      const lifted = lift.get()
+      if (lifted < liftFloor.get() || lifted > maxLift) letGo(lift, 0, liftFloor.get(), maxLift)
     })
 
   const alongAxis = useAnimatedStyle(() => ({ transform: [{ translateX: -scrollX.get() }] }))
