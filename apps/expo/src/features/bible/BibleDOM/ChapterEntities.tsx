@@ -135,13 +135,14 @@ const ChapterEntities = ({
       </h2>
       {(showsPainted || viewMode === 'download' || showsStack || chapterResources) && (
         // One grid for everything the chapter offers: the portraits, the stack of the others and
-        // the media wrap together, their images on one line, the names hanging below
+        // the media wrap together from the left, as in the overlay, their images on one line, the
+        // names hanging below
         <div
           style={{
             display: 'flex',
             flexWrap: 'wrap',
             alignItems: 'flex-start',
-            justifyContent: 'center',
+            justifyContent: 'flex-start',
             gap: '16px 10px',
             marginTop: 20,
           }}
