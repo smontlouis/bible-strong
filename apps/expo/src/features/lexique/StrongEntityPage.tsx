@@ -36,6 +36,8 @@ type Props = {
   onOpenEntityRelation: (relation: StrongLexiconEntityRelation) => void
   /** The map of the places of the Bible, opened on this place. */
   onOpenMap?: (focus: string) => void
+  /** A card the chapter offered and the reader has not collected (ADR-0090). */
+  newCard?: string
 }
 
 const StrongEntityPage = ({
@@ -49,6 +51,7 @@ const StrongEntityPage = ({
   onOpenEntityProfile,
   onOpenEntityRelation,
   onOpenMap,
+  newCard,
 }: Props) => {
   const { t, i18n } = useTranslation()
   const bottomInset = usePageBottomInset()
@@ -93,6 +96,7 @@ const StrongEntityPage = ({
                   entry={portrait}
                   catalog={catalog}
                   language={language ?? i18n.language}
+                  newCard={newCard}
                   onOpenStrong={onOpenStrong}
                 />
               )}
@@ -177,6 +181,7 @@ const StrongEntityPage = ({
               entry={portrait}
               catalog={catalog}
               language={language ?? i18n.language}
+              newCard={newCard}
               onOpenStrong={onOpenStrong}
             />
           )}

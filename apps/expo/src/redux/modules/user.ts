@@ -490,6 +490,8 @@ export interface FireStoreUserData {
   subscription?: string
   bible: UserState['bible']
   plan: OngoingPlan[]
+  /** The collectible cards collected (ADR-0090): card identity → when. */
+  cards?: Record<string, number>
 }
 
 export interface ImportDataPayload {
@@ -497,6 +499,7 @@ export interface ImportDataPayload {
   studies: StudiesObj
   tabGroups?: TabGroup[]
   plan?: OngoingPlan[]
+  cards?: Record<string, number>
 }
 
 export interface UserState {

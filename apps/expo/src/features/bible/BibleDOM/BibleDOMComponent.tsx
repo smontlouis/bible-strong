@@ -191,6 +191,7 @@ type Props = Pick<
   | 'chapterEntities'
   | 'chapterEntitiesLoaded'
   | 'chapterEntityPortraits'
+  | 'chapterNewCards'
   | 'focusStudy'
   | 'focusStudyTranslations'
   | 'chapterEntityModuleStatus'
@@ -206,6 +207,7 @@ type Props = Pick<
     title: string
     groups: { person: string; place: string; group: string; supernatural: string; other: string }
     openEntity: string
+    openNewCard: string
     openMap: string
     empty: string
     downloadTitle: string
@@ -689,6 +691,7 @@ const LoadedBibleContent = ({
   chapterEntities,
   chapterEntitiesLoaded,
   chapterEntityPortraits,
+  chapterNewCards,
   focusStudy,
   focusStudyTranslations,
   chapterEntityModuleStatus,
@@ -1751,11 +1754,16 @@ const LoadedBibleContent = ({
                 />
               ) : null
             }
-            onOpenEntity={uniqueName => {
+            newCards={chapterNewCards}
+            onOpenEntity={(uniqueName, newCard) => {
               void sendReaderIntent({
                 kind: 'open',
                 origin: 'chapter-entities',
-                target: { kind: 'biblical-entity', entityKey: uniqueName },
+                target: {
+                  kind: 'biblical-entity',
+                  entityKey: uniqueName,
+                  ...(newCard && { newCard }),
+                },
               })
             }}
             onOpenMap={places => {

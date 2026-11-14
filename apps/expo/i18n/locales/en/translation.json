@@ -293,6 +293,7 @@
   "bible.chapterEntities.supernatural": "Supernatural realm",
   "bible.chapterEntities.others": "Other",
   "bible.chapterEntities.open": "View {{name}}’s profile",
+  "bible.chapterEntities.openNewCard": "{{name}}, a new card to discover",
   "bible.chapterEntities.openMap": "See the places on the map",
   "bible.chapterEntities.empty": "No entities identified in this chapter.",
   "strongLexicon.biblicalEntities": "Biblical entities",
@@ -2952,5 +2953,10 @@
   "onboarding.abel.sceneStrobi.answer": "In Hebrew, Abel is Hevel (H1893), the same word as hevel (H1892): a breath, a vapour. It opens Ecclesiastes: “Vanity of vanities” (Eccl 1:2). A name that foretells a short life, like a breath (Gen 4:8).",
   "onboarding.abel.sceneStrobi.try": "I want to try",
   "onboarding.abel.sceneStrobi.later": "Later",
-  "onboarding.abel.strobi.signIn": "Create your free account: Strobi will answer your first question right after."
+  "onboarding.abel.strobi.signIn": "Create your free account: Strobi will answer your first question right after.",
+  "entityCards.newCard": "New card unlocked",
+  "entityCards.collect": "Collect",
+  "entityCards.later": "Later",
+  "entityCards.close": "Close",
+  "entityCards.open": "See the card of {{name}}"
 }

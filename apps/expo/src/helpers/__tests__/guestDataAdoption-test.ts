@@ -159,6 +159,7 @@ const createState = (): RootState =>
       onlinePlans: [],
       images: { cached: 'base64' },
     },
+    cards: { collected: { 'Adam@Gen.2.19-Jud': 1700000000000 } },
   }) as unknown as RootState
 
 const tabGroups: TabGroup[] = [
@@ -311,6 +312,7 @@ describe('guest data snapshot', () => {
     expect(snapshot.subcollections).not.toHaveProperty('relationPairs')
     expect(snapshot).not.toHaveProperty('studies')
     expect(snapshot.plan).toEqual([{ id: 'plan', readingSlices: { first: { isRead: true } } }])
+    expect(snapshot.cards).toEqual({ 'Adam@Gen.2.19-Jud': 1700000000000 })
     expect(snapshot.settings.customHighlightColors).toHaveLength(1)
     expect(snapshot.settings).not.toHaveProperty('defaultBibleVersion')
     expect(snapshot.settings).not.toHaveProperty('redWordsDisplay')
@@ -436,7 +438,10 @@ describe('guest adoption checkpoint and replay', () => {
     expect(remote.subcollections.get('user-a/relations')?.has('system')).toBe(false)
     expect(remote.subcollections.get('user-a/relationIndex')?.size).toBeGreaterThan(0)
     expect(remote.subcollections.get('user-a/relationPairs')?.size).toBeGreaterThan(0)
-    expect(remote.userDocuments.get('user-a')).toMatchObject({ id: 'user-a' })
+    expect(remote.userDocuments.get('user-a')).toMatchObject({
+      id: 'user-a',
+      cards: { 'Adam@Gen.2.19-Jud': 1700000000000 },
+    })
     expect(repository.getPendingForUser('user-a')).toBeUndefined()
     expect(repository.getCompleted('user-a')).toMatchObject({ snapshotId: snapshot.id })
   })

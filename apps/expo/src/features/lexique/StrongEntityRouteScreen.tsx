@@ -29,7 +29,7 @@ const StrongEntityRouteScreen = ({ context, entityKey, isFormSheet = false }: Pr
   const resources = useResourceAccess()
   const readingTypography = useStrongReadingTypography()
   const { language: preferredLanguage } = useStrongLexiconLanguage()
-  const params = useLocalSearchParams<{ language?: string }>()
+  const params = useLocalSearchParams<{ language?: string; newCard?: string }>()
   const language =
     params.language === 'fr' || params.language === 'en' ? params.language : preferredLanguage
   const navigation = useStrongRouteNavigation(context)
@@ -77,6 +77,7 @@ const StrongEntityRouteScreen = ({ context, entityKey, isFormSheet = false }: Pr
           onOpenEntityProfile={navigation.openEntity}
           onOpenEntityRelation={navigation.openEntityRelation}
           onOpenMap={focus => navigation.openMap({ focus })}
+          newCard={typeof params.newCard === 'string' ? params.newCard : undefined}
         />
       </StrongEntryRouteScaffold>
     </WidePageFrame>

@@ -1,9 +1,10 @@
 import { Image } from 'expo-image'
 import { useIsFocused } from 'expo-router'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Platform, ScrollView, StyleSheet } from 'react-native'
+import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { useReducedMotion } from 'react-native-reanimated'
+import { useDispatch, useSelector } from 'react-redux'
 
 import books from '~assets/bible_versions/books-desc'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
@@ -11,7 +12,14 @@ import Card from '~common/ui/Card'
 import { FeatherIcon } from '~common/ui/Icon'
 import IconTile from '~common/ui/IconTile'
 import Text from '~common/ui/Text'
+import { getEntityCardView, type EntityCardView } from '~features/entity-cards/cardCatalog'
+import { CARD_RATIO } from '~features/entity-cards/cardGeometry'
+import { CardSpotlight, type WindowRect } from '~features/entity-cards/CardSpotlight'
+import { isCardCollected } from '~features/entity-cards/chapterCards'
+import { EntityCardThumbnail } from '~features/entity-cards/EntityCardThumbnail'
 import type { StrongLexiconEntity } from '~features/resources/strongLexiconAccess'
+import { collectCard } from '~redux/modules/cards'
+import type { RootState } from '~redux/modules/reducer'
 import { formatStrongDisplayCode } from '~helpers/strongIdentities'
 import {
   formatEntityChapterRanges,
@@ -27,14 +35,18 @@ import {
   useEntityPortraitLayerStyles,
   useEntityPortraitTilt,
 } from './EntityPortraitParallax'
-import { useEntityCardCatalog } from './entityCardManifest'
-import { getEntityCardBackdropUri } from './entityCards'
+import { useCardCatalog, useEntityCardCatalog } from './entityCardManifest'
+import { getEntityCardBackdropUri, getEntityCardId } from './entityCards'
 import { getEntityLabel } from './StrongDetailUI'
 import { useEntityPortraitGround } from './useEntityPortraitGround'
 import { useEntityPortraitImage } from './useEntityPortraitImage'
 
 const STAGE_TILE_SIZE = 92
 const TITLE_FONT = 'Literata Book'
+/** The copy of a collected card at the right of the portrait frame. */
+const CARD_THUMBNAIL_WIDTH = 46
+/** The cards are drawn with Skia on iOS and Android; the Web draws the atlas's CSS card. */
+const DRAWS_CARDS = Platform.OS !== 'web'
 
 const StageTile = ({
   uniqueName,
@@ -117,16 +129,26 @@ const StrongEntityPortraitHeader = ({
   entry,
   catalog,
   language,
+  newCard,
   onOpenStrong,
 }: {
   entity: StrongLexiconEntity
   entry: EntityPortraitEntry
   catalog: EntityPortraitCatalog
   language: string
+  /** A card the chapter offered and the reader has not collected: it rises over the page. */
+  newCard?: string
   onOpenStrong: (stepCode: string) => void
 }) => {
   const { t } = useTranslation()
-  const [stageKey, setStageKey] = useState<string>()
+  const dispatch = useDispatch()
+  // Opened on a new card of a life stage, the page shows that stage, where the card will land.
+  const newCardStage = newCard?.startsWith(`${entity.uniqueName}~`)
+    ? newCard.slice(entity.uniqueName.length + 1)
+    : undefined
+  const [stageKey, setStageKey] = useState<string | undefined>(() =>
+    entry.stages?.some(item => item.key === newCardStage) ? newCardStage : undefined
+  )
   const stage = entry.stages?.find(item => item.key === stageKey)
   const image = useEntityPortraitImage(entity.uniqueName, stage?.hash ?? entry.hash, 'w768')
   const ground = useEntityPortraitGround()
@@ -149,6 +171,38 @@ const StrongEntityPortraitHeader = ({
   const roles = (entry.roles ?? []).flatMap(role =>
     catalog.roles[role] ? [getEntityPortraitText(catalog.roles[role], language)] : []
   )
+  // The collected card of the portrait shown stands at the right of the frame (ADR-0090).
+  const cards = useCardCatalog()
+  const collected = useSelector((state: RootState) => state.cards.collected)
+  const cardLanguage = language === 'fr' ? 'fr' : 'en'
+  const viewOf = (cardId: string | undefined): EntityCardView | undefined => {
+    const published = cardId ? cards?.cards.find(item => item.id === cardId) : undefined
+    return published && cards
+      ? getEntityCardView(published, cards, catalog, cardLanguage)
+      : undefined
+  }
+  const stageCardId = stage ? getEntityCardId(entity.uniqueName, stage.key) : undefined
+  const shownCard =
+    viewOf(
+      stageCardId && cards?.cards.some(item => item.id === stageCardId) ? stageCardId : undefined
+    ) ?? viewOf(entity.uniqueName)
+  const revealedCard = newCard ? viewOf(newCard) : undefined
+  const [revealing, setRevealing] = useState(
+    () => DRAWS_CARDS && !!newCard && !isCardCollected(newCard, collected)
+  )
+  const [viewing, setViewing] = useState(false)
+  const shownCollected = !!shownCard && isCardCollected(shownCard.id, collected)
+  const showsSlot =
+    DRAWS_CARDS && !!shownCard && (shownCollected || (revealing && shownCard.id === newCard))
+  const slotRef = useRef<View>(null)
+  const getLandingRect = () =>
+    new Promise<WindowRect | undefined>(resolve => {
+      if (!slotRef.current) return resolve(undefined)
+      slotRef.current.measureInWindow((x, y, width, height) =>
+        resolve(width ? { x, y, width, height } : undefined)
+      )
+    })
+
   const getBookName = (book: number) => {
     const name = books.find(item => item.Numero === book)?.Nom
     return name ? t(name, { lng: language }) : String(book)
@@ -193,29 +247,66 @@ const StrongEntityPortraitHeader = ({
             </ParallaxLayer>
           )}
         </Box>
-        <VStack className="overflow-hidden border-continuous px-[8px] pt-[14px] pb-[6px] gap-[3px]">
-          <Text
-            className="text-[12px] font-semibold text-grey"
-            style={{ letterSpacing: 1.6, textTransform: 'uppercase' }}
-          >
-            {getEntityLabel(entity.category, entity.type, t)}
-          </Text>
-          <Text
-            className="text-default"
-            style={{ fontFamily: TITLE_FONT, fontSize: 32, lineHeight: 38 }}
-          >
-            {entity.name}
-          </Text>
-          {!!title && (
+        <HStack className="overflow-hidden border-continuous items-start gap-[12px] px-[8px] pt-[14px] pb-[6px]">
+          <VStack className="overflow-hidden border-continuous flex-[1] gap-[3px]">
             <Text
-              className="text-grey"
-              style={{ fontFamily: TITLE_FONT, fontSize: 17, lineHeight: 24 }}
+              className="text-[12px] font-semibold text-grey"
+              style={{ letterSpacing: 1.6, textTransform: 'uppercase' }}
             >
-              {getEntityPortraitText(title, language)}
+              {getEntityLabel(entity.category, entity.type, t)}
             </Text>
+            <Text
+              className="text-default"
+              style={{ fontFamily: TITLE_FONT, fontSize: 32, lineHeight: 38 }}
+            >
+              {entity.name}
+            </Text>
+            {!!title && (
+              <Text
+                className="text-grey"
+                style={{ fontFamily: TITLE_FONT, fontSize: 17, lineHeight: 24 }}
+              >
+                {getEntityPortraitText(title, language)}
+              </Text>
+            )}
+          </VStack>
+          {showsSlot && (
+            <View
+              ref={slotRef}
+              collapsable={false}
+              style={{
+                width: CARD_THUMBNAIL_WIDTH,
+                height: Math.round(CARD_THUMBNAIL_WIDTH * CARD_RATIO),
+                marginTop: 2,
+              }}
+            >
+              {shownCollected && shownCard && (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('entityCards.open', { name: shownCard.name })}
+                  onPress={() => setViewing(true)}
+                  style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.94 : 1 }] })}
+                >
+                  <EntityCardThumbnail card={shownCard} width={CARD_THUMBNAIL_WIDTH} />
+                </Pressable>
+              )}
+            </View>
           )}
-        </VStack>
+        </HStack>
       </Box>
+
+      {revealing && revealedCard && (
+        <CardSpotlight
+          card={revealedCard}
+          mode="reveal"
+          getLandingRect={getLandingRect}
+          onCollect={() => dispatch(collectCard({ id: revealedCard.id, collectedAt: Date.now() }))}
+          onClose={() => setRevealing(false)}
+        />
+      )}
+      {viewing && shownCard && (
+        <CardSpotlight card={shownCard} mode="view" onClose={() => setViewing(false)} />
+      )}
 
       {!!entry.stages?.length && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>

@@ -28,6 +28,8 @@ import {
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
+import { getChapterNewCards } from '~features/entity-cards/chapterCards'
+import { useCardCatalog } from '~features/lexique/entityCardManifest'
 import { useEntityPortraitCatalog } from '~features/lexique/entityPortraitManifest'
 import {
   getEntityChapterPortraitHash,
@@ -745,6 +747,22 @@ const BibleViewer = ({
       ]
     })
   )
+
+  // The painted characters whose card the reader has not collected wear a dot (ADR-0090). The
+  // Web cannot draw the cards yet: it offers none.
+  const cardCatalog = useCardCatalog()
+  const collectedCards = useSelector((state: RootState) => state.cards.collected)
+  const chapterNewCards =
+    cardCatalog && Platform.OS !== 'web'
+      ? getChapterNewCards({
+          uniqueNames: chapterEntities.map(entity => entity.uniqueName),
+          portraits: portraitCatalog,
+          cardIds: new Set(cardCatalog.cards.map(card => card.id)),
+          collected: collectedCards,
+          book: book.Numero,
+          chapter,
+        })
+      : {}
 
   const activeBibleTabId = useAtomValue(activeBibleTabIdAtom)
   // Under a verse in focus the reader gathers its study, one verse at a time (ADR-0088).
@@ -1559,6 +1577,7 @@ const BibleViewer = ({
     chapterEntities,
     chapterEntitiesLoaded,
     chapterEntityPortraits,
+    chapterNewCards,
     focusStudy,
     focusStudyTranslations,
     chapterEntityModuleStatus,

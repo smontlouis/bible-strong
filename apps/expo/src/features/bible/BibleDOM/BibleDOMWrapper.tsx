@@ -234,6 +234,8 @@ export type WebViewProps = {
   chapterEntitiesLoaded: boolean
   /** The portraits of the chapter's entities, by unique name (ADR-0089). */
   chapterEntityPortraits: EntityPortraitSources
+  /** The chapter's characters whose card is new to the reader: unique name → card (ADR-0090). */
+  chapterNewCards: Record<string, string>
   /** What the reader gathers under the studied verse of a focus (ADR-0088). */
   focusStudy?: FocusVerseStudy
   focusStudyTranslations?: FocusStudyTranslations
@@ -341,6 +343,7 @@ export const BibleDOMWrapper = ({
   chapterEntities,
   chapterEntitiesLoaded,
   chapterEntityPortraits,
+  chapterNewCards,
   focusStudy,
   focusStudyTranslations,
   chapterEntityModuleStatus,
@@ -500,6 +503,9 @@ export const BibleDOMWrapper = ({
     },
     // Keeps {{name}} for the web view, which puts each entity's name in it.
     openEntity: t('bible.chapterEntities.open', { interpolation: { skipOnVariables: true } }),
+    openNewCard: t('bible.chapterEntities.openNewCard', {
+      interpolation: { skipOnVariables: true },
+    }),
     openMap: t('bible.chapterEntities.openMap'),
     empty: t('bible.chapterEntities.empty'),
     downloadTitle: t('strongLexicon.biblicalEntities'),
@@ -693,6 +699,7 @@ export const BibleDOMWrapper = ({
         chapterEntities={chapterEntities}
         chapterEntitiesLoaded={chapterEntitiesLoaded}
         chapterEntityPortraits={chapterEntityPortraits}
+        chapterNewCards={chapterNewCards}
         focusStudy={focusStudy}
         focusStudyTranslations={focusStudyTranslations}
         chapterEntityModuleStatus={chapterEntityModuleStatus}

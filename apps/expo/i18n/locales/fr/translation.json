@@ -298,6 +298,7 @@
   "bible.chapterEntities.supernatural": "Monde surnaturel",
   "bible.chapterEntities.others": "Autres",
   "bible.chapterEntities.open": "{{name}}, voir la fiche",
+  "bible.chapterEntities.openNewCard": "{{name}}, nouvelle carte à découvrir",
   "bible.chapterEntities.openMap": "Voir les lieux sur la carte",
   "bible.chapterEntities.empty": "Aucune entité identifiée dans ce chapitre.",
   "strongLexicon.biblicalEntities": "Entités bibliques",
@@ -2980,5 +2981,10 @@
   "onboarding.abel.sceneStrobi.answer": "En hébreu, Abel se dit Hevel (H1893), le même mot que hevel (H1892) : un souffle, une buée. C’est lui qui ouvre l’Ecclésiaste : « Vanité des vanités » (Ec 1.2). Un nom qui annonce une vie brève, comme un souffle (Gn 4.8).",
   "onboarding.abel.sceneStrobi.try": "Je veux essayer",
   "onboarding.abel.sceneStrobi.later": "Plus tard",
-  "onboarding.abel.strobi.signIn": "Créez votre compte gratuit : Strobi répondra à votre première question juste après."
+  "onboarding.abel.strobi.signIn": "Créez votre compte gratuit : Strobi répondra à votre première question juste après.",
+  "entityCards.newCard": "Nouvelle carte débloquée",
+  "entityCards.collect": "Récupérer",
+  "entityCards.later": "Plus tard",
+  "entityCards.close": "Fermer",
+  "entityCards.open": "Voir la carte de {{name}}"
 }

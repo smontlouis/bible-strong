@@ -194,7 +194,10 @@ export const getEntityChapterPortraitHash = (
   entry: EntityPortraitEntry,
   book: number,
   chapter: number
-) =>
+) => getEntityChapterStage(entry, book, chapter)?.hash ?? entry.hash
+
+/** The life stage of an entity that covers a whole chapter, if one does. */
+export const getEntityChapterStage = (entry: EntityPortraitEntry, book: number, chapter: number) =>
   entry.stages?.find(stage =>
     stage.ranges.some(
       range =>
@@ -203,7 +206,7 @@ export const getEntityChapterPortraitHash = (
         chapter <= range.to &&
         (range.fromVerse === undefined || range.fromVerse === 1)
     )
-  )?.hash ?? entry.hash
+  )
 
 /** The series an entity belongs to, and its place in it, from 1. */
 export const getEntitySeriesPlace = (catalog: EntityPortraitCatalog, uniqueName: string) => {

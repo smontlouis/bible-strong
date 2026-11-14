@@ -147,7 +147,13 @@ const decodeTarget = (value: unknown): OpenTarget | undefined => {
         ...(value.occurrenceId !== undefined && { occurrenceId: value.occurrenceId as string }),
       }
     case 'biblical-entity':
-      return isText(value.entityKey) ? { kind: value.kind, entityKey: value.entityKey } : undefined
+      return isText(value.entityKey)
+        ? {
+            kind: value.kind,
+            entityKey: value.entityKey,
+            ...(isText(value.newCard) && { newCard: value.newCard }),
+          }
+        : undefined
     case 'map':
       return isTextList(value.places) ? { kind: value.kind, places: value.places } : undefined
     case 'tag':
@@ -539,7 +545,7 @@ export const applyOpenIntent = async (intent: OpenIntent, context: OpenContext) 
             bibleVersion: data.selectedVersion,
             bibleChapter: data.selectedChapter,
           },
-          { entityKey: target.entityKey }
+          { entityKey: target.entityKey, newCard: target.newCard }
         )
       )
       return

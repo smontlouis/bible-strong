@@ -60,7 +60,8 @@ export type OpenTarget =
       word?: string
       occurrenceId?: string
     }
-  | { kind: 'biblical-entity'; entityKey: string }
+  /** A character's page; `newCard` when the chapter offers a card the reader has not collected. */
+  | { kind: 'biblical-entity'; entityKey: string; newCard?: string }
   /** The places of the chapter on the map, by unique name. */
   | { kind: 'map'; places: string[] }
   | { kind: 'tag'; tagId: string }

@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted (2026-10-28).
+Accepted (2026-10-28). Amended 2026-11-14: how a card is found, collected and drawn in the
+application (below).
 
 ## Context
 
@@ -304,3 +305,59 @@ are left for a later decision. The screen keeps room for a Trophées tab beside 
 - A portrait published later needs its sentence, in both languages, and its backdrop before its
   card is published; a moment no backdrop fits needs a new one painted.
 - The backdrops are a third set of images to publish with the portraits and the catalog.
+
+## Amendment of 2026-11-14: a dot in the chapter, the card over the character's page
+
+The owner reworked how a reader meets a card, after the cards were drawn natively. This replaces
+« A card is collected by tapping it at the end of a chapter » and « The album » where they differ;
+the catalog, the identities, the families, the finishes and the storage stay as decided.
+
+### The chapter keeps its avatars
+
+The painted characters stay in the chapter's grid as the avatars they are today: they do not turn
+into small cards. A character whose card the chapter offers and the reader has not collected wears a
+small gold dot at the bottom right of its avatar. A collected card, and God's, wear none. Nothing
+else marks it: no shine, no count, no order of its own in the grid.
+
+### The card rises over the character's page
+
+Tapping an avatar opens the character's page, as before, whether or not its card is new. When it
+is, an overlay comes over that page at once, above the sheet that holds it: « Nouvelle carte
+débloquée », and the card large, tilting with the phone or the finger and turning over at a touch.
+The card enters the collection only when the reader taps « Récupérer »: it then flies to its place
+in the page's header, with a haptic on native. Closing the overlay without collecting leaves the
+card new, its dot still on the avatar. With reduced motion the card is shown and leaves without
+flying.
+
+A card is still collected nowhere else.
+
+### The card in the character's header
+
+Once collected, a small copy of the card stands at the right of the portrait frame of the
+character's page, for the portrait the page shows: the base card, or the card of the life stage
+chosen there. Tapping it opens the card large. A card not collected leaves no trace there.
+
+### The album opens from the home
+
+The album opens from the home page rather than from the profile. Its place on the home is decided
+when the album is built; what it shows stays as decided above.
+
+### How a card is drawn
+
+The application draws a card as the public atlas does (ADR-0092), layer for layer: on iOS and
+Android with React Native Skia, the CSS blend modes becoming Skia layers and the CSS filters colour
+matrices; on the Web and in the desktop app with the atlas's own CSS card. The card turns in Skia's
+own perspective: a native 3D transform cuts a turning card where it crosses the plane of the screen.
+
+The application keeps the whole card catalog on the device, its texts in both languages and its
+sentences, and no longer the backdrops alone.
+
+### Consequences
+
+- React Native Skia is a native dependency: the first store build that carries the cards takes a
+  new runtime, and no update reaches the builds before it.
+- A reader who closes the overlay can collect the card later from the same chapter, or from any
+  chapter that offers it.
+- The character's page gains a second way to open a card large; the chapter's grid keeps its
+  layout.
+

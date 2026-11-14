@@ -76,6 +76,8 @@ export type GuestDataSnapshot = {
   subcollections: GuestDataSubcollections
   settings: AccountSyncedBibleSettings
   plan: RootState['plan']['ongoingPlans']
+  /** The collected cards (ADR-0090); absent from the snapshots taken before them. */
+  cards?: Record<string, number>
   tabGroups: GuestAdoptionTabGroup[]
 }
 
@@ -311,6 +313,9 @@ export const createGuestDataSnapshot = ({
     },
     settings: pickAccountSyncedSettings(bible.settings),
     plan: cloneJson(state.plan.ongoingPlans),
+    ...(Object.keys(state.cards.collected).length
+      ? { cards: cloneJson(state.cards.collected) }
+      : {}),
     tabGroups: sanitizeTabGroups(tabGroups),
   })
 
@@ -335,6 +340,7 @@ export const createGuestSnapshotImportData = (
   },
   studies: {},
   plan: cloneJson(snapshot.plan),
+  ...(snapshot.cards ? { cards: cloneJson(snapshot.cards) } : {}),
   tabGroups: snapshot.tabGroups.map(group => ({
     ...cloneJson(group),
     activeTabIndex: 0,
@@ -374,6 +380,7 @@ const isGuestDataSnapshot = (value: unknown): value is GuestDataSnapshot => {
       'subcollections',
       'settings',
       'plan',
+      'cards',
       'tabGroups',
     ]) ||
     value.schemaVersion !== GUEST_DATA_SNAPSHOT_SCHEMA_VERSION ||
@@ -382,6 +389,9 @@ const isGuestDataSnapshot = (value: unknown): value is GuestDataSnapshot => {
     !isRecord(value.subcollections) ||
     !isRecord(value.settings) ||
     !Array.isArray(value.plan) ||
+    (value.cards !== undefined &&
+      (!isRecord(value.cards) ||
+        Object.values(value.cards).some(collectedAt => typeof collectedAt !== 'number'))) ||
     !Array.isArray(value.tabGroups)
   ) {
     return false
@@ -705,6 +715,7 @@ const writeSnapshot = async ({
     id: userId,
     bible: { settings: snapshot.settings },
     plan: snapshot.plan,
+    ...(snapshot.cards ? { cards: snapshot.cards } : {}),
   })
 
   const tabGroupDocuments = snapshot.tabGroups.reduce<JsonRecord>((result, group) => {

@@ -35,6 +35,7 @@ type ChapterEntityTranslations = {
   title: string
   groups: Record<StrongLexiconEntityCategory, string>
   openEntity: string
+  openNewCard: string
   openMap: string
   empty: string
   downloadTitle: string
@@ -52,11 +53,50 @@ type Props = RootStyles & {
   downloadState: BibleDOMDownloadState
   translations: ChapterEntityTranslations
   chapterResources?: ReactNode
-  onOpenEntity: (uniqueName: string) => void
+  /** The characters whose card is new to the reader: unique name → card (ADR-0090). */
+  newCards?: Record<string, string>
+  /** Opens the character's page, with its new card when it has one. */
+  onOpenEntity: (uniqueName: string, newCard?: string) => void
   /** The map of the places of the Bible, the places of this chapter brought forward. */
   onOpenMap: (uniqueNames: string[]) => void
   onDownload: () => void
   onDismiss: () => void
+}
+
+/**
+ * A character whose card the reader has not collected: a small gold dot at the foot of its avatar
+ * (ADR-0090), breathing once in a while unless motion is reduced.
+ */
+const NewCardDot = ({ ring }: { ring: string }) => {
+  const shouldReduceMotion = useReducedMotion()
+  return (
+    <m.span
+      aria-hidden
+      initial={false}
+      animate={
+        shouldReduceMotion
+          ? undefined
+          : {
+              boxShadow: [
+                `0 0 0 0 rgba(242, 190, 74, 0.55), 0 1px 3px rgba(0, 0, 0, 0.25)`,
+                `0 0 0 6px rgba(242, 190, 74, 0), 0 1px 3px rgba(0, 0, 0, 0.25)`,
+              ],
+            }
+      }
+      transition={{ duration: 1.6, repeat: Infinity, repeatDelay: 2.4, ease: 'easeOut' }}
+      style={{
+        position: 'absolute',
+        right: -3,
+        bottom: -3,
+        width: 15,
+        height: 15,
+        borderRadius: 999,
+        border: `2px solid ${ring}`,
+        background: 'radial-gradient(circle at 35% 30%, #fff1b8 0%, #f2c14e 45%, #d39a1f 100%)',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.25)',
+      }}
+    />
+  )
 }
 
 const ChapterEntities = ({
@@ -68,6 +108,7 @@ const ChapterEntities = ({
   settings,
   translations,
   chapterResources,
+  newCards,
   onOpenEntity,
   onOpenMap,
   onDownload,
@@ -163,9 +204,12 @@ const ChapterEntities = ({
                 type="button"
                 className="chapter-entity-button"
                 data-ignore-verse-touch
-                aria-label={translations.openEntity.replace('{{name}}', entity.name)}
+                aria-label={(newCards?.[entity.uniqueName]
+                  ? translations.openNewCard
+                  : translations.openEntity
+                ).replace('{{name}}', entity.name)}
                 whileTap={{ opacity: 0.55, scale: 0.97 }}
-                onClick={() => onOpenEntity(entity.uniqueName)}
+                onClick={() => onOpenEntity(entity.uniqueName, newCards?.[entity.uniqueName])}
                 style={{
                   width: 74,
                   justifySelf: 'center',
@@ -178,21 +222,30 @@ const ChapterEntities = ({
                   cursor: 'pointer',
                 }}
               >
-                <img
-                  {...getChapterEntityAvatar(entity, portraits)}
-                  alt=""
+                <span
                   style={{
+                    position: 'relative',
                     display: 'block',
                     width: AVATAR_SIZE,
-                    height: AVATAR_SIZE,
                     margin: '0 auto 6px',
-                    border: `2px solid ${colors.reverse}`,
-                    borderRadius: getEntityAvatarRadius(AVATAR_SIZE),
-                    background: portraitGround,
-                    boxShadow: CHAPTER_ENTITY_AVATAR_SHADOW,
-                    objectFit: 'cover',
                   }}
-                />
+                >
+                  <img
+                    {...getChapterEntityAvatar(entity, portraits)}
+                    alt=""
+                    style={{
+                      display: 'block',
+                      width: AVATAR_SIZE,
+                      height: AVATAR_SIZE,
+                      border: `2px solid ${colors.reverse}`,
+                      borderRadius: getEntityAvatarRadius(AVATAR_SIZE),
+                      background: portraitGround,
+                      boxShadow: CHAPTER_ENTITY_AVATAR_SHADOW,
+                      objectFit: 'cover',
+                    }}
+                  />
+                  {newCards?.[entity.uniqueName] && <NewCardDot ring={colors.reverse} />}
+                </span>
                 <span
                   style={{
                     display: '-webkit-box',

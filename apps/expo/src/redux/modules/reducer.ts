@@ -4,6 +4,7 @@ import { persistReducer, type PersistConfig } from 'redux-persist'
 
 import { storage } from '~helpers/storage'
 import { createKeyedPersistStorage } from '~redux/keyedPersistStorage'
+import cards from './cards'
 import plan from './plan'
 import user from './user'
 
@@ -25,6 +26,7 @@ const planPersistConfig: PersistConfig<PlanState> & { deserialize: false } = {
 const rootReducer = combineReducers({
   user,
   plan: persistReducer(planPersistConfig, plan),
+  cards,
 })
 
 export default rootReducer

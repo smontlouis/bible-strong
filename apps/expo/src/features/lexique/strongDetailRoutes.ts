@@ -14,6 +14,8 @@ export type StrongDetailRouteContext = StrongTab['data']
 
 export type StrongDetailRouteOptions = {
   entityKey?: string
+  /** A card the chapter offers and the reader has not collected: the page shows it (ADR-0090). */
+  newCard?: string
 }
 
 const STRONG_DETAIL_PATHNAMES = {
@@ -79,6 +81,7 @@ export const createStrongDetailRoute = (
         ? JSON.stringify(context.morphologyCodes)
         : undefined,
       entityKey: publicEntityPath ? undefined : options.entityKey,
+      newCard: page === 'entity' ? options.newCard : undefined,
     }),
   }
 }

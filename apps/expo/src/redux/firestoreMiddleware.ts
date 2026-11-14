@@ -120,6 +120,7 @@ import {
   startPlan,
   setPlanReminder,
 } from './modules/plan'
+import { collectCard, parseCollectedCards } from './modules/cards'
 import { canonicalizeImportedDataForFirestore } from './firestoreImportDataCanonicalization'
 import { buildCompareSettingsWrite } from './compareSelectionSync'
 import { createStudySyncIntent } from './studySyncIntent'
@@ -666,6 +667,25 @@ const firestoreMiddleware: Middleware = store => next => async action => {
     return result
   }
 
+  // ========== CARDS SYNC (ADR-0090) ==========
+  // One entry per write, merged into the `cards` map: two installs keep each other's cards. The
+  // map is written as an object, never as a dotted field path, since card identities hold `@`
+  // and `.`.
+  if (collectCard.match(action)) {
+    const { id } = action.payload
+    const collectedAt = state.cards.collected[id]
+    if (collectedAt === undefined || oldState.cards.collected[id] === collectedAt) return result
+    const data = { cards: { [id]: collectedAt } }
+    const intent: FirestoreSyncIntent = {
+      kind: 'document-set',
+      path: ['users', userId],
+      data,
+      merge: true,
+    }
+    await syncIntents('cards_sync', [intent], () => setDoc(userDocRef, data, { merge: true }))
+    return result
+  }
+
   // ========== SETTINGS SYNC (reste dans le document user) ==========
   if (isSettingsAction(action)) {
     const comparisonWrite =
@@ -992,9 +1012,12 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       bible,
       studies,
       plan: importedPlan,
+      cards: importedCardEntries,
     } = canonicalizeImportedDataForFirestore(action.payload) as ImportDataPayload & {
       plan?: RootState['plan']['ongoingPlans']
     }
+    const importedCards = parseCollectedCards(importedCardEntries)
+    const hasImportedCards = !!importedCards && Object.keys(importedCards).length > 0
     const importedBible = bible as unknown as Record<string, unknown>
     const importFallbackIntents: FirestoreSyncIntent[] = SUBCOLLECTION_NAMES.flatMap(collection => {
       if (collection === 'tabGroups') return []
@@ -1022,6 +1045,14 @@ const firestoreMiddleware: Middleware = store => next => async action => {
         kind: 'document-set',
         path: ['users', userId],
         data: { plan: removeUndefinedVariables(importedPlan) },
+        merge: true,
+      })
+    }
+    if (hasImportedCards) {
+      importFallbackIntents.push({
+        kind: 'document-set',
+        path: ['users', userId],
+        data: { cards: importedCards },
         merge: true,
       })
     }
@@ -1057,9 +1088,14 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       if (importedPlan) {
         await setDoc(userDocRef, { plan: removeUndefinedVariables(importedPlan) }, { merge: true })
       }
+
+      // 4. Sync the collected cards, merged into the account's
+      if (hasImportedCards) {
+        await setDoc(userDocRef, { cards: importedCards }, { merge: true })
+      }
     })
 
-    // 4. Sync studies (collection séparée)
+    // 5. Sync studies (collection séparée)
     if (studies && Object.keys(studies).length > 0) {
       try {
         await Promise.all(

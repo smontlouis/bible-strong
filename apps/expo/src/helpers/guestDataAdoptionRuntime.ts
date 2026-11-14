@@ -29,6 +29,8 @@ export const firebaseGuestAdoptionRemote: GuestAdoptionRemote = {
       'bible.settings': bible.settings,
       plan: document.plan,
     })
+    // The collected cards merge into the account's, as an object: their identities hold dots.
+    if (document.cards) await setDoc(userDocument, { cards: document.cards }, { merge: true })
   },
   async waitForPendingWrites() {
     await waitForPendingWrites(firebaseDb)
