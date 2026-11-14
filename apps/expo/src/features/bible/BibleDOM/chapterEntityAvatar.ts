@@ -4,6 +4,11 @@ import type { StrongEntityPresentationKind } from '~features/lexique/strongEntit
 import type { StrongLexiconChapterEntity } from '~features/resources/strongLexiconAccess'
 import type { SyntheticEvent } from 'react'
 
+/** The side of a chapter's avatar, inside its 2-point white contour. */
+export const CHAPTER_ENTITY_AVATAR_SIZE = 62
+/** The contour of a chapter's avatar, drawn outside its side. */
+export const CHAPTER_ENTITY_AVATAR_BORDER = 2
+
 type RasterAsset = string | { uri?: string; default?: string }
 
 const resolveRasterAssetUri = (source: RasterAsset): string =>

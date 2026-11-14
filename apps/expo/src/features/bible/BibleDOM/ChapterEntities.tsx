@@ -10,7 +10,11 @@ import type {
 import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
 import type { BibleDOMDownloadState, RootStyles } from './BibleDOMWrapper'
 import ChapterEntitiesOverlay from './ChapterEntitiesOverlay'
-import { CHAPTER_ENTITY_AVATAR_SHADOW, getChapterEntityAvatar } from './chapterEntityAvatar'
+import {
+  CHAPTER_ENTITY_AVATAR_SHADOW,
+  CHAPTER_ENTITY_AVATAR_SIZE,
+  getChapterEntityAvatar,
+} from './chapterEntityAvatar'
 import {
   getEntityAvatarRadius,
   getEntityPortraitGround,
@@ -22,7 +26,7 @@ import { getOverlayLayoutTransition } from './overlayStagger'
 import { isDarkTheme } from './utils'
 
 const MAX_STACKED_ENTITIES = 3
-const AVATAR_SIZE = 62
+const AVATAR_SIZE = CHAPTER_ENTITY_AVATAR_SIZE
 /** A column of the grid: as wide as the widest tile, the download tile. */
 const GRID_COLUMN = 82
 

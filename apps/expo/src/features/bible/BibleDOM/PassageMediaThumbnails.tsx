@@ -2,7 +2,9 @@ import { LayoutGroup, m, useMotionValue, useReducedMotion } from 'motion/react'
 import { useEffect, useId, useRef, useState, type CSSProperties } from 'react'
 import { radii } from '~common/ui/surfaces'
 import type { ResolvedPassageMedia } from '../passageMedia'
+import { getEntityAvatarRadius } from '~features/lexique/entityPortraits'
 import type { RootStyles } from './BibleDOMWrapper'
+import { CHAPTER_ENTITY_AVATAR_BORDER, CHAPTER_ENTITY_AVATAR_SIZE } from './chapterEntityAvatar'
 import { getDisabledStyles } from './disabledStyles'
 import { useBibleOverlayOpen } from './overlayLifecycle'
 import { getOverlayLayoutTransition } from './overlayStagger'
@@ -40,8 +42,10 @@ const COMPACT_INTRODUCTION_THUMBNAIL = {
   margin: '-18px 0 20px',
 }
 
+// Among the chapter's avatars, a media card keeps its own shape but takes their height, contour
+// included, and their rounding.
 const CHAPTER_RESOURCES_THUMBNAIL = {
-  height: 76,
+  height: CHAPTER_ENTITY_AVATAR_SIZE + 2 * CHAPTER_ENTITY_AVATAR_BORDER,
   aspectRatio: 16 / 9,
   margin: '42px auto 0',
 }
@@ -218,8 +222,14 @@ const PassageMediaThumbnails = ({
                 boxSizing: 'border-box',
                 placeSelf: 'center',
                 border: `2px solid ${colors.reverse}`,
-                // Set in a verse, a thumbnail is a mark; elsewhere, a tile
-                borderRadius: isInline && !isCompact ? radii.mark : radii.tile,
+                // Set in a verse, a thumbnail is a mark; among the chapter's avatars, it is
+                // rounded like them; elsewhere, a tile
+                borderRadius:
+                  isInline && !isCompact
+                    ? radii.mark
+                    : placement === 'chapter-resources'
+                      ? getEntityAvatarRadius(CHAPTER_ENTITY_AVATAR_SIZE)
+                      : radii.tile,
                 x: transform.x,
                 rotate: transform.rotate,
                 transformOrigin: 'center',
