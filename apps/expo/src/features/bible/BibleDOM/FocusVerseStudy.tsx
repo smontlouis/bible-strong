@@ -198,6 +198,34 @@ const FocusVerseStudy = ({
   const strongColors = resolveUniverseColors(colors, 'strong')
   const studyVerse = Number(study.verseKey.split('-')[2])
   const verseEntities = entities.filter(entity => entity.verses.includes(studyVerse))
+  const hasSeveralVerses = study.studyVerses.length > 1
+  const studyIndex = study.studyVerses.indexOf(studyVerse)
+  const previousVerse = studyIndex > 0 ? study.studyVerses[studyIndex - 1] : undefined
+  const nextVerse = studyIndex >= 0 ? study.studyVerses[studyIndex + 1] : undefined
+  const verseArrow = (direction: 'previous' | 'next', verse: number | undefined) => (
+    <Pressable
+      type="button"
+      disabled={verse === undefined}
+      aria-label={direction === 'previous' ? translations.previousVerse : translations.nextVerse}
+      onClick={() => verse !== undefined && send({ kind: 'study-verse', verse })}
+      style={{
+        display: 'grid',
+        flex: 'none',
+        width: 36,
+        height: 36,
+        placeItems: 'center',
+        borderRadius: radii.pill,
+        background: colors.surface,
+        // At an end the arrow keeps its place, so that the title stays centred.
+        opacity: verse === undefined ? 0.35 : 1,
+        cursor: verse === undefined ? 'default' : 'pointer',
+        transform: direction === 'previous' ? 'scaleX(-1)' : undefined,
+      }}
+    >
+      <ChevronRight color={colors.link} />
+    </Pressable>
+  )
+
   const portraitGround = getEntityPortraitGround(isDarkTheme(settings.theme), colors)
 
   return (
@@ -228,43 +256,26 @@ const FocusVerseStudy = ({
           box-decoration-break: clone;
         }`}</style>
       )}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <h2 style={{ margin: '0 4px', fontSize: 22, fontWeight: 600, letterSpacing: '-0.01em' }}>
+      {/* In a focus of several verses, arrows on each side of the title walk the studied verse. */}
+      <div
+        role={hasSeveralVerses ? 'group' : undefined}
+        aria-label={hasSeveralVerses ? translations.studyVerse : undefined}
+        style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+      >
+        {hasSeveralVerses && verseArrow('previous', previousVerse)}
+        <h2
+          style={{
+            flex: 1,
+            margin: '0 4px',
+            fontSize: 22,
+            fontWeight: 600,
+            letterSpacing: '-0.01em',
+            textAlign: hasSeveralVerses ? 'center' : undefined,
+          }}
+        >
           {translations.title}
         </h2>
-        {study.studyVerses.length > 1 && (
-          <div
-            role="group"
-            aria-label={translations.studyVerse}
-            style={{ display: 'flex', flexWrap: 'wrap', gap: 8, padding: '0 4px' }}
-          >
-            {study.studyVerses.map(verse => {
-              const selected = verse === studyVerse
-              return (
-                <Pressable
-                  key={verse}
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() => send({ kind: 'study-verse', verse })}
-                  style={{
-                    minWidth: 52,
-                    height: 36,
-                    padding: '0 14px',
-                    borderRadius: radii.pill,
-                    border: `1px solid ${selected ? colors.link : 'transparent'}`,
-                    background: colors.surface,
-                    color: selected ? colors.link : colors.default,
-                    fontSize: 15,
-                    fontWeight: 600,
-                    textAlign: 'center',
-                  }}
-                >
-                  v. {verse}
-                </Pressable>
-              )
-            })}
-          </div>
-        )}
+        {hasSeveralVerses && verseArrow('next', nextVerse)}
       </div>
 
       {study.versions === undefined

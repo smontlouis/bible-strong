@@ -284,6 +284,8 @@
   "bible.focusStudy.dictionary": "In the dictionaries",
   "bible.focusStudy.entities": "People and places",
   "bible.focusStudy.studyVerse": "Studied verse",
+  "bible.focusStudy.previousVerse": "Previous verse",
+  "bible.focusStudy.nextVerse": "Next verse",
   "bible.chapterEntities.title": "In this chapter",
   "bible.chapterEntities.people": "People",
   "bible.chapterEntities.places": "Places",

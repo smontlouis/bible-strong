@@ -796,6 +796,8 @@ const BibleViewer = ({
     topics: t('bible.focusStudy.topics'),
     dictionary: t('bible.focusStudy.dictionary'),
     studyVerse: t('bible.focusStudy.studyVerse'),
+    previousVerse: t('bible.focusStudy.previousVerse'),
+    nextVerse: t('bible.focusStudy.nextVerse'),
   }
   // Shared Bible DOM: detect if this tab is the active Bible tab
   const setSharedProps = useSetAtom(sharedBibleDOMPropsAtom)

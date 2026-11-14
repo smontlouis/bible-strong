@@ -70,4 +70,6 @@ export type FocusStudyTranslations = {
   dictionary: string
   entities: string
   studyVerse: string
+  previousVerse: string
+  nextVerse: string
 }

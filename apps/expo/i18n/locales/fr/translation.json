@@ -289,6 +289,8 @@
   "bible.focusStudy.dictionary": "Dans les dictionnaires",
   "bible.focusStudy.entities": "Personnages et lieux",
   "bible.focusStudy.studyVerse": "Verset étudié",
+  "bible.focusStudy.previousVerse": "Verset précédent",
+  "bible.focusStudy.nextVerse": "Verset suivant",
   "bible.chapterEntities.title": "Dans ce chapitre",
   "bible.chapterEntities.people": "Personnages",
   "bible.chapterEntities.places": "Lieux",
