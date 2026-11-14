@@ -25,8 +25,11 @@ const BUTTON_SIZE = DISC_SIZE + RING_WIDTH * 2
 const AVATAR_SIZE = 54
 const RING_COLOR = 'rgba(91, 127, 229, 0.5)'
 const IDLE_RING_COLOR = 'rgba(122, 122, 122, 0.5)'
-// Left alone this long, the button fades and greys out until it is touched again.
-const IDLE_AFTER_MS = 5000
+// Left alone this long, Strobi falls asleep, still in colour.
+const ASLEEP_AFTER_MS = 5000
+// Once it has dozed off, the button fades and greys out, Strobi held in its sleeping pose,
+// until it is touched again.
+const IDLE_AFTER_MS = ASLEEP_AFTER_MS + 3000
 // While the assistant is open, the button slips 60 pt out toward its edge and fades, quickly,
 // then comes back with a small bounce: the springs of Expo's button window.
 const HIDE_OFFSET = 60
@@ -73,8 +76,8 @@ type Props = {
   onPress: () => void
   onDragStart: () => void
   onDragEnd: () => void
-  /** The button went idle (greyed out) or was touched again. */
-  onIdleChange: (idle: boolean) => void
+  /** Strobi fell asleep, left alone, or was touched again. */
+  onAsleepChange: (asleep: boolean) => void
 }
 
 /**
@@ -89,10 +92,11 @@ export default function AssistantLauncherButton({
   onPress,
   onDragStart,
   onDragEnd,
-  onIdleChange,
+  onAsleepChange,
 }: Props) {
   const insets = useSafeAreaInsets()
   const [layout, setLayout] = useState<LayoutRectangle | null>(null)
+  const [asleep, setAsleep] = useState(false)
   const [idle, setIdle] = useState(false)
   // Each release restarts the wait before the button goes idle.
   const [releasedAt, setReleasedAt] = useState(0)
@@ -101,18 +105,26 @@ export default function AssistantLauncherButton({
 
   useEffect(() => {
     if (touching) return
-    const timer = setTimeout(() => setIdle(true), IDLE_AFTER_MS)
-    return () => clearTimeout(timer)
+    // It falls asleep first, then the button greys out: the reader sees it doze off.
+    const asleepTimer = setTimeout(() => setAsleep(true), ASLEEP_AFTER_MS)
+    const idleTimer = setTimeout(() => setIdle(true), IDLE_AFTER_MS)
+    return () => {
+      clearTimeout(asleepTimer)
+      clearTimeout(idleTimer)
+    }
   }, [touching, releasedAt])
 
-  const reportIdle = useEffectEvent((value: boolean) => onIdleChange(value))
+  const reportAsleep = useEffectEvent((value: boolean) => onAsleepChange(value))
+  useEffect(() => {
+    reportAsleep(asleep)
+  }, [asleep])
   useEffect(() => {
     idleProgress.set(withTiming(idle ? 1 : 0, { duration: 300 }))
-    reportIdle(idle)
   }, [idle, idleProgress])
 
   const wake = () => {
     setTouching(true)
+    setAsleep(false)
     setIdle(false)
   }
   const release = () => {
@@ -140,7 +152,8 @@ export default function AssistantLauncherButton({
     hideOffset.set(direction * HIDE_OFFSET)
     hideOffset.set(withSpring(0, SHOW_SPRING))
     visibility.set(withSpring(1, SHOW_SPRING))
-    // Back on screen, it is awake and waits again before going idle.
+    // Back on screen, it is awake and waits again before falling asleep.
+    setAsleep(false)
     setIdle(false)
     setReleasedAt(Date.now())
   })

@@ -101,8 +101,9 @@ Reanimated frame callback (Bundle Mode forwards `@bible-strong/avatar-core` ther
 `babel.config.js`). The file is of the first format: the package keeps only its character, and
 each of its animation names is a state of the shared catalogue, passed as `state`. The avatar
 always moves (`idle` plays its clips round and round); the callback stops while the app is not
-active, and once `settleAfterMs` has passed with the eyes open. The greyed floating button passes
-`settleAfterMs` as soon as it is muted, so that it stops in its sleeping pose. Do not run the
+active, and once `settleAfterMs` has passed with the eyes open. Left alone 5 s, the floating button's
+Strobi falls asleep in colour; 3 s later the button greys out and the avatar, muted, is paused in
+its sleeping pose (settling would not hold it, since it waits for the eyes to be open). Do not run the
 avatar on the JS thread again: a `requestAnimationFrame` loop there cost 12–19 % CPU at rest and,
 with the app in background where nothing paces `requestAnimationFrame`, spun at 100 % CPU while
 the heap grew by about 40 MB a minute until taps no longer reached JavaScript (2026-10-21). A

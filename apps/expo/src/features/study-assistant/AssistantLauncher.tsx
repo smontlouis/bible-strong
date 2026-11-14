@@ -62,7 +62,7 @@ function AccountAssistant({ account }: { account: string }) {
   const publish = useSetAtom(assistantPageAtom)
   const [historyOpen, setHistoryOpen] = useState(false)
   const [source, setSource] = useState<StudySource | null>(null)
-  // Strobi falls asleep when its button goes idle, and wakes up with it.
+  // Strobi falls asleep when its button is left alone, and wakes up when it is touched.
   const [avatarSleeping, setAvatarSleeping] = useState(false)
   const [avatarDragged, setAvatarDragged] = useState(false)
   const [dictationState, setDictationState] = useState<DictationState>('idle')
@@ -183,7 +183,7 @@ function AccountAssistant({ account }: { account: string }) {
         onPress={() => {
           if (!open) router.push(ASSISTANT_PATH)
         }}
-        onIdleChange={setAvatarSleeping}
+        onAsleepChange={setAvatarSleeping}
         onDragStart={() => setAvatarDragged(true)}
         onDragEnd={() => setAvatarDragged(false)}
       />

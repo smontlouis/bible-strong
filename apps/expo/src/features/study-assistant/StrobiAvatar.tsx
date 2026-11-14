@@ -23,7 +23,11 @@ export default function StrobiAvatar({
 }: {
   animation: StrobiAnimation
   size: number
-  /** Greyed out, as a floating button left idle: it stops computing once its pose is held. */
+  /**
+   * Greyed out, as a floating button left idle: it stops where it is and computes nothing, in
+   * whatever pose it reached (asleep, for the floating button). Settling would not hold a pose
+   * with the eyes closed.
+   */
   muted?: boolean
   /**
    * Holds the pose this long after the last change, eyes open, and stops computing frames: for
@@ -38,7 +42,8 @@ export default function StrobiAvatar({
       size={size}
       accessibilityLabel="Strobi"
       muted={muted}
-      settleAfterMs={muted ? 1 : settleAfterMs}
+      paused={muted}
+      settleAfterMs={settleAfterMs}
     />
   )
 }
