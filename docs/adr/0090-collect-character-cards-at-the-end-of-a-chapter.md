@@ -324,7 +324,7 @@ else marks it: no shine, no count, no order of its own in the grid.
 Tapping an avatar opens the character's page, as before, whether or not its card is new. When it
 is, an overlay comes over that page at once, above the sheet that holds it: « Nouvelle carte
 débloquée », and the card large, tilting with the phone or the finger and turning over at a touch.
-The card enters the collection only when the reader taps « Récupérer »: it then flies to its place
+The card enters the collection only when the reader taps « Récupérer »: it then flies onto its icon
 in the page's header, with a haptic on native. Closing the overlay without collecting leaves the
 card new, its dot still on the avatar. With reduced motion the card is shown and leaves without
 flying.
@@ -333,9 +333,11 @@ A card is still collected nowhere else.
 
 ### The card in the character's header
 
-Once collected, a small copy of the card stands at the right of the portrait frame of the
-character's page, for the portrait the page shows: the base card, or the card of the life stage
-chosen there. Tapping it opens the card large. A card not collected leaves no trace there.
+A small card icon stands at the right of the portrait frame of the character's page, for the
+portrait the page shows: the base card, or the card of the life stage chosen there. It is grey and
+empty until the reader collects that card, then gold like the dot that announced it; a small copy
+of the card itself was tried and set aside, too small to read. Tapping the gold icon opens the card
+large; the grey one does nothing.
 
 ### The album opens from the home
 

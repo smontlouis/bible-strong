@@ -13,10 +13,9 @@ import { FeatherIcon } from '~common/ui/Icon'
 import IconTile from '~common/ui/IconTile'
 import Text from '~common/ui/Text'
 import { getEntityCardView, type EntityCardView } from '~features/entity-cards/cardCatalog'
-import { CARD_RATIO } from '~features/entity-cards/cardGeometry'
+import { CardIcon, CARD_ICON_HEIGHT, CARD_ICON_WIDTH } from '~features/entity-cards/CardIcon'
 import { CardSpotlight, type WindowRect } from '~features/entity-cards/CardSpotlight'
 import { isCardCollected } from '~features/entity-cards/chapterCards'
-import { EntityCardThumbnail } from '~features/entity-cards/EntityCardThumbnail'
 import type { StrongLexiconEntity } from '~features/resources/strongLexiconAccess'
 import { collectCard } from '~redux/modules/cards'
 import type { RootState } from '~redux/modules/reducer'
@@ -43,10 +42,6 @@ import { useEntityPortraitImage } from './useEntityPortraitImage'
 
 const STAGE_TILE_SIZE = 92
 const TITLE_FONT = 'Literata Book'
-/** The copy of a collected card at the right of the portrait frame. */
-const CARD_THUMBNAIL_WIDTH = 46
-/** The cards are drawn with Skia on iOS and Android; the Web draws the atlas's CSS card. */
-const DRAWS_CARDS = Platform.OS !== 'web'
 
 const StageTile = ({
   uniqueName,
@@ -188,12 +183,10 @@ const StrongEntityPortraitHeader = ({
     ) ?? viewOf(entity.uniqueName)
   const revealedCard = newCard ? viewOf(newCard) : undefined
   const [revealing, setRevealing] = useState(
-    () => DRAWS_CARDS && !!newCard && !isCardCollected(newCard, collected)
+    () => !!newCard && !isCardCollected(newCard, collected)
   )
   const [viewing, setViewing] = useState(false)
   const shownCollected = !!shownCard && isCardCollected(shownCard.id, collected)
-  const showsSlot =
-    DRAWS_CARDS && !!shownCard && (shownCollected || (revealing && shownCard.id === newCard))
   const slotRef = useRef<View>(null)
   const getLandingRect = () =>
     new Promise<WindowRect | undefined>(resolve => {
@@ -270,27 +263,28 @@ const StrongEntityPortraitHeader = ({
               </Text>
             )}
           </VStack>
-          {showsSlot && (
-            <View
+          {/* The card of the portrait shown: grey until collected, then gold; it opens large. */}
+          {shownCard && (
+            <Pressable
               ref={slotRef}
               collapsable={false}
-              style={{
-                width: CARD_THUMBNAIL_WIDTH,
-                height: Math.round(CARD_THUMBNAIL_WIDTH * CARD_RATIO),
-                marginTop: 2,
-              }}
+              disabled={!shownCollected}
+              accessibilityRole={shownCollected ? 'button' : 'image'}
+              accessibilityLabel={t(shownCollected ? 'entityCards.open' : 'entityCards.notFound', {
+                name: shownCard.name,
+              })}
+              onPress={() => setViewing(true)}
+              hitSlop={12}
+              style={({ pressed }) => ({
+                width: CARD_ICON_WIDTH,
+                height: CARD_ICON_HEIGHT,
+                marginTop: 6,
+                marginRight: 4,
+                transform: [{ scale: pressed ? 0.9 : 1 }],
+              })}
             >
-              {shownCollected && shownCard && (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t('entityCards.open', { name: shownCard.name })}
-                  onPress={() => setViewing(true)}
-                  style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.94 : 1 }] })}
-                >
-                  <EntityCardThumbnail card={shownCard} width={CARD_THUMBNAIL_WIDTH} />
-                </Pressable>
-              )}
-            </View>
+              <CardIcon collected={shownCollected} />
+            </Pressable>
           )}
         </HStack>
       </Box>

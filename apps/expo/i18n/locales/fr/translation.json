@@ -2986,5 +2986,6 @@
   "entityCards.collect": "Récupérer",
   "entityCards.later": "Plus tard",
   "entityCards.close": "Fermer",
-  "entityCards.open": "Voir la carte de {{name}}"
+  "entityCards.open": "Voir la carte de {{name}}",
+  "entityCards.notFound": "La carte de {{name}}, pas encore trouvée"
 }

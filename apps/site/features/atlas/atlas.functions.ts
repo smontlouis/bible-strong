@@ -26,10 +26,10 @@ import {
   atlasGalleryCards,
   ENTITY_CARD_BASE_URL,
   parseCardCatalog,
-  type AtlasCardView,
   type AtlasGalleryCard,
   type CardCatalog,
 } from './atlasCardCatalog'
+import type { CardView } from '@bible-strong/entity-cards'
 import { projectAtlasPlace } from './atlasProjection'
 import {
   entityClayUrl,
@@ -147,7 +147,7 @@ export type AtlasEntityPageData = {
   painted: boolean
   stagesLabel?: string
   stages: AtlasStageView[]
-  cards: AtlasCardView[]
+  cards: CardView[]
   roles: string[]
   series?: { title: string; rank: number; total: number; members: AtlasTile[] }
   strong: { code: string; label: string; path: string }[]

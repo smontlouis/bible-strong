@@ -13,6 +13,7 @@
 - [Application API](./apps/api/CONTEXT.md) — owns Firebase-backed server operations used by Bible Strong clients.
 - [Bible reference parsing](./packages/bible-reference-parser/CONTEXT.md) — turns French and English Bible-reference text into canonical passage references.
 - [Biblical map](./packages/biblical-map/CONTEXT.md) — draws the map of the places of the Bible for a web page, travelled with the fingers.
+- [Entity cards](./packages/entity-cards/CONTEXT.md) — the collectible cards of the biblical characters: their catalog and the card in HTML and CSS.
 
 - [Study assistant API contract](./packages/ai-contract/CONTEXT.md) — public requests and streamed responses for a separately hosted service.
 
@@ -26,6 +27,7 @@
 - **Resource catalog → Resource delivery / Study workspace**: publisher and client consume the same versioned artifact catalog.
 - **Bible reference parsing → Study workspace**: the parser recognizes inline references used for navigation and study links.
 - **Biblical map → Public site / Study workspace**: the atlas and the application's map screen (in a DOM component) render the same map.
+- **Entity cards → Public site / Study workspace**: the atlas and the application's Web draw the same card; the application's Skia card reads the same catalog model.
 - **Bible reference parsing → Public site**: the site uses the same OSIS book identities in resource links.
 - **Resource delivery → Public site**: the site renders indexable public resource pages on the server from the Resource API.
 - **Application API → Study workspace / Public site**: Firebase functions provide account-adjacent and content-processing operations to both clients.

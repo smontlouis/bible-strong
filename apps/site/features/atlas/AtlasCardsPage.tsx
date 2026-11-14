@@ -17,7 +17,7 @@ import ResourceShell from '../resources/ResourceShell'
 import type { AtlasCardsPageData } from './atlas.functions'
 import { BOOSTER_WORDS } from './atlasBoosterWords'
 import AtlasCardViewer from './AtlasCardViewer'
-import { cardClasses, CardFront } from './AtlasCards'
+import { cardClasses, CardFront } from '@bible-strong/entity-cards/web'
 import { CARD_FAMILY_LABELS, type AtlasGalleryCard } from './atlasCardCatalog'
 import {
   CARD_FAMILIES,

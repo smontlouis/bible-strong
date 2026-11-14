@@ -2958,5 +2958,6 @@
   "entityCards.collect": "Collect",
   "entityCards.later": "Later",
   "entityCards.close": "Close",
-  "entityCards.open": "See the card of {{name}}"
+  "entityCards.open": "See the card of {{name}}",
+  "entityCards.notFound": "{{name}}'s card, not found yet"
 }

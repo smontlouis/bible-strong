@@ -1,0 +1,20 @@
+{
+  "name": "@bible-strong/entity-cards",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./web": "./src/web/index.ts",
+    "./cards.css": "./src/cards.css"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.28.4"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "~19.3.0"
+  }
+}

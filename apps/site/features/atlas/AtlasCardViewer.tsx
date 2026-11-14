@@ -12,10 +12,9 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 're
 import { buildBibleReferencePath } from '../resources/editorialLinks'
 import type { ResourceLanguage } from '../resources/publicSite'
 import { buildStrongPath, displayStrongCode, parseStrongCode } from '../strong/strongRoutes'
-import { CardBack, cardClasses, CardFront } from './AtlasCards'
+import { CardBack, cardClasses, CardFront, useCardTilt } from '@bible-strong/entity-cards/web'
 import { CARD_FAMILY_LABELS, type AtlasGalleryCard } from './atlasCardCatalog'
 import { buildAtlasCardPath, buildAtlasEntityPath } from './atlasRoutes'
-import { useCardTilt } from './useCardTilt'
 
 // A card opened over the gallery, at its own address. Two levels move it: Motion carries the card
 // from its place in the page and back, and from one card to the next with the arrows; the springs

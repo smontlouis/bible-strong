@@ -106,7 +106,7 @@ export const CardSpotlight = ({
     if (!reduceMotion) rise.set(withSpring(1, { damping: 14, stiffness: 120, mass: 0.9 }))
     chrome.set(withDelay(reduceMotion ? 0 : 260, withTiming(1, { duration: 280 })))
     if (mode === 'reveal') {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+      if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
       if (!reduceMotion) {
         halo.set(
           withSequence(
@@ -139,7 +139,9 @@ export const CardSpotlight = ({
   const collect = async () => {
     if (leaving) return
     setLeaving(true)
-    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+    if (Platform.OS !== 'web') {
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+    }
     onCollect?.()
     const [landing, from] = await Promise.all([
       getLandingRect?.(),

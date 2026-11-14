@@ -1,354 +1,24 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { CARD_WORDS, type CardView } from '@bible-strong/entity-cards'
+import {
+  adjust,
+  CardBack,
+  cardClasses,
+  CardFront,
+  clamp,
+  drawTextures,
+  paint,
+  REST,
+  restingSprings,
+  step,
+  type Springs,
+} from '@bible-strong/entity-cards/web'
 import type { ResourceLanguage } from '../resources/publicSite'
-import { CARD_FAMILY_LABELS, type AtlasCardView } from './atlasCardCatalog'
 
 // The collectible cards of ADR-0090 on an entity's page. A card tilts under the pointer, its foil
 // following the light; touched, it comes forward to the middle of the window, and touched again
 // it turns over. The motion follows the springs of the cards prototype (after pokemon-cards-css
-// by Simon Goellner).
-
-export const CARD_WORDS = {
-  fr: {
-    open: 'Ouvrir la carte',
-    flip: 'Verso',
-    front: 'Recto',
-    close: 'Fermer',
-    thisCard: 'Cette carte',
-    first: 'Première mention',
-    appears: 'Apparaît dans',
-    chapters: (count: number) => (count > 1 ? `${count} chapitres` : 'un seul chapitre'),
-    series: 'Série',
-  },
-  en: {
-    open: 'Open the card',
-    flip: 'Back',
-    front: 'Front',
-    close: 'Close',
-    thisCard: 'This card',
-    first: 'First mention',
-    appears: 'Appears in',
-    chapters: (count: number) => (count > 1 ? `${count} chapters` : 'one chapter'),
-    series: 'Series',
-  },
-} as const
-
-// ---------- Motion ----------
-
-export type Spring = { x: number; v: number; t: number; k: number; d: number }
-export const spring = (value: number, k: number, d: number): Spring => ({
-  x: value,
-  v: 0,
-  t: value,
-  k,
-  d,
-})
-
-/** Moves a spring one frame; false once it has come to rest. */
-export const step = (s: Spring, still: boolean) => {
-  if (still) {
-    s.x = s.t
-    s.v = 0
-    return false
-  }
-  s.v = (s.v + (s.t - s.x) * s.k) * (1 - s.d)
-  s.x += s.v
-  if (Math.abs(s.v) < 0.002 && Math.abs(s.t - s.x) < 0.002) {
-    s.x = s.t
-    s.v = 0
-    return false
-  }
-  return true
-}
-
-export const clamp = (value: number, min = 0, max = 100) => Math.min(Math.max(value, min), max)
-export const adjust = (
-  value: number,
-  fromMin: number,
-  fromMax: number,
-  toMin: number,
-  toMax: number
-) => toMin + ((toMax - toMin) * (value - fromMin)) / (fromMax - fromMin)
-
-// At rest the foil stays lit, as from a little above; the pointer only moves the light and adds glare.
-export const REST = { x: 50, y: 32, shine: 0.75 }
-
-export type Springs = Record<
-  'rx' | 'ry' | 'gx' | 'gy' | 'go' | 'gl' | 'bx' | 'by' | 'tx' | 'ty' | 'sc' | 'spin' | 'flip',
-  Spring
->
-
-export const restingSprings = (): Springs => ({
-  rx: spring(0, 0.08, 0.26),
-  ry: spring(0, 0.08, 0.26),
-  gx: spring(REST.x, 0.08, 0.26),
-  gy: spring(REST.y, 0.08, 0.26),
-  go: spring(REST.shine, 0.08, 0.26),
-  gl: spring(0, 0.08, 0.26),
-  bx: spring(adjust(REST.x, 0, 100, 37, 63), 0.08, 0.26),
-  by: spring(adjust(REST.y, 0, 100, 33, 67), 0.08, 0.26),
-  tx: spring(0, 0.045, 0.3),
-  ty: spring(0, 0.045, 0.3),
-  sc: spring(1, 0.045, 0.3),
-  spin: spring(0, 0.04, 0.22),
-  flip: spring(0, 0.07, 0.28),
-})
-
-/** Writes the springs of a card into the CSS variables its layers read. */
-export const paint = (element: HTMLElement, s: Springs) => {
-  const style = element.style
-  const gx = s.gx.x
-  const gy = s.gy.x
-  style.setProperty('--pointer-x', `${gx.toFixed(2)}%`)
-  style.setProperty('--pointer-y', `${gy.toFixed(2)}%`)
-  style.setProperty(
-    '--pointer-from-center',
-    clamp(Math.sqrt((gy - 50) ** 2 + (gx - 50) ** 2) / 50, 0, 1).toFixed(3)
-  )
-  style.setProperty('--pointer-from-top', (gy / 100).toFixed(3))
-  style.setProperty('--pointer-from-left', (gx / 100).toFixed(3))
-  style.setProperty('--card-opacity', s.go.x.toFixed(3))
-  style.setProperty('--glare-opacity', s.gl.x.toFixed(3))
-  style.setProperty('--rotate-x', `${s.rx.x.toFixed(2)}deg`)
-  style.setProperty('--rotate-y', `${s.ry.x.toFixed(2)}deg`)
-  style.setProperty('--tx', (-s.rx.x / 14).toFixed(3))
-  style.setProperty('--ty', (s.ry.x / 14).toFixed(3))
-  style.setProperty('--background-x', `${s.bx.x.toFixed(2)}%`)
-  style.setProperty('--background-y', `${s.by.x.toFixed(2)}%`)
-  style.setProperty('--translate-x', `${s.tx.x.toFixed(1)}px`)
-  style.setProperty('--translate-y', `${s.ty.x.toFixed(1)}px`)
-  style.setProperty('--card-scale', s.sc.x.toFixed(4))
-  style.setProperty('--spin', `${s.spin.x.toFixed(2)}deg`)
-  style.setProperty('--flip', `${s.flip.x.toFixed(2)}deg`)
-}
-
-// The textures of the foils are drawn once in the browser: no image is borrowed.
-let texturesDrawn = false
-export const drawTextures = () => {
-  if (texturesDrawn) return
-  texturesDrawn = true
-  const canvas = (size: number) => {
-    const element = document.createElement('canvas')
-    element.width = element.height = size
-    return [element, element.getContext('2d')] as const
-  }
-  const [glitter, g] = canvas(220)
-  if (g) {
-    g.fillStyle = '#000'
-    g.fillRect(0, 0, 220, 220)
-    for (let index = 0; index < 700; index += 1) {
-      g.fillStyle = `rgba(255,255,255,${(Math.random() * 0.8 + 0.2).toFixed(2)})`
-      g.beginPath()
-      g.arc(Math.random() * 220, Math.random() * 220, Math.random() * 1.3 + 0.3, 0, Math.PI * 2)
-      g.fill()
-    }
-  }
-  const [nebula, n] = canvas(420)
-  if (n) {
-    n.fillStyle = '#05030b'
-    n.fillRect(0, 0, 420, 420)
-    n.globalCompositeOperation = 'lighter'
-    const hues = [280, 300, 190, 220, 320, 260, 170]
-    for (let index = 0; index < 14; index += 1) {
-      const x = Math.random() * 420
-      const y = Math.random() * 420
-      const radius = Math.random() * 150 + 60
-      const gradient = n.createRadialGradient(x, y, 0, x, y, radius)
-      gradient.addColorStop(0, `hsla(${hues[index % hues.length]},80%,60%,0.32)`)
-      gradient.addColorStop(1, 'hsla(0,0%,0%,0)')
-      n.fillStyle = gradient
-      n.fillRect(0, 0, 420, 420)
-    }
-    for (let index = 0; index < 260; index += 1) {
-      n.fillStyle = `rgba(255,255,255,${(Math.random() * 0.9).toFixed(2)})`
-      const big = Math.random() < 0.1 ? 2 : 1
-      n.fillRect(Math.random() * 420, Math.random() * 420, big, big)
-    }
-  }
-  const root = document.documentElement.style
-  root.setProperty('--ac-glitter', `url(${glitter.toDataURL('image/png')})`)
-  root.setProperty('--ac-nebula', `url(${nebula.toDataURL('image/png')})`)
-}
-
-// ---------- Faces ----------
-
-// « ch. » reads the same in both languages.
-const WORDS_CH = 'ch.'
-
-/** The classes of a card: its family's palette, its frame and its foil. */
-export const cardClasses = (card: AtlasCardView) =>
-  [
-    'ac-card',
-    `ac-fam-${card.family}`,
-    card.stages ? 'ac-stages' : '',
-    `ac-fin-${card.finish}`,
-    card.fadeTop ? 'ac-cut-top' : '',
-  ]
-    .filter(Boolean)
-    .join(' ')
-
-// A card in a grid is drawn about 110 to 220 pixels wide: the browser picks the copy it needs.
-// On a phone it is told less than the card's width, so that it takes the small copies even at
-// three pixels per point: a quarter of the weight, a little softer, over hundreds of cards.
-const GRID_SIZES = '(max-width: 640px) 85px, 220px'
-const gridSource = (url: string, small: string) =>
-  `${url.replace('/w768.webp', `/${small}.webp`)} ${small.slice(1)}w, ${url} 768w`
-
-export function CardFront({
-  card,
-  grid = false,
-  eager = false,
-}: {
-  card: AtlasCardView
-  grid?: boolean
-  /** A card on the first screen: its pictures load with the page. */
-  eager?: boolean
-}) {
-  const loading = eager ? 'eager' : 'lazy'
-  return (
-    <>
-      <div className="ac-fr-bg" />
-      {/* A card in a grid is still: its foil is not drawn. */}
-      {!grid && <div className="ac-fr-shine" />}
-      <div className="ac-art">
-        <div className="ac-layer ac-plates">
-          {card.scene ? (
-            <img
-              className="ac-scene"
-              src={card.picture}
-              {...(grid ? { srcSet: gridSource(card.picture, 'w256'), sizes: GRID_SIZES } : {})}
-              alt=""
-              loading={loading}
-              decoding="async"
-              draggable={false}
-            />
-          ) : card.backdrop ? (
-            <img
-              className="ac-decor"
-              src={card.backdrop}
-              {...(grid ? { srcSet: gridSource(card.backdrop, 'w384'), sizes: GRID_SIZES } : {})}
-              alt=""
-              loading={loading}
-              decoding="async"
-              draggable={false}
-              onLoad={event => event.currentTarget.classList.add('is-loaded')}
-              // Loaded before the page came to life, it fired its load with no one listening.
-              ref={element => {
-                if (element?.complete && element.naturalWidth) element.classList.add('is-loaded')
-              }}
-            />
-          ) : null}
-        </div>
-        {!grid && <div className="ac-layer ac-shine-art" />}
-        <div className="ac-layer ac-depth-name" lang={card.script} aria-hidden="true">
-          <span>{card.original}</span>
-        </div>
-        <div className="ac-layer ac-subjects">
-          {!card.scene && (
-            <img
-              src={card.picture}
-              {...(grid ? { srcSet: gridSource(card.picture, 'w256'), sizes: GRID_SIZES } : {})}
-              alt=""
-              loading={loading}
-              decoding="async"
-              draggable={false}
-            />
-          )}
-        </div>
-      </div>
-      <div className="ac-ribbon" />
-      {grid ? (
-        <span className="ac-name">{card.name}</span>
-      ) : (
-        <h3 className="ac-name">{card.name}</h3>
-      )}
-      <span className="ac-subtitle">{card.title}</span>
-      <div className="ac-typeline">
-        <span>{card.typeLine}</span>
-      </div>
-      <div className="ac-textbox">
-        <p className="ac-flavor">
-          {card.paraphrase ? (
-            <span className="ac-para">{card.sentence}</span>
-          ) : (
-            <q>{card.sentence}</q>
-          )}
-          <cite>{card.source}</cite>
-        </p>
-      </div>
-      <div className="ac-foot">
-        <span>{card.foot}</span>
-        <span>
-          {card.chapterCount} {WORDS_CH}
-        </span>
-      </div>
-      <div className="ac-ring" />
-      {!grid && <div className="ac-glare" />}
-    </>
-  )
-}
-
-export function CardBack({
-  card,
-  language,
-  rank,
-  total,
-}: {
-  card: AtlasCardView
-  language: ResourceLanguage
-  rank: number
-  total: number
-}) {
-  const words = CARD_WORDS[language]
-  return (
-    <>
-      <div className="ac-fr-bg" />
-      <div className="ac-fr-shine" />
-      <div className="ac-pattern" />
-      <div className="ac-back-body">
-        <div className="ac-family">{CARD_FAMILY_LABELS[card.family][language]}</div>
-        <div className="ac-big" lang={card.script}>
-          {card.original}
-        </div>
-        {card.transliteration && <div className="ac-translit">{card.transliteration}</div>}
-        {card.strong && <div className="ac-strong">{card.strong}</div>}
-        {card.meaning && (
-          <div className="ac-meaning">
-            {language === 'fr' ? `« ${card.meaning} »` : `“${card.meaning}”`}
-          </div>
-        )}
-        <div className="ac-sep" />
-        <p className="ac-brief">{card.brief}</p>
-        <dl className="ac-facts">
-          <dt>{words.thisCard}</dt>
-          <dd>
-            {card.title}
-            {card.chaptersLabel ? ` · ${card.chaptersLabel}` : ''}
-          </dd>
-          <dt>{words.first}</dt>
-          <dd>{card.firstMention}</dd>
-          <dt>{words.appears}</dt>
-          <dd>{words.chapters(card.chapterCount)}</dd>
-          {total > 1 && (
-            <>
-              <dt>
-                {language === 'fr' ? `Carte ${rank} sur ${total}` : `Card ${rank} of ${total}`}
-              </dt>
-              <dd />
-            </>
-          )}
-          {card.series && (
-            <>
-              <dt>{words.series}</dt>
-              <dd>{card.series}</dd>
-            </>
-          )}
-        </dl>
-      </div>
-      <div className="ac-ring" />
-      <div className="ac-glare" />
-    </>
-  )
-}
+// by Simon Goellner); the card itself is drawn by the shared package (ADR-0113).
 
 // ---------- Deck ----------
 
@@ -377,7 +47,7 @@ export default function AtlasCards({
   cards,
   language,
 }: {
-  cards: AtlasCardView[]
+  cards: CardView[]
   language: ResourceLanguage
 }) {
   const words = CARD_WORDS[language]
@@ -528,14 +198,14 @@ export default function AtlasCards({
 
   // One ref callback per card, kept across renders: a new one would drop the card's springs.
   const refs = useRef(new Map<string, (element: HTMLDivElement | null) => void>())
-  const register = (card: AtlasCardView) => {
+  const register = (card: CardView) => {
     const known = refs.current.get(card.id)
     if (known) return known
     const callback = (element: HTMLDivElement | null) => attach(card, element)
     refs.current.set(card.id, callback)
     return callback
   }
-  const attach = (card: AtlasCardView, element: HTMLDivElement | null) => {
+  const attach = (card: CardView, element: HTMLDivElement | null) => {
     if (!element) {
       states.current.delete(card.id)
       return
@@ -555,7 +225,7 @@ export default function AtlasCards({
     paint(element, state.s)
   }
 
-  const handlers = (card: AtlasCardView) => {
+  const handlers = (card: CardView) => {
     const state = () => states.current.get(card.id)
     return {
       onPointerMove: (event: ReactPointerEvent<HTMLButtonElement>) => {

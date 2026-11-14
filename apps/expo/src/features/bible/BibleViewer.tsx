@@ -748,21 +748,19 @@ const BibleViewer = ({
     })
   )
 
-  // The painted characters whose card the reader has not collected wear a dot (ADR-0090). The
-  // Web cannot draw the cards yet: it offers none.
+  // The painted characters whose card the reader has not collected wear a dot (ADR-0090).
   const cardCatalog = useCardCatalog()
   const collectedCards = useSelector((state: RootState) => state.cards.collected)
-  const chapterNewCards =
-    cardCatalog && Platform.OS !== 'web'
-      ? getChapterNewCards({
-          uniqueNames: chapterEntities.map(entity => entity.uniqueName),
-          portraits: portraitCatalog,
-          cardIds: new Set(cardCatalog.cards.map(card => card.id)),
-          collected: collectedCards,
-          book: book.Numero,
-          chapter,
-        })
-      : {}
+  const chapterNewCards = cardCatalog
+    ? getChapterNewCards({
+        uniqueNames: chapterEntities.map(entity => entity.uniqueName),
+        portraits: portraitCatalog,
+        cardIds: new Set(cardCatalog.cards.map(card => card.id)),
+        collected: collectedCards,
+        book: book.Numero,
+        chapter,
+      })
+    : {}
 
   const activeBibleTabId = useAtomValue(activeBibleTabIdAtom)
   // Under a verse in focus the reader gathers its study, one verse at a time (ADR-0088).

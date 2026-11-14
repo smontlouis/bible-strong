@@ -7,10 +7,9 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react'
 import type { ResourceLanguage } from '../resources/publicSite'
-import { cardClasses, CardFront } from './AtlasCards'
+import { cardClasses, CardFront, useCardSway, useCardTilt } from '@bible-strong/entity-cards/web'
 import type { AtlasGalleryCard } from './atlasCardCatalog'
 import { cardPacks, drawPack, PACK_SIZE, type CardPack } from './atlasCardsGallery'
-import { useCardSway, useCardTilt } from './useCardTilt'
 import { BOOSTER_WORDS } from './atlasBoosterWords'
 
 // Packs of five cards drawn at random, opened for the pleasure of tearing them and turning the

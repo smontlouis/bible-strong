@@ -3,10 +3,10 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import type { ResourceLanguage } from '../resources/publicSite'
 import { Pack, PackOutlines } from './AtlasBooster'
 import { BOOSTER_WORDS } from './atlasBoosterWords'
-import { CARD_WORDS, cardClasses, CardFront } from './AtlasCards'
+import { CARD_WORDS } from '@bible-strong/entity-cards'
+import { cardClasses, CardFront, useCardSway, useCardTilt } from '@bible-strong/entity-cards/web'
 import { CARD_FAMILY_LABELS, type AtlasGalleryCard } from './atlasCardCatalog'
 import { cardPacks, drawStandPack, PACK_SIZE, type CardPack } from './atlasCardsGallery'
-import { useCardSway, useCardTilt } from './useCardTilt'
 
 // The cards on a screen of a stand, with no one at the controls: a pack tears itself open, its five
 // cards are turned over one after the other beside what they hold, then the next pack comes. The

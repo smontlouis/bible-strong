@@ -8,7 +8,7 @@ import {
   restingSprings,
   step,
   type Springs,
-} from './AtlasCards'
+} from './springs'
 
 /** With no hand on it, on a stand, a card tilts by itself under a light that wanders over its foil. */
 export const useCardSway = (springs: { current: Springs }, kick: () => void, swaying: boolean) => {
