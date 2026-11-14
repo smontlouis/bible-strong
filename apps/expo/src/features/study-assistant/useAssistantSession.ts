@@ -70,7 +70,8 @@ export function useAssistantSession({
     [revealing, setRevealing] = useState(false),
     [error, setError] = useState(''),
     [retrying, setRetrying] = useState(false),
-    [progress, setProgress] = useState('')
+    [progress, setProgress] = useState(''),
+    [progressKey, setProgressKey] = useState('')
   // The context a reader took off their question; another context comes joined again.
   const [detachedKey, setDetachedKey] = useState<string | null>(null)
   // What the server suggests asking after the answer it names.
@@ -216,7 +217,10 @@ export function useAssistantSession({
         createCompact?.({ isCurrent: () => active.current === controller }) || compactAssistant,
       isCurrent: () => active.current === controller,
       onUpdate: publish,
-      onProgress: key => setProgress(t(key)),
+      onProgress: key => {
+        setProgress(t(key))
+        setProgressKey(key)
+      },
       onError: key => setError(key),
       onAction,
       onFollowUps: (messageId, questions) => setFollowUps({ messageId, questions }),
@@ -225,6 +229,7 @@ export function useAssistantSession({
         active.current = null
         setBusy(false)
         setProgress('')
+        setProgressKey('')
       }
     })
   }
@@ -306,6 +311,8 @@ export function useAssistantSession({
     error,
     retrying,
     progress,
+    /** The key of the step the run is at (`assistant.steps.reading`…), for Strobi's state. */
+    progressKey,
     /** The account's agreement to send its questions to third-party AI providers. */
     consent,
     context,

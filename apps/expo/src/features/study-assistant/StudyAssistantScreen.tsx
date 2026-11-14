@@ -3,7 +3,6 @@ import { Platform, StyleSheet } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useAtomValue } from 'jotai'
 import { useRouter } from 'expo-router'
-import Animated, { withSpring, withTiming } from 'react-native-reanimated'
 import { KeyboardStickyView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AssistantRuntimeProvider, ThreadListPrimitive } from '@assistant-ui/react-native'
@@ -26,19 +25,6 @@ import AssistantThread from './AssistantThread'
 import AssistantVerifyEmailCard from './AssistantVerifyEmailCard'
 import SourceExcerptSheet from './SourceExcerptSheet'
 import { useAssistantQuota } from './useAssistantQuota'
-import StrobiAvatar from './StrobiAvatar'
-
-// Strobi lands in the page's header: it grows in with the bounce its button comes back with.
-const strobiLanding = () => {
-  'worklet'
-  return {
-    initialValues: { opacity: 0, transform: [{ scale: 0.5 }] },
-    animations: {
-      opacity: withTiming(1, { duration: 200 }),
-      transform: [{ scale: withSpring(1, { duration: 500, dampingRatio: 0.6 }) }],
-    },
-  }
-}
 
 function PageHeader() {
   const { t } = useTranslation()
@@ -65,24 +51,18 @@ function PageHeader() {
           <FeatherIcon name="arrow-left" size={20} />
         </TouchableBox>
       ) : (
-        <>
-          {/* Android opens the assistant as a page: it needs its own way back. */}
-          {Platform.OS === 'android' && (
-            <TouchableBox
-              accessibilityRole="button"
-              accessibilityLabel={t('assistant.modal.close')}
-              onPress={close}
-              className="h-[44px] w-[40px] items-center justify-center"
-            >
-              <FeatherIcon name="arrow-left" size={20} />
-            </TouchableBox>
-          )}
-          <Box className="h-[44px] w-[40px] items-center justify-center">
-            <Animated.View entering={strobiLanding}>
-              <StrobiAvatar animation={busy ? 'thinking' : 'excited'} size={34} />
-            </Animated.View>
-          </Box>
-        </>
+        // Android opens the assistant as a page: it needs its own way back. Strobi is not here:
+        // it lives in the conversation, where it shows what the assistant does (2026-11-14).
+        Platform.OS === 'android' && (
+          <TouchableBox
+            accessibilityRole="button"
+            accessibilityLabel={t('assistant.modal.close')}
+            onPress={close}
+            className="h-[44px] w-[40px] items-center justify-center"
+          >
+            <FeatherIcon name="arrow-left" size={20} />
+          </TouchableBox>
+        )
       )}
       <Text
         accessibilityRole="header"

@@ -1,11 +1,5 @@
 import { createContext, use, useEffect, useRef, useState } from 'react'
-import {
-  ActivityIndicator,
-  View,
-  type FlatList,
-  type LayoutRectangle,
-  type ViewProps,
-} from 'react-native'
+import { View, type FlatList, type LayoutRectangle, type ViewProps } from 'react-native'
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
 import { ThreadPrimitive } from '@assistant-ui/react-native'
 import { useTranslation } from 'react-i18next'
@@ -14,7 +8,6 @@ import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { floatingShadow, radii } from '~common/ui/surfaces'
-import { useTheme } from '~themes/ThemeProvider'
 import AssistantLimitCard from './AssistantLimitCard'
 import { asksEmailVerification, freeQuestionsPaused, questionsSpent } from './assistantQuota'
 import { useAssistantQuota } from './useAssistantQuota'
@@ -23,6 +16,7 @@ import type { ReadingContext } from './conversations'
 import ErrorState from './ErrorState'
 import FollowUpQuestions from './FollowUpQuestions'
 import { AssistantMessage, UserMessage } from './MessageRenderer'
+import ThreadStrobi from './ThreadStrobi'
 
 /** Starting points offered on an empty conversation, chosen from what the reader has open. */
 const shortcutsFor = (context: ReadingContext | null) =>
@@ -42,10 +36,8 @@ const shortcutsFor = (context: ReadingContext | null) =>
 
 function ThreadStatus() {
   const { t } = useTranslation()
-  const { colors } = useTheme()
   const { session } = useAssistantSheet()
-  const { current, busy, ready, error, retrying, progress, storageError, context, followUps } =
-    session
+  const { current, busy, ready, error, retrying, storageError, context, followUps } = session
   const quota = useAssistantQuota()
   const verification = asksEmailVerification(error, quota)
   const paused = freeQuestionsPaused(error, quota)
@@ -53,12 +45,7 @@ function ThreadStatus() {
   const composerDocked = (verification || questionsSpent(quota)) && !busy
   return (
     <Box>
-      {!!progress && (
-        <HStack accessibilityLiveRegion="polite" className="items-center gap-2 py-1">
-          <ActivityIndicator size="small" color={colors.grey} />
-          <Text className="text-grey text-[13px]">{progress}</Text>
-        </HStack>
-      )}
+      <ThreadStrobi />
       {composerDocked ? null : paused && !busy ? (
         <AssistantLimitCard paused />
       ) : error === 'assistant.limit' && !retrying ? (
@@ -126,6 +113,8 @@ function Welcome() {
 
 /** Space kept above the question the page settles on. */
 const ANCHOR_MARGIN = 12
+/** How much of Strobi's row must show above the composer for it to stay in its place. */
+const STROBI_PEEK = 30
 /** How much of the answer must lie below the screen before the way down is offered. */
 const JUMP_THRESHOLD = 80
 /** Opening a conversation: its last question is held in place while the cards above load. */
@@ -201,6 +190,9 @@ export default function AssistantThread() {
   const reserveRef = useRef(0)
   const [reserve, setReserve] = useState(0)
   const [jumpVisible, setJumpVisible] = useState(false)
+  // Strobi's place, at the end of the conversation, is below the screen: it shows over the
+  // composer instead, and a tap on it goes down there (2026-11-14).
+  const [strobiBelow, setStrobiBelow] = useState(false)
   // A reader at the end stays there when the keyboard (or a longer input) pushes it up.
   // Unknown until the first scroll or layout: the composer measuring itself on opening is not a
   // keyboard pushing a reader at the end.
@@ -296,6 +288,14 @@ export default function AssistantThread() {
     atEnd.current = below <= 24
     const visible = below > JUMP_THRESHOLD
     setJumpVisible(previous => (previous === visible ? previous : visible))
+    // Strobi's row opens the footer, right under the last message; the composer covers the
+    // bottom of the list.
+    const last = lastId ? cells.current.get(lastId) : undefined
+    const hidden =
+      !!last &&
+      !!viewport &&
+      last.y + last.height + STROBI_PEEK > scrollY + viewport - paddingBottom
+    setStrobiBelow(previous => (previous === hidden ? previous : hidden))
   }
   const releaseAnchor = () => {
     if (!anchor.current) return
@@ -412,12 +412,12 @@ export default function AssistantThread() {
             )
           }
         </ThreadPrimitive.MessagesFlatList>
-        {jumpVisible && (
+        {busy && strobiBelow ? (
           <Animated.View
             entering={FadeIn.duration(150)}
             exiting={FadeOut.duration(150)}
             pointerEvents="box-none"
-            className="absolute left-0 right-0 items-center"
+            className="absolute left-0 right-0 items-center px-[20px]"
             style={{ bottom: paddingBottom - 2 }}
           >
             <TouchableBox
@@ -431,12 +431,38 @@ export default function AssistantThread() {
                   animated: true,
                 })
               }}
-              className="bg-surface-raised h-[36px] w-[36px] items-center justify-center"
-              style={{ borderRadius: radii.pill, ...floatingShadow }}
+              className="max-w-full"
             >
-              <FeatherIcon name="arrow-down" size={18} />
+              <ThreadStrobi floating />
             </TouchableBox>
           </Animated.View>
+        ) : (
+          jumpVisible && (
+            <Animated.View
+              entering={FadeIn.duration(150)}
+              exiting={FadeOut.duration(150)}
+              pointerEvents="box-none"
+              className="absolute left-0 right-0 items-center"
+              style={{ bottom: paddingBottom - 2 }}
+            >
+              <TouchableBox
+                accessibilityRole="button"
+                accessibilityLabel={t('assistant.modal.toEnd')}
+                onPress={() => {
+                  const end = contentEnd()
+                  if (end === undefined) return
+                  scrollTo({
+                    offset: Math.max(0, end - metrics.current.viewport),
+                    animated: true,
+                  })
+                }}
+                className="bg-surface-raised h-[36px] w-[36px] items-center justify-center"
+                style={{ borderRadius: radii.pill, ...floatingShadow }}
+              >
+                <FeatherIcon name="arrow-down" size={18} />
+              </TouchableBox>
+            </Animated.View>
+          )
         )}
       </Box>
     </CellLayoutContext.Provider>

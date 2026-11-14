@@ -1,5 +1,6 @@
 import { createAvatar } from '@bible-strong/avatar-react-native'
 import strobiDefinition from './strobi.avatar.json'
+import type { StrobiMood } from './strobiMood'
 
 /**
  * What Strobi can be asked to play: the animations of its file of the first version, each of
@@ -21,7 +22,8 @@ export default function StrobiAvatar({
   muted = false,
   settleAfterMs = 0,
 }: {
-  animation: StrobiAnimation
+  /** An animation of its file, or a state of the catalogue the conversation uses. */
+  animation: StrobiAnimation | StrobiMood
   size: number
   /**
    * Greyed out, as a floating button left idle: it stops where it is and computes nothing, in

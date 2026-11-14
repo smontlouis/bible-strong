@@ -1,9 +1,9 @@
-import { ActivityIndicator } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import Box, { TouchableBox } from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { useTheme } from '~themes/ThemeProvider'
+import StrobiAvatar from './StrobiAvatar'
+
+const STROBI_SIZE = 34
 
 export default function ErrorState({
   title,
@@ -17,18 +17,20 @@ export default function ErrorState({
   onRetry?: () => void
 }) {
   const { t } = useTranslation()
-  const { colors } = useTheme()
   return (
     <Box
       accessibilityRole={retrying ? undefined : 'alert'}
       accessibilityLiveRegion="polite"
       className="bg-light-grey my-3 flex-row gap-3 rounded-[12px] p-3"
     >
-      {retrying ? (
-        <ActivityIndicator size="small" color={colors.grey} />
-      ) : (
-        <FeatherIcon name="alert-circle" size={18} color="quart" />
-      )}
+      {/* Strobi says it: it failed, or it is trying again. */}
+      <Box
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        style={{ width: STROBI_SIZE, height: STROBI_SIZE, marginTop: -4 }}
+      >
+        <StrobiAvatar animation={retrying ? 'working' : 'failed'} size={STROBI_SIZE} />
+      </Box>
       <Box className="flex-1 gap-1">
         <Text className="text-[14px] font-semibold">
           {retrying ? t('assistant.errors.retrying') : title}
