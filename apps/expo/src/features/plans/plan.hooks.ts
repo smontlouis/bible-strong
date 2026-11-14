@@ -69,6 +69,7 @@ interface VerseForPlan {
       book: number
       chapter: number
       verse: number
+      focusVerses: number[]
     }
   }
 }
@@ -348,6 +349,8 @@ export const getVersesForPlan = async (
         book: Number(book),
         chapter: Number(chapter),
         verse: startVerse,
+        // The whole passage in focus, not its first verse alone.
+        focusVerses: versesRange.map(([, , verse]) => verse),
       },
     },
   }
