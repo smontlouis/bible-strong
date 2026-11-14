@@ -14,6 +14,7 @@ import {
   memo,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -207,6 +208,9 @@ const MapPlace = memo(function MapPlace({
   )
 })
 
+/** `useLayoutEffect` in a browser; nothing to measure on the server, which renders the site. */
+const useLayoutBeforePaint = typeof window === 'undefined' ? useEffect : useLayoutEffect
+
 export default function BiblicalMapCanvas({
   places,
   focus,
@@ -258,10 +262,12 @@ export default function BiblicalMapCanvas({
   )
 
   // Until the reader moves the map, a new frame size or region opens it again on its region.
+  // The first measure happens before the first paint: a frame drawn on the assumed size would
+  // flash a view of the wrong zoom before the right one.
   const touched = useRef(false)
   const openingRef = useRef(openAt)
   openingRef.current = openAt
-  useEffect(() => {
+  useLayoutBeforePaint(() => {
     const element = frameRef.current
     if (!element) return
     const measure = () => {
