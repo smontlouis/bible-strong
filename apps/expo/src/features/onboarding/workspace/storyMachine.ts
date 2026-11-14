@@ -20,7 +20,25 @@ export const STORY_STEPS = [
   'relations',
   'return',
 ] as const
-export type StoryStep = (typeof STORY_STEPS)[number] | 'finish'
+/**
+ * The story with Strobi's step, when Remote Config opens the assistant: after the word has
+ * crossed the Bible, the reader asks Strobi about it.
+ */
+export const STORY_STEPS_WITH_STROBI = [
+  'highlight',
+  'tools',
+  'strong',
+  'occurrences',
+  'strobi',
+  'note',
+  'relations',
+  'return',
+] as const
+type StoryStepName = (typeof STORY_STEPS_WITH_STROBI)[number]
+export type StoryStep = StoryStepName | 'finish'
+
+/** Where Strobi's step is: the question waits, Strobi thinks, answers, then the reader accepts. */
+export type StrobiPhase = 'question' | 'thinking' | 'answer' | 'accepted'
 
 export const HIGHLIGHT_COLORS = ['color1', 'color2', 'color3', 'color4', 'color5'] as const
 export type StoryHighlightColor = (typeof HIGHLIGHT_COLORS)[number]
@@ -46,6 +64,9 @@ export type OccurrenceFilter = (typeof OCCURRENCE_FILTERS)[number]
 
 export type StoryState = {
   step: StoryStep
+  /** The steps of this telling, with or without Strobi's. */
+  steps: readonly StoryStepName[]
+  strobi: StrobiPhase
   selected: boolean
   color?: StoryHighlightColor
   highlightType: StoryHighlightType
@@ -62,6 +83,8 @@ export type StoryState = {
 
 export const initialStoryState: StoryState = {
   step: 'highlight',
+  steps: STORY_STEPS,
+  strobi: 'question',
   selected: false,
   highlightType: 'background',
   word: 'proper',
@@ -80,6 +103,11 @@ export type StoryAction =
   | { type: 'word'; word: StoryWord }
   | { type: 'filter'; filter: OccurrenceFilter }
   | { type: 'finish' }
+  /** Remote Config's answer, heard until the first step is left. */
+  | { type: 'steps'; withStrobi: boolean }
+  | { type: 'askStrobi' }
+  | { type: 'strobiAnswered' }
+  | { type: 'tryStrobi' }
 
 /** The keys the story listens to: the reader's keys of the Bible and of a selection. */
 export const STORY_SHORTCUTS = [
@@ -163,7 +191,8 @@ const goTo = (state: StoryState, step: StoryStep): StoryState => ({
   nudge: undefined,
 })
 
-const stepIndex = (step: StoryStep) => STORY_STEPS.indexOf(step as (typeof STORY_STEPS)[number])
+const stepIndex = (steps: readonly StoryStepName[], step: StoryStep) =>
+  steps.indexOf(step as StoryStepName)
 
 function onShortcut(
   state: StoryState,
@@ -208,12 +237,16 @@ export function storyReducer(state: StoryState, action: StoryAction): StoryState
       return onShortcut(state, action)
     case 'next': {
       if (state.step === 'finish') return state
-      const next = STORY_STEPS[stepIndex(state.step) + 1]
+      // Strobi's step asks first: Continue puts the question, then waits for the answer.
+      if (state.step === 'strobi' && state.strobi === 'question')
+        return { ...state, strobi: 'thinking' }
+      if (state.step === 'strobi' && state.strobi === 'thinking') return state
+      const next = state.steps[stepIndex(state.steps, state.step) + 1]
       return goTo(completeStep(state), next ?? 'finish')
     }
     case 'back': {
       if (state.step === 'finish') return goTo({ ...state, returned: false }, 'return')
-      const previous = STORY_STEPS[stepIndex(state.step) - 1]
+      const previous = state.steps[stepIndex(state.steps, state.step) - 1]
       if (!previous) return state
       // Going back undoes what the step being left did, so its key teaches again.
       if (state.step === 'strong') return { ...goTo(state, previous), tool: undefined }
@@ -230,9 +263,23 @@ export function storyReducer(state: StoryState, action: StoryAction): StoryState
       return state.step === 'occurrences' ? { ...state, filter: action.filter } : state
     case 'finish':
       return goTo(state, 'finish')
+    case 'steps':
+      return state.step === 'highlight'
+        ? { ...state, steps: action.withStrobi ? STORY_STEPS_WITH_STROBI : STORY_STEPS }
+        : state
+    case 'askStrobi':
+      return state.step === 'strobi' && state.strobi === 'question'
+        ? { ...state, strobi: 'thinking' }
+        : state
+    case 'strobiAnswered':
+      return state.strobi === 'thinking' ? { ...state, strobi: 'answer' } : state
+    case 'tryStrobi':
+      return state.step === 'strobi' && state.strobi === 'answer'
+        ? { ...state, strobi: 'accepted' }
+        : state
   }
 }
 
-/** Position of the step for the progress bar: 1 to 7, the end counts as the last. */
-export const storyStepNumber = (step: StoryStep) =>
-  step === 'finish' ? STORY_STEPS.length : stepIndex(step) + 1
+/** Position of the step for the progress bar, from 1: the end counts as the last. */
+export const storyStepNumber = (step: StoryStep, steps: readonly StoryStepName[] = STORY_STEPS) =>
+  step === 'finish' ? steps.length : stepIndex(steps, step) + 1

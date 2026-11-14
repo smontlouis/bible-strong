@@ -1,6 +1,14 @@
 import { Image } from 'expo-image'
 import { AnimatePresence, motion, useReducedMotion, type Transition } from 'motion/react'
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import type { AvatarHandle } from '@bible-strong/avatar-react-native'
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+  type RefObject,
+} from 'react'
 import { useTranslation } from 'react-i18next'
 
 import Color from 'color'
@@ -14,11 +22,13 @@ import { colorWithOpacity } from '~themes/colorValues'
 import { resolveUniverseColors, type UniverseItem } from '~themes/universeColors'
 
 import { Keycap, keysOf } from './Keycap.web'
+import { StoryStrobi, StrobiPanel } from './StoryStrobi.web'
 import {
   HIGHLIGHT_COLORS,
   HIGHLIGHT_TYPES,
   OCCURRENCE_FILTERS,
   STORY_STEPS,
+  STORY_STEPS_WITH_STROBI,
   STORY_TOOLS,
   type OccurrenceFilter,
   type StoryAction,
@@ -740,20 +750,25 @@ function Pills() {
 }
 
 const stepAtLeast = (state: StoryState, step: (typeof STORY_STEPS)[number]) =>
-  state.step === 'finish' || STORY_STEPS.indexOf(state.step) >= STORY_STEPS.indexOf(step)
+  state.step === 'finish' ||
+  STORY_STEPS_WITH_STROBI.indexOf(state.step) >= STORY_STEPS_WITH_STROBI.indexOf(step)
 
 /** The board, which fills up step after step around the verse, then empties back to it. */
 export function StoryBoard({
   state,
   dispatch,
+  strobiRef,
 }: {
   state: StoryState
   dispatch: (action: StoryAction) => void
+  strobiRef: RefObject<AvatarHandle | null>
 }) {
   const { t } = useTranslation()
   const live = !state.returned
-  const showStrong = live && stepAtLeast(state, 'strong')
-  const showConcordance = live && stepAtLeast(state, 'occurrences')
+  // Strobi's step takes the right column: the lexicon and the concordance come back after it.
+  const asking = state.step === 'strobi'
+  const showStrong = live && !asking && stepAtLeast(state, 'strong')
+  const showConcordance = live && !asking && stepAtLeast(state, 'occurrences')
   const showNote = live && stepAtLeast(state, 'note') && state.noted
   const showStudy = live && stepAtLeast(state, 'relations') && state.related
   return (
@@ -789,8 +804,10 @@ export function StoryBoard({
           <Swatches key="swatches" state={state} dispatch={dispatch} />
         )}
         {state.returned && <Pills key="pills" />}
+        {asking && <StrobiPanel key="strobi" state={state} dispatch={dispatch} />}
       </AnimatePresence>
       <VerseCard state={state} dispatch={dispatch} />
+      <StoryStrobi state={state} strobiRef={strobiRef} />
     </BoardFrame>
   )
 }

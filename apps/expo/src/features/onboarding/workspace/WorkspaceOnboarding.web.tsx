@@ -1,6 +1,6 @@
 import { AnimatePresence } from 'motion/react'
 import { usePathname, useRouter } from 'expo-router'
-import { useAtom } from 'jotai/react'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai/react'
 import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useStore } from 'react-redux'
 
@@ -8,7 +8,11 @@ import { getIncomingLinkAtLoad } from '~features/app-switcher/IncomingLinkGate'
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 import { getWorkspacePageForPath } from '~features/app-switcher/workspaceRoutes'
 import AbelOnboarding from '~features/onboarding/AbelOnboarding'
-import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
+import {
+  isOnboardingCompletedAtom,
+  onboardingFinishedAtom,
+  strobiTrialRequestedAtom,
+} from '~features/onboarding/atom'
 import { isOnboardingForced } from '~helpers/runtimeConfig'
 import { saveAllLogsAsSeen } from '~redux/modules/user'
 import type { RootState } from '~redux/modules/reducer'
@@ -34,6 +38,8 @@ export default function WorkspaceOnboarding() {
   const [view, setView] = useAtom(workspaceOnboardingViewAtom)
   const [completed, setCompleted] = useAtom(isOnboardingCompletedAtom)
   const [tourStatus, setTourStatus] = useAtom(workspaceTourStatusAtom)
+  const strobiTrialRequested = useAtomValue(strobiTrialRequestedAtom)
+  const setOnboardingFinished = useSetAtom(onboardingFinishedAtom)
   const store = useStore<RootState>()
   const dispatch = useDispatch()
   const router = useRouter()
@@ -70,6 +76,8 @@ export default function WorkspaceOnboarding() {
 
   const endStory = (end: StoryEnd) => {
     setCompleted(true)
+    // A reader who asked to try Strobi is led to sign in by `StrobiTrialHandoff`, with Strobi.
+    setOnboardingFinished(true)
     if (firstStory.current) {
       firstStory.current = false
       // A new reader has nothing to catch up on: the story told the app.
@@ -78,7 +86,7 @@ export default function WorkspaceOnboarding() {
     }
     setTourStatus('pending')
     setView(wide ? 'tour' : 'none')
-    if (end === 'signIn') router.push('/login')
+    if (end === 'signIn' && !strobiTrialRequested) router.push('/login')
   }
 
   const endTour = (closed: boolean) => {

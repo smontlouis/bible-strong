@@ -173,3 +173,44 @@ describe('storyReducer', () => {
     expect(play([{ type: 'back' }]).step).toBe('highlight')
   })
 })
+
+describe("Strobi's step", () => {
+  const withStrobi = play([{ type: 'steps', withStrobi: true }])
+  const atStrobi = play(
+    [{ type: 'next' }, { type: 'next' }, { type: 'next' }, { type: 'next' }],
+    withStrobi
+  )
+
+  it('comes after the occurrences when Remote Config opens the assistant', () => {
+    expect(atStrobi.step).toBe('strobi')
+    expect(storyStepNumber(atStrobi.step, atStrobi.steps)).toBe(5)
+    expect(storyStepNumber('finish', atStrobi.steps)).toBe(8)
+  })
+
+  it('is decided on the first step only', () => {
+    const atTools = play([{ type: 'next' }])
+    expect(play([{ type: 'steps', withStrobi: true }], atTools).steps).not.toContain('strobi')
+  })
+
+  it('asks on Continue, waits for the answer, then goes on to the note', () => {
+    const thinking = play([{ type: 'next' }], atStrobi)
+    expect(thinking).toMatchObject({ step: 'strobi', strobi: 'thinking' })
+    expect(play([{ type: 'next' }], thinking).step).toBe('strobi')
+    const answered = play([{ type: 'strobiAnswered' }], thinking)
+    expect(answered.strobi).toBe('answer')
+    expect(play([{ type: 'next' }], answered).step).toBe('note')
+  })
+
+  it('records the wish to try Strobi only once it has answered', () => {
+    expect(play([{ type: 'tryStrobi' }], atStrobi).strobi).toBe('question')
+    expect(
+      play([{ type: 'askStrobi' }, { type: 'strobiAnswered' }, { type: 'tryStrobi' }], atStrobi)
+        .strobi
+    ).toBe('accepted')
+  })
+
+  it('keeps the story of seven steps without it', () => {
+    const atNote = play([{ type: 'next' }, { type: 'next' }, { type: 'next' }, { type: 'next' }])
+    expect(atNote.step).toBe('note')
+  })
+})

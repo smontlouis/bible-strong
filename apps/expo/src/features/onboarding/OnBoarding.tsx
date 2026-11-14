@@ -8,7 +8,7 @@ import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { isOnboardingForced } from '~helpers/runtimeConfig'
 import useLanguage from '~helpers/useLanguage'
 import { setDefaultBibleVersion } from '~redux/modules/user'
-import { isOnboardingCompletedAtom, onboardingFinishedAtom } from './atom'
+import { isOnboardingCompletedAtom, onboardingFinishedAtom, onboardingOnScreenAtom } from './atom'
 import AbelOnboarding from './AbelOnboarding'
 import SelectResources from './SelectResources'
 import ResourceSetupChoice from './ResourceSetupChoice'
@@ -51,6 +51,8 @@ const OnBoarding = () => {
   const setIsOnboardingCompleted = useSetAtom(isOnboardingCompletedAtom)
   const setOnboardingFinished = useSetAtom(onboardingFinishedAtom)
   const { hideOnboarding, showOnboarding } = useOptionalOnboarding()
+  const setOnboardingOnScreen = useSetAtom(onboardingOnScreenAtom)
+  useEffect(() => setOnboardingOnScreen(showOnboarding), [setOnboardingOnScreen, showOnboarding])
 
   // The routes the end of the onboarding leads to are pushed once the modal is gone: iOS crashes
   // when a screen with native buttons mounts while a full-screen modal is closing.

@@ -2,7 +2,7 @@ import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { titleFontStyle } from '~themes/styleValues'
 import { Feather } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Platform, Pressable, useWindowDimensions } from 'react-native'
+import { Pressable, useWindowDimensions } from 'react-native'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import type { AvatarHandle } from '@bible-strong/avatar-react-native'
 import { useSetAtom } from 'jotai/react'
@@ -274,10 +274,8 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
   const reduceMotion = useReducedMotion()
   const opening = useAssistantOpening()
   // Strobi's own scene shows while the assistant is open, and whenever the onboarding is forced
-  // in development, so that it can be worked on. Native only for now: on the web the assistant
-  // does not yet open on its own after sign-in.
-  const strobiSceneOpen =
-    Platform.OS !== 'web' && assistantAvailable && (opening.open || isOnboardingForced)
+  // in development, so that it can be worked on.
+  const strobiSceneOpen = assistantAvailable && (opening.open || isOnboardingForced)
   // Remote Config may answer while the reader goes through the scenes: what it said when the
   // first scene was left holds to the end, so that no scene appears or vanishes on the way.
   const [strobiSceneDecided, setStrobiSceneDecided] = useState<boolean>()

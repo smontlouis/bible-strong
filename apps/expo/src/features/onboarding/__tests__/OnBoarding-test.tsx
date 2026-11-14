@@ -38,6 +38,7 @@ jest.mock('../atom', () => {
   return {
     isOnboardingCompletedAtom: atom(false),
     onboardingFinishedAtom: atom(false),
+    onboardingOnScreenAtom: atom(false),
   }
 })
 

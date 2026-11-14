@@ -16,3 +16,6 @@ export const strobiTrialRequestedAtom = atomWithAsyncStorage<boolean>('strobiTri
 
 // The onboarding was closed during this session: what it asked for can follow.
 export const onboardingFinishedAtom = atom(false)
+
+// The onboarding fills the screen: what waits for its end (Strobi's trial) does not start under it.
+export const onboardingOnScreenAtom = atom(false)

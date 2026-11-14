@@ -1,13 +1,19 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useEffect, useReducer, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSetAtom } from 'jotai/react'
 import { useSelector } from 'react-redux'
+import type { AvatarHandle } from '@bible-strong/avatar-react-native'
 
 import BrandMark from '~common/ui/BrandMark'
 import { IS_DESKTOP } from '~desktop/isDesktopBuild'
 import { useWindowControlsInset, sidebarDragRegion } from '~features/app-switcher/windowChrome'
 import { isEditingTarget } from '~features/keyboard-shortcuts/keyboardTargets'
 import SelectResources from '~features/onboarding/SelectResources'
+import { strobiTrialRequestedAtom } from '~features/onboarding/atom'
+import { assistantAvailable } from '~features/study-assistant/assistantConfig'
+import { useAssistantOpening } from '~helpers/assistantOpening'
+import { isOnboardingForced } from '~helpers/runtimeConfig'
 import type { RootState } from '~redux/modules/reducer'
 import { useTheme } from '~themes/ThemeProvider'
 import { resolveFontFamily } from '~themes/styleValues'
@@ -18,7 +24,6 @@ import { Keycap, keysOf, withKeys } from './Keycap.web'
 import { StoryBoard } from './StoryBoard.web'
 import {
   initialStoryState,
-  STORY_STEPS,
   storyActionForKey,
   storyReducer,
   storyStepNumber,
@@ -51,6 +56,8 @@ function phraseKey(state: StoryState, signedIn: boolean) {
         : 'onboarding.abel.sceneThree.commonPhrase'
     case 'occurrences':
       return 'onboarding.abel.sceneFour.phrase'
+    case 'strobi':
+      return 'onboarding.abel.sceneStrobi.phrase'
     case 'note':
       return 'onboarding.abel.sceneFive.phrase'
     case 'relations':
@@ -79,6 +86,14 @@ function instructionKey(state: StoryState) {
       return 'workspaceOnboarding.strong'
     case 'occurrences':
       return 'workspaceOnboarding.occurrences'
+    case 'strobi':
+      return state.strobi === 'question'
+        ? 'workspaceOnboarding.strobi.ask'
+        : state.strobi === 'thinking'
+          ? 'workspaceOnboarding.strobi.thinking'
+          : state.strobi === 'answer'
+            ? 'workspaceOnboarding.strobi.answer'
+            : 'workspaceOnboarding.strobi.accepted'
     case 'note':
       return state.noted ? 'workspaceOnboarding.noteDone' : 'workspaceOnboarding.note'
     case 'relations':
@@ -117,6 +132,30 @@ export default function WorkspaceStory({ onEnd }: WorkspaceStoryProps) {
   useEffect(() => {
     trackOnboarding({ flow: 'story', step: state.step })
   }, [state.step])
+
+  // Strobi's step is told when Remote Config opens the assistant. Its answer is heard until the
+  // first step is left: no step appears or vanishes on the way.
+  const opening = useAssistantOpening()
+  const strobiOpen = assistantAvailable && (opening.open || isOnboardingForced)
+  useEffect(() => {
+    if (state.step === 'highlight') dispatch({ type: 'steps', withStrobi: strobiOpen })
+  }, [state.step, strobiOpen])
+
+  // Strobi thinks a moment before it answers. Nothing is sent: the answer is written in advance.
+  useEffect(() => {
+    if (state.strobi !== 'thinking') return
+    const timer = setTimeout(() => dispatch({ type: 'strobiAnswered' }), reduce ? 0 : 1800)
+    return () => clearTimeout(timer)
+  }, [reduce, state.strobi])
+
+  // The reader wants to try Strobi: once the story is over, the app offers it.
+  const strobiRef = useRef<AvatarHandle | null>(null)
+  const setStrobiTrialRequested = useSetAtom(strobiTrialRequestedAtom)
+  useEffect(() => {
+    if (state.strobi !== 'accepted') return
+    setStrobiTrialRequested(true)
+    strobiRef.current?.poke('nod')
+  }, [setStrobiTrialRequested, state.strobi])
 
   // The lexicon opens on the proper name, then shows the common noun behind it.
   useEffect(() => {
@@ -178,7 +217,7 @@ export default function WorkspaceStory({ onEnd }: WorkspaceStoryProps) {
     enter,
   }
   const instruction = instructionKey(state)
-  const stepNumber = storyStepNumber(state.step)
+  const stepNumber = storyStepNumber(state.step, state.steps)
   const fade = reduce
     ? { initial: false as const, animate: { opacity: 1 }, exit: { opacity: 0 } }
     : {
@@ -187,11 +226,15 @@ export default function WorkspaceStory({ onEnd }: WorkspaceStoryProps) {
         exit: { opacity: 0, y: -6 },
       }
 
-  const finishBody = IS_DESKTOP
-    ? 'workspaceOnboarding.finish.desktopBody'
-    : signedIn
-      ? 'workspaceOnboarding.finish.signedInBody'
-      : 'workspaceOnboarding.finish.webBody'
+  // A reader who asked to try Strobi learns what signing in brings first.
+  const finishBody =
+    state.strobi === 'accepted' && !signedIn
+      ? 'onboarding.abel.strobi.signIn'
+      : IS_DESKTOP
+        ? 'workspaceOnboarding.finish.desktopBody'
+        : signedIn
+          ? 'workspaceOnboarding.finish.signedInBody'
+          : 'workspaceOnboarding.finish.webBody'
 
   const style = {
     ...webThemeVariables(theme.colors),
@@ -238,7 +281,7 @@ export default function WorkspaceStory({ onEnd }: WorkspaceStoryProps) {
             <div className="bs-onb-eyebrow">
               {state.step === 'finish'
                 ? t('workspaceOnboarding.finish.eyebrow')
-                : t('workspaceOnboarding.eyebrow', { step: stepNumber, total: STORY_STEPS.length })}
+                : t('workspaceOnboarding.eyebrow', { step: stepNumber, total: state.steps.length })}
             </div>
             {/* Slots of fixed height: a title or an instruction of one line or two, or the
                 instant between two of them, never moves the board. */}
@@ -266,7 +309,7 @@ export default function WorkspaceStory({ onEnd }: WorkspaceStoryProps) {
               </AnimatePresence>
             </div>
           </section>
-          <StoryBoard state={state} dispatch={dispatch} />
+          <StoryBoard state={state} dispatch={dispatch} strobiRef={strobiRef} />
         </main>
 
         <footer className="bs-onb-footer" data-finish={state.step === 'finish'}>
@@ -282,7 +325,7 @@ export default function WorkspaceStory({ onEnd }: WorkspaceStoryProps) {
             )}
           </div>
           <div className="bs-onb-progress" aria-hidden="true">
-            {STORY_STEPS.map((step, index) => (
+            {state.steps.map((step, index) => (
               <span key={step} data-done={index < stepNumber} />
             ))}
           </div>

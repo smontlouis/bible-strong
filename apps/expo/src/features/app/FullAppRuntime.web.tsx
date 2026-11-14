@@ -1,4 +1,5 @@
 import AssistantLauncher from '~features/study-assistant/AssistantLauncher.web'
+import StrobiTrialHandoff from '~features/onboarding/StrobiTrialHandoff'
 import WorkspaceOnboarding from '~features/onboarding/workspace/WorkspaceOnboarding.web'
 import { trackAnalyticsScreen } from '~helpers/analytics'
 import WorkspaceAnalytics from '~features/app-switcher/WorkspaceAnalytics.web'
@@ -113,6 +114,7 @@ const FullAppRuntime = ({ theme, children }: { theme: Theme; children?: ReactNod
               <ColorPickerModal />
               <ColorChangeModal />
               <WorkspaceOnboarding />
+              <StrobiTrialHandoff />
             </StrongAudioProvider>
           </BookSelectorSheetProvider>
         </SheetProvider>

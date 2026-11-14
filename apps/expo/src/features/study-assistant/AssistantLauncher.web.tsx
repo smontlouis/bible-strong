@@ -38,6 +38,7 @@ import {
   quotaReturn,
   resumeDate,
 } from './assistantQuota'
+import { useStrobiTrial } from './useStrobiTrial'
 import { contextCaption } from './contextDisplay'
 import ContextMarkIcon from './ContextMarkIcon.web'
 import FireAuth from '~helpers/FireAuth'
@@ -264,6 +265,13 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     send,
     followUps,
   } = session
+  useStrobiTrial({
+    session,
+    open,
+    // The story fills the window: the trial waits for its end.
+    enabled: signedIn && !storyOpen,
+    openAssistant: () => changeOpen(true),
+  })
   useAssistantQuotaSync({ active: open, busy, error })
   // What the account may still ask today, and whether it waits for a verified address.
   const quota = useAssistantQuota()

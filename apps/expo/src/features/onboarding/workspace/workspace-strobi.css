@@ -1,0 +1,127 @@
+/* Strobi in the story of the Web and the desktop app: the guide on the board, and its panel. */
+
+.bs-onb-strobi {
+  position: absolute;
+  z-index: 30;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transform-origin: center;
+}
+
+.bs-onb-strobi-panel {
+  position: absolute;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bs-onb-strobi-question {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  align-self: stretch;
+  min-height: 52px;
+  padding: 0 10px 0 18px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--color-reverse);
+  color: var(--color-default) !important;
+  font-family: var(--onb-sans);
+  font-size: 15px;
+  text-align: left;
+  box-shadow: 0 6px 20px rgba(16, 27, 53, 0.14);
+  cursor: pointer;
+  transition:
+    background-color 220ms ease-out,
+    color 220ms ease-out,
+    margin 220ms ease-out;
+}
+
+.bs-onb-strobi-question span:first-child {
+  flex: 1;
+}
+
+.bs-onb-strobi-question[data-asked='true'] {
+  margin-left: 64px;
+  padding-right: 18px;
+  background: var(--color-primary);
+  color: var(--color-reverse) !important;
+  cursor: default;
+}
+
+.bs-onb-strobi-send {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: var(--color-reverse);
+  font-weight: 700;
+}
+
+.bs-onb-strobi-answer {
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: var(--color-surface);
+  box-shadow: 0 6px 20px rgba(16, 27, 53, 0.14);
+}
+
+.bs-onb-strobi-answer-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-link);
+}
+
+.bs-onb-strobi-answer-label span {
+  color: #ff6b6b;
+  letter-spacing: 0;
+}
+
+.bs-onb-strobi-answer p {
+  margin: 10px 0 0;
+  font-family: var(--onb-serif);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-default);
+}
+
+.bs-onb-strobi-offer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bs-onb-strobi-accepted {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: var(--color-light-primary);
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--color-default);
+}
+
+.bs-onb-strobi-check {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: var(--color-reverse);
+  font-weight: 700;
+}
