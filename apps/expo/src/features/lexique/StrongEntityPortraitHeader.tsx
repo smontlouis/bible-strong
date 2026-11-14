@@ -19,6 +19,8 @@ import {
   type EntityPortraitCatalog,
   type EntityPortraitEntry,
 } from './entityPortraits'
+import { useEntityCardCatalog } from './entityCardManifest'
+import { getEntityCardBackdropUri } from './entityCards'
 import { getEntityLabel } from './StrongDetailUI'
 import { useEntityPortraitGround } from './useEntityPortraitGround'
 import { useEntityPortraitImage } from './useEntityPortraitImage'
@@ -120,6 +122,12 @@ const StrongEntityPortraitHeader = ({
   const stage = entry.stages?.find(item => item.key === stageKey)
   const image = useEntityPortraitImage(entity.uniqueName, stage?.hash ?? entry.hash, 'w768')
   const ground = useEntityPortraitGround()
+  // The painted backdrop of the character's card (or of the chosen stage's) stands behind the
+  // cut-out; the ground the application draws shows while it loads, offline, and for an entity
+  // without a card.
+  const cardCatalog = useEntityCardCatalog()
+  const backdropUri = getEntityCardBackdropUri(cardCatalog, entity.uniqueName, stage?.key)
+  const [failedBackdropUri, setFailedBackdropUri] = useState<string>()
   const title = stage?.label ?? entry.title
   const series = getEntitySeriesPlace(catalog, entity.uniqueName)
   const roles = (entry.roles ?? []).flatMap(role =>
@@ -137,6 +145,20 @@ const StrongEntityPortraitHeader = ({
           className="overflow-hidden border-continuous rounded-[16px]"
           style={{ aspectRatio: 1, experimental_backgroundImage: ground }}
         >
+          {!!backdropUri && backdropUri !== failedBackdropUri && (
+            <Image
+              source={{ uri: backdropUri }}
+              style={StyleSheet.absoluteFill}
+              contentFit="cover"
+              // The backdrop is 2:3: the square keeps the band behind the head and shoulders.
+              contentPosition={{ left: '50%', top: '28%' }}
+              cachePolicy="memory-disk"
+              transition={250}
+              recyclingKey={backdropUri}
+              onError={() => setFailedBackdropUri(backdropUri)}
+              accessible={false}
+            />
+          )}
           {!!image.uri && (
             <Image
               source={{ uri: image.uri }}
