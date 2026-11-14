@@ -42,7 +42,9 @@ light tint they were drawn on.
    joins real plans, since the invitation already opens the catalogue. Title actions are verbs,
    never a second noun beside the title.
 4. **Ma bibliothèque**, what belongs to the reader: the six counts in one card
-   (`ProfileStats home`), then the sign-in prompt. The profile keeps the six cards.
+   (`ProfileStats home`), then the card album (`HomeCardCollection`: the last cards collected in
+   a fan, how many the reader holds, the way into `/cards`, ADR-0090), then the sign-in prompt.
+   The profile keeps the six cards.
 5. **Explorer**, what the app offers: the four illustrated cards (`HomeExploreGrid`), their
    title alone on screen and their hint read aloud; then the **Un mot au hasard** part with
    random Greek, Hebrew, Nave and dictionary entries (`HomeDiscovery`). The home carries no

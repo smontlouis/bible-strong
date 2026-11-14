@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { Events } from './Events'
+import HomeCardCollection from './HomeCardCollection'
 import HomeDiscovery from './HomeDiscovery'
 import HomeExploreGrid from './HomeExploreGrid'
 import HomeFooter from './HomeFooter'
@@ -83,6 +84,7 @@ export const Home = ({ closeHome, inWorkspace = false }: HomeProps) => {
       <HomeToday />
       <HomeSectionTitle title={t('home.myLibrary')} />
       <ProfileStats home />
+      <HomeCardCollection />
       <LoginPrompt className="mt-[12px]" />
     </>
   )

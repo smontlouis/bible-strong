@@ -2987,5 +2987,20 @@
   "entityCards.later": "Plus tard",
   "entityCards.close": "Fermer",
   "entityCards.open": "Voir la carte de {{name}}",
-  "entityCards.notFound": "La carte de {{name}}, pas encore trouvée"
+  "entityCards.notFound": "La carte de {{name}}, pas encore trouvée",
+  "collection.title": "Ma collection",
+  "collection.count": "{{count}} carte sur {{total}}",
+  "collection.count_plural": "{{count}} cartes sur {{total}}",
+  "collection.ofTotal": "sur {{total}} cartes",
+  "collection.characters": "{{found}} / {{total}} personnages",
+  "collection.stages": "{{found}} / {{total}} étapes de vie",
+  "collection.howTo": "Les cartes se trouvent à la fin des chapitres : un point doré marque celles qui vous manquent.",
+  "collection.filters.all": "Toutes",
+  "collection.filters.found": "Trouvées",
+  "collection.filters.missing": "À trouver",
+  "collection.meet": "Se rencontre dans {{book}}",
+  "collection.empty": "Aucune carte ici pour l’instant.",
+  "collection.homeEmpty": "Trouvez les cartes des personnages à la fin des chapitres",
+  "entityCards.openCharacter": "Voir {{name}}",
+  "collection.god": "Dieu"
 }

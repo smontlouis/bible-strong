@@ -2959,5 +2959,20 @@
   "entityCards.later": "Later",
   "entityCards.close": "Close",
   "entityCards.open": "See the card of {{name}}",
-  "entityCards.notFound": "{{name}}'s card, not found yet"
+  "entityCards.notFound": "{{name}}'s card, not found yet",
+  "collection.title": "My collection",
+  "collection.count": "{{count}} card of {{total}}",
+  "collection.count_plural": "{{count}} cards of {{total}}",
+  "collection.ofTotal": "of {{total}} cards",
+  "collection.characters": "{{found}} / {{total}} characters",
+  "collection.stages": "{{found}} / {{total}} life stages",
+  "collection.howTo": "Cards are found at the end of chapters: a gold dot marks the ones you are missing.",
+  "collection.filters.all": "All",
+  "collection.filters.found": "Found",
+  "collection.filters.missing": "To find",
+  "collection.meet": "Met in {{book}}",
+  "collection.empty": "No card here yet.",
+  "collection.homeEmpty": "Find the characters’ cards at the end of chapters",
+  "entityCards.openCharacter": "See {{name}}",
+  "collection.god": "God"
 }

@@ -1,3 +1,4 @@
+// surface-allow: a collectible card is a drawn object with its own edge, radius and shadow (ADR-0090)
 import { View } from 'react-native'
 
 import { useTheme } from '~themes/ThemeProvider'

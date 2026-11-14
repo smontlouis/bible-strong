@@ -1,3 +1,4 @@
+// surface-allow: a collectible card is a drawn object with its own edge, radius and shadow (ADR-0090)
 import * as Haptics from 'expo-haptics'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -61,6 +62,8 @@ type CardSpotlightProps = {
   /** Where the card lands once collected, in the window's coordinates. */
   getLandingRect?: () => Promise<WindowRect | undefined>
   onCollect?: () => void
+  /** The card's character, from the album: the page leads to it. */
+  onOpenCharacter?: () => void
   onClose: () => void
 }
 
@@ -76,6 +79,7 @@ export const CardSpotlight = ({
   mode,
   getLandingRect,
   onCollect,
+  onOpenCharacter,
   onClose,
 }: CardSpotlightProps) => {
   const { t } = useTranslation()
@@ -315,11 +319,37 @@ export const CardSpotlight = ({
               </Pressable>
             </>
           ) : (
-            <Pressable accessibilityRole="button" onPress={leave} style={{ padding: 12 }}>
-              <Text style={{ color: 'rgba(246, 239, 224, 0.8)', fontSize: 16, fontWeight: '600' }}>
-                {t('entityCards.close')}
-              </Text>
-            </Pressable>
+            <>
+              {onOpenCharacter && (
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => {
+                    onClose()
+                    onOpenCharacter()
+                  }}
+                  style={({ pressed }) => ({
+                    minWidth: 200,
+                    alignItems: 'center',
+                    paddingHorizontal: 28,
+                    paddingVertical: 13,
+                    borderRadius: 999,
+                    backgroundColor: 'rgba(246, 239, 224, 0.14)',
+                    opacity: pressed ? 0.75 : 1,
+                  })}
+                >
+                  <Text style={{ color: '#f6efe0', fontSize: 16, fontWeight: '700' }}>
+                    {t('entityCards.openCharacter', { name: card.name })}
+                  </Text>
+                </Pressable>
+              )}
+              <Pressable accessibilityRole="button" onPress={leave} style={{ padding: 12 }}>
+                <Text
+                  style={{ color: 'rgba(246, 239, 224, 0.8)', fontSize: 16, fontWeight: '600' }}
+                >
+                  {t('entityCards.close')}
+                </Text>
+              </Pressable>
+            </>
           )}
         </Animated.View>
       </View>
