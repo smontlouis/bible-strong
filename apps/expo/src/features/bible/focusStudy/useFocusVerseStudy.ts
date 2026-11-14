@@ -286,6 +286,7 @@ export const useFocusVerseStudy = ({
       : commentaryResources.length === 0
         ? []
         : commented?.slice(0, limits.commentaries).map(excerpt => ({
+            projectionId: `${excerpt.resourceId}:${excerpt.language}`,
             title: excerpt.title,
             verses:
               excerpt.rangeStartVerse === excerpt.rangeEndVerse

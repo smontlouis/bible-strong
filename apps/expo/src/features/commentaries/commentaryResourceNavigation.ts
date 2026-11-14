@@ -26,6 +26,23 @@ export const getCommentarySectionsForVerse = <Section extends CommentarySectionR
   )
 }
 
+/**
+ * The section that bears most closely on a verse: the narrowest that covers it, the first of
+ * equals. The same rule picks the excerpt the study shows under a verse.
+ */
+export const findCommentarySectionForVerse = <Section extends CommentarySectionRange>(
+  sections: readonly Section[],
+  verse: number
+): Section | undefined =>
+  getCommentarySectionsForVerse(
+    sections.filter(section => section.rangeEndVerse > 0),
+    verse
+  ).reduce<Section | undefined>(
+    (closest, section) =>
+      !closest || getSectionSpan(section) < getSectionSpan(closest) ? section : closest,
+    undefined
+  )
+
 export const groupCommentarySectionsForVerse = <Section extends CommentarySectionRange>({
   sections,
   verse,

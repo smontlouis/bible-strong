@@ -274,7 +274,22 @@ const FocusVerseStudy = ({
             translations.versions,
             <div style={cardStyle}>
               {study.versions.map((version, index) => (
-                <div key={version.versionId} style={rowStyle(index === 0)}>
+                // The verse in that version, in a page of its own: the reading keeps its version.
+                <Pressable
+                  key={version.versionId}
+                  type="button"
+                  onClick={() =>
+                    open({
+                      kind: 'endpoint',
+                      endpoint: {
+                        type: 'verse',
+                        verseKeys: [study.verseKey],
+                        version: version.versionId,
+                      },
+                    })
+                  }
+                  style={rowStyle(index === 0)}
+                >
                   <div
                     style={{
                       fontSize: 12,
@@ -286,7 +301,7 @@ const FocusVerseStudy = ({
                     {version.name}
                   </div>
                   <div style={bibleTextStyle}>{version.text}</div>
-                </div>
+                </Pressable>
               ))}
               {footer(
                 study.versionsCompared ? translations.compareAll : translations.chooseVersions,
@@ -473,14 +488,10 @@ const FocusVerseStudy = ({
             <div style={cardStyle}>
               {study.commentaries.map((commentary, index) => (
                 <Pressable
-                  key={commentary.title}
+                  key={commentary.projectionId}
                   type="button"
                   onClick={() =>
-                    send({
-                      kind: 'open-resource',
-                      resource: 'commentary',
-                      verseKey: study.verseKey,
-                    })
+                    open({ kind: 'commentary-entry', projectionId: commentary.projectionId })
                   }
                   style={rowStyle(index === 0)}
                 >

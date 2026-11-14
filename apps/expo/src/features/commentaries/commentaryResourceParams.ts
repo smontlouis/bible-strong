@@ -8,6 +8,8 @@ export type CommentaryScreenRouteParams = {
   chapter?: string
   sectionId?: string
   focusVerse?: string
+  /** Without a section: the verse whose closest section opens (the study under a verse). */
+  atVerse?: string
 }
 
 export const parseCommentaryResourceParams = ({

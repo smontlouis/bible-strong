@@ -17,7 +17,13 @@ export type FocusStudyWord = {
 
 export type FocusStudyReference = { verseKey: string; title: string; text: string }
 
-export type FocusStudyCommentary = { title: string; verses: string; text: string }
+export type FocusStudyCommentary = {
+  /** `<commentary id>:<language>`, what opens the commentary. */
+  projectionId: string
+  title: string
+  verses: string
+  text: string
+}
 
 export type FocusStudyTopic = { name: string; nameLower: string }
 

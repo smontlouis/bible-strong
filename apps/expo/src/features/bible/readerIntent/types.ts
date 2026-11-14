@@ -73,6 +73,11 @@ export type OpenTarget =
       revision: string
       sectionId: string
     }
+  /**
+   * A commentary on the verse touched, opened on its section that bears most closely on it.
+   * `projectionId` is `<commentary id>:<language>`.
+   */
+  | { kind: 'commentary-entry'; projectionId: string }
   /** A note of the Bible version's own text. */
   | { kind: 'canonical-note'; note: CanonicalBibleNote }
   /** The page a passage media comes from. */

@@ -446,6 +446,22 @@ describe('open intents on a native platform', () => {
     ])
     expect(reader.preview()).toEqual([])
   })
+  it('opens a commentary of the study on the verse studied, whose page finds the section', async () => {
+    const reader = setup()
+
+    await reader.send({
+      kind: 'open',
+      origin: 'focus-study',
+      verseKey: '1-22-2',
+      target: { kind: 'commentary-entry', projectionId: 'mhy:fr' },
+    })
+    expect(reader.routes).toEqual([
+      {
+        pathname: '/commentary-entry',
+        params: { projectionId: 'mhy:fr', book: '1', chapter: '22', atVerse: '2' },
+      },
+    ])
+  })
 })
 
 describe('open intents on the web, which previews in place of a page', () => {

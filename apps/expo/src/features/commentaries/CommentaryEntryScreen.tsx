@@ -33,7 +33,10 @@ import {
   type CommentaryScreenRouteParams,
 } from './commentaryResourceParams'
 import CommentaryEntryNavigation from './CommentaryEntryNavigation'
-import { groupCommentarySectionsForVerse } from './commentaryResourceNavigation'
+import {
+  findCommentarySectionForVerse,
+  groupCommentarySectionsForVerse,
+} from './commentaryResourceNavigation'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { useRecordHistory } from '~features/history/useRecordHistory'
 import { getCommentaryResourceHistoryEntry } from './commentaryResourceHistory'
@@ -52,6 +55,9 @@ const CommentaryEntryScreen = ({
   const parsedFocusVerse = Number(params.focusVerse)
   const focusVerse =
     Number.isSafeInteger(parsedFocusVerse) && parsedFocusVerse > 0 ? parsedFocusVerse : undefined
+  const parsedAtVerse = Number(params.atVerse)
+  const atVerse =
+    Number.isSafeInteger(parsedAtVerse) && parsedAtVerse > 0 ? parsedAtVerse : undefined
   const resources = useResourceAccess()
   const router = useRouter()
   const pushRouteOnce = usePushRouteOnce()
@@ -73,30 +79,38 @@ const CommentaryEntryScreen = ({
         book: parsed!.book,
         chapter: parsed!.chapter,
       }),
-    enabled: Boolean(parsed && params.sectionId),
+    enabled: Boolean(parsed && (params.sectionId || atVerse)),
     networkMode: 'always',
     retry: false,
     ...staticResourceQueryOptions,
   })
 
+  // Opened on a verse without a section (the study under a verse): the section that bears most
+  // closely on it, the narrowest that covers it, as the excerpt the study showed.
+  const sectionId =
+    params.sectionId ||
+    (atVerse !== undefined && query.data
+      ? findCommentarySectionForVerse(query.data.sections, atVerse)?.id
+      : undefined)
+
   useAssistantResourceContext(
     'panel',
     commentaryContext(
-      params,
-      query.data?.sections.find(item => item.id === params.sectionId)
+      { ...params, sectionId },
+      query.data?.sections.find(item => item.id === sectionId)
     )
   )
   useRecordHistory(
-    params.sectionId
+    sectionId
       ? getCommentaryResourceHistoryEntry(
           parsed,
-          params.sectionId,
-          query.data?.sections.find(item => item.id === params.sectionId)
+          sectionId,
+          query.data?.sections.find(item => item.id === sectionId)
         )
       : null
   )
 
-  if (!parsed || !params.sectionId) {
+  if (!parsed || (!params.sectionId && atVerse === undefined)) {
     return (
       <FormSheetScreen className="bg-canvas" isFormSheet={IS_FORM_SHEET}>
         <ResourceUnavailableView
@@ -118,8 +132,8 @@ const CommentaryEntryScreen = ({
         return [...grouped.directSections, ...grouped.chapterContextSections]
       })()
     : (query.data?.sections ?? [])
-  const section = query.data?.sections.find(candidate => candidate.id === params.sectionId)
-  const sectionIndex = orderedSections.findIndex(candidate => candidate.id === params.sectionId)
+  const section = query.data?.sections.find(candidate => candidate.id === sectionId)
+  const sectionIndex = orderedSections.findIndex(candidate => candidate.id === sectionId)
   const previousSection = sectionIndex > 0 ? orderedSections[sectionIndex - 1] : undefined
   const nextSection = sectionIndex >= 0 ? orderedSections[sectionIndex + 1] : undefined
   const bookLabel = getCommentaryBookLabel(book)
@@ -144,7 +158,7 @@ const CommentaryEntryScreen = ({
                 language={projection.language}
                 book={book}
                 chapter={chapter}
-                sectionId={params.sectionId}
+                sectionId={sectionId}
                 showAvatar={false}
                 share={
                   section

@@ -1,6 +1,7 @@
 import { COMMENTARY_CATALOG_BY_ID } from '@bible-strong/resource-catalog/commentaries'
 
 import {
+  findCommentarySectionForVerse,
   getCommentarySectionsForVerse,
   getCommentaryResourceRoute,
   getCoveredCommentaryLocation,
@@ -163,5 +164,26 @@ describe('commentary resource navigation', () => {
         { book: 41, chapter: 1, verse: 1 }
       )
     ).toBeUndefined()
+  })
+})
+
+describe('findCommentarySectionForVerse', () => {
+  const sections = [
+    { id: 'intro', rangeStartVerse: 0, rangeEndVerse: 0 },
+    { id: 'chapter', rangeStartVerse: 1, rangeEndVerse: 24 },
+    { id: 'test', rangeStartVerse: 1, rangeEndVerse: 19 },
+    { id: 'altar', rangeStartVerse: 9, rangeEndVerse: 10 },
+    { id: 'altar-bis', rangeStartVerse: 10, rangeEndVerse: 11 },
+  ]
+
+  it('takes the narrowest section that covers the verse, the first of equals', () => {
+    expect(findCommentarySectionForVerse(sections, 10)?.id).toBe('altar')
+    expect(findCommentarySectionForVerse(sections, 2)?.id).toBe('test')
+    expect(findCommentarySectionForVerse(sections, 22)?.id).toBe('chapter')
+  })
+
+  it('never takes the introduction, and finds nothing past the sections', () => {
+    expect(findCommentarySectionForVerse(sections.slice(0, 1), 1)).toBeUndefined()
+    expect(findCommentarySectionForVerse(sections, 30)).toBeUndefined()
   })
 })

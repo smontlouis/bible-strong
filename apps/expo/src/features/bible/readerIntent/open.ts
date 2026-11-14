@@ -167,6 +167,10 @@ const decodeTarget = (value: unknown): OpenTarget | undefined => {
             sectionId: value.sectionId,
           }
         : undefined
+    case 'commentary-entry':
+      return isText(value.projectionId)
+        ? { kind: value.kind, projectionId: value.projectionId }
+        : undefined
     case 'canonical-note': {
       const note = decodeCanonicalNote(value.note)
       return note ? { kind: value.kind, note } : undefined
@@ -418,7 +422,8 @@ const openEndpoint = (
       return
     case 'verse':
       if (intent.origin === 'focus-study') {
-        // A cross reference of the study opens on its verse, in the default version.
+        // A cross reference of the study opens on its verse, in the default version; the verse
+        // in another version, from « Dans d’autres versions », in that version.
         const { book, chapter, verse } = parseVerseKey(endpoint.verseKeys[0])
         context.world.navigate({
           pathname: '/bible-view',
@@ -427,6 +432,7 @@ const openEndpoint = (
             book: String(book),
             chapter: String(chapter),
             verse: String(verse),
+            ...(endpoint.version && { version: endpoint.version }),
           },
         })
         return
@@ -558,6 +564,21 @@ export const applyOpenIntent = async (intent: OpenIntent, context: OpenContext) 
     case 'commentary-section':
       openCommentarySection(context, target)
       return
+    case 'commentary-entry': {
+      // The commentary page finds the section of the verse itself, in the chapter it loads.
+      const { book, chapter, verse } = parseVerseKey(intent.verseKey)
+      if (!book || !chapter || !verse) return
+      world.navigate({
+        pathname: '/commentary-entry',
+        params: {
+          projectionId: target.projectionId,
+          book: String(book),
+          chapter: String(chapter),
+          atVerse: String(verse),
+        },
+      })
+      return
+    }
     case 'canonical-note':
       reader.surface({ kind: 'canonical-note', note: target.note })
       return
