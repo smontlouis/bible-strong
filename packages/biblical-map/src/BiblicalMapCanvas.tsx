@@ -33,6 +33,13 @@ const MOVE_TOLERANCE = 4
 const HIT_RADIUS = 12
 /** Paintings show once a degree spans about 220 pixels. */
 const PICTURES_FROM = 2.2
+/**
+ * When places are brought forward, the others are named only once the map is this much closer
+ * than its opening view: one tap on « + » is enough.
+ */
+const OTHER_NAMES_FROM_ZOOM = 1.5
+/** How much the places not brought forward fade. */
+const DIMMED_OPACITY = 0.22
 /** How much speed a glide keeps per millisecond, as a scroll view slows on iOS. */
 const GLIDE_DECAY = 0.998
 /** Below this speed, in pixels per millisecond, a lifted finger leaves the map where it is. */
@@ -140,7 +147,7 @@ const MapPlace = memo(function MapPlace({
         cy={y}
         r={radius}
         strokeWidth={1.5 * unit}
-        opacity={dimmed ? 0.35 : undefined}
+        opacity={dimmed ? DIMMED_OPACITY : undefined}
       />
     )
   }
@@ -554,13 +561,19 @@ export default function BiblicalMapCanvas({
         Number(left.uniqueName === focus) - Number(right.uniqueName === focus) ||
         Number(bright.has(left.uniqueName)) - Number(bright.has(right.uniqueName))
     )
+  // With places brought forward, the map opens on their names alone: the others' names would
+  // bury them. They come back once the reader zooms in.
+  const openingUnit = openAt(aspect).width / frame.width
+  const namesOthers = bright.size === 0 || unit * OTHER_NAMES_FROM_ZOOM <= openingUnit
   const labelled = placeBiblicalMapLabels({
     // Places brought forward are named first, as the place in focus is.
     places: bright.size
-      ? visible.map(place =>
+      ? visible.flatMap(place =>
           bright.has(place.uniqueName)
-            ? { ...place, chapterCount: place.chapterCount + 10_000 }
-            : place
+            ? [{ ...place, chapterCount: place.chapterCount + 10_000 }]
+            : namesOthers || place.uniqueName === focus
+              ? [place]
+              : []
         )
       : visible,
     unit,
@@ -725,7 +738,7 @@ const MAP_CSS = `
   stroke-opacity: var(--biblical-map-river-opacity);
 }
 .biblical-map__place { cursor: pointer; outline: none; }
-.biblical-map__place.is-dimmed { opacity: 0.35; }
+.biblical-map__place.is-dimmed { opacity: ${DIMMED_OPACITY}; }
 .biblical-map__hit { fill: transparent; }
 .biblical-map__dot { fill: var(--biblical-map-place); stroke: var(--biblical-map-halo); }
 .biblical-map__ring { fill: var(--biblical-map-halo); }
