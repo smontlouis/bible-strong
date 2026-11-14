@@ -1,7 +1,9 @@
 import { Image } from 'expo-image'
+import { useIsFocused } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ScrollView, StyleSheet } from 'react-native'
+import { Platform, ScrollView, StyleSheet } from 'react-native'
+import { useReducedMotion } from 'react-native-reanimated'
 
 import books from '~assets/bible_versions/books-desc'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
@@ -19,6 +21,12 @@ import {
   type EntityPortraitCatalog,
   type EntityPortraitEntry,
 } from './entityPortraits'
+import {
+  EntityPortraitTiltSensor,
+  ParallaxLayer,
+  useEntityPortraitLayerStyles,
+  useEntityPortraitTilt,
+} from './EntityPortraitParallax'
 import { useEntityCardCatalog } from './entityCardManifest'
 import { getEntityCardBackdropUri } from './entityCards'
 import { getEntityLabel } from './StrongDetailUI'
@@ -128,6 +136,14 @@ const StrongEntityPortraitHeader = ({
   const cardCatalog = useEntityCardCatalog()
   const backdropUri = getEntityCardBackdropUri(cardCatalog, entity.uniqueName, stage?.key)
   const [failedBackdropUri, setFailedBackdropUri] = useState<string>()
+  const showsBackdrop = !!backdropUri && backdropUri !== failedBackdropUri
+  // In depth only on a backdrop, on a phone, for a reader who allows motion, while on screen.
+  const isFocused = useIsFocused()
+  const reduceMotion = useReducedMotion()
+  const inDepth = showsBackdrop && Platform.OS !== 'web' && !reduceMotion
+  const moves = inDepth && isFocused
+  const tilt = useEntityPortraitTilt()
+  const layers = useEntityPortraitLayerStyles(tilt)
   const title = stage?.label ?? entry.title
   const series = getEntitySeriesPlace(catalog, entity.uniqueName)
   const roles = (entry.roles ?? []).flatMap(role =>
@@ -145,31 +161,36 @@ const StrongEntityPortraitHeader = ({
           className="overflow-hidden border-continuous rounded-[16px]"
           style={{ aspectRatio: 1, experimental_backgroundImage: ground }}
         >
-          {!!backdropUri && backdropUri !== failedBackdropUri && (
-            <Image
-              source={{ uri: backdropUri }}
-              style={StyleSheet.absoluteFill}
-              contentFit="cover"
-              // The backdrop is 2:3: the square keeps the band behind the head and shoulders.
-              contentPosition={{ left: '50%', top: '28%' }}
-              cachePolicy="memory-disk"
-              transition={250}
-              recyclingKey={backdropUri}
-              onError={() => setFailedBackdropUri(backdropUri)}
-              accessible={false}
-            />
+          {moves && <EntityPortraitTiltSensor tilt={tilt} />}
+          {showsBackdrop && (
+            <ParallaxLayer style={[StyleSheet.absoluteFill, inDepth && layers.backdrop]}>
+              <Image
+                source={{ uri: backdropUri }}
+                style={StyleSheet.absoluteFill}
+                contentFit="cover"
+                // The backdrop is 2:3: the square keeps the band behind the head and shoulders.
+                contentPosition={{ left: '50%', top: '28%' }}
+                cachePolicy="memory-disk"
+                transition={250}
+                recyclingKey={backdropUri}
+                onError={() => setFailedBackdropUri(backdropUri)}
+                accessible={false}
+              />
+            </ParallaxLayer>
           )}
           {!!image.uri && (
-            <Image
-              source={{ uri: image.uri }}
-              style={StyleSheet.absoluteFill}
-              contentFit="cover"
-              cachePolicy="memory-disk"
-              transition={200}
-              recyclingKey={image.uri}
-              onError={image.onError}
-              accessibilityLabel={entity.name}
-            />
+            <ParallaxLayer style={[StyleSheet.absoluteFill, inDepth && layers.subject]}>
+              <Image
+                source={{ uri: image.uri }}
+                style={StyleSheet.absoluteFill}
+                contentFit="cover"
+                cachePolicy="memory-disk"
+                transition={200}
+                recyclingKey={image.uri}
+                onError={image.onError}
+                accessibilityLabel={entity.name}
+              />
+            </ParallaxLayer>
           )}
         </Box>
         <VStack className="overflow-hidden border-continuous px-[8px] pt-[14px] pb-[6px] gap-[3px]">
