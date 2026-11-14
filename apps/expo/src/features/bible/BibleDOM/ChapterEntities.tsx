@@ -107,6 +107,13 @@ const ChapterEntities = ({
     textTransform: 'uppercase',
     opacity: 0.62,
   }
+  // The stack and the media have no name below: centred on the line of the portraits' avatars,
+  // whatever their own height
+  const avatarLineStyle: CSSProperties = {
+    display: 'flex',
+    height: AVATAR_SIZE,
+    alignItems: 'center',
+  }
   const dividerStyle: CSSProperties = {
     flex: 1,
     height: 1,
@@ -126,79 +133,71 @@ const ChapterEntities = ({
           }}
         />
       </h2>
-      {showsPainted && (
+      {(showsPainted || viewMode === 'download' || showsStack || chapterResources) && (
+        // One grid for everything the chapter offers: the portraits, the stack of the others and
+        // the media wrap together, their images on one line, the names hanging below
         <div
           style={{
             display: 'flex',
             flexWrap: 'wrap',
+            alignItems: 'flex-start',
             justifyContent: 'center',
             gap: '16px 10px',
             marginTop: 20,
           }}
         >
-          {painted.map(entity => (
-            <m.button
-              key={entity.uniqueName}
-              type="button"
-              className="chapter-entity-button"
-              data-ignore-verse-touch
-              aria-label={translations.openEntity.replace('{{name}}', entity.name)}
-              whileTap={{ opacity: 0.55, scale: 0.97 }}
-              onClick={() => onOpenEntity(entity.uniqueName)}
-              style={{
-                width: 74,
-                margin: 0,
-                padding: 0,
-                border: 0,
-                background: 'transparent',
-                color: colors.default,
-                fontFamily: settings.fontFamily,
-                cursor: 'pointer',
-              }}
-            >
-              <img
-                {...getChapterEntityAvatar(entity, portraits)}
-                alt=""
+          {showsPainted &&
+            painted.map(entity => (
+              <m.button
+                key={entity.uniqueName}
+                type="button"
+                className="chapter-entity-button"
+                data-ignore-verse-touch
+                aria-label={translations.openEntity.replace('{{name}}', entity.name)}
+                whileTap={{ opacity: 0.55, scale: 0.97 }}
+                onClick={() => onOpenEntity(entity.uniqueName)}
                 style={{
-                  display: 'block',
-                  width: AVATAR_SIZE,
-                  height: AVATAR_SIZE,
-                  margin: '0 auto 6px',
-                  border: `2px solid ${colors.reverse}`,
-                  borderRadius: getEntityAvatarRadius(AVATAR_SIZE),
-                  background: portraitGround,
-                  boxShadow: CHAPTER_ENTITY_AVATAR_SHADOW,
-                  objectFit: 'cover',
-                }}
-              />
-              <span
-                style={{
-                  display: '-webkit-box',
-                  overflow: 'hidden',
-                  fontSize: 12,
-                  lineHeight: 1.22,
-                  fontWeight: 600,
-                  textAlign: 'center',
-                  WebkitBoxOrient: 'vertical',
-                  WebkitLineClamp: 2,
+                  width: 74,
+                  margin: 0,
+                  padding: 0,
+                  border: 0,
+                  background: 'transparent',
+                  color: colors.default,
+                  fontFamily: settings.fontFamily,
+                  cursor: 'pointer',
                 }}
               >
-                {entity.name}
-              </span>
-            </m.button>
-          ))}
-        </div>
-      )}
-      {(viewMode === 'download' || showsStack || chapterResources) && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 38,
-            marginTop: 20,
-          }}
-        >
+                <img
+                  {...getChapterEntityAvatar(entity, portraits)}
+                  alt=""
+                  style={{
+                    display: 'block',
+                    width: AVATAR_SIZE,
+                    height: AVATAR_SIZE,
+                    margin: '0 auto 6px',
+                    border: `2px solid ${colors.reverse}`,
+                    borderRadius: getEntityAvatarRadius(AVATAR_SIZE),
+                    background: portraitGround,
+                    boxShadow: CHAPTER_ENTITY_AVATAR_SHADOW,
+                    objectFit: 'cover',
+                  }}
+                />
+                <span
+                  style={{
+                    display: '-webkit-box',
+                    overflow: 'hidden',
+                    fontSize: 12,
+                    lineHeight: 1.22,
+                    fontWeight: 600,
+                    textAlign: 'center',
+                    WebkitBoxOrient: 'vertical',
+                    WebkitLineClamp: 2,
+                  }}
+                >
+                  {entity.name}
+                </span>
+              </m.button>
+            ))}
           {viewMode === 'download' && (
             <div
               style={{
@@ -316,79 +315,83 @@ const ChapterEntities = ({
             </div>
           )}
           {showsStack && (
-            <LayoutGroup id={layoutGroupId}>
-              <m.button
-                layoutDependency={isOverlayOpen}
-                type="button"
-                className="chapter-entity-button"
-                data-ignore-verse-touch
-                aria-label={stacked.map(entity => entity.name).join(', ')}
-                whileTap={{ opacity: 0.55 }}
-                onClick={() => setIsOverlayOpen(true)}
-                style={{
-                  position: 'relative',
-                  display: 'grid',
-                  width: 78,
-                  height: 70,
-                  margin: 0,
-                  padding: 0,
-                  border: 0,
-                  background: 'transparent',
-                  cursor: 'pointer',
-                  isolation: 'isolate',
-                }}
-              >
-                {stackedEntities.map((entity, index) => {
-                  const position =
-                    stackedEntities.length <= 1 ? 0 : (index / (stackedEntities.length - 1)) * 2 - 1
+            <div style={avatarLineStyle}>
+              <LayoutGroup id={layoutGroupId}>
+                <m.button
+                  layoutDependency={isOverlayOpen}
+                  type="button"
+                  className="chapter-entity-button"
+                  data-ignore-verse-touch
+                  aria-label={stacked.map(entity => entity.name).join(', ')}
+                  whileTap={{ opacity: 0.55 }}
+                  onClick={() => setIsOverlayOpen(true)}
+                  style={{
+                    position: 'relative',
+                    display: 'grid',
+                    width: 78,
+                    height: 70,
+                    margin: 0,
+                    padding: 0,
+                    border: 0,
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    isolation: 'isolate',
+                  }}
+                >
+                  {stackedEntities.map((entity, index) => {
+                    const position =
+                      stackedEntities.length <= 1
+                        ? 0
+                        : (index / (stackedEntities.length - 1)) * 2 - 1
 
-                  return (
-                    <m.img
-                      key={entity.uniqueName}
-                      layoutId={`chapter-entity-${entity.uniqueName}`}
-                      layoutDependency={isOverlayOpen}
-                      {...getChapterEntityAvatar(entity, portraits)}
-                      alt=""
-                      transition={{ layout: layoutTransition }}
-                      style={{
-                        gridArea: '1 / 1',
-                        display: 'block',
-                        width: AVATAR_SIZE,
-                        height: AVATAR_SIZE,
-                        placeSelf: 'center',
-                        border: `2px solid ${colors.reverse}`,
-                        borderRadius: getEntityAvatarRadius(AVATAR_SIZE),
-                        background: portraitGround,
-                        boxShadow: CHAPTER_ENTITY_AVATAR_SHADOW,
-                        objectFit: 'cover',
-                        x: position * 6,
-                        y: Math.abs(position) * 2,
-                        rotate: position * 5,
-                        transformOrigin: 'center',
-                        zIndex: index + 1,
-                      }}
-                    />
-                  )
-                })}
-              </m.button>
-              <ChapterEntitiesOverlay
-                entities={stacked}
-                portraits={portraits}
-                groupLabels={translations.groups}
-                openEntityLabel={translations.openEntity}
-                colors={colors}
-                portraitGround={portraitGround}
-                fontFamily={settings.fontFamily}
-                visibleStackItemCount={stackedEntities.length}
-                isOpen={isOverlayOpen}
-                onClose={() => setIsOverlayOpen(false)}
-                onSelect={uniqueName => {
-                  onOpenEntity(uniqueName)
-                }}
-              />
-            </LayoutGroup>
+                    return (
+                      <m.img
+                        key={entity.uniqueName}
+                        layoutId={`chapter-entity-${entity.uniqueName}`}
+                        layoutDependency={isOverlayOpen}
+                        {...getChapterEntityAvatar(entity, portraits)}
+                        alt=""
+                        transition={{ layout: layoutTransition }}
+                        style={{
+                          gridArea: '1 / 1',
+                          display: 'block',
+                          width: AVATAR_SIZE,
+                          height: AVATAR_SIZE,
+                          placeSelf: 'center',
+                          border: `2px solid ${colors.reverse}`,
+                          borderRadius: getEntityAvatarRadius(AVATAR_SIZE),
+                          background: portraitGround,
+                          boxShadow: CHAPTER_ENTITY_AVATAR_SHADOW,
+                          objectFit: 'cover',
+                          x: position * 6,
+                          y: Math.abs(position) * 2,
+                          rotate: position * 5,
+                          transformOrigin: 'center',
+                          zIndex: index + 1,
+                        }}
+                      />
+                    )
+                  })}
+                </m.button>
+                <ChapterEntitiesOverlay
+                  entities={stacked}
+                  portraits={portraits}
+                  groupLabels={translations.groups}
+                  openEntityLabel={translations.openEntity}
+                  colors={colors}
+                  portraitGround={portraitGround}
+                  fontFamily={settings.fontFamily}
+                  visibleStackItemCount={stackedEntities.length}
+                  isOpen={isOverlayOpen}
+                  onClose={() => setIsOverlayOpen(false)}
+                  onSelect={uniqueName => {
+                    onOpenEntity(uniqueName)
+                  }}
+                />
+              </LayoutGroup>
+            </div>
           )}
-          {chapterResources}
+          {chapterResources && <div style={avatarLineStyle}>{chapterResources}</div>}
         </div>
       )}
       {places.length > 0 && (
