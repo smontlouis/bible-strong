@@ -198,6 +198,14 @@ const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
                           })}
                         />
                         <Stack.Screen
+                          name="premium"
+                          // Like the assistant: a full-height form sheet on iOS, a page on Android.
+                          options={createFormSheetOptions(theme, {
+                            contentStyle: { bottom: 0 },
+                            sheetAllowedDetents: [1],
+                          })}
+                        />
+                        <Stack.Screen
                           name="strong"
                           options={createFormSheetOptions(theme, {
                             contentStyle: { bottom: 0 },

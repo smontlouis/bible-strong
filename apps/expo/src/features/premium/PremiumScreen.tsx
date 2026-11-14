@@ -2,9 +2,10 @@ import { format } from 'date-fns'
 import * as Haptics from 'expo-haptics'
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router'
 import { useAtomValue } from 'jotai/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, Platform, StyleSheet } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import Header from '~common/Header'
 import Link from '~common/Link'
@@ -19,6 +20,7 @@ import { useAssistantAccessible } from '~features/study-assistant/assistantConfi
 import { returnToAssistant } from '~features/study-assistant/returnToAssistant'
 import type { StrobiAnimation } from '~features/study-assistant/StrobiAvatar'
 import { useStrobiReaction } from '~features/study-assistant/useStrobiReaction'
+import { IS_FORM_SHEET } from '~helpers/constants'
 import { getDateLocale } from '~helpers/languageUtils'
 import { toast } from '~helpers/toast'
 import useLanguage from '~helpers/useLanguage'
@@ -64,6 +66,7 @@ const tapHaptic = () => {
  * the desktop app, Stripe runs the checkout: no store account is involved and nothing is restored.
  */
 const PremiumScreen = () => {
+  const insets = useSafeAreaInsets()
   const { t } = useTranslation()
   const lang = useLanguage()
   const router = useRouter()
@@ -312,8 +315,10 @@ const PremiumScreen = () => {
   }
 
   return (
-    <Container className="bg-canvas" reserveBottom={offerReady}>
-      <Header hasBackButton />
+    // A form sheet on iOS, as the assistant it is often opened from (2026-11-14): its grabber
+    // closes it, and its bottom clears the home indicator itself. Android keeps a page.
+    <PremiumPage reserveBottom={offerReady}>
+      <Header hasBackButton={!IS_FORM_SHEET} />
       <ScrollView backgroundColor="canvas">
         <PremiumHero
           animation={strobi}
@@ -353,8 +358,11 @@ const PremiumScreen = () => {
 
       {offerReady ? (
         <Box
-          className="bg-canvas border-separator px-[20px] pt-[12px] pb-[8px]"
-          style={{ borderTopWidth: StyleSheet.hairlineWidth }}
+          className="bg-canvas border-separator px-[20px] pt-[12px]"
+          style={{
+            borderTopWidth: StyleSheet.hairlineWidth,
+            paddingBottom: 8 + (IS_FORM_SHEET ? insets.bottom : 0),
+          }}
         >
           <Button
             fullWidth
@@ -401,9 +409,24 @@ const PremiumScreen = () => {
         }
         onClose={() => setWelcome(false)}
       />
-    </Container>
+    </PremiumPage>
   )
 }
+
+const PremiumPage = ({
+  reserveBottom,
+  children,
+}: {
+  reserveBottom: boolean
+  children: ReactNode
+}) =>
+  IS_FORM_SHEET ? (
+    <Box className="bg-canvas flex-1">{children}</Box>
+  ) : (
+    <Container className="bg-canvas" reserveBottom={reserveBottom}>
+      {children}
+    </Container>
+  )
 
 /** Until sales open, the page exists only for the beta list; a link to it leads home. */
 const PremiumRoute = () => (usePremiumVisible() ? <PremiumScreen /> : <Redirect href="/" />)
