@@ -133,7 +133,8 @@ const GlobalStyles = createGlobalStyles`
     -webkit-tap-highlight-color: transparent;
   }
 
-  .chapter-entity-button:active {
+  /* Plain buttons only: Motion reads a pressed opacity as the button's resting one and keeps it. */
+  .chapter-entity-press:active {
     opacity: 0.6;
   }
 

@@ -217,7 +217,7 @@ const ChapterEntities = ({
             >
               <button
                 type="button"
-                className="chapter-entity-button"
+                className="chapter-entity-button chapter-entity-press"
                 disabled={isDownloading}
                 onClick={onDownload}
                 aria-label={
@@ -294,7 +294,7 @@ const ChapterEntities = ({
               {!isDownloading && (
                 <button
                   type="button"
-                  className="chapter-entity-button"
+                  className="chapter-entity-button chapter-entity-press"
                   onClick={onDismiss}
                   aria-label={translations.dismiss}
                   style={{
