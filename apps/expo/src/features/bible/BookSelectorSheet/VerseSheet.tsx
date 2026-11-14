@@ -15,6 +15,10 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import generateUUID from '~helpers/generateUUID'
 import { useQuery } from '@tanstack/react-query'
 import { bibleChapterQueryOptions } from '~features/resources/resourceQueries'
+const ITEM_SIZE = 48
+const ITEM_GAP = 10
+const PADDING = 10
+
 interface VerseSheetProps {
   sheetRef: React.RefObject<SheetRef | null>
   bookSelectorRef: React.RefObject<SheetRef | null>
@@ -34,10 +38,9 @@ const VerseSheet = ({ sheetRef, bookSelectorRef, actions, data }: VerseSheetProp
   const tempSelectedBook = useAtomValue(tempSelectedBookAtom)
   const tempSelectedChapter = useAtomValue(tempSelectedChapterAtom)
 
-  const ITEM_WIDTH = 40
-  const ITEM_GAP = 10
-  const MAX_WIDTH = Math.min(500, windowWidth)
-  const PADDING = 10
+  // The sheet can be narrower than the window: the grid takes the width it is given.
+  const [sheetWidth, setSheetWidth] = React.useState(0)
+  const MAX_WIDTH = Math.min(500, sheetWidth || windowWidth)
 
   const { selectedVersion: version } = data || {}
   const { setTempSelectedVerse, validateTempSelected } = actions || {}
@@ -90,12 +93,12 @@ const VerseSheet = ({ sheetRef, bookSelectorRef, actions, data }: VerseSheetProp
     }, 300)
   }
 
+  // Every cell has the size it is drawn at, so a row holds exactly the cells counted for it.
   const availableWidth = MAX_WIDTH - PADDING * 2
-  const itemsPerRow = Math.floor(availableWidth / (ITEM_WIDTH + ITEM_GAP))
-
-  const totalItemsWidth = itemsPerRow * ITEM_WIDTH + (itemsPerRow - 1) * ITEM_GAP
-
-  const horizontalMargin = (MAX_WIDTH - totalItemsWidth) / 2
+  const itemsPerRow = Math.max(1, Math.floor((availableWidth + ITEM_GAP) / (ITEM_SIZE + ITEM_GAP)))
+  const totalItemsWidth = itemsPerRow * ITEM_SIZE + (itemsPerRow - 1) * ITEM_GAP
+  // Half a point of slack: Yoga wraps the last cell of a row that fills the width exactly.
+  const horizontalMargin = Math.max(PADDING, (MAX_WIDTH - totalItemsWidth) / 2 - 0.5)
 
   return (
     <Sheet
@@ -104,6 +107,7 @@ const VerseSheet = ({ sheetRef, bookSelectorRef, actions, data }: VerseSheetProp
       header={<SheetHeader title={t('goToVerse')} centerTitle />}
     >
       <SheetScrollView
+        onLayout={event => setSheetWidth(event.nativeEvent.layout.width)}
         contentContainerStyle={{
           paddingTop: 10,
           paddingBottom: insets.bottom,
@@ -135,7 +139,7 @@ const VerseSheet = ({ sheetRef, bookSelectorRef, actions, data }: VerseSheetProp
                 handleLongPress(verse)
               }
             }}
-            style={{ width: Math.max(ITEM_WIDTH, 48) }}
+            style={{ width: ITEM_SIZE }}
           >
             <Box
               className="overflow-hidden border-continuous"
