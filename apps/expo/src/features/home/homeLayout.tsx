@@ -79,7 +79,8 @@ export const HomeGrid = ({
   style?: StyleProp<ViewStyle>
 }>) => {
   const { content } = useHomeLayout()
-  const cell = Math.floor((content - columnGap * (columns - 1)) / columns)
+  // Half a point of slack: Yoga wraps the last cell of a row that fills the width exactly.
+  const cell = Math.floor((content - columnGap * (columns - 1)) / columns - 0.5)
   return (
     <Box
       className="flex-row flex-wrap"
