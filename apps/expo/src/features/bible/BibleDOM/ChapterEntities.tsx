@@ -22,6 +22,7 @@ import {
 } from '~features/lexique/entityPortraits'
 import { getChapterEntitiesViewMode, splitChapterEntities } from './chapterEntitiesPresentation'
 import { useBibleOverlayOpen } from './overlayLifecycle'
+import { INTERFACE_FONT } from './interfaceFont'
 import { getOverlayLayoutTransition } from './overlayStagger'
 import { isDarkTheme } from './utils'
 
@@ -408,7 +409,7 @@ const ChapterEntities = ({
         </div>
       )}
       {places.length > 0 && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 18 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 28 }}>
           <m.button
             type="button"
             data-ignore-verse-touch
@@ -423,7 +424,8 @@ const ChapterEntities = ({
               borderRadius: 999,
               background: colors.lightPrimary,
               color: colors.link,
-              fontFamily: settings.fontFamily,
+              // A control of the interface, not a word of the text: the interface's sans serif.
+              fontFamily: INTERFACE_FONT,
               fontSize: 14,
               fontWeight: 600,
               cursor: 'pointer',
