@@ -16,15 +16,13 @@ import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import { storage } from '~helpers/storage'
 import StrobiAvatar, { type StrobiAnimation } from './StrobiAvatar'
 
-// Expo's developer tools button: a 44 pt disc in a 4 pt ring of its colour at half opacity,
-// 52 pt in all, with a soft shadow below it.
-const DISC_SIZE = 44
-const RING_WIDTH = 4
-const BUTTON_SIZE = DISC_SIZE + RING_WIDTH * 2
-// Strobi's body fills about 81% of its drawing: this box gives it the disc's 44 pt.
+// A full 52 pt disc of Strobi's blue at half opacity, with a soft shadow below it: Strobi
+// moves in front of it, and its edge stays a clean circle whatever Strobi does.
+const BUTTON_SIZE = 52
+// Strobi's body fills about 81% of its drawing: this box gives it 44 pt, 4 pt inside the disc.
 const AVATAR_SIZE = 54
-const RING_COLOR = 'rgba(91, 127, 229, 0.5)'
-const IDLE_RING_COLOR = 'rgba(122, 122, 122, 0.5)'
+const DISC_COLOR = 'rgba(91, 127, 229, 0.5)'
+const IDLE_DISC_COLOR = 'rgba(122, 122, 122, 0.5)'
 // Left alone this long, Strobi falls asleep, still in colour.
 const ASLEEP_AFTER_MS = 5000
 // Once it has dozed off, the button fades and greys out, Strobi held in its sleeping pose,
@@ -266,8 +264,8 @@ export default function AssistantLauncherButton({
       { scale: scale.get() },
     ],
   }))
-  const ringStyle = useAnimatedStyle(() => ({
-    borderColor: interpolateColor(idleProgress.get(), [0, 1], [RING_COLOR, IDLE_RING_COLOR]),
+  const discStyle = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(idleProgress.get(), [0, 1], [DISC_COLOR, IDLE_DISC_COLOR]),
   }))
 
   return (
@@ -291,8 +289,7 @@ export default function AssistantLauncherButton({
             }}
             style={[styles.button, style]}
           >
-            <Animated.View style={[styles.ring, ringStyle]} />
-            <View style={styles.disc} />
+            <Animated.View style={[styles.disc, discStyle]} />
             <StrobiAvatar animation={animation} size={AVATAR_SIZE} muted={idle} />
           </Animated.View>
         </GestureDetector>
@@ -311,20 +308,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  ring: {
-    position: 'absolute',
-    width: BUTTON_SIZE,
-    height: BUTTON_SIZE,
-    borderRadius: BUTTON_SIZE / 2,
-    borderWidth: RING_WIDTH,
-  },
   // Casts Expo's shadow: black at 40%, 8 pt of blur, 4 pt down.
   // surface-allow: the launcher keeps the shadow of Expo's button, which gives the avatar its lift.
   disc: {
     position: 'absolute',
-    width: DISC_SIZE,
-    height: DISC_SIZE,
-    borderRadius: DISC_SIZE / 2,
+    width: BUTTON_SIZE,
+    height: BUTTON_SIZE,
+    borderRadius: BUTTON_SIZE / 2,
     boxShadow: '0px 4px 16px rgba(0, 0, 0, 0.4)',
   },
 })
