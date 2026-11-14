@@ -6,6 +6,7 @@ import { toolActivityIsSearch } from './toolActivity'
  * moment of the run, in the place of the spinners (2026-11-14).
  */
 export type StrobiMood =
+  | 'idle'
   | 'listening'
   | 'curious'
   | 'searching'

@@ -117,7 +117,8 @@ stands at the end of the conversation, in the place of the spinners, and plays a
 catalogue for each moment of a run (`strobiMood.ts`): listening before the service names a step,
 `curious` while it analyses, `searching` or `reading` for the resource being read (named on the
 line beside it), `thinking`, then `writing` while the answer shows; `confused` for a moment when a
-read fails, `finished` before it leaves. `searching`, `thinking` and `writing` turn the body into a
+read fails, `finished`, then it rests under the last answer, still (its row never goes, so the
+page does not jump when an answer ends). `searching`, `thinking` and `writing` turn the body into a
 radar, dots and a pen. Each state plays at least 0.9 s. While its row is below the screen, the
 same Strobi shows in a pill over the composer, in the place of the way down, and a tap on it goes
 there. The error card shows it `failed` (`working` while it retries). The mobile answer no longer

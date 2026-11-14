@@ -16,8 +16,10 @@ const ROW_HEIGHT = 40
 const HOLD_MS = 900
 /** A read that failed: Strobi is confused this long, then goes on. */
 const CONFUSED_MS = 1400
-/** The answer is complete: Strobi shows it is finished this long, then leaves. */
+/** The answer is complete: Strobi shows it is finished this long, then rests. */
 const FINISHED_MS = 1600
+/** At rest, it holds its pose this long, eyes open, then stops computing frames. */
+const SETTLE_MS = 1500
 
 // Strobi comes in with the bounce of its floating button.
 const landing = () => {
@@ -52,7 +54,8 @@ function useHeldMood(target: StrobiMood) {
  * pill over the composer while its place in the conversation is below the screen): it shows what the run is
  * doing (listening, searching, reading, thinking, writing) with a line that says it, goes down
  * with the answer as it is written, is confused for a moment when a read fails, and shows it is
- * finished before it leaves. Errors have their own card, with their own Strobi.
+ * finished, then rests at the end of the last answer, still: its row never goes, so the page
+ * does not jump when an answer ends (2026-11-14). Errors have their own card, with their own Strobi.
  */
 export default function ThreadStrobi({ floating = false }: { floating?: boolean }) {
   const { t } = useTranslation()
@@ -88,12 +91,20 @@ export default function ThreadStrobi({ floating = false }: { floating?: boolean 
   }, [failed, busy])
 
   const target: StrobiMood = !busy
-    ? 'finished'
+    ? finishing
+      ? 'finished'
+      : 'idle'
     : confused
       ? 'confused'
       : runMood(progressKey, tools)
   const mood = useHeldMood(target)
-  const visible = busy || finishing
+  // After an answer, and on a conversation opened again, it waits under the last answer.
+  const resting =
+    !busy &&
+    !error &&
+    last?.role === 'assistant' &&
+    ['complete', 'interrupted'].includes(last.state)
+  const visible = busy || finishing || (!floating && resting)
   if (!visible) return null
 
   const reading = busy && progressKey !== 'assistant.writing' ? runningTool(tools) : undefined
@@ -123,7 +134,11 @@ export default function ThreadStrobi({ floating = false }: { floating?: boolean 
           importantForAccessibility="no-hide-descendants"
         >
           <Box style={{ width: STROBI_SIZE, height: STROBI_SIZE }}>
-            <StrobiAvatar animation={mood} size={STROBI_SIZE} />
+            <StrobiAvatar
+              animation={mood}
+              size={STROBI_SIZE}
+              settleAfterMs={!busy && !finishing ? SETTLE_MS : 0}
+            />
           </Box>
         </Animated.View>
         {!!line && (
