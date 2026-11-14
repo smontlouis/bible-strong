@@ -298,10 +298,13 @@ const Timeline = ({
               activeOpacity={0.7}
               accessibilityRole="button"
               accessibilityLabel={`${event.title}, ${event.dates}`}
-              style={{ width: CARD_WIDTH, flex: 1 }}
+              // A cell of a horizontal list is a row: a flex here would size the card's width, and
+              // measure its title on one line at any width, which then overflowed on two. The
+              // cell already stretches each card to the tallest of the strip.
+              style={{ width: CARD_WIDTH }}
               onPress={() => open(event)}
             >
-              <Card className="flex-[1]">
+              <Card style={{ flexGrow: 1 }}>
                 <Picture uri={event.image} width={CARD_WIDTH} />
                 <VStack className="gap-[2px] p-[12px]">
                   <HStack className="items-center gap-[6px]">
