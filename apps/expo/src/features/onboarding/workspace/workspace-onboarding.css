@@ -66,7 +66,9 @@
   border-radius: 999px;
   font-size: 14px;
   color: var(--color-grey) !important;
-  transition: background-color 180ms ease-out, color 180ms ease-out;
+  transition:
+    background-color 180ms ease-out,
+    color 180ms ease-out;
 }
 
 .bs-onb-text-button:hover {
@@ -151,7 +153,9 @@
   color: var(--color-reverse) !important;
   font-size: 15px;
   font-weight: 600;
-  transition: opacity 180ms ease-out, transform 180ms ease-out;
+  transition:
+    opacity 180ms ease-out,
+    transform 180ms ease-out;
 }
 
 .bs-onb-button:disabled {
@@ -248,7 +252,9 @@
   line-height: 1;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  transition: border-color 180ms ease-out, background-color 180ms ease-out;
+  transition:
+    border-color 180ms ease-out,
+    background-color 180ms ease-out;
 }
 
 button.bs-onb-key:hover {
@@ -311,12 +317,16 @@ button.bs-onb-key:hover {
   border-radius: 4px;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
-  transition: background-image 0.3s ease, color 0.3s ease;
+  transition:
+    background-image 0.3s ease,
+    color 0.3s ease;
 }
 
 .bs-onb-verse-word {
   border-radius: 4px;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 .bs-onb-verse-word[data-studied='true'] {
@@ -502,7 +512,9 @@ button.bs-onb-key:hover {
   background: transparent;
   font-size: 16px;
   color: var(--color-grey) !important;
-  transition: background-color 180ms ease-out, color 180ms ease-out;
+  transition:
+    background-color 180ms ease-out,
+    color 180ms ease-out;
 }
 
 .bs-onb-segment[aria-checked='true'] {
@@ -554,7 +566,9 @@ button.bs-onb-key:hover {
   background: var(--color-canvas);
   font-size: 15px;
   color: var(--color-grey) !important;
-  transition: background-color 180ms ease-out, color 180ms ease-out;
+  transition:
+    background-color 180ms ease-out,
+    color 180ms ease-out;
 }
 
 .bs-onb-filter[aria-checked='true'] {

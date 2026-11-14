@@ -7,16 +7,19 @@ La feature Onboarding guide les nouveaux utilisateurs à travers l'installation 
 ## Fonctionnalités principales
 
 ### Workflow en 3 étapes
+
 1. **Slides de bienvenue** : Présentation des fonctionnalités clés
 2. **Sélection des ressources** : Choix des Bibles et bases de données
 3. **Téléchargement** : Installation des ressources sélectionnées
 
 ### Vérification automatique
+
 - Détection de l'absence de Bible par défaut (LSG/KJV)
 - Lancement automatique au premier démarrage
 - Modal fullscreen non-dismissible
 
 ### Gestion des ressources
+
 - Téléchargement de Bibles multiples
 - Installation de bases de données (Strong, dictionnaire)
 - Barre de progression détaillée
@@ -93,22 +96,23 @@ const checkOnboarding = () => setShowOnboarding(!hasCompletedOnboarding())
 ```typescript
 const slides = [
   {
-    title: "Bienvenue dans Bible Strong",
+    title: 'Bienvenue dans Bible Strong',
     description: "Votre compagnon pour l'étude biblique",
     image: require('./assets/slide1.png'),
-    backgroundColor: '#FFB6C1'
+    backgroundColor: '#FFB6C1',
   },
   {
-    title: "Multiples versions",
-    description: "Accédez à plusieurs traductions",
+    title: 'Multiples versions',
+    description: 'Accédez à plusieurs traductions',
     image: require('./assets/slide2.png'),
-    backgroundColor: '#87CEEB'
+    backgroundColor: '#87CEEB',
   },
   // ...
 ]
 ```
 
 ### Navigation des slides
+
 - Swipe horizontal pour naviguer
 - Indicateurs de progression
 - Bouton "Suivant" pour passer à la sélection
@@ -151,13 +155,10 @@ const downloadResource = async (resource: Resource) => {
     // Télécharger depuis Firebase Storage
     const response = await fetch(resource.url)
     const blob = await response.blob()
-    
+
     // Sauvegarder localement
-    await FileSystem.writeAsStringAsync(
-      `${FileSystem.documentDirectory}${resource.id}.db`,
-      blob
-    )
-    
+    await FileSystem.writeAsStringAsync(`${FileSystem.documentDirectory}${resource.id}.db`, blob)
+
     // Mettre à jour la progression
     updateProgress(resource.id, 100)
   } catch (error) {
@@ -171,7 +172,7 @@ const downloadResource = async (resource: Resource) => {
 ```typescript
 interface DownloadProgress {
   [resourceId: string]: {
-    progress: number      // 0-100
+    progress: number // 0-100
     status: 'pending' | 'downloading' | 'completed' | 'error'
     error?: string
   }
@@ -179,6 +180,7 @@ interface DownloadProgress {
 ```
 
 ### Interface utilisateur
+
 - Barre de progression globale
 - Progression individuelle par ressource
 - Retry en cas d'échec
@@ -187,12 +189,14 @@ interface DownloadProgress {
 ## Gestion des erreurs
 
 ### Types d'erreurs
+
 - Erreur réseau
 - Espace disque insuffisant
 - Corruption de fichier
 - Timeout de téléchargement
 
 ### Stratégies de récupération
+
 ```typescript
 // Retry automatique
 const retryDownload = async (resource: Resource, attempts = 3) => {
@@ -211,14 +215,16 @@ const retryDownload = async (resource: Resource, attempts = 3) => {
 ## Configuration
 
 ### Ressources par défaut
+
 ```typescript
 const DEFAULT_RESOURCES = {
   fr: ['LSG', 'STRONG_HEBREU', 'STRONG_GREC'],
-  en: ['KJV', 'STRONG_HEBREW', 'STRONG_GREEK']
+  en: ['KJV', 'STRONG_HEBREW', 'STRONG_GREEK'],
 }
 ```
 
 ### URLs de téléchargement
+
 - Stockées dans Firebase Remote Config
 - Fallback vers URLs codées en dur
 - Support CDN pour performances
@@ -226,6 +232,7 @@ const DEFAULT_RESOURCES = {
 ## Performance
 
 ### Optimisations
+
 - Téléchargements parallèles limités (max 3)
 - Compression des fichiers de base de données
 - Vérification d'intégrité MD5
@@ -234,6 +241,7 @@ const DEFAULT_RESOURCES = {
 ## Points d'extension
 
 Pour ajouter une nouvelle ressource :
+
 1. Ajouter dans la liste des ressources disponibles
 2. Configurer l'URL dans Firebase
 3. Implémenter la logique d'installation spécifique
