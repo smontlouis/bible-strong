@@ -114,7 +114,7 @@ function Welcome() {
 /** Space kept above the question the page settles on. */
 const ANCHOR_MARGIN = 12
 /** How much of Strobi's row must show above the composer for it to stay in its place. */
-const STROBI_PEEK = 30
+const STROBI_PEEK = 36
 /** How much of the answer must lie below the screen before the way down is offered. */
 const JUMP_THRESHOLD = 80
 /** Opening a conversation: its last question is held in place while the cards above load. */

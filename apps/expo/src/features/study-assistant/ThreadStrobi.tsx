@@ -9,9 +9,9 @@ import StrobiAvatar from './StrobiAvatar'
 import { failedCalls, runMood, runningTool, type StrobiMood } from './strobiMood'
 import { toolActivityChip, toolActivityKind } from './toolActivity'
 
-const STROBI_SIZE = 34
+const STROBI_SIZE = 40
 /** The row keeps one height whatever it says: the thread measures it to hold its anchor. */
-const ROW_HEIGHT = 40
+const ROW_HEIGHT = 48
 /** Each state plays at least this long: steps that follow each other quickly do not flicker. */
 const HOLD_MS = 900
 /** A read that failed: Strobi is confused this long, then goes on. */
@@ -119,7 +119,7 @@ export default function ThreadStrobi({ floating = false }: { floating?: boolean 
       <HStack
         className={
           floating
-            ? 'bg-surface-raised max-w-full items-center gap-2 pl-[6px] pr-[14px]'
+            ? 'bg-surface-raised max-w-full items-center gap-2 pl-[6px] pr-[16px]'
             : 'items-center gap-2'
         }
         style={
@@ -144,7 +144,7 @@ export default function ThreadStrobi({ floating = false }: { floating?: boolean 
         {!!line && (
           <Text
             accessibilityLiveRegion={floating ? 'none' : 'polite'}
-            className={floating ? 'text-grey shrink text-[13px]' : 'text-grey flex-1 text-[13px]'}
+            className={floating ? 'text-grey shrink text-[16px]' : 'text-grey flex-1 text-[16px]'}
             numberOfLines={1}
           >
             {line}

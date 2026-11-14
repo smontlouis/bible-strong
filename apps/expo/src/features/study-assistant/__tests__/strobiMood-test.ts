@@ -20,21 +20,21 @@ describe("Strobi's state during a run", () => {
 
   it('shows each step', () => {
     expect(runMood('assistant.steps.analyzing', [])).toBe('curious')
-    expect(runMood('assistant.steps.searching', [])).toBe('searching')
-    expect(runMood('assistant.searching', [])).toBe('searching')
-    expect(runMood('assistant.steps.thinking', [])).toBe('thinking')
+    expect(runMood('assistant.steps.searching', [])).toBe('curious')
+    expect(runMood('assistant.searching', [])).toBe('curious')
+    expect(runMood('assistant.steps.thinking', [])).toBe('suspicious')
     expect(runMood('assistant.steps.reading', [])).toBe('reading')
-    expect(runMood('assistant.steps.reviewing', [])).toBe('thinking')
+    expect(runMood('assistant.steps.reviewing', [])).toBe('suspicious')
     expect(runMood('assistant.steps.composing', [])).toBe('writing')
     expect(runMood('assistant.writing', [])).toBe('writing')
   })
 
   it('shows the resource being read rather than the step around it', () => {
-    expect(runMood('assistant.steps.thinking', [tool('search_library', 'running')])).toBe(
-      'searching'
-    )
+    expect(runMood('assistant.steps.thinking', [tool('search_library', 'running')])).toBe('curious')
     expect(runMood('assistant.steps.searching', [tool('read_passage', 'running')])).toBe('reading')
-    expect(runMood('assistant.steps.thinking', [tool('read_passage', 'complete')])).toBe('thinking')
+    expect(runMood('assistant.steps.thinking', [tool('read_passage', 'complete')])).toBe(
+      'suspicious'
+    )
   })
 
   it('writes once the answer shows, whatever is still marked as read', () => {

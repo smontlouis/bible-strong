@@ -115,11 +115,12 @@ callback stops; a new animation plays again. `StrobiAvatar.web.tsx` draws the sa
 Strobi in the conversation (mobile, 2026-11-14). The page header has no Strobi: `ThreadStrobi`
 stands at the end of the conversation, in the place of the spinners, and plays a state of the
 catalogue for each moment of a run (`strobiMood.ts`): listening before the service names a step,
-`curious` while it analyses, `searching` or `reading` for the resource being read (named on the
-line beside it), `thinking`, then `writing` while the answer shows; `confused` for a moment when a
+`curious` while it analyses and searches, `reading` for a resource being read (named on the
+line beside it), `suspicious` (eyes narrowed) while it thinks, then `writing` while the answer shows; `confused` for a moment when a
 read fails, `finished`, then it rests under the last answer, still (its row never goes, so the
-page does not jump when an answer ends). `searching`, `thinking` and `writing` turn the body into a
-radar, dots and a pen. Each state plays at least 0.9 s. While its row is below the screen, the
+page does not jump when an answer ends). It keeps its face for as long as the run works: only
+`writing` turns the body into a pattern, the pen (the catalogue's `searching` and `thinking` are a
+radar and dots, which hid it for most of a run). Strobi is 40 pt in a row of 48, its line in 16 px. Each state plays at least 0.9 s. While its row is below the screen, the
 same Strobi shows in a pill over the composer, in the place of the way down, and a tap on it goes
 there. The error card shows it `failed` (`working` while it retries). The mobile answer no longer
 lists the tools it used: Strobi's line names each resource while it is read. In development, `/ai-widgets` → « Ouvrir dans l'assistant » plays a scripted run
