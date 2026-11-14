@@ -65,6 +65,8 @@ const Picture = ({ uri, width }: { uri?: string; width?: number }) => (
         source={{ uri }}
         recyclingKey={uri}
         contentFit="cover"
+        // The paintings are square, the faces near their top: the 3:2 frame keeps the top.
+        contentPosition="top"
         transition={150}
         style={{ width: '100%', height: '100%' }}
       />
