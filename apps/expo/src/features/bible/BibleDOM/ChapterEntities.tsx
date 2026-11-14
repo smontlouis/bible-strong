@@ -23,6 +23,8 @@ import { isDarkTheme } from './utils'
 
 const MAX_STACKED_ENTITIES = 3
 const AVATAR_SIZE = 62
+/** A column of the grid: as wide as the widest tile, the download tile. */
+const GRID_COLUMN = 82
 
 type ChapterEntityTranslations = {
   title: string
@@ -113,6 +115,7 @@ const ChapterEntities = ({
     display: 'flex',
     height: AVATAR_SIZE,
     alignItems: 'center',
+    justifySelf: 'center',
   }
   const dividerStyle: CSSProperties = {
     flex: 1,
@@ -135,14 +138,15 @@ const ChapterEntities = ({
       </h2>
       {(showsPainted || viewMode === 'download' || showsStack || chapterResources) && (
         // One grid for everything the chapter offers: the portraits, the stack of the others and
-        // the media wrap together from the left, as in the overlay, their images on one line, the
-        // names hanging below
+        // the media, their images on one line, the names hanging below. The grid is centred as a
+        // block and fills its rows from the left, as in the overlay: a last row with one tile
+        // starts under the first column. Empty columns collapse, so a single row stays centred.
         <div
           style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'flex-start',
-            justifyContent: 'flex-start',
+            display: 'grid',
+            gridTemplateColumns: `repeat(auto-fit, ${GRID_COLUMN}px)`,
+            justifyContent: 'center',
+            alignItems: 'start',
             gap: '16px 10px',
             marginTop: 20,
           }}
@@ -159,6 +163,7 @@ const ChapterEntities = ({
                 onClick={() => onOpenEntity(entity.uniqueName)}
                 style={{
                   width: 74,
+                  justifySelf: 'center',
                   margin: 0,
                   padding: 0,
                   border: 0,
@@ -207,7 +212,7 @@ const ChapterEntities = ({
                 width: 82,
                 flexDirection: 'column',
                 alignItems: 'center',
-                alignSelf: 'flex-start',
+                justifySelf: 'center',
               }}
             >
               <button
@@ -392,7 +397,10 @@ const ChapterEntities = ({
               </LayoutGroup>
             </div>
           )}
-          {chapterResources && <div style={avatarLineStyle}>{chapterResources}</div>}
+          {chapterResources && (
+            // The media card is wider than a portrait: it takes two columns.
+            <div style={{ ...avatarLineStyle, gridColumn: 'span 2' }}>{chapterResources}</div>
+          )}
         </div>
       )}
       {places.length > 0 && (
