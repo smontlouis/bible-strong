@@ -70,6 +70,7 @@ type PlaygroundHomeProps = {
   onOpenAbelOnboarding: () => void
   onOpenOfflineSetup: () => void
   onOpenHTMLBenchmark: () => void
+  onOpenEntityCard: () => void
 }
 
 const PlaygroundHome = ({
@@ -78,6 +79,7 @@ const PlaygroundHome = ({
   onOpenAbelOnboarding,
   onOpenOfflineSetup,
   onOpenHTMLBenchmark,
+  onOpenEntityCard,
 }: PlaygroundHomeProps) => {
   const stylingTheme = useStylingTheme()
 
@@ -138,6 +140,13 @@ const PlaygroundHome = ({
                 onPress={() => router.push('/ai-widgets')}
               />
             )}
+            <PlaygroundLink
+              eyebrow="Cartes · Skia"
+              title="Les cartes en natif"
+              description="Les cartes de l’atlas dessinées avec React Native Skia : les cinq finitions, le verso, l’inclinaison au doigt ou au téléphone."
+              icon="credit-card"
+              onPress={onOpenEntityCard}
+            />
             <PlaygroundLink
               eyebrow="Performance mobile"
               title="HTML : Native / Expo DOM"
