@@ -11,13 +11,17 @@ import Header from '~common/Header'
 import Login from '~common/Login'
 import useLogin from '~helpers/useLogin'
 import { useTranslation } from 'react-i18next'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import StrobiAvatar from '~features/study-assistant/StrobiAvatar'
 const LoginScreen = () => {
   const stylingTheme = useStylingTheme()
 
   const router = useRouter()
   const { isLogged, isSessionLost } = useLogin()
   const { t } = useTranslation()
+  // Sent here by the onboarding: the reader asked to try Strobi.
+  const { strobi } = useLocalSearchParams<{ strobi?: string }>()
+  const forStrobi = strobi === '1'
   // A lost session still shows the account: the screen stays until the reader signs in again.
   const isSignedIn = isLogged && !isSessionLost
 
@@ -35,8 +39,15 @@ const LoginScreen = () => {
           <Text className="text-[30px] mb-[30px]" style={titleFontStyle(stylingTheme)}>
             {t('Bienvenue !')}
           </Text>
+          {forStrobi && (
+            <Box className="overflow-visible border-continuous items-center mb-[20px]">
+              <StrobiAvatar animation="happy" size={96} />
+            </Box>
+          )}
           <Paragraph className="mb-[10px]" scaleLineHeight={-2}>
-            {t('Connectez-vous pour sauvegarder toutes vos données sur le cloud !')}
+            {forStrobi
+              ? t('onboarding.abel.strobi.signIn')
+              : t('Connectez-vous pour sauvegarder toutes vos données sur le cloud !')}
           </Paragraph>
           <Login />
         </Box>

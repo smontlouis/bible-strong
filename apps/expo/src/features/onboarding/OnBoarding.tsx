@@ -1,6 +1,6 @@
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useEffect, useRef, useState } from 'react'
-import { Modal } from 'react-native'
+import { Modal, Platform } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { useDispatch } from 'react-redux'
 import Box from '~common/ui/Box'
@@ -8,7 +8,7 @@ import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { isOnboardingForced } from '~helpers/runtimeConfig'
 import useLanguage from '~helpers/useLanguage'
 import { setDefaultBibleVersion } from '~redux/modules/user'
-import { isOnboardingCompletedAtom } from './atom'
+import { isOnboardingCompletedAtom, onboardingFinishedAtom } from './atom'
 import AbelOnboarding from './AbelOnboarding'
 import SelectResources from './SelectResources'
 import ResourceSetupChoice from './ResourceSetupChoice'
@@ -49,9 +49,21 @@ const useOptionalOnboarding = () => {
 const OnBoarding = () => {
   const [step, setStep] = useState<'abel' | 'choice' | 'resources'>('abel')
   const setIsOnboardingCompleted = useSetAtom(isOnboardingCompletedAtom)
+  const setOnboardingFinished = useSetAtom(onboardingFinishedAtom)
   const { hideOnboarding, showOnboarding } = useOptionalOnboarding()
 
+  // The routes the end of the onboarding leads to are pushed once the modal is gone: iOS crashes
+  // when a screen with native buttons mounts while a full-screen modal is closing.
+  const finishPending = useRef(false)
+  const markFinished = () => {
+    if (!finishPending.current) return
+    finishPending.current = false
+    setOnboardingFinished(true)
+  }
+
   const completeOnboarding = () => {
+    finishPending.current = true
+    if (Platform.OS !== 'ios') markFinished()
     if (isOnboardingForced) {
       hideOnboarding()
       return
@@ -65,6 +77,7 @@ const OnBoarding = () => {
       animationType="fade"
       presentationStyle="fullScreen"
       onRequestClose={completeOnboarding}
+      onDismiss={markFinished}
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
         <Box

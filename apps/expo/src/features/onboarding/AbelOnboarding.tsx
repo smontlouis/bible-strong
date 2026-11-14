@@ -2,9 +2,11 @@ import { useTheme as useStylingTheme, useTheme } from '~themes/ThemeProvider'
 import { titleFontStyle } from '~themes/styleValues'
 import { Feather } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Pressable, useWindowDimensions } from 'react-native'
+import { Platform, Pressable, useWindowDimensions } from 'react-native'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
-import { useEffect, useRef, useState } from 'react'
+import type { AvatarHandle } from '@bible-strong/avatar-react-native'
+import { useSetAtom } from 'jotai/react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Animated, {
   cubicBezier,
@@ -20,14 +22,33 @@ import Animated, {
   useReducedMotion,
   useSharedValue,
   withDelay,
+  withRepeat,
+  withSequence,
   withSpring,
+  withTiming,
 } from 'react-native-reanimated'
 import Box, { AnimatedBox, HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { supportsOfflineCopies } from '~desktop/isDesktop'
 import { OnboardingStage } from './abel/OnboardingStage'
 import { SceneGraph } from './abel/SceneGraph'
-import { ONBOARDING_SCENE_COUNT, ONBOARDING_SCENES } from './abel/sceneRegistry'
+import { onboardingScenes, type OnboardingSceneId } from './abel/sceneRegistry'
+import { radii } from '~common/ui/surfaces'
+import OnboardingButton from './OnboardingButton'
+import { softHaptic, successHaptic, tapHaptic } from './onboardingHaptics'
+import { createStrobiNode, type StrobiDirection, withStrobi } from './abel/strobiGuide'
+import {
+  createSceneStrobi,
+  STROBI_SCENE_CONFIRMATION_CENTER,
+  STROBI_SCENE_OFFER_CENTER,
+  STROBI_SCENE_PLACEMENT,
+  STROBI_SCENE_QUESTION_CENTER,
+  type StrobiScenePhase,
+} from './abel/scenes/SceneStrobi'
+import { strobiTrialRequestedAtom } from './atom'
+import { assistantAvailable } from '~features/study-assistant/assistantConfig'
+import { useAssistantOpening } from '~helpers/assistantOpening'
+import { isOnboardingForced } from '~helpers/runtimeConfig'
 import { type HighlightColor, type ResourceIllustration } from './abel/VerseCard'
 import { createSceneOneVerseHighlight } from './abel/scenes/SceneOneVerseHighlight'
 import { createSceneFiveNotes } from './abel/scenes/SceneFiveNotes'
@@ -180,7 +201,67 @@ const StrongCarouselPrompt = ({
   )
 }
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
+// How long Strobi thinks before it answers, and how long a scene waits before Strobi points at its
+// next action.
+const STROBI_THINKING_MS = 1800
+const NEXT_ARROW_HINT_MS = 4500
+
+/**
+ * What Strobi does in each scene, where it stands and what it looks at: the scene's next action.
+ * Coordinates are design points of the 350 × 480 stage.
+ */
+const STROBI_IN_SCENES: Record<Exclude<OnboardingSceneId, 'scene-strobi'>, StrobiDirection> = {
+  // Down at the verse.
+  'scene-one': { placement: { x: 50, y: 38, size: 84 }, clip: 'Idle_B', lookAt: [0.25, -0.8] },
+  // To the right, at the resources.
+  'scene-two': { placement: { x: 60, y: 178, size: 70 }, state: 'idle', lookAt: [0.8, 0] },
+  // Up and to the right, at the carousel.
+  'scene-three': {
+    placement: { x: 34, y: 430, size: 62 },
+    state: 'surprised',
+    lookAt: [0.6, 0.5],
+  },
+  // Down and to the left.
+  'scene-four': {
+    placement: { x: 300, y: 48, size: 64 },
+    state: 'reading',
+    lookAt: [-0.5, -0.7],
+  },
+  'scene-five': {
+    placement: { x: 50, y: 424, size: 70 },
+    state: 'listening',
+    target: { x: 286, y: 276 },
+  },
+  'scene-six': {
+    placement: { x: 46, y: 432, size: 62 },
+    state: 'proud',
+    target: { x: 321, y: 289 },
+  },
+  'scene-seven': { placement: { x: 175, y: 432, size: 88 }, state: 'celebrate' },
+}
+
+const strobiDirection = (
+  sceneId: OnboardingSceneId,
+  strobiPhase: StrobiScenePhase
+): StrobiDirection => {
+  if (sceneId !== 'scene-strobi') return STROBI_IN_SCENES[sceneId]
+  if (strobiPhase === 'question') {
+    return {
+      placement: STROBI_SCENE_PLACEMENT,
+      state: 'controlling',
+      target: STROBI_SCENE_QUESTION_CENTER,
+    }
+  }
+  if (strobiPhase === 'thinking') return { placement: STROBI_SCENE_PLACEMENT, state: 'thinking' }
+  if (strobiPhase === 'accepted') {
+    return {
+      placement: STROBI_SCENE_PLACEMENT,
+      state: 'happy',
+      target: STROBI_SCENE_CONFIRMATION_CENTER,
+    }
+  }
+  return { placement: STROBI_SCENE_PLACEMENT, state: 'happy', target: STROBI_SCENE_OFFER_CENTER }
+}
 
 const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardingProps) => {
   const stylingTheme = useStylingTheme()
@@ -191,7 +272,27 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
   const insets = useSafeAreaInsets()
   const { width } = useWindowDimensions()
   const reduceMotion = useReducedMotion()
+  const opening = useAssistantOpening()
+  // Strobi's own scene shows while the assistant is open, and whenever the onboarding is forced
+  // in development, so that it can be worked on. Native only for now: on the web the assistant
+  // does not yet open on its own after sign-in.
+  const strobiSceneOpen =
+    Platform.OS !== 'web' && assistantAvailable && (opening.open || isOnboardingForced)
+  // Remote Config may answer while the reader goes through the scenes: what it said when the
+  // first scene was left holds to the end, so that no scene appears or vanishes on the way.
+  const [strobiSceneDecided, setStrobiSceneDecided] = useState<boolean>()
+  const showStrobiScene = strobiSceneDecided ?? strobiSceneOpen
+  const scenes = useMemo(() => onboardingScenes(showStrobiScene), [showStrobiScene])
+  const sceneCount = scenes.length
   const [sceneIndex, setSceneIndex] = useState(0)
+  const [strobiPhase, setStrobiPhase] = useState<StrobiScenePhase>('question')
+  // Strobi's handle, set by a callback: a ref object handed to the scene graph would be frozen
+  // by the worklets it reaches, and could no longer be set.
+  const strobiRef = useRef<AvatarHandle | null>(null)
+  const [setStrobiHandle] = useState(() => (handle: AvatarHandle | null) => {
+    strobiRef.current = handle
+  })
+  const setStrobiTrialRequested = useSetAtom(strobiTrialRequestedAtom)
   const [isFinishing, setIsFinishing] = useState(false)
   const [isFinalActionReady, setIsFinalActionReady] = useState(false)
   const [delayProgressAfterFinalBack, setDelayProgressAfterFinalBack] = useState(false)
@@ -207,10 +308,10 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
   const sceneFiveHevelRotation = useSharedValue(0)
   const navigationDirection = useSharedValue<1 | -1>(1)
   const [sceneViewportHeight, setSceneViewportHeight] = useState<number>()
-  const currentScene = ONBOARDING_SCENES[sceneIndex]
+  const currentScene = scenes[Math.min(sceneIndex, sceneCount - 1)]
   const canGoBack = sceneIndex > 0
   const isFinalScene = currentScene.id === 'scene-seven'
-  const sceneProgress = (sceneIndex + 1) / ONBOARDING_SCENE_COUNT
+  const sceneProgress = (sceneIndex + 1) / sceneCount
   const progress = isFinishing ? 1 : sceneProgress
   const strongCarouselProgress = useSharedValue<number>(strongCardIndex)
   const backOpacity = useSharedValue(canGoBack ? 1 : 0)
@@ -281,8 +382,11 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
   const advance = () => {
     if (progressDelayTimeout.current) clearTimeout(progressDelayTimeout.current)
     setDelayProgressAfterFinalBack(false)
-    if (sceneIndex < ONBOARDING_SCENES.length - 1) {
-      if (sceneIndex === ONBOARDING_SCENES.length - 2) setIsFinalActionReady(false)
+    if (sceneIndex < sceneCount - 1) {
+      if (sceneIndex === 0 && strobiSceneDecided === undefined) {
+        setStrobiSceneDecided(strobiSceneOpen)
+      }
+      if (sceneIndex === sceneCount - 2) setIsFinalActionReady(false)
       navigationDirection.set(1)
       setSceneIndex(value => value + 1)
       return
@@ -303,6 +407,93 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
       setSceneIndex(value => value - 1)
     }
   }
+
+  // Strobi answers the question of its scene after a moment of thought.
+  const strobiThinking = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const askStrobi = () => {
+    if (strobiPhase !== 'question') return
+    setStrobiPhase('thinking')
+    strobiThinking.current = setTimeout(
+      () => {
+        setStrobiPhase('answer')
+        softHaptic()
+      },
+      reduceMotion ? 0 : STROBI_THINKING_MS
+    )
+  }
+  useEffect(
+    () => () => {
+      if (strobiThinking.current) clearTimeout(strobiThinking.current)
+    },
+    []
+  )
+
+  // The reader wants to try Strobi: the scene says what follows, and the app offers it once the
+  // onboarding is over. The reader goes on with the arrow.
+  const tryStrobi = () => {
+    successHaptic()
+    setStrobiPhase('accepted')
+    strobiRef.current?.poke('nod')
+    setStrobiTrialRequested(true)
+  }
+
+  // Touching Strobi only makes it spin: the arrow and the scene's own actions lead on.
+  const pressStrobi = () => {
+    strobiRef.current?.poke('spin')
+  }
+
+  // Strobi nods at each colour the reader picks.
+  const firstColor = useRef(true)
+  useEffect(() => {
+    if (firstColor.current) {
+      firstColor.current = false
+      return
+    }
+    strobiRef.current?.poke('nod')
+  }, [activeColor])
+
+  // The arrow leads on from every scene but the last, whose progress bar becomes « Commencer ».
+  // A reader who waits on a scene sees it pulse.
+  const showNextArrow = !isFinalScene
+  const nextArrowVisible = useSharedValue(showNextArrow ? 1 : 0)
+  const nextArrowPulse = useSharedValue(1)
+  useEffect(() => {
+    nextArrowVisible.set(reduceMotion ? (showNextArrow ? 1 : 0) : withSpring(showNextArrow ? 1 : 0))
+  }, [nextArrowVisible, reduceMotion, showNextArrow])
+  useEffect(() => {
+    nextArrowPulse.set(1)
+    if (reduceMotion || !showNextArrow) return
+    if (currentScene.id === 'scene-strobi' && strobiPhase === 'thinking') return
+    // Once the reader has asked to try Strobi, the arrow shows at once how to go on.
+    const accepted = currentScene.id === 'scene-strobi' && strobiPhase === 'accepted'
+    const timeout = setTimeout(
+      () => {
+        nextArrowPulse.set(
+          withRepeat(
+            withSequence(withTiming(1.12, { duration: 220 }), withTiming(1, { duration: 260 })),
+            2
+          )
+        )
+      },
+      accepted ? 500 : NEXT_ARROW_HINT_MS
+    )
+    return () => clearTimeout(timeout)
+  }, [currentScene.id, nextArrowPulse, reduceMotion, showNextArrow, strobiPhase])
+  const nextArrowStyle = useAnimatedStyle(() => ({
+    opacity: nextArrowVisible.get(),
+    transform: [{ scale: nextArrowPulse.get() * (0.6 + 0.4 * nextArrowVisible.get()) }],
+  }))
+
+  const strobiFor = (
+    sceneId: OnboardingSceneId,
+    metrics: Parameters<typeof createStrobiNode>[0]['metrics']
+  ) =>
+    createStrobiNode({
+      direction: strobiDirection(sceneId, strobiPhase),
+      metrics,
+      strobiRef: setStrobiHandle,
+      onPress: pressStrobi,
+    })
 
   const changeOccurrenceFilter = (nextFilter: OccurrenceFilterId) => {
     if (nextFilter === occurrenceFilter) return
@@ -348,12 +539,15 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
         },
       ]}
     >
-      <AnimatedPressable
+      <OnboardingButton
         pointerEvents={canGoBack ? 'auto' : 'none'}
         accessibilityRole="button"
         accessibilityLabel={t('onboarding.abel.back')}
-        disabled={!canGoBack}
-        onPress={goBack}
+        enabled={canGoBack}
+        onPress={() => {
+          tapHaptic()
+          goBack()
+        }}
         onPressIn={handleBackPressIn}
         onPressOut={handleBackPressOut}
         style={[
@@ -374,7 +568,7 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
         ]}
       >
         <Feather name="arrow-left" size={21} color={theme.colors.primary} />
-      </AnimatedPressable>
+      </OnboardingButton>
 
       <Box
         className="overflow-hidden border-continuous h-[28px] mt-[19px] self-center relative"
@@ -435,96 +629,130 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
                   metrics={metrics}
                   reduceMotion={reduceMotion}
                 >
-                  {createSceneOneVerseHighlight({
-                    metrics,
-                    reduceMotion,
-                    activeColor,
-                    actionLabel: t('onboarding.abel.sceneOne.openLexique'),
-                    onVersePress: advance,
-                    onColorSelect: setActiveColor,
-                  })}
-                  {createSceneTwoLexique({
-                    metrics,
-                    reduceMotion,
-                    highlightColor: activeColor,
-                    resourceIllustration: sceneTwoIllustration,
-                    resourceColor: sceneTwoIllustration
-                      ? getSceneTwoNodeColor(sceneTwoIllustration, theme)
-                      : undefined,
-                    onCommentsPress: () =>
-                      setSceneTwoIllustration(current =>
-                        current === 'comments' ? undefined : 'comments'
-                      ),
-                    onComparisonsPress: () =>
-                      setSceneTwoIllustration(current =>
-                        current === 'comparisons' ? undefined : 'comparisons'
-                      ),
-                    onDictionaryPress: () =>
-                      setSceneTwoIllustration(current =>
-                        current === 'dictionary' ? undefined : 'dictionary'
-                      ),
-                    onReferencesPress: () =>
-                      setSceneTwoIllustration(current =>
-                        current === 'references' ? undefined : 'references'
-                      ),
-                    onThemesPress: () =>
-                      setSceneTwoIllustration(current =>
-                        current === 'themes' ? undefined : 'themes'
-                      ),
-                    onLexiquePress: advance,
-                    t,
-                  })}
-                  {createSceneThreeStrong({
-                    activeIndex: strongCardIndex,
-                    carouselProgress: strongCarouselProgress,
-                    metrics,
-                    reduceMotion,
-                    highlightColor: activeColor,
-                    onIndexChange: setStrongCardIndex,
-                    onStrongPress: advance,
-                    t,
-                  })}
-                  {createSceneFourOccurrences({
-                    activeFilter: occurrenceFilter,
-                    filterDirection: occurrenceFilterDirection,
-                    highlightColor: activeColor,
-                    metrics,
-                    onAddNotePress: advance,
-                    onFilterChange: changeOccurrenceFilter,
-                    reduceMotion,
-                    t,
-                  })}
-                  {createSceneFiveNotes({
-                    highlightColor: activeColor,
-                    metrics,
-                    onAddTagPress: advance,
-                    reduceMotion,
-                    shakeRotations: {
-                      abel: sceneFiveAbelRotation,
-                      genesis: sceneFiveGenesisRotation,
-                      hevel: sceneFiveHevelRotation,
-                    },
-                    t,
-                  })}
-                  {createSceneSixRelations({
-                    theme,
-                    highlightColor: activeColor,
-                    metrics,
-                    navigationDirection,
-                    onCollapsePress: advance,
-                    reduceMotion,
-                    shakeRotations: {
-                      abel: sceneFiveAbelRotation,
-                      hevel: sceneFiveHevelRotation,
-                    },
-                    t,
-                  })}
-                  {createSceneSevenReturnToVerse({
-                    highlightColor: activeColor,
-                    metrics,
-                    reduceMotion,
-                    t,
-                  })}
+                  {withStrobi(
+                    createSceneOneVerseHighlight({
+                      metrics,
+                      reduceMotion,
+                      activeColor,
+                      actionLabel: t('onboarding.abel.sceneOne.openLexique'),
+                      onVersePress: advance,
+                      onColorSelect: setActiveColor,
+                    }),
+                    strobiFor('scene-one', metrics)
+                  )}
+                  {withStrobi(
+                    createSceneTwoLexique({
+                      metrics,
+                      reduceMotion,
+                      highlightColor: activeColor,
+                      resourceIllustration: sceneTwoIllustration,
+                      resourceColor: sceneTwoIllustration
+                        ? getSceneTwoNodeColor(sceneTwoIllustration, theme)
+                        : undefined,
+                      onCommentsPress: () =>
+                        setSceneTwoIllustration(current =>
+                          current === 'comments' ? undefined : 'comments'
+                        ),
+                      onComparisonsPress: () =>
+                        setSceneTwoIllustration(current =>
+                          current === 'comparisons' ? undefined : 'comparisons'
+                        ),
+                      onDictionaryPress: () =>
+                        setSceneTwoIllustration(current =>
+                          current === 'dictionary' ? undefined : 'dictionary'
+                        ),
+                      onReferencesPress: () =>
+                        setSceneTwoIllustration(current =>
+                          current === 'references' ? undefined : 'references'
+                        ),
+                      onThemesPress: () =>
+                        setSceneTwoIllustration(current =>
+                          current === 'themes' ? undefined : 'themes'
+                        ),
+                      onLexiquePress: advance,
+                      t,
+                    }),
+                    strobiFor('scene-two', metrics)
+                  )}
+                  {withStrobi(
+                    createSceneThreeStrong({
+                      activeIndex: strongCardIndex,
+                      carouselProgress: strongCarouselProgress,
+                      metrics,
+                      reduceMotion,
+                      highlightColor: activeColor,
+                      onIndexChange: setStrongCardIndex,
+                      onStrongPress: advance,
+                      t,
+                    }),
+                    strobiFor('scene-three', metrics)
+                  )}
+                  {withStrobi(
+                    createSceneFourOccurrences({
+                      activeFilter: occurrenceFilter,
+                      filterDirection: occurrenceFilterDirection,
+                      highlightColor: activeColor,
+                      metrics,
+                      onAddNotePress: advance,
+                      onFilterChange: changeOccurrenceFilter,
+                      reduceMotion,
+                      t,
+                    }),
+                    strobiFor('scene-four', metrics)
+                  )}
+                  {showStrobiScene &&
+                    withStrobi(
+                      createSceneStrobi({
+                        metrics,
+                        phase: strobiPhase,
+                        reduceMotion,
+                        onAsk: askStrobi,
+                        onTry: tryStrobi,
+                        onLater: advance,
+                        t,
+                      }),
+                      strobiFor('scene-strobi', metrics)
+                    )}
+                  {withStrobi(
+                    createSceneFiveNotes({
+                      highlightColor: activeColor,
+                      metrics,
+                      onAddTagPress: advance,
+                      reduceMotion,
+                      shakeRotations: {
+                        abel: sceneFiveAbelRotation,
+                        genesis: sceneFiveGenesisRotation,
+                        hevel: sceneFiveHevelRotation,
+                      },
+                      t,
+                    }),
+                    strobiFor('scene-five', metrics)
+                  )}
+                  {withStrobi(
+                    createSceneSixRelations({
+                      theme,
+                      highlightColor: activeColor,
+                      metrics,
+                      navigationDirection,
+                      onCollapsePress: advance,
+                      reduceMotion,
+                      shakeRotations: {
+                        abel: sceneFiveAbelRotation,
+                        hevel: sceneFiveHevelRotation,
+                      },
+                      t,
+                    }),
+                    strobiFor('scene-six', metrics)
+                  )}
+                  {withStrobi(
+                    createSceneSevenReturnToVerse({
+                      highlightColor: activeColor,
+                      metrics,
+                      reduceMotion,
+                      t,
+                    }),
+                    strobiFor('scene-seven', metrics)
+                  )}
                 </SceneGraph>
               )}
             </OnboardingStage>
@@ -560,7 +788,9 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
                 className="text-center"
                 style={{
                   fontSize: currentScene.id === 'scene-one' ? 32 : isFinalScene ? 22 : 25,
-                  lineHeight: currentScene.id === 'scene-one' ? 38 : isFinalScene ? 26 : 32,
+                  // Three lines of the final phrase must fit the 76-point box, or iOS crams the end
+                  // of the text onto its last line.
+                  lineHeight: currentScene.id === 'scene-one' ? 38 : isFinalScene ? 25 : 32,
                   fontFamily: 'Literata Book',
                 }}
               >
@@ -578,22 +808,27 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
               justifyContent: 'center',
             }}
           >
-            <AnimatedPressable
+            <OnboardingButton
               accessibilityRole={showFinalAction ? 'button' : 'progressbar'}
               accessibilityLabel={
                 showFinalAction
                   ? t('onboarding.abel.start')
                   : t('onboarding.abel.progress', {
                       current: sceneIndex + 1,
-                      total: ONBOARDING_SCENE_COUNT,
+                      total: sceneCount,
                     })
               }
               accessibilityValue={
-                showFinalAction
-                  ? undefined
-                  : { min: 0, max: ONBOARDING_SCENE_COUNT, now: sceneIndex + 1 }
+                showFinalAction ? undefined : { min: 0, max: sceneCount, now: sceneIndex + 1 }
               }
-              onPress={showFinalAction ? advance : undefined}
+              onPress={
+                showFinalAction
+                  ? () => {
+                      tapHaptic()
+                      advance()
+                    }
+                  : undefined
+              }
               onPressIn={showFinalAction ? handlePressIn : undefined}
               onPressOut={showFinalAction ? handlePressOut : undefined}
               style={{
@@ -655,8 +890,37 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
                   </HStack>
                 </AnimatedBox>
               ) : null}
-            </AnimatedPressable>
+            </OnboardingButton>
           </Animated.View>
+          <OnboardingButton
+            pointerEvents={showNextArrow ? 'auto' : 'none'}
+            accessibilityRole="button"
+            accessibilityLabel={t('onboarding.abel.next')}
+            accessibilityElementsHidden={!showNextArrow}
+            importantForAccessibility={showNextArrow ? 'auto' : 'no-hide-descendants'}
+            enabled={showNextArrow}
+            onPress={() => {
+              tapHaptic()
+              advance()
+            }}
+            hitSlop={8}
+            style={[
+              {
+                position: 'absolute',
+                right: 0,
+                top: 7,
+                width: 44,
+                height: 44,
+                borderRadius: radii.pill,
+                backgroundColor: theme.colors.primary,
+                alignItems: 'center',
+                justifyContent: 'center',
+              },
+              nextArrowStyle,
+            ]}
+          >
+            <Feather name="arrow-right" size={21} color="#FFFFFF" />
+          </OnboardingButton>
         </Box>
       </VStack>
     </AnimatedBox>

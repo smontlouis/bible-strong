@@ -3,6 +3,7 @@ export type OnboardingSceneId =
   | 'scene-two'
   | 'scene-three'
   | 'scene-four'
+  | 'scene-strobi'
   | 'scene-five'
   | 'scene-six'
   | 'scene-seven'
@@ -11,8 +12,6 @@ export type OnboardingSceneDefinition = {
   id: OnboardingSceneId
   promptKey: string
 }
-
-export const ONBOARDING_SCENE_COUNT = 7
 
 export const ONBOARDING_SCENES: readonly OnboardingSceneDefinition[] = [
   {
@@ -32,6 +31,10 @@ export const ONBOARDING_SCENES: readonly OnboardingSceneDefinition[] = [
     promptKey: 'onboarding.abel.sceneFour.phrase',
   },
   {
+    id: 'scene-strobi',
+    promptKey: 'onboarding.abel.sceneStrobi.phrase',
+  },
+  {
     id: 'scene-five',
     promptKey: 'onboarding.abel.sceneFive.phrase',
   },
@@ -44,3 +47,10 @@ export const ONBOARDING_SCENES: readonly OnboardingSceneDefinition[] = [
     promptKey: 'onboarding.abel.sceneSeven.phrase',
   },
 ]
+
+/**
+ * The scenes this reader sees: the one that presents Strobi only while the study assistant is
+ * open to them.
+ */
+export const onboardingScenes = (showStrobiScene: boolean) =>
+  ONBOARDING_SCENES.filter(scene => scene.id !== 'scene-strobi' || showStrobiScene)

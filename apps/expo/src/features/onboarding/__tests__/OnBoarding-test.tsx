@@ -14,6 +14,7 @@ let mockLanguage = 'fr'
 jest.mock('react-native', () => {
   const React = jest.requireActual<typeof import('react')>('react')
   return {
+    Platform: { OS: 'android' },
     Modal: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) =>
       React.createElement('Modal', { ...props, testID: 'onboarding-modal' }, children),
   }
@@ -36,6 +37,7 @@ jest.mock('../atom', () => {
   const { atom } = jest.requireActual<typeof import('jotai/vanilla')>('jotai/vanilla')
   return {
     isOnboardingCompletedAtom: atom(false),
+    onboardingFinishedAtom: atom(false),
   }
 })
 

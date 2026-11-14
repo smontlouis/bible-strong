@@ -11,6 +11,7 @@ import {
 } from 'react'
 import type { ViewProps } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
+import { tapHaptic } from '../onboardingHaptics'
 import {
   cancelAnimation,
   createAnimatedComponent,
@@ -116,6 +117,8 @@ type SceneNodeProps = {
   onPress?: () => void
   pressScale?: number
   accessibilityLabel?: string
+  /** A press that only plays: hidden from accessibility, which has the scene's real actions. */
+  decorative?: boolean
   pointerEvents?: ViewProps['pointerEvents']
   children: ReactElement
 }
@@ -681,6 +684,13 @@ const NodeRenderer = ({
       }
     })
   const onPress = descriptor.onPress
+  // Every touch of a scene is felt, whatever it does.
+  const pressWithHaptic = onPress
+    ? () => {
+        tapHaptic()
+        onPress()
+      }
+    : undefined
   const tapGesture = Gesture.Tap()
     .enabled(Boolean(onPress))
     .maxDistance(5)
@@ -688,7 +698,7 @@ const NodeRenderer = ({
       interactionScale.set(reduceMotion ? pressedScale : withSpring(pressedScale))
     })
     .onEnd((_event, success) => {
-      if (success && onPress) runOnJS(onPress)()
+      if (success && pressWithHaptic) runOnJS(pressWithHaptic)()
     })
     .onFinalize(() => {
       if (!panActive.get()) interactionScale.set(reduceMotion ? 1 : withSpring(1))
@@ -762,10 +772,12 @@ const NodeRenderer = ({
     <AnimatedBox
       className="border-continuous overflow-visible absolute left-[0px] top-[0px]"
       style={animatedStyle}
-      accessible={Boolean(onPress)}
-      accessibilityRole={onPress ? 'button' : undefined}
+      accessible={Boolean(onPress) && !descriptor.decorative}
+      accessibilityRole={onPress && !descriptor.decorative ? 'button' : undefined}
       accessibilityLabel={descriptor.accessibilityLabel}
-      onAccessibilityTap={onPress}
+      accessibilityElementsHidden={descriptor.decorative}
+      importantForAccessibility={descriptor.decorative ? 'no-hide-descendants' : undefined}
+      onAccessibilityTap={descriptor.decorative ? undefined : onPress}
       pointerEvents={descriptor.pointerEvents}
     >
       <AnimatedBox

@@ -10,3 +10,9 @@ export const isOnboardingCompletedAtom = atomWithAsyncStorage<boolean>(
   'isOnboardingCompleted',
   false
 )
+
+// The reader asked to try Strobi during the onboarding: once it is over, the app offers it.
+export const strobiTrialRequestedAtom = atomWithAsyncStorage<boolean>('strobiTrialRequested', false)
+
+// The onboarding was closed during this session: what it asked for can follow.
+export const onboardingFinishedAtom = atom(false)

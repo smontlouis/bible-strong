@@ -26,6 +26,7 @@ import { BookSelectorSheetProvider } from '~features/bible/BookSelectorSheet/Boo
 import { StrongAudioProvider } from '~features/bible/StrongAudioProvider'
 import { FeatureOnboardingModal } from '~features/feature-onboarding'
 import OnBoardingModal from '~features/onboarding/OnBoarding'
+import StrobiTrialHandoff from '~features/onboarding/StrobiTrialHandoff'
 import LocalMigrationGate from '~features/migrations/LocalMigrationGate'
 import { appLogger } from '~helpers/agentObservability'
 import { createFormSheetOptions } from '~navigation/formSheetOptions'
@@ -81,6 +82,7 @@ const DeferredModals = () => {
     <>
       <ChangelogModal />
       <OnBoardingModal />
+      <StrobiTrialHandoff />
       <UnifiedTagsModal />
       <ColorPickerModal />
       <ColorChangeModal />

@@ -34,6 +34,7 @@ import type { StrobiAnimation } from './StrobiAvatar'
 import { useAssistantQuotaSync } from './useAssistantQuota'
 import { useAssistantSession } from './useAssistantSession'
 import { useReadingContext } from './useReadingContext'
+import { useStrobiTrial } from './useStrobiTrial'
 
 const PREMIUM_PATH = '/premium'
 
@@ -111,6 +112,7 @@ function AccountAssistant({ account }: { account: string }) {
     onCurrentThreadDeleted: () => dictation.cancel(),
   })
   const { current, ready, busy, send } = session
+  useStrobiTrial({ session, open })
   useAssistantQuotaSync({ active: open, busy, error: session.error })
   // The daily quota used up, Strobi sleeps until it starts again, unless the account holds Premium.
   const premium = useAtomValue(premiumStatusAtom)
