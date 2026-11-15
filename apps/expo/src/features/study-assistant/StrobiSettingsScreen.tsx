@@ -56,6 +56,19 @@ export default function StrobiSettingsScreen() {
     })
     if (confirmed) await aiConsent.withdraw().catch(() => {})
   }
+  // Given here, the agreement shows its whole text first, as in the conversation (5.1.2(i)).
+  const promptGrantAiConsent = async () => {
+    const confirmed = await confirm({
+      title: t('strobi.settings.consentAskTitle'),
+      message: t('assistant.consent.detail'),
+      cancelLabel: t('Annuler'),
+      confirmLabel: t('assistant.consent.accept'),
+    })
+    if (confirmed) await aiConsent.accept().catch(() => {})
+  }
+  const consentGranted = aiConsent.status === 'granted'
+  const toggleAiConsent = () =>
+    void (consentGranted ? promptWithdrawAiConsent() : promptGrantAiConsent())
 
   // What is left today, once the service has said it.
   const quotaDetail =
@@ -107,14 +120,7 @@ export default function StrobiSettingsScreen() {
         )}
 
         {assistantShown && (
-          <ListSection
-            title={t('strobi.settings.display')}
-            footer={t(
-              Platform.OS === 'web'
-                ? 'strobi.settings.bubbleFooterWeb'
-                : 'strobi.settings.bubbleFooter'
-            )}
-          >
+          <ListSection title={t('strobi.settings.display')}>
             <ListRow
               icon={<FeatherIcon name="message-circle" size={18} color="grey" />}
               label={t('strobi.settings.showBubble')}
@@ -135,26 +141,31 @@ export default function StrobiSettingsScreen() {
           </ListSection>
         )}
 
-        {/* The agreement to share questions with AI providers can be taken back here (5.1.2(i)).
-            It is given only in the conversation, where its whole text is shown. */}
+        {/* The agreement to share questions with AI providers, given or taken back (5.1.2(i)):
+            each way asks first, and giving it shows its whole text. */}
         {assistantShown && isLogged && aiConsent.status !== 'loading' && (
-          <ListSection title={t('strobi.settings.data')}>
-            {aiConsent.status === 'granted' ? (
-              <ListRow
-                onPress={promptWithdrawAiConsent}
-                icon={<FeatherIcon name="shield" size={18} color="grey" />}
-                label={t('assistant.consent.settingsLabel')}
-                description={t('assistant.consent.settingsDetail')}
-              />
-            ) : (
-              <ListRow
-                disabled
-                icon={<FeatherIcon name="shield" size={18} color="grey" />}
-                label={t('assistant.consent.settingsLabel')}
-                description={t('strobi.settings.consentMissing')}
-                hasChevron={false}
-              />
-            )}
+          <ListSection
+            title={t('strobi.settings.data')}
+            footer={t('strobi.settings.consentDetail')}
+          >
+            <ListRow
+              icon={<FeatherIcon name="shield" size={18} color="grey" />}
+              label={t('assistant.consent.settingsLabel')}
+              onPress={toggleAiConsent}
+              accessibilityState={{ checked: consentGranted }}
+              trailing={
+                <Switch
+                  accessibilityLabel={t('assistant.consent.settingsLabel')}
+                  accessibilityState={{ checked: consentGranted }}
+                  // Stays where it is until the reader confirms; the agreement moves it then.
+                  value={consentGranted}
+                  onValueChange={toggleAiConsent}
+                  trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                  ios_backgroundColor={theme.colors.border}
+                  thumbColor="#ffffff"
+                />
+              }
+            />
           </ListSection>
         )}
       </ScrollView>
