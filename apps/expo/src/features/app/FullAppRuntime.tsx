@@ -30,6 +30,7 @@ import StrobiTrialHandoff from '~features/onboarding/StrobiTrialHandoff'
 import LocalMigrationGate from '~features/migrations/LocalMigrationGate'
 import { appLogger } from '~helpers/agentObservability'
 import { createFormSheetOptions } from '~navigation/formSheetOptions'
+import { isPageOverSheet } from '~navigation/sheetPresentation'
 import { Theme } from '~themes/index'
 import { PlaybackService } from '../../../playbackService'
 import { downloadManager } from '~helpers/downloadManager'
@@ -161,7 +162,26 @@ const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
                     {__DEV__ && <AgentTools />}
                     <NavigationTracking />
                     <WorkspaceLayout>
-                      <Stack screenOptions={{ headerShown: false }}>
+                      <Stack
+                        // A page opened over a sheet becomes a sheet (iOS cannot slip it under
+                        // one): Strobi's settings from its conversation, the timeline from an
+                        // event, a plan from an answer… From anywhere else, a page.
+                        screenOptions={({ route, navigation }) => {
+                          const { routes } = navigation.getState()
+                          const index = routes.findIndex(
+                            (candidate: { key: string }) => candidate.key === route.key
+                          )
+                          return isPageOverSheet(routes, index)
+                            ? {
+                                headerShown: false,
+                                ...createFormSheetOptions(theme, {
+                                  contentStyle: { bottom: 0 },
+                                  sheetAllowedDetents: [1],
+                                }),
+                              }
+                            : { headerShown: false }
+                        }}
+                      >
                         <Stack.Screen name="index" />
                         <Stack.Screen
                           name="(timeline-search)"
@@ -204,32 +224,6 @@ const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
                             contentStyle: { bottom: 0 },
                             sheetAllowedDetents: [1],
                           })}
-                        />
-                        <Stack.Screen
-                          name="strobi"
-                          // Opened from the assistant, a sheet over its sheet: iOS cannot slip a
-                          // page under a sheet. From « Plus », a page like the other settings.
-                          options={({ route }) =>
-                            (route.params as { from?: string } | undefined)?.from === 'assistant'
-                              ? createFormSheetOptions(theme, {
-                                  contentStyle: { bottom: 0 },
-                                  sheetAllowedDetents: [1],
-                                })
-                              : {}
-                          }
-                        />
-                        <Stack.Screen
-                          name="timeline"
-                          // Located from an event's sheet, the timeline is a sheet over it, which
-                          // gives the event back once closed. From elsewhere, a page.
-                          options={({ route }) =>
-                            (route.params as { from?: string } | undefined)?.from === 'sheet'
-                              ? createFormSheetOptions(theme, {
-                                  contentStyle: { bottom: 0 },
-                                  sheetAllowedDetents: [1],
-                                })
-                              : {}
-                          }
                         />
                         <Stack.Screen
                           name="strong"

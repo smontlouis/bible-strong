@@ -16,6 +16,8 @@ import Animated, {
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
+import { WithoutWorkspaceHeaderInset } from '~features/app-switcher/workspaceHeaderInset'
+import { usePageOverSheet } from '~navigation/sheetPresentation'
 import Text, { AnimatedText, TextProps } from './Text'
 
 export type BoxProps = React.ComponentPropsWithRef<typeof View> & {
@@ -52,15 +54,6 @@ export const VStack = ({ className, ...props }: BoxProps) => (
  */
 const PageBottomInsetContext = createContext<number | null>(null)
 
-/** Sets the room a page keeps at its bottom, for a page that is not in a tab (a sheet). */
-export const PageBottomInset = ({
-  value,
-  children,
-}: {
-  value: number
-  children: React.ReactNode
-}) => <PageBottomInsetContext.Provider value={value}>{children}</PageBottomInsetContext.Provider>
-
 export const usePageBottomInset = () => {
   const { bottomBarHeight } = useBottomBarHeightInTab()
   return useContext(PageBottomInsetContext) ?? bottomBarHeight
@@ -82,6 +75,9 @@ export const RightInsetCleared = ({ children }: { children: React.ReactNode }) =
   <RightInsetClearedContext.Provider value>{children}</RightInsetClearedContext.Provider>
 )
 
+// Room above a sheet's content for its grabber.
+const SHEET_GRABBER_ROOM = 8
+
 export const SafeAreaBox = ({
   isPadding = true,
   reserveBottom = false,
@@ -101,20 +97,27 @@ export const SafeAreaBox = ({
   const insets = useSafeAreaInsets()
   const rightInset = useRightInsetToClear()
   const { bottomBarHeight } = useBottomBarHeightInTab()
-  const bottomSpace = isPadding ? bottomBarHeight : insets.bottom
-  return (
+  // A page opened over a sheet is a sheet itself on iOS (sheetPresentation): room for its grabber
+  // rather than the status bar, the home indicator rather than the tab bar.
+  const overSheet = usePageOverSheet()
+  const topSpace = overSheet ? SHEET_GRABBER_ROOM : insets.top
+  const bottomSpace = overSheet || !isPadding ? insets.bottom : bottomBarHeight
+  const page = (
     <Box
       {...props}
+      // Never flattened: in a sheet, iOS stretches a scroll view that is the screen's direct child
+      // over the whole sheet, header included.
+      collapsable={false}
       style={[
         // The right inset clears a landscape iPhone's camera; the workspace sidebar covers the left.
         isPadding
           ? {
-              paddingTop: insets.top,
+              paddingTop: topSpace,
               paddingRight: rightInset,
               paddingBottom: reserveBottom ? bottomSpace : 0,
             }
           : {
-              marginTop: insets.top,
+              marginTop: topSpace,
               marginRight: rightInset,
               marginBottom: reserveBottom ? bottomSpace : 0,
             },
@@ -127,6 +130,8 @@ export const SafeAreaBox = ({
       </PageBottomInsetContext.Provider>
     </Box>
   )
+  // Sheets open away from the sidebar button of a wide workspace.
+  return overSheet ? <WithoutWorkspaceHeaderInset>{page}</WithoutWorkspaceHeaderInset> : page
 }
 
 export const AnimatedSafeAreaBox = ({

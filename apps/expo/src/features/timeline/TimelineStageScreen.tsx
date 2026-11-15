@@ -4,8 +4,7 @@ import { useTranslation } from 'react-i18next'
 import ContextualMenu from '~common/ContextualPanel/ContextualMenu'
 import Header from '~common/Header'
 import { type SheetRef } from '~common/sheet'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import Box, { PageBottomInset, TouchableBox } from '~common/ui/Box'
+import Box, { TouchableBox } from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
@@ -19,7 +18,6 @@ import type { ResourceLanguage } from '~helpers/databaseTypes'
 import generateUUID from '~helpers/generateUUID'
 import { getPublicSiteUrl } from '~helpers/publicSiteLinks'
 import { toast } from '~helpers/toast'
-import ModalRouteFrame from '~navigation/ModalRouteFrame'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { useResourceLanguage } from 'src/state/resourcesLanguage'
 import { timelineStageContext } from '~features/study-assistant/resourceContext'
@@ -39,8 +37,6 @@ type Props = {
   onPositionChange?: (position: TimelineStagePosition) => void
   /** Where the assistant finds this page: its tab, or the route opened over the reader. */
   assistantScope?: string
-  /** Shown as a sheet over the sheet of the event it locates: no status bar, no tab bar. */
-  inSheet?: boolean
 }
 
 /** The timeline page: its header, and the stage under it. */
@@ -51,10 +47,8 @@ const TimelineStageScreen = ({
   hasBackButton = true,
   onPositionChange,
   assistantScope = 'panel',
-  inSheet = false,
 }: Props) => {
   const { t } = useTranslation()
-  const insets = useSafeAreaInsets()
   const detailsRef = useRef<SheetRef>(null)
   const position = useRef<TimelineStagePosition>(undefined)
   const pushRouteOnce = usePushRouteOnce()
@@ -88,13 +82,9 @@ const TimelineStageScreen = ({
       },
     })
 
-  const page = (
-    <FormSheetScreen className="bg-canvas" isFormSheet={inSheet}>
-      <Box
-        className="overflow-hidden border-continuous flex-[1] bg-canvas"
-        // Room for the sheet's grabber.
-        style={inSheet ? { paddingTop: 8 } : undefined}
-      >
+  return (
+    <FormSheetScreen className="bg-canvas">
+      <Box className="overflow-hidden border-continuous flex-[1] bg-canvas">
         <Header
           hasBackButton={hasBackButton}
           title={t('La Chronologie biblique')}
@@ -179,12 +169,6 @@ const TimelineStageScreen = ({
         <TimelineHomeDetailModal modalRef={detailsRef} />
       </Box>
     </FormSheetScreen>
-  )
-  if (!inSheet) return page
-  return (
-    <ModalRouteFrame>
-      <PageBottomInset value={insets.bottom}>{page}</PageBottomInset>
-    </ModalRouteFrame>
   )
 }
 

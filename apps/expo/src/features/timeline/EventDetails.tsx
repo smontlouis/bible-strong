@@ -73,7 +73,7 @@ const LocateOnTimeline = ({ slug, language }: { slug: string; language: Resource
   const locate = () =>
     Platform.OS === 'web'
       ? router.dismissTo({ pathname: '/timeline', params: { event: slug, language } })
-      : router.push({ pathname: '/timeline', params: { event: slug, language, from: 'sheet' } })
+      : router.push({ pathname: '/timeline', params: { event: slug, language } })
   return (
     <TouchableBox className="self-start py-[4px]" accessibilityRole="link" onPress={locate}>
       <Text className="text-[15px] font-semibold text-link">{t('timeline.event.locate')}</Text>
