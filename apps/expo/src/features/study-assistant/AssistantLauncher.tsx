@@ -57,7 +57,6 @@ function GuestAssistant() {
   const bubble = useStrobiBubble()
   const [asleep, setAsleep] = useState(false)
   const [dragged, setDragged] = useState(false)
-  if (bubble.hidden) return null
   return (
     <AboveSheets>
       <AssistantLauncherButton
@@ -72,6 +71,8 @@ function GuestAssistant() {
         onDragEnd={() => setDragged(false)}
         onDismiss={bubble.confirmHide}
         dismissLabel={t('strobi.menu.hide')}
+        // Put away, the bubble shrinks away; it comes back from Strobi's settings page.
+        putAway={bubble.hidden}
       />
     </AboveSheets>
   )
@@ -206,8 +207,7 @@ function AccountAssistant({ account }: { account: string }) {
   useEffect(() => {
     if (!open) setSource(null)
   }, [open])
-  // Put away, the bubble comes back from Strobi's settings page.
-  if (!ready || bubble.hidden) return null
+  if (!ready) return null
   return (
     <AboveSheets>
       <AssistantLauncherButton
@@ -223,6 +223,8 @@ function AccountAssistant({ account }: { account: string }) {
         onDragEnd={() => setAvatarDragged(false)}
         onDismiss={bubble.confirmHide}
         dismissLabel={t('strobi.menu.hide')}
+        // Put away, the bubble shrinks away; it comes back from Strobi's settings page.
+        putAway={bubble.hidden}
       />
     </AboveSheets>
   )

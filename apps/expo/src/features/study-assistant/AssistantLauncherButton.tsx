@@ -35,6 +35,9 @@ const IDLE_AFTER_MS = ASLEEP_AFTER_MS + 3000
 const HIDE_OFFSET = 60
 const HIDE_SPRING = { duration: 300, dampingRatio: 0.8 }
 const SHOW_SPRING = { duration: 500, dampingRatio: 0.6 }
+// Shown again from Strobi's page, it grows back with a bounce; put away, it shrinks and fades.
+const APPEAR_SPRING = { duration: 550, dampingRatio: 0.5 }
+const PUT_AWAY_MS = 200
 const EDGE_MARGIN = 10
 // Below this distance the touch is a tap, as in Expo's button.
 const DRAG_THRESHOLD = 10
@@ -82,13 +85,15 @@ type Props = {
   animation: StrobiAnimation
   /** Out of the way while the assistant's sheet is up. */
   hidden: boolean
+  /** Put away by the reader (the cross, Strobi's page): it shrinks away, and grows back. */
+  putAway: boolean
   accessibilityLabel: string
   onPress: () => void
   onDragStart: () => void
   onDragEnd: () => void
   /**
    * Dropped on the cross, or asked by VoiceOver: asks whether to put the bubble away, and
-   * resolves to whether it was. Put away, the button is unmounted; kept, it goes back to rest.
+   * resolves to whether it was. Put away, the button stays invisible; kept, it goes back to rest.
    */
   onDismiss: () => Promise<boolean>
   dismissLabel: string
@@ -104,6 +109,7 @@ type Props = {
 export default function AssistantLauncherButton({
   animation,
   hidden,
+  putAway,
   accessibilityLabel,
   onPress,
   onDragStart,
@@ -164,6 +170,8 @@ export default function AssistantLauncherButton({
   // A page that opens without it (Premium, reached by a link) starts it hidden.
   const visibility = useSharedValue(hidden ? 0 : 1)
   const shownOnce = useRef(false)
+  const presence = useSharedValue(putAway ? 0 : 1)
+  const putAwayOnce = useRef(false)
 
   // Reads the latest layout without sliding again when it changes.
   const slide = useEffectEvent((hidden: boolean) => {
@@ -190,6 +198,30 @@ export default function AssistantLauncherButton({
     }
     slide(hidden)
   }, [hidden])
+  // Reads the latest layout; the effect below runs only when the reader puts it away or back.
+  const appear = useEffectEvent((away: boolean) => {
+    if (away) {
+      presence.set(withTiming(0, { duration: PUT_AWAY_MS }))
+      return
+    }
+    // Back at rest at full size, out of the cross it may have been dropped on, awake.
+    const point = restingPoint()
+    x.set(point.x)
+    y.set(point.y)
+    dismissScale.set(1)
+    presence.set(0)
+    presence.set(withSpring(1, APPEAR_SPRING))
+    setAsleep(false)
+    setIdle(false)
+    setReleasedAt(Date.now())
+  })
+  useEffect(() => {
+    if (!putAwayOnce.current) {
+      putAwayOnce.current = true
+      return
+    }
+    appear(putAway)
+  }, [putAway])
   const startX = useSharedValue(0)
   const startY = useSharedValue(0)
   // Where a snap is heading, until the avatar first reaches it: the moment it lands.
@@ -345,11 +377,15 @@ export default function AssistantLauncherButton({
     })
 
   const style = useAnimatedStyle(() => ({
-    opacity: Math.min(Math.max(visibility.get(), 0), 1) * (1 - idleProgress.get() * 0.5),
+    opacity:
+      Math.min(Math.max(visibility.get(), 0), 1) *
+      Math.min(Math.max(presence.get(), 0), 1) *
+      (1 - idleProgress.get() * 0.5),
     transform: [
       { translateX: x.get() + hideOffset.get() },
       { translateY: y.get() },
-      { scale: scale.get() * dismissScale.get() },
+      // The spring overshoots 1 on the way back: the bounce.
+      { scale: scale.get() * dismissScale.get() * (0.3 + 0.7 * presence.get()) },
     ],
   }))
   const targetStyle = useAnimatedStyle(() => ({
@@ -386,9 +422,9 @@ export default function AssistantLauncherButton({
       {layout && (
         <GestureDetector gesture={Gesture.Race(pan, tap)}>
           <Animated.View
-            pointerEvents={hidden ? 'none' : 'auto'}
-            accessibilityElementsHidden={hidden}
-            importantForAccessibility={hidden ? 'no-hide-descendants' : 'auto'}
+            pointerEvents={hidden || putAway ? 'none' : 'auto'}
+            accessibilityElementsHidden={hidden || putAway}
+            importantForAccessibility={hidden || putAway ? 'no-hide-descendants' : 'auto'}
             accessible
             accessibilityRole="button"
             accessibilityLabel={accessibilityLabel}
