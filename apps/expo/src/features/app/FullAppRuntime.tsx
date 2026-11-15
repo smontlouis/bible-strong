@@ -219,6 +219,19 @@ const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
                           }
                         />
                         <Stack.Screen
+                          name="timeline"
+                          // Located from an event's sheet, the timeline is a sheet over it, which
+                          // gives the event back once closed. From elsewhere, a page.
+                          options={({ route }) =>
+                            (route.params as { from?: string } | undefined)?.from === 'sheet'
+                              ? createFormSheetOptions(theme, {
+                                  contentStyle: { bottom: 0 },
+                                  sheetAllowedDetents: [1],
+                                })
+                              : {}
+                          }
+                        />
+                        <Stack.Screen
                           name="strong"
                           options={createFormSheetOptions(theme, {
                             contentStyle: { bottom: 0 },

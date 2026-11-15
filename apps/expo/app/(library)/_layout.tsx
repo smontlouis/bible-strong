@@ -25,7 +25,6 @@ const LibraryLayout = () => {
         <Stack.Screen name="nave" />
         <Stack.Screen name="commentary-library" />
         <Stack.Screen name="timeline-home" />
-        <Stack.Screen name="timeline" />
         <Stack.Screen name="timeline/[language]/index" />
         <Stack.Screen name="passage-media" />
       </Stack>

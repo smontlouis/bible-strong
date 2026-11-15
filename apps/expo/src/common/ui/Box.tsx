@@ -52,6 +52,15 @@ export const VStack = ({ className, ...props }: BoxProps) => (
  */
 const PageBottomInsetContext = createContext<number | null>(null)
 
+/** Sets the room a page keeps at its bottom, for a page that is not in a tab (a sheet). */
+export const PageBottomInset = ({
+  value,
+  children,
+}: {
+  value: number
+  children: React.ReactNode
+}) => <PageBottomInsetContext.Provider value={value}>{children}</PageBottomInsetContext.Provider>
+
 export const usePageBottomInset = () => {
   const { bottomBarHeight } = useBottomBarHeightInTab()
   return useContext(PageBottomInsetContext) ?? bottomBarHeight

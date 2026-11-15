@@ -10,6 +10,7 @@ import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai/react'
 import { useRouter } from 'expo-router'
+import { Platform } from 'react-native'
 import ListSection, { ListRow } from '~common/ui/ListSection'
 import useTimelineLanguage from './useTimelineLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
@@ -61,16 +62,20 @@ const Description = ({ description, article }: Partial<TimelineEventDetail>) => 
   )
 }
 
-/** Takes the reader to the place of an event on the timeline. */
+/**
+ * Takes the reader to the place of an event on the timeline. On the phone and the tablet the
+ * timeline opens over the event (a sheet on iOS, a page on Android), and closing it gives the event
+ * back. The Web keeps its panel: the timeline replaces the event.
+ */
 const LocateOnTimeline = ({ slug, language }: { slug: string; language: ResourceLanguage }) => {
   const { t } = useTranslation()
   const router = useRouter()
+  const locate = () =>
+    Platform.OS === 'web'
+      ? router.dismissTo({ pathname: '/timeline', params: { event: slug, language } })
+      : router.push({ pathname: '/timeline', params: { event: slug, language, from: 'sheet' } })
   return (
-    <TouchableBox
-      className="self-start py-[4px]"
-      accessibilityRole="link"
-      onPress={() => router.dismissTo({ pathname: '/timeline', params: { event: slug, language } })}
-    >
+    <TouchableBox className="self-start py-[4px]" accessibilityRole="link" onPress={locate}>
       <Text className="text-[15px] font-semibold text-link">{t('timeline.event.locate')}</Text>
     </TouchableBox>
   )
