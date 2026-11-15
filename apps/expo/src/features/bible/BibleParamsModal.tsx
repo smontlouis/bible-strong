@@ -29,8 +29,10 @@ import { RootState } from '~redux/modules/reducer'
 import {
   decreaseSettingsFontSizeScale,
   increaseSettingsFontSizeScale,
+  isCardCollectionEnabled,
   isContextualInformationDisplayEnabled,
   setSettingsAlignContent,
+  setSettingsCardCollection,
   setSettingsContextualInformationDisplay,
   setSettingsLineHeight,
   setSettingsPreferredColorScheme,
@@ -221,6 +223,9 @@ const BibleParamsModal = ({
   const press = useSelector((state: RootState) => state.user.bible.settings.press)
   const redWordsDisplay = useSelector(
     (state: RootState) => state.user.bible.settings.redWordsDisplay
+  )
+  const cardCollection = useSelector((state: RootState) =>
+    isCardCollectionEnabled(state.user.bible.settings.cardCollection)
   )
   const contextualInformationDisplay = useSelector((state: RootState) =>
     isContextualInformationDisplayEnabled(state.user.bible.settings.contextualInformationDisplay)
@@ -510,6 +515,20 @@ const BibleParamsModal = ({
               onPress={() =>
                 dispatch(setSettingsContextualInformationDisplay(!contextualInformationDisplay))
               }
+            />
+          </HalfContainer>
+          <HalfContainer border>
+            <Text className={inline ? 'flex-[5] text-[14px]' : 'flex-[5]'}>
+              {t('bible.settings.cardCollection')}
+            </Text>
+            <Text className="ml-[5px] text-[12px] font-bold">
+              {cardCollection ? t('Activé') : t('Désactivé')}
+            </Text>
+            <TouchableIcon
+              accessibilityLabel={t('bible.settings.cardCollection')}
+              isSelected={cardCollection}
+              name="copy"
+              onPress={() => dispatch(setSettingsCardCollection(!cardCollection))}
             />
           </HalfContainer>
           <HalfContainer border>

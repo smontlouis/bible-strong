@@ -18,6 +18,7 @@ type CardAlbumTileProps = {
   collected: boolean
   /** The book where the character is first met, the hint of a card still to find. */
   meetingBook: string
+  /** Opens a collected card large; a card still to find does nothing. */
   onPress: () => void
 }
 
@@ -41,11 +42,11 @@ export const CardAlbumTile = ({
 
   if (!collected) {
     return (
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`${card.name}, ${t('collection.meet', { book: meetingBook })}`}
-        onPress={onPress}
-        style={({ pressed }) => ({
+      <View
+        accessible
+        accessibilityRole="image"
+        accessibilityLabel={t('collection.missing', { book: meetingBook })}
+        style={{
           width,
           height,
           borderRadius: radius,
@@ -54,21 +55,15 @@ export const CardAlbumTile = ({
           alignItems: 'center',
           justifyContent: 'center',
           paddingHorizontal: 8,
-          gap: 8,
-          opacity: pressed ? 0.7 : 1,
+          gap: 10,
           experimental_backgroundImage: ground,
-        })}
+        }}
       >
         <CardIcon collected={false} />
-        <View style={{ alignItems: 'center', gap: 2 }}>
-          <Text className="text-[12px] font-semibold text-grey text-center" numberOfLines={2}>
-            {card.name}
-          </Text>
-          <Text className="text-[10px] text-grey text-center" numberOfLines={2}>
-            {t('collection.meet', { book: meetingBook })}
-          </Text>
-        </View>
-      </Pressable>
+        <Text className="text-[11px] text-grey text-center" numberOfLines={2}>
+          {meetingBook}
+        </Text>
+      </View>
     )
   }
 

@@ -28,6 +28,7 @@ export const SET_DEFAULT_COLOR_TYPE = 'user/SET_DEFAULT_COLOR_TYPE'
 export const SET_DEFAULT_BIBLE_VERSION = 'user/SET_DEFAULT_BIBLE_VERSION'
 export const SET_DEFAULT_STRONG_BIBLE_VERSION = 'user/SET_DEFAULT_STRONG_BIBLE_VERSION'
 export const SET_SETTINGS_RED_WORDS_DISPLAY = 'user/SET_SETTINGS_RED_WORDS_DISPLAY'
+export const SET_SETTINGS_CARD_COLLECTION = 'user/SET_SETTINGS_CARD_COLLECTION'
 export const SET_SETTINGS_CONTEXTUAL_INFORMATION_DISPLAY =
   'user/SET_SETTINGS_CONTEXTUAL_INFORMATION_DISPLAY'
 export const SET_SETTINGS_COMMENTARY_SELECTION = 'user/SET_SETTINGS_COMMENTARY_SELECTION'
@@ -165,6 +166,15 @@ export const setSettingsContextualInformationDisplay = createAction(
 )
 
 export const isContextualInformationDisplayEnabled = (value?: boolean): boolean => value !== false
+
+/** The collectible cards (ADR-0090): the dots of the chapters, the cards of the characters and the album of the home. */
+export const setSettingsCardCollection = createAction(
+  SET_SETTINGS_CARD_COLLECTION,
+  (payload: boolean) => ({ payload })
+)
+
+/** On unless the reader turned it off: a reader from before the setting collects cards. */
+export const isCardCollectionEnabled = (value?: boolean): boolean => value !== false
 
 export const setSettingsInlineCommentaries = createAction<string[]>(
   'user/SET_SETTINGS_INLINE_COMMENTARIES'

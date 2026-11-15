@@ -13,6 +13,7 @@ import { getEntityCardView, type CardLanguage } from '~features/entity-cards/car
 import { getCardAlbum, getLatestCollected } from '~features/entity-cards/cardCollection'
 import { CARD_ICON_HEIGHT, CARD_ICON_WIDTH, CardIcon } from '~features/entity-cards/CardIcon'
 import { getCardPalette } from '~features/entity-cards/cardPalettes'
+import { useCardCollectionEnabled } from '~features/entity-cards/useCardCollectionEnabled'
 import { useCardCatalog } from '~features/lexique/entityCardManifest'
 import { useEntityPortraitCatalog } from '~features/lexique/entityPortraitManifest'
 import type { RootState } from '~redux/modules/reducer'
@@ -32,7 +33,8 @@ const HomeCardCollection = () => {
   const catalog = useCardCatalog()
   const portraits = useEntityPortraitCatalog()
   const collected = useSelector((state: RootState) => state.cards.collected)
-  if (!catalog || !portraits) return null
+  const enabled = useCardCollectionEnabled()
+  if (!enabled || !catalog || !portraits) return null
 
   const album = getCardAlbum(catalog, collected, language)
   const latest = getLatestCollected(catalog, collected, 3).flatMap(card => {

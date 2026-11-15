@@ -107,6 +107,7 @@ import {
   setSettingsPreferredLightTheme,
   setSettingsPress,
   setSettingsRedWordsDisplay,
+  setSettingsCardCollection,
   setSettingsRelationsDisplay,
   setSettingsTagsDisplay,
   setSettingsTextDisplay,
@@ -564,6 +565,8 @@ export interface UserState {
       inlineCommentaries?: string[]
       commentarySelection: CommentarySelectionState
       contextualInformationDisplay?: boolean
+      /** The collectible cards (ADR-0090); absent means on. */
+      cardCollection?: boolean
       redWordsDisplay: boolean
       shareVerses: {
         hasVerseNumbers: boolean
@@ -661,6 +664,7 @@ const getInitialState = (): UserState => ({
           ? ['barnes:en', 'acbc:en', 'mhcc:en']
           : ['barnes:fr', 'acbc:fr', 'mhy-fr:fr'],
       contextualInformationDisplay: true,
+      cardCollection: true,
       redWordsDisplay: true,
       shareVerses: {
         hasVerseNumbers: true,
@@ -1350,6 +1354,9 @@ const userSlice = createSlice({
     })
     builder.addCase(setSettingsContextualInformationDisplay, (state, action) => {
       state.bible.settings.contextualInformationDisplay = action.payload
+    })
+    builder.addCase(setSettingsCardCollection, (state, action) => {
+      state.bible.settings.cardCollection = action.payload
     })
     builder.addCase(setSettingsRedWordsDisplay, (state, action) => {
       state.bible.settings.redWordsDisplay = action.payload

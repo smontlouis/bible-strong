@@ -29,6 +29,7 @@ import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { getChapterNewCards } from '~features/entity-cards/chapterCards'
+import { useCardCollectionEnabled } from '~features/entity-cards/useCardCollectionEnabled'
 import { useCardCatalog } from '~features/lexique/entityCardManifest'
 import { useEntityPortraitCatalog } from '~features/lexique/entityPortraitManifest'
 import {
@@ -751,16 +752,18 @@ const BibleViewer = ({
   // The painted characters whose card the reader has not collected wear a dot (ADR-0090).
   const cardCatalog = useCardCatalog()
   const collectedCards = useSelector((state: RootState) => state.cards.collected)
-  const chapterNewCards = cardCatalog
-    ? getChapterNewCards({
-        uniqueNames: chapterEntities.map(entity => entity.uniqueName),
-        portraits: portraitCatalog,
-        cardIds: new Set(cardCatalog.cards.map(card => card.id)),
-        collected: collectedCards,
-        book: book.Numero,
-        chapter,
-      })
-    : {}
+  const cardCollection = useCardCollectionEnabled()
+  const chapterNewCards =
+    cardCollection && cardCatalog
+      ? getChapterNewCards({
+          uniqueNames: chapterEntities.map(entity => entity.uniqueName),
+          portraits: portraitCatalog,
+          cardIds: new Set(cardCatalog.cards.map(card => card.id)),
+          collected: collectedCards,
+          book: book.Numero,
+          chapter,
+        })
+      : {}
 
   const activeBibleTabId = useAtomValue(activeBibleTabIdAtom)
   // Under a verse in focus the reader gathers its study, one verse at a time (ADR-0088).

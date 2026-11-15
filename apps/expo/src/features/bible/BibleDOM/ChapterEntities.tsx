@@ -67,7 +67,8 @@ type Props = RootStyles & {
  * A character whose card the reader has not collected: a small gold dot at the foot of its avatar
  * (ADR-0090), breathing once in a while unless motion is reduced.
  */
-const NewCardDot = ({ ring }: { ring: string }) => {
+/** A plain gold dot inside the portrait's corner: a card of this character waits to be collected. */
+const NewCardDot = () => {
   const shouldReduceMotion = useReducedMotion()
   return (
     <m.span
@@ -77,23 +78,18 @@ const NewCardDot = ({ ring }: { ring: string }) => {
         shouldReduceMotion
           ? undefined
           : {
-              boxShadow: [
-                `0 0 0 0 rgba(242, 190, 74, 0.55), 0 1px 3px rgba(0, 0, 0, 0.25)`,
-                `0 0 0 6px rgba(242, 190, 74, 0), 0 1px 3px rgba(0, 0, 0, 0.25)`,
-              ],
+              boxShadow: ['0 0 0 0 rgba(242, 193, 78, 0.6)', '0 0 0 5px rgba(242, 193, 78, 0)'],
             }
       }
       transition={{ duration: 1.6, repeat: Infinity, repeatDelay: 2.4, ease: 'easeOut' }}
       style={{
         position: 'absolute',
-        right: -3,
-        bottom: -3,
-        width: 15,
-        height: 15,
+        right: 6,
+        bottom: 6,
+        width: 9,
+        height: 9,
         borderRadius: 999,
-        border: `2px solid ${ring}`,
-        background: 'radial-gradient(circle at 35% 30%, #fff1b8 0%, #f2c14e 45%, #d39a1f 100%)',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.25)',
+        background: '#f2c14e',
       }}
     />
   )
@@ -244,7 +240,7 @@ const ChapterEntities = ({
                       objectFit: 'cover',
                     }}
                   />
-                  {newCards?.[entity.uniqueName] && <NewCardDot ring={colors.reverse} />}
+                  {newCards?.[entity.uniqueName] && <NewCardDot />}
                 </span>
                 <span
                   style={{

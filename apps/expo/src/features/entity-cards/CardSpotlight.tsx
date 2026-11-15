@@ -3,6 +3,7 @@ import * as Haptics from 'expo-haptics'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  ActivityIndicator,
   Modal,
   Platform,
   Pressable,
@@ -62,23 +63,30 @@ type CardSpotlightProps = {
   /** Where the card lands once collected, in the window's coordinates. */
   getLandingRect?: () => Promise<WindowRect | undefined>
   onCollect?: () => void
+  /** The collected card reaches the header: the place there takes its turn to show it. */
+  onLanded?: () => void
   /** The card's character, from the album: the page leads to it. */
   onOpenCharacter?: () => void
   onClose: () => void
 }
 
-const FLY_DURATION = 620
+const FLY_DURATION = 520
+/** The card is gone this early in its flight: it only hints at where it goes. */
+const FLY_FADE = 220
+/** A card whose pictures never come shows without them after this wait. */
+const READY_TIMEOUT = 8000
 
 /**
  * A card large over the page (ADR-0090): it rises, tilts with the phone or the finger and turns
- * over at a touch. A new card enters the collection only with « Récupérer », then flies to its
- * place in the character's header.
+ * over at a touch. A new card enters the collection only with « Récupérer », then sets off toward
+ * its place in the character's header and fades on the way; the place there takes over.
  */
 export const CardSpotlight = ({
   card,
   mode,
   getLandingRect,
   onCollect,
+  onLanded,
   onOpenCharacter,
   onClose,
 }: CardSpotlightProps) => {
@@ -96,6 +104,12 @@ export const CardSpotlight = ({
   const canvas = getEntityCardCanvasSize(cardWidth)
   const cardRef = useRef<View>(null)
   const [leaving, setLeaving] = useState(false)
+  // A spinner holds the card's place while its font and pictures load, the first time above all.
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    const timeout = setTimeout(() => setReady(true), READY_TIMEOUT)
+    return () => clearTimeout(timeout)
+  }, [])
 
   const shade = useSharedValue(0)
   const rise = useSharedValue(reduceMotion ? 1 : 0)
@@ -104,6 +118,7 @@ export const CardSpotlight = ({
   const flyX = useSharedValue(0)
   const flyY = useSharedValue(0)
   const flyScale = useSharedValue(1)
+  const fade = useSharedValue(1)
 
   useEffect(() => {
     shade.set(withTiming(1, { duration: 240 }))
@@ -128,20 +143,27 @@ export const CardSpotlight = ({
     }
   }, [shade, rise, chrome, halo, mode, reduceMotion])
 
-  const leave = () => {
+  /** Everything fades together, the card sinking a little; `then` runs once it is gone. */
+  const leave = (then?: () => void) => {
+    if (leaving) return
     setLeaving(true)
+    const done = () => {
+      onClose()
+      then?.()
+    }
     chrome.set(withTiming(0, { duration: 160 }))
-    halo.set(withTiming(0, { duration: 160 }))
+    halo.set(withTiming(0, { duration: 180 }))
+    fade.set(withTiming(0, { duration: 220, easing: Easing.out(Easing.quad) }))
+    if (!reduceMotion) rise.set(withTiming(0.85, { duration: 240, easing: Easing.in(Easing.quad) }))
     shade.set(
-      withTiming(0, { duration: 220 }, finished => {
-        if (finished) scheduleOnRN(onClose)
+      withTiming(0, { duration: 260 }, finished => {
+        if (finished) scheduleOnRN(done)
       })
     )
-    if (!reduceMotion) rise.set(withTiming(0.6, { duration: 220 }))
   }
 
   const collect = async () => {
-    if (leaving) return
+    if (leaving || !ready) return
     setLeaving(true)
     if (Platform.OS !== 'web') {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
@@ -157,11 +179,13 @@ export const CardSpotlight = ({
     chrome.set(withTiming(0, { duration: 160 }))
     halo.set(withTiming(0, { duration: 200 }))
     if (!landing || !from || reduceMotion) {
+      fade.set(withTiming(0, { duration: 220 }))
       shade.set(
         withTiming(0, { duration: 260 }, finished => {
           if (finished) scheduleOnRN(onClose)
         })
       )
+      onLanded?.()
       return
     }
     // The card itself sits in the middle of its canvas, which leaves room for its turn.
@@ -179,8 +203,10 @@ export const CardSpotlight = ({
       })
     )
     flyScale.set(withTiming(landing.width / cardWidth, { duration: FLY_DURATION, easing }))
+    fade.set(withTiming(0, { duration: FLY_FADE, easing: Easing.in(Easing.quad) }))
+    setTimeout(() => onLanded?.(), FLY_FADE)
     shade.set(
-      withTiming(0, { duration: FLY_DURATION }, finished => {
+      withTiming(0, { duration: FLY_FADE + 80 }, finished => {
         if (finished) scheduleOnRN(onClose)
       })
     )
@@ -196,7 +222,7 @@ export const CardSpotlight = ({
     transform: [{ scale: 0.7 + halo.get() * 0.5 }],
   }))
   const cardStyle = useAnimatedStyle(() => ({
-    opacity: Math.min(1, rise.get() * 1.4),
+    opacity: Math.min(1, rise.get() * 1.4) * fade.get(),
     transform: [
       { translateX: flyX.get() },
       { translateY: flyY.get() + (1 - rise.get()) * 140 },
@@ -206,13 +232,13 @@ export const CardSpotlight = ({
   }))
 
   return (
-    <AboveEverything onClose={leave}>
+    <AboveEverything onClose={() => leave()}>
       <Animated.View style={[StyleSheet.absoluteFill, shadeStyle]}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={mode === 'reveal' ? t('entityCards.later') : t('entityCards.close')}
           style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(4, 6, 12, 0.9)' }]}
-          onPress={leave}
+          onPress={() => leave()}
           disabled={leaving}
         />
       </Animated.View>
@@ -241,16 +267,6 @@ export const CardSpotlight = ({
               }}
             >
               {t('entityCards.newCard')}
-            </Text>
-            <Text
-              style={{
-                color: '#f6efe0',
-                fontFamily: 'Literata Book',
-                fontSize: 26,
-                marginTop: 4,
-              }}
-            >
-              {card.name}
             </Text>
           </Animated.View>
         )}
@@ -282,8 +298,15 @@ export const CardSpotlight = ({
               ]}
             />
           )}
+          {!ready && (
+            <ActivityIndicator
+              color="#f2c14e"
+              accessibilityLabel={t('Chargement...')}
+              style={{ position: 'absolute' }}
+            />
+          )}
           <Animated.View ref={cardRef} collapsable={false} style={cardStyle}>
-            <EntityCardCanvas card={card} width={cardWidth} />
+            <EntityCardCanvas card={card} width={cardWidth} onReady={() => setReady(true)} />
           </Animated.View>
         </View>
 
@@ -295,6 +318,8 @@ export const CardSpotlight = ({
             <>
               <Pressable
                 accessibilityRole="button"
+                accessibilityState={{ disabled: !ready }}
+                disabled={!ready}
                 onPress={collect}
                 style={({ pressed }) => ({
                   minWidth: 200,
@@ -303,16 +328,16 @@ export const CardSpotlight = ({
                   paddingVertical: 14,
                   borderRadius: 999,
                   backgroundColor: '#f2c14e',
-                  opacity: pressed ? 0.8 : 1,
+                  opacity: !ready ? 0.45 : pressed ? 0.8 : 1,
                   transform: [{ scale: pressed ? 0.97 : 1 }],
-                  boxShadow: '0 6px 18px rgba(242, 193, 78, 0.35)',
+                  boxShadow: ready ? '0 6px 18px rgba(242, 193, 78, 0.35)' : undefined,
                 })}
               >
                 <Text style={{ color: '#2a1d05', fontSize: 17, fontWeight: '700' }}>
                   {t('entityCards.collect')}
                 </Text>
               </Pressable>
-              <Pressable accessibilityRole="button" onPress={leave} style={{ padding: 10 }}>
+              <Pressable accessibilityRole="button" onPress={() => leave()} style={{ padding: 10 }}>
                 <Text style={{ color: 'rgba(246, 239, 224, 0.7)', fontSize: 15 }}>
                   {t('entityCards.later')}
                 </Text>
@@ -323,10 +348,7 @@ export const CardSpotlight = ({
               {onOpenCharacter && (
                 <Pressable
                   accessibilityRole="button"
-                  onPress={() => {
-                    onClose()
-                    onOpenCharacter()
-                  }}
+                  onPress={() => leave(onOpenCharacter)}
                   style={({ pressed }) => ({
                     minWidth: 200,
                     alignItems: 'center',
@@ -342,7 +364,7 @@ export const CardSpotlight = ({
                   </Text>
                 </Pressable>
               )}
-              <Pressable accessibilityRole="button" onPress={leave} style={{ padding: 12 }}>
+              <Pressable accessibilityRole="button" onPress={() => leave()} style={{ padding: 12 }}>
                 <Text
                   style={{ color: 'rgba(246, 239, 224, 0.8)', fontSize: 16, fontWeight: '600' }}
                 >

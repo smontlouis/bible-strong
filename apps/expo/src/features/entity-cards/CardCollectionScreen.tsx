@@ -42,8 +42,8 @@ const rowsOf = <Item,>(items: Item[], size: number) =>
 /**
  * The album of the collectible cards (ADR-0090), opened from the home: every card of the catalog
  * in the order of the Bible, grouped by era, those collected in their painting, the others on the
- * clay ground with where their character is met. A collected card opens large; a card still to
- * find opens its character's page, since pictures are never locked.
+ * clay ground with only the book where their character is met, a riddle to solve while reading.
+ * A collected card opens large.
  */
 const CardCollectionScreen = () => {
   const { t, i18n } = useTranslation()
@@ -148,7 +148,6 @@ const CardCollectionScreen = () => {
                   {' · '}
                   {t('collection.stages', album.stages)}
                 </Text>
-                <Text className="text-[13px] text-grey">{t('collection.howTo')}</Text>
               </VStack>
             </Card>
             <HStack className="gap-[8px]">
@@ -207,13 +206,11 @@ const CardCollectionScreen = () => {
                   collected={has}
                   meetingBook={getMeetingBook(card, language)}
                   onPress={() =>
-                    has
-                      ? setOpened(
-                          catalog && portraits
-                            ? getEntityCardView(card, catalog, portraits, language)
-                            : undefined
-                        )
-                      : router.push(buildPublicStrongEntityPath(card.entity) as never)
+                    setOpened(
+                      catalog && portraits
+                        ? getEntityCardView(card, catalog, portraits, language)
+                        : undefined
+                    )
                   }
                 />
               )

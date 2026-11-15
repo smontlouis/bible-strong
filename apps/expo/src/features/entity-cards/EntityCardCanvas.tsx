@@ -1,13 +1,4 @@
-import {
-  BlurMask,
-  Canvas,
-  Group,
-  RoundedRect,
-  rect,
-  rrect,
-  useFonts,
-  useImage,
-} from '@shopify/react-native-skia'
+import { BlurMask, Canvas, Group, RoundedRect, rect, rrect } from '@shopify/react-native-skia'
 import { useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
@@ -25,7 +16,8 @@ import type { EntityCardView } from './cardCatalog'
 import { CARD_RATIO } from './cardGeometry'
 import { useCardMotion } from './cardMotion'
 import { getCardPalette } from './cardPalettes'
-import { LITERATA, buildBackParagraphs, buildFrontParagraphs } from './cardParagraphs'
+import { buildBackParagraphs, buildFrontParagraphs } from './cardParagraphs'
+import { useCardFonts, useCardPicture } from './cardResources'
 import { CardBack, CardFront } from './CardFaces'
 
 /** The room around the card, in shares of its width, for its turn and its glow. */
@@ -43,6 +35,8 @@ type EntityCardCanvasProps = {
   width: number
   /** Read the phone's tilt; off for a card that only shows. */
   moves?: boolean
+  /** The card is drawn whole: its lettering set and its pictures loaded or given up. */
+  onReady?: () => void
 }
 
 /**
@@ -50,28 +44,34 @@ type EntityCardCanvasProps = {
  * the light, its depths move with the turn, a touch turns it over. The finger tilts it; when no
  * finger does, the phone's tilt does.
  */
-export const EntityCardCanvas = ({ card, width, moves = true }: EntityCardCanvasProps) => {
+export const EntityCardCanvas = ({ card, width, moves = true, onReady }: EntityCardCanvasProps) => {
   const height = Math.round(width * CARD_RATIO)
   const canvas = getEntityCardCanvasSize(width)
   const { pad } = canvas
   const palette = getCardPalette(card.family, card.stages)
 
-  const fonts = useFonts({ [LITERATA]: [require('~assets/fonts/LiterataBook-Regular.otf')] })
-  const backdrop = useImage(card.scene ? null : (card.backdrop ?? null))
-  const subject = useImage(card.picture)
+  const fonts = useCardFonts()
+  const backdropPicture = useCardPicture(card.scene ? null : card.backdrop)
+  const subjectPicture = useCardPicture(card.picture)
+  const backdrop = backdropPicture.image
+  const subject = subjectPicture.image
 
   const front = fonts ? buildFrontParagraphs(card, palette, fonts, width) : null
   const back = fonts ? buildBackParagraphs(card, palette, fonts, width) : null
 
   const { motion, gravity, touch, flipped } = useCardMotion()
 
-  // The card comes in once its lettering is set; each picture fades in as it arrives.
+  // The card comes in whole, once its lettering is set and its pictures are there (or given up);
+  // each picture still fades in, should it come later.
   const appear = useSharedValue(0)
   const backdropOpacity = useSharedValue(0)
   const subjectOpacity = useSharedValue(0)
-  const ready = !!front
+  const ready = !!front && backdropPicture.settled && subjectPicture.settled
   useEffect(() => {
-    if (ready) appear.set(withTiming(1, { duration: 250 }))
+    if (!ready) return
+    appear.set(withTiming(1, { duration: 250 }))
+    onReady?.()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, appear])
   useEffect(() => {
     if (backdrop) backdropOpacity.set(withTiming(1, { duration: 350 }))
@@ -120,7 +120,8 @@ export const EntityCardCanvas = ({ card, width, moves = true }: EntityCardCanvas
   const radius = 0.046 * width
   const face = rrect(rect(0, 0, width, height), radius, 0.033 * height)
 
-  if (!front || !back) return <View style={{ width: canvas.width, height: canvas.height }} />
+  if (!front || !back || !ready)
+    return <View style={{ width: canvas.width, height: canvas.height }} />
 
   return (
     <GestureDetector gesture={Gesture.Simultaneous(pan, tap)}>

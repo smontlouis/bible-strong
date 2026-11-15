@@ -363,3 +363,26 @@ sentences, and no longer the backdrops alone.
 - The character's page gains a second way to open a card large; the chapter's grid keeps its
   layout.
 
+
+## Amendment of 2026-11-15: after the first TestFlight build
+
+The owner tried the cards and asked for these changes; the rest of the amendment above stands.
+
+- **The dot sits inside the portrait.** A plain gold dot, without a ring or a gradient, in the
+  bottom right corner of the avatar's square, a little in from its edges.
+- **The overlay says « Nouvelle carte », without the name**, which the card already carries. It
+  stays « carte » rather than « personnage »: a portrait is never locked, and a life stage's card
+  brings no new character.
+- **The card shows whole.** A spinner holds its place while its font and pictures load, and
+  « Récupérer » waits for it. The font and the last pictures are kept on the device for the run of
+  the app.
+- **The flight only hints.** After « Récupérer » the card sets off toward the header and has faded
+  within a fifth of a second; the icon there turns gold at that moment, jumps and spreads a gold
+  ring. Closing the overlay fades the card with it.
+- **The album keeps the missing cards secret.** A card still to find shows the clay ground, a grey
+  card and the book where its character is met, without the name, and does nothing when tapped.
+  The album no longer explains where cards are found.
+- **The cards can be turned off.** « Collection de cartes » in the Bible's settings, on by default,
+  synced with the other settings. Off, the chapters show no dot, the characters' pages no card icon
+  and no overlay, and the home no album; the cards already collected are kept for when it is turned
+  on again.

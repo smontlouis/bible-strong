@@ -50,6 +50,7 @@ const accountSyncedSettingKeys = [
   'tagsDisplay',
   'commentsDisplay',
   'contextualInformationDisplay',
+  'cardCollection',
   'shareVerses',
   'colors',
   'compare',

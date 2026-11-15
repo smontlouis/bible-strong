@@ -74,6 +74,7 @@ import {
   setSettingsPreferredLightTheme,
   setSettingsPress,
   setSettingsRedWordsDisplay,
+  setSettingsCardCollection,
   setSettingsRelationsDisplay,
   setSettingsTagsDisplay,
   setSettingsTextDisplay,
@@ -537,7 +538,8 @@ const isSettingsAction = isAnyOf(
   setDefaultColorType,
   isSyncedDefaultBibleVersionAction,
   setDefaultStrongBibleVersion,
-  setSettingsRedWordsDisplay
+  setSettingsRedWordsDisplay,
+  setSettingsCardCollection
 )
 
 const isCustomColorAction = isAnyOf(addCustomColor, updateCustomColor, deleteCustomColor)

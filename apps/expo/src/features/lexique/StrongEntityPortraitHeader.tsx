@@ -16,6 +16,7 @@ import { getEntityCardView, type EntityCardView } from '~features/entity-cards/c
 import { CardIcon, CARD_ICON_HEIGHT, CARD_ICON_WIDTH } from '~features/entity-cards/CardIcon'
 import { CardSpotlight, type WindowRect } from '~features/entity-cards/CardSpotlight'
 import { isCardCollected } from '~features/entity-cards/chapterCards'
+import { useCardCollectionEnabled } from '~features/entity-cards/useCardCollectionEnabled'
 import type { StrongLexiconEntity } from '~features/resources/strongLexiconAccess'
 import { collectCard } from '~redux/modules/cards'
 import type { RootState } from '~redux/modules/reducer'
@@ -177,16 +178,23 @@ const StrongEntityPortraitHeader = ({
       : undefined
   }
   const stageCardId = stage ? getEntityCardId(entity.uniqueName, stage.key) : undefined
-  const shownCard =
-    viewOf(
-      stageCardId && cards?.cards.some(item => item.id === stageCardId) ? stageCardId : undefined
-    ) ?? viewOf(entity.uniqueName)
-  const revealedCard = newCard ? viewOf(newCard) : undefined
+  const cardCollection = useCardCollectionEnabled()
+  const shownCard = !cardCollection
+    ? undefined
+    : (viewOf(
+        stageCardId && cards?.cards.some(item => item.id === stageCardId) ? stageCardId : undefined
+      ) ?? viewOf(entity.uniqueName))
+  const revealedCard = newCard && cardCollection ? viewOf(newCard) : undefined
   const [revealing, setRevealing] = useState(
-    () => !!newCard && !isCardCollected(newCard, collected)
+    () => !!newCard && cardCollection && !isCardCollected(newCard, collected)
   )
+  // A card being collected turns gold in the header when it lands there, not at the tap.
+  const [landed, setLanded] = useState(false)
   const [viewing, setViewing] = useState(false)
-  const shownCollected = !!shownCard && isCardCollected(shownCard.id, collected)
+  const shownCollected =
+    !!shownCard &&
+    isCardCollected(shownCard.id, collected) &&
+    !(revealing && !landed && revealedCard?.id === shownCard.id)
   const slotRef = useRef<View>(null)
   const getLandingRect = () =>
     new Promise<WindowRect | undefined>(resolve => {
@@ -240,7 +248,7 @@ const StrongEntityPortraitHeader = ({
             </ParallaxLayer>
           )}
         </Box>
-        <HStack className="overflow-hidden border-continuous items-start gap-[12px] px-[8px] pt-[14px] pb-[6px]">
+        <HStack className="items-center gap-[12px] px-[8px] pt-[14px] pb-[6px]">
           <VStack className="overflow-hidden border-continuous flex-[1] gap-[3px]">
             <Text
               className="text-[12px] font-semibold text-grey"
@@ -295,6 +303,7 @@ const StrongEntityPortraitHeader = ({
           mode="reveal"
           getLandingRect={getLandingRect}
           onCollect={() => dispatch(collectCard({ id: revealedCard.id, collectedAt: Date.now() }))}
+          onLanded={() => setLanded(true)}
           onClose={() => setRevealing(false)}
         />
       )}

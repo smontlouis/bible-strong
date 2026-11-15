@@ -2,7 +2,7 @@ import '@bible-strong/entity-cards/cards.css'
 
 import { CARD_WORDS } from '@bible-strong/entity-cards'
 import { CardBack, CardFront, cardClasses, useCardTilt } from '@bible-strong/entity-cards/web'
-import { useState, type CSSProperties } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { View } from 'react-native'
 
 import type { EntityCardView } from './cardCatalog'
@@ -23,6 +23,8 @@ type EntityCardCanvasProps = {
   width: number
   /** The pointer moves it on the Web; there is no tilt of the device to read. */
   moves?: boolean
+  /** The card is on the page; its pictures load as images of the page do. */
+  onReady?: () => void
 }
 
 /**
@@ -30,7 +32,11 @@ type EntityCardCanvasProps = {
  * tilting under the pointer and turning over at a click, in the room the Skia card takes on a
  * phone.
  */
-export const EntityCardCanvas = ({ card, width }: EntityCardCanvasProps) => {
+export const EntityCardCanvas = ({ card, width, onReady }: EntityCardCanvasProps) => {
+  useEffect(() => {
+    onReady?.()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const canvas = getEntityCardCanvasSize(width)
   const words = CARD_WORDS[card.language]
   const [flipped, setFlipped] = useState(false)
