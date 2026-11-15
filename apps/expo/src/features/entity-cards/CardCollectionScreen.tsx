@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useWindowDimensions, View } from 'react-native'
+import { useWindowDimensions } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
@@ -9,7 +9,6 @@ import Empty from '~common/Empty'
 import FiltersHeader, { type FiltersHeaderItem } from '~common/FiltersHeader'
 import Loading from '~common/Loading'
 import Box, { HStack, VStack } from '~common/ui/Box'
-import Card from '~common/ui/Card'
 import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
 import { MenuView } from '~common/ui/MenuView'
@@ -24,10 +23,12 @@ import { setSettingsCardCollection } from '~redux/modules/user/settings'
 import { titleFontStyle } from '~themes/styleValues'
 import { useTheme } from '~themes/ThemeProvider'
 
+import { CardAlbumSummary } from './CardAlbumSummary'
 import { CardAlbumTile } from './CardAlbumTile'
 import { getEntityCardView, type CardLanguage, type EntityCardView } from './cardCatalog'
 import {
   getCardAlbum,
+  getFanCards,
   getMeetingBook,
   FOUND_GROUP,
   MISSING_GROUP,
@@ -209,7 +210,14 @@ const CardCollectionScreen = () => {
     )
   }
 
-  const progress = album.total ? album.found / album.total : 0
+  // The last cards found, newest first, for the fan at the head of the album.
+  const latest =
+    catalog && portraits
+      ? getFanCards(catalog, collected).flatMap(card => {
+          const view = views.get(card.id)
+          return view ? [view] : []
+        })
+      : []
   const sections = album.eras.map(era => ({
     key: era.key,
     title: era.title,
@@ -228,43 +236,7 @@ const CardCollectionScreen = () => {
         contentContainerStyle={{ alignSelf: 'center', width: contentWidth + 2 * GUTTER }}
         ListHeaderComponent={
           <VStack style={{ paddingHorizontal: GUTTER, paddingTop: 8, gap: 14 }}>
-            <Card>
-              <VStack className="p-[18px] gap-[10px]">
-                <HStack className="items-baseline gap-[8px]">
-                  <Text
-                    className="text-[34px] leading-[40px]"
-                    style={[titleFontStyle(theme), { fontVariant: ['tabular-nums'] }]}
-                  >
-                    {album.found}
-                  </Text>
-                  <Text className="text-[17px] text-grey">
-                    {t('collection.ofTotal', { total: album.total })}
-                  </Text>
-                </HStack>
-                <View
-                  style={{
-                    height: 8,
-                    borderRadius: 999,
-                    overflow: 'hidden',
-                    backgroundColor: theme.colors.border,
-                  }}
-                >
-                  <View
-                    style={{
-                      width: `${Math.max(progress * 100, album.found ? 2 : 0)}%`,
-                      height: '100%',
-                      borderRadius: 999,
-                      backgroundColor: '#f2c14e',
-                    }}
-                  />
-                </View>
-                <Text className="text-[13px] text-grey">
-                  {t('collection.characters', album.characters)}
-                  {' · '}
-                  {t('collection.stages', album.stages)}
-                </Text>
-              </VStack>
-            </Card>
+            <CardAlbumSummary album={album} latest={latest} />
           </VStack>
         }
         ListEmptyComponent={<Empty message={t('collection.empty')} />}
@@ -315,7 +287,12 @@ const CardCollectionScreen = () => {
           mode="view"
           onOpenCharacter={() => {
             const entity = catalog?.cards.find(card => card.id === opened.id)?.entity
-            if (entity) router.push(buildPublicStrongEntityPath(entity) as never)
+            if (!entity) return
+            // The page opens on the card's life stage, as the album showed it.
+            router.push({
+              pathname: buildPublicStrongEntityPath(entity),
+              params: { card: opened.id },
+            } as never)
           }}
           onClose={() => setOpened(undefined)}
         />

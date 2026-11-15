@@ -38,6 +38,8 @@ type Props = {
   onOpenMap?: (focus: string) => void
   /** A card the chapter offered and the reader has not collected (ADR-0090). */
   newCard?: string
+  /** A card opened from the album: the page shows its life stage (ADR-0090). */
+  card?: string
 }
 
 const StrongEntityPage = ({
@@ -52,6 +54,7 @@ const StrongEntityPage = ({
   onOpenEntityRelation,
   onOpenMap,
   newCard,
+  card,
 }: Props) => {
   const { t, i18n } = useTranslation()
   const bottomInset = usePageBottomInset()
@@ -97,6 +100,7 @@ const StrongEntityPage = ({
                   catalog={catalog}
                   language={language ?? i18n.language}
                   newCard={newCard}
+                  card={card}
                   onOpenStrong={onOpenStrong}
                 />
               )}
@@ -182,6 +186,7 @@ const StrongEntityPage = ({
               catalog={catalog}
               language={language ?? i18n.language}
               newCard={newCard}
+              card={card}
               onOpenStrong={onOpenStrong}
             />
           )}

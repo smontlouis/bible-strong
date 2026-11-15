@@ -3018,6 +3018,8 @@
   "collection.ofTotal": "sur {{total}} cartes",
   "collection.characters": "{{found}} / {{total}} personnages",
   "collection.stages": "{{found}} / {{total}} étapes de vie",
+  "collection.charactersLabel": "Personnages",
+  "collection.stagesLabel": "Étapes de vie",
   "collection.filters.all": "Toutes",
   "collection.filters.found": "Trouvées",
   "collection.filters.missing": "À trouver",

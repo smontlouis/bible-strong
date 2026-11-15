@@ -1,6 +1,7 @@
 import type { CardCatalog, PublishedCard } from '../cardCatalog'
 import {
   getCardAlbum,
+  getFanCards,
   getLatestCollected,
   getMeetingBook,
   sortCardsByBible,
@@ -99,6 +100,13 @@ describe('the card album', () => {
     expect(album.eras.map(era => [era.key, era.cards.map(item => item.id)])).toEqual([
       ['found', ['Moses@Exo.2.10-Rev', 'Adam@Gen.2.19-Jud', 'LORD@Gen.1.1-Rev']],
       ['missing', ['Abraham@Gen.11.26-1Pe', 'Abraham@Gen.11.26-1Pe~abram', 'Baal@Num.25.3-Rom']],
+    ])
+  })
+
+  it('fills the fan with God’s cards while fewer were found', () => {
+    expect(getFanCards(catalog, { 'Adam@Gen.2.19-Jud': 5 }).map(item => item.id)).toEqual([
+      'Adam@Gen.2.19-Jud',
+      'LORD@Gen.1.1-Rev',
     ])
   })
 

@@ -348,6 +348,7 @@ export const CardSpotlight = ({
               {onOpenCharacter && (
                 <Pressable
                   accessibilityRole="button"
+                  accessibilityLabel={t('entityCards.openCharacter', { name: card.name })}
                   onPress={() => leave(onOpenCharacter)}
                   style={({ pressed }) => ({
                     minWidth: 200,
@@ -360,7 +361,7 @@ export const CardSpotlight = ({
                   })}
                 >
                   <Text style={{ color: '#f6efe0', fontSize: 16, fontWeight: '700' }}>
-                    {t('entityCards.openCharacter', { name: card.name })}
+                    {t('entityCards.openPage')}
                   </Text>
                 </Pressable>
               )}

@@ -2990,6 +2990,8 @@
   "collection.ofTotal": "of {{total}} cards",
   "collection.characters": "{{found}} / {{total}} characters",
   "collection.stages": "{{found}} / {{total}} life stages",
+  "collection.charactersLabel": "Characters",
+  "collection.stagesLabel": "Life stages",
   "collection.filters.all": "All",
   "collection.filters.found": "Found",
   "collection.filters.missing": "To find",

@@ -126,6 +126,7 @@ const StrongEntityPortraitHeader = ({
   catalog,
   language,
   newCard,
+  card,
   onOpenStrong,
 }: {
   entity: StrongLexiconEntity
@@ -134,13 +135,17 @@ const StrongEntityPortraitHeader = ({
   language: string
   /** A card the chapter offered and the reader has not collected: it rises over the page. */
   newCard?: string
+  /** A card opened from the album: the page shows its life stage. */
+  card?: string
   onOpenStrong: (stepCode: string) => void
 }) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
-  // Opened on a new card of a life stage, the page shows that stage, where the card will land.
-  const newCardStage = newCard?.startsWith(`${entity.uniqueName}~`)
-    ? newCard.slice(entity.uniqueName.length + 1)
+  // Opened on a card of a life stage, new or from the album, the page shows that stage: where a
+  // new card will land, or the one the reader was looking at.
+  const openedCard = newCard ?? card
+  const newCardStage = openedCard?.startsWith(`${entity.uniqueName}~`)
+    ? openedCard.slice(entity.uniqueName.length + 1)
     : undefined
   const [stageKey, setStageKey] = useState<string | undefined>(() =>
     entry.stages?.some(item => item.key === newCardStage) ? newCardStage : undefined

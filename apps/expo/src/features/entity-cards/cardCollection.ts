@@ -163,3 +163,13 @@ export const getLatestCollected = (
     .filter(card => collected[card.id] !== undefined)
     .sort((left, right) => collected[right.id] - collected[left.id])
     .slice(0, limit)
+
+/**
+ * The cards of the fan on the home and at the head of the album: the last ones collected, newest
+ * first, and God's, held from the start, to fill the fan while the reader has found fewer.
+ */
+export const getFanCards = (catalog: CardCatalog, collected: Record<string, number>, limit = 3) => {
+  const latest = getLatestCollected(catalog, collected, limit)
+  const gods = sortCardsByBible(catalog.cards.filter(card => card.entity === GOD_ENTITY))
+  return [...latest, ...gods].slice(0, limit)
+}
