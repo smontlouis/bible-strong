@@ -2,6 +2,7 @@ import {
   deleteAssistantConversation,
   observeAssistantConversation,
   observeAssistantConversationIndex,
+  pinAssistantConversationContext,
   renameAssistantConversation,
   saveAssistantConversationTurn,
 } from '~helpers/assistantConversationFirestore'
@@ -14,6 +15,7 @@ import {
   parseConversationTurn,
   type Conversation,
   type ConversationMetadata,
+  type ReadingContext,
 } from './conversations'
 
 type Unsubscribe = () => void
@@ -39,6 +41,7 @@ export function observeConversationIndex(
               messages: [],
               summaryMessageCount: metadata.messageCount,
               ...(metadata.memory ? { memory: metadata.memory } : {}),
+              ...(metadata.pinnedContext ? { pinnedContext: metadata.pinnedContext } : {}),
             }
           })
         )
@@ -107,11 +110,19 @@ export async function saveConversation(account: string, conversation: Conversati
       updatedAt: metadata.updatedAt,
       messageCount: metadata.messageCount,
       memory: metadata.memory,
+      pinnedContext: metadata.pinnedContext,
     },
     turn.user.id,
     turn
   )
 }
+
+/** Pins a context to a saved conversation, or unpins it (`null`), without moving it in the list. */
+export const pinConversationContext = (
+  account: string,
+  conversationId: string,
+  context: ReadingContext | null
+) => pinAssistantConversationContext(account, conversationId, context)
 
 export const renameConversation = renameAssistantConversation
 export const deleteConversation = deleteAssistantConversation

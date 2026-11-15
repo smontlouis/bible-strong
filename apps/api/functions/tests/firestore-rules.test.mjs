@@ -59,4 +59,7 @@ test('validates owner-scoped assistant conversations and terminal turns', async 
   assert.match(rules, /allow create, update: if owns\(userId\) && validConversation\(\);/u)
   assert.match(rules, /match \/users\/\{userId\}\/assistantConversations\/\{conversationId\}\/turns\/\{turnId\}/u)
   assert.match(rules, /\['complete', 'interrupted', 'error'\]/u)
+  // A context pinned to a conversation is a map, or null once unpinned.
+  assert.match(rules, /'pinnedContext'\n\s*\]\)/u)
+  assert.match(rules, /request\.resource\.data\.pinnedContext is map/u)
 })

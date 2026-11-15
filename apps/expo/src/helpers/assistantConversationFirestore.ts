@@ -25,6 +25,8 @@ export type AssistantConversationDocument = {
   updatedAt: number
   messageCount: number
   memory?: unknown
+  /** A context pinned to the conversation; `null` once unpinned. */
+  pinnedContext?: unknown
 }
 
 const clean = (value: unknown): unknown => {
@@ -123,11 +125,25 @@ export async function saveAssistantConversationTurn(
         updatedAt: Math.max(remote?.updatedAt ?? -1, local.updatedAt),
         messageCount,
         memory: local.memory,
+        // Left out when the reader never touched the pin: a pin set on another device stays.
+        pinnedContext: local.pinnedContext,
       }),
       { merge: true }
     )
     transaction.set(turnDocument, cleanRecord(turn))
   })
+}
+
+export async function pinAssistantConversationContext(
+  account: string,
+  conversationId: string,
+  pinnedContext: unknown
+) {
+  await setDoc(
+    conversationRef(account, conversationId),
+    { pinnedContext: pinnedContext === null ? null : cleanRecord(pinnedContext as object) },
+    { merge: true }
+  )
 }
 
 export async function renameAssistantConversation(

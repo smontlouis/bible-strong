@@ -49,6 +49,11 @@ export type LocalMessage = {
 
 export type Conversation = {
   memory?: MemoryCheckpoint
+  /**
+   * A context the reader pinned to the conversation: it goes with every question, wherever the
+   * reader is. `null` once unpinned, so that the next save clears it on every device.
+   */
+  pinnedContext?: ReadingContext | null
   id: string
   title: string
   updatedAt: number
@@ -190,6 +195,11 @@ export function parseConversationMetadata(id: string, value: unknown): Conversat
     updatedAt: metadata.updatedAt!,
     messageCount: metadata.messageCount!,
     ...(validCheckpoint(metadata.memory) ? { memory: metadata.memory } : {}),
+    ...(isContext(metadata.pinnedContext)
+      ? { pinnedContext: metadata.pinnedContext }
+      : metadata.pinnedContext === null
+        ? { pinnedContext: null }
+        : {}),
   }
 }
 
@@ -223,6 +233,7 @@ export function hydrateConversation(
     updatedAt: metadata.updatedAt,
     messages,
     ...(metadata.memory ? { memory: metadata.memory } : {}),
+    ...(metadata.pinnedContext ? { pinnedContext: metadata.pinnedContext } : {}),
   }
 }
 
@@ -266,6 +277,7 @@ export function conversationMetadata(conversation: Conversation): ConversationMe
     updatedAt: conversation.updatedAt,
     messageCount: persistableTurns(conversation).length * 2,
     memory: conversation.memory,
+    pinnedContext: conversation.pinnedContext,
   })
 }
 

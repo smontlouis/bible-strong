@@ -78,6 +78,21 @@ function ThreadStatus() {
       {!!followUps.length && !error && !composerDocked && (
         <FollowUpQuestions questions={followUps} disabled={busy || !ready} />
       )}
+      {!!session.resumable && !busy && (
+        // A new conversation offers to go back to the last one, before the starting points.
+        <TouchableBox
+          accessibilityRole="button"
+          onPress={() => session.threadList.onSwitchToThread(session.resumable!.id)}
+          className="bg-light-grey mt-2 flex-row items-center gap-2 rounded-[12px] px-4 py-3"
+        >
+          <FeatherIcon name="corner-up-left" size={15} color="primary" />
+          <Text className="flex-1 text-[15px]" numberOfLines={2}>
+            {session.resumable.title
+              ? t('assistant.modal.resume', { title: session.resumable.title })
+              : t('assistant.modal.resumeUntitled')}
+          </Text>
+        </TouchableBox>
+      )}
       {!current.messages.length && session.consent.status === 'granted' && !composerDocked && (
         <Box className="mt-2 gap-2">
           {shortcutsFor(context).map(key => (

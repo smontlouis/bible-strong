@@ -12,7 +12,8 @@ service cloud.firestore {
           'schemaVersion', 'title', 'createdAt', 'updatedAt', 'messageCount'
         ])
         && request.resource.data.keys().hasOnly([
-          'schemaVersion', 'title', 'createdAt', 'updatedAt', 'messageCount', 'memory'
+          'schemaVersion', 'title', 'createdAt', 'updatedAt', 'messageCount', 'memory',
+          'pinnedContext'
         ])
         && request.resource.data.schemaVersion == 1
         && request.resource.data.title is string
@@ -21,7 +22,10 @@ service cloud.firestore {
         && request.resource.data.updatedAt is int
         && request.resource.data.messageCount is int
         && request.resource.data.messageCount >= 0
-        && request.resource.data.messageCount <= 300;
+        && request.resource.data.messageCount <= 300
+        && (!('pinnedContext' in request.resource.data)
+          || request.resource.data.pinnedContext == null
+          || request.resource.data.pinnedContext is map);
     }
     function validMessage(message, role) {
       return message is map

@@ -484,6 +484,17 @@
   width: 12px;
   height: 12px;
 }
+/* Pinned to the conversation (2026-11-15): the pin takes the place of the resource's mark. */
+.bs-assistant-context-chip.is-pinned > svg {
+  width: 13px;
+  height: 13px;
+  color: var(--as-accent);
+}
+.bs-assistant-suggestions button span:first-child svg {
+  width: 15px;
+  height: 15px;
+  vertical-align: -2px;
+}
 .bs-assistant-context-restore {
   display: flex;
   align-items: center;

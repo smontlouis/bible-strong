@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useKeyboardState } from '~common/KeyboardAwareScrollView'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
+import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { premiumStatusAtom } from '~features/premium/premiumStatus'
 import { usePremiumVisible } from '~features/premium/premiumVisibility'
@@ -27,24 +27,43 @@ const StopSquare = () => <Box className="bg-reverse h-[11px] w-[11px] rounded-[2
 
 /**
  * What the reader is looking at goes with the question, as an attachment would: its mark and
- * name, and a cross to send the question without it. Taken off, it waits as a dashed chip.
+ * name, a pin that keeps it with the conversation wherever the reader goes, and a cross to send
+ * the question without it. Taken off, it waits as a dashed chip.
  */
 function ContextChip() {
   const { t } = useTranslation()
   const { session, liveContext } = useAssistantSheet()
-  const { context } = session
+  const { context, pinnedContext } = session
   if (context) {
     const caption = contextCaption(context)
     return (
       // A long name is cut short, leaving the composer's line to its buttons.
-      <HStack className="bg-light-grey mr-2 h-[30px] max-w-[220px] shrink items-center gap-[6px] rounded-full pl-[10px] pr-[2px]">
-        <ContextMarkIcon context={context} />
+      <HStack className="bg-light-grey mr-2 h-[30px] max-w-[240px] shrink items-center gap-[6px] rounded-full pl-[10px] pr-[2px]">
+        {pinnedContext ? (
+          <MaterialIcon name="push-pin" size={14} color="primary" />
+        ) : (
+          <ContextMarkIcon context={context} />
+        )}
         <Text className="shrink text-[13px]" numberOfLines={1}>
           {caption}
         </Text>
+        {!pinnedContext && (
+          <TouchableBox
+            accessibilityRole="button"
+            accessibilityLabel={t('assistant.modal.pinContext', { context: caption })}
+            hitSlop={6}
+            onPress={session.pinContext}
+            className="h-[26px] w-[24px] items-center justify-center"
+          >
+            <MaterialIcon name="push-pin" size={13} color="grey" />
+          </TouchableBox>
+        )}
         <TouchableBox
           accessibilityRole="button"
-          accessibilityLabel={t('assistant.modal.detachContext', { context: caption })}
+          accessibilityLabel={t(
+            pinnedContext ? 'assistant.modal.unpinContext' : 'assistant.modal.detachContext',
+            { context: caption }
+          )}
           hitSlop={8}
           onPress={session.detachContext}
           className="h-[26px] w-[26px] items-center justify-center"

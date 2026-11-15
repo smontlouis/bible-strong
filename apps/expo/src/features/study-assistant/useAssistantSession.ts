@@ -19,9 +19,16 @@ import {
   deleteConversation,
   observeConversation,
   observeConversationIndex,
+  pinConversationContext,
   renameConversation,
   saveConversation,
 } from './conversationRepository'
+
+/**
+ * Closed for less than this, the assistant reopens on the conversation the reader left: back from
+ * a source, from Premium. Longer, and it opens on a new one, as after the app is started again.
+ */
+export const RESUME_WINDOW_MS = 5 * 60 * 1000
 
 const retryableErrors = [
   'assistant.unavailable',
@@ -87,8 +94,13 @@ export function useAssistantSession({
   // Nothing is sent before the account agreed to share it with third-party AI providers.
   const consent = useAiConsent(signedIn ? account : null)
   // What the reader is looking at goes with each question, like an attachment, unless they
-  // took it off (2026-11-08): it replaced a « follow my reading » setting and a pin.
-  const context = liveContext && liveContext.key !== detachedKey ? liveContext : null
+  // took it off (2026-11-08). A context pinned to the conversation goes instead, wherever the
+  // reader is (2026-11-15).
+  const pinnedContext = current.pinnedContext ?? null
+  const context =
+    pinnedContext ?? (liveContext && liveContext.key !== detachedKey ? liveContext : null)
+  // When the assistant was last closed; in memory only, so that a new start opens a new conversation.
+  const closedAt = useRef<number | null>(null)
   useEffect(() => {
     const stop = observeConversationIndex(
       account,
@@ -110,9 +122,10 @@ export function useAssistantSession({
           ]
         })
         setCurrent(previous => {
+          // The app starts on a new conversation; the last one is offered to be resumed.
           if (!receivedInitialIndex.current) {
             receivedInitialIndex.current = true
-            return remote[0] || previous
+            return previous
           }
           const metadata = remote.find(item => item.id === previous.id)
           if (metadata)
@@ -247,6 +260,28 @@ export function useAssistantSession({
     setCurrent(conversation)
     setError('')
   }
+  /** The assistant shows: on the conversation left less than five minutes ago, or a new one. */
+  const markOpened = () => {
+    const closed = closedAt.current
+    closedAt.current = null
+    if (working || (closed !== null && Date.now() - closed < RESUME_WINDOW_MS)) return
+    if (!current.messages.length && !current.summaryMessageCount) return
+    startNewThread()
+  }
+  /** The assistant was closed (not covered by a page it opened). */
+  const markClosed = () => {
+    closedAt.current = Date.now()
+  }
+  const setPinnedContext = (pin: ReadingContext | null) => {
+    const conversation = { ...current, pinnedContext: pin }
+    setCurrent(conversation)
+    setConversations(previous =>
+      previous.map(item => (item.id === current.id ? { ...item, pinnedContext: pin } : item))
+    )
+    // A conversation not saved yet carries its pin with its first question.
+    if (currentIsCloud)
+      void pinConversationContext(account, current.id, pin).catch(() => setStorageError(true))
+  }
   const deleteThread = (id: string) => {
     if (working) return
     void deleteConversation(account, id)
@@ -316,9 +351,29 @@ export function useAssistantSession({
     /** The account's agreement to send its questions to third-party AI providers. */
     consent,
     context,
+    /** The context pinned to this conversation, which goes with its questions wherever the reader is. */
+    pinnedContext,
+    /** Pins the context joined now to the conversation. */
+    pinContext: () => {
+      if (context && !pinnedContext) setPinnedContext(context)
+    },
+    /** Unpins it: what the reader is looking at goes with the questions again. */
+    unpinContext: () => setPinnedContext(null),
     /** Takes the current context off the next questions, until the reader is somewhere else. */
-    detachContext: () => setDetachedKey(liveContext?.key ?? null),
+    detachContext: () => {
+      if (pinnedContext) setPinnedContext(null)
+      else setDetachedKey(liveContext?.key ?? null)
+    },
     attachContext: () => setDetachedKey(null),
+    /** The most recent other conversation, offered on a new one to be resumed. */
+    resumable:
+      current.messages.length || current.summaryMessageCount
+        ? null
+        : (conversations.find(
+            item => item.id !== current.id && (item.summaryMessageCount ?? item.messages.length) > 0
+          ) ?? null),
+    markOpened,
+    markClosed,
     send,
     /** Stops the run and shows at once everything it received. */
     cancel: () => {

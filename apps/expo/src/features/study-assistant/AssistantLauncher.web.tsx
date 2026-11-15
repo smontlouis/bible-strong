@@ -1,7 +1,7 @@
 import type { DebugEntry, DebugSession } from './debug/trace'
 import ErrorState from './ErrorState.web'
 import { createPortal } from 'react-dom'
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useEffectEvent, useRef, useState, type CSSProperties } from 'react'
 import { useSelector } from 'react-redux'
 import { useAtomValue } from 'jotai'
 import { workspaceStoryOpenAtom } from '~features/onboarding/workspace/state'
@@ -85,6 +85,8 @@ function Icon({
     | 'error'
     | 'down'
     | 'followUp'
+    | 'pin'
+    | 'resume'
 }) {
   const paths = {
     error: 'M12 8v5m0 3.5v.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z',
@@ -100,6 +102,8 @@ function Icon({
     trash: 'M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 10v7M14 10v7',
     down: 'M12 5v14m7-7-7 7-7-7',
     followUp: 'm15 10 5 5-5 5M4 4v7a4 4 0 0 0 4 4h12',
+    pin: 'M12 17v5M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z',
+    resume: 'M9 14 4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3',
   }
   return (
     <svg
@@ -266,6 +270,13 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     send,
     followUps,
   } = session
+  // Opened again within five minutes, the window shows the conversation left; later, a new one.
+  const noteOpening = useEffectEvent((value: boolean) =>
+    value ? session.markOpened() : session.markClosed()
+  )
+  useEffect(() => {
+    noteOpening(open)
+  }, [open])
   // Put away on this device, the bubble shows only while its window is open.
   const bubbleHidden = useAtomValue(strobiBubbleHiddenAtom)
   useStrobiTrial({
@@ -766,23 +777,51 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                       />
                       <div className="bs-assistant-composer-toolbar">
                         {context ? (
-                          <div className="bs-assistant-context-chip">
-                            <ContextMarkIcon context={context} />
+                          <div
+                            className={`bs-assistant-context-chip${session.pinnedContext ? ' is-pinned' : ''}`}
+                          >
+                            {session.pinnedContext ? (
+                              <Icon name="pin" />
+                            ) : (
+                              <ContextMarkIcon context={context} />
+                            )}
                             <span
                               className="bs-assistant-context-label"
                               title={contextCaption(context)}
                             >
                               {contextCaption(context)}
                             </span>
+                            {!session.pinnedContext && (
+                              // Keeps it with the conversation, wherever the reader goes.
+                              <button
+                                type="button"
+                                className="bs-assistant-chip-remove"
+                                aria-label={t('assistant.modal.pinContext', {
+                                  context: contextCaption(context),
+                                })}
+                                title={t('assistant.modal.pinContext', {
+                                  context: contextCaption(context),
+                                })}
+                                onClick={session.pinContext}
+                              >
+                                <Icon name="pin" />
+                              </button>
+                            )}
                             <button
                               type="button"
                               className="bs-assistant-chip-remove"
-                              aria-label={t('assistant.modal.detachContext', {
-                                context: contextCaption(context),
-                              })}
-                              title={t('assistant.modal.detachContext', {
-                                context: contextCaption(context),
-                              })}
+                              aria-label={t(
+                                session.pinnedContext
+                                  ? 'assistant.modal.unpinContext'
+                                  : 'assistant.modal.detachContext',
+                                { context: contextCaption(context) }
+                              )}
+                              title={t(
+                                session.pinnedContext
+                                  ? 'assistant.modal.unpinContext'
+                                  : 'assistant.modal.detachContext',
+                                { context: contextCaption(context) }
+                              )}
                               onClick={detachContext}
                             >
                               <Icon name="close" />
@@ -890,6 +929,24 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                     >
                       {t('assistant.modal.login')}
                     </button>
+                  )}
+                  {session.resumable && !busy && (
+                    // A new conversation offers to go back to the last one, before the starting points.
+                    <div className="bs-assistant-suggestions">
+                      <button
+                        type="button"
+                        onClick={() => session.threadList.onSwitchToThread(session.resumable!.id)}
+                      >
+                        <span aria-hidden="true">
+                          <Icon name="resume" />
+                        </span>
+                        <span>
+                          {session.resumable.title
+                            ? t('assistant.modal.resume', { title: session.resumable.title })
+                            : t('assistant.modal.resumeUntitled')}
+                        </span>
+                      </button>
+                    </div>
                   )}
                   {!current.messages.length &&
                     !docked &&

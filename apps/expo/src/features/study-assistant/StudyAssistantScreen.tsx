@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useEffectEvent, useState } from 'react'
 import { Platform, StyleSheet } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useAtomValue } from 'jotai'
@@ -27,6 +27,21 @@ import AssistantVerifyEmailCard from './AssistantVerifyEmailCard'
 import SourceExcerptSheet from './SourceExcerptSheet'
 import { useStrobiBubble } from './strobiBubble'
 import { useAssistantQuota } from './useAssistantQuota'
+
+/**
+ * The page shows, or is closed (a page it opened above it leaves it in place): the session resumes
+ * the conversation left less than five minutes ago, or starts a new one.
+ */
+function OpeningTracker() {
+  const { session } = useAssistantSheet()
+  const opened = useEffectEvent(() => session.markOpened())
+  const closed = useEffectEvent(() => session.markClosed())
+  useEffect(() => {
+    opened()
+    return () => closed()
+  }, [])
+  return null
+}
 
 function PageHeader() {
   const { t } = useTranslation()
@@ -140,6 +155,7 @@ export default function StudyAssistantScreen() {
         <ComposerInsetContext.Provider
           value={{ height: composerHeight, setHeight: setComposerHeight }}
         >
+          <OpeningTracker />
           <ModalRouteFrame>
             <Box className="bg-reverse flex-1">
               <PageHeader />
