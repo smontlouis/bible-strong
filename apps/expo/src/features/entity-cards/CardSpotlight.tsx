@@ -93,6 +93,8 @@ const FLY_DURATION = 520
 const FLY_FADE = 220
 /** A card whose pictures never come shows without them after this wait. */
 const READY_TIMEOUT = 8000
+/** A card still loading after this long shows a spinner; one in the cache never does. */
+const SPINNER_DELAY = 200
 
 /**
  * A card large over the page (ADR-0090): it rises, tilts with the phone or the finger and turns
@@ -133,6 +135,15 @@ export const CardSpotlight = ({
     const timeout = setTimeout(() => setReadyCard(id), READY_TIMEOUT)
     return () => clearTimeout(timeout)
   }, [card.id])
+  // The spinner waits a moment: a card in the cache says it is ready one frame after it is drawn,
+  // and a spinner shown for that frame would flash at every card of the album.
+  const [slowCard, setSlowCard] = useState<string>()
+  useEffect(() => {
+    const id = card.id
+    const timeout = setTimeout(() => setSlowCard(id), SPINNER_DELAY)
+    return () => clearTimeout(timeout)
+  }, [card.id])
+  const showsSpinner = !ready && slowCard === card.id
 
   const shade = useSharedValue(0)
   const rise = useSharedValue(reduceMotion ? 1 : 0)
@@ -440,7 +451,7 @@ export const CardSpotlight = ({
               ]}
             />
           )}
-          {!ready && (
+          {showsSpinner && (
             <ActivityIndicator
               color="#f2c14e"
               accessibilityLabel={t('Chargement...')}
