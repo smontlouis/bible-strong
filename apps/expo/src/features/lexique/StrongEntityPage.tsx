@@ -135,9 +135,7 @@ const StrongEntityPage = ({
               <EntityChronologySection subjectKey={entity.uniqueName} language={studyLanguage} />
 
               {entity.category === 'place' && !!place && onOpenMap && (
-                <StudySection title={t('strongDetail.entity.location')}>
-                  <StrongEntityPlaceMap entity={entity} onOpenMap={onOpenMap} />
-                </StudySection>
+                <StrongEntityPlaceMap entity={entity} onOpenMap={onOpenMap} />
               )}
 
               {graph.length > 0 && (
@@ -218,9 +216,7 @@ const StrongEntityPage = ({
           <EntityChronologySection subjectKey={entity.uniqueName} language={studyLanguage} />
 
           {entity.category === 'place' && !!place && onOpenMap && (
-            <StudySection title={t('strongDetail.entity.location')}>
-              <StrongEntityPlaceMap entity={entity} onOpenMap={onOpenMap} />
-            </StudySection>
+            <StrongEntityPlaceMap entity={entity} onOpenMap={onOpenMap} />
           )}
 
           {graph.length > 0 && (

@@ -853,7 +853,6 @@
   "strongDetail.entity.mapZoomOut": "Dézoomer",
   "strongDetail.entity.mapWhole": "Toute la carte",
   "strongDetail.entity.mapNoPlace": "Aucun lieu de ce chapitre n’est situé sur la carte.",
-  "strongDetail.entity.locationUnknown": "L’emplacement de ce lieu n’est pas connu.",
   "strongDetail.entity.region": "Région : {{region}}",
   "strongDetail.entity.relationships": "Relations",
   "studyLinks.entities": "Personnes et lieux",

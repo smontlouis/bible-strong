@@ -845,7 +845,6 @@
   "strongDetail.entity.mapZoomOut": "Zoom out",
   "strongDetail.entity.mapWhole": "Whole map",
   "strongDetail.entity.mapNoPlace": "No place of this chapter is located on the map.",
-  "strongDetail.entity.locationUnknown": "Where this place lay is not known.",
   "strongDetail.entity.region": "Region: {{region}}",
   "strongDetail.entity.relationships": "Relationships",
   "studyLinks.entities": "People and places",
