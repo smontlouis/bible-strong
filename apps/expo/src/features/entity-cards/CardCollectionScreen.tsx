@@ -191,7 +191,8 @@ const CardCollectionScreen = () => {
             }
           }}
         >
-          <Box className="flex-row items-center justify-center h-[54px] w-[54px]">
+          {/* Close to the filter button, whose own margin it takes back; the same edge as before. */}
+          <Box className="flex-row items-center justify-center h-[54px] w-[36px] -ml-[10px] mr-[9px]">
             <FeatherIcon name="more-vertical" size={18} />
           </Box>
         </MenuView>
