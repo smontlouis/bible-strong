@@ -8,6 +8,9 @@ import type { StrobiMood } from './strobiMood'
  */
 export type StrobiAnimation = keyof typeof strobiDefinition.animations
 
+/** States of the shared catalogue that Strobi's file does not name. */
+type CatalogueState = 'blocked'
+
 // The file is of the first format: the package keeps its character and plays the catalogue.
 const Avatar = createAvatar(strobiDefinition)
 
@@ -23,7 +26,7 @@ export default function StrobiAvatar({
   settleAfterMs = 0,
 }: {
   /** An animation of its file, or a state of the catalogue the conversation uses. */
-  animation: StrobiAnimation | StrobiMood
+  animation: StrobiAnimation | StrobiMood | CatalogueState
   size: number
   /**
    * Greyed out, as a floating button left idle: it stops where it is and computes nothing, in

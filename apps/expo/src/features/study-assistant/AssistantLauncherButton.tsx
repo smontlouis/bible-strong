@@ -119,6 +119,8 @@ export default function AssistantLauncherButton({
   // Each release restarts the wait before the button goes idle.
   const [releasedAt, setReleasedAt] = useState(0)
   const [touching, setTouching] = useState(false)
+  // Held over the cross, Strobi looks blocked: about to be put away.
+  const [onCross, setOnCross] = useState(false)
   const idleProgress = useSharedValue(0)
 
   useEffect(() => {
@@ -225,6 +227,7 @@ export default function AssistantLauncherButton({
 
   // A firm knock when it is drawn onto the cross, a light tick when it leaves it.
   const feelTarget = (near: boolean) => {
+    setOnCross(near)
     if (near) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
     else Haptics.selectionAsync()
   }
@@ -235,6 +238,7 @@ export default function AssistantLauncherButton({
     overTarget.set(false)
     targetScale.set(1)
     if (dismissed) return
+    setOnCross(false)
     // Kept: back where it rested, growing out of the cross.
     const point = restingPoint()
     dismissScale.set(withSpring(1, SHOW_SPRING))
@@ -396,7 +400,11 @@ export default function AssistantLauncherButton({
             style={[styles.button, style]}
           >
             <Animated.View style={[styles.disc, discStyle]} />
-            <StrobiAvatar animation={animation} size={AVATAR_SIZE} muted={idle} />
+            <StrobiAvatar
+              animation={onCross ? 'blocked' : animation}
+              size={AVATAR_SIZE}
+              muted={idle}
+            />
           </Animated.View>
         </GestureDetector>
       )}
