@@ -124,11 +124,15 @@ export const CardSpotlight = ({
   const cardRef = useRef<View>(null)
   const [leaving, setLeaving] = useState(false)
   // A spinner holds the card's place while its font and pictures load, the first time above all.
-  const [ready, setReady] = useState(false)
+  // Kept by the card it is for: the next card of the album, already in the cache, says it is ready
+  // in its own effect, which runs before any effect of this overlay could reset a plain flag.
+  const [readyCard, setReadyCard] = useState<string>()
+  const ready = readyCard === card.id
   useEffect(() => {
-    const timeout = setTimeout(() => setReady(true), READY_TIMEOUT)
+    const id = card.id
+    const timeout = setTimeout(() => setReadyCard(id), READY_TIMEOUT)
     return () => clearTimeout(timeout)
-  }, [])
+  }, [card.id])
 
   const shade = useSharedValue(0)
   const rise = useSharedValue(reduceMotion ? 1 : 0)
@@ -153,7 +157,6 @@ export const CardSpotlight = ({
   useEffect(() => {
     if (shownCard.current === card.id) return
     shownCard.current = card.id
-    setReady(false)
     const step = moving.current ?? 1
     moving.current = null
     if (reduceMotion) {
@@ -315,6 +318,38 @@ export const CardSpotlight = ({
     )
   }
 
+  /** A step through the album, either side of « Voir la fiche ». */
+  const arrow = (step: 1 | -1) => {
+    const enabled = canMove(step)
+    return (
+      <Pressable
+        key={step}
+        accessibilityRole="button"
+        accessibilityLabel={t(step === 1 ? 'entityCards.next' : 'entityCards.previous')}
+        accessibilityState={{ disabled: !enabled }}
+        disabled={!enabled}
+        hitSlop={8}
+        onPress={() => move(step)}
+        style={({ pressed }) => ({
+          width: 40,
+          height: 40,
+          borderRadius: 999,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'rgba(246, 239, 224, 0.14)',
+          opacity: !enabled ? 0.3 : pressed ? 0.6 : 1,
+          transform: [{ scale: pressed ? 0.92 : 1 }],
+        })}
+      >
+        <FeatherIcon
+          name={step === 1 ? 'chevron-right' : 'chevron-left'}
+          size={22}
+          color="#f6efe0"
+        />
+      </Pressable>
+    )
+  }
+
   const shadeStyle = useAnimatedStyle(() => ({ opacity: shade.get() }))
   const chromeStyle = useAnimatedStyle(() => ({
     opacity: chrome.get(),
@@ -417,57 +452,10 @@ export const CardSpotlight = ({
               key={card.id}
               card={card}
               width={cardWidth}
-              onReady={() => setReady(true)}
+              onReady={() => setReadyCard(card.id)}
             />
           </Animated.View>
         </View>
-
-        {navigation && (
-          <Animated.View
-            pointerEvents={leaving ? 'none' : 'box-none'}
-            style={[
-              StyleSheet.absoluteFill,
-              {
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                paddingHorizontal: 8,
-              },
-              chromeStyle,
-            ]}
-          >
-            {([-1, 1] as const).map(step => {
-              const enabled = canMove(step)
-              return (
-                <Pressable
-                  key={step}
-                  accessibilityRole="button"
-                  accessibilityLabel={t(step === 1 ? 'entityCards.next' : 'entityCards.previous')}
-                  accessibilityState={{ disabled: !enabled }}
-                  disabled={!enabled}
-                  hitSlop={8}
-                  onPress={() => move(step)}
-                  style={({ pressed }) => ({
-                    width: 40,
-                    height: 40,
-                    borderRadius: 999,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: 'rgba(246, 239, 224, 0.14)',
-                    opacity: !enabled ? 0.3 : pressed ? 0.6 : 1,
-                    transform: [{ scale: pressed ? 0.92 : 1 }],
-                  })}
-                >
-                  <FeatherIcon
-                    name={step === 1 ? 'chevron-right' : 'chevron-left'}
-                    size={22}
-                    color="#f6efe0"
-                  />
-                </Pressable>
-              )
-            })}
-          </Animated.View>
-        )}
 
         <Animated.View
           pointerEvents={leaving ? 'none' : 'box-none'}
@@ -520,26 +508,30 @@ export const CardSpotlight = ({
                   {navigation.index + 1} / {navigation.total}
                 </Text>
               )}
-              {onOpenCharacter && (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t('entityCards.openCharacter', { name: card.name })}
-                  onPress={() => leave(onOpenCharacter)}
-                  style={({ pressed }) => ({
-                    minWidth: 200,
-                    alignItems: 'center',
-                    paddingHorizontal: 28,
-                    paddingVertical: 13,
-                    borderRadius: 999,
-                    backgroundColor: 'rgba(246, 239, 224, 0.14)',
-                    opacity: pressed ? 0.75 : 1,
-                  })}
-                >
-                  <Text style={{ color: '#f6efe0', fontSize: 16, fontWeight: '700' }}>
-                    {t('entityCards.openPage')}
-                  </Text>
-                </Pressable>
-              )}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+                {navigation && arrow(-1)}
+                {onOpenCharacter && (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('entityCards.openCharacter', { name: card.name })}
+                    onPress={() => leave(onOpenCharacter)}
+                    style={({ pressed }) => ({
+                      minWidth: 200,
+                      alignItems: 'center',
+                      paddingHorizontal: 28,
+                      paddingVertical: 13,
+                      borderRadius: 999,
+                      backgroundColor: 'rgba(246, 239, 224, 0.14)',
+                      opacity: pressed ? 0.75 : 1,
+                    })}
+                  >
+                    <Text style={{ color: '#f6efe0', fontSize: 16, fontWeight: '700' }}>
+                      {t('entityCards.openPage')}
+                    </Text>
+                  </Pressable>
+                )}
+                {navigation && arrow(1)}
+              </View>
               <Pressable accessibilityRole="button" onPress={() => leave()} style={{ padding: 12 }}>
                 <Text
                   style={{ color: 'rgba(246, 239, 224, 0.8)', fontSize: 16, fontWeight: '600' }}
