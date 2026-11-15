@@ -199,11 +199,13 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
               iconSize={AVATAR_ROW_ICON}
               label={t('strobi.settings.title')}
               description={
-                premiumStatus.kind === 'active'
-                  ? t('premiumPlan.active')
-                  : premiumVisible
-                    ? t('premiumPlan.benefit.assistant')
-                    : undefined
+                !isLogged
+                  ? t('strobi.settings.guestDetail')
+                  : premiumStatus.kind === 'active'
+                    ? t('premiumPlan.active')
+                    : premiumVisible
+                      ? t('premiumPlan.benefit.assistant')
+                      : undefined
               }
             />
           )}

@@ -1,7 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { Platform } from 'react-native'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import Header from '~common/Header'
 import { usePageBottomInset } from '~common/ui/Box'
@@ -38,8 +37,8 @@ export default function StrobiSettingsScreen() {
   const { isLogged, user } = useLogin()
   const account = isLogged ? user.id : null
   const assistantShown = useAssistantAccessible(account)
-  // On the phone and the tablet the assistant needs an account; the Web also answers guests.
-  const canOpen = assistantShown && (isLogged || Platform.OS === 'web')
+  // A visitor opens it too: its page offers to sign in.
+  const canOpen = assistantShown
   const premiumVisible = usePremiumVisible()
   const premium = useAtomValue(premiumStatusAtom)
   const quota = useAssistantQuota()

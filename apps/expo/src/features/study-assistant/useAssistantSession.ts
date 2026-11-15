@@ -102,6 +102,11 @@ export function useAssistantSession({
   // When the assistant was last closed; in memory only, so that a new start opens a new conversation.
   const closedAt = useRef<number | null>(null)
   useEffect(() => {
+    // A visitor has no history: nothing to read, and the assistant only offers to sign in.
+    if (!signedIn) {
+      setReady(true)
+      return
+    }
     const stop = observeConversationIndex(
       account,
       remote => {

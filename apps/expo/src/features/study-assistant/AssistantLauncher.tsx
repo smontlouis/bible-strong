@@ -43,7 +43,38 @@ const PREMIUM_PATH = '/premium'
 export default function AssistantLauncher() {
   const { id } = useSelector(selectUserLoginInfo)
   if (!useAssistantAccessible(id)) return null
+  // A visitor finds Strobi too, once it is open to everyone; its page offers to sign in.
+  if (!id) return <GuestAssistant />
   return <AccountAssistant key={id} account={id} />
+}
+
+/** Strobi's bubble for a visitor: it moves, sleeps and is put away like an account's. */
+function GuestAssistant() {
+  const { t } = useTranslation()
+  const router = useRouter()
+  const pathname = usePathname()
+  const open = pathname === ASSISTANT_PATH
+  const bubble = useStrobiBubble()
+  const [asleep, setAsleep] = useState(false)
+  const [dragged, setDragged] = useState(false)
+  if (bubble.hidden) return null
+  return (
+    <AboveSheets>
+      <AssistantLauncherButton
+        animation={dragged ? 'excited' : asleep ? 'sleeping' : 'idle'}
+        accessibilityLabel={t('assistant.modal.open')}
+        hidden={open || pathname === PREMIUM_PATH}
+        onPress={() => {
+          if (!open) router.push(ASSISTANT_PATH)
+        }}
+        onAsleepChange={setAsleep}
+        onDragStart={() => setDragged(true)}
+        onDragEnd={() => setDragged(false)}
+        onDismiss={bubble.confirmHide}
+        dismissLabel={t('strobi.menu.hide')}
+      />
+    </AboveSheets>
+  )
 }
 
 /**

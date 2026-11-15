@@ -13,6 +13,9 @@ import Text from '~common/ui/Text'
 import ModalRouteFrame from '~navigation/ModalRouteFrame'
 import AssistantComposer from './AssistantComposer'
 import AssistantConsentCard from './AssistantConsentCard'
+import AssistantGuestScreen from './AssistantGuestScreen'
+import { useAssistantAccessible } from './assistantConfig'
+import useLogin from '~helpers/useLogin'
 import AssistantHistory from './AssistantHistory'
 import AssistantLimitCard from './AssistantLimitCard'
 import { asksEmailVerification, questionsSpent } from './assistantQuota'
@@ -141,13 +144,16 @@ export default function StudyAssistantScreen() {
   const page = useAtomValue(assistantPageAtom)
   const [composerHeight, setComposerHeight] = useState(0)
   const quota = useAssistantQuota()
-  // Signed out, or the assistant is not offered to this account: nothing to show here.
+  // A visitor sees Strobi too, once it is open to everyone, and is offered to sign in.
+  const { isLogged } = useLogin()
+  const guest = useAssistantAccessible(null) && !isLogged
+  // The assistant is not offered to this account: nothing to show here.
   useEffect(() => {
-    if (page) return
+    if (page || guest) return
     const timer = setTimeout(() => (router.canGoBack() ? router.back() : router.replace('/')), 0)
     return () => clearTimeout(timer)
-  }, [page, router])
-  if (!page) return null
+  }, [page, guest, router])
+  if (!page) return guest ? <AssistantGuestScreen /> : null
   const { sheet, runtime } = page
   return (
     <AssistantRuntimeProvider runtime={runtime}>
