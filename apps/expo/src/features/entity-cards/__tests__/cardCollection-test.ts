@@ -69,7 +69,7 @@ describe('the card album', () => {
   })
 
   it('opens on God, then the eras of the story, and counts what is collected', () => {
-    const album = getCardAlbum(catalog, { 'Adam@Gen.2.19-Jud': 5 }, 'fr', 'all', () => true, 'Dieu')
+    const album = getCardAlbum(catalog, { 'Adam@Gen.2.19-Jud': 5 }, 'fr')
     expect(album.eras.map(era => [era.title, era.found, era.total])).toEqual([
       ['Dieu', 1, 1],
       ['Origines', 1, 1],
@@ -83,13 +83,23 @@ describe('the card album', () => {
   })
 
   it('keeps only the cards a filter asks for', () => {
-    const found = getCardAlbum(catalog, { 'Adam@Gen.2.19-Jud': 5 }, 'fr', 'found')
+    const found = getCardAlbum(catalog, { 'Adam@Gen.2.19-Jud': 5 }, 'fr', { filter: 'found' })
     expect(found.eras.flatMap(era => era.cards.map(item => item.id))).toEqual([
       'LORD@Gen.1.1-Rev',
       'Adam@Gen.2.19-Jud',
     ])
-    const missing = getCardAlbum(catalog, { 'Adam@Gen.2.19-Jud': 5 }, 'fr', 'missing')
+    const missing = getCardAlbum(catalog, { 'Adam@Gen.2.19-Jud': 5 }, 'fr', { filter: 'missing' })
     expect(missing.eras.map(era => era.key)).toEqual(['Patriarches', 'Exode', 'Dieux et idoles'])
+  })
+
+  it('sorts the found cards newest first, God last, then those still to find', () => {
+    const album = getCardAlbum(catalog, { 'Adam@Gen.2.19-Jud': 5, 'Moses@Exo.2.10-Rev': 9 }, 'fr', {
+      order: 'recent',
+    })
+    expect(album.eras.map(era => [era.key, era.cards.map(item => item.id)])).toEqual([
+      ['found', ['Moses@Exo.2.10-Rev', 'Adam@Gen.2.19-Jud', 'LORD@Gen.1.1-Rev']],
+      ['missing', ['Abraham@Gen.11.26-1Pe', 'Abraham@Gen.11.26-1Pe~abram', 'Baal@Num.25.3-Rom']],
+    ])
   })
 
   it('names the book where a character is met, and the last cards collected', () => {

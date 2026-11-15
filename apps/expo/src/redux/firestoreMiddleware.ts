@@ -121,7 +121,7 @@ import {
   startPlan,
   setPlanReminder,
 } from './modules/plan'
-import { collectCard, parseCollectedCards } from './modules/cards'
+import { collectCard, parseCollectedCards, resetCards } from './modules/cards'
 import { canonicalizeImportedDataForFirestore } from './firestoreImportDataCanonicalization'
 import { buildCompareSettingsWrite } from './compareSelectionSync'
 import { createStudySyncIntent } from './studySyncIntent'
@@ -685,6 +685,21 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       merge: true,
     }
     await syncIntents('cards_sync', [intent], () => setDoc(userDocRef, data, { merge: true }))
+    return result
+  }
+  // The emptied collection replaces the whole map, so that the other devices empty theirs.
+  if (resetCards.match(action)) {
+    const data = { cards: {} }
+    const intent: FirestoreSyncIntent = {
+      kind: 'document-set',
+      path: ['users', userId],
+      data,
+      merge: true,
+      mergeFields: ['cards'],
+    }
+    await syncIntents('cards_reset', [intent], () =>
+      setDoc(userDocRef, data, { mergeFields: ['cards'] })
+    )
     return result
   }
 

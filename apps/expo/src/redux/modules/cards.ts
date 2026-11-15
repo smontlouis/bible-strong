@@ -3,8 +3,9 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { importData, receiveLiveUpdates, USER_LOGOUT } from './user'
 
 // The collectible cards a reader has collected (ADR-0090): card identity → when it was collected.
-// The collection only grows; it is synced as the `cards` field of the user document, one entry
-// per write, so two installs that collect at the same time keep both.
+// The collection grows one card at a time, synced as the `cards` field of the user document, one
+// entry per write, so two installs that collect at the same time keep both. The reader can empty
+// it from the album: the whole field is then replaced, on every device.
 
 export type CollectedCards = Record<string, number>
 
@@ -44,6 +45,10 @@ const cardsSlice = createSlice({
       const { id, collectedAt } = action.payload
       if (state.collected[id] === undefined) state.collected[id] = collectedAt
     },
+    /** Empties the collection, to find every card again; God's cards are never stored. */
+    resetCards(state) {
+      state.collected = {}
+    },
   },
   extraReducers: builder => {
     // The account's collection is authoritative, as the plans: Firestore's snapshots already
@@ -62,6 +67,6 @@ const cardsSlice = createSlice({
   },
 })
 
-export const { collectCard } = cardsSlice.actions
+export const { collectCard, resetCards } = cardsSlice.actions
 
 export default cardsSlice.reducer

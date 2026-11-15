@@ -50,8 +50,11 @@ export const getMeetingBook = (card: PublishedCard, language: CardLanguage) => {
 
 export type CardAlbumFilter = 'all' | 'found' | 'missing'
 
+/** The album in the order of the Bible, era by era, or the cards found last first. */
+export type CardAlbumOrder = 'bible' | 'recent'
+
 export type CardAlbumEra = {
-  /** The era as the catalog names it in French: the key of the group. */
+  /** The era as the catalog names it in French, or a group of its own: the key of the group. */
   key: string
   title: string
   cards: PublishedCard[]
@@ -71,17 +74,35 @@ export type CardAlbum = {
 
 /** The key of the album's first group: God's cards, held by every reader from the start. */
 export const GOD_GROUP = 'god'
+/** The groups of the album sorted by the cards found last. */
+export const FOUND_GROUP = 'found'
+export const MISSING_GROUP = 'missing'
 
-/** Every card of the catalog grouped by era, God's first, with the counts the album shows. */
+export type CardAlbumOptions = {
+  filter?: CardAlbumFilter
+  order?: CardAlbumOrder
+  /** A card the device can draw: its portrait is published. */
+  isDrawable?: (card: PublishedCard) => boolean
+  /** The titles of the groups of its own, in the language of the interface. */
+  titles?: { god: string; found: string; missing: string }
+}
+
+const DEFAULT_TITLES = { god: 'Dieu', found: 'Trouvées', missing: 'À trouver' }
+
+/**
+ * Every card of the catalog with the counts the album shows: grouped by era, God's first, or, by
+ * the cards found last, the found ones newest first and then those still to find.
+ */
 export const getCardAlbum = (
   catalog: CardCatalog,
   collected: Record<string, number>,
   language: CardLanguage,
-  filter: CardAlbumFilter = 'all',
-  /** A card the device can draw: its portrait is published. */
-  isDrawable: (card: PublishedCard) => boolean = () => true,
-  /** The title of God's group, in the language of the interface. */
-  godTitle = 'Dieu'
+  {
+    filter = 'all',
+    order = 'bible',
+    isDrawable = () => true,
+    titles = DEFAULT_TITLES,
+  }: CardAlbumOptions = {}
 ): CardAlbum => {
   const cards = sortCardsByBible(catalog.cards.filter(isDrawable))
   const has = (card: PublishedCard) => isCardCollected(card.id, collected)
@@ -89,31 +110,43 @@ export const getCardAlbum = (
     found: list.filter(has).length,
     total: list.length,
   })
+  const shown = (list: PublishedCard[]) =>
+    list.filter(card => (filter === 'all' ? true : filter === 'found' ? has(card) : !has(card)))
 
-  const byEra = new Map<string, PublishedCard[]>()
-  cards.forEach(card => {
-    const key = card.entity === GOD_ENTITY ? GOD_GROUP : (card.era ?? '')
-    byEra.set(key, [...(byEra.get(key) ?? []), card])
-  })
-  const rank = (key: string) => {
-    if (key === GOD_GROUP) return -1
-    const index = CARD_ERA_ORDER.indexOf(key)
-    return index < 0 ? CARD_ERA_ORDER.length : index
+  let groups: [string, string, PublishedCard[]][]
+  if (order === 'recent') {
+    // God's cards were never collected: they close the cards found.
+    const found = cards
+      .filter(has)
+      .sort((left, right) => (collected[right.id] ?? -1) - (collected[left.id] ?? -1))
+    groups = [
+      [FOUND_GROUP, titles.found, found],
+      [MISSING_GROUP, titles.missing, cards.filter(card => !has(card))],
+    ]
+  } else {
+    const byEra = new Map<string, PublishedCard[]>()
+    cards.forEach(card => {
+      const key = card.entity === GOD_ENTITY ? GOD_GROUP : (card.era ?? '')
+      byEra.set(key, [...(byEra.get(key) ?? []), card])
+    })
+    const rank = (key: string) => {
+      if (key === GOD_GROUP) return -1
+      const index = CARD_ERA_ORDER.indexOf(key)
+      return index < 0 ? CARD_ERA_ORDER.length : index
+    }
+    groups = [...byEra.entries()]
+      .sort(([left], [right]) => rank(left) - rank(right))
+      .map(([key, list]) => [
+        key,
+        key === GOD_GROUP ? titles.god : list[0]?.text[language].era || key,
+        list,
+      ])
   }
-  const eras = [...byEra.entries()]
-    .sort(([left], [right]) => rank(left) - rank(right))
-    .map(([key, list]) => ({
-      key,
-      title: key === GOD_GROUP ? godTitle : list[0]?.text[language].era || key,
-      cards: list.filter(card =>
-        filter === 'all' ? true : filter === 'found' ? has(card) : !has(card)
-      ),
-      ...count(list),
-    }))
-    .filter(era => era.cards.length > 0)
 
   return {
-    eras,
+    eras: groups
+      .map(([key, title, list]) => ({ key, title, cards: shown(list), ...count(list) }))
+      .filter(era => era.cards.length > 0),
     characters: count(cards.filter(card => !card.stage)),
     stages: count(cards.filter(card => !!card.stage)),
     ...count(cards),

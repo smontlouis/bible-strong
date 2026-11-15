@@ -3022,5 +3022,17 @@
   "collection.empty": "Aucune carte ici pour l’instant.",
   "collection.homeEmpty": "Trouvez les cartes des personnages à la fin des chapitres",
   "entityCards.openCharacter": "Voir {{name}}",
-  "collection.god": "Dieu"
+  "collection.god": "Dieu",
+  "collection.menu": "Options de la collection",
+  "collection.sort.bible": "Ordre biblique",
+  "collection.sort.recent": "Dernières trouvées",
+  "collection.disable": "Désactiver les cartes",
+  "collection.disableTitle": "Désactiver les cartes ?",
+  "collection.disableMessage": "Les points des chapitres, les cartes des personnages et cet album disparaîtront. Vos cartes sont gardées : vous pourrez réactiver la collection dans les réglages de la Bible (Aa).",
+  "collection.disableConfirm": "Désactiver",
+  "collection.reset": "Réinitialiser la collection",
+  "collection.resetTitle": "Réinitialiser la collection ?",
+  "collection.resetMessage": "Vous perdrez votre carte. Elle redeviendra à trouver dans les chapitres. Cette action est définitive et s'applique à tous vos appareils.",
+  "collection.resetMessage_plural": "Vous perdrez vos {{count}} cartes. Elles redeviendront à trouver dans les chapitres. Cette action est définitive et s'applique à tous vos appareils.",
+  "collection.resetConfirm": "Réinitialiser"
 }

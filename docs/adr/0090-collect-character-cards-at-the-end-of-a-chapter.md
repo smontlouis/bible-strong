@@ -386,5 +386,10 @@ The owner tried the cards and asked for these changes; the rest of the amendment
   synced with the other settings. Off, the chapters show no dot, the characters' pages no card icon
   and no overlay, and the home no album; the cards already collected are kept for when it is turned
   on again.
+- **The album has a menu.** It sorts the cards by the Bible's order or by the cards found last,
+  turns the cards off (the setting above, after a confirmation), and resets the collection. A
+  reset asks once, in a plain alert that says how many cards are lost, that it is final and that it
+  reaches every device: it is not the typed confirmation of deleting an account. It replaces the
+  account's whole collection; God's cards stay held.
 
 A question about the chapter before a card is revealed is proposed and parked in ADR-0114.

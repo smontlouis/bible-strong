@@ -2,26 +2,38 @@ import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pressable, useWindowDimensions, View } from 'react-native'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
+import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
-import { HStack, VStack } from '~common/ui/Box'
+import Box, { HStack, VStack } from '~common/ui/Box'
 import Card from '~common/ui/Card'
 import Container from '~common/ui/Container'
+import { FeatherIcon } from '~common/ui/Icon'
+import { MenuView } from '~common/ui/MenuView'
 import SectionList from '~common/ui/SectionList'
 import Text from '~common/ui/Text'
 import { useCardCatalog } from '~features/lexique/entityCardManifest'
 import { useEntityPortraitCatalog } from '~features/lexique/entityPortraitManifest'
 import { buildPublicStrongEntityPath } from '~features/lexique/publicStrongRoutes'
+import { resetCards } from '~redux/modules/cards'
 import type { RootState } from '~redux/modules/reducer'
+import { setSettingsCardCollection } from '~redux/modules/user/settings'
 import { titleFontStyle } from '~themes/styleValues'
 import { useTheme } from '~themes/ThemeProvider'
 
 import { CardAlbumTile } from './CardAlbumTile'
 import { getEntityCardView, type CardLanguage, type EntityCardView } from './cardCatalog'
-import { getCardAlbum, getMeetingBook, type CardAlbumFilter } from './cardCollection'
+import {
+  getCardAlbum,
+  getMeetingBook,
+  FOUND_GROUP,
+  MISSING_GROUP,
+  type CardAlbumFilter,
+  type CardAlbumOrder,
+} from './cardCollection'
 import { CardSpotlight } from './CardSpotlight'
 import { isCardCollected } from './chapterCards'
 
@@ -43,18 +55,22 @@ const rowsOf = <Item,>(items: Item[], size: number) =>
  * The album of the collectible cards (ADR-0090), opened from the home: every card of the catalog
  * in the order of the Bible, grouped by era, those collected in their painting, the others on the
  * clay ground with only the book where their character is met, a riddle to solve while reading.
- * A collected card opens large.
+ * A collected card opens large. Its menu sorts the album by the cards found last, turns the
+ * cards off, or empties the collection to find them all again.
  */
 const CardCollectionScreen = () => {
   const { t, i18n } = useTranslation()
   const theme = useTheme()
   const router = useRouter()
+  const dispatch = useDispatch()
+  const confirm = useConfirmDialog()
   const { width: windowWidth } = useWindowDimensions()
   const language: CardLanguage = i18n.language.startsWith('fr') ? 'fr' : 'en'
   const catalog = useCardCatalog()
   const portraits = useEntityPortraitCatalog()
   const collected = useSelector((state: RootState) => state.cards.collected)
   const [filter, setFilter] = useState<CardAlbumFilter>('all')
+  const [order, setOrder] = useState<CardAlbumOrder>('bible')
   const [opened, setOpened] = useState<EntityCardView>()
 
   const contentWidth = Math.min(windowWidth, MAX_WIDTH) - 2 * GUTTER
@@ -73,17 +89,94 @@ const CardCollectionScreen = () => {
   }
   const album =
     catalog && portraits
-      ? getCardAlbum(
-          catalog,
-          collected,
-          language,
+      ? getCardAlbum(catalog, collected, language, {
           filter,
-          card => views.has(card.id),
-          t('collection.god')
-        )
+          order,
+          isDrawable: card => views.has(card.id),
+          titles: {
+            god: t('collection.god'),
+            found: t('collection.filters.found'),
+            missing: t('collection.filters.missing'),
+          },
+        })
       : undefined
 
-  const header = <Header hasBackButton title={t('collection.title')} />
+  // The cards the reader found, God's held from the start left aside: what a reset takes away.
+  const collectedCount = Object.keys(collected).length
+
+  const turnOff = async () => {
+    const confirmed = await confirm({
+      title: t('collection.disableTitle'),
+      message: t('collection.disableMessage'),
+      confirmLabel: t('collection.disableConfirm'),
+      cancelLabel: t('Annuler'),
+    })
+    if (!confirmed) return
+    dispatch(setSettingsCardCollection(false))
+    router.back()
+  }
+
+  const reset = async () => {
+    const confirmed = await confirm({
+      title: t('collection.resetTitle'),
+      message: t('collection.resetMessage', { count: collectedCount }),
+      confirmLabel: t('collection.resetConfirm'),
+      cancelLabel: t('Annuler'),
+      destructive: true,
+    })
+    if (confirmed) dispatch(resetCards())
+  }
+
+  const header = (
+    <Header
+      hasBackButton
+      title={t('collection.title')}
+      rightComponent={
+        <MenuView
+          accessibilityLabel={t('collection.menu')}
+          actions={[
+            {
+              id: 'bible',
+              title: t('collection.sort.bible'),
+              image: 'book',
+              state: order === 'bible' ? 'on' : 'off',
+            },
+            {
+              id: 'recent',
+              title: t('collection.sort.recent'),
+              image: 'clock.arrow.circlepath',
+              state: order === 'recent' ? 'on' : 'off',
+            },
+            { id: 'disable', title: t('collection.disable'), image: 'xmark.circle' },
+            {
+              id: 'reset',
+              title: t('collection.reset'),
+              image: 'trash',
+              attributes: { destructive: true, disabled: collectedCount === 0 },
+            },
+          ]}
+          onPressAction={({ nativeEvent }) => {
+            switch (nativeEvent.event) {
+              case 'bible':
+              case 'recent':
+                setOrder(nativeEvent.event)
+                break
+              case 'disable':
+                void turnOff()
+                break
+              case 'reset':
+                void reset()
+                break
+            }
+          }}
+        >
+          <Box className="flex-row items-center justify-center h-[54px] w-[54px]">
+            <FeatherIcon name="more-vertical" size={18} />
+          </Box>
+        </MenuView>
+      }
+    />
+  )
 
   if (!album) {
     return (
@@ -188,7 +281,9 @@ const CardCollectionScreen = () => {
               {section.title}
             </Text>
             <Text className="text-[13px] text-grey" style={{ fontVariant: ['tabular-nums'] }}>
-              {section.found} / {section.total}
+              {section.key === FOUND_GROUP || section.key === MISSING_GROUP
+                ? section.data.flat().length
+                : `${section.found} / ${section.total}`}
             </Text>
           </HStack>
         )}

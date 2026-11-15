@@ -1,4 +1,4 @@
-import cards, { collectCard, mergeCollectedCards, parseCollectedCards } from '../cards'
+import cards, { collectCard, mergeCollectedCards, parseCollectedCards, resetCards } from '../cards'
 import { importData, receiveLiveUpdates, USER_LOGOUT } from '../user'
 
 // The user module pulls in the app's runtime: the same mocks as the plan's test.
@@ -101,6 +101,11 @@ describe('the collected cards', () => {
     )
     expect(imported.collected).toEqual({ 'Adam@Gen.2.19-Jud': 4, 'Eve@Gen.3.20-1Ti': 6 })
     expect(cards(imported, { type: USER_LOGOUT }).collected).toEqual({})
+  })
+
+  it('empties the collection when the reader resets it', () => {
+    const state = cards(undefined, collectCard({ id: 'Adam@Gen.2.19-Jud', collectedAt: 5 }))
+    expect(cards(state, resetCards()).collected).toEqual({})
   })
 
   it('reads only well-formed entries', () => {

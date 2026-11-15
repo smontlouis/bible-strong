@@ -2994,5 +2994,17 @@
   "collection.empty": "No card here yet.",
   "collection.homeEmpty": "Find the characters’ cards at the end of chapters",
   "entityCards.openCharacter": "See {{name}}",
-  "collection.god": "God"
+  "collection.god": "God",
+  "collection.menu": "Collection options",
+  "collection.sort.bible": "Bible order",
+  "collection.sort.recent": "Latest found",
+  "collection.disable": "Turn off the cards",
+  "collection.disableTitle": "Turn off the cards?",
+  "collection.disableMessage": "The dots in the chapters, the characters' cards and this album will disappear. Your cards are kept: you can turn the collection back on in the Bible settings (Aa).",
+  "collection.disableConfirm": "Turn off",
+  "collection.reset": "Reset the collection",
+  "collection.resetTitle": "Reset the collection?",
+  "collection.resetMessage": "You will lose your card. It will be waiting to be found in the chapters again. This cannot be undone and applies to all your devices.",
+  "collection.resetMessage_plural": "You will lose your {{count}} cards. They will be waiting to be found in the chapters again. This cannot be undone and applies to all your devices.",
+  "collection.resetConfirm": "Reset"
 }
