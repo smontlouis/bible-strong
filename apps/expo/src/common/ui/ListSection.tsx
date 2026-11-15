@@ -96,7 +96,9 @@ const ListSection = ({
 const separatorInset = (row: ReturnType<typeof Children.toArray>[number], contentInset: number) =>
   isValidElement<ListRowProps>(row) && row.type === ListRow
     ? row.props.icon
-      ? ICON_INSET
+      ? row.props.iconSize
+        ? ROW_PADDING + row.props.iconSize + ROW_GAP
+        : ICON_INSET
       : ROW_PADDING
     : contentInset
 
@@ -119,6 +121,8 @@ type ListRowProps = Pick<
   iconTint?: string
   /** Exact fill of the icon tile. */
   iconBg?: string
+  /** A larger tile, for an avatar (the account, Strobi). */
+  iconSize?: number
   /** Shown at the end of the row instead of the chevron. */
   trailing?: ReactNode
   hasChevron?: boolean
@@ -134,6 +138,7 @@ export const ListRow = ({
   icon,
   iconTint,
   iconBg,
+  iconSize,
   trailing,
   hasChevron = true,
   destructive = false,
@@ -148,7 +153,7 @@ export const ListRow = ({
   >
     {icon ? (
       <Box>
-        <IconTile tint={iconTint} bg={iconBg}>
+        <IconTile tint={iconTint} bg={iconBg} size={iconSize}>
           {icon}
         </IconTile>
         {badge && (

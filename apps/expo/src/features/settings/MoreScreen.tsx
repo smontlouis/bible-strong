@@ -43,6 +43,13 @@ import app from '../../../package.json'
 import { useRouter } from 'expo-router'
 import { MainStackProps } from '~navigation/type'
 
+// The account and Strobi stand in larger tiles than the rows below, side by side at one size.
+const AVATAR_ROW_ICON = 36
+// Drawn characters keep room around their body, which a photo does not: Strobi's body fills
+// about 81% of its drawing, a generated avatar's about 70%. These sizes show all three alike.
+const STROBI_ROW_SIZE = 44
+const GENERATED_AVATAR_SIZE = 50
+
 export const LinkItem = (
   componentProps: Omit<
     UIComponentProps<typeof Link>,
@@ -148,23 +155,25 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
           backgroundColor: theme.colors.canvas,
         }}
       >
+        {/* The account and Strobi, one group, rows of one size: Strobi's row only when it is offered. */}
         <ListSection>
           {isLogged ? (
-            <Link route="Profile" className="flex-row items-center gap-[12px] px-[14px] py-[12px]">
-              <UserAvatar
-                size={48}
-                photoURL={user.photoURL}
-                displayName={user.displayName}
-                email={user.email}
-              />
-              <Box className="flex-[1]">
-                <Text className="text-[17px] font-bold" numberOfLines={1}>
-                  {extractFirstName(user.displayName)}
-                </Text>
-                <Text className="text-[13px] text-grey mt-[2px]">{t('settings.viewProfile')}</Text>
-              </Box>
-              <FeatherIcon name="chevron-right" size={18} color="grey" />
-            </Link>
+            <ListRow
+              route="Profile"
+              icon={
+                <UserAvatar
+                  size={user.photoURL ? AVATAR_ROW_ICON : GENERATED_AVATAR_SIZE}
+                  photoURL={user.photoURL}
+                  displayName={user.displayName}
+                  email={user.email}
+                />
+              }
+              iconBg="transparent"
+              iconSize={AVATAR_ROW_ICON}
+              label={extractFirstName(user.displayName)}
+              labelClassName="font-bold"
+              description={t('settings.viewProfile')}
+            />
           ) : (
             <ListRow
               route="Login"
@@ -174,10 +183,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
               labelClassName="text-link"
             />
           )}
-        </ListSection>
-
-        {strobiShown && (
-          <ListSection>
+          {strobiShown && (
             <ListRow
               route="Strobi"
               // Strobi holds still facing the reader: a row need not move while the page is open.
@@ -185,11 +191,12 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
               icon={
                 <StrobiAvatar
                   animation={premiumStatus.kind === 'active' ? 'happy' : 'idle'}
-                  size={36}
+                  size={STROBI_ROW_SIZE}
                   settleAfterMs={2600}
                 />
               }
               iconBg="transparent"
+              iconSize={AVATAR_ROW_ICON}
               label={t('strobi.settings.title')}
               description={
                 premiumStatus.kind === 'active'
@@ -199,8 +206,8 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
                     : undefined
               }
             />
-          </ListSection>
-        )}
+          )}
+        </ListSection>
 
         <ListSection title={t('settings.resources')}>
           <ListRow
