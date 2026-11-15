@@ -27,6 +27,29 @@
 .bs-assistant-avatar:hover {
   box-shadow: none;
 }
+/* Put away, the bubble shrinks and fades; shown again from Strobi's page, it grows back with a
+   bounce (2026-11-15). */
+.bs-assistant-avatar.is-back {
+  animation: bs-assistant-avatar-back 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes bs-assistant-avatar-back {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.bs-assistant-avatar.is-put-away {
+  opacity: 0;
+  transform: scale(0.3);
+  pointer-events: none;
+  transition:
+    transform 200ms ease-in,
+    opacity 200ms ease-in;
+}
 .bs-assistant-avatar svg {
   width: 100%;
   height: 100%;

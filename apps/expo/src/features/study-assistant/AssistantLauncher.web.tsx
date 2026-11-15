@@ -39,7 +39,8 @@ import {
   resumeDate,
 } from './assistantQuota'
 import { useStrobiTrial } from './useStrobiTrial'
-import { strobiBubbleHiddenAtom } from './strobiBubble'
+import { useStrobiBubble } from './strobiBubble'
+import { MenuView } from '~common/ui/MenuView'
 import { contextCaption } from './contextDisplay'
 import ContextMarkIcon from './ContextMarkIcon.web'
 import FireAuth from '~helpers/FireAuth'
@@ -87,6 +88,7 @@ function Icon({
     | 'followUp'
     | 'pin'
     | 'resume'
+    | 'more'
 }) {
   const paths = {
     error: 'M12 8v5m0 3.5v.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z',
@@ -104,6 +106,7 @@ function Icon({
     followUp: 'm15 10 5 5-5 5M4 4v7a4 4 0 0 0 4 4h12',
     pin: 'M12 17v5M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z',
     resume: 'M9 14 4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3',
+    more: 'M4 12a1.5 1.5 0 1 0 3 0 1.5 1.5 0 1 0-3 0M10.5 12a1.5 1.5 0 1 0 3 0 1.5 1.5 0 1 0-3 0M17 12a1.5 1.5 0 1 0 3 0 1.5 1.5 0 1 0-3 0',
   }
   return (
     <svg
@@ -278,7 +281,19 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     noteOpening(open)
   }, [open])
   // Put away on this device, the bubble shows only while its window is open.
-  const bubbleHidden = useAtomValue(strobiBubbleHiddenAtom)
+  const bubble = useStrobiBubble()
+  const bubbleHidden = bubble.hidden
+  // Shown again, the bubble plays its bounce once (`is-back`).
+  const [bubbleBack, setBubbleBack] = useState(false)
+  const wasHidden = useRef(bubbleHidden)
+  useEffect(() => {
+    const comingBack = wasHidden.current && !bubbleHidden
+    wasHidden.current = bubbleHidden
+    if (!comingBack) return
+    setBubbleBack(true)
+    const timer = window.setTimeout(() => setBubbleBack(false), 600)
+    return () => window.clearTimeout(timer)
+  }, [bubbleHidden])
   useStrobiTrial({
     session,
     open,
@@ -430,11 +445,14 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
       >
         {ready &&
           // Strobi stays out of the Premium page and of the onboarding's story.
-          (open || (pathname !== '/premium' && !storyOpen && !bubbleHidden)) &&
+          // Put away, the bubble stays mounted to shrink away and grow back (its class).
+          (open || (pathname !== '/premium' && !storyOpen)) &&
           createPortal(
             <Modal.Anchor className="bs-assistant-anchor" style={vars}>
               <Modal.Trigger
-                className="bs-assistant-avatar"
+                className={`bs-assistant-avatar${bubbleHidden && !open ? ' is-put-away' : bubbleBack ? ' is-back' : ''}`}
+                aria-hidden={bubbleHidden && !open ? true : undefined}
+                tabIndex={bubbleHidden && !open ? -1 : undefined}
                 aria-label={t(open ? 'assistant.modal.close' : 'assistant.modal.open')}
                 onMouseEnter={() => setAvatarHovered(true)}
                 onMouseLeave={() => setAvatarHovered(false)}
@@ -456,6 +474,11 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
           className={`bs-assistant-modal ${__DEV__ && debugOpen ? 'bs-assistant-debug-open' : ''}`}
           style={vars}
           aria-label={t('assistant.title')}
+          // A choice in Strobi's menu, drawn in its own layer, does not close the window.
+          onInteractOutside={event => {
+            if ((event.target as Element | null)?.closest?.('[role="menu"], [role="dialog"]'))
+              event.preventDefault()
+          }}
           onOpenAutoFocus={event => {
             event.preventDefault()
             ;(inputRef.current || loginRef.current)?.focus()
@@ -514,6 +537,28 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                 <Icon name="plus" />
               </button>
             </ThreadListPrimitive.New>
+            {/* Strobi's own options: its settings page, and its floating bubble. */}
+            <MenuView
+              accessibilityLabel={t('strobi.menu.label')}
+              actions={[
+                { id: 'settings', title: t('strobi.menu.settings'), image: 'gearshape' },
+                bubbleHidden
+                  ? { id: 'show', title: t('strobi.menu.show'), image: 'plus.circle' }
+                  : { id: 'hide', title: t('strobi.menu.hide'), image: 'xmark.circle' },
+              ]}
+              onPressAction={({ nativeEvent }) => {
+                if (nativeEvent.event === 'settings') {
+                  changeOpen(false)
+                  router.push('/strobi')
+                }
+                if (nativeEvent.event === 'hide') void bubble.confirmHide()
+                if (nativeEvent.event === 'show') bubble.setHidden(false)
+              }}
+            >
+              <span className="bs-assistant-icon">
+                <Icon name="more" />
+              </span>
+            </MenuView>
           </header>
           {historyOpen ? (
             <section className="bs-assistant-history">
