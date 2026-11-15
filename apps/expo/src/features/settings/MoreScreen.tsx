@@ -47,7 +47,7 @@ import { MainStackProps } from '~navigation/type'
 const AVATAR_ROW_ICON = 36
 // Drawn characters keep room around their body, which a photo does not: Strobi's body fills
 // about 81% of its drawing, a generated avatar's about 70%. These sizes show all three alike.
-const STROBI_ROW_SIZE = 44
+const STROBI_ROW_SIZE = 40
 const GENERATED_AVATAR_SIZE = 50
 
 export const LinkItem = (

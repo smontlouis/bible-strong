@@ -153,7 +153,13 @@ export const ListRow = ({
   >
     {icon ? (
       <Box>
-        <IconTile tint={iconTint} bg={iconBg} size={iconSize}>
+        <IconTile
+          tint={iconTint}
+          bg={iconBg}
+          size={iconSize}
+          // Without a fill there is no tile to keep to: an avatar that moves may cross its edge.
+          className={iconBg === 'transparent' ? 'overflow-visible' : undefined}
+        >
           {icon}
         </IconTile>
         {badge && (
