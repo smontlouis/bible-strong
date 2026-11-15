@@ -14,6 +14,12 @@ import { REST, adjust, clamp, type Point } from './cardGeometry'
 export const MAX_ROTATION = 14
 
 const SPRING = { damping: 18, stiffness: 110, mass: 0.7 }
+/**
+ * A change of the phone's tilt smaller than this is the sensor's noise on a phone at rest: it is
+ * not followed, so the springs settle and the card stops being redrawn. A hand's tremor is well
+ * above it and still moves the light; at most it is 0.03° of turn.
+ */
+const TILT_NOISE = 0.002
 const FLIP_SPRING = { damping: 16, stiffness: 90, mass: 0.9 }
 
 /**
@@ -52,10 +58,26 @@ export const useCardMotion = () => {
   const glare = useSharedValue(0)
   const flip = useSharedValue(0)
   const flipped = useSharedValue(false)
+  // The tilt the springs last went to; null while a finger leads, so that lifting it follows the
+  // tilt again at once.
+  const followedTilt = useSharedValue<Point | null>(null)
 
   useAnimatedReaction(
     () => ({ finger: touch.get(), tilt: gravity.get() }),
     ({ finger, tilt }) => {
+      if (finger) {
+        followedTilt.set(null)
+      } else {
+        const followed = followedTilt.get()
+        if (
+          followed &&
+          Math.abs(tilt.x - followed.x) < TILT_NOISE &&
+          Math.abs(tilt.y - followed.y) < TILT_NOISE
+        ) {
+          return
+        }
+        followedTilt.set({ x: tilt.x, y: tilt.y })
+      }
       let px: number
       let py: number
       let rx: number

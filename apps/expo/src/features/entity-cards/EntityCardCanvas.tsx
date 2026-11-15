@@ -15,10 +15,54 @@ import { EntityPortraitTiltSensor } from '~features/lexique/EntityPortraitParall
 import type { EntityCardView } from './cardCatalog'
 import { CARD_RATIO } from './cardGeometry'
 import { useCardMotion } from './cardMotion'
-import { getCardPalette } from './cardPalettes'
+import { getCardPalette, type CardPalette } from './cardPalettes'
 import { buildBackParagraphs, buildFrontParagraphs } from './cardParagraphs'
 import { useCardFonts, useCardPicture } from './cardResources'
 import { CardBack, CardFront } from './CardFaces'
+import { Snapshot, useCardSnapshot } from './cardSnapshots'
+
+/** How far the glow's blur reaches beyond the card's edge, in points. */
+const GLOW_REACH = 40
+
+/** The shadow and the coloured glow of an opened card, and its thin edge of light. */
+const CardGlow = ({
+  width,
+  height,
+  palette,
+}: {
+  width: number
+  height: number
+  palette: CardPalette
+}) => {
+  const radius = 0.046 * width
+  return (
+    <>
+      <RoundedRect x={0} y={15} width={width} height={height - 10} r={radius} color="#000">
+        <BlurMask blur={10} style="normal" />
+      </RoundedRect>
+      <RoundedRect
+        x={-2}
+        y={-2}
+        width={width + 4}
+        height={height + 4}
+        r={radius + 2}
+        color={palette.glow}
+      >
+        <BlurMask blur={7} style="normal" />
+      </RoundedRect>
+      <RoundedRect
+        x={-1}
+        y={-1}
+        width={width + 2}
+        height={height + 2}
+        r={radius + 1}
+        color={palette.edge}
+      >
+        <BlurMask blur={1.5} style="normal" />
+      </RoundedRect>
+    </>
+  )
+}
 
 /** The room around the card, in shares of its width, for its turn and its glow. */
 const ROOM = 0.14
@@ -49,6 +93,18 @@ export const EntityCardCanvas = ({ card, width, moves = true, onReady }: EntityC
   const canvas = getEntityCardCanvasSize(width)
   const { pad } = canvas
   const palette = getCardPalette(card.family, card.stages)
+  // The glow never changes shape: three blurs drawn once rather than at every frame.
+  const glowArea = {
+    x: -GLOW_REACH,
+    y: -GLOW_REACH,
+    width: width + 2 * GLOW_REACH,
+    height: height + 2 * GLOW_REACH,
+  }
+  const glowImage = useCardSnapshot(
+    `glow:${width}:${height}:${palette.glow}:${palette.edge}`,
+    glowArea,
+    () => <CardGlow width={width} height={height} palette={palette} />
+  )
 
   const fonts = useCardFonts()
   const backdropPicture = useCardPicture(card.scene ? null : card.backdrop)
@@ -131,37 +187,10 @@ export const EntityCardCanvas = ({ card, width, moves = true, onReady }: EntityC
           <Group>
             <Group transform={cardTransform} origin={center}>
               <Group transform={[{ translateX: pad }, { translateY: pad }]}>
-                {/* The glow of an opened card (`.ac-card.is-active .ac-rotator`). */}
-                <RoundedRect
-                  x={0}
-                  y={15}
-                  width={width}
-                  height={height - 10}
-                  r={radius}
-                  color="#000"
-                >
-                  <BlurMask blur={10} style="normal" />
-                </RoundedRect>
-                <RoundedRect
-                  x={-2}
-                  y={-2}
-                  width={width + 4}
-                  height={height + 4}
-                  r={radius + 2}
-                  color={palette.glow}
-                >
-                  <BlurMask blur={7} style="normal" />
-                </RoundedRect>
-                <RoundedRect
-                  x={-1}
-                  y={-1}
-                  width={width + 2}
-                  height={height + 2}
-                  r={radius + 1}
-                  color={palette.edge}
-                >
-                  <BlurMask blur={1.5} style="normal" />
-                </RoundedRect>
+                {/* The glow of an opened card (`.ac-card.is-active .ac-rotator`), drawn once. */}
+                <Snapshot image={glowImage} area={glowArea}>
+                  <CardGlow width={width} height={height} palette={palette} />
+                </Snapshot>
 
                 {facing === 'front' ? (
                   <Group clip={face}>

@@ -13,6 +13,7 @@ import {
   type SkImage,
   type SkParagraph,
 } from '@shopify/react-native-skia'
+import { Platform } from 'react-native'
 import { useDerivedValue, type SharedValue } from 'react-native-reanimated'
 
 import type { EntityCardView } from './cardCatalog'
@@ -21,6 +22,7 @@ import type { CardMotion } from './cardMotion'
 import { getFoilColors, type CardPalette } from './cardPalettes'
 import type { BackParagraphs, FrontParagraphs } from './cardParagraphs'
 import { ArtShine, FrameShine, Grain, PREMUL } from './CardFinishes'
+import { Snapshot, useCardSnapshot } from './cardSnapshots'
 import { getPaperTexture } from './cardTextures'
 
 // The two faces of a card, as `CardFront` and `CardBack` in apps/site/features/atlas/AtlasCards.tsx.
@@ -94,8 +96,40 @@ const FoilText = ({
   )
 }
 
+/**
+ * Android draws the parts of a card that never move from images made once: there the whole card
+ * goes to the GPU from the UI thread at every frame of its turn. iOS keeps drawing them live.
+ */
+const SNAPSHOTS = Platform.OS === 'android'
+
 /** The frame and its foil, under everything (`.ac-fr-bg`, `.ac-fr-shine`). */
 const Frame = ({ card, palette, width, height, motion }: FaceProps) => {
+  const area = { x: 0, y: 0, width, height }
+  const image = useCardSnapshot(
+    SNAPSHOTS ? `frame:${card.id}:${width}:${height}` : null,
+    area,
+    () => <FrameBase palette={palette} width={width} height={height} />
+  )
+  return (
+    <>
+      <Snapshot image={image} area={area}>
+        <FrameBase palette={palette} width={width} height={height} />
+      </Snapshot>
+      <FrameShine finish={card.finish} width={width} height={height} motion={motion} />
+    </>
+  )
+}
+
+/** The frame's colours and grain (`.ac-fr-bg`). */
+const FrameBase = ({
+  palette,
+  width,
+  height,
+}: {
+  palette: CardPalette
+  width: number
+  height: number
+}) => {
   const ends = cssLinearEnds(165, 0, 0, width, height)
   const [sizeX, sizeY] = palette.frameTopSize
   return (
@@ -119,7 +153,6 @@ const Frame = ({ card, palette, width, height, motion }: FaceProps) => {
         />
       </Rect>
       <Grain width={width} height={height} />
-      <FrameShine finish={card.finish} width={width} height={height} motion={motion} />
     </>
   )
 }
@@ -261,6 +294,37 @@ export const CardFront = ({
     <Image image={subject} fit="fill" {...subjectRect} opacity={pictures.subjectOpacity} />
   )
 
+  // The lettering that never moves: title, type, sentence and foot, on the parchment.
+  const lettering = (
+    <>
+      <Paragraph paragraph={paragraphs.title} x={7 * u} y={17 * u} width={50 * u} />
+      <Paragraph paragraph={paragraphs.typeLine} x={6 * u} y={102.3 * u} width={88 * u} />
+
+      <Panel palette={palette} box={panel} u={u} />
+      <Paragraph
+        paragraph={paragraphs.sentence}
+        x={panel.x + 3.6 * u}
+        y={panelTextTop}
+        width={panel.width - 7.2 * u}
+      />
+      <Paragraph
+        paragraph={paragraphs.source}
+        x={panel.x + 3.6 * u}
+        y={panelTextTop + sentenceHeight + 0.8 * u}
+        width={panel.width - 7.2 * u}
+      />
+
+      <Paragraph paragraph={paragraphs.footLeft} x={7 * u} y={footY} width={62 * u} />
+      <Paragraph paragraph={paragraphs.footRight} x={7 * u} y={footY} width={86 * u} />
+    </>
+  )
+  const cardArea = { x: 0, y: 0, width, height }
+  const letteringImage = useCardSnapshot(
+    SNAPSHOTS ? `lettering:${card.id}:${card.language}:${width}:${height}` : null,
+    cardArea,
+    () => lettering
+  )
+
   return (
     <>
       <Frame card={card} palette={palette} width={width} height={height} motion={motion} />
@@ -352,25 +416,9 @@ export const CardFront = ({
         palette={palette}
         motion={motion}
       />
-      <Paragraph paragraph={paragraphs.title} x={7 * u} y={17 * u} width={50 * u} />
-      <Paragraph paragraph={paragraphs.typeLine} x={6 * u} y={102.3 * u} width={88 * u} />
-
-      <Panel palette={palette} box={panel} u={u} />
-      <Paragraph
-        paragraph={paragraphs.sentence}
-        x={panel.x + 3.6 * u}
-        y={panelTextTop}
-        width={panel.width - 7.2 * u}
-      />
-      <Paragraph
-        paragraph={paragraphs.source}
-        x={panel.x + 3.6 * u}
-        y={panelTextTop + sentenceHeight + 0.8 * u}
-        width={panel.width - 7.2 * u}
-      />
-
-      <Paragraph paragraph={paragraphs.footLeft} x={7 * u} y={footY} width={62 * u} />
-      <Paragraph paragraph={paragraphs.footRight} x={7 * u} y={footY} width={86 * u} />
+      <Snapshot image={letteringImage} area={cardArea}>
+        {lettering}
+      </Snapshot>
 
       <RingAndGlare palette={palette} width={width} height={height} motion={motion} />
     </>
