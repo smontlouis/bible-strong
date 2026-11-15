@@ -41,10 +41,13 @@ export default function FiltersHeader({
   hasBackButton,
   filters,
   onReset,
+  actions,
   buttonOnly = false,
 }: {
   title: ReactNode
   children?: ReactNode
+  /** Beside the filter button: what acts on the page rather than on what it shows (a menu). */
+  actions?: ReactNode
   buttonOnly?: boolean
   hasBackButton?: boolean
   filters: FiltersHeaderItem[]
@@ -183,6 +186,7 @@ export default function FiltersHeader({
         )}
         <Text className="flex-1 text-[14px] font-bold">{title}</Text>
         {filterButton}
+        {actions}
       </PageContent>
       {children && <PageContent style={widthStyle}>{children}</PageContent>}
     </Box>

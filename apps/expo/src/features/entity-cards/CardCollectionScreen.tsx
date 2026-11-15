@@ -1,12 +1,12 @@
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, useWindowDimensions, View } from 'react-native'
+import { useWindowDimensions, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import Empty from '~common/Empty'
-import Header from '~common/Header'
+import FiltersHeader, { type FiltersHeaderItem } from '~common/FiltersHeader'
 import Loading from '~common/Loading'
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Card from '~common/ui/Card'
@@ -44,6 +44,7 @@ const TILE_WIDTH = 120
 const MAX_WIDTH = 860
 
 const FILTERS: CardAlbumFilter[] = ['all', 'found', 'missing']
+const ORDERS: CardAlbumOrder[] = ['bible', 'recent']
 
 /** Splits a list into rows of a given length. */
 const rowsOf = <Item,>(items: Item[], size: number) =>
@@ -127,26 +128,50 @@ const CardCollectionScreen = () => {
     if (confirmed) dispatch(resetCards())
   }
 
+  const filters: FiltersHeaderItem[] = [
+    {
+      key: 'show',
+      icon: 'filter',
+      label: t('collection.show'),
+      value: t(`collection.filters.${filter}`),
+      active: filter !== 'all',
+      onPress: () => {},
+      options: FILTERS.map(item => ({
+        key: item,
+        label: t(`collection.filters.${item}`),
+        selected: item === filter,
+        onSelect: () => setFilter(item),
+      })),
+    },
+    {
+      key: 'order',
+      icon: 'clock',
+      label: t('collection.order'),
+      value: t(`collection.sort.${order}`),
+      active: order !== 'bible',
+      onPress: () => {},
+      options: ORDERS.map(item => ({
+        key: item,
+        label: t(`collection.sort.${item}`),
+        selected: item === order,
+        onSelect: () => setOrder(item),
+      })),
+    },
+  ]
+
   const header = (
-    <Header
+    <FiltersHeader
       hasBackButton
       title={t('collection.title')}
-      rightComponent={
+      filters={filters}
+      onReset={() => {
+        setFilter('all')
+        setOrder('bible')
+      }}
+      actions={
         <MenuView
           accessibilityLabel={t('collection.menu')}
           actions={[
-            {
-              id: 'bible',
-              title: t('collection.sort.bible'),
-              image: 'book',
-              state: order === 'bible' ? 'on' : 'off',
-            },
-            {
-              id: 'recent',
-              title: t('collection.sort.recent'),
-              image: 'clock.arrow.circlepath',
-              state: order === 'recent' ? 'on' : 'off',
-            },
             { id: 'disable', title: t('collection.disable'), image: 'xmark.circle' },
             {
               id: 'reset',
@@ -157,10 +182,6 @@ const CardCollectionScreen = () => {
           ]}
           onPressAction={({ nativeEvent }) => {
             switch (nativeEvent.event) {
-              case 'bible':
-              case 'recent':
-                setOrder(nativeEvent.event)
-                break
               case 'disable':
                 void turnOff()
                 break
@@ -243,32 +264,6 @@ const CardCollectionScreen = () => {
                 </Text>
               </VStack>
             </Card>
-            <HStack className="gap-[8px]">
-              {FILTERS.map(item => {
-                const active = item === filter
-                return (
-                  <Pressable
-                    key={item}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: active }}
-                    onPress={() => setFilter(item)}
-                    style={{
-                      paddingHorizontal: 14,
-                      paddingVertical: 7,
-                      borderRadius: 999,
-                      backgroundColor: active ? theme.colors.primary : theme.colors.lightGrey,
-                    }}
-                  >
-                    <Text
-                      className="text-[14px] font-semibold"
-                      style={{ color: active ? theme.colors.reverse : theme.colors.default }}
-                    >
-                      {t(`collection.filters.${item}`)}
-                    </Text>
-                  </Pressable>
-                )
-              })}
-            </HStack>
           </VStack>
         }
         ListEmptyComponent={<Empty message={t('collection.empty')} />}
