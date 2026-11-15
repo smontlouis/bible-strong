@@ -386,3 +386,5 @@ The owner tried the cards and asked for these changes; the rest of the amendment
   synced with the other settings. Off, the chapters show no dot, the characters' pages no card icon
   and no overlay, and the home no album; the cards already collected are kept for when it is turned
   on again.
+
+A question about the chapter before a card is revealed is proposed and parked in ADR-0114.
