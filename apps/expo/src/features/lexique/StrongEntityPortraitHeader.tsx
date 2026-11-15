@@ -32,6 +32,7 @@ import {
 } from './entityPortraits'
 import {
   EntityPortraitTiltSensor,
+  useEntityPortraitPointer,
   ParallaxLayer,
   useEntityPortraitLayerStyles,
   useEntityPortraitTilt,
@@ -161,13 +162,15 @@ const StrongEntityPortraitHeader = ({
   const backdropUri = getEntityCardBackdropUri(cardCatalog, entity.uniqueName, stage?.key)
   const [failedBackdropUri, setFailedBackdropUri] = useState<string>()
   const showsBackdrop = !!backdropUri && backdropUri !== failedBackdropUri
-  // In depth only on a backdrop, on a phone, for a reader who allows motion, while on screen.
+  // In depth only on a backdrop, for a reader who allows motion: a phone's tilt moves the layers
+  // while on screen, the pointer over the picture on the Web and in the desktop app.
   const isFocused = useIsFocused()
   const reduceMotion = useReducedMotion()
-  const inDepth = showsBackdrop && Platform.OS !== 'web' && !reduceMotion
-  const moves = inDepth && isFocused
+  const inDepth = showsBackdrop && !reduceMotion
+  const moves = inDepth && isFocused && Platform.OS !== 'web'
   const tilt = useEntityPortraitTilt()
   const layers = useEntityPortraitLayerStyles(tilt)
+  const pointer = useEntityPortraitPointer(tilt)
   const title = stage?.label ?? entry.title
   const series = getEntitySeriesPlace(catalog, entity.uniqueName)
   const roles = (entry.roles ?? []).flatMap(role =>
@@ -221,6 +224,7 @@ const StrongEntityPortraitHeader = ({
         <Box
           className="overflow-hidden border-continuous rounded-[16px]"
           style={{ aspectRatio: 1, ...backgroundImage(ground) }}
+          {...(inDepth && Platform.OS === 'web' ? pointer : {})}
         >
           {moves && <EntityPortraitTiltSensor tilt={tilt} />}
           {showsBackdrop && (

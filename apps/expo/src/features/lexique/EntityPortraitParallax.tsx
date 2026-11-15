@@ -65,6 +65,28 @@ export const EntityPortraitTiltSensor = ({ tilt }: { tilt: SharedValue<Tilt> }) 
 
 export const useEntityPortraitTilt = () => useSharedValue<Tilt>({ x: 0, y: 0 })
 
+type PointerEvent = {
+  nativeEvent: { clientX: number; clientY: number }
+  currentTarget: unknown
+}
+
+/**
+ * On the Web and in the desktop app, where no sensor runs, the pointer over the picture stands for
+ * the tilt: at its centre the layers rest, toward an edge they move as a phone leaning that way
+ * would move them, the character following the pointer. Let go, they come back to rest.
+ */
+export const useEntityPortraitPointer = (tilt: SharedValue<Tilt>) => ({
+  onPointerMove: (event: PointerEvent) => {
+    const target = event.currentTarget as { getBoundingClientRect?: () => DOMRect }
+    const box = target.getBoundingClientRect?.()
+    if (!box?.width || !box.height) return
+    const px = (event.nativeEvent.clientX - box.left) / box.width
+    const py = (event.nativeEvent.clientY - box.top) / box.height
+    tilt.set({ x: clampUnit((px - 0.5) * 2), y: clampUnit(-(py - 0.5) * 2) })
+  },
+  onPointerLeave: () => tilt.set({ x: 0, y: 0 }),
+})
+
 export const useEntityPortraitLayerStyles = (tilt: SharedValue<Tilt>) => {
   const backdrop = useAnimatedStyle(() => {
     const { x, y } = tilt.get()
