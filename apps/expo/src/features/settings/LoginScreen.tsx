@@ -41,7 +41,7 @@ const LoginScreen = () => {
           </Text>
           {forStrobi && (
             <Box className="overflow-visible border-continuous items-center mb-[20px]">
-              <StrobiAvatar animation="happy" size={96} />
+              <StrobiAvatar animation="happy" size={96} pettable />
             </Box>
           )}
           <Paragraph className="mb-[10px]" scaleLineHeight={-2}>

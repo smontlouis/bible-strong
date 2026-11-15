@@ -1,4 +1,7 @@
-import { createAvatar } from '@bible-strong/avatar-react-native'
+import { useRef } from 'react'
+import { Pressable } from 'react-native'
+import * as Haptics from 'expo-haptics'
+import { createAvatar, type AvatarHandle } from '@bible-strong/avatar-react-native'
 import strobiDefinition from './strobi.avatar.json'
 import type { StrobiMood } from './strobiMood'
 
@@ -24,6 +27,8 @@ export default function StrobiAvatar({
   size,
   muted = false,
   settleAfterMs = 0,
+  pettable = false,
+  onPet,
 }: {
   /** An animation of its file, or a state of the catalogue the conversation uses. */
   animation: StrobiAnimation | StrobiMood | CatalogueState
@@ -40,9 +45,18 @@ export default function StrobiAvatar({
    * `animation` plays again. 0 keeps it moving.
    */
   settleAfterMs?: number
+  /**
+   * Strobi standing on its own (a page, a card, not a row that opens something): touched, it
+   * spins with a light tap of the haptic engine, as in the onboarding (2026-11-15).
+   */
+  pettable?: boolean
+  /** Also told when Strobi is touched, for a reaction of the screen's own. */
+  onPet?: () => void
 }) {
-  return (
+  const handle = useRef<AvatarHandle>(null)
+  const avatar = (
     <Avatar
+      ref={handle}
       state={animation}
       size={size}
       accessibilityLabel="Strobi"
@@ -50,5 +64,19 @@ export default function StrobiAvatar({
       paused={muted}
       settleAfterMs={settleAfterMs}
     />
+  )
+  if (!pettable) return avatar
+  return (
+    <Pressable
+      accessible={false}
+      hitSlop={8}
+      onPress={() => {
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+        handle.current?.poke('spin')
+        onPet?.()
+      }}
+    >
+      {avatar}
+    </Pressable>
   )
 }

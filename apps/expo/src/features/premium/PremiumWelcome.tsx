@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BackHandler, Platform, Pressable, StyleSheet } from 'react-native'
+import { BackHandler, Platform, StyleSheet } from 'react-native'
 import Animated, { FadeIn, FadeInDown, FadeOut } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -51,15 +51,13 @@ function Welcome({ onAsk, onClose }: { onAsk?: () => void; onClose: () => void }
         style={{ paddingTop: insets.top + 24, paddingBottom: insets.bottom + 20 }}
       >
         <Box className="flex-1 items-center justify-center">
-          <Pressable
-            accessible={false}
-            onPress={() => {
-              if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-              react('laughing')
-            }}
-          >
-            <StrobiAvatar animation={animation} size={200} settleAfterMs={9000} />
-          </Pressable>
+          <StrobiAvatar
+            animation={animation}
+            size={200}
+            settleAfterMs={9000}
+            pettable
+            onPet={() => react('laughing')}
+          />
           <Animated.View
             entering={FadeInDown.delay(500).duration(400)}
             style={{ alignItems: 'center' }}

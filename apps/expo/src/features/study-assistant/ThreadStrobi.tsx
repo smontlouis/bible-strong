@@ -138,6 +138,7 @@ export default function ThreadStrobi({ floating = false }: { floating?: boolean 
               animation={mood}
               size={STROBI_SIZE}
               settleAfterMs={!busy && !finishing ? SETTLE_MS : 0}
+              pettable
             />
           </Box>
         </Animated.View>

@@ -53,7 +53,7 @@ export default function AssistantLimitCard({
       accessibilityLiveRegion="polite"
       className={`bg-light-grey items-center px-5 pb-5 pt-3 ${docked ? 'rounded-[16px]' : 'my-3 rounded-[12px]'}`}
     >
-      <StrobiAvatar animation={animation} size={docked ? 64 : 96} settleAfterMs={5000} />
+      <StrobiAvatar animation={animation} size={docked ? 64 : 96} settleAfterMs={5000} pettable />
       <Text className="mt-1 text-center text-[16px] font-semibold">
         {t('assistant.limitCard.title')}
       </Text>

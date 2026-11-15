@@ -1,5 +1,4 @@
-import * as Haptics from 'expo-haptics'
-import { Platform, Pressable } from 'react-native'
+import { View } from 'react-native'
 import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg'
 
 import Box from '~common/ui/Box'
@@ -15,7 +14,7 @@ const AVATAR_SIZE = 140
 /**
  * The head of the Premium pages: Strobi on a soft halo of the theme's accent, the title and a
  * line under it. Strobi is blue: the halo stays pale so that he keeps his contrast on it.
- * Touching him makes him react (`onPet`), with a light tap of the haptic engine.
+ * Touching him makes him spin with a light tap of the haptic engine, and react (`onPet`).
  */
 const PremiumHero = ({
   animation,
@@ -32,12 +31,7 @@ const PremiumHero = ({
   const accent = resolveThemeColor(theme, 'primary')
   return (
     <Box className="items-center px-[24px] mb-[22px]">
-      <Pressable
-        accessible={false}
-        onPress={() => {
-          if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-          onPet?.()
-        }}
+      <View
         style={{
           width: HALO_SIZE,
           height: HALO_SIZE - 50,
@@ -65,8 +59,14 @@ const PremiumHero = ({
             fill="url(#premium-halo)"
           />
         </Svg>
-        <StrobiAvatar animation={animation} size={AVATAR_SIZE} settleAfterMs={8000} />
-      </Pressable>
+        <StrobiAvatar
+          animation={animation}
+          size={AVATAR_SIZE}
+          settleAfterMs={8000}
+          pettable
+          onPet={onPet}
+        />
+      </View>
       <Text
         accessibilityRole="header"
         className="text-[28px] text-center"

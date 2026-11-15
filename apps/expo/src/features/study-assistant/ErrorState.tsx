@@ -29,7 +29,7 @@ export default function ErrorState({
         importantForAccessibility="no-hide-descendants"
         style={{ width: STROBI_SIZE, height: STROBI_SIZE, marginTop: -4 }}
       >
-        <StrobiAvatar animation={retrying ? 'working' : 'failed'} size={STROBI_SIZE} />
+        <StrobiAvatar animation={retrying ? 'working' : 'failed'} size={STROBI_SIZE} pettable />
       </Box>
       <Box className="flex-1 gap-1">
         <Text className="text-[14px] font-semibold">

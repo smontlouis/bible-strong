@@ -51,7 +51,7 @@ export default function AssistantGuestScreen() {
             contentContainerStyle={{ padding: 24, paddingBottom: 24 + insets.bottom }}
           >
             <Box className="items-center pt-6">
-              <StrobiAvatar animation="happy" size={112} settleAfterMs={4000} />
+              <StrobiAvatar animation="happy" size={112} settleAfterMs={4000} pettable />
             </Box>
             <Text className="mt-6 text-center text-[24px] font-bold">
               {t('assistant.guest.title')}
