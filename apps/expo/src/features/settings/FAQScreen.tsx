@@ -1,10 +1,10 @@
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { titleFontStyle } from '~themes/styleValues'
 import { colorWithOpacity } from '~themes/colorValues'
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Linking } from 'react-native'
 import Header from '~common/Header'
+import type { SheetRef } from '~common/sheet'
 import { LinkBox } from '~common/Link'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -16,21 +16,34 @@ import ListSection, { ListRow } from '~common/ui/ListSection'
 import Paragraph from '~common/ui/Paragraph'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
+import { PUBLIC_SITE_URL } from '~helpers/publicSiteLinks'
+import ContactDeveloperSheet from './ContactDeveloperSheet'
+
+type FAQLink = { label: string; href?: string; onPress?: () => void }
+type FAQEntry = { id: string; question: string; answer: string; links?: FAQLink[] }
 
 const FAQScreen = () => {
   const stylingTheme = useStylingTheme()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const contactDeveloperRef = useRef<SheetRef>(null)
+  const openContact = () => contactDeveloperRef.current?.present()
+  // The site serves French pages under /fr and English ones at its root.
+  const sitePath = (path: string) =>
+    `${PUBLIC_SITE_URL}${i18n.language.startsWith('fr') ? '/fr' : ''}${path}`
   const [categoryId, setCategoryId] = useState('start')
   const [expandedId, setExpandedId] = useState<string | null>('availability')
   const [contentWidth, setContentWidth] = useState(0)
   const wide = contentWidth >= 900
   const titleStyle = titleFontStyle(stylingTheme)
-  const entries = [
+  const entries: FAQEntry[] = [
     {
       id: 'availability',
       question: t('faq.availabilityQuestion'),
       answer: t('faq.availabilityAnswer'),
-      link: { href: 'https://web.bible-strong.app/home', label: t('faq.openWeb') },
+      links: [
+        { href: sitePath('/download'), label: t('faq.download') },
+        { href: 'https://web.bible-strong.app/home', label: t('faq.openWeb') },
+      ],
     },
     { id: 'free', question: t('faq.freeQuestion'), answer: t('faq.freeAnswer') },
     { id: 'account', question: t('faq.accountQuestion'), answer: t('faq.accountAnswer') },
@@ -54,24 +67,40 @@ const FAQScreen = () => {
       id: 'bugNoticed',
       question: t('faq.bugNoticedQuestion'),
       answer: t('faq.bugNoticedAnswer'),
-      link: {
-        href: 'https://github.com/smontlouis/bible-strong/issues',
-        label: t('faq.openIssues'),
-      },
+      links: [
+        { onPress: openContact, label: t('faq.contact') },
+        { href: 'https://github.com/smontlouis/bible-strong/issues', label: t('faq.openIssues') },
+      ],
     },
     {
       id: 'idea',
       question: t('faq.ideaQuestion'),
       answer: t('faq.ideaAnswer'),
-      link: { href: 'mailto:stephane@lestudio316.com', label: t('faq.contact') },
+      links: [{ onPress: openContact, label: t('faq.contact') }],
     },
     {
       id: 'support',
       question: t('faq.supportQuestion'),
       answer: t('faq.supportAnswer'),
-      link: { href: 'https://bible-strong.app/give', label: t('faq.donate') },
+      links: [{ href: sitePath('/give'), label: t('faq.donate') }],
     },
     { id: 'author', question: t('faq.authorQuestion'), answer: t('faq.authorAnswer') },
+    {
+      id: 'deleteAccount',
+      question: t('faq.deleteAccountQuestion'),
+      answer: t('faq.deleteAccountAnswer'),
+      links: [{ href: sitePath('/how-to-delete-data'), label: t('faq.deleteAccountPage') }],
+    },
+    {
+      id: 'assistant',
+      question: t('faq.assistantQuestion'),
+      answer: t('faq.assistantAnswer'),
+    },
+    {
+      id: 'premiumManage',
+      question: t('faq.premiumManageQuestion'),
+      answer: t('faq.premiumManageAnswer'),
+    },
   ]
 
   const categories = [
@@ -89,7 +118,7 @@ const FAQScreen = () => {
       summary: t('faq.category.accountSummary'),
       title: t('faq.category.accountTitle'),
       description: t('faq.category.accountDescription'),
-      entries: ['sync', 'account', 'backup'],
+      entries: ['sync', 'account', 'backup', 'deleteAccount'],
     },
     {
       id: 'reading',
@@ -100,12 +129,28 @@ const FAQScreen = () => {
       entries: ['offline', 'storage', 'strong', 'versions'],
     },
     {
+      id: 'assistant',
+      label: t('faq.category.assistant'),
+      summary: t('faq.category.assistantSummary'),
+      title: t('faq.category.assistantTitle'),
+      description: t('faq.category.assistantDescription'),
+      entries: ['assistant', 'premiumManage'],
+    },
+    {
       id: 'help',
       label: t('faq.category.help'),
       summary: t('faq.category.helpSummary'),
       title: t('faq.category.helpTitle'),
       description: t('faq.category.helpDescription'),
-      entries: ['whiteScreen', 'performance', 'bugNoticed', 'idea', 'support', 'author'],
+      entries: ['whiteScreen', 'performance', 'bugNoticed', 'idea'],
+    },
+    {
+      id: 'project',
+      label: t('faq.category.project'),
+      summary: t('faq.category.projectSummary'),
+      title: t('faq.category.projectTitle'),
+      description: t('faq.category.projectDescription'),
+      entries: ['author', 'support'],
     },
   ]
   const category = categories.find(item => item.id === categoryId) ?? categories[0]
@@ -201,6 +246,18 @@ const FAQScreen = () => {
                   {category.description}
                 </Paragraph>
               </Box>
+              {category.id === 'project' && (
+                <ListSection>
+                  <ListRow
+                    route="Manifesto"
+                    icon={<FeatherIcon name="feather" size={18} color="primary" />}
+                    iconTint="primary"
+                    label={t('faq.manifesto')}
+                    description={t('faq.manifestoDescription')}
+                    labelClassName="font-bold"
+                  />
+                </ListSection>
+              )}
               <ListSection>
                 {questions.map(entry => {
                   const expanded = entry.id === expandedId
@@ -223,15 +280,21 @@ const FAQScreen = () => {
                       {expanded && (
                         <Box className="px-[14px] pb-[16px]">
                           <Paragraph scale={-1}>{entry.answer}</Paragraph>
-                          {entry.link && (
+                          {entry.links?.map(link => (
                             <LinkBox
-                              href={entry.link.href}
+                              key={link.label}
+                              href={link.href}
+                              onPress={link.onPress}
                               className="mt-[10px] py-[6px] self-start flex-row items-center gap-[6px]"
                             >
-                              <Text className="text-link font-bold shrink">{entry.link.label}</Text>
-                              <FeatherIcon name="arrow-up-right" size={16} color="primary" />
+                              <Text className="text-link font-bold shrink">{link.label}</Text>
+                              <FeatherIcon
+                                name={link.href ? 'arrow-up-right' : 'arrow-right'}
+                                size={16}
+                                color="primary"
+                              />
                             </LinkBox>
-                          )}
+                          ))}
                         </Box>
                       )}
                     </Box>
@@ -255,7 +318,7 @@ const FAQScreen = () => {
                   </Box>
                 </HStack>
                 <Button
-                  onPress={() => Linking.openURL('mailto:stephane@lestudio316.com')}
+                  onPress={openContact}
                   rightIcon={
                     <FeatherIcon
                       name="arrow-right"
@@ -273,6 +336,7 @@ const FAQScreen = () => {
           </Box>
         </Box>
       </ScrollView>
+      <ContactDeveloperSheet modalRef={contactDeveloperRef} />
     </Container>
   )
 }

@@ -217,6 +217,7 @@ export type MainStackProps = {
   ForgotPassword: undefined
   Dictionnaire: DictionaryScreenProps
   FAQ: undefined
+  Manifesto: undefined
   Nave: NaveScreenProps
   NaveDetail: NaveDetailScreenProps
   ToggleCompareVerses: undefined

@@ -11,6 +11,7 @@ const settingsPaths = new Set([
   '/register',
   '/forgot-password',
   '/faq',
+  '/manifesto',
   '/support',
   '/backup',
   '/automatic-backups',
