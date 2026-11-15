@@ -11,6 +11,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 
+import { backgroundImage } from '~common/ui/backgroundImage'
 import { useTheme } from '~themes/ThemeProvider'
 
 export const CARD_ICON_WIDTH = 22
@@ -77,11 +78,13 @@ export const CardIcon = ({ collected }: { collected: boolean }) => {
             borderColor: ink,
             padding: 2.5,
             opacity: collected ? 1 : 0.45,
-            // The gold under the gradient, for the Web, which draws no background image here.
+            // The gold under the gradient, while it is drawn.
             backgroundColor: collected ? '#f2c14e' : undefined,
-            experimental_backgroundImage: collected
-              ? 'linear-gradient(135deg, #fff1b8 0%, #f2c14e 45%, #d39a1f 100%)'
-              : undefined,
+            ...backgroundImage(
+              collected
+                ? 'linear-gradient(135deg, #fff1b8 0%, #f2c14e 45%, #d39a1f 100%)'
+                : undefined
+            ),
             boxShadow: collected ? '0 1px 4px rgba(185, 133, 28, 0.45)' : undefined,
           },
           cardStyle,

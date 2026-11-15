@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useTranslation } from 'react-i18next'
 import { Pressable, StyleSheet, View } from 'react-native'
 
+import { backgroundImage } from '~common/ui/backgroundImage'
 import Text from '~common/ui/Text'
 import { useEntityPortraitGround } from '~features/lexique/useEntityPortraitGround'
 
@@ -56,7 +57,7 @@ export const CardAlbumTile = ({
           justifyContent: 'center',
           paddingHorizontal: 8,
           gap: 10,
-          experimental_backgroundImage: ground,
+          ...backgroundImage(ground),
         }}
       >
         <CardIcon collected={false} />

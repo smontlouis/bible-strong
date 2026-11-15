@@ -7,6 +7,7 @@ import { useReducedMotion } from 'react-native-reanimated'
 import { useDispatch, useSelector } from 'react-redux'
 
 import books from '~assets/bible_versions/books-desc'
+import { backgroundImage } from '~common/ui/backgroundImage'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Card from '~common/ui/Card'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -88,7 +89,7 @@ const StageTile = ({
             width: STAGE_TILE_SIZE - 10,
             height: STAGE_TILE_SIZE - 10,
             borderRadius: radius - 5,
-            experimental_backgroundImage: ground,
+            ...backgroundImage(ground),
           }}
         >
           {!!image.uri && (
@@ -219,7 +220,7 @@ const StrongEntityPortraitHeader = ({
       <Box className="overflow-hidden border-continuous bg-surface rounded-[24px] p-[10px]">
         <Box
           className="overflow-hidden border-continuous rounded-[16px]"
-          style={{ aspectRatio: 1, experimental_backgroundImage: ground }}
+          style={{ aspectRatio: 1, ...backgroundImage(ground) }}
         >
           {moves && <EntityPortraitTiltSensor tilt={tilt} />}
           {showsBackdrop && (

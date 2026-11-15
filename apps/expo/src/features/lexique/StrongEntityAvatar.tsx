@@ -1,6 +1,8 @@
 import { Image } from 'expo-image'
 import { StyleSheet, View } from 'react-native'
 
+import { backgroundImage } from '~common/ui/backgroundImage'
+
 import { getEntityAvatarRadius } from './entityPortraits'
 import { useEntityPortraitHash } from './entityPortraitManifest'
 import { getStrongEntityPlaceholderSource } from './strongEntityAvatars'
@@ -36,7 +38,7 @@ const StrongEntityAvatar = ({
     borderRadius: getEntityAvatarRadius(size),
     borderCurve: 'continuous' as const,
     overflow: 'hidden' as const,
-    experimental_backgroundImage: ground,
+    ...backgroundImage(ground),
   }
 
   return (

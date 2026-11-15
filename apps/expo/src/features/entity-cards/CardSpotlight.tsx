@@ -12,7 +12,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native'
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler'
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -28,7 +28,11 @@ import { FullWindowOverlay } from 'react-native-screens'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { scheduleOnRN } from 'react-native-worklets'
 
+import { backgroundImage } from '~common/ui/backgroundImage'
+import { FeatherIcon } from '~common/ui/Icon'
+
 import type { EntityCardView } from './cardCatalog'
+import { prefetchCards } from './cardPrefetch'
 import { EntityCardCanvas, getEntityCardCanvasSize } from './EntityCardCanvas'
 
 export type WindowRect = { x: number; y: number; width: number; height: number }
@@ -67,8 +71,22 @@ type CardSpotlightProps = {
   onLanded?: () => void
   /** The card's character, from the album: the page leads to it. */
   onOpenCharacter?: () => void
+  /** The album's other cards, one step either way: buttons, a swipe beside the card, the arrows. */
+  navigation?: CardNavigation
   onClose: () => void
 }
+
+export type CardNavigation = {
+  /** From 0, among `total`. */
+  index: number
+  total: number
+  /** The cards either side, whose pictures load ahead. */
+  neighbours: EntityCardView[]
+  onMove: (step: 1 | -1) => void
+}
+
+/** How far a card slides when the next one takes its place, in shares of the screen's width. */
+const SLIDE = 0.55
 
 const FLY_DURATION = 520
 /** The card is gone this early in its flight: it only hints at where it goes. */
@@ -88,6 +106,7 @@ export const CardSpotlight = ({
   onCollect,
   onLanded,
   onOpenCharacter,
+  navigation,
   onClose,
 }: CardSpotlightProps) => {
   const { t } = useTranslation()
@@ -119,6 +138,90 @@ export const CardSpotlight = ({
   const flyY = useSharedValue(0)
   const flyScale = useSharedValue(1)
   const fade = useSharedValue(1)
+  // The slide from one card of the album to the next: out on one side, in from the other.
+  const slide = useSharedValue(0)
+  const slideFade = useSharedValue(1)
+  const moving = useRef<1 | -1 | null>(null)
+  const shownCard = useRef(card.id)
+
+  useEffect(() => {
+    if (navigation?.neighbours.length) prefetchCards(navigation.neighbours)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [card.id])
+
+  // A new card of the album arrives from the side it was asked from.
+  useEffect(() => {
+    if (shownCard.current === card.id) return
+    shownCard.current = card.id
+    setReady(false)
+    const step = moving.current ?? 1
+    moving.current = null
+    if (reduceMotion) {
+      slide.set(0)
+      slideFade.set(withTiming(1, { duration: 180 }))
+      return
+    }
+    slide.set(step * SLIDE * screenWidth)
+    slideFade.set(0)
+    slide.set(withSpring(0, { damping: 18, stiffness: 170, mass: 0.8 }))
+    slideFade.set(withTiming(1, { duration: 220 }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [card.id])
+
+  /** A card lies that way in the album; a move under way is checked when it is asked. */
+  const canMove = (step: 1 | -1) =>
+    !!navigation &&
+    !leaving &&
+    navigation.index + step >= 0 &&
+    navigation.index + step < navigation.total
+
+  /** The card leaves on the side opposite to the step, then the album hands the next one. */
+  const move = (step: 1 | -1) => {
+    if (!navigation || !canMove(step) || moving.current !== null) return
+    moving.current = step
+    if (Platform.OS !== 'web') void Haptics.selectionAsync()
+    const handOver = () => navigation.onMove(step)
+    if (reduceMotion) {
+      slideFade.set(
+        withTiming(0, { duration: 140 }, finished => {
+          if (finished) scheduleOnRN(handOver)
+        })
+      )
+      return
+    }
+    slideFade.set(withTiming(0, { duration: 170 }))
+    slide.set(
+      withTiming(
+        -step * SLIDE * screenWidth,
+        { duration: 190, easing: Easing.in(Easing.quad) },
+        finished => {
+          if (finished) scheduleOnRN(handOver)
+        }
+      )
+    )
+  }
+
+  // The arrows of a keyboard, on the Web and in the desktop app.
+  useEffect(() => {
+    if (Platform.OS !== 'web' || !navigation) return
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowRight') move(1)
+      if (event.key === 'ArrowLeft') move(-1)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  })
+
+  // A swipe beside the card moves through the album; on the card itself the finger tilts it.
+  const swipe = Gesture.Pan()
+    .runOnJS(true)
+    .enabled(!!navigation)
+    .activeOffsetX([-20, 20])
+    .failOffsetY([-24, 24])
+    .onEnd(event => {
+      if (event.translationX < -50) move(1)
+      else if (event.translationX > 50) move(-1)
+    })
 
   useEffect(() => {
     shade.set(withTiming(1, { duration: 240 }))
@@ -222,9 +325,10 @@ export const CardSpotlight = ({
     transform: [{ scale: 0.7 + halo.get() * 0.5 }],
   }))
   const cardStyle = useAnimatedStyle(() => ({
-    opacity: Math.min(1, rise.get() * 1.4) * fade.get(),
+    opacity: Math.min(1, rise.get() * 1.4) * fade.get() * slideFade.get(),
     transform: [
-      { translateX: flyX.get() },
+      { translateX: flyX.get() + slide.get() },
+      { rotateZ: `${(slide.get() / screenWidth) * 10}deg` },
       { translateY: flyY.get() + (1 - rise.get()) * 140 },
       { scale: flyScale.get() * (0.82 + 0.18 * rise.get()) },
       { rotateZ: `${(1 - rise.get()) * -6}deg` },
@@ -233,15 +337,17 @@ export const CardSpotlight = ({
 
   return (
     <AboveEverything onClose={() => leave()}>
-      <Animated.View style={[StyleSheet.absoluteFill, shadeStyle]}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={mode === 'reveal' ? t('entityCards.later') : t('entityCards.close')}
-          style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(4, 6, 12, 0.9)' }]}
-          onPress={() => leave()}
-          disabled={leaving}
-        />
-      </Animated.View>
+      <GestureDetector gesture={swipe}>
+        <Animated.View style={[StyleSheet.absoluteFill, shadeStyle]}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={mode === 'reveal' ? t('entityCards.later') : t('entityCards.close')}
+            style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(4, 6, 12, 0.9)' }]}
+            onPress={() => leave()}
+            disabled={leaving}
+          />
+        </Animated.View>
+      </GestureDetector>
 
       <View
         pointerEvents="box-none"
@@ -291,8 +397,9 @@ export const CardSpotlight = ({
                   height: canvas.width * 1.5,
                   borderRadius: canvas.width,
                   // A new card is gold, as the dot that announced it.
-                  experimental_backgroundImage:
-                    'radial-gradient(circle, rgba(242, 193, 78, 0.5) 0%, rgba(242, 193, 78, 0) 62%)',
+                  ...backgroundImage(
+                    'radial-gradient(circle, rgba(242, 193, 78, 0.5) 0%, rgba(242, 193, 78, 0) 62%)'
+                  ),
                 },
                 haloStyle,
               ]}
@@ -306,9 +413,61 @@ export const CardSpotlight = ({
             />
           )}
           <Animated.View ref={cardRef} collapsable={false} style={cardStyle}>
-            <EntityCardCanvas card={card} width={cardWidth} onReady={() => setReady(true)} />
+            <EntityCardCanvas
+              key={card.id}
+              card={card}
+              width={cardWidth}
+              onReady={() => setReady(true)}
+            />
           </Animated.View>
         </View>
+
+        {navigation && (
+          <Animated.View
+            pointerEvents={leaving ? 'none' : 'box-none'}
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingHorizontal: 8,
+              },
+              chromeStyle,
+            ]}
+          >
+            {([-1, 1] as const).map(step => {
+              const enabled = canMove(step)
+              return (
+                <Pressable
+                  key={step}
+                  accessibilityRole="button"
+                  accessibilityLabel={t(step === 1 ? 'entityCards.next' : 'entityCards.previous')}
+                  accessibilityState={{ disabled: !enabled }}
+                  disabled={!enabled}
+                  hitSlop={8}
+                  onPress={() => move(step)}
+                  style={({ pressed }) => ({
+                    width: 40,
+                    height: 40,
+                    borderRadius: 999,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'rgba(246, 239, 224, 0.14)',
+                    opacity: !enabled ? 0.3 : pressed ? 0.6 : 1,
+                    transform: [{ scale: pressed ? 0.92 : 1 }],
+                  })}
+                >
+                  <FeatherIcon
+                    name={step === 1 ? 'chevron-right' : 'chevron-left'}
+                    size={22}
+                    color="#f6efe0"
+                  />
+                </Pressable>
+              )
+            })}
+          </Animated.View>
+        )}
 
         <Animated.View
           pointerEvents={leaving ? 'none' : 'box-none'}
@@ -345,6 +504,22 @@ export const CardSpotlight = ({
             </>
           ) : (
             <>
+              {navigation && (
+                <Text
+                  accessibilityLabel={t('entityCards.position', {
+                    index: navigation.index + 1,
+                    total: navigation.total,
+                  })}
+                  style={{
+                    color: 'rgba(246, 239, 224, 0.6)',
+                    fontSize: 13,
+                    fontVariant: ['tabular-nums'],
+                    marginBottom: 4,
+                  }}
+                >
+                  {navigation.index + 1} / {navigation.total}
+                </Text>
+              )}
               {onOpenCharacter && (
                 <Pressable
                   accessibilityRole="button"

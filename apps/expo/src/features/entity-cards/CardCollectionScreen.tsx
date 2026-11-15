@@ -75,7 +75,9 @@ const CardCollectionScreen = () => {
   const [order, setOrder] = useState<CardAlbumOrder>('bible')
   const [opened, setOpened] = useState<EntityCardView>()
 
-  const contentWidth = Math.min(windowWidth, MAX_WIDTH) - 2 * GUTTER
+  // The page's own width: beside a sidebar (a tablet, the Web) it is narrower than the window.
+  const [pageWidth, setPageWidth] = useState<number>()
+  const contentWidth = Math.min(pageWidth ?? windowWidth, MAX_WIDTH) - 2 * GUTTER
   const columns = Math.max(3, Math.floor((contentWidth + GAP) / (TILE_WIDTH + GAP)))
   const tileWidth = Math.floor((contentWidth - GAP * (columns - 1)) / columns)
 
@@ -210,6 +212,33 @@ const CardCollectionScreen = () => {
     )
   }
 
+  // The collected cards the album shows, in its order and with its filter: the opened card moves
+  // through them.
+  const openable = album.eras.flatMap(era =>
+    era.cards.filter(card => isCardCollected(card.id, collected) && views.has(card.id))
+  )
+  const largeView = (index: number) => {
+    const card = openable[index]
+    return card && catalog && portraits
+      ? getEntityCardView(card, catalog, portraits, language)
+      : undefined
+  }
+  const openedIndex = opened ? openable.findIndex(card => card.id === opened.id) : -1
+  const navigation =
+    openedIndex >= 0 && openable.length > 1
+      ? {
+          index: openedIndex,
+          total: openable.length,
+          neighbours: [largeView(openedIndex - 1), largeView(openedIndex + 1)].filter(
+            (view): view is EntityCardView => !!view
+          ),
+          onMove: (step: 1 | -1) => {
+            const next = largeView(openedIndex + step)
+            if (next) setOpened(next)
+          },
+        }
+      : undefined
+
   // The last cards found, newest first, for the fan at the head of the album.
   const latest =
     catalog && portraits
@@ -230,6 +259,7 @@ const CardCollectionScreen = () => {
     <Container>
       {header}
       <SectionList
+        onLayout={event => setPageWidth(event.nativeEvent.layout.width)}
         sections={sections}
         keyExtractor={(row, index) => `${row[0]?.id ?? index}`}
         stickySectionHeadersEnabled={false}
@@ -285,6 +315,7 @@ const CardCollectionScreen = () => {
         <CardSpotlight
           card={opened}
           mode="view"
+          navigation={navigation}
           onOpenCharacter={() => {
             const entity = catalog?.cards.find(card => card.id === opened.id)?.entity
             if (!entity) return

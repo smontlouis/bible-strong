@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { View } from 'react-native'
 
+import { backgroundImage } from '~common/ui/backgroundImage'
 import { HStack, VStack } from '~common/ui/Box'
 import { radii } from '~common/ui/surfaces'
 import Text from '~common/ui/Text'
@@ -75,7 +76,7 @@ export const CardAlbumSummary = ({
       style={{
         borderRadius: radii.card,
         borderCurve: 'continuous',
-        experimental_backgroundImage: ground,
+        ...backgroundImage(ground),
         backgroundColor: theme.colors.lightGrey,
       }}
     >
