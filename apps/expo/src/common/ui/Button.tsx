@@ -83,8 +83,9 @@ const buttonStyles = ({
   ...(small && {
     height: 30,
     minWidth: 100,
-    paddingLeft: 5,
-    paddingRight: 5,
+    // A pill: a label longer than the minimum width keeps clear of its rounded ends.
+    paddingLeft: 14,
+    paddingRight: 14,
     marginRight: 0,
     marginLeft: 0,
   }),
