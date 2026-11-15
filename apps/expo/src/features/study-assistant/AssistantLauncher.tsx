@@ -35,6 +35,7 @@ import { useAssistantQuotaSync } from './useAssistantQuota'
 import { useAssistantSession } from './useAssistantSession'
 import { useReadingContext } from './useReadingContext'
 import { onboardingOnScreenAtom } from '~features/onboarding/atom'
+import { useStrobiBubble } from './strobiBubble'
 import { useStrobiTrial } from './useStrobiTrial'
 
 const PREMIUM_PATH = '/premium'
@@ -114,7 +115,9 @@ function AccountAssistant({ account }: { account: string }) {
   })
   const { current, ready, busy, send } = session
   const onboardingOnScreen = useAtomValue(onboardingOnScreenAtom)
-  useStrobiTrial({ session, open, enabled: !onboardingOnScreen })
+  const bubble = useStrobiBubble()
+  // With its bubble put away, Strobi does not open by itself either.
+  useStrobiTrial({ session, open, enabled: !onboardingOnScreen && !bubble.hidden })
   useAssistantQuotaSync({ active: open, busy, error: session.error })
   // The daily quota used up, Strobi sleeps until it starts again, unless the account holds Premium.
   const premium = useAtomValue(premiumStatusAtom)
@@ -172,7 +175,8 @@ function AccountAssistant({ account }: { account: string }) {
   useEffect(() => {
     if (!open) setSource(null)
   }, [open])
-  if (!ready) return null
+  // Put away, the bubble comes back from Strobi's settings page.
+  if (!ready || bubble.hidden) return null
   return (
     <AboveSheets>
       <AssistantLauncherButton
@@ -186,6 +190,8 @@ function AccountAssistant({ account }: { account: string }) {
         onAsleepChange={setAvatarSleeping}
         onDragStart={() => setAvatarDragged(true)}
         onDragEnd={() => setAvatarDragged(false)}
+        onDismiss={bubble.confirmHide}
+        dismissLabel={t('strobi.menu.hide')}
       />
     </AboveSheets>
   )

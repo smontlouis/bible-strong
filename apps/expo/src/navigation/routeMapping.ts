@@ -31,6 +31,7 @@ export const routeMapping: Record<keyof MainStackProps, string> = {
   Login: '/login',
   Support: '/support',
   Premium: '/premium',
+  Strobi: '/strobi',
   ImportExport: '/import-export',
   Backup: '/backup',
   AutomaticBackups: '/automatic-backups',

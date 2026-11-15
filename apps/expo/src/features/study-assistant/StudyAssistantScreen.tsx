@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AssistantRuntimeProvider, ThreadListPrimitive } from '@assistant-ui/react-native'
 import Box, { HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
+import { MenuView } from '~common/ui/MenuView'
 import Text from '~common/ui/Text'
 import ModalRouteFrame from '~navigation/ModalRouteFrame'
 import AssistantComposer from './AssistantComposer'
@@ -24,13 +25,15 @@ import {
 import AssistantThread from './AssistantThread'
 import AssistantVerifyEmailCard from './AssistantVerifyEmailCard'
 import SourceExcerptSheet from './SourceExcerptSheet'
+import { useStrobiBubble } from './strobiBubble'
 import { useAssistantQuota } from './useAssistantQuota'
 
 function PageHeader() {
   const { t } = useTranslation()
-  const { session, historyOpen, setHistoryOpen, close } = useAssistantSheet()
+  const { session, historyOpen, setHistoryOpen, close, navigate } = useAssistantSheet()
   const { current, busy } = session
   const insets = useSafeAreaInsets()
+  const bubble = useStrobiBubble()
   return (
     <HStack
       className="border-separator bg-reverse z-10 min-h-[50px] items-center pl-3 pr-2"
@@ -89,6 +92,26 @@ function PageHeader() {
       >
         <FeatherIcon name="plus" size={21} color={busy ? 'border' : 'default'} />
       </ThreadListPrimitive.New>
+      {/* Strobi's own options: its settings page, and its floating bubble. */}
+      <MenuView
+        accessibilityLabel={t('strobi.menu.label')}
+        actions={[
+          { id: 'settings', title: t('strobi.menu.settings'), image: 'gearshape' },
+          bubble.hidden
+            ? { id: 'show', title: t('strobi.menu.show'), image: 'plus.circle' }
+            : { id: 'hide', title: t('strobi.menu.hide'), image: 'xmark.circle' },
+        ]}
+        onPressAction={({ nativeEvent }) => {
+          if (nativeEvent.event === 'settings')
+            navigate({ pathname: '/strobi', params: { from: 'assistant' } })
+          if (nativeEvent.event === 'hide') void bubble.confirmHide()
+          if (nativeEvent.event === 'show') bubble.setHidden(false)
+        }}
+      >
+        <Box className="h-[44px] w-[40px] items-center justify-center">
+          <FeatherIcon name="more-horizontal" size={20} />
+        </Box>
+      </MenuView>
     </HStack>
   )
 }

@@ -201,6 +201,7 @@ export type MainStackProps = {
   Login: undefined
   Support: undefined
   Premium: undefined
+  Strobi: { from?: string } | undefined
   ImportExport: undefined
   Backup: undefined
   AutomaticBackups: undefined

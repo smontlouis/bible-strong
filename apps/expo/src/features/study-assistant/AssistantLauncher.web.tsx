@@ -39,6 +39,7 @@ import {
   resumeDate,
 } from './assistantQuota'
 import { useStrobiTrial } from './useStrobiTrial'
+import { strobiBubbleHiddenAtom } from './strobiBubble'
 import { contextCaption } from './contextDisplay'
 import ContextMarkIcon from './ContextMarkIcon.web'
 import FireAuth from '~helpers/FireAuth'
@@ -265,11 +266,13 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     send,
     followUps,
   } = session
+  // Put away on this device, the bubble shows only while its window is open.
+  const bubbleHidden = useAtomValue(strobiBubbleHiddenAtom)
   useStrobiTrial({
     session,
     open,
     // The story fills the window: the trial waits for its end.
-    enabled: signedIn && !storyOpen,
+    enabled: signedIn && !storyOpen && !bubbleHidden,
     openAssistant: () => changeOpen(true),
   })
   useAssistantQuotaSync({ active: open, busy, error })
@@ -416,7 +419,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
       >
         {ready &&
           // Strobi stays out of the Premium page and of the onboarding's story.
-          (open || (pathname !== '/premium' && !storyOpen)) &&
+          (open || (pathname !== '/premium' && !storyOpen && !bubbleHidden)) &&
           createPortal(
             <Modal.Anchor className="bs-assistant-anchor" style={vars}>
               <Modal.Trigger

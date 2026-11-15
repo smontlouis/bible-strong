@@ -206,6 +206,19 @@ const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
                           })}
                         />
                         <Stack.Screen
+                          name="strobi"
+                          // Opened from the assistant, a sheet over its sheet: iOS cannot slip a
+                          // page under a sheet. From « Plus », a page like the other settings.
+                          options={({ route }) =>
+                            (route.params as { from?: string } | undefined)?.from === 'assistant'
+                              ? createFormSheetOptions(theme, {
+                                  contentStyle: { bottom: 0 },
+                                  sheetAllowedDetents: [1],
+                                })
+                              : {}
+                          }
+                        />
+                        <Stack.Screen
                           name="strong"
                           options={createFormSheetOptions(theme, {
                             contentStyle: { bottom: 0 },

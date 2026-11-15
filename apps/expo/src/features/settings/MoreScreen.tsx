@@ -8,7 +8,6 @@ import { useAtomValue, useSetAtom } from 'jotai/react'
 import { premiumStatusAtom } from '~features/premium/premiumStatus'
 import { usePremiumVisible } from '~features/premium/premiumVisibility'
 import StrobiAvatar from '~features/study-assistant/StrobiAvatar'
-import { useAiConsent } from '~features/study-assistant/aiConsent'
 import { useAssistantAccessible } from '~features/study-assistant/assistantConfig'
 import { memo, useRef, type ComponentPropsWithRef as UIComponentProps } from 'react'
 import { supportsOfflineCopies } from '~desktop/isDesktop'
@@ -114,19 +113,8 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
     if (confirmed) await logout()
   }
 
-  // The agreement to share questions with AI providers can be taken back here (5.1.2(i)).
-  const assistantShown = useAssistantAccessible(user?.id)
-  const aiConsent = useAiConsent(isLogged && assistantShown ? user?.id : null)
-  const promptWithdrawAiConsent = async () => {
-    const confirmed = await confirm({
-      title: t('assistant.consent.withdrawTitle'),
-      message: t('assistant.consent.withdrawDetail'),
-      cancelLabel: t('Non'),
-      confirmLabel: t('assistant.consent.withdraw'),
-      destructive: true,
-    })
-    if (confirmed) await aiConsent.withdraw().catch(() => {})
-  }
+  // Strobi's page holds its subscription, its bubble and the agreement given to AI providers.
+  const strobiShown = useAssistantAccessible(isLogged ? user?.id : null) || premiumVisible
 
   const appleIsReviewing = getAppleReviewing()
 
@@ -188,24 +176,27 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
           )}
         </ListSection>
 
-        {premiumVisible && (
+        {strobiShown && (
           <ListSection>
             <ListRow
-              route="Premium"
-              // Strobi looks up, then holds still: a row need not move while the page is open.
+              route="Strobi"
+              // Strobi holds still facing the reader: a row need not move while the page is open.
+              // Not `curious`: it settles with its head turned, its face out of sight.
               icon={
                 <StrobiAvatar
-                  animation={premiumStatus.kind === 'active' ? 'happy' : 'curious'}
+                  animation={premiumStatus.kind === 'active' ? 'happy' : 'idle'}
                   size={36}
                   settleAfterMs={2600}
                 />
               }
               iconBg="transparent"
-              label={t('premiumPlan.headline')}
+              label={t('strobi.settings.title')}
               description={
                 premiumStatus.kind === 'active'
                   ? t('premiumPlan.active')
-                  : t('premiumPlan.benefit.assistant')
+                  : premiumVisible
+                    ? t('premiumPlan.benefit.assistant')
+                    : undefined
               }
             />
           </ListSection>
@@ -271,14 +262,6 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
             icon={<FeatherIcon name="book-open" size={18} color="grey" />}
             label={t('bibleDefaults.title')}
           />
-          {aiConsent.status === 'granted' && (
-            <ListRow
-              onPress={promptWithdrawAiConsent}
-              icon={<FeatherIcon name="shield" size={18} color="grey" />}
-              label={t('assistant.consent.settingsLabel')}
-              description={t('assistant.consent.settingsDetail')}
-            />
-          )}
           {Platform.OS === 'web' && (
             <ListRow
               route="KeyboardShortcuts"

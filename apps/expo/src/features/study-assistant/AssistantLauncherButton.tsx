@@ -7,11 +7,13 @@ import Animated, {
   useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
   withSpring,
   withTiming,
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { runOnJS } from 'react-native-worklets'
+import { FeatherIcon } from '~common/ui/Icon'
 import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
 import { storage } from '~helpers/storage'
 import StrobiAvatar, { type StrobiAnimation } from './StrobiAvatar'
@@ -45,6 +47,16 @@ const PROJECTION = 0.998 / (1 - 0.998) / 1000
 const FOLLOW_SPRING = { mass: 1, stiffness: 632, damping: 42.7 }
 const SNAP_SPRING = { mass: 1, stiffness: 110, damping: 14.7 }
 
+// While it is dragged, a cross waits at the bottom centre, just above the tab bar: dropped on
+// it, Strobi's bubble is put away.
+const TARGET_SIZE = 56
+const TARGET_CENTER_ABOVE_BOTTOM = TAB_ICON_SIZE + 52
+// Closer than this, the bubble is drawn onto the cross, which grows: let go, and it goes.
+const MAGNET_RADIUS = 80
+const MAGNET_SPRING = { mass: 1, stiffness: 400, damping: 28 }
+const TARGET_SPRING = { duration: 250, dampingRatio: 0.6 }
+const TARGET_COLOR = 'rgba(0, 0, 0, 0.55)'
+
 const POSITION_KEY = 'assistant.launcher.position'
 
 type Side = 'left' | 'right'
@@ -74,6 +86,12 @@ type Props = {
   onPress: () => void
   onDragStart: () => void
   onDragEnd: () => void
+  /**
+   * Dropped on the cross, or asked by VoiceOver: asks whether to put the bubble away, and
+   * resolves to whether it was. Put away, the button is unmounted; kept, it goes back to rest.
+   */
+  onDismiss: () => Promise<boolean>
+  dismissLabel: string
   /** Strobi fell asleep, left alone, or was touched again. */
   onAsleepChange: (asleep: boolean) => void
 }
@@ -81,7 +99,7 @@ type Props = {
 /**
  * Strobi's floating button. Like Expo's developer tools button, it can be thrown anywhere on
  * the screen: it keeps some momentum, snaps to the nearer side with a small bounce and stays
- * where it was left.
+ * where it was left. Dragged onto the cross that shows at the bottom centre, it is put away.
  */
 export default function AssistantLauncherButton({
   animation,
@@ -90,6 +108,8 @@ export default function AssistantLauncherButton({
   onPress,
   onDragStart,
   onDragEnd,
+  onDismiss,
+  dismissLabel,
   onAsleepChange,
 }: Props) {
   const insets = useSafeAreaInsets()
@@ -133,6 +153,11 @@ export default function AssistantLauncherButton({
   const x = useSharedValue(0)
   const y = useSharedValue(0)
   const scale = useSharedValue(1)
+  // Shrinks the bubble into the cross when it is dropped there.
+  const dismissScale = useSharedValue(1)
+  const targetShown = useSharedValue(0)
+  const targetScale = useSharedValue(1)
+  const overTarget = useSharedValue(false)
   const hideOffset = useSharedValue(0)
   // A page that opens without it (Premium, reached by a link) starts it hidden.
   const visibility = useSharedValue(hidden ? 0 : 1)
@@ -173,18 +198,50 @@ export default function AssistantLauncherButton({
   const minY = insets.top + EDGE_MARGIN
   const maxY = (layout?.height ?? 0) - insets.bottom - EDGE_MARGIN - BUTTON_SIZE
 
+  const targetX = (layout?.width ?? 0) / 2
+  const targetY = (layout?.height ?? 0) - insets.bottom - TARGET_CENTER_ABOVE_BOTTOM
+
+  // Where it rests: where it was left, or, until it is moved, bottom right above the tab bar.
+  const restingPoint = () => {
+    const travel = Math.max(maxY - minY, 1)
+    const stored = readPosition() ?? {
+      side: 'right',
+      y: ((layout?.height ?? 0) - insets.bottom - TAB_ICON_SIZE - 62 - BUTTON_SIZE - minY) / travel,
+    }
+    return {
+      x: stored.side === 'left' ? minX : maxX,
+      y: minY + Math.min(Math.max(stored.y, 0), 1) * travel,
+    }
+  }
+
   // Placed without animation on the first layout and whenever the screen changes size.
   useEffect(() => {
     if (!layout) return
-    const travel = Math.max(maxY - minY, 1)
-    // Until it is moved, where it always was: bottom right, above the tab bar.
-    const stored = readPosition() ?? {
-      side: 'right',
-      y: (layout.height - insets.bottom - TAB_ICON_SIZE - 62 - BUTTON_SIZE - minY) / travel,
-    }
-    x.set(stored.side === 'left' ? minX : maxX)
-    y.set(minY + Math.min(Math.max(stored.y, 0), 1) * travel)
+    const point = restingPoint()
+    x.set(point.x)
+    y.set(point.y)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layout, minX, maxX, minY, maxY, insets.bottom, x, y])
+
+  // A firm knock when it is drawn onto the cross, a light tick when it leaves it.
+  const feelTarget = (near: boolean) => {
+    if (near) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+    else Haptics.selectionAsync()
+  }
+
+  const requestDismiss = async () => {
+    onDragEnd()
+    const dismissed = await onDismiss()
+    overTarget.set(false)
+    targetScale.set(1)
+    if (dismissed) return
+    // Kept: back where it rested, growing out of the cross.
+    const point = restingPoint()
+    dismissScale.set(withSpring(1, SHOW_SPRING))
+    landingX.set(point.x)
+    x.set(withSpring(point.x, SNAP_SPRING))
+    y.set(withSpring(point.y, SNAP_SPRING))
+  }
 
   const land = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
@@ -225,6 +282,8 @@ export default function AssistantLauncherButton({
     .onFinalize(() => {
       'worklet'
       scale.set(withTiming(1, { duration: 100 }))
+      // Dropped on the cross, it leaves with the bubble (`onEnd`).
+      if (!overTarget.get()) targetShown.set(withTiming(0, { duration: 150 }))
       runOnJS(release)()
     })
     .onStart(() => {
@@ -232,28 +291,53 @@ export default function AssistantLauncherButton({
       landingX.set(null)
       startX.set(x.get())
       startY.set(y.get())
+      targetShown.set(withTiming(1, { duration: 200 }))
       runOnJS(onDragStart)()
     })
     .onUpdate(event => {
       'worklet'
-      x.set(withSpring(startX.get() + event.translationX, FOLLOW_SPRING))
-      y.set(withSpring(startY.get() + event.translationY, FOLLOW_SPRING))
+      const fingerX = startX.get() + event.translationX
+      const fingerY = startY.get() + event.translationY
+      const dx = fingerX + BUTTON_SIZE / 2 - targetX
+      const dy = fingerY + BUTTON_SIZE / 2 - targetY
+      const near = dx * dx + dy * dy < MAGNET_RADIUS * MAGNET_RADIUS
+      if (near !== overTarget.get()) {
+        overTarget.set(near)
+        targetScale.set(withSpring(near ? 1.2 : 1, TARGET_SPRING))
+        runOnJS(feelTarget)(near)
+      }
+      if (near) {
+        x.set(withSpring(targetX - BUTTON_SIZE / 2, MAGNET_SPRING))
+        y.set(withSpring(targetY - BUTTON_SIZE / 2, MAGNET_SPRING))
+        return
+      }
+      x.set(withSpring(fingerX, FOLLOW_SPRING))
+      y.set(withSpring(fingerY, FOLLOW_SPRING))
     })
     .onEnd(event => {
       'worklet'
+      if (overTarget.get()) {
+        // Into the cross, then the cross goes; the question comes as it leaves.
+        x.set(withSpring(targetX - BUTTON_SIZE / 2, MAGNET_SPRING))
+        y.set(withSpring(targetY - BUTTON_SIZE / 2, MAGNET_SPRING))
+        dismissScale.set(withTiming(0, { duration: 220 }))
+        targetShown.set(withDelay(150, withTiming(0, { duration: 200 })))
+        runOnJS(requestDismiss)()
+        return
+      }
       const momentumX = event.velocityX * PROJECTION * MOMENTUM_FACTOR
       const momentumY = event.velocityY * PROJECTION * MOMENTUM_FACTOR
       const centerX = startX.get() + event.translationX + BUTTON_SIZE / 2 + momentumX
       const side: Side = centerX < (layout?.width ?? 0) / 2 ? 'left' : 'right'
-      const targetX = side === 'left' ? minX : maxX
-      const targetY = Math.min(
+      const restX = side === 'left' ? minX : maxX
+      const restY = Math.min(
         Math.max(startY.get() + event.translationY + momentumY, minY),
         Math.max(minY, maxY)
       )
-      landingX.set(targetX)
-      x.set(withSpring(targetX, { ...SNAP_SPRING, velocity: event.velocityX }))
-      y.set(withSpring(targetY, { ...SNAP_SPRING, velocity: event.velocityY }))
-      runOnJS(settle)(side, (targetY - minY) / Math.max(maxY - minY, 1))
+      landingX.set(restX)
+      x.set(withSpring(restX, { ...SNAP_SPRING, velocity: event.velocityX }))
+      y.set(withSpring(restY, { ...SNAP_SPRING, velocity: event.velocityY }))
+      runOnJS(settle)(side, (restY - minY) / Math.max(maxY - minY, 1))
     })
 
   const style = useAnimatedStyle(() => ({
@@ -261,7 +345,14 @@ export default function AssistantLauncherButton({
     transform: [
       { translateX: x.get() + hideOffset.get() },
       { translateY: y.get() },
-      { scale: scale.get() },
+      { scale: scale.get() * dismissScale.get() },
+    ],
+  }))
+  const targetStyle = useAnimatedStyle(() => ({
+    opacity: targetShown.get(),
+    transform: [
+      { translateY: (1 - targetShown.get()) * 24 },
+      { scale: (0.8 + 0.2 * targetShown.get()) * targetScale.get() },
     ],
   }))
   const discStyle = useAnimatedStyle(() => ({
@@ -275,6 +366,20 @@ export default function AssistantLauncherButton({
       onLayout={event => setLayout(event.nativeEvent.layout)}
     >
       {layout && (
+        <Animated.View
+          pointerEvents="none"
+          importantForAccessibility="no-hide-descendants"
+          accessibilityElementsHidden
+          style={[
+            styles.target,
+            { left: targetX - TARGET_SIZE / 2, top: targetY - TARGET_SIZE / 2 },
+            targetStyle,
+          ]}
+        >
+          <FeatherIcon name="x" size={26} color="#ffffff" />
+        </Animated.View>
+      )}
+      {layout && (
         <GestureDetector gesture={Gesture.Race(pan, tap)}>
           <Animated.View
             pointerEvents={hidden ? 'none' : 'auto'}
@@ -283,9 +388,10 @@ export default function AssistantLauncherButton({
             accessible
             accessibilityRole="button"
             accessibilityLabel={accessibilityLabel}
-            accessibilityActions={[{ name: 'activate' }]}
+            accessibilityActions={[{ name: 'activate' }, { name: 'hide', label: dismissLabel }]}
             onAccessibilityAction={event => {
               if (event.nativeEvent.actionName === 'activate') onPress()
+              if (event.nativeEvent.actionName === 'hide') void onDismiss()
             }}
             style={[styles.button, style]}
           >
@@ -316,5 +422,15 @@ const styles = StyleSheet.create({
     height: BUTTON_SIZE,
     borderRadius: BUTTON_SIZE / 2,
     boxShadow: '0px 4px 16px rgba(0, 0, 0, 0.4)',
+  },
+  // A dark disc that reads over any page, light or dark.
+  target: {
+    position: 'absolute',
+    width: TARGET_SIZE,
+    height: TARGET_SIZE,
+    borderRadius: TARGET_SIZE / 2,
+    backgroundColor: TARGET_COLOR,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 })
