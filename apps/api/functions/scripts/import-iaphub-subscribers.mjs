@@ -21,6 +21,13 @@ const PAUSE_MS = 250
 
 const args = process.argv.slice(2)
 const apply = args.includes('--apply')
+const option = name => {
+  const index = args.indexOf(`--${name}`)
+  return index === -1 ? undefined : args[index + 1]
+}
+// --platform ios|android and --limit <n> narrow a run, to try the import on a few first.
+const onlyPlatform = option('platform')
+const limit = option('limit') ? Number(option('limit')) : Infinity
 const reportIndex = args.indexOf('--report')
 const reportPath = reportIndex === -1 ? undefined : args[reportIndex + 1]
 
@@ -65,11 +72,21 @@ async function activeSubscriptions() {
   }
 }
 
-// The token RevenueCat needs to look the subscription up at the store itself.
+// Whether the store can be asked about the subscription: an App Store receipt, or a Google Play
+// purchase token.
 const fetchToken = subscription =>
-  subscription.platform === 'ios'
-    ? subscription.iosOriginalTransactionId || subscription.iosTransactionId
-    : subscription.androidToken
+  subscription.platform === 'ios' ? subscription.receipt : subscription.androidToken
+
+// RevenueCat takes a base64 App Store receipt (or a signed StoreKit 2 transaction), not a bare
+// transaction id: the receipt IAPHUB keeps for the subscription is sent instead.
+async function iosReceipt(receiptId) {
+  const response = await fetch(`https://api.iaphub.com/v1/app/${IAPHUB_APP_ID}/receipt/${receiptId}`, {
+    headers: { Authorization: `ApiKey ${iaphubKey}` },
+  })
+  if (!response.ok) throw new Error(`IAPHUB receipt ${response.status} ${await response.text()}`)
+  const { token } = await response.json()
+  return token
+}
 
 async function revenueCat(platform, path, init = {}) {
   const response = await fetch(`${REVENUECAT_URL}${path}`, {
@@ -131,13 +148,19 @@ console.log(`Skipped: ${skipped.length}`, count(skipped, s => s.reason))
 
 const results = []
 if (apply) {
-  for (const subscription of candidates) {
+  const chosen = candidates
+    .filter(subscription => !onlyPlatform || subscription.platform === onlyPlatform)
+    .slice(0, limit)
+  for (const subscription of chosen) {
     const { platform, userId, productSku } = subscription
+    const token =
+      platform === 'ios' ? await iosReceipt(subscription.receipt) : subscription.androidToken
+    if (platform === 'ios') await wait(PAUSE_MS)
     const sent = await revenueCat(platform, '/receipts', {
       method: 'POST',
       body: JSON.stringify({
         app_user_id: userId,
-        fetch_token: fetchToken(subscription),
+        fetch_token: token,
         ...(platform === 'android' ? { product_id: productSku } : {}),
       }),
     })
