@@ -17,6 +17,7 @@ import Paragraph from '~common/ui/Paragraph'
 import ScrollView from '~common/ui/ScrollView'
 import Text from '~common/ui/Text'
 import { PUBLIC_SITE_URL } from '~helpers/publicSiteLinks'
+import { useStoreReviewing } from '~helpers/storeReviewing'
 import ContactDeveloperSheet from './ContactDeveloperSheet'
 
 type FAQLink = { label: string; href?: string; onPress?: () => void }
@@ -26,6 +27,7 @@ const FAQScreen = () => {
   const stylingTheme = useStylingTheme()
   const { t, i18n } = useTranslation()
   const contactDeveloperRef = useRef<SheetRef>(null)
+  const storeIsReviewing = useStoreReviewing()
   const openContact = () => contactDeveloperRef.current?.present()
   // The site serves French pages under /fr and English ones at its root.
   const sitePath = (path: string) =>
@@ -45,7 +47,11 @@ const FAQScreen = () => {
         { href: 'https://web.bible-strong.app/home', label: t('faq.openWeb') },
       ],
     },
-    { id: 'free', question: t('faq.freeQuestion'), answer: t('faq.freeAnswer') },
+    {
+      id: 'free',
+      question: t('faq.freeQuestion'),
+      answer: t(storeIsReviewing ? 'faq.freeAnswerInStores' : 'faq.freeAnswer'),
+    },
     { id: 'account', question: t('faq.accountQuestion'), answer: t('faq.accountAnswer') },
     { id: 'sync', question: t('faq.syncQuestion'), answer: t('faq.syncAnswer') },
     { id: 'offline', question: t('faq.offlineQuestion'), answer: t('faq.offlineAnswer') },
@@ -81,8 +87,9 @@ const FAQScreen = () => {
     {
       id: 'support',
       question: t('faq.supportQuestion'),
-      answer: t('faq.supportAnswer'),
-      links: [{ href: sitePath('/give'), label: t('faq.donate') }],
+      // The stores' apps lead to no payment outside the stores, so no donation there.
+      answer: t(storeIsReviewing ? 'faq.supportAnswerInStores' : 'faq.supportAnswer'),
+      links: storeIsReviewing ? undefined : [{ href: sitePath('/give'), label: t('faq.donate') }],
     },
     { id: 'author', question: t('faq.authorQuestion'), answer: t('faq.authorAnswer') },
     {

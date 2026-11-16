@@ -2,7 +2,7 @@ import ContactDeveloperSheet from './ContactDeveloperSheet'
 import { goBackOrHome } from '~navigation/goBackOrHome'
 import { resolveUniverseColors } from '~themes/universeColors'
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
-import { getAppleReviewing } from '~helpers/getAppleReviewing'
+import { useStoreReviewing } from '~helpers/storeReviewing'
 import { Image } from 'expo-image'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { premiumStatusAtom } from '~features/premium/premiumStatus'
@@ -123,7 +123,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
   // Strobi's page holds its subscription, its bubble and the agreement given to AI providers.
   const strobiShown = useAssistantAccessible(isLogged ? user?.id : null) || premiumVisible
 
-  const appleIsReviewing = getAppleReviewing()
+  const storeIsReviewing = useStoreReviewing()
 
   const promptNuke = async () => {
     const confirmed = await confirm({
@@ -347,7 +347,7 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
             iconTint="success"
             label={t("Partager l'application")}
           />
-          {!appleIsReviewing && (
+          {!storeIsReviewing && (
             <ListRow
               href={
                 lang === 'fr' ? 'https://bible-strong.app/fr/give' : 'https://bible-strong.app/give'

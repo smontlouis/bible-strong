@@ -267,7 +267,7 @@ SENTRY_DSN
 ```
 
 ### Remote Config
-- `apple_reviewing` : Mode review Apple
+- `apple_reviewing` : review App Store ou Google Play en cours (les apps natives cachent les dons ; cachés aussi tant que Remote Config n'a pas répondu)
 - `download_urls` : URLs des bases de données
 - `feature_flags` : Activation de features
 

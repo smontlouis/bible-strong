@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { FeatherIcon } from '~common/ui/Icon'
 import { ICON_TILE_SIZE } from '~common/ui/IconTile'
 import ListSection, { ListRow } from '~common/ui/ListSection'
-import { getAppleReviewing } from '~helpers/getAppleReviewing'
+import { useStoreReviewing } from '~helpers/storeReviewing'
 import useLanguage from '~helpers/useLanguage'
 
 /**
@@ -13,7 +13,7 @@ import useLanguage from '~helpers/useLanguage'
 const HomeGoFurther = () => {
   const { t } = useTranslation()
   const lang = useLanguage()
-  const appleIsReviewing = getAppleReviewing()
+  const storeIsReviewing = useStoreReviewing()
 
   const rows = [
     <ListRow
@@ -30,7 +30,7 @@ const HomeGoFurther = () => {
         />
       }
     />,
-    ...(appleIsReviewing
+    ...(storeIsReviewing
       ? []
       : [
           <ListRow
