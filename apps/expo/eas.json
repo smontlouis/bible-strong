@@ -32,7 +32,10 @@
     },
     "production": {
       "channel": "production",
-      "autoIncrement": true
+      "autoIncrement": true,
+      "android": {
+        "resourceClass": "large"
+      }
     },
     "production-apk": {
       "channel": "production",
