@@ -95,7 +95,6 @@ const getInitialState = (): UserState =>
     displayName: '',
     photoURL: '',
     provider: '',
-    subscription: undefined,
     emailVerified: false,
     createdAt: null,
     isLoading: true,
@@ -442,7 +441,6 @@ describe('User Reducer', () => {
       displayName: '',
       photoURL: '',
       provider: 'email',
-      subscription: undefined,
       bible: {
         settings: {
           ...initialState.bible.settings,

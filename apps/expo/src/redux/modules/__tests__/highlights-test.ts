@@ -74,7 +74,6 @@ const getInitialState = (): UserState =>
     displayName: '',
     photoURL: '',
     provider: '',
-    subscription: undefined,
     emailVerified: false,
     createdAt: null,
     isLoading: true,

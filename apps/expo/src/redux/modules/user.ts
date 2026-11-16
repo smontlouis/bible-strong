@@ -488,7 +488,6 @@ export interface FireStoreUserData {
   displayName: string
   photoURL: string
   provider: string
-  subscription?: string
   bible: UserState['bible']
   plan: OngoingPlan[]
   /** The collectible cards collected (ADR-0090): card identity → when. */
@@ -509,7 +508,6 @@ export interface UserState {
   displayName: string
   photoURL: string
   provider: string
-  subscription?: string
   emailVerified: boolean
   createdAt: string | null
   isLoading: boolean
@@ -610,7 +608,6 @@ const getInitialState = (): UserState => ({
   displayName: '',
   photoURL: '',
   provider: '',
-  subscription: undefined,
   emailVerified: false,
   createdAt: null,
   isLoading: true,
@@ -736,15 +733,13 @@ const userSlice = createSlice({
       }
     },
     receiveLiveUpdates(state, action: PayloadAction<{ remoteUserData: FireStoreUserData }>) {
-      const { id, email, displayName, photoURL, provider, bible, subscription } =
-        action.payload.remoteUserData
+      const { id, email, displayName, photoURL, provider, bible } = action.payload.remoteUserData
 
       state.id = id
       state.email = email
       state.displayName = state.displayName || displayName
       state.photoURL = photoURL
       state.provider = provider
-      state.subscription = subscription
 
       // Preserve subcollection data (managed separately)
       const currentBookmarks = state.bible.bookmarks

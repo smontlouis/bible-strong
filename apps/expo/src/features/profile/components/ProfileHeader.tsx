@@ -92,8 +92,6 @@ const ProfileHeader = () => {
           )}
         </HStack>
 
-        {/* <SubscriptionBadge /> */}
-
         {memberSince && (
           <Text className="text-grey text-[12px]">
             {t('profile.memberSince', { date: memberSince })}
