@@ -2495,6 +2495,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@bible-strong/avatar-react-native@patch:@bible-strong/avatar-react-native@npm%3A1.0.0#~/.yarn/patches/@bible-strong-avatar-react-native-npm-1.0.0-a87ce83292.patch":
+  version: 1.0.0
+  resolution: "@bible-strong/avatar-react-native@patch:@bible-strong/avatar-react-native@npm%3A1.0.0#~/.yarn/patches/@bible-strong-avatar-react-native-npm-1.0.0-a87ce83292.patch::version=1.0.0&hash=833cb4"
+  dependencies:
+    "@bible-strong/avatar-core": "npm:^1.0.0"
+  peerDependencies:
+    react: ^19.0.0
+    react-native: "*"
+    react-native-reanimated: ">=4.7.0"
+    react-native-svg: ">=15.0.0"
+    react-native-worklets: ">=0.13.0"
+  checksum: 10c0/2e608ea0ab1865cea96f5fbbe15771ef03a98a97e73e072f887bce65ad16f7f05b841b815b1050c79ae1f0485574d8736d21f7b4faad8018ac5df1818bea16ee
+  languageName: node
+  linkType: hard
+
 "@bible-strong/avatar-react@npm:1.0.0":
   version: 1.0.0
   resolution: "@bible-strong/avatar-react@npm:1.0.0"
@@ -2561,7 +2576,7 @@ __metadata:
     "@babel/runtime": "npm:^7.28.4"
     "@bible-strong/ai-contract": "workspace:*"
     "@bible-strong/avatar-react": "npm:1.0.0"
-    "@bible-strong/avatar-react-native": "npm:1.0.0"
+    "@bible-strong/avatar-react-native": "patch:@bible-strong/avatar-react-native@npm%3A1.0.0#~/.yarn/patches/@bible-strong-avatar-react-native-npm-1.0.0-a87ce83292.patch"
     "@bible-strong/bible-reference-parser": "workspace:*"
     "@bible-strong/biblical-map": "workspace:*"
     "@bible-strong/entity-cards": "workspace:*"

@@ -1,0 +1,97 @@
+diff --git a/dist/Avatar.js b/dist/Avatar.js
+index 92263b8b50ced8602c2463755944f6e985651bd1..eeb1e40b792e19a7fee160565bd2024ae25401cf 100644
+--- a/dist/Avatar.js
++++ b/dist/Avatar.js
+@@ -38,6 +38,21 @@ const assertRuntime = () => {
+ };
+ const AnimatedPath = Animated.createAnimatedComponent(Path);
+ const AnimatedG = Animated.createAnimatedComponent(G);
++// react-native-svg on Android draws a <G> whose opacity is not 1 into a layer, and tests the
++// opacity again at the end of the draw: when it crosses 1 in between (the body turning into a
++// spinner's disc), it restores a canvas it never saved and the app crashes (« Underflow in
++// restore »). On Android the groups keep an opacity of 1 and each path carries the group's.
++const OPACITY_ON_PATHS = Platform.OS === 'android';
++/** The opacity a path inside the fading groups carries on Android. */
++const fadedOpacity = (current) => {
++    'worklet';
++    return OPACITY_ON_PATHS ? current.bodyOpacity * current.fading : 1;
++};
++/** The opacity a path of the body outside the fading groups carries on Android. */
++const bodyOpacityOf = (current) => {
++    'worklet';
++    return OPACITY_ON_PATHS ? current.bodyOpacity : 1;
++};
+ // An avatar is rarely on its way to grey: the colour itself is the common case.
+ const tint = (color, muted) => {
+     'worklet';
+@@ -52,7 +67,9 @@ function BodyGroup({ frame, children }) {
+     const animatedProps = useAnimatedProps(() => {
+         'worklet';
+         const current = frame.get();
+-        return { matrix: current.matrix, opacity: current.bodyOpacity };
++        return OPACITY_ON_PATHS
++            ? { matrix: current.matrix }
++            : { matrix: current.matrix, opacity: current.bodyOpacity };
+     });
+     return _jsx(AnimatedG, { animatedProps: animatedProps, children: children });
+ }
+@@ -60,7 +77,7 @@ function BodyGroup({ frame, children }) {
+ function FadingGroup({ frame, clipPath, children, }) {
+     const animatedProps = useAnimatedProps(() => {
+         'worklet';
+-        return { opacity: frame.get().fading };
++        return OPACITY_ON_PATHS ? {} : { opacity: frame.get().fading };
+     });
+     return (_jsx(AnimatedG, { animatedProps: animatedProps, clipPath: clipPath, children: children }));
+ }
+@@ -68,7 +85,7 @@ function HeadPath({ frame, muted }) {
+     const animatedProps = useAnimatedProps(() => {
+         'worklet';
+         const current = frame.get();
+-        return { d: current.head, fill: tint(current.body, muted) };
++        return { d: current.head, fill: tint(current.body, muted), opacity: bodyOpacityOf(current) };
+     });
+     return _jsx(AnimatedPath, { animatedProps: animatedProps });
+ }
+@@ -76,7 +93,10 @@ function OutlinePath({ frame, layer, index, }) {
+     const animatedProps = useAnimatedProps(() => {
+         'worklet';
+         const current = frame.get();
+-        return { d: layer === 'head' ? current.head : (current[layer][index] ?? '') };
++        return {
++            d: layer === 'head' ? current.head : (current[layer][index] ?? ''),
++            opacity: fadedOpacity(current),
++        };
+     });
+     return _jsx(AnimatedPath, { animatedProps: animatedProps });
+ }
+@@ -89,6 +109,7 @@ function BodyPath({ frame, muted, layer, index, clipped, clipPath, }) {
+         return {
+             d: shown ? (current[layer][index] ?? '') : '',
+             fill: tint(colors[index] ?? current.body, muted),
++            opacity: fadedOpacity(current),
+         };
+     });
+     return _jsx(AnimatedPath, { animatedProps: animatedProps, clipPath: clipPath });
+@@ -104,7 +125,7 @@ function FacePath({ frame, muted, part }) {
+     const animatedProps = useAnimatedProps(() => {
+         'worklet';
+         const current = frame.get();
+-        return { d: current[part], fill: tint(current.eyes, muted) };
++        return { d: current[part], fill: tint(current.eyes, muted), opacity: fadedOpacity(current) };
+     });
+     return _jsx(AnimatedPath, { animatedProps: animatedProps });
+ }
+@@ -112,7 +133,11 @@ function DiscPath({ frame, muted }) {
+     const animatedProps = useAnimatedProps(() => {
+         'worklet';
+         const current = frame.get();
+-        return { d: current.disc, opacity: current.discOpacity, fill: tint(current.body, muted) };
++        return {
++            d: current.disc,
++            opacity: current.discOpacity * bodyOpacityOf(current),
++            fill: tint(current.body, muted),
++        };
+     });
+     return _jsx(AnimatedPath, { animatedProps: animatedProps });
+ }
