@@ -1,6 +1,9 @@
+import { verseStudyStrongCodes } from '@bible-strong/resource-domain/verse-study'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { listCommentaries } from '../commentary/commentaryCatalog'
 import { readResource } from '../resources/resourceApi'
 import { createPageReads, PAGE_READ_CONCURRENCY } from '../resources/pageReads'
+import { bibleStrongLinks } from './bibleStrongLinks'
 import { loadVerseStudy } from './bibleVerseStudy'
 
 vi.mock('../resources/resourceApi', () => ({ readResource: vi.fn() }))
@@ -254,5 +257,318 @@ describe('loadVerseStudy', () => {
 
     expect(pathsRead().length).toBeGreaterThan(PAGE_READ_CONCURRENCY)
     expect(most).toBe(PAGE_READ_CONCURRENCY)
+  })
+})
+
+// ---------- The verse study the Resource API gathers (ADR-0115) ----------
+
+type Language = 'fr' | 'en'
+
+// John 3:16 as the Resource API holds it: the tagged words of each Strong Bible, a word tagged
+// with the sense it has there, a compound word, and an entry the lexicon does not have.
+const SPANS: Record<
+  string,
+  { startOffset: number; length: number; identities: { kind: string; code: string }[] }[]
+> = {
+  LSG: [
+    { startOffset: 4, length: 4, identities: [{ kind: 'strong', code: 'G2316' }] },
+    {
+      startOffset: 9,
+      length: 6,
+      identities: [
+        { kind: 'strong', code: 'G0025' },
+        { kind: 'dstrong', code: 'G0025G' },
+      ],
+    },
+    {
+      startOffset: 16,
+      length: 9,
+      identities: [
+        { kind: 'strong', code: 'G2889' },
+        { kind: 'estrong', code: 'G3779' },
+      ],
+    },
+    { startOffset: 26, length: 3, identities: [{ kind: 'strong', code: 'G9999' }] },
+  ],
+  DBY: [{ startOffset: 0, length: 4, identities: [{ kind: 'strong', code: 'G1063' }] }],
+  KJV: [
+    { startOffset: 4, length: 3, identities: [{ kind: 'strong', code: 'G2316' }] },
+    { startOffset: 8, length: 2, identities: [{ kind: 'strong', code: 'G3779' }] },
+  ],
+}
+const MISSING_ENTRY = 'G9999'
+const REFERENCES = ['God.', '45-5-8', '62-4-9', '43-3-16', '40-17-21']
+const ENTITIES = [
+  {
+    uniqueName: 'God@Gen.1.1',
+    name: 'Dieu',
+    category: 'supernatural',
+    type: 'Deity',
+    verses: [16],
+  },
+  {
+    uniqueName: 'Nicodemus@Jhn.3.1',
+    name: 'Nicodème',
+    category: 'person',
+    type: 'Male',
+    verses: [1],
+  },
+]
+const DICTIONARY = [
+  {
+    resource: { work: 'westphal' },
+    id: 12,
+    word: 'Amour',
+    normalizedWord: 'amour',
+    evidenceKind: 'verse-name',
+    correspondenceId: 'love',
+  },
+  {
+    resource: { work: 'bost' },
+    id: 7,
+    word: 'Monde',
+    normalizedWord: 'monde',
+    evidenceKind: 'source-citation',
+  },
+]
+const TOPICS = [{ normalizedName: 'amour', name: 'Amour' }]
+
+const verseTextOf = (versionId: string, key: string) =>
+  key === '40-17-21' ? '' : `${versionId} ${key} Car Dieu a tant aimé le monde`
+const card = (code: string) => ({
+  selectedIdentity: { kind: 'dstrong', code },
+  original: `original ${code}`,
+  transliteration: `translit ${code}`,
+  gloss: `gloss ${code}`,
+})
+const sectionsOf = (commentaries: string, language: Language) =>
+  commentaries
+    .split(',')
+    .filter(Boolean)
+    .map(resourceId => ({
+      resource: { kind: 'commentary', resourceId, language, revision: 'r1' },
+      slug: '16-17',
+      startVerse: 16,
+      endVerse: 17,
+      content: `<p>Commentaire de ${resourceId}.</p>`,
+    }))
+
+/**
+ * The Resource API over one set of data, its routes one by one, and with or without the
+ * verse study that gathers them; `failing` makes the study fail.
+ */
+const resourceApi =
+  (study: 'answered' | 'unknown' | 'failing') =>
+  (path: string, query: Query): unknown => {
+    const language: Language = path.includes('/en/') || query.language === 'en' ? 'en' : 'fr'
+    const studied = /^\/v1\/verse-studies\/(fr|en)\/43-3-16$/u.exec(path)
+    if (studied) {
+      if (study === 'failing') throw new Error('Resource API responded 500')
+      if (study === 'unknown') return undefined
+      const studyLanguage = studied[1] as Language
+      const versionId = studyLanguage === 'en' ? 'KJV' : 'LSG'
+      const spans = SPANS[versionId]!
+      return {
+        verseKey: '43-3-16',
+        language: studyLanguage,
+        words: {
+          versionId,
+          spans,
+          entries: verseStudyStrongCodes(spans)
+            .filter(code => code !== MISSING_ENTRY)
+            .map(card),
+        },
+        crossReferences: REFERENCES,
+        commentaries: sectionsOf(String(query.commentaries ?? ''), studyLanguage),
+        topics: TOPICS,
+        dictionary: DICTIONARY,
+        entities: ENTITIES.filter(entity => entity.verses.includes(16)),
+      }
+    }
+    if (path === '/v1/bibles/chapters') {
+      return { chapters: String(query.versions).split(',').map(chapterOf) }
+    }
+    const verses = /^\/v1\/bibles\/([^/]+)\/verses$/u.exec(path)
+    if (verses) {
+      return {
+        verses: String(query.references)
+          .split(',')
+          .map(key => {
+            const [book, chapter, number] = key.split('-').map(Number)
+            return { book, chapter, number, text: verseTextOf(verses[1]!, key) }
+          }),
+      }
+    }
+    const strong = /^\/v1\/strong-bibles\/([^/]+)\/books\/43\/chapters\/3$/u.exec(path)
+    if (strong) {
+      const spans = SPANS[strong[1]!]
+      return spans && { verses: [{ number: 16, spans }] }
+    }
+    if (path === '/v1/strong-lexicon/entries/batch') {
+      return {
+        entries: String(query.identities)
+          .split(',')
+          .map(identity => identity.replace(/^dstrong:/u, ''))
+          .filter(code => code !== MISSING_ENTRY)
+          .map(card),
+      }
+    }
+    if (path === '/v1/cross-references/fr/verses/43-3-16') return { references: REFERENCES }
+    if (path === '/v1/commentaries/verses/43-3-16/sections') {
+      return { sections: sectionsOf(String(query.commentaries), language) }
+    }
+    if (path === `/v1/naves/${language}/verses/43-3-16/topics`) {
+      return { verseTopics: TOPICS, chapterTopics: [] }
+    }
+    if (path === '/v1/dictionaries/verses/43-3-16/entries') return { entries: DICTIONARY }
+    if (path === '/v1/strong-lexicon/entities/chapters/Jhn/3') return { entities: ENTITIES }
+    return undefined
+  }
+
+const publicationIdOf = (language: Language, id: string) =>
+  listCommentaries(language).find(commentary => commentary.id === id)?.publicationId
+
+const commentingOf = (language: Language) =>
+  listCommentaries(language)
+    .slice(0, 3)
+    .map(commentary => ({
+      id: commentary.id,
+      title: commentary.title,
+      path: `/c/${commentary.id}`,
+    }))
+
+const studyIn = (versionId: string, language: Language, reads = createPageReads()) =>
+  loadVerseStudy({
+    reads,
+    language,
+    versionId,
+    verse,
+    verseText: Promise.resolve(verseTextOf(versionId, '43-3-16')),
+    carrying: Promise.resolve(
+      language === 'en' ? ['BHG', 'ESV', 'KJV', 'NIV', 'NKJV', 'NLT'] : carrying
+    ),
+    commenting: Promise.resolve(commentingOf(language)),
+  })
+
+// The Bibles a page is read in: the one a language borrows words from, an untagged one, a
+// tagged one of its own, in both languages.
+const READ_IN: [string, Language][] = [
+  ['LSG', 'fr'],
+  ['S21', 'fr'],
+  ['DBY', 'fr'],
+  ['KJV', 'en'],
+  ['NIV', 'en'],
+]
+
+describe('loadVerseStudy with the verse study of the Resource API', () => {
+  it.each(READ_IN)(
+    'shows in %s (%s) what it shows reading each part on its own',
+    async (versionId, language) => {
+      answerWith(resourceApi('unknown'))
+      const ownReads = createPageReads()
+      const own = await studyIn(versionId, language, ownReads)
+      answerWith(resourceApi('answered'))
+      const sharedReads = createPageReads()
+      const shared = await studyIn(versionId, language, sharedReads)
+
+      expect(shared).toEqual(own)
+      expect(sharedReads.incomplete).toBe(false)
+      // Every part has something, so the comparison compares something.
+      expect(own.words.length).toBeGreaterThan(0)
+      expect(own.crossReferences.length).toBeGreaterThan(0)
+      expect(own.comments.length).toBeGreaterThan(0)
+      expect(own.topics.length).toBeGreaterThan(0)
+      expect(own.dictionary.length).toBeGreaterThan(0)
+      expect(own.entities.map(entity => entity.name)).toEqual(['Dieu'])
+      // A word whose entry the lexicon lacks is left out either way.
+      expect(own.words.some(word => word.code === MISSING_ENTRY)).toBe(false)
+    }
+  )
+
+  it('reads the study, the verse in the other Bibles and the passages it names: three reads', async () => {
+    answerWith(resourceApi('answered'))
+    await studyIn('S21', 'fr')
+
+    expect(vi.mocked(readResource).mock.calls).toEqual([
+      ['/v1/bibles/chapters', { versions: 'BDS,BHG,DBY,LSG,NEG79,S21', book: 43, chapter: 3 }],
+      [
+        '/v1/verse-studies/fr/43-3-16',
+        {
+          commentaries: commentingOf('fr')
+            .map(link => publicationIdOf('fr', link.id))
+            .join(','),
+        },
+      ],
+      ['/v1/bibles/S21/verses', { references: '45-5-8,62-4-9,40-17-21' }],
+    ])
+  })
+
+  it('asks every Bible of a language the same study', async () => {
+    answerWith(resourceApi('answered'))
+    for (const [versionId] of READ_IN.filter(([, language]) => language === 'fr')) {
+      await studyIn(versionId, 'fr')
+    }
+    const studies = vi
+      .mocked(readResource)
+      .mock.calls.filter(([path]) => path.startsWith('/v1/verse-studies/'))
+    expect(new Set(studies.map(call => JSON.stringify(call))).size).toBe(1)
+    expect(studies).toHaveLength(3)
+  })
+
+  it('reads the words of a tagged Bible other than the one its language borrows from', async () => {
+    answerWith(resourceApi('answered'))
+    const found = await studyIn('DBY', 'fr')
+
+    expect(pathsRead().sort()).toEqual([
+      '/v1/bibles/DBY/verses',
+      '/v1/bibles/chapters',
+      '/v1/strong-bibles/DBY/books/43/chapters/3',
+      '/v1/strong-lexicon/entries/batch',
+      '/v1/verse-studies/fr/43-3-16',
+    ])
+    expect(found.words.map(word => word.code)).toEqual(['G1063'])
+    expect(found.wordsVersion).toBeUndefined()
+  })
+
+  it('borrows the words of an untagged Bible from the study, cut from the text they tag', async () => {
+    answerWith(resourceApi('answered'))
+    const found = await studyIn('S21', 'fr')
+    const borrowedText = chapterOf('LSG').verses[1]!.text
+
+    expect(found.wordsVersion).toBe('LSG')
+    expect(found.words.map(word => [word.code, word.word])).toEqual([
+      ['G2316', borrowedText.slice(4, 8).trim()],
+      ['G0025G', undefined],
+      ['G2889', undefined],
+      ['G3779', undefined],
+    ])
+  })
+
+  it('leaves every part out and reads none of them again when the study fails', async () => {
+    answerWith(resourceApi('failing'))
+    const reads = createPageReads()
+    const found = await studyIn('LSG', 'fr', reads)
+
+    expect(reads.incomplete).toBe(true)
+    expect(found).toMatchObject({
+      words: [],
+      crossReferences: [],
+      comments: [],
+      topics: [],
+      dictionary: [],
+      entities: [],
+    })
+    // The verse in the other Bibles does not depend on the study.
+    expect(found.versions).toHaveLength(4)
+    expect(pathsRead().sort()).toEqual(['/v1/bibles/chapters', '/v1/verse-studies/fr/43-3-16'])
+  })
+
+  it('names the same Strong entries as the words it shows', () => {
+    for (const spans of Object.values(SPANS)) {
+      const shown = spans.flatMap(span =>
+        bibleStrongLinks(span.identities, 'fr').map(link => link.code)
+      )
+      expect(new Set(verseStudyStrongCodes(spans))).toEqual(new Set(shown))
+    }
   })
 })

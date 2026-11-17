@@ -9,10 +9,11 @@ import type {
 } from '@bible-strong/resource-domain/contracts/strongLexiconContract'
 import { TIPNR_BOOK_CODES } from '@bible-strong/resource-domain/strong-lexicon'
 import type { CommentaryVerseSectionsResponseDto } from '@bible-strong/resource-domain/contracts/supplementaryContract'
+import type { VerseStudyResponseDto } from '@bible-strong/resource-domain/contracts/verseStudyContract'
 import { readAtlasPortraitCatalog } from '../atlas/atlas.functions'
 import { entityClayUrl, entityPortraitUrl } from '../atlas/atlasPortraits'
 import { buildAtlasEntityPath } from '../atlas/atlasRoutes'
-import { listCommentaries } from '../commentary/commentaryCatalog'
+import { listCommentaries, type Commentary } from '../commentary/commentaryCatalog'
 import { commentaryExcerpt, renderCommentaryHtml } from '../commentary/commentaryHtml'
 import type { CommentaryLink } from '../commentary/commentaryLinks'
 import { buildCommentarySectionPath } from '../commentary/commentaryRoutes'
@@ -43,17 +44,37 @@ import { bibleVersionName, defaultBibleVersionId, findBibleVersion } from './bib
 const COMMENT_EXCERPT_LENGTH = 460
 
 type CrossReferencesDto = { references: string[] }
-type NaveVerseTopicsDto = { verseTopics: { normalizedName: string; name: string }[] }
-type DictionaryVerseEntriesDto = {
-  entries: {
-    resource: { work: string }
-    id: number
-    word: string
-    normalizedWord: string
-    evidenceKind: string
-    correspondenceId?: string
-  }[]
+type NaveVerseTopicsDto = { verseTopics: NaveTopic[] }
+type NaveTopic = { normalizedName: string; name: string }
+type DictionaryVerseEntriesDto = { entries: DictionaryVerseEntry[] }
+type DictionaryVerseEntry = {
+  resource: { work: string }
+  id: number
+  word: string
+  normalizedWord: string
+  evidenceKind: string
+  correspondenceId?: string
 }
+type StrongSpan = {
+  startOffset: number
+  length: number
+  identities: readonly { kind: string; code: string }[]
+}
+type LexiconCard = Pick<
+  StrongLexiconEntryCardsDto['entries'][number],
+  'selectedIdentity' | 'original' | 'transliteration' | 'gloss'
+>
+type CommentarySection = CommentaryVerseSectionsResponseDto['sections'][number]
+type ChapterEntity = StrongLexiconChapterEntitiesResponseDto['entities'][number]
+
+/**
+ * What the Resource API gathers around a verse that is the same in every Bible of a language
+ * (ADR-0115), in one read: the parts this page reads otherwise one by one.
+ */
+type SharedVerseStudy = Pick<
+  VerseStudyResponseDto,
+  'words' | 'crossReferences' | 'commentaries' | 'topics' | 'dictionary' | 'entities'
+>
 
 export type VerseQuote = { label: string; path: string; text: string }
 
@@ -99,13 +120,42 @@ export type VerseStudyData = {
   entities: { name: string; path: string; picture: string }[]
 }
 
-// Every part of the study is read through `reads.optional`: a part that cannot be read is
-// left out, and never keeps the verse from being read.
+// Every part of the study is read through `reads.optional` or marks the page with `missed`:
+// a part that cannot be read is left out, and never keeps the verse from being read.
 
 const readVerseTexts = (versionId: string, verses: readonly VerseKey[]) =>
   readResource<BibleVerseTextsDto>(`/v1/bibles/${versionId}/verses`, {
     references: verses.map(verseKey).join(','),
   })
+
+/** A study the Resource API failed to answer: each part is left out, and the page knows it. */
+const UNREAD = null
+
+/**
+ * The verse study the page shares with every Bible of its language, in one read. Undefined when
+ * the Resource API does not know the route: it is deployed by hand before the site, which
+ * deploys itself on a push, and for that while the page reads each part on its own, as it
+ * did before. A study that could not be read is not read again part by part: an API already
+ * refusing reads would be sent a dozen more.
+ */
+const readSharedStudy = async (
+  reads: PageReads,
+  language: ResourceLanguage,
+  verse: VerseKey,
+  commentaries: readonly Commentary[]
+): Promise<SharedVerseStudy | typeof UNREAD | undefined> => {
+  try {
+    return await reads.queue(() =>
+      readResource<SharedVerseStudy>(`/v1/verse-studies/${language}/${verseKey(verse)}`, {
+        commentaries:
+          commentaries.map(commentary => commentary.publicationId).join(',') || undefined,
+      })
+    )
+  } catch {
+    reads.missed()
+    return UNREAD
+  }
+}
 
 /**
  * The verse in several Bibles, by Bible. Their chapters are read in one read, the same for
@@ -194,55 +244,30 @@ const presentOriginal = (
     : undefined
 }
 
-/**
- * The words of the verse behind which a Strong number stands. A Bible that is not tagged
- * borrows them from the reference Bible of its language.
- */
-const loadWords = async (
-  reads: PageReads,
-  language: ResourceLanguage,
-  versionId: string,
-  verse: VerseKey,
-  verseText: Promise<string>,
-  texts: Promise<ReadonlyMap<string, string>>
-): Promise<Pick<VerseStudyData, 'words' | 'wordsVersion'>> => {
-  const tagged = isBiblePresentationSupported(versionId, 'strong')
-    ? versionId
-    : defaultBibleVersionId(language)
-  const borrowed = tagged !== versionId
-  const [chapter, text] = await Promise.all([
-    reads.optional(() =>
-      readResource<StrongBibleChapterDto>(
-        `/v1/strong-bibles/${tagged}/books/${verse.book}/chapters/${verse.chapter}`
-      )
-    ),
-    borrowed ? texts.then(found => found.get(tagged) ?? '') : verseText,
-  ])
-  const spans = chapter?.verses.find(candidate => candidate.number === verse.verse)?.spans ?? []
-
+/** The words of a verse behind which a Strong number stands, each once, in the order of the text. */
+const taggedWordsOf = (spans: readonly StrongSpan[], text: string, language: ResourceLanguage) => {
   const taggedWords = spans.flatMap(span =>
     bibleStrongLinks(span.identities, language).map(link => ({
       ...link,
       word: text.slice(span.startOffset, span.startOffset + span.length).trim() || undefined,
     }))
   )
-  const unique = taggedWords.filter(
+  return taggedWords.filter(
     (word, index) => taggedWords.findIndex(other => other.code === word.code) === index
   )
-  if (!unique.length) return { words: [] }
+}
 
-  const cards = await reads.optional(() =>
-    readResource<StrongLexiconEntryCardsDto>('/v1/strong-lexicon/entries/batch', {
-      language,
-      level: 'simple',
-      identities: unique.map(word => `dstrong:${word.code}`).join(','),
-    })
-  )
+/** The words with the original word of their entry; a word whose entry is missing is left out. */
+const presentWords = (
+  words: ReturnType<typeof taggedWordsOf>,
+  cards: readonly LexiconCard[],
+  wordsVersion: string | undefined
+): Pick<VerseStudyData, 'words' | 'wordsVersion'> => {
   const cardByCode = new Map(
-    (cards?.entries ?? []).map(card => [parseStrongCode(card.selectedIdentity.code)?.code, card])
+    cards.map(card => [parseStrongCode(card.selectedIdentity.code)?.code, card])
   )
   return {
-    words: unique.flatMap(word => {
+    words: words.flatMap(word => {
       const card = cardByCode.get(word.code)
       return card
         ? [
@@ -255,21 +280,71 @@ const loadWords = async (
           ]
         : []
     }),
-    wordsVersion: borrowed ? tagged : undefined,
+    wordsVersion,
   }
 }
 
+/**
+ * The words of the verse behind which a Strong number stands. A Bible that is not tagged
+ * borrows them from the reference Bible of its language, whose words come with the shared
+ * study; a tagged Bible of its own reads its own, in two reads.
+ */
+const loadWords = async (
+  reads: PageReads,
+  language: ResourceLanguage,
+  versionId: string,
+  verse: VerseKey,
+  verseText: Promise<string>,
+  texts: Promise<ReadonlyMap<string, string>>,
+  study: Promise<SharedVerseStudy | typeof UNREAD | undefined>
+): Promise<Pick<VerseStudyData, 'words' | 'wordsVersion'>> => {
+  const tagged = isBiblePresentationSupported(versionId, 'strong')
+    ? versionId
+    : defaultBibleVersionId(language)
+  const borrowed = tagged !== versionId
+  const text = () => (borrowed ? texts.then(found => found.get(tagged) ?? '') : verseText)
+
+  if (tagged === defaultBibleVersionId(language)) {
+    const shared = await study
+    if (shared === UNREAD) return { words: [] }
+    if (shared && shared.words.versionId === tagged) {
+      const words = taggedWordsOf(shared.words.spans, await text(), language)
+      if (!words.length) return { words: [] }
+      return presentWords(words, shared.words.entries, borrowed ? tagged : undefined)
+    }
+  }
+
+  const [chapter, verseTextOfTagged] = await Promise.all([
+    reads.optional(() =>
+      readResource<StrongBibleChapterDto>(
+        `/v1/strong-bibles/${tagged}/books/${verse.book}/chapters/${verse.chapter}`
+      )
+    ),
+    text(),
+  ])
+  const spans = chapter?.verses.find(candidate => candidate.number === verse.verse)?.spans ?? []
+  const words = taggedWordsOf(spans, verseTextOfTagged, language)
+  if (!words.length) return { words: [] }
+
+  const cards = await reads.optional(() =>
+    readResource<StrongLexiconEntryCardsDto>('/v1/strong-lexicon/entries/batch', {
+      language,
+      level: 'simple',
+      identities: words.map(word => `dstrong:${word.code}`).join(','),
+    })
+  )
+  return presentWords(words, cards?.entries ?? [], borrowed ? tagged : undefined)
+}
+
+/** The passages a verse is read with, in the Bible being read: one read of their texts. */
 const loadCrossReferences = async (
   reads: PageReads,
   language: ResourceLanguage,
   versionId: string,
-  verse: VerseKey
+  verse: VerseKey,
+  references: readonly string[]
 ): Promise<VerseQuote[]> => {
-  // The references are the same in every language; the list is published once.
-  const list = await reads.optional(() =>
-    readResource<CrossReferencesDto>(`/v1/cross-references/fr/verses/${verseKey(verse)}`)
-  )
-  const verses = crossReferenceVerses(list?.references ?? [], verse)
+  const verses = crossReferenceVerses(references, verse)
   if (!verses.length) return []
   const texts = await reads.optional(() => readVerseTexts(versionId, verses))
   const textByKey = new Map(
@@ -297,23 +372,38 @@ const loadCrossReferences = async (
   })
 }
 
+// The cross-references are the same in every language; the list is published once.
+const readCrossReferenceList = async (
+  reads: PageReads,
+  verse: VerseKey
+): Promise<readonly string[]> =>
+  (
+    await reads.optional(() =>
+      readResource<CrossReferencesDto>(`/v1/cross-references/fr/verses/${verseKey(verse)}`)
+    )
+  )?.references ?? []
+
+/** The first commentaries of the chapter, those a verse page quotes. */
+const quotedCommentaries = (
+  language: ResourceLanguage,
+  commenting: readonly CommentaryLink[]
+): Commentary[] => {
+  const catalog = new Map(listCommentaries(language).map(commentary => [commentary.id, commentary]))
+  return commenting.slice(0, VERSE_COMMENTARY_COUNT).flatMap(link => catalog.get(link.id) ?? [])
+}
+
 /**
  * How the first commentaries of the chapter begin on this verse: the section of each that
  * bears most closely on it, in one read. The Resource API picks the section; reading the
  * chapters to pick it here cost a read per commentary, and several hundred KB.
  */
-const loadComments = async (
+const readCommentSections = async (
   reads: PageReads,
   language: ResourceLanguage,
   verse: VerseKey,
-  commenting: readonly CommentaryLink[]
-): Promise<VerseComment[]> => {
-  const catalog = new Map(listCommentaries(language).map(commentary => [commentary.id, commentary]))
-  const commentaries = commenting
-    .slice(0, VERSE_COMMENTARY_COUNT)
-    .flatMap(link => catalog.get(link.id) ?? [])
+  commentaries: readonly Commentary[]
+): Promise<readonly CommentarySection[]> => {
   if (!commentaries.length) return []
-
   const found = await reads.optional(() =>
     readResource<CommentaryVerseSectionsResponseDto>(
       `/v1/commentaries/verses/${verseKey(verse)}/sections`,
@@ -323,9 +413,16 @@ const loadComments = async (
       }
     )
   )
-  const sections = new Map(
-    (found?.sections ?? []).map(section => [section.resource.resourceId, section])
-  )
+  return found?.sections ?? []
+}
+
+const presentComments = (
+  language: ResourceLanguage,
+  verse: VerseKey,
+  commentaries: readonly Commentary[],
+  found: readonly CommentarySection[]
+): VerseComment[] => {
+  const sections = new Map(found.map(section => [section.resource.resourceId, section]))
   return commentaries.flatMap(commentary => {
     const section = sections.get(commentary.publicationId)
     const excerpt =
@@ -349,34 +446,48 @@ const loadComments = async (
   })
 }
 
-const loadTopics = async (
+const readTopics = async (
   reads: PageReads,
   language: ResourceLanguage,
   verse: VerseKey
-): Promise<VerseStudyData['topics']> => {
-  const found = await reads.optional(() =>
-    readResource<NaveVerseTopicsDto>(`/v1/naves/${language}/verses/${verseKey(verse)}/topics`)
-  )
-  return (found?.verseTopics ?? []).flatMap(topic => {
+): Promise<readonly NaveTopic[]> =>
+  (
+    await reads.optional(() =>
+      readResource<NaveVerseTopicsDto>(`/v1/naves/${language}/verses/${verseKey(verse)}/topics`)
+    )
+  )?.verseTopics ?? []
+
+const presentTopics = (
+  language: ResourceLanguage,
+  topics: readonly NaveTopic[]
+): VerseStudyData['topics'] =>
+  topics.flatMap(topic => {
     try {
       return [{ name: topic.name, path: buildNavePath(language, topic.normalizedName) }]
     } catch {
       return []
     }
   })
-}
 
-const loadDictionary = async (
+const readDictionaryEntries = async (
   reads: PageReads,
   language: ResourceLanguage,
   verse: VerseKey
-): Promise<VerseStudyData['dictionary']> => {
-  const found = await reads.optional(() =>
-    readResource<DictionaryVerseEntriesDto>(`/v1/dictionaries/verses/${verseKey(verse)}/entries`, {
-      language,
-    })
-  )
-  return verseDictionaryEntries(found?.entries ?? []).flatMap(entry => {
+): Promise<readonly DictionaryVerseEntry[]> =>
+  (
+    await reads.optional(() =>
+      readResource<DictionaryVerseEntriesDto>(
+        `/v1/dictionaries/verses/${verseKey(verse)}/entries`,
+        { language }
+      )
+    )
+  )?.entries ?? []
+
+const presentDictionary = (
+  language: ResourceLanguage,
+  entries: readonly DictionaryVerseEntry[]
+): VerseStudyData['dictionary'] =>
+  verseDictionaryEntries(entries).flatMap(entry => {
     try {
       return [
         {
@@ -393,26 +504,34 @@ const loadDictionary = async (
       return []
     }
   })
-}
 
-const loadEntities = async (
+// The entities of the chapter, as its end lists them in the app, then those of this verse.
+const readChapterEntities = async (
   reads: PageReads,
   language: ResourceLanguage,
   verse: VerseKey
-): Promise<VerseStudyData['entities']> => {
+): Promise<readonly ChapterEntity[]> => {
   const bookCode = TIPNR_BOOK_CODES[verse.book - 1]
   if (!bookCode) return []
-  // The entities of the chapter, as its end lists them in the app, then those of this verse.
-  const [found, portraits] = await Promise.all([
-    reads.optional(() =>
-      readResource<StrongLexiconChapterEntitiesResponseDto>(
-        `/v1/strong-lexicon/entities/chapters/${bookCode}/${verse.chapter}`,
-        { language }
+  return (
+    (
+      await reads.optional(() =>
+        readResource<StrongLexiconChapterEntitiesResponseDto>(
+          `/v1/strong-lexicon/entities/chapters/${bookCode}/${verse.chapter}`,
+          { language }
+        )
       )
-    ),
-    reads.optional(readAtlasPortraitCatalog),
-  ])
-  return (found?.entities ?? [])
+    )?.entities ?? []
+  )
+}
+
+const presentEntities = (
+  language: ResourceLanguage,
+  verse: VerseKey,
+  entities: readonly ChapterEntity[],
+  portraits: Awaited<ReturnType<typeof readAtlasPortraitCatalog>> | undefined
+): VerseStudyData['entities'] =>
+  entities
     .filter(entity => entity.verses.includes(verse.verse))
     .map(entity => {
       const portrait = portraits?.entities[entity.uniqueName]
@@ -424,12 +543,17 @@ const loadEntities = async (
           : entityClayUrl(entity.category, entity.type, entity.uniqueName),
       }
     })
-}
 
 /**
  * Everything a verse page shows around its verse: the verse in a few other Bibles and in its
  * original language, its words, the people and places it names, the passages it is read with,
  * how commentaries begin on it, and the topics and dictionary articles that name it.
+ *
+ * What is the same in every Bible of the language comes in one read, the verse study the
+ * Resource API gathers (ADR-0115): the 48 Bibles of the site share it. What changes with the
+ * Bible is read beside it: the verse in the other Bibles, by chapter, and the texts of the
+ * passages it is read with, once the study names them. A tagged Bible other than the one its
+ * language borrows from reads its own words.
  *
  * Nothing here waits for the chapter of the page: what the study needs from it comes as
  * promises, so its reads leave with the read of the chapter instead of after it.
@@ -461,16 +585,60 @@ export const loadVerseStudy = async ({
       verse
     )
   )
-  // The reads another read waits for are asked first: the words, then the cross-references.
+  // The commentaries are named in the read of the study: every Bible of the language names
+  // the same ones, in the same order, and shares its answer.
+  const commentaries = commenting.then(links => quotedCommentaries(language, links))
+  const study = commentaries.then(quoted => readSharedStudy(reads, language, verse, quoted))
+  const portraits = reads.optional(readAtlasPortraitCatalog)
+
+  // Each part comes from the study, or, while the Resource API does not know it, from its own
+  // read. A study that could not be read leaves every part out.
+  const part = <Shared, Part>(
+    shared: (found: SharedVerseStudy) => Shared,
+    empty: Shared,
+    own: () => Promise<Shared>,
+    present: (found: Shared) => Part | Promise<Part>
+  ): Promise<Part> =>
+    study.then(async found =>
+      present(found === undefined ? await own() : found === UNREAD ? empty : shared(found))
+    )
+
   const [words, crossReferences, quoted, comments, topics, dictionary, entities] =
     await Promise.all([
-      loadWords(reads, language, versionId, verse, verseText, texts),
-      loadCrossReferences(reads, language, versionId, verse),
+      loadWords(reads, language, versionId, verse, verseText, texts, study),
+      part(
+        found => found.crossReferences,
+        [],
+        () => readCrossReferenceList(reads, verse),
+        references => loadCrossReferences(reads, language, versionId, verse, references)
+      ),
       texts,
-      commenting.then(links => loadComments(reads, language, verse, links)),
-      loadTopics(reads, language, verse),
-      loadDictionary(reads, language, verse),
-      loadEntities(reads, language, verse),
+      commentaries.then(quotedOnes =>
+        part(
+          found => found.commentaries,
+          [],
+          () => readCommentSections(reads, language, verse, quotedOnes),
+          sections => presentComments(language, verse, quotedOnes, sections)
+        )
+      ),
+      part(
+        found => found.topics,
+        [],
+        () => readTopics(reads, language, verse),
+        found => presentTopics(language, found)
+      ),
+      part(
+        found => found.dictionary,
+        [],
+        () => readDictionaryEntries(reads, language, verse),
+        found => presentDictionary(language, found)
+      ),
+      part(
+        found => found.entities,
+        [],
+        () => readChapterEntities(reads, language, verse),
+        async found => presentEntities(language, verse, found, await portraits)
+      ),
     ])
   return {
     versions: presentOtherVersions(language, versionId, verse, quoted),

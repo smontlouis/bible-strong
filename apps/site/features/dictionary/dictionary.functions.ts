@@ -4,6 +4,7 @@ import type {
   DictionaryDirectoryResponseDto,
   DictionaryEntriesResponseDto,
   DictionaryEntryResponseDto,
+  DictionaryTermResponseDto,
 } from '@bible-strong/resource-domain/contracts/dictionaryContract'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
@@ -380,8 +381,55 @@ export const loadDictionaryEntryPage = createServerFn({ method: 'GET' })
     }
   })
 
-// A term is found among the notions its first word brings up; a few pages are enough.
+// While the Resource API cannot find a term by its slug, a term is found among the notions its
+// first word brings up; a few pages are enough.
 const TERM_SEARCH_PAGES = 4
+
+type DictionaryNotion = DictionaryDirectoryResponseDto['items'][number]
+
+// The longest slug the Resource API looks a term up by (`DictionaryTermSlug`, resource-domain).
+const TERM_SLUG_MAX_LENGTH = 200
+
+/** The notion a term is searched for by the first word of its slug, as the site did first. */
+const searchTermNotion = async (
+  language: ResourceLanguage,
+  slug: string
+): Promise<DictionaryNotion | undefined> => {
+  let notion: DictionaryNotion | undefined
+  let cursor: string | undefined
+  for (let page = 0; page < TERM_SEARCH_PAGES && !notion; page += 1) {
+    const directory = await readResource<DictionaryDirectoryResponseDto>(
+      '/v1/dictionaries/directory',
+      { language, search: slug.split('-')[0], limit: DIRECTORY_REQUEST_LIMIT, cursor }
+    )
+    notion = directory?.items.find(item => createDictionaryArticleSlug(item.label) === slug)
+    cursor = directory?.nextCursor
+    if (!cursor) break
+  }
+  return notion
+}
+
+/**
+ * The notion of a term page: one read of the Resource API, which finds it by its slug through
+ * an index (ADR-0115). The search by the first word cost up to four reads of a hundred notions,
+ * one after the other, and missed a heading its normalized form keeps accented (`Ésaïe`).
+ *
+ * The Resource API is deployed by hand before the site, which deploys itself on a push. While
+ * the API answers the route 404, as a version without it does, the term is searched as before;
+ * a slug the API knows no notion for is answered without one, not 404.
+ */
+const findTermNotion = async (
+  language: ResourceLanguage,
+  slug: string
+): Promise<DictionaryNotion | undefined> => {
+  // The route refuses a slug longer than any heading's (`DictionaryTermSlug`); such an
+  // address is searched as before, and has no page, rather than failing the request.
+  if (slug.length > TERM_SLUG_MAX_LENGTH) return searchTermNotion(language, slug)
+  const found = await readResource<DictionaryTermResponseDto>(`/v1/dictionaries/terms/${slug}`, {
+    language,
+  })
+  return found ? found.notion : searchTermNotion(language, slug)
+}
 
 /** A term as the dictionaries of a language define it, one article after the other. */
 export type DictionaryTermPageData = {
@@ -401,8 +449,7 @@ export type DictionaryTermArticle = { kind: 'article'; work: string; id: number;
 
 /**
  * `/dictionary/:language/term/:slug` — every article the dictionaries of a language have on
- * one notion. The notion is looked for by the first word of its slug, among the notions the
- * Resource API gathers across dictionaries.
+ * one notion, the notion the Resource API files under a label of that slug.
  */
 export const loadDictionaryTermPage = createServerFn({ method: 'GET' })
   .middleware([keptLikeAPage])
@@ -412,17 +459,7 @@ export const loadDictionaryTermPage = createServerFn({ method: 'GET' })
     if (!isResourceLanguage(data.language) || !slug) throw notFound()
     const language = data.language
 
-    let notion: DictionaryDirectoryResponseDto['items'][number] | undefined
-    let cursor: string | undefined
-    for (let page = 0; page < TERM_SEARCH_PAGES && !notion; page += 1) {
-      const directory = await readResource<DictionaryDirectoryResponseDto>(
-        '/v1/dictionaries/directory',
-        { language, search: slug.split('-')[0], limit: DIRECTORY_REQUEST_LIMIT, cursor }
-      )
-      notion = directory?.items.find(item => createDictionaryArticleSlug(item.label) === slug)
-      cursor = directory?.nextCursor
-      if (!cursor) break
-    }
+    const notion = await findTermNotion(language, slug)
     if (!notion) throw notFound()
 
     const works = new Map((await listDictionaryWorks(language)).map(work => [work.id, work]))

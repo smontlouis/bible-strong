@@ -135,4 +135,64 @@ describe('loadBiblePage', () => {
       passage: { startVerse: 20, endVerse: 22 },
     })
   })
+
+  it('renders a verse page from the verse study of the Resource API, in four reads', async () => {
+    // What is read around Matthew 17:20, by its own routes and gathered in the verse study.
+    const around = (path: string, query: Record<string, unknown> = {}): unknown => {
+      // The other Bibles, chapter by chapter, in one read.
+      if (path === '/v1/bibles/chapters') {
+        return { chapters: String(query.versions).split(',').map(chapter) }
+      }
+      if (path === '/v1/cross-references/fr/verses/40-17-20') return { references: ['40-17-22'] }
+      if (path === '/v1/naves/en/verses/40-17-20/topics') {
+        return { verseTopics: [{ normalizedName: 'faith', name: 'Faith' }], chapterTopics: [] }
+      }
+      if (path === '/v1/bibles/NIV/verses') {
+        return { verses: [{ book: 40, chapter: 17, number: 22, text: TEXTS[22] }] }
+      }
+      return undefined
+    }
+    const answer = (study: boolean) =>
+      vi.mocked(readResource).mockImplementation(async (path, query) => {
+        const [, versionId, document] = /^\/v1\/bibles\/([^/]+)\/(.+)$/u.exec(path) ?? []
+        if (versionId && document === 'coverage') return coverage(versionId) as never
+        if (versionId && document === 'books/40/chapters/17') return chapter(versionId) as never
+        if (study && path === '/v1/verse-studies/en/40-17-20') {
+          return {
+            verseKey: '40-17-20',
+            language: 'en',
+            words: { versionId: 'KJV', spans: [], entries: [] },
+            crossReferences: ['40-17-22'],
+            commentaries: [],
+            topics: [{ normalizedName: 'faith', name: 'Faith' }],
+            dictionary: [],
+            entities: [],
+          } as never
+        }
+        return around(path, query) as never
+      })
+
+    answer(false)
+    const own = await load('niv/matt/17/20')
+    vi.mocked(readResource).mockReset()
+    answer(true)
+    const shared = await load('niv/matt/17/20')
+
+    expect(shared).toEqual(own)
+    expect(shared.study?.crossReferences.map(quote => quote.path)).toEqual(['/bible/niv/matt/17/22'])
+    expect(shared.study?.topics.map(topic => topic.name)).toEqual(['Faith'])
+    // The coverages are kept by the server instance for an hour; the page reads the rest.
+    expect(
+      vi
+        .mocked(readResource)
+        .mock.calls.map(([path]) => path)
+        .filter(path => !path.endsWith('/coverage'))
+        .sort()
+    ).toEqual([
+      '/v1/bibles/NIV/books/40/chapters/17',
+      '/v1/bibles/NIV/verses',
+      '/v1/bibles/chapters',
+      '/v1/verse-studies/en/40-17-20',
+    ])
+  })
 })
