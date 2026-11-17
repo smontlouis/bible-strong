@@ -3,12 +3,25 @@ import { flushSync } from 'react-dom'
 
 export type ThemePreference = 'auto' | 'light' | 'dark'
 export const themePreferences: ThemePreference[] = ['auto', 'light', 'dark']
-// One preference for the whole site: the landing page reads it on the server, cached pages in the browser.
+// One preference for the whole site, read in the browser: every page is kept for everyone.
 export const themeCookieName = 'bible-strong-landing-theme'
 const themeTransitionDurationMs = 500
 
 export const isThemePreference = (value: string | undefined): value is ThemePreference =>
   value === 'auto' || value === 'light' || value === 'dark'
+
+/** The theme the reader chose, read in the browser: pages are kept for everyone. */
+export const readThemePreference = (): ThemePreference => {
+  const value = new RegExp(`(?:^|; )${themeCookieName}=([^;]*)`).exec(document.cookie)?.[1]
+  return isThemePreference(value) ? value : 'auto'
+}
+
+/**
+ * An inline script that sets the chosen theme on its parent element before the first paint,
+ * so that a page kept for everyone opens in the reader's theme without a flash.
+ */
+export const applyStoredThemeScript = (attribute: 'theme' | 'landingTheme') =>
+  `(function(){try{var m=document.cookie.match(/(?:^|; )${themeCookieName}=(light|dark)/);if(m)document.currentScript.parentElement.dataset.${attribute}=m[1]}catch(e){}})()`
 
 export const persistThemePreference = (theme: ThemePreference) => {
   document.cookie = `${themeCookieName}=${encodeURIComponent(theme)}; Path=/; Max-Age=31536000; SameSite=Lax`

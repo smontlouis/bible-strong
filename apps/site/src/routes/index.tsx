@@ -1,16 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { shareCardMeta } from '@/features/share/shareCardMeta'
 import Home from '@/pages'
-import { getLandingTheme } from '@/lib/landing-theme'
 import {
   absoluteSiteUrl,
   HOME_FONT_PRELOADS,
   HOME_PATHS,
+  RESOURCE_PAGE_CACHE_CONTROL,
 } from '@/features/resources/publicSite'
 import { pageAddressLinks } from '@/features/resources/resourceHead'
 
 export const Route = createFileRoute('/')({
-  loader: () => getLandingTheme(),
+  // The same page for everyone: the theme is applied in the browser.
+  headers: () => ({ 'Cache-Control': RESOURCE_PAGE_CACHE_CONTROL }),
   component: LandingHome,
   head: () => ({
     meta: [
@@ -30,5 +31,5 @@ export const Route = createFileRoute('/')({
 })
 
 function LandingHome() {
-  return <Home initialTheme={Route.useLoaderData()} />
+  return <Home />
 }

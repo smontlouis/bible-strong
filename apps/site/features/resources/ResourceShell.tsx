@@ -1,10 +1,10 @@
 import SiteLink from '@/components/SiteLink'
 import { useEffect, useLayoutEffect, useState, type ReactNode } from 'react'
 import {
-  isThemePreference,
+  applyStoredThemeScript,
   LanguageMark,
   persistThemePreference,
-  themeCookieName,
+  readThemePreference,
   ThemeToggle,
   type ThemePreference,
 } from '@/components/SiteThemeControls'
@@ -17,14 +17,9 @@ import { RESOURCE_SECTIONS, type ResourceSectionKey } from './sections'
 
 const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect
 
-const readThemePreference = (): ThemePreference => {
-  const value = new RegExp(`(?:^|; )${themeCookieName}=([^;]*)`).exec(document.cookie)?.[1]
-  return isThemePreference(value) ? value : 'auto'
-}
-
 // Pages are cached for everyone, so the stored theme is applied in the browser, before the
-// first paint, rather than rendered on the server like on the landing page.
-const applyStoredTheme = `(function(){try{var m=document.cookie.match(/(?:^|; )${themeCookieName}=(light|dark)/);if(m)document.currentScript.parentElement.dataset.theme=m[1]}catch(e){}})()`
+// first paint.
+const applyStoredTheme = applyStoredThemeScript('theme')
 
 /**
  * Standalone chrome of a public resource page: brand, the sections of the site, the app

@@ -1,5 +1,5 @@
 import SiteLink from '@/components/SiteLink'
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -9,8 +9,10 @@ import LandingBibleViewerDemo from '../components/LandingBibleViewerDemo'
 import { TextReveal } from '../components/ui/text-reveal'
 import { MobileDownloadLink } from '../components/MobileAppPromotion'
 import {
+  applyStoredThemeScript,
   LanguageMark,
   persistThemePreference,
+  readThemePreference,
   ThemeToggle,
   type ThemePreference,
 } from '../components/SiteThemeControls'
@@ -77,9 +79,11 @@ const worldsCarouselStyle = {
   '--worlds-progress-margin-top': `${WORLDS_CAROUSEL_CONFIG.progress.marginTopPx}px`,
 } as CSSProperties
 
-export type HomeProps = {
-  initialTheme: ThemePreference
-}
+const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect
+
+// The home page is kept for everyone, so the stored theme is applied in the browser, before
+// the first paint, as on the resource pages; reading it on the server made every visit render.
+const applyStoredLandingTheme = applyStoredThemeScript('landingTheme')
 
 function Reveal({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return <div className={`landing-reveal ${className}`}>{children}</div>
@@ -451,9 +455,12 @@ function ReasoningDemo({
   )
 }
 
-export default function Home({ initialTheme }: HomeProps) {
+export default function Home() {
   const rootRef = useRef<HTMLElement>(null)
-  const [theme, setTheme] = useState<ThemePreference>(initialTheme)
+  const [theme, setTheme] = useState<ThemePreference>('auto')
+  useIsomorphicLayoutEffect(() => {
+    setTheme(readThemePreference())
+  }, [])
   const [annotationTool, setAnnotationTool] = useState<AnnotationType>('background')
   const [annotation, setAnnotation] = useState({
     type: 'background' as AnnotationType,
@@ -839,7 +846,13 @@ export default function Home({ initialTheme }: HomeProps) {
   )
 
   return (
-    <main className="landing-shell" data-landing-theme={theme} ref={rootRef}>
+    <main
+      className="landing-shell"
+      data-landing-theme={theme}
+      ref={rootRef}
+      suppressHydrationWarning
+    >
+      <script dangerouslySetInnerHTML={{ __html: applyStoredLandingTheme }} />
       <LandingHeader
         locale={locale}
         homePath={homePath}
