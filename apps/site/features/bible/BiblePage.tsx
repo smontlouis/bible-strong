@@ -13,6 +13,7 @@ import BibleNotePopover from './BibleNotePopover'
 import BibleVerseDetails from './BibleVerseDetails'
 import {
   buildBiblePath,
+  buildBibleVersePath,
   buildWebAppBibleUrl,
   closestBiblePresentation,
 } from './bibleRoutes'
@@ -214,9 +215,7 @@ export default function BiblePage({ page }: { page: BiblePageData }) {
                   <SiteLink
                     id={`v${verse.number}`}
                     className="bible-verse-number"
-                    href={keep(
-                      buildBiblePath({ ...location, passage: { startVerse: verse.number } })
-                    )}
+                    href={keep(buildBibleVersePath({ versionId, book, chapter, verse: verse.number }))}
                     aria-label={`${bookName} ${chapter}:${verse.number}`}
                   >
                     {verse.number}

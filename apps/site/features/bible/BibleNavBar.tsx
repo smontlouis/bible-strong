@@ -1,5 +1,7 @@
+import { useNavigate } from '@tanstack/react-router'
 import SiteLink from '@/components/SiteLink'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type MouseEvent } from 'react'
+import { siteAddress } from '../resources/pageNavigation'
 import { useI18n } from '@/locales'
 import type { BiblePageData } from './bible.functions'
 import { bibleBookName } from './bibleBooks'
@@ -10,6 +12,7 @@ import {
   buildBiblePath,
   closestBiblePresentation,
   supportedBiblePresentations,
+  type BibleLocation,
 } from './bibleRoutes'
 import { BIBLE_VERSIONS, bibleVersionName, type BibleVersion } from './bibleVersions'
 
@@ -28,6 +31,11 @@ const Chevron = () => (
  * Book, chapter, version and reading-mode controls of a Bible page, as in the study
  * workspace. Panels are native disclosures holding plain links, so they work before
  * hydration and every destination stays reachable by a crawler.
+ *
+ * On a verse or a range, another version or mode is linked as its chapter, opened at the
+ * verse: a reader's click still opens the same passage there. Linking the passage in every
+ * version and mode let crawlers render each verse about fifty times over, and ranges have
+ * no page worth indexing; a verse page of another version stays reachable from its chapter.
  */
 export default function BibleNavBar({
   page,
@@ -38,6 +46,7 @@ export default function BibleNavBar({
   onCommentariesChange?: () => void
 }) {
   const t = useI18n()
+  const navigate = useNavigate()
   const { versionId, presentation, language, book, chapter, passage, gloss } = page
   // The commentaries shown in the text follow the reader to wherever the bar leads.
   const keep = (path: string) => withInlineCommentaries(path, page.commentaryChoice)
@@ -65,6 +74,25 @@ export default function BibleNavBar({
   }, [])
 
   const location = { versionId, presentation, book, chapter, gloss }
+  // Where a version or mode leads: the passage itself on a chapter page; on a passage page,
+  // its chapter at the verse for crawlers, and the passage for a reader who clicks.
+  const passageLink = (target: BibleLocation) => {
+    const passagePath = keep(buildBiblePath({ ...target, passage }))
+    if (!passage) return { href: passagePath }
+    return {
+      href: keep(`${buildBiblePath(target)}#v${passage.startVerse}`),
+      onClick: (event: MouseEvent<HTMLAnchorElement>) => {
+        // A new tab or window takes the chapter, as the link says.
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+          return
+        }
+        const address = siteAddress(passagePath)
+        if (!address) return
+        event.preventDefault()
+        void navigate(address)
+      },
+    }
+  }
   const testaments = [
     // Deuterocanonical books (67 and above) are read within the Old Testament.
     { key: 'oldTestament' as const, books: page.books.filter(entry => entry.book < 40 || entry.book > 66) },
@@ -160,17 +188,14 @@ export default function BibleNavBar({
                       <SiteLink
                         className="bible-nav__item bible-nav__item--version"
                         aria-current={version.id === versionId ? 'true' : undefined}
-                        href={keep(
-                          buildBiblePath({
-                            versionId: version.id,
-                            presentation: closestBiblePresentation(version.id, presentation),
-                            book,
-                            chapter,
-                            passage,
-                            // An interlinear reading opened from here speaks the page language.
-                            gloss: language,
-                          })
-                        )}
+                        {...passageLink({
+                          versionId: version.id,
+                          presentation: closestBiblePresentation(version.id, presentation),
+                          book,
+                          chapter,
+                          // An interlinear reading opened from here speaks the page language.
+                          gloss: language,
+                        })}
                       >
                         <span className="min-w-0 truncate">
                           <span className="font-semibold">{version.id}</span>
@@ -215,9 +240,7 @@ export default function BibleNavBar({
                   <SiteLink
                     className="bible-nav__item bible-nav__item--mode"
                     aria-current={mode === presentation ? 'true' : undefined}
-                    href={keep(
-                      buildBiblePath({ ...location, presentation: mode, passage, gloss: language })
-                    )}
+                    {...passageLink({ ...location, presentation: mode, gloss: language })}
                   >
                     <span className="font-semibold">{t(`bible.mode.${mode}`)}</span>
                     <span className="resource-muted block text-sm">{t(`bible.mode.${mode}.hint`)}</span>

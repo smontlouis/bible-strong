@@ -19,7 +19,7 @@ import {
 import { bibleVersionName, findBibleVersion } from './bibleVersions'
 import type { ShareCardContent } from '@bible-strong/share-card-service/content'
 import { shareCardMeta } from '../share/shareCardMeta'
-import { shareCardExcerpt, shareCardVerse } from '../share/shareCardText'
+import { shareCardVerse } from '../share/shareCardText'
 
 const VERSE_TITLE_LENGTH = 90
 
@@ -55,24 +55,18 @@ export const buildBibleHead = (page: BiblePageData) => {
   const path = buildBiblePath({ ...location, gloss })
   const url = absoluteSiteUrl(path)
   const versionName = version ? bibleVersionName(version, language) : versionId
-  // A verse is shared for its words, a chapter for its name; a range shows how it begins.
+  // A verse is shared for its words, a chapter for its name. A range shares the card of its
+  // chapter: the image is drawn once per chapter instead of once per range, and ranges are
+  // endless (each one drawn costs about a second of work).
   const shareCard: ShareCardContent = page.study
     ? { kind: 'text', kicker: reference, chip: versionId, text: shareCardVerse(page.study.text) }
-    : passage
-      ? {
-          kind: 'title',
-          kicker: versionName,
-          chip: versionId,
-          title: reference,
-          excerpt: shareCardExcerpt(page.description.replace(/^.*? — /u, ''), false),
-        }
-      : {
-          kind: 'title',
-          kicker: versionName,
-          chip: presentation === 'text' ? versionId : READINGS[presentation][language],
-          title: reference,
-          large: true,
-        }
+    : {
+        kind: 'title',
+        kicker: versionName,
+        chip: presentation === 'text' ? versionId : READINGS[presentation][language],
+        title: `${bibleBookName(book, language)} ${chapter}`,
+        large: true,
+      }
   // The interlinear reading exists with French and with English glosses.
   const alternates =
     presentation === 'interlinear'

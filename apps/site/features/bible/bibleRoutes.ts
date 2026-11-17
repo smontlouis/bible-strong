@@ -174,6 +174,18 @@ export const buildBiblePath = ({
   return `/${segments.join('/')}`
 }
 
+/**
+ * The verse page of a verse read in a version, whatever the mode the reader is in. A verse in
+ * a study mode is not indexed: the verse page read as text is the one search engines know.
+ */
+export const buildBibleVersePath = ({
+  versionId,
+  book,
+  chapter,
+  verse,
+}: Pick<BibleLocation, 'versionId' | 'book' | 'chapter'> & { verse: number }): string =>
+  buildBiblePath({ versionId, book, chapter, passage: { startVerse: verse } })
+
 /** `/bible/:version` — the books and chapters of a version. */
 export const buildBibleVersionPath = (versionId: string): string =>
   `/bible/${bibleVersionSlug(versionId)}`

@@ -32,6 +32,7 @@ import { loadVerseStudy, type VerseStudyData } from './bibleVerseStudy'
 import { createInstanceCache } from './instanceCache'
 import {
   buildBiblePath,
+  buildBibleVersePath,
   INTERLINEAR_VERSION_ID,
   parseBibleRoute,
   type BiblePassage,
@@ -401,12 +402,11 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
     )
 
     const studied = studiedVerse === undefined ? undefined : selected[0]
-    const location = { versionId: version.id, presentation, book, chapter, gloss }
     const contextVerse = ({ number, text: verseText }: { number: number; text: string }) => ({
       verse: number,
       text: quoteVerseText(verseText),
       path: withInlineCommentaries(
-        buildBiblePath({ ...location, passage: { startVerse: number } }),
+        buildBibleVersePath({ versionId: version.id, book, chapter, verse: number }),
         commentaryChoice
       ),
     })
@@ -503,9 +503,11 @@ export const loadBiblePage = createServerFn({ method: 'GET' })
           }
         : renderBibleText(selected, {
             blocksAfterVerse: commentsByVerse,
+            // A verse number leads to the verse page read as text, from any mode: a verse
+            // in a study mode is not indexed, and each one linked from here was crawled.
             verseHref: verse =>
               withInlineCommentaries(
-                buildBiblePath({ ...location, passage: { startVerse: verse } }),
+                buildBibleVersePath({ versionId: version.id, book, chapter, verse }),
                 commentaryChoice
               ),
             verseLabel: verse => `${bibleBookName(book, language)} ${chapter}:${verse}`,

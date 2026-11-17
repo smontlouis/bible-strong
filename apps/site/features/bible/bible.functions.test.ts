@@ -91,6 +91,13 @@ describe('loadBiblePage', () => {
     expect(page.html).not.toContain('/bible/niv/matt/17/21')
   })
 
+  it('leads the verse numbers of a Strong chapter to the verse pages read as text', async () => {
+    const page = await load('kjv/strong/matt/17')
+
+    expect(page.html).toContain('href="/bible/kjv/matt/17/20"')
+    expect(page.html).not.toContain('/bible/kjv/strong/matt/17/20')
+  })
+
   it('neither quotes a blank verse beside its neighbours nor leads to it', async () => {
     const before = await load('niv/matt/17/22')
     const after = await load('niv/matt/17/20')

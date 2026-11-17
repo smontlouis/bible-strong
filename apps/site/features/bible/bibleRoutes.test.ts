@@ -4,6 +4,7 @@ import { bibleBookName, bibleBookSlug, findBibleBook } from './bibleBooks'
 import {
   bibleVersionAids,
   buildBiblePath,
+  buildBibleVersePath,
   buildWebAppBibleUrl,
   closestBiblePresentation,
   parseBibleRoute,
@@ -146,6 +147,17 @@ describe('Bible public routes', () => {
     ).toBe('https://web.bible-strong.app/bible/bhg/interlinear/en/gen/1')
     expect(() => buildBiblePath({ versionId: 'S21', presentation: 'strong', book: 1, chapter: 1 })).toThrow(
       'BIBLE_ROUTE_INVALID'
+    )
+  })
+})
+
+describe('Verse page of a verse', () => {
+  it('is the verse read as text, whatever the mode it is linked from', () => {
+    expect(buildBibleVersePath({ versionId: 'LSG', book: 43, chapter: 3, verse: 16 })).toBe(
+      '/bible/lsg/john/3/16'
+    )
+    expect(buildBibleVersePath({ versionId: 'BHG', book: 1, chapter: 1, verse: 1 })).toBe(
+      '/bible/bhg/gen/1/1'
     )
   })
 })

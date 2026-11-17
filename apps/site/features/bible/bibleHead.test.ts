@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { BiblePageData } from './bible.functions'
 import { buildBibleHead } from './bibleHead'
 
@@ -41,5 +41,19 @@ describe('Indexing of a Bible page', () => {
     expect(
       robots(page({ commentaryChoice: ['mhy-fr'], inlineCommentaries: [{ id: 'mhy-fr', title: 'Matthew Henry' }] }))
     ).toBe('noindex, follow')
+  })
+})
+
+const shareImage = (data: BiblePageData) =>
+  buildBibleHead(data).meta.find(meta => 'property' in meta && meta.property === 'og:image')
+
+describe('Share image of a Bible page', () => {
+  afterEach(() => vi.unstubAllEnvs())
+
+  it('gives a verse range the image of its chapter, drawn once for every range', () => {
+    vi.stubEnv('SHARE_CARD_SECRET', 'secret')
+    const chapter = shareImage(page({}))
+    expect(shareImage(page({ passage: { startVerse: 16, endVerse: 18 } }))).toEqual(chapter)
+    expect(shareImage(page({ passage: { startVerse: 1, endVerse: 21 } }))).toEqual(chapter)
   })
 })
