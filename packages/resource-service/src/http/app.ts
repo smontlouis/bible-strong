@@ -56,6 +56,7 @@ import {
   readDictionaryEntryById,
   readDictionaryEntries,
   readDictionaryPassageAnchors,
+  readDictionaryTerm,
   readDictionaryVerseWords,
   type DictionaryRepositoryService,
 } from '../domain/dictionary'
@@ -133,6 +134,7 @@ import {
   readTimelineEvents,
   type TimelineRepositoryService,
 } from '../domain/timeline'
+import { readVerseStudy } from '../domain/verseStudy'
 import { HealthResponse, ResourceApi } from './api'
 import { SearchAnalyticsAcceptedDto } from '@bible-strong/resource-domain/contracts/searchAnalyticsContract'
 import { parseBibleVerseKey } from '@bible-strong/resource-domain/contracts/bibleChapterContract'
@@ -715,6 +717,13 @@ const DictionaryApiLive = HttpApiBuilder.group(ResourceApi, 'dictionaries', hand
         Effect.mapError(cause => toHttpProblem(cause, requestId))
       )
     })
+    .handle('readDictionaryTerm', ({ path, urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return readDictionaryTerm({ language: urlParams.language, slug: path.slug }).pipe(
+        Effect.tap(() => addResponseHeaders({ 'x-request-id': requestId })),
+        Effect.mapError(cause => toHttpProblem(cause, requestId))
+      )
+    })
     .handle('discoverDictionaryPassageEntries', ({ path, urlParams, request }) => {
       const requestId = requestIdFrom(request.headers['x-request-id'])
       return discoverDictionaryPassageEntries({
@@ -1232,6 +1241,23 @@ const StudyLinksApiLive = HttpApiBuilder.group(ResourceApi, 'studyLinks', handle
   })
 )
 
+const VerseStudyApiLive = HttpApiBuilder.group(ResourceApi, 'verseStudies', handlers =>
+  handlers.handle('readVerseStudy', ({ path, urlParams, request }) => {
+    const requestId = requestIdFrom(request.headers['x-request-id'])
+    const [book, chapter, verse] = path.verseKey.split('-').map(Number)
+    return readVerseStudy({
+      language: path.language,
+      book: book!,
+      chapter: chapter!,
+      verse: verse!,
+      commentaries: (urlParams.commentaries ?? '').split(',').filter(Boolean),
+    }).pipe(
+      Effect.tap(() => addResponseHeaders({ 'x-request-id': requestId })),
+      Effect.mapError(cause => toHttpProblem(cause, requestId))
+    )
+  })
+)
+
 export const ResourceApiLive = HttpApiBuilder.api(ResourceApi).pipe(
   Layer.provide(SystemApiLive),
   Layer.provide(SearchAnalyticsApiLive),
@@ -1243,7 +1269,8 @@ export const ResourceApiLive = HttpApiBuilder.api(ResourceApi).pipe(
   Layer.provide(StrongLexiconApiLive),
   Layer.provide(SupplementaryApiLive),
   Layer.provide(TimelineApiLive),
-  Layer.provide(StudyLinksApiLive)
+  Layer.provide(StudyLinksApiLive),
+  Layer.provide(VerseStudyApiLive)
 )
 
 const unavailableRepository: BibleChapterRepositoryService = {
@@ -1282,6 +1309,7 @@ const unavailableStudyLinksRepository: StudyLinksRepositoryService = {
 
 const unavailableDictionaryRepository: DictionaryRepositoryService = {
   browseDirectory: () => Effect.succeed({ items: [], limit: 100 }),
+  findDirectoryTerm: () => Effect.succeed(undefined),
   listWorks: () => Effect.succeed([]),
   listEntries: input =>
     Effect.fail(

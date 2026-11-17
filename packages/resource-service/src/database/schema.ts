@@ -17,6 +17,8 @@ import {
 
 import type { BibleVersePresentation } from '@bible-strong/resource-domain/contracts/bibleChapterContract'
 
+import { dictionaryTermSlugSql } from './dictionaryTermSlug'
+
 const vector = customType<{ data: number[]; driverData: string; config: { dimensions: number } }>({
   dataType: config => `vector(${config!.dimensions})`,
   toDriver: value => `[${value.join(',')}]`,
@@ -563,6 +565,8 @@ export const dictionaryEntries = pgTable(
       'gin',
       sql`${table.normalized_word} gin_trgm_ops`
     ),
+    // A term page names its notion by the slug of a heading (ADR-0115).
+    index('dictionary_entries_term_slug').on(sql.raw(dictionaryTermSlugSql('"word"'))),
   ]
 )
 

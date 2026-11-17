@@ -57,3 +57,11 @@ nothing shared in the cache.
   each section appears when it is ready, and a verse already studied is read from the cache.
 - The study is drawn by the reader's DOM component under the verses; the cards it opens stay
   native.
+
+## Amendment (2026-11-17): the site reads its study in one read
+
+The single answer this decision left out for the app is what the public site now reads
+([ADR-0115](./0115-read-the-verse-study-of-a-language-in-one-read.md)): the site has no offline
+copy and makes the same choices for every reader of a language, so one answer per verse and
+language serves its 48 Bibles. The app still reads each section through its own resource access,
+and the per-resource routes stay.

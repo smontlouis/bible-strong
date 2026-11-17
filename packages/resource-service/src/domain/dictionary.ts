@@ -15,6 +15,8 @@ import {
   DictionaryEntryResponseDto,
   DictionaryRevisionDto,
   DictionarySummaryDto,
+  DictionaryTermResponseDto,
+  dictionaryTermSlug,
   DictionaryVerseWordsResponseDto,
   DictionaryWorkDto,
 } from '@bible-strong/resource-domain/contracts/dictionaryContract'
@@ -69,6 +71,9 @@ export type DictionaryDirectoryInput = {
   limit?: number
   cursor?: string
 }
+
+/** A term of the directory, by the slug of its label (ADR-0115). */
+export type DictionaryTermLookup = { language: DictionaryLanguage; slug: string }
 
 export type DictionaryEntryLookup = DictionaryResourceLookup & { word: string }
 export type DictionaryEntryIdLookup = DictionaryResourceLookup & { id: number }
@@ -180,6 +185,13 @@ export type DictionaryRepositoryService = {
   browseDirectory: (
     input: DictionaryDirectoryInput
   ) => Effect.Effect<DictionaryDirectoryPage, DictionaryRepositoryError>
+  /**
+   * The first notion, in the order of the directory of the language, whose label has the slug;
+   * nothing when none has.
+   */
+  findDirectoryTerm: (
+    input: DictionaryTermLookup
+  ) => Effect.Effect<DictionaryDirectoryItem | undefined, DictionaryRepositoryError>
 }
 
 export class DictionaryRepository extends Context.Tag('DictionaryRepository')<
@@ -226,37 +238,55 @@ export const browseDictionaryEntries = (input: DictionaryListInput) =>
     })
   })
 
+const directoryItemDto = (item: DictionaryDirectoryItem) =>
+  new DictionaryDirectoryItemDto({
+    key: item.key,
+    label: item.label,
+    normalizedLabel: item.normalizedLabel,
+    ...(item.correspondenceId ? { correspondenceId: item.correspondenceId } : {}),
+    sources: item.sources.map(
+      source =>
+        new DictionaryDirectorySourceDto({
+          resource: revisionDto(source.work, source.language, source.revision),
+          resourceId: source.resourceId,
+          title: source.title,
+          abbreviation: source.abbreviation,
+          id: source.id,
+          word: source.word,
+          normalizedWord: source.normalizedWord,
+        })
+    ),
+  })
+
 export const browseDictionaryDirectory = (input: DictionaryDirectoryInput) =>
   Effect.gen(function* () {
     const repository = yield* DictionaryRepository
     const page = yield* repository.browseDirectory(input)
     return new DictionaryDirectoryResponseDto({
       language: input.language,
-      items: page.items.map(
-        item =>
-          new DictionaryDirectoryItemDto({
-            key: item.key,
-            label: item.label,
-            normalizedLabel: item.normalizedLabel,
-            ...(item.correspondenceId ? { correspondenceId: item.correspondenceId } : {}),
-            sources: item.sources.map(
-              source =>
-                new DictionaryDirectorySourceDto({
-                  resource: revisionDto(source.work, source.language, source.revision),
-                  resourceId: source.resourceId,
-                  title: source.title,
-                  abbreviation: source.abbreviation,
-                  id: source.id,
-                  word: source.word,
-                  normalizedWord: source.normalizedWord,
-                })
-            ),
-          })
-      ),
+      items: page.items.map(directoryItemDto),
       limit: page.limit,
       ...(page.nextCursor ? { nextCursor: page.nextCursor } : {}),
     })
   })
+
+/**
+ * The notion a term page names by its slug, found by an index instead of searched for among
+ * the notions its first word brings up (ADR-0115). The slug is checked again against the
+ * label with the rule the site writes it with: the database only finds the candidates.
+ */
+export const readDictionaryTerm = (input: DictionaryTermLookup) =>
+  Effect.gen(function* () {
+    const repository = yield* DictionaryRepository
+    const found = yield* repository.findDirectoryTerm(input)
+    const notion = found && dictionaryTermSlug(found.label) === input.slug ? found : undefined
+    return new DictionaryTermResponseDto({
+      language: input.language,
+      slug: input.slug,
+      ...(notion ? { notion: directoryItemDto(notion) } : {}),
+    })
+  })
+
 
 export const readDictionaryEntry = (input: DictionaryEntryLookup) =>
   Effect.gen(function* () {

@@ -1,13 +1,15 @@
 import { Effect } from 'effect'
-import { sql, type Kysely } from 'kysely'
+import { sql, type Kysely, type RawBuilder } from 'kysely'
 
 import { tryDatabasePromise } from '../database/databaseEffect'
+import { dictionaryTermSlugSql } from '../database/dictionaryTermSlug'
 import { likeLiteral } from '../database/likePattern'
 import { makeNeonDatabase, type NeonDatabaseConfig } from '../database/neonDatabase'
 import {
   ActiveDictionaryPublicationUnavailable,
   DictionaryEntryNotFound,
   DictionaryRepositoryFailure,
+  type DictionaryDirectoryItem,
   type DictionaryEntry,
   type DictionaryLanguage,
   type DictionaryRepositoryService,
@@ -74,6 +76,118 @@ const mapWork = (row: {
   }
 }
 
+// What the directory counts as a dictionary: an active publication with the names a source shows.
+const ACTIVE_DICTIONARY_PUBLICATION = sql<boolean>`
+  publication.resource_kind = 'dictionary'
+  AND publication.status = 'active'
+  AND publication.resource_identity ~ '^dictionary:[a-z0-9]+(?:-[a-z0-9]+)*:(?:fr|en)$'
+  AND coalesce(publication.metadata->>'resource_id', '') <> ''
+  AND coalesce(publication.metadata->>'title', '') <> ''
+  AND coalesce(publication.metadata->>'abbreviation', '') <> ''
+`
+
+const DIRECTORY_ENTRY_COLUMNS = sql`
+  CASE
+    WHEN entry.correspondence_id IS NOT NULL
+      THEN 'c:' || entry.correspondence_id
+    ELSE 'e:' || publication.id::text || ':' || entry.entry_id::text
+  END AS group_key,
+  entry.correspondence_id,
+  publication.resource_identity,
+  publication.revision,
+  publication.language,
+  -- The names a source shows, rather than the whole metadata on every entry.
+  publication.metadata->>'resource_id' AS resource_id,
+  publication.metadata->>'title' AS title,
+  publication.metadata->>'abbreviation' AS abbreviation,
+  entry.entry_id,
+  entry.word,
+  entry.normalized_word
+`
+
+/**
+ * `active_entries`: every active entry of the notions holding an entry that `matches`, a notion
+ * being the entries that share a correspondence, or an entry that shares none. The matching
+ * entries are found first, so that an index can find them.
+ */
+const notionsHolding = (matches: RawBuilder<unknown>) => sql`
+  active_publications AS MATERIALIZED (
+    SELECT id, resource_identity, revision, language, metadata
+    FROM resource_publications publication
+    WHERE ${ACTIVE_DICTIONARY_PUBLICATION}
+  ),
+  matched_entries AS MATERIALIZED (
+    SELECT entry.publication_id, entry.entry_id, entry.correspondence_id
+    FROM dictionary_entries entry
+    WHERE entry.publication_id IN (SELECT id FROM active_publications)
+      AND ${matches}
+  ),
+  notion_entries AS (
+    SELECT entry.publication_id, entry.entry_id, entry.correspondence_id, entry.word, entry.normalized_word
+    FROM dictionary_entries entry
+    WHERE entry.correspondence_id IN (
+      SELECT correspondence_id FROM matched_entries WHERE correspondence_id IS NOT NULL
+    )
+    UNION ALL
+    SELECT entry.publication_id, entry.entry_id, entry.correspondence_id, entry.word, entry.normalized_word
+    FROM dictionary_entries entry
+    JOIN matched_entries matched
+      ON matched.publication_id = entry.publication_id AND matched.entry_id = entry.entry_id
+    WHERE matched.correspondence_id IS NULL
+  ),
+  active_entries AS (
+    SELECT ${DIRECTORY_ENTRY_COLUMNS}
+    FROM notion_entries entry
+    JOIN active_publications publication ON publication.id = entry.publication_id
+  )
+`
+
+/** The label of a notion: the first of its headings in the language of the directory. */
+const notionLabel = (column: 'word' | 'normalized_word', language: DictionaryLanguage) =>
+  sql`(array_agg(${sql.ref(column)} ORDER BY (language = ${language}) DESC, normalized_word, resource_identity, entry_id))[1]`
+
+/** Each notion of `page_keys` with every article filed under it, in the directory's order. */
+const NOTIONS_OF_PAGE_KEYS = sql`
+  SELECT
+    key.group_key,
+    key.label,
+    key.normalized_label,
+    key.correspondence_id,
+    jsonb_agg(
+      jsonb_build_object(
+        'work', split_part(entry.resource_identity, ':', 2),
+        'language', entry.language,
+        'revision', entry.revision,
+        'resourceId', entry.resource_id,
+        'title', entry.title,
+        'abbreviation', entry.abbreviation,
+        'id', entry.entry_id,
+        'word', entry.word,
+        'normalizedWord', entry.normalized_word
+      ) ORDER BY entry.language, entry.resource_identity, entry.entry_id
+    ) AS sources
+  FROM page_keys key
+  JOIN active_entries entry ON entry.group_key = key.group_key
+  GROUP BY key.group_key, key.label, key.normalized_label, key.correspondence_id
+  ORDER BY key.normalized_label, key.group_key
+`
+
+type DirectoryNotionRow = {
+  group_key: string
+  label: string
+  normalized_label: string
+  correspondence_id: string | null
+  sources: DictionaryDirectoryItem['sources'][number][]
+}
+
+const directoryItemFrom = (row: DirectoryNotionRow): DictionaryDirectoryItem => ({
+  key: row.group_key,
+  label: row.label,
+  normalizedLabel: row.normalized_label,
+  ...(row.correspondence_id ? { correspondenceId: row.correspondence_id } : {}),
+  sources: row.sources,
+})
+
 export const makeKyselyDictionaryRepository = (
   database: Kysely<ResourceDatabase>
 ): DictionaryRepositoryService => {
@@ -104,98 +218,28 @@ export const makeKyselyDictionaryRepository = (
         const initial = input.initial?.trim().toLocaleLowerCase()
         const search = input.search?.trim()
         const searchPattern = search ? `%${likeLiteral(search)}%` : null
-        const activePublication = sql<boolean>`
-          publication.resource_kind = 'dictionary'
-          AND publication.status = 'active'
-          AND publication.resource_identity ~ '^dictionary:[a-z0-9]+(?:-[a-z0-9]+)*:(?:fr|en)$'
-          AND coalesce(publication.metadata->>'resource_id', '') <> ''
-          AND coalesce(publication.metadata->>'title', '') <> ''
-          AND coalesce(publication.metadata->>'abbreviation', '') <> ''
-        `
-        const activeEntryColumns = sql`
-          CASE
-            WHEN entry.correspondence_id IS NOT NULL
-              THEN 'c:' || entry.correspondence_id
-            ELSE 'e:' || publication.id::text || ':' || entry.entry_id::text
-          END AS group_key,
-          entry.correspondence_id,
-          publication.resource_identity,
-          publication.revision,
-          publication.language,
-          -- The names a source shows, rather than the whole metadata on every entry.
-          publication.metadata->>'resource_id' AS resource_id,
-          publication.metadata->>'title' AS title,
-          publication.metadata->>'abbreviation' AS abbreviation,
-          entry.entry_id,
-          entry.word,
-          entry.normalized_word
-        `
         // A search gathers only the notions holding a matching heading: the headings are found
         // through their trigram indexes, then every entry of their notions. Gathering the whole
         // directory to keep a few notions of it cost a fifth of a second a call.
         const activeEntries = search
-          ? sql`
-              active_publications AS MATERIALIZED (
-                SELECT id, resource_identity, revision, language, metadata
-                FROM resource_publications publication
-                WHERE ${activePublication}
-              ),
-              matched_entries AS MATERIALIZED (
-                SELECT entry.publication_id, entry.entry_id, entry.correspondence_id
-                FROM dictionary_entries entry
-                WHERE entry.publication_id IN (SELECT id FROM active_publications)
-                  AND (entry.word ILIKE ${searchPattern} OR entry.normalized_word ILIKE ${searchPattern})
-              ),
-              notion_entries AS (
-                SELECT entry.publication_id, entry.entry_id, entry.correspondence_id, entry.word, entry.normalized_word
-                FROM dictionary_entries entry
-                WHERE entry.correspondence_id IN (
-                  SELECT correspondence_id FROM matched_entries WHERE correspondence_id IS NOT NULL
-                )
-                UNION ALL
-                SELECT entry.publication_id, entry.entry_id, entry.correspondence_id, entry.word, entry.normalized_word
-                FROM dictionary_entries entry
-                JOIN matched_entries matched
-                  ON matched.publication_id = entry.publication_id AND matched.entry_id = entry.entry_id
-                WHERE matched.correspondence_id IS NULL
-              ),
-              active_entries AS (
-                SELECT ${activeEntryColumns}
-                FROM notion_entries entry
-                JOIN active_publications publication ON publication.id = entry.publication_id
-              )
-            `
+          ? notionsHolding(
+              sql`(entry.word ILIKE ${searchPattern} OR entry.normalized_word ILIKE ${searchPattern})`
+            )
           : sql`
               active_entries AS (
-                SELECT ${activeEntryColumns}
+                SELECT ${DIRECTORY_ENTRY_COLUMNS}
                 FROM dictionary_entries entry
                 JOIN resource_publications publication ON publication.id = entry.publication_id
-                WHERE ${activePublication}
+                WHERE ${ACTIVE_DICTIONARY_PUBLICATION}
               )
             `
-        const result = await sql<{
-          group_key: string
-          label: string
-          normalized_label: string
-          correspondence_id: string | null
-          sources: Array<{
-            work: string
-            language: DictionaryLanguage
-            revision: string
-            resourceId: string
-            title: string
-            abbreviation: string
-            id: number
-            word: string
-            normalizedWord: string
-          }>
-        }>`
+        const result = await sql<DirectoryNotionRow>`
           WITH ${activeEntries},
           directory_keys AS (
             SELECT
               group_key,
-              (array_agg(word ORDER BY (language = ${input.language}) DESC, normalized_word, resource_identity, entry_id))[1] AS label,
-              (array_agg(normalized_word ORDER BY (language = ${input.language}) DESC, normalized_word, resource_identity, entry_id))[1] AS normalized_label,
+              ${notionLabel('word', input.language)} AS label,
+              ${notionLabel('normalized_word', input.language)} AS normalized_label,
               max(correspondence_id) AS correspondence_id,
               bool_or(${search ?? null}::text IS NULL OR word ILIKE ${searchPattern} OR normalized_word ILIKE ${searchPattern}) AS matches_search
             FROM active_entries
@@ -215,39 +259,12 @@ export const makeKyselyDictionaryRepository = (
             ORDER BY normalized_label, group_key
             LIMIT ${limit + 1}
           )
-          SELECT
-            key.group_key,
-            key.label,
-            key.normalized_label,
-            key.correspondence_id,
-            jsonb_agg(
-              jsonb_build_object(
-                'work', split_part(entry.resource_identity, ':', 2),
-                'language', entry.language,
-                'revision', entry.revision,
-                'resourceId', entry.resource_id,
-                'title', entry.title,
-                'abbreviation', entry.abbreviation,
-                'id', entry.entry_id,
-                'word', entry.word,
-                'normalizedWord', entry.normalized_word
-              ) ORDER BY entry.language, entry.resource_identity, entry.entry_id
-            ) AS sources
-          FROM page_keys key
-          JOIN active_entries entry ON entry.group_key = key.group_key
-          GROUP BY key.group_key, key.label, key.normalized_label, key.correspondence_id
-          ORDER BY key.normalized_label, key.group_key
+          ${NOTIONS_OF_PAGE_KEYS}
         `.execute(database)
         const rows = result.rows
         const pageRows = rows.slice(0, limit)
         return {
-          items: pageRows.map(row => ({
-            key: row.group_key,
-            label: row.label,
-            normalizedLabel: row.normalized_label,
-            ...(row.correspondence_id ? { correspondenceId: row.correspondence_id } : {}),
-            sources: row.sources,
-          })),
+          items: pageRows.map(directoryItemFrom),
           limit,
           ...(rows.length > limit && pageRows.length > 0
             ? {
@@ -258,6 +275,35 @@ export const makeKyselyDictionaryRepository = (
               }
             : {}),
         }
+      }).pipe(Effect.mapError(cause => new DictionaryRepositoryFailure({ cause }))),
+    // The notions holding a heading of that slug, through the index on the slug of the
+    // headings, labelled and ordered as the directory labels and orders them; the first whose
+    // label has the slug. A notion is named by its label, which may be another of its headings.
+    findDirectoryTerm: input =>
+      tryDatabasePromise('dictionary.directory.term', async () => {
+        const result = await sql<DirectoryNotionRow>`
+          WITH ${notionsHolding(sql`${sql.raw(dictionaryTermSlugSql('entry.word'))} = ${input.slug}`)},
+          directory_keys AS (
+            SELECT
+              group_key,
+              ${notionLabel('word', input.language)} AS label,
+              ${notionLabel('normalized_word', input.language)} AS normalized_label,
+              max(correspondence_id) AS correspondence_id
+            FROM active_entries
+            GROUP BY group_key
+            HAVING bool_or(language = ${input.language})
+          ),
+          page_keys AS (
+            SELECT group_key, label, normalized_label, correspondence_id
+            FROM directory_keys
+            WHERE ${sql.raw(dictionaryTermSlugSql('label'))} = ${input.slug}
+            ORDER BY normalized_label, group_key
+            LIMIT 1
+          )
+          ${NOTIONS_OF_PAGE_KEYS}
+        `.execute(database)
+        const [row] = result.rows
+        return row ? directoryItemFrom(row) : undefined
       }).pipe(Effect.mapError(cause => new DictionaryRepositoryFailure({ cause }))),
     listWorks: language =>
       tryDatabasePromise('dictionary.publications.list-active', async () => {

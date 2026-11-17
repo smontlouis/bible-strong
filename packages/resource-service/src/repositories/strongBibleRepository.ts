@@ -539,6 +539,19 @@ export const makeKyselyStrongBibleRepository = (
           })),
         }
       }),
+    // A verse study reads one verse of a chapter: its spans alone, a thirtieth of a chapter.
+    findActiveVerse: input =>
+      Effect.gen(function* () {
+        const publication = yield* findActivePublication(input.versionId)
+        if (!publication) {
+          return yield* new ActiveStrongBiblePublicationUnavailable({ versionId: input.versionId })
+        }
+        const spanRows = yield* loadSpanRows(publication.id, [input])
+        return {
+          ...revisionFrom(publication),
+          spans: groupSpans(spanRows).get(`${input.book}-${input.chapter}-${input.verse}`) ?? [],
+        }
+      }),
     findCountsByBook,
     findCountsByBookOfReferences:
       options.referenceCountsRead === 'read-by-read'

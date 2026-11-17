@@ -432,6 +432,76 @@ describe('Resource Worker binding', () => {
     )
   })
 
+  it('renews a verse study and a term with the catalog and with any hand invalidation', async () => {
+    const catalogOf = (lsg: string, mhy: string) => ({
+      resources: {
+        'bible-strong:LSG': { contentSha256: lsg },
+        'database:MHY:fr': { contentSha256: mhy },
+      },
+    })
+    const revision = (
+      path: string,
+      catalog = catalogOf('lsg-r1', 'mhy-r1'),
+      invalidations: Record<string, number> = {}
+    ) =>
+      resourceApiCacheRevisionFrom(
+        new Request(`https://api.bible-strong.app${path}`),
+        catalog,
+        'search-r1',
+        invalidations
+      )
+    const study = '/v1/verse-studies/fr/43-3-16?commentaries=MHY'
+    const term = '/v1/dictionaries/terms/ephese?language=fr'
+    const first = await revision(study)
+    const firstTerm = await revision(term)
+
+    // The study reads the dictionaries of a language, which the catalog does not list: any
+    // publication renews it, and so does an invalidation of any resource it may read.
+    assert.notEqual(await revision(study, catalogOf('lsg-r2', 'mhy-r1')), first)
+    assert.notEqual(await revision(study, catalogOf('lsg-r1', 'mhy-r2')), first)
+    assert.notEqual(await revision(study, undefined, { 'cross-references:fr': 1 }), first)
+    assert.notEqual(await revision(study, undefined, { 'database:NAVE:fr': 1 }), first)
+    assert.notEqual(await revision(term, catalogOf('lsg-r1', 'mhy-r2')), firstTerm)
+    assert.notEqual(await revision(term, undefined, { 'database:WESTPHAL:fr': 1 }), firstTerm)
+    // Neither is the key of another route over the same catalog.
+    assert.notEqual(first, firstTerm)
+    assert.notEqual(first, await revision('/v1/dictionaries/verses/43-3-16/entries?language=fr'))
+    assert.equal(await revision(study), first)
+  })
+
+  it('keeps a verse study under the parameters it reads, so every Bible shares it', async () => {
+    const cache = new Map<string, Response>()
+    const keys: string[] = []
+    const edgeCache = {
+      match: async (request: Request) => cache.get(request.url)?.clone(),
+      put: async (request: Request, response: Response) => {
+        keys.push(request.url)
+        cache.set(request.url, response)
+      },
+    }
+    let loads = 0
+    const read = (path: string) =>
+      routeResourceApiRequest({
+        request: new Request(`https://api.bible-strong.app${path}`),
+        authorize: async () => true,
+        cache: edgeCache,
+        cacheEpoch: 'epoch',
+        waitUntil: () => undefined,
+        load: async () => {
+          loads += 1
+          return Response.json({ verseKey: '43-3-16' })
+        },
+      })
+
+    assert.equal((await read('/v1/verse-studies/fr/43-3-16?commentaries=MHY')).status, 200)
+    await new Promise(resolve => setTimeout(resolve, 0))
+    // A parameter no route reads gets the answer already kept.
+    const again = await read('/v1/verse-studies/fr/43-3-16?commentaries=MHY&version=S21')
+    assert.equal(again.headers.get('x-resource-cache'), 'HIT')
+    assert.equal(loads, 1)
+    assert.equal(keys.length, 1)
+  })
+
   it('keeps the Strong entry cache revision equal to the one the repository answers with', () => {
     // The cache module repeats the value so that it does not load Effect with the Worker.
     assert.equal(STRONG_LEXICON_ENTRY_CACHE_REVISION, STRONG_LEXICON_ENTRY_RESPONSE_REVISION)
@@ -656,6 +726,8 @@ describe('Resource Worker binding', () => {
       '/v1/strong-lexicon/entities?language=fr',
       '/v1/strong-bibles/LSG/books/19/identities/H3068/occurrences?limit=500',
       '/v1/timelines/fr/events',
+      '/v1/verse-studies/fr/43-3-16?commentaries=MHY,barnes',
+      '/v1/verse-studies/en/43-3-16',
     ]) {
       assert.equal(ttl(path), thirtyDays, path)
     }
@@ -680,6 +752,7 @@ describe('Resource Worker binding', () => {
       '/v1/dictionaries/verses/2-6-20/entries?language=fr',
       '/v1/dictionaries/bost/fr/entries?limit=500',
       '/v1/dictionaries/directory?language=fr&limit=500',
+      '/v1/dictionaries/terms/ephese?language=fr',
     ]) {
       assert.equal(ttl(path), thirtyDays, path)
     }

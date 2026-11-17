@@ -242,3 +242,45 @@ export class DictionaryDirectoryResponseDto extends Schema.Class<DictionaryDirec
   limit: Schema.Int.pipe(Schema.positive()),
   nextCursor: Schema.optional(Schema.NonEmptyString),
 }) {}
+
+/**
+ * The slug a heading is written as in an address: its letters without their accents, in lower
+ * case, every other run of characters a hyphen. A heading with no Latin letter or digit is
+ * `article`. The public site names a term page by the slug of its notion's label, and the
+ * Resource API finds the notion back by it (ADR-0115): the database compares the same rule,
+ * written in SQL next to its index, which a test keeps equal to this one.
+ */
+export const dictionaryTermSlug = (word: string): string =>
+  word
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/gu, '-')
+    .replace(/^-+|-+$/gu, '') || 'article'
+
+export const DictionaryTermSlug = Schema.String.pipe(
+  Schema.maxLength(200),
+  Schema.pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/u)
+)
+
+export class DictionaryTermPath extends Schema.Class<DictionaryTermPath>('DictionaryTermPath')({
+  slug: DictionaryTermSlug,
+}) {}
+
+export class DictionaryTermQuery extends Schema.Class<DictionaryTermQuery>('DictionaryTermQuery')({
+  language: Schema.Literal('fr', 'en'),
+}) {}
+
+/**
+ * The notion of the directory of a language whose label has this slug, as the directory lists
+ * it; the first in the order of the directory when several share it. A slug no notion has is
+ * answered without one, not as absent: the site reads an absent answer as a Resource API that
+ * does not know the route yet.
+ */
+export class DictionaryTermResponseDto extends Schema.Class<DictionaryTermResponseDto>(
+  'DictionaryTermResponseDto'
+)({
+  language: Schema.Literal('fr', 'en'),
+  slug: DictionaryTermSlug,
+  notion: Schema.optional(DictionaryDirectoryItemDto),
+}) {}

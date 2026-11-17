@@ -57,6 +57,9 @@ import {
   DictionaryPassagePath,
   DictionaryPassageQuery,
   DictionaryResourcePath,
+  DictionaryTermPath,
+  DictionaryTermQuery,
+  DictionaryTermResponseDto,
   DictionaryVersePath,
   DictionaryVerseWordsResponseDto,
 } from '@bible-strong/resource-domain/contracts/dictionaryContract'
@@ -125,6 +128,11 @@ import {
   TimelineEventsResponseDto,
   TimelineLanguagePath,
 } from '@bible-strong/resource-domain/contracts/timelineContract'
+import {
+  VerseStudyPath,
+  VerseStudyQuery,
+  VerseStudyResponseDto,
+} from '@bible-strong/resource-domain/contracts/verseStudyContract'
 import {
   InvalidResourceRequestProblem,
   ResourceInternalProblem,
@@ -291,6 +299,19 @@ const DictionaryApi = HttpApiGroup.make('dictionaries')
       .setUrlParams(DictionaryDirectoryQuery)
       .addSuccess(DictionaryDirectoryResponseDto)
       .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    // A term page names its notion by a slug; the notion is found by it (ADR-0115).
+    HttpApiEndpoint.get('readDictionaryTerm', '/v1/dictionaries/terms/:slug')
+      .setPath(DictionaryTermPath)
+      .setUrlParams(DictionaryTermQuery)
+      .addSuccess(DictionaryTermResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      // Declared for the problems the lookup shares with the other routes; an unknown slug is
+      // answered without a notion, never 404.
       .addError(ResourceNotFoundProblem, { status: 404 })
       .addError(ResourceUnavailableProblem, { status: 503 })
       .addError(ResourceInternalProblem, { status: 500 })
@@ -684,6 +705,23 @@ const TimelineApi = HttpApiGroup.make('timelines')
       .addError(ResourceInternalProblem, { status: 500 })
   )
 
+// What a verse page gathers around a verse that is the same in every Bible of a language
+// (ADR-0115). A verse with nothing to gather is answered with empty parts, never as absent.
+const VerseStudyApi = HttpApiGroup.make('verseStudies')
+  .add(
+    HttpApiEndpoint.get('readVerseStudy', '/v1/verse-studies/:language/:verseKey')
+      .setPath(VerseStudyPath)
+      .setUrlParams(VerseStudyQuery)
+      .addSuccess(VerseStudyResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      // Declared for the problems the parts share with their own routes; what a part has
+      // nothing for is left empty, and the study is never answered 404.
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .addError(ResourceRateLimitedProblem, { status: 429 })
+
 const StudyLinksPath = Schema.Struct({
   kind: StudyLinkKind,
   key: Schema.NonEmptyString,
@@ -711,4 +749,5 @@ export class ResourceApi extends HttpApi.make('resource-api')
   .add(StrongLexiconApi)
   .add(SupplementaryApi)
   .add(TimelineApi)
-  .add(StudyLinksApi) {}
+  .add(StudyLinksApi)
+  .add(VerseStudyApi) {}

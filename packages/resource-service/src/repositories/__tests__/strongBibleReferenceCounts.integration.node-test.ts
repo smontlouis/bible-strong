@@ -389,4 +389,45 @@ describe('Strong Bible counts of several references', { skip: !runIntegration },
       await isolated.dispose()
     }
   })
+
+  it('reads the words of one verse as its chapter reads them', async () => {
+    const isolated = await createIsolatedPostgres(connectionString, 'strong_verse', 1)
+    const { database } = isolated
+
+    try {
+      await insertIndex(database, 'LSG', 'lsg-strong-r1')
+      await insertPublication(database, 'bible-text:LSG', 'text-r1', {
+        text_revision: 'text-r1',
+        text_sha256: TEXT_SHA256,
+      })
+      // Another version, whose identities are numbered otherwise, is not read.
+      await insertIndex(database, 'KJV', 'kjv-strong-r1', { shift: 3 })
+      const repository = makeKyselyStrongBibleRepository(database)
+      const verseOf = (book: number, chapter: number, verse: number) =>
+        Effect.runPromise(repository.findActiveVerse!({ versionId: 'LSG', book, chapter, verse }))
+      const chapterOf = (book: number, chapter: number) =>
+        Effect.runPromise(repository.findActiveChapter({ versionId: 'LSG', book, chapter }))
+
+      for (const [book, chapter, verse] of [
+        [1, 1, 1],
+        [1, 1, 2],
+        [1, 2, 4],
+        [43, 1, 1],
+      ] as const) {
+        const alone = await verseOf(book, chapter, verse)
+        const withChapter = await chapterOf(book, chapter)
+        assert.ok(alone.spans.length > 0)
+        assert.deepEqual(
+          alone.spans,
+          withChapter.verses.find(candidate => candidate.number === verse)?.spans
+        )
+        assert.equal(alone.revision, withChapter.revision)
+      }
+      // A verse with no tagged word, in a chapter that has some or none, has no spans.
+      assert.deepEqual((await verseOf(1, 1, 3)).spans, [])
+      assert.deepEqual((await verseOf(2, 9, 9)).spans, [])
+    } finally {
+      await isolated.dispose()
+    }
+  })
 })

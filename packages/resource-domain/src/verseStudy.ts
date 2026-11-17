@@ -2,6 +2,13 @@
 // verse the app's reader holds in focus (ADR-0088). The two read their data in their own way;
 // they share which passages and articles are named, and how many.
 
+import {
+  createStrongIdentity,
+  getDisplayedStrongIdentities,
+  STRONG_IDENTITY_KINDS,
+  type StrongIdentity,
+} from './strongIdentities'
+
 /** How many of each kind a surface names; the rest stays a link away. */
 export const VERSE_STUDY_LIMITS = {
   /** The public verse page, read on a desktop as well as a phone. */
@@ -79,4 +86,34 @@ export const verseDictionaryEntries = <Entry extends DictionaryEvidence>(
       return true
     })
     .slice(0, limit)
+}
+
+type TaggedIdentity = { kind: string; code: string }
+
+const isStrongIdentity = (identity: TaggedIdentity): identity is StrongIdentity =>
+  (STRONG_IDENTITY_KINDS as readonly string[]).includes(identity.kind)
+
+/**
+ * The Strong entries the tagged words of a verse open, each once, as a sense code (`H0430`,
+ * `H1254A`): of the identities a word is tagged with, the most precise of each number, as a
+ * reader is shown them. The site names a word by this code and reads its entry by it; the
+ * Resource API reads the same entries for the verse study it gathers (ADR-0115), so neither
+ * names a word the other has no entry for.
+ */
+export const verseStudyStrongCodes = (
+  spans: readonly { identities: readonly TaggedIdentity[] }[]
+): string[] => {
+  const codes = spans.flatMap(span =>
+    getDisplayedStrongIdentities(span.identities.filter(isStrongIdentity)).flatMap(identity =>
+      /^[hg]\d+[a-z]*$/iu.test(identity.code)
+        ? [
+            createStrongIdentity(
+              identity.code,
+              identity.code[0]?.toLowerCase() === 'h' ? 'hebrew' : 'greek'
+            ).code,
+          ]
+        : []
+    )
+  )
+  return [...new Set(codes)]
 }

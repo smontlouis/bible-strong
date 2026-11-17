@@ -38,6 +38,10 @@ const STRONG_LEXICON_BATCH_RESPONSE_REVISION = 'strong-lexicon-batch-case-sensit
 // A Worker older than the option ignored it and cached the gathered list under the same URL.
 const STRONG_LEXICON_ALL_IDENTITIES_RESPONSE_REVISION = 'strong-lexicon-browse-all-identities-v1'
 const DICTIONARY_PASSAGE_DISCOVERY_RESPONSE_REVISION = 'dictionary-passage-discovery-directory-v1'
+// A verse study gathers the answers of several routes (ADR-0115): it carries the revisions of
+// those that have their own, so that bumping one of them renews the studies too.
+const VERSE_STUDY_RESPONSE_REVISION = 'verse-study-v1'
+const DICTIONARY_TERM_RESPONSE_REVISION = 'dictionary-term-v1'
 
 type CatalogEntry = { contentSha256?: unknown; archiveSha256?: unknown }
 
@@ -166,6 +170,26 @@ export const resourceApiCacheRevisionFrom = async (
       STRONG_LEXICON_ALL_IDENTITIES_RESPONSE_REVISION,
     ])
   }
+  // A verse study reads a dozen resources, the dictionaries of a language among them, which
+  // the catalog does not list by language; a term reads the dictionaries of a language too.
+  // Their key is the whole catalog, as for the dictionary articles of a verse, and every hand
+  // invalidation: one made for any resource they read must renew them.
+  if (/^\/v1\/verse-studies\/[^/]+\/[^/]+$/u.test(pathname)) {
+    return resourceApiCacheEpochFrom([
+      requestRevision,
+      invalidations,
+      VERSE_STUDY_RESPONSE_REVISION,
+      STRONG_LEXICON_BATCH_RESPONSE_REVISION,
+      DICTIONARY_PASSAGE_DISCOVERY_RESPONSE_REVISION,
+    ])
+  }
+  if (/^\/v1\/dictionaries\/terms\/[^/]+$/u.test(pathname)) {
+    return resourceApiCacheEpochFrom([
+      requestRevision,
+      invalidations,
+      DICTIONARY_TERM_RESPONSE_REVISION,
+    ])
+  }
   if (/^\/v1\/dictionaries\/verses\/[^/]+\/entries$/u.test(pathname)) {
     return resourceApiCacheEpochFrom([
       requestRevision,
@@ -228,6 +252,8 @@ const LONG_LIVED_PATHS = [
   /^\/v1\/cross-references\/[^/]+\/verses\/[^/]+$/,
   /^\/v1\/timelines\/[^/]+\/events\/[^/]+$/,
   /^\/v1\/study-links\/[^/]+\/[^/]+$/,
+  /^\/v1\/verse-studies\/[^/]+\/[^/]+$/,
+  /^\/v1\/dictionaries\/terms\/[^/]+$/,
   // Lists and their pages: their keys name the content they read like those of reads.
   /^\/v1\/naves\/[^/]+\/topics$/,
   /^\/v1\/dictionaries\/directory$/,

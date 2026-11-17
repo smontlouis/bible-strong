@@ -31,6 +31,32 @@ const repository: DictionaryRepositoryService = {
       ],
       limit: input.limit ?? 100,
     }),
+  // The repository finds candidates by an index; `wrong-label` stands for one whose label the
+  // rule of the site would not write with that slug.
+  findDirectoryTerm: input =>
+    Effect.succeed(
+      input.slug === 'ange' || input.slug === 'wrong-label'
+        ? {
+            key: 'c:dictionary-correspondence-ange',
+            label: 'Ange',
+            normalizedLabel: 'ange',
+            correspondenceId: 'dictionary-correspondence-ange',
+            sources: [
+              {
+                work: 'westphal',
+                language: input.language,
+                revision: 'dictionary-westphal-fr-r1',
+                resourceId: 'WESTPHAL',
+                title: 'Dictionnaire encyclopédique de la Bible',
+                abbreviation: 'Westphal',
+                id: 43,
+                word: 'Ange',
+                normalizedWord: 'ange',
+              },
+            ],
+          }
+        : undefined
+    ),
   listWorks: language =>
     Effect.succeed([
       {
@@ -245,6 +271,48 @@ describe('v1 Dictionary API', () => {
       assert.deepEqual(body.entries, [
         { id: 43, word: 'Ange', normalizedWord: 'ange', evidenceKind: 'source-citation' },
       ])
+    } finally {
+      await web.dispose()
+    }
+  })
+
+  it('finds the notion of a term page by its slug, as the directory lists it', async () => {
+    const web = makeResourceWebHandler(undefined, undefined, { dictionary: repository })
+    try {
+      const term = await web.handler(
+        new Request('http://localhost/v1/dictionaries/terms/ange?language=fr')
+      )
+      assert.equal(term.status, 200)
+      const directory = await web.handler(
+        new Request('http://localhost/v1/dictionaries/directory?language=fr&search=ange')
+      )
+      const { items } = (await directory.json()) as { items: unknown[] }
+      assert.deepEqual(await term.json(), { language: 'fr', slug: 'ange', notion: items[0] })
+    } finally {
+      await web.dispose()
+    }
+  })
+
+  it('answers a slug no notion has without one, never as absent', async () => {
+    const web = makeResourceWebHandler(undefined, undefined, { dictionary: repository })
+    try {
+      for (const slug of ['nothing', 'wrong-label']) {
+        const response = await web.handler(
+          new Request(`http://localhost/v1/dictionaries/terms/${slug}?language=fr`)
+        )
+        assert.equal(response.status, 200)
+        // A label the site would write with another slug is no answer for this one.
+        assert.deepEqual(await response.json(), { language: 'fr', slug })
+      }
+      for (const path of [
+        '/v1/dictionaries/terms/Ange?language=fr',
+        '/v1/dictionaries/terms/ange-?language=fr',
+        '/v1/dictionaries/terms/ange?language=de',
+        '/v1/dictionaries/terms/ange',
+      ]) {
+        const response = await web.handler(new Request(`http://localhost${path}`))
+        assert.equal(response.status, 400, path)
+      }
     } finally {
       await web.dispose()
     }

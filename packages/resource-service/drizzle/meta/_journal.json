@@ -281,6 +281,13 @@
       "when": 1794458805793,
       "tag": "0042_drop_library_perspective_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1794913988400,
+      "tag": "0043_dictionary_term_slug",
+      "breakpoints": true
     }
   ]
 }

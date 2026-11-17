@@ -62,6 +62,14 @@ export type ResourceOriginRead = {
 }
 
 /**
+ * How many connections a request opens to Hyperdrive. A verse study reads its parts together
+ * (ADR-0115): on one connection its dozen statements would wait for each other, each a round
+ * trip to the database. A Worker request may hold six connections at a time; four leave room.
+ */
+export const databaseConnectionsFor = (request: Request): number =>
+  /^\/v1\/verse-studies\//u.test(new URL(request.url).pathname) ? 4 : 1
+
+/**
  * The repositories of one request and the database handle they share. Whoever asks for them
  * closes the database when the request is answered.
  */
@@ -103,7 +111,8 @@ export const resourceRequestServicesFor = ({
   const statementStarts = new WeakMap<object, number>()
   const database = makeHyperdriveDatabase(
     hyperdriveConnectionString,
-    onDatabaseConnection
+    onDatabaseConnection,
+    databaseConnectionsFor(request)
   ).withPlugin({
     transformQuery(args) {
       onSqlStatement()

@@ -29,6 +29,7 @@ export type StrongBibleResourceRevision = {
 }
 
 export type StrongBibleLocation = { versionId: string; book: number; chapter: number }
+export type StrongBibleVerseLocation = StrongBibleLocation & { verse: number }
 export type StrongBibleIdentityLookup = {
   versionId: string
   book: number
@@ -107,6 +108,16 @@ export type StrongBibleRepositoryService = {
   findActiveChapter: (
     input: StrongBibleLocation
   ) => Effect.Effect<ActiveStrongBibleChapter, StrongBibleRepositoryError>
+  /**
+   * The tagged words of one verse, without the rest of its chapter: none when the verse has
+   * no tags or does not exist. A repository without it is read through its chapter.
+   */
+  findActiveVerse?: (
+    input: StrongBibleVerseLocation
+  ) => Effect.Effect<
+    StrongBibleResourceRevision & { spans: readonly StrongBibleSpan[] },
+    StrongBibleRepositoryError
+  >
   findCountsByBook: (
     input: StrongBibleIdentityLookup
   ) => Effect.Effect<ActiveStrongBibleCounts, StrongBibleRepositoryError>
@@ -182,6 +193,22 @@ export const readStrongBibleChapter = (input: StrongBibleLocation) =>
           })
       ),
     })
+  })
+
+/**
+ * The tagged words of one verse, for a verse study (ADR-0115): what the chapter of the Strong
+ * Bible answers for that verse, read alone.
+ */
+export const readStrongBibleVerseSpans = (input: StrongBibleVerseLocation) =>
+  Effect.gen(function* () {
+    yield* assertSupported(input.versionId)
+    const repository = yield* StrongBibleRepository
+    if (repository.findActiveVerse) {
+      const active = yield* repository.findActiveVerse(input)
+      return active.spans.map(spanDto)
+    }
+    const chapter = yield* repository.findActiveChapter(input)
+    return (chapter.verses.find(verse => verse.number === input.verse)?.spans ?? []).map(spanDto)
   })
 
 export const readStrongBibleCounts = (input: StrongBibleIdentityLookup) =>

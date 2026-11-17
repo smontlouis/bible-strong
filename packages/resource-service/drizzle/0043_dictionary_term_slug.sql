@@ -1,0 +1,3 @@
+-- The slug a term page is named by, so that the page finds its notion through an index (ADR-0115).
+-- The expression is `dictionaryTermSlugSql` (src/database/dictionaryTermSlug.ts): a query that writes it otherwise is not served by it.
+CREATE INDEX "dictionary_entries_term_slug" ON "dictionary_entries" USING btree (coalesce(nullif(btrim(regexp_replace(lower(regexp_replace(normalize("word", NFD), '[\u0300-\u036f]', '', 'g')), '[^a-z0-9]+', '-', 'g'), '-'), ''), 'article'));
