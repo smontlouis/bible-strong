@@ -32,4 +32,12 @@ Disallow: /_serverFn/
 Disallow: /download/latest/
 Disallow: /*?*commentary=
 
+# Crawlers that bring no search readers and render hundreds of thousands of pages a day
+# (Cloudflare analytics, November 2026). The zone firewall refuses them too, robots.txt excepted.
+User-agent: ShapBot
+User-agent: Reflectionbot
+User-agent: ElevenlabsCrawler
+User-agent: Epochal-Search
+Disallow: /
+
 Sitemap: https://bible-strong.app/sitemap.xml

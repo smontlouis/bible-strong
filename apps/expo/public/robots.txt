@@ -4,5 +4,10 @@ User-agent: Googlebot
 User-agent: Bingbot
 Allow: /
 
+# Applebot follows the Googlebot group when no group names it: it fetched about 110,000 pages and
+# their scripts here every day (November 2026). Its own group keeps it on bible-strong.app.
+User-agent: Applebot
+Disallow: /
+
 User-agent: *
 Disallow: /
