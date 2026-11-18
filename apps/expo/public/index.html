@@ -1,7 +1,10 @@
 <!doctype html>
-<html lang="%LANG_ISO_CODE%">
+<!-- The app sets `lang` to its own language once it loads (i18n/index.tsx). `translate="no"` keeps
+     browser translators (Edge, Chrome) off the page: a machine translation of the Bible text is never wanted. -->
+<html lang="fr" translate="no">
   <head>
     <meta charset="utf-8" />
+    <meta name="google" content="notranslate" />
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title>%WEB_TITLE%</title>

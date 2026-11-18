@@ -54,6 +54,16 @@ const languageDetector = {
   },
 }
 
+// On the Web, the page's language tells the browser what language its text is in. Left at English,
+// Edge offered to translate the French Bible and turned « bras » into « soutiens-gorges ».
+const syncDocumentLanguage = (language: string) => {
+  if (typeof document === 'undefined') return
+  document.documentElement.lang = isActiveLanguage(language) ? language : DEFAULT_LANGUAGE
+}
+
+// Registered before init, which emits the first languageChanged.
+i18n.on('languageChanged', syncDocumentLanguage)
+
 // Init at module level so the promise is already resolved when useAppLoad awaits it.
 // Resources are already in memory (require'd above) and languageDetector is synchronous.
 const initPromise = i18n
