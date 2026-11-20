@@ -12,7 +12,9 @@ import {
   getCommentaryBibleViewRoute,
   getCommentaryPassageBibleViewRoute,
 } from './commentaryReferenceNavigation'
+import { useAtomValue } from 'jotai/react'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { activeBibleTabVersionAtom } from '~state/tabs'
 
 /** Shared article presentation for the full page and its inline preview. */
 export default function CommentarySectionCard({
@@ -37,6 +39,8 @@ export default function CommentarySectionCard({
   preview?: boolean
 }) {
   const pushRouteOnce = usePushRouteOnce()
+  // Its passages open in the version being read.
+  const readingVersion = useAtomValue(activeBibleTabVersionAtom)
   const { t } = useTranslation()
   const start = section.rangeStartVerse
   const end = section.rangeEndVerse
@@ -60,6 +64,7 @@ export default function CommentarySectionCard({
               chapter,
               startVerse: start,
               endVerse: end,
+              version: readingVersion,
             })
             if (route) pushRouteOnce(route)
           }}
@@ -70,7 +75,7 @@ export default function CommentarySectionCard({
           value={section.content}
           onLinkPress={href => {
             const osis = commentaryHrefToOsis(href)
-            const route = osis ? getCommentaryBibleViewRoute(osis) : undefined
+            const route = osis ? getCommentaryBibleViewRoute(osis, readingVersion) : undefined
             if (route) pushRouteOnce(route)
             else if (/^https?:\/\//iu.test(href)) void Linking.openURL(href)
           }}

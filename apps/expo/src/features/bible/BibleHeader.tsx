@@ -234,7 +234,7 @@ const Header = ({
   const bookTriggerClassName = `overflow-hidden border-continuous items-center justify-center pl-[12px] h-[32px] ${
     isParallel ? 'pr-[12px]' : 'pr-[7px]'
   }`
-  const bookTriggerContent = (
+  const renderBookTriggerContent = (label: string) => (
     <>
       <AnimatedBox
         className={`overflow-hidden border-continuous bg-light-grey absolute left-[0px] bottom-[0px] right-[0px] top-[0px] ${
@@ -242,10 +242,39 @@ const Header = ({
         }`}
         style={opacityTransitionStyle}
       />
-      <AnimatedText className="font-bold text-[14px]" style={translateYTransitionStyle}>
-        {isSmall ? truncate(`${bookName} ${chapter}`, 10) : `${bookName} ${chapter}`}
+      <AnimatedText
+        className="font-bold text-[14px]"
+        numberOfLines={1}
+        style={translateYTransitionStyle}
+      >
+        {label}
       </AnimatedText>
     </>
+  )
+  const bookTriggerContent = renderBookTriggerContent(
+    isSmall ? truncate(`${bookName} ${chapter}`, 10) : `${bookName} ${chapter}`
+  )
+  // The book selector the chapter header opens; a passage chosen in it ends the focus.
+  const renderBookTrigger = (label: string, accessibilityReference: string) => (
+    <BibleSelectorTrigger
+      kind="book"
+      data={getDefaultStore().get(bibleAtom).data}
+      actions={actions}
+      coverage={coverage}
+      className={bookTriggerClassName}
+      onPress={() => {
+        openBookSelector({
+          actions,
+          data: getDefaultStore().get(bibleAtom).data,
+        })
+      }}
+      accessibilityRole="button"
+      accessibilityLabel={t('accessibility.chooseBookAndChapter', {
+        reference: accessibilityReference,
+      })}
+    >
+      {renderBookTriggerContent(label)}
+    </BibleSelectorTrigger>
   )
 
   const isVerticalParallelMode = displayMode === 'vertical'
@@ -581,17 +610,16 @@ const Header = ({
         ) : null}
         {hasFocusVerses && !planPassage ? (
           <HStack className="overflow-hidden border-continuous flex-1 items-center">
-            <HStack className="overflow-hidden border-continuous flex-1 min-w-0 items-center gap-[10px] pl-[22px]">
-              <AnimatedText
-                className="font-bold text-[14px]"
-                numberOfLines={1}
-                style={[{ flexShrink: 1 }, translateYTransitionStyle]}
-              >
-                {isParallel ? `${focusedReference} - ${version}` : focusedReference}
-              </AnimatedText>
+            <HStack className="overflow-hidden border-continuous flex-1 min-w-0 items-center gap-[3px] pl-[10px]">
+              <HStack className="overflow-hidden border-continuous shrink min-w-0">
+                {renderBookTrigger(
+                  isParallel ? `${focusedReference} - ${version}` : focusedReference,
+                  focusedReference
+                )}
+              </HStack>
               {!isParallel && (
                 <HStack className="overflow-hidden border-continuous shrink-0">
-                  {renderVersionChip(true)}
+                  {renderVersionChip(false)}
                 </HStack>
               )}
             </HStack>
@@ -625,25 +653,10 @@ const Header = ({
                     {bookTriggerContent}
                   </Box>
                 ) : (
-                  <BibleSelectorTrigger
-                    kind="book"
-                    data={getDefaultStore().get(bibleAtom).data}
-                    actions={actions}
-                    coverage={coverage}
-                    className={bookTriggerClassName}
-                    onPress={() => {
-                      openBookSelector({
-                        actions,
-                        data: getDefaultStore().get(bibleAtom).data,
-                      })
-                    }}
-                    accessibilityRole="button"
-                    accessibilityLabel={t('accessibility.chooseBookAndChapter', {
-                      reference: `${bookName} ${chapter}`,
-                    })}
-                  >
-                    {bookTriggerContent}
-                  </BibleSelectorTrigger>
+                  renderBookTrigger(
+                    isSmall ? truncate(`${bookName} ${chapter}`, 10) : `${bookName} ${chapter}`,
+                    `${bookName} ${chapter}`
+                  )
                 )}
               </HStack>
               {!isParallel && renderVersionChip(false)}

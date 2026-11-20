@@ -428,8 +428,8 @@ const openEndpoint = (
       return
     case 'verse':
       if (intent.origin === 'focus-study') {
-        // A cross reference of the study opens on its verse, in the default version; the verse
-        // in another version, from « Dans d’autres versions », in that version.
+        // A cross reference of the study opens on its verse, in the version it was read in; the
+        // verse in another version, from « Dans d’autres versions », in that version.
         const { book, chapter, verse } = parseVerseKey(endpoint.verseKeys[0])
         context.world.navigate({
           pathname: '/bible-view',
@@ -438,7 +438,7 @@ const openEndpoint = (
             book: String(book),
             chapter: String(chapter),
             verse: String(verse),
-            ...(endpoint.version && { version: endpoint.version }),
+            version: endpoint.version ?? data.selectedVersion,
           },
         })
         return

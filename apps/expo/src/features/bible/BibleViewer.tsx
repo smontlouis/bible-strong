@@ -775,12 +775,13 @@ const BibleViewer = ({
     studiedVerse !== null && studyVerses.includes(studiedVerse) ? studiedVerse : studyVerses[0]
   const studyVerseKey = `${book.Numero}-${chapter}-${currentStudyVerse}`
   const focusStudy = useFocusVerseStudy({
-    // Only the reader on screen reads it: a tab kept in the background waits to be shown.
+    // Only the reader on screen reads it: a tab kept in the background waits to be shown. A
+    // reader opened by a route, like a cross reference on the web or Android, is always shown.
     enabled:
       isContextFocused &&
       currentStudyVerse !== undefined &&
       !planPassage &&
-      (isFormSheet || activeBibleTabId === bible.id),
+      (isFormSheet || !isInTab || activeBibleTabId === bible.id),
     verseKey: studyVerseKey,
     studyVerses,
     version,

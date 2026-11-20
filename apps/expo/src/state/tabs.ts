@@ -317,6 +317,12 @@ export const DEFAULT_GROUP_ID = 'default-group'
 // DEFAULT FACTORIES
 // ============================================================================
 
+/** A passage chosen in the book selector is read in its chapter: the focus it was chosen from ends. */
+export const chapterReading = {
+  focusVerses: undefined,
+  contextDisplayMode: 'fullChapter',
+} as const satisfies Partial<BibleTab['data']>
+
 export const getDefaultBibleTab = (version?: VersionCode): BibleTab => ({
   id: `bible-${generateUUID()}`,
   isRemovable: true,
@@ -782,6 +788,15 @@ export const activeTabIdAtom = atom(get => {
 // @deprecated Use activeTabIdAtom instead
 export const activeAtomIdAtom = activeTabIdAtom
 
+/** The version of the active Bible tab, if a Bible tab is active: the version being read. */
+export const activeBibleTabVersionAtom = atom<VersionCode | undefined>(get => {
+  const tabsAtoms = get(tabsAtomsAtom)
+  const activeTabIndex = get(activeTabIndexAtom)
+  if (activeTabIndex < 0 || activeTabIndex >= tabsAtoms.length) return undefined
+  const tab = get(tabsAtoms[activeTabIndex])
+  return tab.type === 'bible' ? tab.data.selectedVersion : undefined
+})
+
 // Cached tab IDs (global cache shared across all groups)
 // Uses stable tab.id instead of atom.toString()
 // Storage atom - holds the actual cached tab IDs in memory
@@ -1038,6 +1053,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
         draft.data.selectedBook = draft.data.temp.selectedBook
         draft.data.selectedChapter = draft.data.temp.selectedChapter
         draft.data.selectedVerse = draft.data.temp.selectedVerse
+        Object.assign(draft.data, chapterReading)
       })
     )
   }

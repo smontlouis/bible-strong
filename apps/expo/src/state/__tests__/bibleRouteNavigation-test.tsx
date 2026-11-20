@@ -123,3 +123,45 @@ describe('Bible route navigation adapter', () => {
     expect(adapter.replaceWithChapter).toHaveBeenCalledWith(getBook(1), 1)
   })
 })
+
+describe('Book selector validation in a tab', () => {
+  const bibleAtom = atom<BibleTab>(getDefaultBibleTab('LSG'))
+  let actions: BibleTabActions
+  let renderer: ReactTestRenderer
+
+  const Harness = () => {
+    actions = useBibleTabActions(bibleAtom)
+    return null
+  }
+
+  beforeEach(() => {
+    const tab = getDefaultBibleTab('LSG')
+    getDefaultStore().set(bibleAtom, {
+      ...tab,
+      data: { ...tab.data, focusVerses: [4], contextDisplayMode: 'focused' },
+    })
+    ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
+    act(() => {
+      renderer = create(<Harness />)
+    })
+  })
+
+  afterEach(() => act(() => renderer.unmount()))
+
+  it('ends the focus and opens the chosen chapter on its verse', () => {
+    const john = getBook(43)!
+    act(() => {
+      actions.setTempSelectedBook(john)
+      actions.setTempSelectedChapter(3)
+      actions.setTempSelectedVerse(16)
+      actions.validateTempSelected()
+    })
+
+    const { data } = getDefaultStore().get(bibleAtom)
+    expect(data.selectedBook).toBe(john)
+    expect(data.selectedChapter).toBe(3)
+    expect(data.selectedVerse).toBe(16)
+    expect(data.focusVerses).toBeUndefined()
+    expect(data.contextDisplayMode).toBe('fullChapter')
+  })
+})

@@ -9,6 +9,7 @@ import { Book } from '~assets/bible_versions/books-desc'
 import Box from '~common/ui/Box'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
+import { chapterReading } from '~state/tabs'
 import { HelpTip } from '~features/tips/HelpTip'
 import { bookSelectorSelectionModeAtom, bookSelectorSortAtom, bookSelectorVersesAtom } from './atom'
 import {
@@ -132,6 +133,7 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
               type: 'bible',
               data: {
                 ...bookSelectorData,
+                ...chapterReading,
                 selectionMode: bookSelectorData?.selectionMode || 'list',
                 selectedBook: book,
                 selectedChapter: chapter,

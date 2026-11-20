@@ -53,7 +53,7 @@ import {
 import { RootState } from '~redux/modules/reducer'
 import { makeWordTagsSelector } from '~redux/selectors/bible'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
-import { DictionaryTab } from '../../state/tabs'
+import { DictionaryTab, activeBibleTabVersionAtom } from '../../state/tabs'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { createDictionaryEndpoint } from '~features/studyRelations/endpoints'
@@ -117,6 +117,8 @@ const DictionnaryDetailScreen = ({
   const { t } = useTranslation()
   const page = useWidePage()
   const preferredDictionaryLanguage = useAtomValue(resourcesLanguageAtom).DICTIONNAIRE
+  // Its passages open in the version being read.
+  const readingVersion = useAtomValue(activeBibleTabVersionAtom)
   const dictionaryResourceLanguage = storedLanguage ?? preferredDictionaryLanguage
   const work = storedWork ?? getDefaultDictionaryWork(dictionaryResourceLanguage)
   const resolvedDictionaryTitle =
@@ -316,7 +318,7 @@ const DictionnaryDetailScreen = ({
 
   const openLink = ({ href, type }: HTMLViewLinkPayload) => {
     if (href.startsWith('bible://')) {
-      const route = getCommentaryBibleViewRoute(href.slice('bible://'.length))
+      const route = getCommentaryBibleViewRoute(href.slice('bible://'.length), readingVersion)
       if (route) pushRouteOnce(route)
       else toast.error('Impossible de charger cette référence biblique.')
     } else if (href.startsWith('strong://')) {

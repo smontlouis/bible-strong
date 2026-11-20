@@ -2,9 +2,8 @@ import { Platform } from 'react-native'
 import { createContext, useContext } from 'react'
 import { useResourcesLanguageValue } from '~state/resourcesLanguage'
 import { parseResourcePreviewLink, type PreviewSource } from './resourceTarget'
-import { atom } from 'jotai/vanilla'
 import { useAtomValue, useSetAtom } from 'jotai/react'
-import { activeTabIndexAtom, tabsAtom } from '~state/tabs'
+import { activeBibleTabVersionAtom } from '~state/tabs'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 import type { HTMLViewLinkPayload } from '~common/htmlContentTypes'
 import { parseReferencePreviewLink } from './referenceTarget'
@@ -16,16 +15,12 @@ export {
   type ReferencePreviewRequest,
 } from './previewHistory'
 export const PreviewNestedContext = createContext(false)
-const readerVersionAtom = atom(get => {
-  const active = get(tabsAtom)[get(activeTabIndexAtom)]
-  return active?.type === 'bible' ? active.data.selectedVersion : undefined
-})
 
 export function useReferencePreview() {
   const setHistory = useSetAtom(previewHistoryAtom)
   const nested = useContext(PreviewNestedContext)
   const languages = useResourcesLanguageValue()
-  const readerVersion = useAtomValue(readerVersionAtom)
+  const readerVersion = useAtomValue(activeBibleTabVersionAtom)
   const defaultVersion = useDefaultBibleVersion()
   return (
     payload: Pick<HTMLViewLinkPayload, 'href' | 'type'>,

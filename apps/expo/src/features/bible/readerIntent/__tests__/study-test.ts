@@ -69,9 +69,11 @@ const tab: BibleTab = {
 
 const setup = ({
   platform = 'ios',
+  readerTab = tab,
   reader: snapshot = {},
 }: {
   platform?: ReaderWorld['platform']
+  readerTab?: BibleTab
   reader?: Partial<Omit<ReaderSnapshot, 'tabAtom'>>
 } = {}) => {
   const store = createStore()
@@ -99,7 +101,7 @@ const setup = ({
   const reader: Reader = {
     now: () => ({
       tabId: 'tab-1',
-      tabAtom: atom(tab),
+      tabAtom: atom(readerTab),
       annotationMode: false,
       annotationSession: atom(INITIAL_ANNOTATION_SESSION_STATE),
       versesByVersion: {},
@@ -170,8 +172,11 @@ describe.each(['ios', 'web'] as const)('the study of a verse in focus, %s', plat
     ])
   })
 
-  it('opens a cross reference on its verse', async () => {
-    const { open, routes, preview } = setup({ platform })
+  it('opens a cross reference on its verse, in the version being read', async () => {
+    const { open, routes, preview } = setup({
+      platform,
+      readerTab: { ...tab, data: { ...tab.data, selectedVersion: 'NBS' } },
+    })
 
     await expect(
       open({ kind: 'endpoint', endpoint: { type: 'verse', verseKeys: ['19-56-9'] } })
@@ -180,7 +185,13 @@ describe.each(['ios', 'web'] as const)('the study of a verse in focus, %s', plat
     expect(routes).toEqual([
       {
         pathname: '/bible-view',
-        params: { contextDisplayMode: 'focused', book: '19', chapter: '56', verse: '9' },
+        params: {
+          contextDisplayMode: 'focused',
+          book: '19',
+          chapter: '56',
+          verse: '9',
+          version: 'NBS',
+        },
       },
     ])
   })

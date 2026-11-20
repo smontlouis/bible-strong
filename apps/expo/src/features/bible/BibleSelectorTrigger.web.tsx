@@ -30,6 +30,7 @@ import { useVersionCatalog, VersionCatalogList } from './VersionCatalogView'
 import VersionSelectorItem from './VersionSelectorItem'
 import BibleOfflineDetailsSheet from './VersionSelectorSheet/BibleOfflineDetailsSheet'
 import type { BibleSelectorTriggerProps } from './BibleSelectorTrigger'
+import { chapterReading } from '~state/tabs'
 import type { PanelScreen } from '~common/ContextualPanel/types'
 import type { Version } from '~helpers/bibleVersions'
 
@@ -225,7 +226,13 @@ export function useBookPanelScreens({
         title: t('Bible'),
         type: 'bible',
         isRemovable: true,
-        data: { ...data, selectedBook: book, selectedChapter: chapterNumber, selectedVerse: verse },
+        data: {
+          ...data,
+          ...chapterReading,
+          selectedBook: book,
+          selectedChapter: chapterNumber,
+          selectedVerse: verse,
+        },
       },
       { autoRedirect: true }
     )

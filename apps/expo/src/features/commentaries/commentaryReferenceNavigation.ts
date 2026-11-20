@@ -1,7 +1,11 @@
 import { getBook } from '~helpers/bibleBookCatalog'
 import { osisToBibleReferenceTarget } from '~helpers/bcvParser'
 
-export const getCommentaryBibleViewRoute = (osis: string) => {
+/**
+ * A passage a commentary or dictionary names opens focused, in the version being read when the
+ * caller knows it (the active Bible tab), else in the default version.
+ */
+export const getCommentaryBibleViewRoute = (osis: string, version?: string) => {
   const target = osisToBibleReferenceTarget(osis)
   if (!target) return undefined
   const focusVerses = target.focusVerses ?? [target.verse]
@@ -14,6 +18,7 @@ export const getCommentaryBibleViewRoute = (osis: string) => {
       chapter: String(target.chapter),
       verse: String(target.verse),
       focusVerses: JSON.stringify(focusVerses),
+      ...(version && { version }),
     },
   }
 }
@@ -23,11 +28,13 @@ export const getCommentaryPassageBibleViewRoute = ({
   chapter,
   startVerse,
   endVerse = startVerse,
+  version,
 }: {
   book: number
   chapter: number
   startVerse: number
   endVerse?: number
+  version?: string
 }) => {
   const bookEntry = getBook(book)
   if (
@@ -52,6 +59,7 @@ export const getCommentaryPassageBibleViewRoute = ({
       focusVerses: JSON.stringify(
         Array.from({ length: endVerse - startVerse + 1 }, (_, index) => startVerse + index)
       ),
+      ...(version && { version }),
     },
   }
 }

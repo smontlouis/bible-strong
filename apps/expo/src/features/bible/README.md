@@ -32,7 +32,10 @@ actions et leur ordre que le chapitre normal, sauf l'affichage parallèle ; les
 gestionnaires d'actions sont partagés entre les deux présentations.
 
 L'en-tête du focus garde la référence et ajoute une puce de version, qui ouvre le
-même sélecteur que le chapitre et conserve les versets ciblés. Annoter ne quitte pas
+même sélecteur que le chapitre et conserve les versets ciblés. La référence a le style
+du chapitre et ouvre le même sélecteur de livre : choisir un passage quitte le focus et
+ouvre le chapitre sur ce verset. Une référence croisée du bloc « Autour de… » s'ouvre
+dans la version de lecture. Annoter ne quitte pas
 le focus : le chapitre ne revient pas, et le bloc « Autour de… » reste visible sous le
 texte, ses liens inactifs jusqu'à la sortie de l'annotation.
 

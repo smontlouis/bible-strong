@@ -88,3 +88,19 @@ describe('commentary reference navigation', () => {
     })
   })
 })
+
+describe('commentary reference navigation in the version being read', () => {
+  it('opens an OSIS reference in the given version', () => {
+    expect(getCommentaryBibleViewRoute('Matt.3.13', 'NBS')).toMatchObject({
+      params: { verse: '13', version: 'NBS' },
+    })
+  })
+
+  it('opens a commentary passage chip in the given version', () => {
+    expect(
+      getCommentaryPassageBibleViewRoute({ book: 40, chapter: 3, startVerse: 13, version: 'NBS' })
+    ).toMatchObject({
+      params: { verse: '13', version: 'NBS' },
+    })
+  })
+})

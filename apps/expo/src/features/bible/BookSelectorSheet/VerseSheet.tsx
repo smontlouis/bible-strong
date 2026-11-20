@@ -5,7 +5,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { BibleTab, BibleTabActions } from 'src/state/tabs'
+import { BibleTab, BibleTabActions, chapterReading } from 'src/state/tabs'
 import { Book } from '~assets/bible_versions/books-desc'
 import { Verse } from '~common/types'
 import Box, { TouchableBox } from '~common/ui/Box'
@@ -82,6 +82,7 @@ const VerseSheet = ({ sheetRef, bookSelectorRef, actions, data }: VerseSheetProp
           type: 'bible',
           data: {
             ...data,
+            ...chapterReading,
             selectionMode: data?.selectionMode || 'list',
             selectedBook: tempSelectedBook,
             selectedChapter: tempSelectedChapter,

@@ -82,6 +82,8 @@ const ReferenceItem = ({ reference, version }: { reference: string; version: Ver
         chapter,
         verse,
         focusVerses: [verse],
+        // The verse opens in the version it is read in here.
+        version,
       }}
     >
       <Box className="overflow-hidden border-continuous mb-[30px]">

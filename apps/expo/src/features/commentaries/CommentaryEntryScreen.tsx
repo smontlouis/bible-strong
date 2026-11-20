@@ -3,6 +3,8 @@ import { commentaryContext } from '~features/study-assistant/resourceContext'
 import { useQuery } from '@tanstack/react-query'
 import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useAtomValue } from 'jotai/react'
+import { activeBibleTabVersionAtom } from '~state/tabs'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking } from 'react-native'
@@ -61,6 +63,8 @@ const CommentaryEntryScreen = ({
   const resources = useResourceAccess()
   const router = useRouter()
   const pushRouteOnce = usePushRouteOnce()
+  // Its passages open in the version being read.
+  const readingVersion = useAtomValue(activeBibleTabVersionAtom)
   const { t } = useTranslation()
   const canGoBackInStack = useCanGoBackInStack()
   const bottomInset = usePageBottomInset()
@@ -229,6 +233,7 @@ const CommentaryEntryScreen = ({
                     chapter,
                     startVerse: section.rangeStartVerse,
                     endVerse: section.rangeEndVerse,
+                    version: readingVersion,
                   })
                   if (route) pushRouteOnce(route)
                 }}
@@ -251,7 +256,9 @@ const CommentaryEntryScreen = ({
                   value={section.content}
                   onLinkPress={href => {
                     const osis = commentaryHrefToOsis(href)
-                    const route = osis ? getCommentaryBibleViewRoute(osis) : undefined
+                    const route = osis
+                      ? getCommentaryBibleViewRoute(osis, readingVersion)
+                      : undefined
                     if (route) pushRouteOnce(route)
                     else if (/^https?:\/\//iu.test(href)) void Linking.openURL(href)
                   }}
