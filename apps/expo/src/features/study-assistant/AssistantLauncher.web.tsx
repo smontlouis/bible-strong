@@ -57,6 +57,7 @@ import { LiveDictationAdapter } from './dictationAdapter'
 import { scriptedAnswersAtom, scriptedRequest } from './playground/scriptedAnswers'
 import { captureDictationAudio, dictationSupported } from './dictationAudio.web'
 import { convertRatedMessage, useAssistantFeedback } from './useAssistantFeedback'
+import AssistantFeedbackSheet from './AssistantFeedbackSheet'
 import { AssistantMessage, UserMessage } from './MessageRenderer.web'
 import strobiDefinition from './strobi.avatar.json'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
@@ -547,6 +548,15 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
               accessibilityLabel={t('strobi.menu.label')}
               actions={[
                 { id: 'settings', title: t('strobi.menu.settings'), image: 'gearshape' },
+                ...(feedback.available
+                  ? [
+                      {
+                        id: 'feedback',
+                        title: t('assistant.feedback.generalTitle'),
+                        image: 'bubble.left.and.bubble.right' as const,
+                      },
+                    ]
+                  : []),
                 bubbleHidden
                   ? { id: 'show', title: t('strobi.menu.show'), image: 'plus.circle' }
                   : { id: 'hide', title: t('strobi.menu.hide'), image: 'xmark.circle' },
@@ -555,6 +565,11 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                 if (nativeEvent.event === 'settings') {
                   changeOpen(false)
                   router.push('/strobi')
+                }
+                if (nativeEvent.event === 'feedback') {
+                  // One dialog at a time: under the form, the window would still take Escape.
+                  changeOpen(false)
+                  feedback.openDraft({ kind: 'general', from: 'conversation' })
                 }
                 if (nativeEvent.event === 'hide') void bubble.confirmHide()
                 if (nativeEvent.event === 'show') bubble.setHidden(false)
@@ -1038,6 +1053,8 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
           )}
         </Modal.Content>
       </Modal.Root>
+      {/* An opinion on Strobi as a whole, asked from the conversation's menu. */}
+      <AssistantFeedbackSheet place="conversation" />
     </AssistantRuntimeProvider>
   )
 }

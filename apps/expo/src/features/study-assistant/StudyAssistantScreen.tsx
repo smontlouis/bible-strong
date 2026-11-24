@@ -1,7 +1,7 @@
 import { useEffect, useEffectEvent, useState } from 'react'
 import { Platform, StyleSheet } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { useAtomValue } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { useRouter } from 'expo-router'
 import { KeyboardStickyView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -31,6 +31,7 @@ import AssistantVerifyEmailCard from './AssistantVerifyEmailCard'
 import BetaChip from './BetaChip'
 import SourceExcerptSheet from './SourceExcerptSheet'
 import { useStrobiBubble } from './strobiBubble'
+import { feedbackDraftAtom } from './useAssistantFeedback'
 import { useAssistantQuota } from './useAssistantQuota'
 
 /**
@@ -54,6 +55,7 @@ function PageHeader() {
   const { current, busy } = session
   const insets = useSafeAreaInsets()
   const bubble = useStrobiBubble()
+  const setFeedbackDraft = useSetAtom(feedbackDraftAtom)
   return (
     <HStack
       className="border-separator bg-reverse z-10 min-h-[50px] items-center pl-3 pr-2"
@@ -119,6 +121,11 @@ function PageHeader() {
         accessibilityLabel={t('strobi.menu.label')}
         actions={[
           { id: 'settings', title: t('strobi.menu.settings'), image: 'gearshape' },
+          {
+            id: 'feedback',
+            title: t('assistant.feedback.generalTitle'),
+            image: 'bubble.left.and.bubble.right',
+          },
           bubble.hidden
             ? { id: 'show', title: t('strobi.menu.show'), image: 'plus.circle' }
             : { id: 'hide', title: t('strobi.menu.hide'), image: 'xmark.circle' },
@@ -126,6 +133,8 @@ function PageHeader() {
         onPressAction={({ nativeEvent }) => {
           if (nativeEvent.event === 'settings')
             navigate({ pathname: '/strobi', params: { from: 'assistant' } })
+          if (nativeEvent.event === 'feedback')
+            setFeedbackDraft({ kind: 'general', from: 'conversation' })
           if (nativeEvent.event === 'hide') void bubble.confirmHide()
           if (nativeEvent.event === 'show') bubble.setHidden(false)
         }}
@@ -203,7 +212,7 @@ export default function StudyAssistantScreen() {
             </Box>
           </ModalRouteFrame>
           <SourceExcerptSheet source={sheet.source} onClose={() => sheet.showSource(null)} />
-          <AssistantFeedbackSheet kind="answer" />
+          <AssistantFeedbackSheet place="conversation" />
         </ComposerInsetContext.Provider>
       </AssistantSheetContext.Provider>
     </AssistantRuntimeProvider>

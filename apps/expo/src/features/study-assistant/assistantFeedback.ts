@@ -25,7 +25,13 @@ export type FeedbackAnswer = {
 /** The opinion being written: on an answer, or on Strobi as a whole. */
 export type FeedbackDraft =
   | { kind: 'answer'; answer: FeedbackAnswer; rating: FeedbackRating }
-  | { kind: 'general' }
+  | { kind: 'general'; from: FeedbackPlace }
+
+/**
+ * Where an opinion is asked from. Strobi's settings page may lie over the conversation, each with
+ * its own sheet: only the sheet of the page that asked answers.
+ */
+export type FeedbackPlace = 'conversation' | 'settings'
 
 /** The answer of a conversation with the question asked just before it. */
 export function feedbackAnswer(conversation: Conversation, messageId: string): FeedbackAnswer {

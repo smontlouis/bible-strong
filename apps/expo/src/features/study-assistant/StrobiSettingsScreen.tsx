@@ -125,7 +125,7 @@ export default function StrobiSettingsScreen() {
               <ListRow
                 icon={<FeatherIcon name="message-square" size={18} color="grey" />}
                 label={t('assistant.feedback.generalTitle')}
-                onPress={() => feedback.openDraft({ kind: 'general' })}
+                onPress={() => feedback.openDraft({ kind: 'general', from: 'settings' })}
                 trailing={
                   <HStack className="items-center gap-2">
                     <BetaChip />
@@ -185,7 +185,7 @@ export default function StrobiSettingsScreen() {
           </ListSection>
         )}
       </ScrollView>
-      <AssistantFeedbackSheet kind="general" />
+      <AssistantFeedbackSheet place="settings" />
     </Container>
   )
 }

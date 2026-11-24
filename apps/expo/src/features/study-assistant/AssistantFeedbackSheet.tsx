@@ -15,16 +15,16 @@ import {
   FEEDBACK_REASONS,
   MAX_FEEDBACK_COMMENT,
   type FeedbackDraft,
+  type FeedbackPlace,
   type FeedbackReason,
 } from './assistantFeedback'
 import { feedbackDraftAtom, useAssistantFeedback } from './useAssistantFeedback'
 
 /**
  * Where an opinion is written: what went wrong with an answer, or what the reader thinks of
- * Strobi as a whole. Each page that asks for opinions mounts it for its own kind: the settings page
- * may lie over the conversation, and only one of the two sheets must answer a draft.
+ * Strobi as a whole. Each page that asks for opinions mounts it for its own place.
  */
-export default function AssistantFeedbackSheet({ kind }: { kind: FeedbackDraft['kind'] }) {
+export default function AssistantFeedbackSheet({ place }: { place: FeedbackPlace }) {
   const { t } = useTranslation()
   const theme = useTheme()
   const wellColor = useSheetWellColor()
@@ -36,12 +36,12 @@ export default function AssistantFeedbackSheet({ kind }: { kind: FeedbackDraft['
   const [comment, setComment] = useState('')
   const sheet = useRef<SheetRef>(null)
   useEffect(() => {
-    if (!draft || draft.kind !== kind) return
+    if (!draft || (draft.kind === 'general' ? draft.from : 'conversation') !== place) return
     setShown(draft)
     setReasons([])
     setComment('')
     sheet.current?.present()
-  }, [draft, kind])
+  }, [draft, place])
 
   const down = shown?.kind === 'answer' && shown.rating === 'down'
   const empty = !comment.trim() && !reasons.length
@@ -59,7 +59,8 @@ export default function AssistantFeedbackSheet({ kind }: { kind: FeedbackDraft['
   return (
     <Sheet
       ref={sheet}
-      snapPoints={[0.6, 1]}
+      // As tall as what it holds: a few chips, a field and a button.
+      snapPoints={['auto']}
       onDismiss={() => setDraft(null)}
       header={
         <SheetHeader

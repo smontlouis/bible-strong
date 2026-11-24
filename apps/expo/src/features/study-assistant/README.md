@@ -196,7 +196,9 @@ again in the place of its turn, and counts as a question of the day. The thumbs 
 feedback buttons: `adapters.feedback` (`useAssistantFeedback().adapter`) keeps the thumb and opens
 the form of a thumb down (a sheet on native, a form in the answer's flow on the web), and
 `convertRatedMessage` gives each message the thumb this device remembers, so the buttons show it.
-Strobi's settings page takes an opinion on the assistant as a whole. Opinions are documents of
+Strobi's settings page and the conversation's menu take an opinion on the assistant as a whole, in
+a sheet as tall as what it holds (on the web the conversation's window closes first: one dialog
+at a time). Opinions are documents of
 `users/{uid}/assistantFeedback` (the answer's message id, so a new thumb replaces the old one): the
 account's own folder, which the rules already open to its owner and which deleting the account
 erases. Read them across accounts as the collection group `assistantFeedback`. An opinion on an
