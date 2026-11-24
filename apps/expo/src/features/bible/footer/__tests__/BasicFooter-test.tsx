@@ -23,7 +23,7 @@ jest.mock(
   { virtual: true }
 )
 jest.mock('~features/app-switcher/context/TabContext', () => ({
-  useBottomBarHeightInTab: () => ({ bottomBarHeight: 0 }),
+  useBottomBarHeightInTab: () => ({ bottomBarHeight: 0, miniPlayerHeight: 0 }),
 }))
 jest.mock('~common/ui/Box', () => {
   const ReactModule = jest.requireActual<typeof React>('react')

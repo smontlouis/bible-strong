@@ -21,10 +21,13 @@ export const useBottomBarHeightInTab = () => {
   const insets = useSafeAreaInsets()
   const { isInTab } = useTabContext()
   const isWide = useResponsiveWorkspace()
+  const hasTabBar = isInTab && !isWide
   // The small audio player sits in the tab bar, which grows by its height.
-  const miniPlayerHeight = useBibleAudioMiniPlayerHeight()
-  const bottomBarHeight =
-    isInTab && !isWide ? TAB_ICON_SIZE + miniPlayerHeight + insets.bottom : insets.bottom
+  const audioMiniPlayerHeight = useBibleAudioMiniPlayerHeight()
+  const miniPlayerHeight = hasTabBar ? audioMiniPlayerHeight : 0
+  const bottomBarHeight = hasTabBar
+    ? TAB_ICON_SIZE + miniPlayerHeight + insets.bottom
+    : insets.bottom
 
-  return { bottomBarHeight }
+  return { bottomBarHeight, miniPlayerHeight }
 }

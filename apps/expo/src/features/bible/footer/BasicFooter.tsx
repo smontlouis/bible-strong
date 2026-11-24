@@ -41,15 +41,19 @@ const BasicFooter = ({
   onNextChapter,
   type,
 }: BasicFooterProps) => {
-  const { bottomBarHeight } = useBottomBarHeightInTab()
+  const { bottomBarHeight, miniPlayerHeight } = useBottomBarHeightInTab()
   const isWide = useResponsiveWorkspace()
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const isFullScreenBible = useFooterFullScreen()
   const isBibleOverlayOpen = useAtomValue(isBibleOverlayOpenAtom)
 
-  const fullScreenTranslateY = isFullScreenBible ? HEADER_HEIGHT + insets.bottom + 60 : 0
-  const centerTranslateY = isFullScreenBible ? HEADER_HEIGHT : 0
+  // In full screen the tab bar, with the small audio player in it, slides away: the chapter
+  // buttons leave the screen and the play button comes down where the bar was.
+  const fullScreenTranslateY = isFullScreenBible
+    ? HEADER_HEIGHT + miniPlayerHeight + insets.bottom + 60
+    : 0
+  const centerTranslateY = isFullScreenBible ? HEADER_HEIGHT + miniPlayerHeight : 0
 
   if (isBibleOverlayOpen) return null
 
