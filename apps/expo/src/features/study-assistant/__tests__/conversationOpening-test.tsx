@@ -133,8 +133,7 @@ it('reads a pin from the saved conversation, and keeps an unpin', () => {
     messageCount: 2,
   }
   expect(
-    parseConversationMetadata('a', { ...stored, pinnedContext: passage('Jacques 2') })
-      .pinnedContext
+    parseConversationMetadata('a', { ...stored, pinnedContext: passage('Jacques 2') }).pinnedContext
   ).toEqual(passage('Jacques 2'))
   expect(parseConversationMetadata('a', { ...stored, pinnedContext: null }).pinnedContext).toBe(
     null
