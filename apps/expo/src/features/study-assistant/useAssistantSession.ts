@@ -329,6 +329,23 @@ export function useAssistantSession({
           ).finally(() => setRetrying(false))
         }
       : undefined
+  // Asking the last question again writes a new answer in the place of the one given: the same
+  // turn in the account, and one more question of the day.
+  const lastAnswer = current.messages.at(-1)
+  const regenerate =
+    !working &&
+    !error &&
+    failedQuestion?.role === 'user' &&
+    lastAnswer?.role === 'assistant' &&
+    lastAnswer.state === 'complete'
+      ? () =>
+          void send(
+            failedQuestion.text,
+            { ...current, messages: current.messages.slice(0, -2) },
+            failedQuestion.context || null,
+            failedQuestion
+          )
+      : undefined
   return {
     conversations,
     current,
@@ -386,6 +403,7 @@ export function useAssistantSession({
       reveal.flush()
     },
     retry,
+    regenerate,
     threadList: {
       threadId: current.id,
       threads: conversations.map(conversation => ({

@@ -56,7 +56,7 @@ import { OPEN_ASSISTANT_EVENT } from './returnToAssistant'
 import { LiveDictationAdapter } from './dictationAdapter'
 import { scriptedAnswersAtom, scriptedRequest } from './playground/scriptedAnswers'
 import { captureDictationAudio, dictationSupported } from './dictationAudio.web'
-import { convertMessage } from './messageRuntime'
+import { convertRatedMessage, useAssistantFeedback } from './useAssistantFeedback'
 import { AssistantMessage, UserMessage } from './MessageRenderer.web'
 import strobiDefinition from './strobi.avatar.json'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
@@ -390,18 +390,22 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
   const onNew = async (message: AppendMessage) => {
     await send(message.content.flatMap(p => (p.type === 'text' ? [p.text] : [])).join('\n'))
   }
+  const feedback = useAssistantFeedback()
   const runtime = useExternalStoreRuntime({
     adapters: {
       dictation,
       threadList: session.threadList,
+      feedback: feedback.adapter(current),
     },
     messages: current.messages,
-    convertMessage,
+    convertMessage: convertRatedMessage,
     isRunning: busy,
     onNew,
     onCancel: async () => {
       session.cancel()
     },
+    // Only the last answer is written again: see `regenerate`.
+    ...(session.regenerate ? { onReload: async () => session.regenerate?.() } : {}),
   })
   const vars = {
     // The panel is portaled outside ScopedTheme: shared components drawn in it (`text-default`,
@@ -497,6 +501,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
               <strong title={current.title || t('assistant.modal.newChat')}>
                 {current.title || t('assistant.modal.newChat')}
               </strong>
+              <span className="bs-assistant-beta">{t('assistant.beta')}</span>
             </button>
             {__DEV__ && signedIn && (
               <button
@@ -622,6 +627,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                 {!current.messages.length && (
                   <div className="bs-assistant-welcome">
                     <h2>{t('assistant.modal.welcome')}</h2>
+                    <p className="bs-assistant-beta-note">{t('assistant.betaNote')}</p>
                   </div>
                 )}
                 <ThreadPrimitive.Messages>
@@ -633,6 +639,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                         busy={busy}
                         error={error}
                         lastMessageId={current.messages.at(-1)?.id}
+                        conversation={current}
                       />
                     )
                   }

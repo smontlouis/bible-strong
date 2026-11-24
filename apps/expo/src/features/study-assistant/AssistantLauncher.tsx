@@ -29,7 +29,7 @@ import { connectAssistantDictation } from './client'
 import { LiveDictationAdapter } from './dictationAdapter'
 import { scriptedAnswersAtom, scriptedRequest } from './playground/scriptedAnswers'
 import { captureDictationAudio } from './dictationAudio'
-import { convertMessage } from './messageRuntime'
+import { convertRatedMessage, useAssistantFeedback } from './useAssistantFeedback'
 import type { StrobiAnimation } from './StrobiAvatar'
 import { useAssistantQuotaSync } from './useAssistantQuota'
 import { useAssistantSession } from './useAssistantSession'
@@ -167,15 +167,18 @@ function AccountAssistant({ account }: { account: string }) {
   const onNew = async (message: AppendMessage) => {
     await send(message.content.flatMap(p => (p.type === 'text' ? [p.text] : [])).join('\n'))
   }
+  const feedback = useAssistantFeedback()
   const runtime = useExternalStoreRuntime({
-    adapters: { dictation, threadList: session.threadList },
+    adapters: { dictation, threadList: session.threadList, feedback: feedback.adapter(current) },
     messages: current.messages,
-    convertMessage,
+    convertMessage: convertRatedMessage,
     isRunning: busy,
     onNew,
     onCancel: async () => {
       session.cancel()
     },
+    // Only the last answer is written again: see `regenerate`.
+    ...(session.regenerate ? { onReload: async () => session.regenerate?.() } : {}),
   })
   const avatarAnimation: StrobiAnimation = busy
     ? 'thinking'

@@ -138,6 +138,110 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* The assistant is in beta: said beside the conversation's title, and on an empty conversation. */
+.bs-assistant-heading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.bs-assistant-heading strong {
+  min-width: 0;
+}
+.bs-assistant-beta {
+  flex-shrink: 0;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--as-soft);
+  color: var(--as-link);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 14px;
+}
+.bs-assistant-beta-note {
+  margin: -15px 0 22px;
+  color: var(--as-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+/* The reader's opinion on an answer. */
+.bs-assistant-feedback {
+  margin-top: 4px;
+}
+.bs-assistant-feedback-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: -8px;
+}
+.bs-assistant-feedback-thanks {
+  margin-left: 6px;
+  color: var(--as-muted);
+  font-size: 12px;
+}
+.bs-assistant-feedback-thanks button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--as-link) !important;
+  font-size: 12px;
+}
+.bs-assistant-feedback-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+.bs-assistant-feedback-reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.bs-assistant-feedback-reasons button {
+  padding: 5px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--as-soft);
+  font-size: 12px;
+}
+.bs-assistant-feedback-reasons button[aria-pressed='true'] {
+  background: var(--as-accent);
+  color: white !important;
+}
+.bs-assistant-feedback-form textarea {
+  resize: vertical;
+  min-height: 72px;
+  padding: 9px 12px;
+  border: 1px solid var(--as-border);
+  border-radius: 12px;
+  background: var(--as-surface);
+  color: var(--as-ink);
+  font: inherit;
+  font-size: 13px;
+}
+.bs-assistant-feedback-form textarea:focus-visible {
+  outline: 2px solid var(--as-accent);
+  outline-offset: 1px;
+}
+.bs-assistant-feedback-form small {
+  color: var(--as-muted);
+  font-size: 11px;
+}
+.bs-assistant-feedback-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.bs-assistant-feedback-actions button {
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--as-soft);
+  font-size: 13px;
+}
+.bs-assistant-feedback-actions button[type='submit'] {
+  background: var(--as-accent);
+  color: white !important;
+}
 .bs-assistant-icon {
   border: 0;
   background: none;

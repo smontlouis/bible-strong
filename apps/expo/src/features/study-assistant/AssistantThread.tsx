@@ -122,6 +122,7 @@ function Welcome() {
       <Text className="text-grey mt-2 text-[15px]">
         {t(session.context ? 'assistant.modal.contextIntro' : 'assistant.modal.intro')}
       </Text>
+      <Text className="text-grey mt-3 text-[13px]">{t('assistant.betaNote')}</Text>
     </Box>
   )
 }
@@ -423,7 +424,12 @@ export default function AssistantThread() {
             message.role === 'user' ? (
               <UserMessage />
             ) : (
-              <AssistantMessage busy={busy} error={error} lastMessageId={lastId} />
+              <AssistantMessage
+                busy={busy}
+                error={error}
+                lastMessageId={lastId}
+                conversation={current}
+              />
             )
           }
         </ThreadPrimitive.MessagesFlatList>

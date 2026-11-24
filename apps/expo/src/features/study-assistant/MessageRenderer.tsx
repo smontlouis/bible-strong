@@ -12,11 +12,12 @@ import type {
 } from '@bible-strong/ai-contract/contract'
 import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import AnswerActions from './AnswerActions'
 import AssistantMessageMarkdown from './AssistantMessageMarkdown'
 import StudyWidget from './widgets/StudyWidget'
 import WidgetReveal from './widgets/WidgetReveal'
 import { messageSegments, placedWidgetIds } from './widgetSegments'
-import { type ReadingContext } from './conversations'
+import { type Conversation, type ReadingContext } from './conversations'
 import { contextCaption } from './contextDisplay'
 import ContextMarkIcon from './ContextMarkIcon'
 import { messagePartNames } from './messageRuntime'
@@ -58,10 +59,12 @@ export function AssistantMessage({
   busy,
   error,
   lastMessageId,
+  conversation,
 }: {
   busy: boolean
   error: string
   lastMessageId?: string
+  conversation: Conversation
 }) {
   const { t } = useTranslation()
   const message = useAuiState(s => s.message)
@@ -75,6 +78,9 @@ export function AssistantMessage({
   const widgetIds = new Set(widgets.map(widget => widget.id))
   const text = message.content.find(part => part.type === 'text')?.text || ''
   const placed = placedWidgetIds(text, widgetIds)
+  // A finished answer takes its actions and the reader's opinion, once it is fully shown.
+  const rated =
+    message.status?.type === 'complete' && !!text.trim() && !(busy && message.id === lastMessageId)
   return (
     <MessagePrimitive.Root className="mb-6">
       <MessagePrimitive.Parts>
@@ -118,6 +124,13 @@ export function AssistantMessage({
       </MessagePrimitive.Parts>
       {incomplete && !(error && message.id === lastMessageId) && (
         <Text className="text-grey mt-2 text-[13px]">{t('assistant.modal.incomplete')}</Text>
+      )}
+      {rated && (
+        <AnswerActions
+          conversation={conversation}
+          messageId={message.id}
+          last={message.id === lastMessageId}
+        />
       )}
     </MessagePrimitive.Root>
   )

@@ -185,6 +185,25 @@ until Remote Config answers on a first start, they are hidden. This only hides t
 the settings entry and Premium: it is not an authorization boundary. The Worker independently
 authenticates Firebase Auth and App Check and counts each account's questions.
 
+Beta, actions and opinions (2026-11-24, both presentations). While the assistant opens country by
+country it says it is in beta: a mark beside the conversation's title and on More's Strobi row
+(`BetaChip`), and a sentence on an empty conversation. Under each finished answer sits
+assistant-ui's action bar (`AnswerActions`): copy, share (native), write the last answer again, and
+two thumbs. Copy and share send the answer without the links that only work in the conversation
+(`answerText.ts`), which is why the web copy button is ours and not the library's. Writing again is
+the runtime's `onReload`, given only while `session.regenerate` exists: it asks the last question
+again in the place of its turn, and counts as a question of the day. The thumbs are the library's
+feedback buttons: `adapters.feedback` (`useAssistantFeedback().adapter`) keeps the thumb and opens
+the form of a thumb down (a sheet on native, a form in the answer's flow on the web), and
+`convertRatedMessage` gives each message the thumb this device remembers, so the buttons show it.
+Strobi's settings page takes an opinion on the assistant as a whole. Opinions are documents of
+`users/{uid}/assistantFeedback` (the answer's message id, so a new thumb replaces the old one): the
+account's own folder, which the rules already open to its owner and which deleting the account
+erases. Read them across accounts as the collection group `assistantFeedback`. An opinion on an
+answer carries the question and the answer, since the conversation may be gone; the form and the
+privacy policy say so. The thumbs shown are remembered per device, never read back from the
+account: no Firestore read per answer.
+
 Daily quota (2026-11-10): the Worker counts the questions of an account without Premium per UTC
 day, checks Premium itself (ADR-0110) and asks for a verified address before the free questions.
 The app only shows what it is told. `useAssistantQuotaSync` reads the quota route when the

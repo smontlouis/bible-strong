@@ -11,12 +11,13 @@ import type {
   StudyWidget as StudyWidgetDescriptor,
   ToolActivity,
 } from '@bible-strong/ai-contract/contract'
+import AnswerActions from './AnswerActions.web'
 import AssistantMessageMarkdown from './AssistantMessageMarkdown.web'
 import ToolTimeline from './ToolTimeline.web'
 import StudyWidget from './widgets/StudyWidget.web'
 import WidgetReveal from './widgets/WidgetReveal.web'
 import { messageSegments, placedWidgetIds } from './widgetSegments'
-import { type ReadingContext } from './conversations'
+import { type Conversation, type ReadingContext } from './conversations'
 import { contextCaption } from './contextDisplay'
 import ContextMarkIcon from './ContextMarkIcon.web'
 import { messagePartNames, savedToolSummary } from './messageRuntime'
@@ -79,10 +80,12 @@ export function AssistantMessage({
   busy,
   error,
   lastMessageId,
+  conversation,
 }: {
   busy: boolean
   error: string
   lastMessageId?: string
+  conversation: Conversation
 }) {
   const { t } = useTranslation()
   const message = useAuiState(s => s.message)
@@ -97,6 +100,9 @@ export function AssistantMessage({
   const widgetIds = new Set(widgets.map(widget => widget.id))
   const text = message.content.find(part => part.type === 'text')?.text || ''
   const placed = placedWidgetIds(text, widgetIds)
+  // A finished answer takes its actions and the reader's opinion, once it is fully shown.
+  const rated =
+    message.status?.type === 'complete' && !!text.trim() && !(busy && message.id === lastMessageId)
   return (
     <MessagePrimitive.Root asChild>
       <article className="bs-assistant-message bs-assistant-message-assistant">
@@ -143,6 +149,13 @@ export function AssistantMessage({
         </MessagePrimitive.Parts>
         {incomplete && !(error && message.id === lastMessageId) && (
           <small className="bs-assistant-incomplete">{t('assistant.modal.incomplete')}</small>
+        )}
+        {rated && (
+          <AnswerActions
+            conversation={conversation}
+            messageId={message.id}
+            last={message.id === lastMessageId}
+          />
         )}
       </article>
     </MessagePrimitive.Root>

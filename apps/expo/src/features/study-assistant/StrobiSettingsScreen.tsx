@@ -3,7 +3,7 @@ import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import Header from '~common/Header'
-import { usePageBottomInset } from '~common/ui/Box'
+import { HStack, usePageBottomInset } from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
 import ListSection, { ListRow } from '~common/ui/ListSection'
@@ -15,7 +15,10 @@ import { usePremiumVisible } from '~features/premium/premiumVisibility'
 import useLogin from '~helpers/useLogin'
 import { useTheme } from '~themes/ThemeProvider'
 import { useAiConsent } from './aiConsent'
+import { useAssistantFeedback } from './useAssistantFeedback'
+import AssistantFeedbackSheet from './AssistantFeedbackSheet'
 import { useAssistantAccessible } from './assistantConfig'
+import BetaChip from './BetaChip'
 import { returnToAssistant } from './returnToAssistant'
 import StrobiAvatar from './StrobiAvatar'
 import { useStrobiBubble } from './strobiBubble'
@@ -44,6 +47,7 @@ export default function StrobiSettingsScreen() {
   const quota = useAssistantQuota()
   const bubble = useStrobiBubble()
   const aiConsent = useAiConsent(assistantShown ? account : null)
+  const feedback = useAssistantFeedback()
 
   const promptWithdrawAiConsent = async () => {
     const confirmed = await confirm({
@@ -66,6 +70,7 @@ export default function StrobiSettingsScreen() {
     if (confirmed) await aiConsent.accept().catch(() => {})
   }
   const consentGranted = aiConsent.status === 'granted'
+  const consentShown = isLogged && aiConsent.status !== 'loading'
   const toggleAiConsent = () =>
     void (consentGranted ? promptWithdrawAiConsent() : promptGrantAiConsent())
 
@@ -89,37 +94,57 @@ export default function StrobiSettingsScreen() {
           { paddingTop: 20, paddingBottom: 20 + bottomInset },
         ]}
       >
-        {canOpen && (
+        {/* What Strobi's page leads to: the conversation, the subscription, and the reader's
+            opinion while the assistant is in beta. One group, so that no row stands alone. */}
+        {(canOpen || premiumVisible) && (
           <ListSection>
-            <ListRow
-              onPress={() => returnToAssistant(router, from)}
-              // Strobi holds still facing the reader. Not `curious`: it settles with its head turned.
-              icon={<StrobiAvatar animation="idle" size={36} settleAfterMs={2600} />}
-              iconBg="transparent"
-              label={t('strobi.settings.open')}
-              description={quotaDetail}
-            />
+            {canOpen && (
+              <ListRow
+                onPress={() => returnToAssistant(router, from)}
+                // Strobi holds still facing the reader. Not `curious`: it settles with its head turned.
+                icon={<StrobiAvatar animation="idle" size={36} settleAfterMs={2600} />}
+                iconBg="transparent"
+                label={t('strobi.settings.open')}
+                description={quotaDetail}
+              />
+            )}
+            {premiumVisible && (
+              <ListRow
+                route="Premium"
+                icon={<FeatherIcon name="star" size={18} color="primary" />}
+                iconTint="primary"
+                label={t('premiumPlan.headline')}
+                description={
+                  premium.kind === 'active'
+                    ? t('premiumPlan.active')
+                    : t('premiumPlan.benefit.assistant')
+                }
+              />
+            )}
+            {assistantShown && feedback.available && (
+              <ListRow
+                icon={<FeatherIcon name="message-square" size={18} color="grey" />}
+                label={t('assistant.feedback.generalTitle')}
+                onPress={() => feedback.openDraft({ kind: 'general' })}
+                trailing={
+                  <HStack className="items-center gap-2">
+                    <BetaChip />
+                    <FeatherIcon name="chevron-right" size={18} color="grey" />
+                  </HStack>
+                }
+              />
+            )}
           </ListSection>
         )}
 
-        {premiumVisible && (
-          <ListSection title={t('strobi.settings.subscription')}>
-            <ListRow
-              route="Premium"
-              icon={<FeatherIcon name="star" size={18} color="primary" />}
-              iconTint="primary"
-              label={t('premiumPlan.headline')}
-              description={
-                premium.kind === 'active'
-                  ? t('premiumPlan.active')
-                  : t('premiumPlan.benefit.assistant')
-              }
-            />
-          </ListSection>
-        )}
-
+        {/* Its settings: the floating bubble, and the agreement to share questions with AI
+            providers, given or taken back (5.1.2(i)): each way asks first, and giving it shows its
+            whole text. The agreement comes last, so that the group's footer reads as its own. */}
         {assistantShown && (
-          <ListSection title={t('strobi.settings.display')}>
+          <ListSection
+            title={t('strobi.settings.settings')}
+            footer={consentShown ? t('strobi.settings.consentDetail') : undefined}
+          >
             <ListRow
               icon={<FeatherIcon name="message-circle" size={18} color="grey" />}
               label={t('strobi.settings.showBubble')}
@@ -137,37 +162,30 @@ export default function StrobiSettingsScreen() {
                 />
               }
             />
-          </ListSection>
-        )}
-
-        {/* The agreement to share questions with AI providers, given or taken back (5.1.2(i)):
-            each way asks first, and giving it shows its whole text. */}
-        {assistantShown && isLogged && aiConsent.status !== 'loading' && (
-          <ListSection
-            title={t('strobi.settings.data')}
-            footer={t('strobi.settings.consentDetail')}
-          >
-            <ListRow
-              icon={<FeatherIcon name="shield" size={18} color="grey" />}
-              label={t('assistant.consent.settingsLabel')}
-              onPress={toggleAiConsent}
-              accessibilityState={{ checked: consentGranted }}
-              trailing={
-                <Switch
-                  accessibilityLabel={t('assistant.consent.settingsLabel')}
-                  accessibilityState={{ checked: consentGranted }}
-                  // Stays where it is until the reader confirms; the agreement moves it then.
-                  value={consentGranted}
-                  onValueChange={toggleAiConsent}
-                  trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
-                  ios_backgroundColor={theme.colors.border}
-                  thumbColor="#ffffff"
-                />
-              }
-            />
+            {consentShown && (
+              <ListRow
+                icon={<FeatherIcon name="shield" size={18} color="grey" />}
+                label={t('assistant.consent.settingsLabel')}
+                onPress={toggleAiConsent}
+                accessibilityState={{ checked: consentGranted }}
+                trailing={
+                  <Switch
+                    accessibilityLabel={t('assistant.consent.settingsLabel')}
+                    accessibilityState={{ checked: consentGranted }}
+                    // Stays where it is until the reader confirms; the agreement moves it then.
+                    value={consentGranted}
+                    onValueChange={toggleAiConsent}
+                    trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                    ios_backgroundColor={theme.colors.border}
+                    thumbColor="#ffffff"
+                  />
+                }
+              />
+            )}
           </ListSection>
         )}
       </ScrollView>
+      <AssistantFeedbackSheet kind="general" />
     </Container>
   )
 }

@@ -7,6 +7,7 @@ import { Image } from 'expo-image'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { premiumStatusAtom } from '~features/premium/premiumStatus'
 import { usePremiumVisible } from '~features/premium/premiumVisibility'
+import BetaChip from '~features/study-assistant/BetaChip'
 import StrobiAvatar from '~features/study-assistant/StrobiAvatar'
 import { useAssistantAccessible } from '~features/study-assistant/assistantConfig'
 import { memo, useRef, type ComponentPropsWithRef as UIComponentProps } from 'react'
@@ -22,7 +23,7 @@ import LexiqueIcon from '~common/LexiqueIcon'
 import Link, { LinkProps } from '~common/Link'
 import NaveIcon from '~common/NaveIcon'
 import { type SheetRef } from '~common/sheet'
-import Box, { SafeAreaBox, usePageBottomInset } from '~common/ui/Box'
+import Box, { HStack, SafeAreaBox, usePageBottomInset } from '~common/ui/Box'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import ListSection, { ListRow } from '~common/ui/ListSection'
 import ScrollView from '~common/ui/ScrollView'
@@ -206,6 +207,12 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
                     : premiumVisible
                       ? t('premiumPlan.benefit.assistant')
                       : undefined
+              }
+              trailing={
+                <HStack className="items-center gap-2">
+                  <BetaChip />
+                  <FeatherIcon name="chevron-right" size={18} color="grey" />
+                </HStack>
               }
             />
           )}

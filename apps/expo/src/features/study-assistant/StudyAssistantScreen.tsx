@@ -13,6 +13,7 @@ import Text from '~common/ui/Text'
 import ModalRouteFrame from '~navigation/ModalRouteFrame'
 import AssistantComposer from './AssistantComposer'
 import AssistantConsentCard from './AssistantConsentCard'
+import AssistantFeedbackSheet from './AssistantFeedbackSheet'
 import AssistantGuestScreen from './AssistantGuestScreen'
 import { useAssistantAccessible } from './assistantConfig'
 import useLogin from '~helpers/useLogin'
@@ -27,6 +28,7 @@ import {
 } from './assistantSheetContext'
 import AssistantThread from './AssistantThread'
 import AssistantVerifyEmailCard from './AssistantVerifyEmailCard'
+import BetaChip from './BetaChip'
 import SourceExcerptSheet from './SourceExcerptSheet'
 import { useStrobiBubble } from './strobiBubble'
 import { useAssistantQuota } from './useAssistantQuota'
@@ -85,13 +87,15 @@ function PageHeader() {
           </TouchableBox>
         )
       )}
-      <Text
-        accessibilityRole="header"
-        className="flex-1 pl-1 text-[16px] font-bold"
-        numberOfLines={1}
-      >
-        {historyOpen ? t('assistant.modal.history') : current.title || t('assistant.modal.newChat')}
-      </Text>
+      {/* The title takes what it needs, so that the beta mark sits right after it. */}
+      <HStack className="flex-1 items-center gap-2 pl-1">
+        <Text accessibilityRole="header" className="shrink text-[16px] font-bold" numberOfLines={1}>
+          {historyOpen
+            ? t('assistant.modal.history')
+            : current.title || t('assistant.modal.newChat')}
+        </Text>
+        {!historyOpen && <BetaChip />}
+      </HStack>
       {!historyOpen && (
         <TouchableBox
           accessibilityRole="button"
@@ -199,6 +203,7 @@ export default function StudyAssistantScreen() {
             </Box>
           </ModalRouteFrame>
           <SourceExcerptSheet source={sheet.source} onClose={() => sheet.showSource(null)} />
+          <AssistantFeedbackSheet kind="answer" />
         </ComposerInsetContext.Provider>
       </AssistantSheetContext.Provider>
     </AssistantRuntimeProvider>
