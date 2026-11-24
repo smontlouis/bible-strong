@@ -8,7 +8,11 @@ import {
 } from '~features/bible-audio/atoms'
 import { listenToPassage, pause, play } from '~features/bible-audio/bibleAudioPlayer'
 import { isSamePassage } from '~features/bible-audio/samePassage'
-import { hasRecordedAudio } from '~features/bible-audio/recordedEngine'
+import {
+  bibleAudioCatalogAtom,
+  bibleAudioChoiceByVersionAtom,
+  resolveBibleAudio,
+} from '~features/bible-audio/audioCatalog'
 import {
   getNextAvailableChapterLocation,
   getPreviousAvailableChapterLocation,
@@ -49,7 +53,10 @@ const BibleFooter = ({
 }: BibleFooterProps) => {
   const store = useStore()
   const bibleTab = useAtomValue(bibleAtom)
-  const { passage, status } = useAtomValue(bibleAudioStateAtom)
+  const { passage, source, status } = useAtomValue(bibleAudioStateAtom)
+  // Read so that the button follows a change of choice or of catalog.
+  useAtomValue(bibleAudioChoiceByVersionAtom)
+  useAtomValue(bibleAudioCatalogAtom)
   const getIsCurrentTab = useIsCurrentTab()
   const isCurrentTab = getIsCurrentTab(bibleAtom)
 
@@ -72,6 +79,8 @@ const BibleFooter = ({
   const isPlaying = isShownPassage && status === 'playing'
   const isLoading = isShownPassage && status === 'loading'
   const tabId = isInTab ? bibleTab.id : undefined
+  // What the button plays: the voice heard for the passage shown, else the reader's choice for it.
+  const heardWith = isShownPassage ? source : resolveBibleAudio(shown).source
 
   const onPlay = () => {
     if (!isShownPassage) {
@@ -101,7 +110,7 @@ const BibleFooter = ({
       isDisabled={disabled}
       isLoading={isLoading}
       hasError={isShownPassage && status === 'error'}
-      type={hasRecordedAudio(version) ? 'url' : 'tts'}
+      type={heardWith === 'recorded' ? 'url' : 'tts'}
     />
   )
 }

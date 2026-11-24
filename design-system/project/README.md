@@ -22,6 +22,7 @@ Read the rules below, then take every value from `tokens.json`. Never copy a col
 - **`mark` is the only highlight**: a pale yellow behind a searched or examined word, whose text stays `ink`.
 - **`words-of-jesus` is reserved** for the words of Jesus in reading text. It is not an error colour and not an accent.
 - **The `universe-` colours identify a kind of resource in the app** (Strong, dictionary, topics, commentaries, references, Bible). Use them for an icon or a badge at a 12% tint, never for text on the canvas. The app defines their values per theme in `apps/expo/src/themes/`.
+- **The `bible-part-` colours stand for a part of the Bible** (Pentateuch, history, poetry, prophets, Gospels, Acts and letters, Revelation) on the cover of the audio player: a ground, its ink, and an accent for the large chapter number and the progress bar. Each has a light and a dark value; the app reads them in `apps/expo/src/themes/bibleBookColors.ts`. They tint nothing else.
 - **The `world-` tints are grounds for illustrations**: one per section of the landing page and per chapter of a video. They never tint an interface control. The illustration style itself is ruled by `docs/design/illustrations.md`.
 - **Both themes are designed.** Dark is not an inversion: the canvas turns to a deep blue-black, the blues lighten, and the button label turns dark. Take the dark value of each token; do not derive it.
 
@@ -51,7 +52,7 @@ The mark is a white disc, a grey ring lit from the top and a dot in `brand`. It 
 
 ## Icons
 
-Icons are outline icons from Lucide, in the colour of the text beside them. Small inline arrows (a menu chevron, a back arrow) are drawn inline as SVG at a 1.8px stroke with round caps and joins. No filled icon, no emoji, no icon without a visible or spoken label.
+Icons are outline icons from Lucide, in the colour of the text beside them. Small inline arrows (a menu chevron, a back arrow) are drawn inline as SVG at a 1.8px stroke with round caps and joins. No filled icon, no emoji, no icon without a visible or spoken label. One exception: the transport of the audio player (play, pause, the chapter before and after) uses Ionicons' filled glyphs, as media players do.
 
 ## The app
 

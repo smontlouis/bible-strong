@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./bible-audio": "./src/bibleAudioCatalog.ts",
     "./catalog": "./src/catalog.ts",
     "./commentaries": "./src/commentaryCatalog.ts",
     "./interlinear-bible": "./src/interlinearBiblePublicationCatalog.ts",

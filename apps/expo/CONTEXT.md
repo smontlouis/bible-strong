@@ -68,7 +68,9 @@
 
 **Tab** — One open working surface in the study workspace.
 
-**Bible audio player** — The one player of the app that voices a Bible chapter, with the version's recording or the device's voice. It holds its own passage, whatever the Tabs show; a Bible Tab starts it on the passage it shows and turns its pages with it until its reader goes elsewhere (ADR-0116).
+**Bible audio player** — The one player of the app that voices a Bible chapter, with one of the version's Bible recordings or the device's voice. It holds its own passage, whatever the Tabs show; a Bible Tab starts it on the passage it shows and turns its pages with it until its reader goes elsewhere (ADR-0116).
+
+**Bible recording** — One voicing of a Bible version streamed from its publisher, such as the LSG read or the LSG dramatized. A version has none or many; a catalog on the media host lists them, with the books each covers. The device's voice is not a Bible recording (ADR-0117).
 
 **Tab group** — A persisted collection of Tabs with one active Tab.
 

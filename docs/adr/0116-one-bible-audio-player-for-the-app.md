@@ -49,3 +49,16 @@ nothing showed it outside a Bible Tab.
   the player: the recorded engine activates them once and then only updates their text.
 - The footer of the Bible keeps the chapter buttons and the way into the player; the expanded footer,
   its two audio variants and the way back to the playing Tab are gone.
+
+## Amendment (2026-11-24): a full screen with a cover
+
+The large player of a phone becomes a full screen, after Audibible's. A cover stands for the chapter
+heard: the book's name and a large chapter number cropped by the edge, in the colours of the book's
+part of the Bible (seven families, `bible-part-*` in the design tokens, light and dark). The cover
+grows while it plays, and its thumbnail sits in the small player and in the panel of a wide screen.
+The bar under it can be dragged or tapped: the player and both engines gain `seekTo`, a point of the
+chapter from 0 to 1, a moment of a recording or a verse of the device's voice. The transport keeps
+Audibible's filled icons, the one exception to the outline icons of the design system.
+
+The recordings of a version are now entries of a catalog on the media host, from none to many per
+version, and « Listen with » chooses among them and the device's voice: ADR-0117.

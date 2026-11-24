@@ -1,40 +1,21 @@
-import { twMerge } from '~common/ui/classNames'
-
 import { useAtom } from 'jotai/react'
-import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { BoxProps, TouchableBox } from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
-import Text from '~common/ui/Text'
+import { TouchableBox } from '~common/ui/Box'
 import { audioRepeatAtom } from '../atoms'
-import AudioChip from './AudioChip'
-export type AudioRepeatButtonProps = BoxProps
+import PlayerOption from './PlayerOption'
 
-const AudioRepeatButton = (props: AudioRepeatButtonProps) => {
+const AudioRepeatButton = () => {
   const { t } = useTranslation()
   const [isActive, setIsActive] = useAtom(audioRepeatAtom)
 
-  const onToggle = () => setIsActive(!isActive)
-
   return (
     <TouchableBox
-      className="overflow-hidden border-continuous"
-      onPress={onToggle}
+      onPress={() => setIsActive(!isActive)}
       accessibilityRole="switch"
       accessibilityLabel={t('audio.repeat')}
       accessibilityState={{ checked: isActive }}
     >
-      <AudioChip {...props} isActive={isActive}>
-        <FeatherIcon name="repeat" size={14} color={isActive ? 'primary' : 'grey'} />
-        <Text
-          className={twMerge(
-            isActive ? 'text-link' : 'text-grey',
-            'ml-[5px] font-bold text-[10px]'
-          )}
-        >
-          {t('audio.repeat')}
-        </Text>
-      </AudioChip>
+      <PlayerOption isActive={isActive} icon="repeat" />
     </TouchableBox>
   )
 }

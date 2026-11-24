@@ -29,9 +29,14 @@ jest.mock('~state/tabs', () => ({
   useIsCurrentTab: () => () => mockIsCurrentTab,
 }))
 
-jest.mock('~features/bible-audio/recordedEngine', () => ({
-  hasRecordedAudio: () => true,
-}))
+jest.mock('~features/bible-audio/audioCatalog', () => {
+  const { atom } = jest.requireActual('jotai/vanilla')
+  return {
+    bibleAudioCatalogAtom: atom({ version: 1, recordings: [] }),
+    bibleAudioChoiceByVersionAtom: atom({}),
+    resolveBibleAudio: () => ({ source: 'recorded', recording: null }),
+  }
+})
 
 jest.mock('~features/bible-audio/bibleAudioPlayer', () => ({
   listenToPassage: (...args: unknown[]) => mockListenToPassage(...args),

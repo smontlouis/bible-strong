@@ -3143,5 +3143,22 @@
   "bibleAudio.chooseVersion": "Choisir la version",
   "bibleAudio.unavailable": "Audio indisponible pour ce chapitre. Touchez lecture pour réessayer.",
   "bibleAudio.verse": "Verset {{verse}}",
-  "bibleAudio.verseCount": "{{index}} sur {{count}}"
+  "bibleAudio.verseCount": "{{index}} sur {{count}}",
+  "bibleAudio.read": "Lire",
+  "bibleAudio.position": "Position dans le chapitre",
+  "bibleAudio.more": "Plus d’options",
+  "bibleAudio.listenWith": "Écouter avec",
+  "bibleAudio.recordings": "Enregistrements",
+  "bibleAudio.kind.drama": "Dramatisée",
+  "bibleAudio.notThisBook": "Pas pour {{book}}",
+  "bibleAudio.deviceVoice": "Voix de l’appareil",
+  "bibleAudio.speechDetail": "Lit le texte de la version",
+  "bibleAudio.recordingCount": "{{count}} enregistrements",
+  "bibleAudio.part.pentateuch": "Pentateuque",
+  "bibleAudio.part.history": "Livres historiques",
+  "bibleAudio.part.poetry": "Livres poétiques",
+  "bibleAudio.part.prophets": "Prophètes",
+  "bibleAudio.part.gospels": "Évangiles",
+  "bibleAudio.part.letters": "Actes et épîtres",
+  "bibleAudio.part.revelation": "Apocalypse"
 }

@@ -31,6 +31,7 @@ import {
 } from '~helpers/strongBiblePublications'
 import type { StrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
 import StrongMark from './StrongMark'
+import VersionAudioMark from '~features/bible-audio/ui/VersionAudioMark'
 import { isInterlinearCapableBibleVersion } from '~helpers/interlinearBiblePublications'
 import InterlinearShortcut from './InterlinearShortcut'
 import { getDownloadItemProgress } from '~state/downloadQueue'
@@ -179,9 +180,9 @@ const VersionIdentity = ({
         >
           {version.displayName || version.name}
         </Text>
-        {showCapabilities && version.hasAudio && (
+        {showCapabilities && (
           <Box className="overflow-hidden border-continuous ml-[4px]">
-            <FeatherIcon name="volume-2" size={16} color="primary" />
+            <VersionAudioMark version={version.id} />
           </Box>
         )}
         {showCapabilities && showStrongCapability && (

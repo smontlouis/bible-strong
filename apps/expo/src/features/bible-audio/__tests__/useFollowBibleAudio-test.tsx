@@ -42,6 +42,7 @@ const setAudioPassage = (book: Book, chapter: number, version = 'LSG') =>
     store.set(bibleAudioStateAtom, {
       passage: { version, book, chapter },
       source: 'recorded',
+      recordingId: 'lsg-topchretien',
       status: 'playing',
     })
   })
@@ -52,7 +53,12 @@ describe('useFollowBibleAudio', () => {
   })
 
   beforeEach(() => {
-    store.set(bibleAudioStateAtom, { passage: null, source: 'recorded', status: 'idle' })
+    store.set(bibleAudioStateAtom, {
+      passage: null,
+      source: 'recorded',
+      recordingId: null,
+      status: 'idle',
+    })
     store.set(bibleAudioFollowingTabIdAtom, 'tab-1')
   })
 

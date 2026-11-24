@@ -5,6 +5,7 @@ import type { BibleAudioProgress, BibleAudioState } from './types'
 export const bibleAudioStateAtom = atom<BibleAudioState>({
   passage: null,
   source: 'recorded',
+  recordingId: null,
   status: 'idle',
 })
 

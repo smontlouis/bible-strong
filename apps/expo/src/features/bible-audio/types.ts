@@ -1,3 +1,4 @@
+import type { BibleAudioRecording } from '@bible-strong/resource-domain/bible-audio'
 import type { Book } from '~assets/bible_versions/books-desc'
 import type { VersionCode } from '~state/tabs'
 
@@ -17,6 +18,8 @@ export type BibleAudioState = {
   /** Absent: nothing is loaded and the player is hidden. */
   passage: BibleAudioPassage | null
   source: BibleAudioSource
+  /** The recording heard, by its id in the catalog; null with the device's voice. */
+  recordingId: string | null
   status: BibleAudioStatus
 }
 
@@ -44,12 +47,17 @@ export type BibleAudioEngineEvents = {
  */
 export interface BibleAudioEngine {
   readonly source: BibleAudioSource
-  /** Readies the chapter, paused. A rejected promise means the chapter cannot be voiced. */
-  open: (passage: BibleAudioPassage) => Promise<void>
+  /**
+   * Readies the chapter, paused, with the recording given (the device's voice takes none). A
+   * rejected promise means the chapter cannot be voiced.
+   */
+  open: (passage: BibleAudioPassage, recording: BibleAudioRecording | null) => Promise<void>
   play: () => Promise<void>
   pause: () => void
   /** Stops and lets go of everything, the lock screen controls included. */
   stop: () => void
   /** A step back or forward: ten seconds of a recording, a verse of the device's voice. */
   skip: (direction: -1 | 1) => void
+  /** Goes to a point of the chapter, from 0 to 1: a moment of a recording, a verse of the voice. */
+  seekTo: (ratio: number) => void
 }

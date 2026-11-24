@@ -1,14 +1,8 @@
-import { twMerge } from '~common/ui/classNames'
-
 import { useAtom } from 'jotai/react'
-import React from 'react'
 import { useTranslation } from 'react-i18next'
 import DropdownMenu from '~common/DropdownMenu'
-import { BoxProps } from '~common/ui/Box'
-import Text from '~common/ui/Text'
 import { ttsPitchAtom } from '../atoms'
-import AudioChip from './AudioChip'
-export type TTSPitchButtonProps = BoxProps
+import PlayerOption from './PlayerOption'
 
 const choices = [
   { value: '0.5', label: '0.5x' },
@@ -19,7 +13,8 @@ const choices = [
   { value: '1.75', label: '1.75x' },
   { value: '2', label: '2x' },
 ]
-const TTSPitchButton = (props: TTSPitchButtonProps) => {
+
+const TTSPitchButton = () => {
   const { t } = useTranslation()
   const [pitch, setPitch] = useAtom(ttsPitchAtom)
   const isActive = pitch !== 1
@@ -28,14 +23,14 @@ const TTSPitchButton = (props: TTSPitchButtonProps) => {
     <DropdownMenu
       title={t('audio.pitch')}
       currentValue={pitch.toString()}
-      setValue={v => setPitch(Number(v))}
+      setValue={value => setPitch(Number(value))}
       choices={choices}
       customRender={
-        <AudioChip isActive={isActive} {...props}>
-          <Text className={twMerge(isActive ? 'text-link' : 'text-grey', 'font-bold text-[10px]')}>
-            {t('audio.pitch')} {pitch}x
-          </Text>
-        </AudioChip>
+        <PlayerOption
+          isActive={isActive}
+          icon="pulse-outline"
+          caption={isActive ? `x${pitch}` : undefined}
+        />
       }
     />
   )

@@ -55,6 +55,7 @@
     "resources:entities:images": "yarn workspace @bible-strong/resource-studio resources:entities:images",
     "resources:timeline:images": "yarn workspace @bible-strong/resource-studio resources:timeline:images",
     "resources:timeline:paintings": "yarn workspace @bible-strong/resource-studio resources:timeline:paintings",
+    "resources:audio": "yarn workspace @bible-strong/resource-studio resources:audio",
     "resources:worker:types": "yarn workspace @bible-strong/resource-service worker:types",
     "resources:worker:check": "yarn workspace @bible-strong/resource-service worker:check",
     "resources:worker:deploy": "yarn workspace @bible-strong/resource-service worker:deploy",

@@ -1,14 +1,8 @@
-import { twMerge } from '~common/ui/classNames'
-
 import { useAtom } from 'jotai/react'
-import React from 'react'
 import { useTranslation } from 'react-i18next'
 import DropdownMenu from '~common/DropdownMenu'
-import { BoxProps } from '~common/ui/Box'
-import Text from '~common/ui/Text'
 import { audioSpeedAtom } from '../atoms'
-import AudioChip from './AudioChip'
-export type AudioSpeedButtonProps = BoxProps
+import PlayerOption from './PlayerOption'
 
 const choices = [
   { value: '0.75', label: '0.75x' },
@@ -18,27 +12,18 @@ const choices = [
   { value: '1.75', label: '1.75x' },
   { value: '2', label: '2x' },
 ]
-const AudioSpeedButton = (props: AudioSpeedButtonProps) => {
+
+const AudioSpeedButton = () => {
   const { t } = useTranslation()
   const [rate, setRate] = useAtom(audioSpeedAtom)
-
-  const onChange = (value: string) => setRate(Number(value))
-
-  const isActive = rate !== 1
 
   return (
     <DropdownMenu
       title={t('audio.speed')}
       currentValue={rate.toString()}
-      setValue={onChange}
+      setValue={value => setRate(Number(value))}
       choices={choices}
-      customRender={
-        <AudioChip isActive={isActive} {...props}>
-          <Text className={twMerge(isActive ? 'text-link' : 'text-grey', 'font-bold text-[10px]')}>
-            {rate}x
-          </Text>
-        </AudioChip>
-      }
+      customRender={<PlayerOption isActive={rate !== 1} value={`x${rate}`} />}
     />
   )
 }

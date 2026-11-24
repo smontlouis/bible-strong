@@ -171,6 +171,11 @@ export const createSpeechEngine = (
       events.onEnded()
       return
     }
+    goToVerse(target)
+  }
+
+  /** Reads from another verse, or waits on it while paused. */
+  const goToVerse = (target: number) => {
     if (isPlaying) {
       generation++
       Speech.stop()
@@ -181,5 +186,13 @@ export const createSpeechEngine = (
     emitProgress()
   }
 
-  return { source: 'speech', open, play, pause, stop, skip }
+  const seekTo = (ratio: number) => {
+    const count = chapter.verseKeys.length
+    if (!count) return
+    // The bar shows a verse as read once it starts: its end is the start of the next one.
+    const target = Math.max(0, Math.min(Math.ceil(ratio * count) - 1, count - 1))
+    if (target !== index || !isPlaying) goToVerse(target)
+  }
+
+  return { source: 'speech', open, play, pause, stop, skip, seekTo }
 }

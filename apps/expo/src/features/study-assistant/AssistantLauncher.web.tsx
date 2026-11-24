@@ -62,6 +62,8 @@ import { AssistantMessage, UserMessage } from './MessageRenderer.web'
 import strobiDefinition from './strobi.avatar.json'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { createTabForAssistantAction } from './assistantActions'
+import { bibleAudioPlayerOpenAtom } from '~features/bible-audio/atoms'
+import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 
 const DebugPanel = __DEV__
   ? (require('./debug/DebugPanel.web').default as typeof import('./debug/DebugPanel.web').default)
@@ -136,6 +138,9 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     { colors, fontFamily } = useTheme()
   const openInNewTab = useOpenInNewTab()
   const storyOpen = useAtomValue(workspaceStoryOpenAtom)
+  // On a narrow window the audio player fills the screen, over the bubble's corner.
+  const isWide = useResponsiveWorkspace()
+  const audioScreenOpen = useAtomValue(bibleAudioPlayerOpenAtom) && !isWide
   const liveContext = useReadingContext()
   const [debugOpen, setDebugOpen] = useState(false)
   const [debugSession, setDebugSession] = useState<DebugSession | null>(null)
@@ -449,9 +454,9 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
         unstable_openOnRunStart={false}
       >
         {ready &&
-          // Strobi stays out of the Premium page and of the onboarding's story.
+          // Strobi stays out of the Premium page, the onboarding's story and the full-screen player.
           // Put away, the bubble stays mounted to shrink away and grow back (its class).
-          (open || (pathname !== '/premium' && !storyOpen)) &&
+          (open || (pathname !== '/premium' && !storyOpen && !audioScreenOpen)) &&
           createPortal(
             <Modal.Anchor className="bs-assistant-anchor" style={vars}>
               <Modal.Trigger

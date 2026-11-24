@@ -8,8 +8,11 @@ import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { floatingShadow, radii } from '~common/ui/surfaces'
+import { getBiblePart, getBiblePartColors } from '~themes/bibleBookColors'
+import { useTheme } from '~themes/ThemeProvider'
 import { bibleAudioStateAtom } from '../atoms'
 import { openBibleAudioPlayer, stop, togglePlay } from '../bibleAudioPlayer'
+import BibleAudioCover from './BibleAudioCover'
 import { BibleAudioProgressLine } from './BibleAudioProgressBar'
 import { useBibleAudioLabels } from './useBibleAudioLabels'
 import { MINI_PLAYER_HEIGHT } from './useBibleAudioMiniPlayerHeight'
@@ -26,6 +29,7 @@ const BibleAudioMiniPlayer = ({ variant, className }: BibleAudioMiniPlayerProps)
   const { t } = useTranslation()
   const { passage, status } = useAtomValue(bibleAudioStateAtom)
   const { title, subtitle } = useBibleAudioLabels()
+  const theme = useTheme()
 
   // Swiping the small player up opens the large one.
   const swipeUp = Gesture.Pan()
@@ -39,6 +43,7 @@ const BibleAudioMiniPlayer = ({ variant, className }: BibleAudioMiniPlayerProps)
 
   if (!passage) return null
 
+  const partColors = getBiblePartColors(getBiblePart(passage.book.Numero), theme)
   const isPlaying = status === 'playing'
   const isLoading = status === 'loading'
   const hasError = status === 'error'
@@ -46,7 +51,7 @@ const BibleAudioMiniPlayer = ({ variant, className }: BibleAudioMiniPlayerProps)
   const row = (
     <Box
       className={twMerge(
-        'overflow-hidden border-continuous flex-row items-center pl-[16px] pr-[8px]',
+        'overflow-hidden border-continuous flex-row items-center pl-[10px] pr-[8px]',
         variant === 'card' ? 'bg-surface-raised' : 'border-separator'
       )}
       style={[
@@ -56,20 +61,23 @@ const BibleAudioMiniPlayer = ({ variant, className }: BibleAudioMiniPlayerProps)
           : { borderBottomWidth: StyleSheet.hairlineWidth },
       ]}
     >
-      <BibleAudioProgressLine />
+      <BibleAudioProgressLine color={partColors.accent} />
       <TouchableBox
-        className="flex-[1] min-w-0 justify-center h-full"
+        className="flex-[1] min-w-0 flex-row items-center h-full"
         onPress={openBibleAudioPlayer}
         accessibilityRole="button"
         accessibilityLabel={t('bibleAudio.open')}
         accessibilityHint={`${title}, ${subtitle}`}
       >
-        <Text className="text-[14px] font-bold" numberOfLines={1}>
-          {title}
-        </Text>
-        <Text className="text-[12px] text-grey" numberOfLines={1}>
-          {hasError ? t('accessibility.audioUnavailable') : subtitle}
-        </Text>
+        <BibleAudioCover passage={passage} size={40} />
+        <Box className="flex-[1] min-w-0 ml-[10px]">
+          <Text className="text-[14px] font-bold" numberOfLines={1}>
+            {title}
+          </Text>
+          <Text className="text-[12px] text-grey" numberOfLines={1}>
+            {hasError ? t('accessibility.audioUnavailable') : subtitle}
+          </Text>
+        </Box>
       </TouchableBox>
       <TouchableBox
         className="w-[44px] h-[44px] items-center justify-center"

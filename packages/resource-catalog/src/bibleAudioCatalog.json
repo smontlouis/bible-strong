@@ -1,0 +1,245 @@
+{
+  "version": 1,
+  "recordings": [
+    {
+      "id": "lsg-topchretien",
+      "version": "LSG",
+      "name": {
+        "fr": "Lecture",
+        "en": "Reading"
+      },
+      "kind": "reading",
+      "credit": "TopChrétien",
+      "sources": [
+        {
+          "books": [
+            19, 44, 46, 54, 53, 52, 56, 61, 57, 62, 63, 64, 65, 59, 1, 43, 45, 50, 20, 66, 47, 40,
+            55, 51, 48, 49, 41, 58, 42, 60
+          ],
+          "url": "https://s.topchretien.com/media/topbible/bible_v2/{book:2}_{chapter:2}.mp3"
+        },
+        {
+          "books": [
+            29, 14, 39, 3, 7, 16, 37, 24, 34, 15, 5, 23, 25, 12, 8, 33, 28, 35, 4, 17, 38, 27, 13,
+            10, 2, 18, 11, 36, 9
+          ],
+          "url": "https://s.topchretien.com/media/topbible/bible/{book:2}_{chapter:2}.mp3"
+        },
+        {
+          "url": "https://s.topchretien.com/media/topbible/bible_say/{book:2}_{chapter:2}.mp3"
+        }
+      ]
+    },
+    {
+      "id": "bds-bible-audio",
+      "version": "BDS",
+      "name": {
+        "fr": "Lecture",
+        "en": "Reading"
+      },
+      "kind": "reading",
+      "credit": "bible.audio",
+      "sources": [
+        {
+          "url": "https://www.bible.audio/media/sem/{testament}/{book:2}_{chapter:3}.mp3"
+        }
+      ]
+    },
+    {
+      "id": "kjv-wordpocket",
+      "version": "KJV",
+      "name": {
+        "fr": "Lecture",
+        "en": "Reading"
+      },
+      "kind": "reading",
+      "credit": "WordPocket",
+      "sources": [
+        {
+          "url": "https://www.wordpocket.org/bibles/app/audio/1/{book}/{chapter}.mp3"
+        }
+      ]
+    },
+    {
+      "id": "esv-biblestudytools",
+      "version": "ESV",
+      "name": {
+        "fr": "Lecture",
+        "en": "Reading"
+      },
+      "kind": "reading",
+      "credit": "Bible Study Tools",
+      "bookCodes": [
+        "ge",
+        "ex",
+        "le",
+        "nu",
+        "de",
+        "jos",
+        "jud",
+        "ru",
+        "1sa",
+        "2sa",
+        "1ki",
+        "2ki",
+        "1ch",
+        "2ch",
+        "ezr",
+        "ne",
+        "es",
+        "job",
+        "ps",
+        "pr",
+        "ec",
+        "so",
+        "isa",
+        "jer",
+        "la",
+        "eze",
+        "da",
+        "ho",
+        "joe",
+        "am",
+        "ob",
+        "jon",
+        "mic",
+        "na",
+        "hab",
+        "zen",
+        "hag",
+        "zec",
+        "mal",
+        "mt",
+        "mr",
+        "lu",
+        "joh",
+        "ac",
+        "ro",
+        "1co",
+        "2co",
+        "ga",
+        "eph",
+        "php",
+        "col",
+        "1th",
+        "2th",
+        "1ti",
+        "2ti",
+        "tit",
+        "phm",
+        "heb",
+        "jas",
+        "1pe",
+        "2pe",
+        "1jo",
+        "2jo",
+        "3jo",
+        "jude",
+        "re"
+      ],
+      "sources": [
+        {
+          "url": "https://content.swncdn.com/biblestudytools/audio/esv-mp3/{book:2}_{bookCode}_{chapter:3}.mp3"
+        }
+      ]
+    },
+    {
+      "id": "niv-bible-audio",
+      "version": "NIV",
+      "name": {
+        "fr": "Lecture",
+        "en": "Reading"
+      },
+      "kind": "reading",
+      "credit": "bible.audio",
+      "sources": [
+        {
+          "url": "https://www.bible.audio/media/niv/{testament}/{testamentBook:2}_{chapter:3}.mp3"
+        }
+      ]
+    },
+    {
+      "id": "nlt-biblestudytools",
+      "version": "NLT",
+      "name": {
+        "fr": "Lecture",
+        "en": "Reading"
+      },
+      "kind": "reading",
+      "credit": "Bible Study Tools",
+      "bookCodes": [
+        "ge",
+        "ex",
+        "le",
+        "nu",
+        "de",
+        "jos",
+        "jud",
+        "ru",
+        "1sa",
+        "2sa",
+        "1ki",
+        "2ki",
+        "1ch",
+        "2ch",
+        "ezr",
+        "ne",
+        "es",
+        "job",
+        "ps",
+        "pr",
+        "ec",
+        "so",
+        "isa",
+        "jer",
+        "la",
+        "eze",
+        "da",
+        "ho",
+        "joe",
+        "am",
+        "ob",
+        "jon",
+        "mic",
+        "na",
+        "hab",
+        "zen",
+        "hag",
+        "zec",
+        "mal",
+        "mt",
+        "mr",
+        "lu",
+        "joh",
+        "ac",
+        "ro",
+        "1co",
+        "2co",
+        "ga",
+        "eph",
+        "php",
+        "col",
+        "1th",
+        "2th",
+        "1ti",
+        "2ti",
+        "tit",
+        "phm",
+        "heb",
+        "jas",
+        "1pe",
+        "2pe",
+        "1jo",
+        "2jo",
+        "3jo",
+        "jude",
+        "re"
+      ],
+      "sources": [
+        {
+          "url": "https://content.swncdn.com/biblestudytools/audio/nlt-mp3/{book:2}_{bookCode}_{chapter:3}.mp3"
+        }
+      ]
+    }
+  ]
+}

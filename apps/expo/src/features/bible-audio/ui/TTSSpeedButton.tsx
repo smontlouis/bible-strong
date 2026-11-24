@@ -1,14 +1,8 @@
-import { twMerge } from '~common/ui/classNames'
-
 import { useAtom } from 'jotai/react'
-import React from 'react'
 import { useTranslation } from 'react-i18next'
 import DropdownMenu from '~common/DropdownMenu'
-import { BoxProps } from '~common/ui/Box'
-import Text from '~common/ui/Text'
 import { ttsSpeedAtom } from '../atoms'
-import AudioChip from './AudioChip'
-export type TTSSpeedButtonProps = BoxProps
+import PlayerOption from './PlayerOption'
 
 const choices = [
   { value: '0.5', label: '0.5x' },
@@ -19,25 +13,18 @@ const choices = [
   { value: '1.75', label: '1.75x' },
   { value: '2', label: '2x' },
 ]
-const TTSSpeedButton = (props: TTSSpeedButtonProps) => {
+
+const TTSSpeedButton = () => {
   const { t } = useTranslation()
   const [speed, setSpeed] = useAtom(ttsSpeedAtom)
-  const isActive = speed !== 1
-  const choice = choices.find(c => c.value === speed.toString())
 
   return (
     <DropdownMenu
       title={t('audio.speed')}
       currentValue={speed.toString()}
-      setValue={v => setSpeed(Number(v))}
+      setValue={value => setSpeed(Number(value))}
       choices={choices}
-      customRender={
-        <AudioChip isActive={isActive} {...props}>
-          <Text className={twMerge(isActive ? 'text-link' : 'text-grey', 'font-bold text-[10px]')}>
-            {t('audio.speed')} {choice?.label}
-          </Text>
-        </AudioChip>
-      }
+      customRender={<PlayerOption isActive={speed !== 1} value={`x${speed}`} />}
     />
   )
 }

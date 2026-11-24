@@ -14,9 +14,11 @@ import {
 } from 'react-native-reanimated'
 import { runOnJS } from 'react-native-worklets'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { LinearGradient } from 'expo-linear-gradient'
 import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import { floatingShadow, radii } from '~common/ui/surfaces'
 import { colorWithOpacity } from '~themes/colorValues'
+import { getBiblePart, getBiblePartColors } from '~themes/bibleBookColors'
 import { useTheme } from '~themes/ThemeProvider'
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 import { subscribeToHardwareBackPress } from '~helpers/hardwareBackPress'
@@ -31,8 +33,8 @@ const CLOSE_VELOCITY = 800
 const PANEL_WIDTH = 400
 
 /**
- * The large player. On a phone, a sheet that rises from the small player and goes back down with
- * the finger; on a wide screen, a panel at the bottom left, where the small player sits.
+ * The large player. On a phone, a full screen that rises from the small player and goes back down
+ * with the finger; on a wide screen, a panel at the bottom left, where the small player sits.
  */
 const BibleAudioPlayerSheet = () => {
   const { t } = useTranslation()
@@ -142,7 +144,7 @@ const BibleAudioPlayerSheet = () => {
       </AnimatedBox>
       <GestureDetector gesture={drag}>
         <AnimatedBox
-          className="absolute bg-surface-raised px-[20px] pt-[10px]"
+          className="absolute"
           accessibilityViewIsModal
           style={[
             isWide
@@ -151,29 +153,46 @@ const BibleAudioPlayerSheet = () => {
                   bottom: 16 + insets.bottom,
                   width: PANEL_WIDTH,
                   borderRadius: radii.sheet,
-                  paddingBottom: 16,
+                  paddingHorizontal: 20,
+                  paddingTop: 18,
+                  paddingBottom: 12,
+                  backgroundColor: theme.colors.surfaceRaised,
+                  ...floatingShadow,
                 }
               : {
+                  top: 0,
                   left: 0,
                   right: 0,
                   bottom: 0,
                   borderTopLeftRadius: radii.sheet,
                   borderTopRightRadius: radii.sheet,
+                  paddingTop: insets.top,
                   paddingBottom: insets.bottom + 12,
+                  paddingHorizontal: 20,
+                  overflow: 'hidden',
+                  backgroundColor: theme.colors.canvas,
                 },
-            floatingShadow,
             sheetStyle,
           ]}
         >
-          {!isWide && (
-            <Box className="items-center mb-[8px]">
-              <Box
-                className="w-[36px] h-[5px] rounded-full"
-                style={{ backgroundColor: colorWithOpacity(theme.colors.default, 0.2) }}
-              />
-            </Box>
+          {!isWide && passage && (
+            // The top of the screen takes a tint of the book's part, fading into the page.
+            <LinearGradient
+              pointerEvents="none"
+              colors={[
+                getBiblePartColors(getBiblePart(passage.book.Numero), theme).glow,
+                colorWithOpacity(theme.colors.canvas, 0) ?? 'transparent',
+              ]}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: windowHeight * 0.65,
+              }}
+            />
           )}
-          <BibleAudioPlayerContent />
+          <BibleAudioPlayerContent layout={isWide ? 'panel' : 'screen'} />
         </AnimatedBox>
       </GestureDetector>
     </Box>

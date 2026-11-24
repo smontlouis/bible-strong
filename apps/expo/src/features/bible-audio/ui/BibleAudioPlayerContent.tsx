@@ -1,12 +1,15 @@
 import { useAtomValue } from 'jotai/react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Linking } from 'react-native'
-import { twMerge } from '~common/ui/classNames'
-import Box, { HStack, TouchableBox } from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
+import { ActivityIndicator, Linking } from 'react-native'
+import { useAnimatedStyle, withSpring } from 'react-native-reanimated'
+import DropdownMenu from '~common/DropdownMenu'
+import Box, { AnimatedBox, HStack, TouchableBox } from '~common/ui/Box'
+import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
+import { floatingShadow, radii } from '~common/ui/surfaces'
 import { colorWithOpacity } from '~themes/colorValues'
+import { getBiblePart, getBiblePartColors } from '~themes/bibleBookColors'
 import { useTheme } from '~themes/ThemeProvider'
 import { useBookAndVersionSelector } from '~features/bible/BookSelectorSheet/BookSelectorSheetProvider'
 import type { Book } from '~assets/bible_versions/books-desc'
@@ -18,58 +21,24 @@ import {
   getAdjacentPassage,
   goToAdjacentChapter,
   loadBibleAudioCoverage,
-  setSource,
   skip,
   togglePlay,
 } from '../bibleAudioPlayer'
-import { hasRecordedAudio } from '../recordedEngine'
-import type { BibleAudioPassage, BibleAudioSource } from '../types'
+import type { BibleAudioPassage } from '../types'
 import { useShowBibleAudioText } from '../useShowBibleAudioText'
+import AudioChoiceButton from './AudioChoiceButton'
 import AudioRepeatButton from './AudioRepeatButton'
 import AudioSleepButton from './AudioSleepButton'
 import AudioSpeedButton from './AudioSpeedButton'
+import BibleAudioCover from './BibleAudioCover'
 import BibleAudioProgressBar from './BibleAudioProgressBar'
-import ChapterButton from './ChapterButton'
-import PlayButton from './PlayButton'
 import TTSPitchButton from './TTSPitchButton'
 import TTSRepeatButton from './TTSRepeatButton'
 import TTSSpeedButton from './TTSSpeedButton'
 import TTSVoiceButton from './TTSVoiceButton'
 import { useBibleAudioLabels } from './useBibleAudioLabels'
 
-type PillProps = {
-  label: string
-  isActive?: boolean
-  onPress: () => void
-  accessibilityLabel?: string
-  accessibilityRole?: 'button' | 'radio' | 'link'
-}
-
-// A pill filled with a tint, the primary one when chosen: no outline.
-const Pill = ({ label, isActive, onPress, accessibilityLabel, accessibilityRole }: PillProps) => {
-  const theme = useTheme()
-  return (
-    <TouchableBox
-      className="overflow-hidden border-continuous flex-row items-center px-[12px] h-[30px] rounded-full"
-      style={{
-        backgroundColor: isActive
-          ? colorWithOpacity(theme.colors.primary, 0.12)
-          : colorWithOpacity(theme.colors.default, 0.07),
-      }}
-      onPress={onPress}
-      accessibilityRole={accessibilityRole ?? 'button'}
-      accessibilityLabel={accessibilityLabel ?? label}
-      accessibilityState={accessibilityRole === 'radio' ? { checked: !!isActive } : undefined}
-    >
-      <Text
-        className={twMerge(isActive ? 'text-link' : 'text-default', 'text-[12px] font-bold')}
-        numberOfLines={1}
-      >
-        {label}
-      </Text>
-    </TouchableBox>
-  )
-}
+const AUDIBIBLE_URL = 'https://click.audibible.app/5nmN/stephane30'
 
 /** The Bible tab data the book and version selectors read, made from the player's passage. */
 const getSelectorData = (passage: BibleAudioPassage): BibleTab['data'] => ({
@@ -97,20 +66,8 @@ const useAdjacentChapters = (passage: BibleAudioPassage | null) => {
   return adjacent
 }
 
-/** The controls of the large player, the same in the sheet and in the panel of a wide screen. */
-const BibleAudioPlayerContent = () => {
-  const { t } = useTranslation()
-  const { passage, source, status } = useAtomValue(bibleAudioStateAtom)
-  const { title, subtitle } = useBibleAudioLabels()
+const usePassageSelectors = (passage: BibleAudioPassage) => {
   const { openBookSelector, openVersionSelector } = useBookAndVersionSelector()
-  const showText = useShowBibleAudioText()
-  const adjacent = useAdjacentChapters(passage)
-
-  if (!passage) return null
-
-  const isPlaying = status === 'playing'
-  const isLoading = status === 'loading'
-  const canSwitchSource = hasRecordedAudio(passage.version)
 
   const chooseVersion = () =>
     openVersionSelector({
@@ -138,154 +95,369 @@ const BibleAudioPlayerContent = () => {
     openBookSelector({ actions, data: getSelectorData(passage), coverage })
   }
 
-  const chooseSource = (next: BibleAudioSource) => setSource(next)
+  return { chooseChapter, chooseVersion }
+}
+
+/** « Lire »: back to the text heard, in the tab it came from or a new one. */
+const ReadButton = ({ compact }: { compact?: boolean }) => {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const showText = useShowBibleAudioText()
+  return (
+    <TouchableBox
+      className="overflow-hidden border-continuous flex-row items-center rounded-full px-[14px]"
+      style={{
+        height: compact ? 32 : 40,
+        backgroundColor: colorWithOpacity(theme.colors.default, 0.07),
+      }}
+      onPress={showText}
+      accessibilityRole="button"
+      accessibilityLabel={t('bibleAudio.showText')}
+    >
+      <FeatherIcon name="book-open" size={16} color="default" />
+      <Text className="text-[13px] font-semibold ml-[6px]">{t('bibleAudio.read')}</Text>
+    </TouchableBox>
+  )
+}
+
+/** The menu of what is not a control: for now, the way to Audibible. */
+const MoreMenu = () => {
+  const { t } = useTranslation()
+  return (
+    <DropdownMenu
+      title={t('bibleAudio.more')}
+      setValue={value => {
+        if (value === 'audibible') void Linking.openURL(AUDIBIBLE_URL)
+      }}
+      choices={[{ value: 'audibible', label: t('accessibility.openAudibible') }]}
+      customRender={
+        <Box className="w-[44px] h-[44px] items-center justify-center">
+          <FeatherIcon name="more-horizontal" size={22} color="default" />
+        </Box>
+      }
+    />
+  )
+}
+
+type PassageTitleProps = { passage: BibleAudioPassage; size: 'large' | 'medium' }
+
+/** « Genèse 1 » and the version, each opening its selector. */
+const PassageTitle = ({ passage, size }: PassageTitleProps) => {
+  const { t } = useTranslation()
+  const { title, subtitle, shortSubtitle } = useBibleAudioLabels()
+  const { chooseChapter, chooseVersion } = usePassageSelectors(passage)
+  return (
+    <Box className="flex-[1] min-w-0">
+      <TouchableBox
+        onPress={chooseChapter}
+        accessibilityRole="button"
+        accessibilityLabel={t('bibleAudio.chooseChapter')}
+        accessibilityHint={title}
+        className="flex-row items-center self-start"
+      >
+        <Text
+          className={size === 'large' ? 'text-[20px] font-bold' : 'text-[18px] font-bold'}
+          numberOfLines={1}
+        >
+          {title}
+        </Text>
+        <FeatherIcon name="chevron-down" size={16} color="grey" style={{ marginLeft: 4 }} />
+      </TouchableBox>
+      <TouchableBox
+        onPress={chooseVersion}
+        accessibilityRole="button"
+        accessibilityLabel={t('bibleAudio.chooseVersion')}
+        accessibilityHint={subtitle}
+        className="flex-row items-center self-start mt-[2px]"
+      >
+        <Text className="text-[16px] text-grey" numberOfLines={1}>
+          {shortSubtitle}
+        </Text>
+        <FeatherIcon name="chevron-down" size={16} color="grey" style={{ marginLeft: 4 }} />
+      </TouchableBox>
+    </Box>
+  )
+}
+
+type TransportProps = { passage: BibleAudioPassage; scale?: number }
+
+/**
+ * Audibible's transport: the chapter before and after on either side of play, a step of ten
+ * seconds (or a verse of the device's voice) at each end.
+ */
+const Transport = ({ passage, scale = 1 }: TransportProps) => {
+  const { t } = useTranslation()
+  const { source, status } = useAtomValue(bibleAudioStateAtom)
+  const adjacent = useAdjacentChapters(passage)
+  const isPlaying = status === 'playing'
+  const isLoading = status === 'loading'
+  const isSpeech = source === 'speech'
+
+  const step = (direction: -1 | 1) => (
+    <TouchableBox
+      className="w-[48px] h-[48px] items-center justify-center"
+      onPress={() => skip(direction)}
+      accessibilityRole="button"
+      accessibilityLabel={t(
+        isSpeech
+          ? direction === -1
+            ? 'accessibility.previousVerse'
+            : 'accessibility.nextVerse'
+          : direction === -1
+            ? 'accessibility.rewindTenSeconds'
+            : 'accessibility.forwardTenSeconds'
+      )}
+    >
+      <FeatherIcon
+        name={
+          isSpeech
+            ? direction === -1
+              ? 'corner-up-left'
+              : 'corner-up-right'
+            : direction === -1
+              ? 'rotate-ccw'
+              : 'rotate-cw'
+        }
+        size={22}
+        color="grey"
+      />
+      {!isSpeech && (
+        <Text className="absolute text-[8px] font-bold text-grey" style={{ top: 20 }}>
+          10
+        </Text>
+      )}
+    </TouchableBox>
+  )
+
+  const chapter = (direction: 'previous' | 'next') => {
+    const isAvailable = direction === 'previous' ? adjacent.previous : adjacent.next
+    return (
+      <TouchableBox
+        className="w-[56px] h-[56px] items-center justify-center"
+        disabled={!isAvailable}
+        style={{ opacity: isAvailable ? 1 : 0.3 }}
+        onPress={() => void goToAdjacentChapter(direction)}
+        accessibilityRole="button"
+        accessibilityLabel={t(
+          direction === 'previous' ? 'accessibility.previousChapter' : 'accessibility.nextChapter'
+        )}
+        accessibilityState={{ disabled: !isAvailable }}
+      >
+        <IonIcon
+          name={direction === 'previous' ? 'play-back' : 'play-forward'}
+          size={36 * scale}
+          color="default"
+        />
+      </TouchableBox>
+    )
+  }
 
   return (
-    <Box>
-      <HStack className="items-center gap-[6px]">
-        {canSwitchSource && (
-          <>
-            <Pill
-              label={t('bibleAudio.recorded')}
-              isActive={source === 'recorded'}
-              onPress={() => chooseSource('recorded')}
-              accessibilityRole="radio"
-            />
-            <Pill
-              label={t('bibleAudio.speech')}
-              isActive={source === 'speech'}
-              onPress={() => chooseSource('speech')}
-              accessibilityRole="radio"
-            />
-          </>
+    <HStack className="items-center justify-between">
+      {step(-1)}
+      {chapter('previous')}
+      <TouchableBox
+        className="items-center justify-center"
+        style={{ width: 80 * scale, height: 80 * scale }}
+        onPress={togglePlay}
+        accessibilityRole="button"
+        accessibilityLabel={t(
+          isLoading
+            ? 'accessibility.audioLoading'
+            : isPlaying
+              ? 'accessibility.pauseAudio'
+              : 'accessibility.playAudio'
         )}
-        <Box className="flex-[1]" />
-        <Pill
-          label="Audibible"
-          onPress={() => Linking.openURL('https://click.audibible.app/5nmN/stephane30')}
-          accessibilityRole="link"
-          accessibilityLabel={t('accessibility.openAudibible')}
-        />
+        accessibilityState={{ busy: isLoading }}
+      >
+        {isLoading ? (
+          <ActivityIndicator size="large" />
+        ) : (
+          <IonIcon
+            name={isPlaying ? 'pause' : 'play'}
+            size={58 * scale}
+            color="default"
+            // The triangle's weight sits left of its box.
+            style={isPlaying ? undefined : { marginLeft: 5 * scale }}
+          />
+        )}
+      </TouchableBox>
+      {chapter('next')}
+      {step(1)}
+    </HStack>
+  )
+}
+
+/** The large options: what the version is heard with, its speed and settings, repeat, the timer. */
+const Options = ({ passage }: { passage: BibleAudioPassage }) => {
+  const { source } = useAtomValue(bibleAudioStateAtom)
+  const isSpeech = source === 'speech'
+
+  return (
+    <HStack className="items-center justify-around">
+      <AudioChoiceButton passage={passage} />
+      {isSpeech ? (
+        <>
+          <TTSSpeedButton />
+          <TTSVoiceButton currentVersion={passage.version} />
+          <TTSPitchButton />
+          <TTSRepeatButton />
+        </>
+      ) : (
+        <>
+          <AudioSpeedButton />
+          <AudioRepeatButton />
+        </>
+      )}
+      <AudioSleepButton />
+    </HStack>
+  )
+}
+
+const ErrorLine = () => {
+  const { t } = useTranslation()
+  const { status } = useAtomValue(bibleAudioStateAtom)
+  if (status !== 'error') return null
+  return (
+    <Text className="text-[12px] text-grey text-center mt-[4px]">
+      {t('bibleAudio.unavailable')}
+    </Text>
+  )
+}
+
+/** The cover fills the room left above the controls, and breathes in while it plays. */
+const CoverStage = ({ passage }: { passage: BibleAudioPassage }) => {
+  const { status } = useAtomValue(bibleAudioStateAtom)
+  const [room, setRoom] = useState({ width: 0, height: 0 })
+  const isPlaying = status === 'playing' || status === 'loading'
+  const size = Math.floor(Math.min(room.width, room.height))
+
+  const coverStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        scale: withSpring(isPlaying ? 1 : 0.84, { mass: 1, damping: 18, stiffness: 140 }),
+      },
+    ],
+  }))
+
+  return (
+    <Box
+      className="flex-[1] items-center justify-center min-h-[0px]"
+      onLayout={event => {
+        const { width, height } = event.nativeEvent.layout
+        setRoom({ width, height })
+      }}
+    >
+      {size > 0 && (
+        <AnimatedBox style={[{ borderRadius: radii.sheet, ...floatingShadow }, coverStyle]}>
+          <BibleAudioCover passage={passage} size={size} />
+        </AnimatedBox>
+      )}
+    </Box>
+  )
+}
+
+type BibleAudioPlayerContentProps = {
+  /** `screen`: the full screen of a phone. `panel`: the panel of a wide screen. */
+  layout: 'screen' | 'panel'
+}
+
+/** The large player: the cover, the passage, the bar, the transport and the options. */
+const BibleAudioPlayerContent = ({ layout }: BibleAudioPlayerContentProps) => {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const { passage } = useAtomValue(bibleAudioStateAtom)
+  if (!passage) return null
+
+  const part = getBiblePart(passage.book.Numero)
+  const colors = getBiblePartColors(part, theme)
+
+  if (layout === 'panel') {
+    return (
+      <Box>
+        <HStack className="items-start">
+          <Box style={{ borderRadius: radii.card, ...floatingShadow }}>
+            <BibleAudioCover passage={passage} size={104} />
+          </Box>
+          <Box className="flex-[1] min-w-0 ml-[14px]">
+            <Text
+              className="text-[11px] text-grey uppercase font-medium"
+              style={{ letterSpacing: 1.5 }}
+              numberOfLines={1}
+            >
+              {t(`bibleAudio.part.${part}`)}
+            </Text>
+            <Box className="mt-[2px]">
+              <PassageTitle passage={passage} size="medium" />
+            </Box>
+            <Box className="mt-[8px] self-start">
+              <ReadButton compact />
+            </Box>
+          </Box>
+          <HStack className="-mt-[10px] -mr-[10px]">
+            <MoreMenu />
+            <TouchableBox
+              className="w-[44px] h-[44px] items-center justify-center"
+              onPress={closeBibleAudioPlayer}
+              accessibilityRole="button"
+              accessibilityLabel={t('accessibility.reduceAudioPlayer')}
+            >
+              <FeatherIcon name="x" size={20} color="default" />
+            </TouchableBox>
+          </HStack>
+        </HStack>
+        <Box className="mt-[10px]">
+          <BibleAudioProgressBar color={colors.accent} />
+        </Box>
+        <ErrorLine />
+        <Box className="mt-[4px]">
+          <Transport passage={passage} scale={0.85} />
+        </Box>
+        <Box className="mt-[6px]">
+          <Options passage={passage} />
+        </Box>
+      </Box>
+    )
+  }
+
+  return (
+    <Box className="flex-[1]">
+      <HStack className="items-center h-[44px] -mx-[10px]">
         <TouchableBox
-          className="w-[36px] h-[36px] items-center justify-center"
+          className="w-[44px] h-[44px] items-center justify-center"
           onPress={closeBibleAudioPlayer}
           accessibilityRole="button"
           accessibilityLabel={t('accessibility.reduceAudioPlayer')}
         >
-          <FeatherIcon name="chevron-down" size={22} color="grey" />
+          <FeatherIcon name="chevron-down" size={26} color="default" />
         </TouchableBox>
-      </HStack>
-
-      <Box className="items-center mt-[16px]">
-        <TouchableBox
-          onPress={chooseChapter}
-          accessibilityRole="button"
-          accessibilityLabel={t('bibleAudio.chooseChapter')}
-          accessibilityHint={title}
-          className="flex-row items-center"
+        <Text
+          className="flex-[1] text-center text-[11px] text-grey uppercase font-medium"
+          style={{ letterSpacing: 1.5 }}
+          numberOfLines={1}
         >
-          <Text className="text-[24px] font-bold" numberOfLines={1}>
-            {title}
-          </Text>
-          <FeatherIcon name="chevron-down" size={18} color="grey" style={{ marginLeft: 4 }} />
-        </TouchableBox>
-        <TouchableBox
-          onPress={chooseVersion}
-          accessibilityRole="button"
-          accessibilityLabel={t('bibleAudio.chooseVersion')}
-          accessibilityHint={subtitle}
-          className="flex-row items-center mt-[4px]"
-        >
-          <Text className="text-[13px] text-grey" numberOfLines={1}>
-            {subtitle}
-          </Text>
-          <FeatherIcon name="chevron-down" size={14} color="grey" style={{ marginLeft: 4 }} />
-        </TouchableBox>
-      </Box>
-
-      <Box className="mt-[20px]">
-        <BibleAudioProgressBar />
-      </Box>
-
-      {status === 'error' && (
-        <Text className="text-[12px] text-grey text-center mt-[8px]">
-          {t('bibleAudio.unavailable')}
+          {t(`bibleAudio.part.${part}`)}
         </Text>
-      )}
-
-      <HStack className="items-center justify-center mt-[12px]">
-        <ChapterButton
-          hasNextChapter={adjacent.previous}
-          direction="left"
-          onPress={() => void goToAdjacentChapter('previous')}
-        />
-        <HStack className="flex-[1] items-center justify-center">
-          <TouchableBox
-            className="w-[44px] h-[44px] items-center justify-center"
-            onPress={() => skip(-1)}
-            accessibilityRole="button"
-            accessibilityLabel={t(
-              source === 'speech' ? 'accessibility.previousVerse' : 'accessibility.rewindTenSeconds'
-            )}
-          >
-            <FeatherIcon
-              name={source === 'speech' ? 'chevron-left' : 'rotate-ccw'}
-              size={22}
-              color="tertiary"
-            />
-          </TouchableBox>
-          <PlayButton isPlaying={isPlaying} isLoading={isLoading} onToggle={togglePlay} />
-          <TouchableBox
-            className="w-[44px] h-[44px] items-center justify-center"
-            onPress={() => skip(1)}
-            accessibilityRole="button"
-            accessibilityLabel={t(
-              source === 'speech' ? 'accessibility.nextVerse' : 'accessibility.forwardTenSeconds'
-            )}
-          >
-            <FeatherIcon
-              name={source === 'speech' ? 'chevron-right' : 'rotate-cw'}
-              size={22}
-              color="tertiary"
-            />
-          </TouchableBox>
-        </HStack>
-        <ChapterButton
-          hasNextChapter={adjacent.next}
-          direction="right"
-          onPress={() => void goToAdjacentChapter('next')}
-        />
+        <MoreMenu />
       </HStack>
-
-      <HStack className="mt-[16px] items-center justify-center flex-wrap gap-[6px]">
-        {source === 'speech' ? (
-          <>
-            <TTSVoiceButton currentVersion={passage.version} />
-            <TTSSpeedButton />
-            <TTSPitchButton />
-            <TTSRepeatButton />
-          </>
-        ) : (
-          <>
-            <AudioSpeedButton />
-            <AudioRepeatButton />
-          </>
-        )}
-        <AudioSleepButton />
+      <Box className="flex-[1] py-[12px]">
+        <CoverStage passage={passage} />
+      </Box>
+      <HStack className="items-center">
+        <PassageTitle passage={passage} size="large" />
+        <Box className="ml-[12px]">
+          <ReadButton />
+        </Box>
       </HStack>
-
-      <Box className="items-center mt-[16px]">
-        <TouchableBox
-          className="flex-row items-center h-[44px] px-[12px]"
-          onPress={showText}
-          accessibilityRole="button"
-          accessibilityLabel={t('bibleAudio.showText')}
-        >
-          <FeatherIcon name="book-open" size={16} color="primary" />
-          <Text className="text-link text-[14px] font-bold ml-[6px]">
-            {t('bibleAudio.showText')}
-          </Text>
-        </TouchableBox>
+      <Box className="mt-[14px]">
+        <BibleAudioProgressBar color={colors.accent} />
+      </Box>
+      <ErrorLine />
+      <Box className="mt-[10px]">
+        <Transport passage={passage} />
+      </Box>
+      <Box className="mt-[14px]">
+        <Options passage={passage} />
       </Box>
     </Box>
   )

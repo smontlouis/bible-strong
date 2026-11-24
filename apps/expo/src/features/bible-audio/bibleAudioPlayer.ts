@@ -17,7 +17,13 @@ import {
   bibleAudioSourceTabIdAtom,
   bibleAudioStateAtom,
 } from './atoms'
-import { createRecordedEngine, hasRecordedAudio } from './recordedEngine'
+import {
+  rememberBibleAudioChoice,
+  resolveBibleAudio,
+  SPEECH_CHOICE,
+  type BibleAudioChoice,
+} from './audioCatalog'
+import { createRecordedEngine } from './recordedEngine'
 import { createSpeechEngine } from './speechEngine'
 import type {
   BibleAudioEngine,
@@ -119,10 +125,6 @@ const getEngine = (source: BibleAudioSource) => {
   return engine
 }
 
-/** The source a version is voiced with: its recordings when it has some, unless speech is asked. */
-export const getBibleAudioSource = (version: string, preferred?: BibleAudioSource) =>
-  hasRecordedAudio(version) && preferred !== 'speech' ? 'recorded' : 'speech'
-
 export { isSamePassage } from './samePassage'
 
 const isActive = () => {
@@ -130,13 +132,16 @@ const isActive = () => {
   return status === 'playing' || status === 'loading'
 }
 
-/** Readies a passage with a source, keeping playback going if it was. */
+/**
+ * Readies a passage with what the reader listens to its version with (or the choice given),
+ * keeping playback going if it was.
+ */
 const load = async (
   passage: BibleAudioPassage,
-  source: BibleAudioSource,
-  options: { play: boolean }
+  options: { play: boolean; choice?: BibleAudioChoice }
 ) => {
   const token = ++loadToken
+  const { source, recording } = resolveBibleAudio(passage, options.choice)
   const engine = getEngine(source)
   // A recording that moves to another chapter of its book plays on without a pause.
   const playsOn = current === engine && getState().status === 'playing'
@@ -146,11 +151,12 @@ const load = async (
   setState({
     passage,
     source,
+    recordingId: recording?.id ?? null,
     status: options.play && !playsOn ? 'loading' : getState().status,
   })
 
   try {
-    await engine.open(passage)
+    await engine.open(passage, recording)
     if (token !== loadToken) return
     if (options.play) await engine.play()
     else if (getState().status !== 'playing') setState({ status: 'paused' })
@@ -167,21 +173,20 @@ const load = async (
  */
 export const listenToPassage = (
   passage: BibleAudioPassage,
-  options: { tabId?: string; source?: BibleAudioSource; open?: boolean } = {}
+  options: { tabId?: string; open?: boolean } = {}
 ) => {
   store.set(bibleAudioSourceTabIdAtom, options.tabId ?? '')
   store.set(bibleAudioFollowingTabIdAtom, options.tabId ?? '')
   if (options.open !== false) store.set(bibleAudioPlayerOpenAtom, true)
-  const source = getBibleAudioSource(passage.version, options.source ?? getState().source)
-  void load(passage, source, { play: true })
+  void load(passage, { play: true })
 }
 
 export const play = async () => {
-  const { passage, source, status } = getState()
+  const { passage, status } = getState()
   if (!passage) return
   // Nothing left in the queue, or the last try failed: start the chapter again.
   if (!current || status === 'ended' || status === 'error') {
-    await load(passage, source, { play: true })
+    await load(passage, { play: true, choice: currentChoice() })
     return
   }
   setState({ status: 'loading' })
@@ -211,12 +216,14 @@ export const stop = () => {
   store.set(bibleAudioPlayerOpenAtom, false)
   store.set(bibleAudioFollowingTabIdAtom, '')
   store.set(bibleAudioSourceTabIdAtom, '')
-  // The next listening starts from the recordings again, as the reader's button shows.
-  setState({ passage: null, source: 'recorded', status: 'idle' })
+  setState({ passage: null, source: 'recorded', recordingId: null, status: 'idle' })
 }
 
 /** Ten seconds of a recording, or a verse of the device's voice. */
 export const skip = (direction: -1 | 1) => current?.skip(direction)
+
+/** A point of the chapter, from 0 to 1, as the progress bar gives it. */
+export const seekTo = (ratio: number) => current?.seekTo(Math.max(0, Math.min(ratio, 1)))
 
 export const getAdjacentPassage = async (
   passage: BibleAudioPassage,
@@ -235,7 +242,7 @@ export async function goToAdjacentChapter(
   direction: 'previous' | 'next',
   options: { play?: boolean } = {}
 ) {
-  const { passage, source } = getState()
+  const { passage } = getState()
   if (!passage) return
   const shouldPlay = options.play ?? isActive()
   const target = await getAdjacentPassage(passage, direction)
@@ -244,20 +251,34 @@ export async function goToAdjacentChapter(
     if (direction === 'next' && options.play) setState({ status: 'ended' })
     return
   }
-  await load(target, source, { play: shouldPlay })
+  // Within a book, the recording heard plays on; another book takes the reader's choice again.
+  await load(target, {
+    play: shouldPlay,
+    choice: target.book.Numero === passage.book.Numero ? currentChoice() : undefined,
+  })
 }
 
 /** Another chapter, book or version chosen in the player, keeping playback going if it was. */
 export const changePassage = (passage: BibleAudioPassage) => {
-  const { source } = getState()
-  void load(passage, getBibleAudioSource(passage.version, source), { play: isActive() })
+  void load(passage, { play: isActive() })
 }
 
-/** Switches between the recordings and the device's voice on the same chapter. */
-export const setSource = (source: BibleAudioSource) => {
+/** What is heard now: the recording's id, or the device's voice. */
+function currentChoice(): BibleAudioChoice {
+  const { source, recordingId } = getState()
+  return source === 'speech' || !recordingId ? SPEECH_CHOICE : recordingId
+}
+
+/**
+ * Listens to the passage with another recording of its version or with the device's voice, and
+ * remembers it for the version.
+ */
+export const chooseBibleAudio = (choice: BibleAudioChoice) => {
   const { passage } = getState()
-  if (!passage || source === getState().source) return
-  void load(passage, getBibleAudioSource(passage.version, source), { play: isActive() })
+  if (!passage) return
+  rememberBibleAudioChoice(passage.version, choice)
+  if (choice === currentChoice()) return
+  void load(passage, { play: isActive(), choice })
 }
 
 /** Pauses the Bible audio for another sound, such as the pronunciation of a Strong word. */

@@ -9,8 +9,13 @@ import { getDefaultStore } from 'jotai/vanilla'
 import i18n from '~i18n'
 import { getAvailableChapters } from '~helpers/bibleCoverage'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
-import { getVersions, type Version } from '~helpers/bibleVersions'
 import { audioRepeatAtom, audioSpeedAtom } from './atoms'
+import {
+  getRecordingName,
+  getRecordingUrl,
+  getVersionName,
+  type BibleAudioRecording,
+} from './audioCatalog'
 import type {
   BibleAudioEngine,
   BibleAudioEngineEvents,
@@ -37,24 +42,25 @@ type RecordedTrack = {
   artist?: string
 }
 
-const getAudioUrl = (version: string, book: number, chapter: number) =>
-  (getVersions()[version] as Version | undefined)?.getAudioUrl?.(book, chapter) || ''
-
-/** Whether a version has recordings to play. */
-export const hasRecordedAudio = (version: string) =>
-  Boolean((getVersions()[version] as Version | undefined)?.hasAudio)
-
 export const getRecordedTracks = (
   passage: BibleAudioPassage,
+  recording: BibleAudioRecording,
   coverage?: BibleVersionCoverage
 ): RecordedTrack[] => {
-  const artist = (getVersions()[passage.version] as Version | undefined)?.name
-  return getAvailableChapters(passage.book, coverage).map(chapter => ({
-    chapter,
-    url: getAudioUrl(passage.version, passage.book.Numero, chapter),
-    title: `${i18n.t(passage.book.Nom)} ${chapter} ${passage.version}`,
-    artist,
-  }))
+  const artist = `${getVersionName(passage.version)} · ${getRecordingName(recording)}`
+  return getAvailableChapters(passage.book, coverage).flatMap(chapter => {
+    const url = getRecordingUrl(recording, passage.book.Numero, chapter)
+    return url
+      ? [
+          {
+            chapter,
+            url,
+            title: `${i18n.t(passage.book.Nom)} ${chapter} ${passage.version}`,
+            artist,
+          },
+        ]
+      : []
+  })
 }
 
 /**
@@ -74,7 +80,7 @@ export const createRecordedEngine = (
 ): BibleAudioEngine => {
   let playlist: AudioPlaylist | null = null
   let tracks: RecordedTrack[] = []
-  let loadedBook: { version: string; book: number } | null = null
+  let loadedBook: { recording: string; book: number } | null = null
   let lockScreenActive = false
   // Playback asked for and not paused since; the playlist has no such state.
   let wantsPlayback = false
@@ -169,25 +175,24 @@ export const createRecordedEngine = (
     return playlist
   }
 
-  const open = async (passage: BibleAudioPassage) => {
+  const open = async (passage: BibleAudioPassage, recording: BibleAudioRecording | null) => {
+    if (!recording) throw new Error(`No recording given for ${passage.version}`)
     const player = getPlaylist()
     const isSameBook =
-      loadedBook?.version === passage.version && loadedBook.book === passage.book.Numero
+      loadedBook?.recording === recording.id && loadedBook.book === passage.book.Numero
 
     if (!isSameBook) {
       const coverage = await loadCoverage(passage.version).catch(() => undefined)
-      const nextTracks = getRecordedTracks(passage, coverage)
+      const nextTracks = getRecordedTracks(passage, recording, coverage)
       player.clear()
       tracks = nextTracks
-      loadedBook = { version: passage.version, book: passage.book.Numero }
+      loadedBook = { recording: recording.id, book: passage.book.Numero }
       nextTracks.forEach(track => player.add({ uri: track.url, name: track.title }))
     }
 
     const index = tracks.findIndex(track => track.chapter === passage.chapter)
-    if (index === -1 || !tracks[index]?.url) {
-      throw new Error(
-        `No recording for ${passage.version} ${passage.book.Numero}:${passage.chapter}`
-      )
+    if (index === -1) {
+      throw new Error(`No recording for ${recording.id} ${passage.book.Numero}:${passage.chapter}`)
     }
     if (index !== player.currentIndex) player.skipTo(index)
 
@@ -248,14 +253,22 @@ export const createRecordedEngine = (
     status = 'idle'
   }
 
-  const skip = (direction: -1 | 1) => {
-    if (!playlist) return
+  const seekToTime = (player: AudioPlaylist, seconds: number) => {
     const end =
-      playlist.duration > 0 ? playlist.duration - END_MARGIN_SECONDS : Number.POSITIVE_INFINITY
-    // Read live: quick taps would otherwise all start from the last rendered position.
-    const target = playlist.currentTime + direction * SKIP_SECONDS
-    void playlist.seekTo(Math.max(0, Math.min(target, end)))
+      player.duration > 0 ? player.duration - END_MARGIN_SECONDS : Number.POSITIVE_INFINITY
+    void player.seekTo(Math.max(0, Math.min(seconds, end)))
   }
 
-  return { source: 'recorded', open, play, pause, stop, skip }
+  const skip = (direction: -1 | 1) => {
+    if (!playlist) return
+    // Read live: quick taps would otherwise all start from the last rendered position.
+    seekToTime(playlist, playlist.currentTime + direction * SKIP_SECONDS)
+  }
+
+  const seekTo = (ratio: number) => {
+    if (!playlist || !(playlist.duration > 0)) return
+    seekToTime(playlist, ratio * playlist.duration)
+  }
+
+  return { source: 'recorded', open, play, pause, stop, skip, seekTo }
 }

@@ -1,17 +1,10 @@
-import { twMerge } from '~common/ui/classNames'
-
 import { useAtom } from 'jotai/react'
-import React from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import DropdownMenu from '~common/DropdownMenu'
-import { BoxProps } from '~common/ui/Box'
-import { IonIcon } from '~common/ui/Icon'
-import Text from '~common/ui/Text'
 import { secondsToMinutes } from '~helpers/secondsToMinutes'
 import { audioSleepMinutesAtom, audioSleepTimeAtom } from '../atoms'
-import AudioChip from './AudioChip'
-import { useMountTime } from '~helpers/useMountTime'
-export type AudioSleepButtonProps = BoxProps
+import PlayerOption from './PlayerOption'
 
 const choices = [
   { value: 'off', label: 'Off' },
@@ -23,8 +16,7 @@ const choices = [
   { value: '120', label: '2 heures' },
 ]
 
-const AudioSleepButton = (props: AudioSleepButtonProps) => {
-  const mountTime = useMountTime()
+const AudioSleepButton = () => {
   const { t } = useTranslation()
   const [timer, setTimer] = useAtom(audioSleepMinutesAtom)
   const [audioSleepTime, setAudioSleep] = useAtom(audioSleepTimeAtom)
@@ -45,7 +37,16 @@ const AudioSleepButton = (props: AudioSleepButtonProps) => {
     // setAudioSleep(Date.now() + 5000) // For testing purpose only
   }
 
-  const elapsed = audioSleepTime - mountTime
+  // The time left counts down under the icon.
+  const [now, setNow] = useState(Date.now)
+  useEffect(() => {
+    if (!audioSleepTime) return
+    setNow(Date.now())
+    const tick = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(tick)
+  }, [audioSleepTime])
+
+  const remaining = Math.max(0, audioSleepTime - now)
 
   return (
     <DropdownMenu
@@ -54,17 +55,11 @@ const AudioSleepButton = (props: AudioSleepButtonProps) => {
       setValue={onChange}
       choices={choices}
       customRender={
-        <AudioChip isActive={isActive} {...props}>
-          <IonIcon name="timer-outline" size={18} color={isActive ? 'primary' : 'grey'} />
-          <Text
-            className={twMerge(
-              isActive ? 'text-link' : 'text-grey',
-              'ml-[5px] font-bold text-[10px]'
-            )}
-          >
-            {isActive ? secondsToMinutes(elapsed / 1000) : t('audio.timer')}
-          </Text>
-        </AudioChip>
+        <PlayerOption
+          isActive={isActive}
+          icon="timer-outline"
+          caption={isActive ? secondsToMinutes(remaining / 1000) : undefined}
+        />
       }
     />
   )

@@ -1,6 +1,7 @@
 import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
 import { isInterlinearCapableBibleVersion } from '~helpers/interlinearBiblePublications'
 import StrongMark from './StrongMark'
+import VersionAudioMark from '~features/bible-audio/ui/VersionAudioMark'
 import InterlinearShortcut from './InterlinearShortcut'
 import { twMerge } from '~common/ui/classNames'
 
@@ -85,7 +86,7 @@ const VersionSelectorItem = ({
               >
                 {version.displayName || version.name}
               </Text>
-              {version.hasAudio && <FeatherIcon name="volume-2" size={16} color="primary" />}
+              <VersionAudioMark version={version.id} />
               {(showStrongIndex || selectionRequirement === 'strong') &&
                 isStrongCapableBibleVersion(version.id) && <StrongMark passive />}
             </Box>

@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./contracts/*": "./src/contracts/*.ts",
+    "./bible-audio": "./src/bibleAudio.ts",
     "./bible-canon": "./src/bibleCanon.ts",
     "./biblical-map": "./src/biblicalMap.ts",
     "./bible-search-input": "./src/bibleSearchInput.ts",
