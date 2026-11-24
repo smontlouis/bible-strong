@@ -173,7 +173,7 @@
     "goober": "^2.1.16",
     "hoist-non-react-statics": "^3.3.0",
     "htmlparser2": "^10.1.0",
-    "i18next": "^19.5.1",
+    "i18next": "^26.3.4",
     "immer": "^9.0.16",
     "intl": "^1.2.5",
     "jotai": "^2.16.0",
