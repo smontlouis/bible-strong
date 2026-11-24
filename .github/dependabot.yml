@@ -1,0 +1,18 @@
+# Dependabot security updates only (no version updates), grouped into one
+# pull request so a lockfile merge doesn't put every other one in conflict.
+# Major bumps stay in their own pull requests to be reviewed one by one.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    groups:
+      npm-security:
+        applies-to: security-updates
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
