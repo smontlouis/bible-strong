@@ -55,7 +55,7 @@
     "@zip.js/zip.js": "2.18.2",
     "drizzle-orm": "0.45.2",
     "effect": "3.22.1",
-    "fflate": "0.8.2",
+    "fflate": "0.8.3",
     "jose": "6.2.9",
     "kysely": "0.29.5",
     "kysely-neon": "3.0.0",
