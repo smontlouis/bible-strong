@@ -35075,20 +35075,20 @@ multer@emadalam/multer:
   linkType: hard
 
 "websocket-driver@npm:>=0.5.1":
-  version: 0.7.4
-  resolution: "websocket-driver@npm:0.7.4"
+  version: 0.8.0
+  resolution: "websocket-driver@npm:0.8.0"
   dependencies:
     http-parser-js: "npm:>=0.5.1"
     safe-buffer: "npm:>=5.1.0"
-    websocket-extensions: "npm:>=0.1.1"
-  checksum: 10c0/5f09547912b27bdc57bac17b7b6527d8993aa4ac8a2d10588bb74aebaf785fdcf64fea034aae0c359b7adff2044dd66f3d03866e4685571f81b13e548f9021f1
+    websocket-extensions: "npm:>=0.2.0"
+  checksum: 10c0/94f00a56b0ec9bd42c774df12b896e28d1de4d4320b31d746b72bc271b66bf639fbeada7a393910a25f9c609339ab9067d75d80c4d7a23607d102be1c9d1d6fc
   languageName: node
   linkType: hard
 
-"websocket-extensions@npm:>=0.1.1":
-  version: 0.1.4
-  resolution: "websocket-extensions@npm:0.1.4"
-  checksum: 10c0/bbc8c233388a0eb8a40786ee2e30d35935cacbfe26ab188b3e020987e85d519c2009fe07cfc37b7f718b85afdba7e54654c9153e6697301f72561bfe429177e0
+"websocket-extensions@npm:>=0.2.0":
+  version: 0.2.0
+  resolution: "websocket-extensions@npm:0.2.0"
+  checksum: 10c0/f82a2bc6111e9ada2c6337be8ef7a5464d1239fb443bd472b8d951e6202aacc58356162fced989468a1f1eacd4b744b9a3b03acb4bbce0c6039e62578f27e2b6
   languageName: node
   linkType: hard
 
