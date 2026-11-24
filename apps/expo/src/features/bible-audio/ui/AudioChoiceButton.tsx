@@ -2,12 +2,11 @@ import { useAtomValue } from 'jotai/react'
 import type { ComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet } from 'react-native'
-import { Sheet, SheetHeader, SheetScrollView } from '~common/sheet'
+import ContextualPanel from '~common/ContextualPanel'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { IonIcon } from '~common/ui/Icon'
 import SheetWell from '~common/ui/SheetWell'
 import Text from '~common/ui/Text'
-import { useSheet } from '~helpers/useSheet'
 import { bibleAudioStateAtom } from '../atoms'
 import {
   getRecordingName,
@@ -74,17 +73,16 @@ type AudioChoiceButtonProps = { passage: BibleAudioPassage }
 
 /**
  * The first option of the player: what the version is heard with. It opens « Listen with », the
- * version's recordings and the device's voice (ADR-0117).
+ * version's recordings and the device's voice (ADR-0117): a sheet on a phone, a popover on the web.
  */
 const AudioChoiceButton = ({ passage }: AudioChoiceButtonProps) => {
   const { t } = useTranslation()
-  const { ref, open, close } = useSheet()
   const { source, recordingId } = useAtomValue(bibleAudioStateAtom)
   const recordings = useVersionRecordings(passage.version)
   const isSpeech = source === 'speech'
   const current = recordings.find(recording => recording.id === recordingId)
 
-  const choose = (choice: BibleAudioChoice) => {
+  const choose = (choice: BibleAudioChoice, close: () => void) => {
     chooseBibleAudio(choice)
     close()
   }
@@ -96,13 +94,13 @@ const AudioChoiceButton = ({ passage }: AudioChoiceButtonProps) => {
       : t('bibleAudio.recorded')
 
   return (
-    <>
-      <TouchableBox
-        onPress={() => open()}
-        accessibilityRole="button"
-        accessibilityLabel={t('bibleAudio.listenWith')}
-        accessibilityHint={currentLabel}
-      >
+    <ContextualPanel
+      accessibilityLabel={`${t('bibleAudio.listenWith')}: ${currentLabel}`}
+      initialScreen="choice"
+      width={340}
+      // The option sits at the bottom of the player: the web popover opens above it.
+      placement="top start"
+      trigger={
         <PlayerOption
           isActive={recordings.length > 1 || isSpeech}
           icon={
@@ -113,59 +111,59 @@ const AudioChoiceButton = ({ passage }: AudioChoiceButtonProps) => {
                 : 'mic-outline'
           }
         />
-      </TouchableBox>
-      <Sheet
-        ref={ref}
-        snapPoints={['auto']}
-        header={<SheetHeader title={t('bibleAudio.listenWith')} centerTitle />}
-      >
-        <SheetScrollView>
-          <Box className="px-[16px] pb-[24px] gap-[8px]">
-            {recordings.length > 0 && (
-              <>
-                <Text className="text-[13px] text-grey mt-[8px] ml-[4px]">
-                  {t('bibleAudio.recordings')}
-                </Text>
-                <SheetWell>
-                  {recordings.map((recording, index) => {
-                    const covers = recordingCoversBook(recording, passage.book.Numero)
-                    const kind = recording.kind === 'drama' ? t('bibleAudio.kind.drama') : undefined
-                    const detail = covers
-                      ? [kind, recording.credit].filter(Boolean).join(' · ')
-                      : t('bibleAudio.notThisBook', { book: t(passage.book.Nom) })
-                    return (
-                      <Box key={recording.id}>
-                        {index > 0 && <Hairline />}
-                        <ChoiceRow
-                          icon={getRecordingIcon(recording)}
-                          label={getRecordingName(recording)}
-                          detail={detail || undefined}
-                          isSelected={!isSpeech && recording.id === recordingId}
-                          isDisabled={!covers}
-                          onPress={() => choose(recording.id)}
-                        />
-                      </Box>
-                    )
-                  })}
-                </SheetWell>
-              </>
-            )}
-            <Text className="text-[13px] text-grey mt-[8px] ml-[4px]">
-              {t('bibleAudio.deviceVoice')}
-            </Text>
-            <SheetWell>
-              <ChoiceRow
-                icon="chatbubble-ellipses-outline"
-                label={t('bibleAudio.speech')}
-                detail={t('bibleAudio.speechDetail')}
-                isSelected={isSpeech}
-                onPress={() => choose(SPEECH_CHOICE)}
-              />
-            </SheetWell>
-          </Box>
-        </SheetScrollView>
-      </Sheet>
-    </>
+      }
+      screens={{
+        choice: {
+          title: t('bibleAudio.listenWith'),
+          content: navigation => (
+            <Box className="px-[16px] pb-[16px] gap-[8px]">
+              {recordings.length > 0 && (
+                <>
+                  <Text className="text-[13px] text-grey mt-[8px] ml-[4px]">
+                    {t('bibleAudio.recordings')}
+                  </Text>
+                  <SheetWell>
+                    {recordings.map((recording, index) => {
+                      const covers = recordingCoversBook(recording, passage.book.Numero)
+                      const kind =
+                        recording.kind === 'drama' ? t('bibleAudio.kind.drama') : undefined
+                      const detail = covers
+                        ? [kind, recording.credit].filter(Boolean).join(' · ')
+                        : t('bibleAudio.notThisBook', { book: t(passage.book.Nom) })
+                      return (
+                        <Box key={recording.id}>
+                          {index > 0 && <Hairline />}
+                          <ChoiceRow
+                            icon={getRecordingIcon(recording)}
+                            label={getRecordingName(recording)}
+                            detail={detail || undefined}
+                            isSelected={!isSpeech && recording.id === recordingId}
+                            isDisabled={!covers}
+                            onPress={() => choose(recording.id, navigation.close)}
+                          />
+                        </Box>
+                      )
+                    })}
+                  </SheetWell>
+                </>
+              )}
+              <Text className="text-[13px] text-grey mt-[8px] ml-[4px]">
+                {t('bibleAudio.deviceVoice')}
+              </Text>
+              <SheetWell>
+                <ChoiceRow
+                  icon="chatbubble-ellipses-outline"
+                  label={t('bibleAudio.speech')}
+                  detail={t('bibleAudio.speechDetail')}
+                  isSelected={isSpeech}
+                  onPress={() => choose(SPEECH_CHOICE, navigation.close)}
+                />
+              </SheetWell>
+            </Box>
+          ),
+        },
+      }}
+    />
   )
 }
 

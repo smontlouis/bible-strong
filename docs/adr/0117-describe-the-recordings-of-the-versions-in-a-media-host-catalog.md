@@ -50,3 +50,27 @@ player knows only « the recording » or « the device's voice ».
   and changes too seldom. Should recordings need them, the entry becomes a publication without the
   player changing.
 - Amends ADR-0116, whose player knew one recording per version.
+
+## Amendment (2026-11-24): the picture of a chapter on its cover
+
+The catalog also names the picture painted on the cover of a chapter, by `book:chapter`:
+
+- **a scene** under `scenes`, the slug of a timeline event whose painting the media host holds
+  (ADR-0096): among the painted events whose passages fall in the chapter, the one that tells most
+  of its verses; on a tie, the one spread over fewer chapters, then the one that starts first. The
+  passages come from the Resource API (`scriptures` of an event).
+- **else a place** under `places`, an entity whose portrait the media host holds (ADR-0089): among
+  the painted places that STEPBible's TIPNR names in the chapter, the one named most often; on a
+  tie, the one named first; then the best known across the Bible.
+- **else the picture of a chapter of the same book**, the nearest one at most three chapters away,
+  the earlier one on a tie; beyond that, a cover of type alone.
+
+`yarn resources:audio covers` writes both maps into the catalog file, and
+`apps/resource-studio/config/bible-audio-scene-overrides.json` and
+`bible-audio-place-overrides.json` name the picture of a chapter the rules get wrong, or `null` for
+none. On 2026-11-24, 324 chapters have their own scene, 824 their own place, 258 borrow a
+neighbour's: 1,110 of the 1,189 chapters have a picture (93 %).
+
+The application lays the painting under the cover, in the part's hue: the accent over it in the
+« color » blend, the ground washing it, a fade clearing the top for the book's name; the chapter
+number then takes the ink. A thumbnail keeps the number alone.

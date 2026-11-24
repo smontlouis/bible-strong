@@ -46,7 +46,13 @@ suivent, ils ne le possèdent pas.
   tonalité pour la synthèse, la répétition et la minuterie avec le temps restant. « … » mène à
   Audibible. Sur grand écran, un panneau en bas à gauche (Échap le ferme), la pochette en vignette à
   côté du titre. La bulle de l'assistant se cache tant qu'il est ouvert.
-- **Pochette.** Le petit lecteur en montre une vignette, qui ne garde que le numéro.
+- **Pochette.** Le catalogue nomme l'image d'un chapitre : sa scène de la frise (`scenes`, peintures
+  de la frise), sinon son lieu (`places`, portraits de l'hôte média), sinon celle d'un chapitre voisin
+  du livre (trois au plus). La peinture passe sous la pochette, dans la teinte de la partie :
+  l'accent en fusion « color », un voile du fond, un fondu en haut. `yarn resources:audio covers`
+  choisit ces images (passages de la frise par l'API, TIPNR, et les exceptions de
+  `apps/resource-studio/config/bible-audio-*-overrides.json`), puis `publish` les publie. Le petit
+  lecteur en montre une vignette, qui ne garde que le numéro.
 - **Suivi souple.** Le bouton lecture d'un onglet Bible appelle `listenToPassage` avec l'onglet. Cet
   onglet suit les changements de chapitre de l'audio. Dès que son lecteur va ailleurs, il se détache
   et l'audio continue ; il se détache aussi si l'audio sort de son plan de lecture ou change de

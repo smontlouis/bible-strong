@@ -335,7 +335,7 @@ const CoverStage = ({ passage }: { passage: BibleAudioPassage }) => {
   const coverStyle = useAnimatedStyle(() => ({
     transform: [
       {
-        scale: withSpring(isPlaying ? 1 : 0.84, { mass: 1, damping: 18, stiffness: 140 }),
+        scale: withSpring(isPlaying ? 1 : 0.84),
       },
     ],
   }))

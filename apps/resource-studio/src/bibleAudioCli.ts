@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -8,6 +8,14 @@ import {
   type BibleAudioRecording
 } from "@bible-strong/resource-domain/bible-audio";
 
+import {
+  borrowNeighbourPictures,
+  BOOK_CHAPTER_COUNTS,
+  chooseChapterPlaces,
+  chooseChapterScenes,
+  parseTipnrPlaces,
+  type TimelineScene
+} from "./bibleAudioPlaces.js";
 import { CATALOG_CACHE_CONTROL, wranglerPut } from "./mediaUpload.js";
 
 /**
@@ -21,12 +29,43 @@ const CATALOG_FILE = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../../../packages/resource-catalog/src/bibleAudioCatalog.json"
 );
+const STUDIO_DIR = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  ".."
+);
+const TIPNR_FILE = path.join(STUDIO_DIR, "data/external/stepbible/TIPNR.txt");
+const PLACE_OVERRIDES_FILE = path.join(
+  STUDIO_DIR,
+  "config/bible-audio-place-overrides.json"
+);
+const SCENE_OVERRIDES_FILE = path.join(
+  STUDIO_DIR,
+  "config/bible-audio-scene-overrides.json"
+);
+const PORTRAIT_CATALOG_URL =
+  "https://media.bible-strong.app/entity-images/catalog.json";
+const PAINTING_CATALOG_URL =
+  "https://media.bible-strong.app/timeline-paintings/catalog.json";
+const TIMELINE_EVENT_URL =
+  "https://api.bible-strong.app/v1/timelines/fr/events/";
+const CHAPTER_COUNT = BOOK_CHAPTER_COUNTS.reduce(
+  (total, count) => total + count,
+  0
+);
+const EVENT_REQUESTS_IN_FLIGHT = 4;
 const PROBE_TIMEOUT_MS = 15_000;
 
 const USAGE = `Usage:
   yarn resources:audio check
       Reads packages/resource-catalog/src/bibleAudioCatalog.json, refuses an entry the app would
       leave out, and asks each recording for its first chapter.
+  yarn resources:audio covers
+      Chooses the picture of each chapter's cover and writes it into the catalog file: a scene,
+      the painted timeline event that tells most of the chapter (the Resource API's passages,
+      config/bible-audio-scene-overrides.json); then a place, the painted place named most in it
+      (STEPBible's TIPNR in data/external/stepbible/TIPNR.txt,
+      config/bible-audio-place-overrides.json); then the picture of a chapter of the book at
+      most three chapters away.
   yarn resources:audio publish [--bucket <name>] [--dry-run]
       Checks, then puts the file at ${CATALOG_KEY} in ${BUCKET} through the operator's wrangler
       session. The application reads it within a day.`;
@@ -93,6 +132,84 @@ const check = async () => {
   return catalog;
 };
 
+const readJson = async <T>(url: string): Promise<T> => {
+  const answer = await fetch(url);
+  if (!answer.ok) throw new Error(`UNREACHABLE: ${answer.status} ${url}`);
+  return (await answer.json()) as T;
+};
+
+/** The painted timeline events with the passages they tell, from the Resource API. */
+const loadTimelineScenes = async (): Promise<TimelineScene[]> => {
+  const { events } = await readJson<{ events?: Record<string, unknown> }>(
+    PAINTING_CATALOG_URL
+  );
+  const slugs = Object.keys(events ?? {}).filter(
+    (slug) => !slug.startsWith("period:")
+  );
+  const scenes: TimelineScene[] = [];
+  const queue = [...slugs];
+  await Promise.all(
+    Array.from({ length: EVENT_REQUESTS_IN_FLIGHT }, async () => {
+      for (let slug = queue.shift(); slug; slug = queue.shift()) {
+        const payload = await readJson<{
+          event?: { scriptures?: string[] };
+          scriptures?: string[];
+        }>(`${TIMELINE_EVENT_URL}${encodeURIComponent(slug)}`);
+        scenes.push({
+          slug,
+          scriptures: (payload.event ?? payload).scriptures ?? []
+        });
+      }
+    })
+  );
+  return scenes;
+};
+
+/** Writes the scene and place of each chapter into the catalog file, its recordings untouched. */
+const buildCovers = async () => {
+  const sceneOverrides = JSON.parse(
+    await readFile(SCENE_OVERRIDES_FILE, "utf8")
+  ) as Record<string, string | null>;
+  const scenes = chooseChapterScenes(
+    await loadTimelineScenes(),
+    sceneOverrides
+  );
+
+  const tipnr = parseTipnrPlaces(await readFile(TIPNR_FILE, "utf8"));
+  const portraits = await readJson<{ entities?: Record<string, unknown> }>(
+    PORTRAIT_CATALOG_URL
+  );
+  const painted = new Set(
+    Object.keys(portraits.entities ?? {}).filter((name) => tipnr.has(name))
+  );
+  const placeOverrides = JSON.parse(
+    await readFile(PLACE_OVERRIDES_FILE, "utf8")
+  ) as Record<string, string | null>;
+  const places = chooseChapterPlaces(tipnr, painted, placeOverrides);
+
+  const filled = borrowNeighbourPictures(scenes, places);
+  const catalog = JSON.parse(await readFile(CATALOG_FILE, "utf8")) as Record<
+    string,
+    unknown
+  >;
+  await writeFile(
+    CATALOG_FILE,
+    `${JSON.stringify({ ...catalog, scenes: filled.scenes, places: filled.places }, null, 2)}\n`
+  );
+  const covered = new Set([
+    ...Object.keys(filled.scenes),
+    ...Object.keys(filled.places)
+  ]).size;
+  const percent = (count: number) =>
+    `${Math.round((count / CHAPTER_COUNT) * 100)} %`;
+  console.log(
+    [
+      `Scenes for ${Object.keys(scenes).length} chapters, places for ${Object.keys(places).length}, ${filled.borrowed} borrowed from a neighbour.`,
+      `A picture for ${covered} of ${CHAPTER_COUNT} chapters (${percent(covered)}).`
+    ].join("\n")
+  );
+};
+
 const publish = async (args: string[]) => {
   const bucketFlag = args.indexOf("--bucket");
   const bucket = bucketFlag >= 0 ? args[bucketFlag + 1] : BUCKET;
@@ -122,6 +239,7 @@ const main = async () => {
     await check();
     return;
   }
+  if (command === "covers") return buildCovers();
   if (command === "publish") return publish(args);
   console.log(USAGE);
 };

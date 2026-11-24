@@ -3,6 +3,8 @@ import { describe, it } from 'node:test'
 
 import {
   getBibleAudioUrl,
+  getChapterPlace,
+  getChapterScene,
   getVersionRecordings,
   parseBibleAudioCatalog,
   recordingCoversBook,
@@ -103,5 +105,30 @@ describe('getVersionRecordings', () => {
       getVersionRecordings(catalog, 'LSG').map(entry => entry.id),
       ['lsg-a', 'lsg-drama']
     )
+  })
+})
+
+describe('places of the chapters', () => {
+  it('keeps the well-formed places and reads one by book and chapter', () => {
+    const catalog = parseBibleAudioCatalog({
+      version: 1,
+      recordings: [],
+      places: { '1:2': 'Eden@Gen.2.8-Jol', 'Gen 3': 'Eden@Gen.2.8-Jol', '2:19': 42 },
+    })
+    assert.deepEqual(catalog?.places, { '1:2': 'Eden@Gen.2.8-Jol' })
+    assert.equal(catalog && getChapterPlace(catalog, 1, 2), 'Eden@Gen.2.8-Jol')
+    assert.equal(catalog && getChapterPlace(catalog, 1, 1), undefined)
+  })
+})
+
+describe('scenes of the chapters', () => {
+  it('keeps the slugs of the scenes and reads one by book and chapter', () => {
+    const catalog = parseBibleAudioCatalog({
+      version: 1,
+      recordings: [],
+      scenes: { '1:7': 'flood', '1:8': 'Not A Slug' },
+    })
+    assert.deepEqual(catalog?.scenes, { '1:7': 'flood' })
+    assert.equal(catalog && getChapterScene(catalog, 1, 7), 'flood')
   })
 })

@@ -39,6 +39,16 @@ export type BibleAudioRecording = {
 export type BibleAudioCatalog = {
   version: 1
   recordings: BibleAudioRecording[]
+  /**
+   * The place painted on the cover of a chapter, by `book:chapter`: the unique name of an entity
+   * whose portrait the media host holds. A chapter absent from it keeps a cover of type alone.
+   */
+  places?: Record<string, string>
+  /**
+   * The timeline scene painted on the cover of a chapter, by `book:chapter`: the slug of an event
+   * whose painting the media host holds (ADR-0096). It comes before the place.
+   */
+  scenes?: Record<string, string>
 }
 
 const ID_PATTERN = /^[a-z0-9][a-z0-9-]{1,63}$/
@@ -102,6 +112,33 @@ const parseRecording = (value: unknown): BibleAudioRecording | undefined => {
   }
 }
 
+const CHAPTER_KEY_PATTERN = /^\d{1,3}:\d{1,3}$/
+
+const parseChapterMap = (
+  value: unknown,
+  isName: (name: string) => boolean
+): Record<string, string> | undefined => {
+  if (!isRecord(value)) return undefined
+  const entries = Object.entries(value).filter(
+    (entry): entry is [string, string] =>
+      CHAPTER_KEY_PATTERN.test(entry[0]) && typeof entry[1] === 'string' && isName(entry[1])
+  )
+  return entries.length ? Object.fromEntries(entries) : undefined
+}
+
+const SCENE_SLUG_PATTERN = /^[a-z0-9][a-z0-9-]*$/
+
+/** The key of a chapter in the places of the catalog. */
+export const getBibleAudioChapterKey = (book: number, chapter: number) => `${book}:${chapter}`
+
+/** The timeline scene painted on the cover of a chapter, by its slug, if the catalog has one. */
+export const getChapterScene = (catalog: BibleAudioCatalog, book: number, chapter: number) =>
+  catalog.scenes?.[getBibleAudioChapterKey(book, chapter)]
+
+/** The place painted on the cover of a chapter, by its unique name, if the catalog has one. */
+export const getChapterPlace = (catalog: BibleAudioCatalog, book: number, chapter: number) =>
+  catalog.places?.[getBibleAudioChapterKey(book, chapter)]
+
 /**
  * The well-formed recordings of a published catalog, or nothing when it is not one. A malformed
  * entry is left out rather than failing the whole catalog; a repeated id keeps its first entry.
@@ -115,7 +152,14 @@ export const parseBibleAudioCatalog = (value: unknown): BibleAudioCatalog | unde
     seen.add(recording.id)
     return [recording]
   })
-  return { version: 1, recordings }
+  const places = parseChapterMap(value.places, name => name.includes('@'))
+  const scenes = parseChapterMap(value.scenes, name => SCENE_SLUG_PATTERN.test(name))
+  return {
+    version: 1,
+    recordings,
+    ...(places ? { places } : {}),
+    ...(scenes ? { scenes } : {}),
+  }
 }
 
 /** The recordings of a version, in the catalog's order. */

@@ -105,7 +105,7 @@ const BibleAudioPlayerSheet = () => {
         runOnJS(closeBibleAudioPlayer)()
         return
       }
-      offset.set(withSpring(0, { damping: 24, stiffness: 260 }))
+      offset.set(withSpring(0))
     })
 
   const sheetStyle = useAnimatedStyle(() =>
