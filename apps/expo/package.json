@@ -241,7 +241,7 @@
     "vaul": "^1.1.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.29.0",
+    "@babel/core": "^7.29.13",
     "@babel/runtime": "^7.28.4",
     "@dagrejs/dagre": "^3.0.0",
     "@react-native/jest-preset": "0.88.0",
