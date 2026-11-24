@@ -112,61 +112,23 @@ const playNextVerse = () => {
 
 ## Mode URL (Audio Files)
 
-### Configuration Track Player
+La lecture passe par une seule playlist `expo-audio`, partagée par tous les onglets et décrite dans
+`src/features/bible/footer/bibleAudioPlaylist.ts` :
 
-```typescript
-import TrackPlayer from 'react-native-track-player'
+- `loadBibleAudioTracks` remplace la file par les chapitres du livre lu et se place sur le chapitre
+  ouvert ; la vitesse (`audioSpeedAtom`) et la répétition du chapitre (`audioRepeatAtom`) enregistrées
+  s'y appliquent.
+- `playBibleAudio` règle le mode audio (`doNotMix`, lecture en arrière-plan) et active les commandes
+  de l'écran verrouillé : lecture, pause, ±10 s, chapitre suivant et précédent.
+- Quand la playlist change de piste (fin du chapitre ou écran verrouillé), le pied de page ouvre le
+  chapitre correspondant.
+- La minuterie de sommeil (`audioSleepTimeAtom`) arrête la lecture depuis les mises à jour de statut
+  de la playlist ; une pause l'annule.
+- La playlist iOS ne signale pas d'erreur de chargement : un chapitre qui ne se charge pas en 20 s est
+  affiché en erreur. Android signale l'erreur dans une mise à jour de statut.
 
-// Setup initial
-await TrackPlayer.setupPlayer({
-  capabilities: [
-    Capability.Play,
-    Capability.Pause,
-    Capability.SkipToNext,
-    Capability.SkipToPrevious,
-    Capability.SeekTo
-  ]
-})
-
-// Ajout des pistes
-const tracks = chapters.map(chapter => ({
-  id: `${book}-${chapter}`,
-  url: getAudioUrl(book, chapter, version),
-  title: `${bookName} ${chapter}`,
-  artist: 'Bible Audio'
-}))
-```
-
-### Synchronisation avec le texte
-
-```typescript
-// Listener de progression
-TrackPlayer.addEventListener(Event.PlaybackProgress, (data) => {
-  const currentTime = data.position
-  const currentVerse = findVerseAtTime(currentTime, timestamps)
-  
-  if (currentVerse !== activeVerse) {
-    highlightVerse(currentVerse)
-    scrollToVerse(currentVerse)
-  }
-})
-```
-
-### Gestion de la file de lecture
-
-```typescript
-// Charger tous les chapitres d'un livre
-const loadBookAudio = async (book: number) => {
-  const chapters = getBookChapters(book)
-  const tracks = await Promise.all(
-    chapters.map(ch => createTrack(book, ch))
-  )
-  
-  await TrackPlayer.reset()
-  await TrackPlayer.add(tracks)
-  await TrackPlayer.skip(currentChapter - 1)
-}
-```
+La prononciation des mots Strong utilise un autre lecteur `expo-audio` (`StrongAudioProvider`), qui
+met la lecture de la Bible en pause.
 
 ## Interface utilisateur
 
@@ -304,7 +266,7 @@ const activateAudio = (tabId: string) => {
 useEffect(() => {
   return () => {
     Speech.stop()
-    TrackPlayer.reset()
+    stopBibleAudio()
     clearTimers()
   }
 }, [])

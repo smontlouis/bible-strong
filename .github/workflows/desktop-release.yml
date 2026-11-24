@@ -67,8 +67,7 @@ jobs:
       - name: Fetch the dependencies
         run: yarn install --immutable --mode=skip-build
 
-      # With the patched packages: react-native-track-player is patched, and its patched archive
-      # has its own checksum.
+      # With the patched packages: a patched Git dependency gets an archive, and a checksum, of its own.
       - name: Keep the archives of the Git dependencies
         run: |
           cache="$(yarn config get cacheFolder)"

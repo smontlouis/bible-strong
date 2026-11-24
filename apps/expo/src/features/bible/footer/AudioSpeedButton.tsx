@@ -1,14 +1,14 @@
 import { twMerge } from '~common/ui/classNames'
 
 import { useAtom } from 'jotai/react'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
-import TrackPlayer from 'react-native-track-player'
 import DropdownMenu from '~common/DropdownMenu'
 import { BoxProps } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { audioSpeedAtom } from './atom'
 import AudioChip from './AudioChip'
+import { getBibleAudioPlaylist } from './bibleAudioPlaylist'
 export type AudioSpeedButtonProps = BoxProps
 
 const choices = [
@@ -23,15 +23,10 @@ const AudioSpeedButton = (props: AudioSpeedButtonProps) => {
   const { t } = useTranslation()
   const [rate, setRate] = useAtom(audioSpeedAtom)
 
-  useEffect(() => {
-    ;(async () => {
-      setRate(await TrackPlayer.getRate())
-    })()
-  }, [setRate])
-
-  const onChange = async (value: string) => {
-    setRate(Number(value))
-    await TrackPlayer.setRate(parseFloat(value))
+  const onChange = (value: string) => {
+    const nextRate = Number(value)
+    setRate(nextRate)
+    getBibleAudioPlaylist().playbackRate = nextRate
   }
 
   const isActive = rate !== 1

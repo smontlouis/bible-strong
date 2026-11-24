@@ -2744,7 +2744,6 @@ __metadata:
     react-native-svg: "npm:15.16.0"
     react-native-tab-view: "npm:^2.14.0"
     react-native-teleport: "npm:^1.2.2"
-    react-native-track-player: "patch:react-native-track-player@https%3A//github.com/weights-ai/react-native-track-player.git%23commit=17a3ac866b642405a6a21dddbec38ddf3f217cd0#~/.yarn/patches/react-native-track-player-https-0ed4312346.patch"
     react-native-url-polyfill: "npm:^2.0.0"
     react-native-view-shot: "npm:5.1.1"
     react-native-web: "npm:~0.21.4"
@@ -30292,40 +30291,6 @@ multer@emadalam/multer:
     react-dom: "*"
     react-native: "*"
   checksum: 10c0/5f82da01ea56924723399d8d5963f1299eb82ec151ab3c272d14812b8d32783cba3252a9adc622062c52b2bb2e398d9b6da743e0d87557406d16213f8f044e28
-  languageName: node
-  linkType: hard
-
-"react-native-track-player@https://github.com/weights-ai/react-native-track-player.git#commit=17a3ac866b642405a6a21dddbec38ddf3f217cd0":
-  version: 4.1.6
-  resolution: "react-native-track-player@https://github.com/weights-ai/react-native-track-player.git#commit=17a3ac866b642405a6a21dddbec38ddf3f217cd0"
-  peerDependencies:
-    react: ">=18"
-    react-native: ">=0.77"
-    react-native-windows: ">=0.77"
-    shaka-player: ^4.7.9
-  peerDependenciesMeta:
-    react-native-windows:
-      optional: true
-    shaka-player:
-      optional: true
-  checksum: 10c0/65864e4e762d2139f3d17ab8fed6a88ff9655677b08659dba7301df724ae1c285e9e32f82284220cb7d366abbce62d6ca7296752b7fffa97d410c705fd15ce3f
-  languageName: node
-  linkType: hard
-
-"react-native-track-player@patch:react-native-track-player@https%3A//github.com/weights-ai/react-native-track-player.git%23commit=17a3ac866b642405a6a21dddbec38ddf3f217cd0#~/.yarn/patches/react-native-track-player-https-0ed4312346.patch":
-  version: 4.1.6
-  resolution: "react-native-track-player@patch:react-native-track-player@https%3A//github.com/weights-ai/react-native-track-player.git%23commit=17a3ac866b642405a6a21dddbec38ddf3f217cd0#~/.yarn/patches/react-native-track-player-https-0ed4312346.patch::version=4.1.6&hash=386105"
-  peerDependencies:
-    react: ">=18"
-    react-native: ">=0.77"
-    react-native-windows: ">=0.77"
-    shaka-player: ^4.7.9
-  peerDependenciesMeta:
-    react-native-windows:
-      optional: true
-    shaka-player:
-      optional: true
-  checksum: 10c0/f6869183948d32a2aee79395e76345a08fe7adb751570e92a5abaab933056501758c0763a35ee54d27d7d5fa5c1eb7f6d79c92d131f0ec387a68438a12f0190d
   languageName: node
   linkType: hard
 

@@ -1,15 +1,8 @@
-import { useAtom, useAtomValue, useSetAtom } from 'jotai/react'
+import { useAtom, useAtomValue } from 'jotai/react'
 import React, { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PrimitiveAtom } from 'jotai/vanilla'
-import TrackPlayer, {
-  AppKilledPlaybackBehavior,
-  Capability,
-  Event,
-  State,
-  useProgress,
-  useTrackPlayerEvents,
-} from 'react-native-track-player'
+import { useAudioPlaylistStatus } from 'expo-audio'
 import { Book } from '~assets/bible_versions/books-desc'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -23,7 +16,6 @@ import {
 } from '~helpers/bibleCoverage'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
 import { appLogger } from '~helpers/agentObservability'
-import { ensureTrackPlayerSetup } from '~features/audio/trackPlayerSetup'
 import { BiblePlanPassage, BibleTab, VersionCode } from '../../../state/tabs'
 import { canGoToNextPlanChapter, canGoToPreviousPlanChapter } from '../planPassage'
 import AudioBar from './AudioBar'
@@ -34,7 +26,17 @@ import AudioSpeedButton from './AudioSpeedButton'
 import BasicFooter from './BasicFooter'
 import ChapterButton from './ChapterButton'
 import PlayButton from './PlayButton'
-import { audioSleepMinutesAtom, audioSleepTimeAtom, playingBibleTabIdAtom } from './atom'
+import { playingBibleTabIdAtom } from './atom'
+import {
+  type BibleAudioTrack,
+  getBibleAudioPlaylist,
+  getBibleAudioTrack,
+  isPausedUpdate,
+  loadBibleAudioTracks,
+  pauseBibleAudio,
+  playBibleAudio,
+  stopBibleAudio,
+} from './bibleAudioPlaylist'
 type UseLoadSoundProps = {
   audioUrl?: string
   canPlayAudio?: boolean
@@ -50,19 +52,16 @@ type UseLoadSoundProps = {
   coverage?: BibleVersionCoverage
 }
 
-const events = [
-  Event.PlaybackState,
-  Event.PlaybackError,
-  Event.PlaybackActiveTrackChanged,
-  Event.PlaybackProgressUpdated,
-]
+// The iOS playlist reports no load error: a chapter that does not start this long after the
+// request counts as one.
+const LOAD_TIMEOUT_MS = 20_000
 
 const getBookTracks = (
   version: string,
   book: Book,
   t: (key: string) => string,
   coverage?: BibleVersionCoverage
-) => {
+): BibleAudioTrack[] => {
   try {
     const bibleVersion = getVersions()[version] as Version
     const tracks = getAvailableChapters(book, coverage).map(chapter => ({
@@ -71,7 +70,6 @@ const getBookTracks = (
       url: bibleVersion?.getAudioUrl?.(book.Numero, chapter) || '',
       title: `${t(book.Nom)} ${chapter} ${version}`,
       artist: bibleVersion?.name,
-      artwork: require('~assets/images/icon.png'),
     }))
     return tracks
   } catch (error) {
@@ -95,66 +93,100 @@ const useLoadSound = ({
 }: UseLoadSoundProps) => {
   const { t } = useTranslation()
   const bibleTab = useAtomValue(bibleAtom)
+  const playlist = getBibleAudioPlaylist()
+  const status = useAudioPlaylistStatus(playlist)
   const [isExpanded, setExpandedMode] = useState(false)
-  const [playerState, setPlayerState] = useState<State>(State.None)
   const [error, setError] = useState(false)
   const [isSetup, setIsSetup] = useState(false)
+  // Playback asked for in this footer and not paused since; the playlist has no such state.
+  const [wantsPlayback, setWantsPlayback] = useState(false)
+  // The last chapter of the queue ended: the iOS queue is then empty and reports itself buffering.
+  const [hasEnded, setHasEnded] = useState(false)
+  const wasPlayingRef = useRef(false)
   const hasAutoTrackChange = useRef(false)
-  const [audioSleepTime, setAudioSleepTime] = useAtom(audioSleepTimeAtom)
-  const setAudioSleepMinutes = useSetAtom(audioSleepMinutesAtom)
   const [playingBibleTabId, setPlayingBibleTabId] = useAtom(playingBibleTabIdAtom)
   // Use stable tab.id instead of atom.toString()
   const isCurrentTabPlaying = playingBibleTabId === bibleTab.id
 
-  useTrackPlayerEvents(events, async event => {
-    if (!isSetup) {
-      return
-    }
-    if (event.type === Event.PlaybackError) {
-      let trackObject = await TrackPlayer.getActiveTrack()
-      console.log('[Bible] Track URL:', trackObject?.url)
-      console.warn('[Bible] An error occured while playing the current track.')
-      setError(true)
-    }
-    if (event.type === Event.PlaybackState) {
-      setPlayerState(event.state)
-
-      if (event.state === State.Paused && audioSleepTime) {
-        setAudioSleepTime(0)
-        setAudioSleepMinutes('off')
-      }
-    }
-
-    if (event.type === Event.PlaybackProgressUpdated && isCurrentTabPlaying) {
-      const track = await TrackPlayer.getTrack(event.track)
-
-      if (track && track?.chapter !== chapter) {
-        hasAutoTrackChange.current = true
-        goToChapter({
-          book: track?.book,
-          chapter: track?.chapter,
-        })
-      }
+  // Follow the chapter the playlist moved to on its own, or from the lock screen.
+  const onTrackChanged = useEffectEvent((index: number) => {
+    if (!isCurrentTabPlaying) return
+    const track = getBibleAudioTrack(index)
+    if (track && track.chapter !== chapter) {
+      hasAutoTrackChange.current = true
+      goToChapter({ book: track.book, chapter: track.chapter })
     }
   })
 
-  const isPlaying = playerState === State.Playing
-  const isLoading =
-    playerState === State.Buffering || playerState === State.Loading || playerState === State.None
+  useEffect(() => {
+    const trackSubscription = playlist.addListener('trackChanged', ({ currentIndex }) =>
+      onTrackChanged(currentIndex)
+    )
+    const statusSubscription = playlist.addListener('playlistStatusUpdate', update => {
+      const wasPlaying = wasPlayingRef.current
+      wasPlayingRef.current = update.playing
 
-  const onPlay = async () => {
+      // Android reports a failed load in a single status update, which the next one forgets.
+      if ((update as typeof update & { error?: unknown }).error) {
+        console.warn('[Bible] An error occured while playing the current track.')
+        setError(true)
+      }
+      if (update.didJustFinish) {
+        setHasEnded(true)
+        setWantsPlayback(false)
+      } else if (wasPlaying && isPausedUpdate(update)) {
+        // Paused from the lock screen or by the sleep timer.
+        setWantsPlayback(false)
+      }
+    })
+    return () => {
+      trackSubscription.remove()
+      statusSubscription.remove()
+    }
+  }, [playlist])
+
+  const isPlaying = status.playing
+  const isLoading = wantsPlayback && !isPlaying
+
+  useEffect(() => {
+    if (!isLoading) return
+    const timeout = setTimeout(() => {
+      console.warn('[Bible] The current track did not start.')
+      setError(true)
+    }, LOAD_TIMEOUT_MS)
+    return () => clearTimeout(timeout)
+  }, [isLoading, status.currentIndex])
+
+  // Only generate tracks for the current book (not all 1189 chapters)
+  const tracks = getBookTracks(version, book, t, coverage)
+  // The effects below load and skip with the tracks and chapter of the render that ran them.
+  const getChapterTracks = useEffectEvent(() => ({ tracks, chapter }))
+
+  const onPlay = () => {
     // Use stable tab.id instead of atom.toString()
     setPlayingBibleTabId(bibleTab.id)
     setExpandedMode(true)
 
     if (!isPlaying) {
-      TrackPlayer.play()
+      setWantsPlayback(true)
+      if (hasEnded) {
+        // Nothing is left to play: start the queue again on the chapter shown.
+        const trackIndex = tracks.findIndex(track => track.chapter === chapter)
+        if (trackIndex !== -1) playlist.skipTo(trackIndex)
+        setHasEnded(false)
+      }
+      playBibleAudio().catch(playError => {
+        console.log('[Bible] Error playing the chapter audio:', playError)
+        setWantsPlayback(false)
+        setError(true)
+      })
     }
   }
 
   const onPause = () => {
     setPlayingBibleTabId('')
-    TrackPlayer.pause()
+    setWantsPlayback(false)
+    pauseBibleAudio()
   }
 
   const onReduce = () => {
@@ -169,68 +201,33 @@ const useLoadSound = ({
     goToPrevChapter()
   }
 
-  // Only generate tracks for the current book (not all 1189 chapters)
-  const tracks = getBookTracks(version, book, t, coverage)
-  // The effects below load and skip with the tracks and chapter of the render that ran them.
-  const getChapterTracks = useEffectEvent(() => ({ tracks, chapter }))
+  const onSeekBy = (seconds: number) => {
+    // Past the end, the iOS player stalls instead of finishing the chapter.
+    const end = playlist.duration > 0 ? playlist.duration - 0.5 : Infinity
+    // Read live: quick taps would otherwise all start from the last rendered position.
+    void playlist.seekTo(Math.max(0, Math.min(playlist.currentTime + seconds, end)))
+  }
 
   useEffect(() => {
     return () => {
-      TrackPlayer.pause()
-      TrackPlayer.reset()
+      stopBibleAudio()
       setPlayingBibleTabId('')
-      setAudioSleepTime(0)
-      setAudioSleepMinutes('off')
     }
-  }, [setPlayingBibleTabId, setAudioSleepMinutes, setAudioSleepTime])
+  }, [setPlayingBibleTabId])
 
   // Audio init on version or book change
   useEffect(() => {
-    let cancelled = false
     const current = getChapterTracks()
-    ;(async () => {
-      try {
-        await ensureTrackPlayerSetup()
-
-        // Reset player and add tracks for current book
-        await TrackPlayer.reset()
-
-        TrackPlayer.updateOptions({
-          forwardJumpInterval: 10,
-          backwardJumpInterval: 10,
-
-          // Media controls capabilities
-          capabilities: [
-            Capability.Play,
-            Capability.Pause,
-            Capability.SkipToNext,
-            Capability.SkipToPrevious,
-            Capability.JumpForward,
-            Capability.JumpBackward,
-            Capability.SeekTo,
-          ],
-
-          progressUpdateEventInterval: 1,
-
-          android: {
-            appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
-          },
-        })
-
-        await TrackPlayer.add(current.tracks)
-        const trackIndex = current.tracks.findIndex(track => track.chapter === current.chapter)
-        if (trackIndex !== -1) {
-          await TrackPlayer.skip(trackIndex)
-        }
-      } catch (e) {
-        console.log('[Bible] Silent catch:', e)
-      }
-      if (!cancelled) setIsSetup(true)
-    })()
-
-    return () => {
-      cancelled = true
+    try {
+      const trackIndex = current.tracks.findIndex(track => track.chapter === current.chapter)
+      loadBibleAudioTracks(current.tracks, Math.max(trackIndex, 0))
+    } catch (e) {
+      console.log('[Bible] Silent catch:', e)
     }
+    // A new queue starts paused, as the old player did after a book change.
+    setWantsPlayback(false)
+    setHasEnded(false)
+    setIsSetup(true)
   }, [version, book.Numero])
 
   // Skip to track on chapter change
@@ -244,21 +241,15 @@ const useLoadSound = ({
     }
 
     const current = getChapterTracks()
-    ;(async () => {
-      const trackIndex = current.tracks.findIndex(track => track.chapter === current.chapter)
-      if (trackIndex === -1) return
-      try {
-        await TrackPlayer.skip(trackIndex)
-
-        const duration = await TrackPlayer.getProgress().then(progress => progress.duration)
-        await TrackPlayer.updateMetadataForTrack(trackIndex, {
-          duration,
-        })
-      } catch {
-        console.log('[Bible] Silent catch')
-      }
-    })()
-  }, [book.Numero, chapter, isSetup, version])
+    const trackIndex = current.tracks.findIndex(track => track.chapter === current.chapter)
+    if (trackIndex === -1 || trackIndex === playlist.currentIndex) return
+    try {
+      playlist.skipTo(trackIndex)
+      setHasEnded(false)
+    } catch {
+      console.log('[Bible] Silent catch')
+    }
+  }, [book.Numero, chapter, isSetup, version, playlist])
 
   return {
     error,
@@ -266,11 +257,14 @@ const useLoadSound = ({
     isExpanded,
     isLoading,
     isSetup,
+    position: status.currentTime,
+    duration: status.duration,
     onPlay,
     onPause,
     onReduce,
     onNextChapter,
     onPrevChapter,
+    onSeekBy,
   }
 }
 
@@ -324,6 +318,9 @@ const AudioUrlFooter = ({
     onPause,
     onNextChapter,
     onPrevChapter,
+    onSeekBy,
+    position,
+    duration,
   } = useLoadSound({
     book,
     chapter,
@@ -334,8 +331,6 @@ const AudioUrlFooter = ({
     bibleAtom,
     coverage,
   })
-
-  const progress = useProgress(200)
 
   if (!isExpanded) {
     return (
@@ -354,7 +349,7 @@ const AudioUrlFooter = ({
 
   return (
     <AudioContainer onReduce={onReduce} audioMode="url" onChangeMode={onChangeMode}>
-      <AudioBar duration={progress.duration} position={progress.position} />
+      <AudioBar duration={duration} position={position} />
       <Box className="border-continuous overflow-visible flex-[1] flex-row items-center justify-center mt-[10px]">
         <ChapterButton
           disabled={disabled}
@@ -367,7 +362,7 @@ const AudioUrlFooter = ({
             className="overflow-hidden border-continuous w-[40px] h-[40px] items-center justify-center"
             disabled={disabled || isLoading || !isSetup}
             activeOpacity={0.5}
-            onPress={() => TrackPlayer.seekTo(progress.position - 10)}
+            onPress={() => onSeekBy(-10)}
             accessibilityRole="button"
             accessibilityLabel={t('accessibility.rewindTenSeconds')}
             accessibilityState={{ disabled: disabled || isLoading || !isSetup }}
@@ -389,7 +384,7 @@ const AudioUrlFooter = ({
             className="overflow-hidden border-continuous w-[40px] h-[40px] items-center justify-center"
             disabled={disabled || isLoading}
             activeOpacity={0.5}
-            onPress={() => TrackPlayer.seekTo(progress.position + 10)}
+            onPress={() => onSeekBy(10)}
             accessibilityRole="button"
             accessibilityLabel={t('accessibility.forwardTenSeconds')}
             accessibilityState={{ disabled: disabled || isLoading }}

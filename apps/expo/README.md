@@ -148,7 +148,7 @@ Downloadable resources follow a versioned catalog. Canonical Bibles, their Stron
 | Styling | Uniwind with Tailwind CSS v4 |
 | Local data | SQLite (`expo-sqlite`) |
 | Backend | Firebase Auth (email, Google, Apple), Firestore, Resource service API |
-| Audio | `react-native-track-player`, `expo-audio`, `expo-speech` |
+| Audio | `expo-audio`, `expo-speech` |
 | Notifications | Notifee |
 | Animations | Reanimated 4, Lottie |
 | Monitoring | Sentry |

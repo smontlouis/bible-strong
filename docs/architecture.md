@@ -119,7 +119,7 @@ Changes to sync, auth, backup, import/export, and migrations are sensitive. See 
 
 ## Audio
 
-Audio is integrated mainly under `src/features/bible/footer/` and `playbackService`. The app supports TTS through Expo Speech and remote audio through `react-native-track-player`. TrackPlayer registration is deferred after first interactions in `src/features/app/FullAppRuntime.tsx`.
+Audio is integrated mainly under `src/features/bible/footer/`. The app supports TTS through Expo Speech and remote audio through `expo-audio`: one playlist holds the chapters of the book being heard and drives the lock screen controls (`bibleAudioPlaylist.ts`), and the Strong words play on a separate `expo-audio` player.
 
 ## Observability
 

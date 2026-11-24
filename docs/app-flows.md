@@ -465,7 +465,7 @@ Modes:
 | Mode | Description |
 |---|---|
 | TTS | Synthèse vocale native, voix, vitesse, pitch, répétition. |
-| URL audio | Lecture distante avec TrackPlayer, vitesse, seek, répétition. |
+| URL audio | Lecture distante avec une playlist `expo-audio`, vitesse, seek, répétition, minuterie et écran verrouillé. |
 | Compact | Footer réduit intégré à la lecture. |
 | Étendu | Contrôles détaillés et navigation audio. |
 | Retour audio | Footer permettant de revenir à l'audio actif depuis une autre navigation. |

@@ -212,7 +212,6 @@
     "react-native-svg": "15.16.0",
     "react-native-tab-view": "^2.14.0",
     "react-native-teleport": "^1.2.2",
-    "react-native-track-player": "patch:react-native-track-player@https%3A//github.com/weights-ai/react-native-track-player.git%23commit=17a3ac866b642405a6a21dddbec38ddf3f217cd0#~/.yarn/patches/react-native-track-player-https-0ed4312346.patch",
     "react-native-url-polyfill": "^2.0.0",
     "react-native-view-shot": "5.1.1",
     "react-native-web": "~0.21.4",
@@ -316,7 +315,6 @@
         "exclude": [
           "@notifee/react-native",
           "expo-modules-jsi",
-          "react-native-track-player",
           "redux-devtools-expo-dev-plugin",
           "rn-fetch-blob"
         ]

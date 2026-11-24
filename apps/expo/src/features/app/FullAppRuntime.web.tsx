@@ -13,7 +13,6 @@ import * as Sentry from '@sentry/react-native'
 import { Stack, useLocalSearchParams, usePathname, useSegments } from 'expo-router'
 import { useEffect, useRef, type ReactNode } from 'react'
 import { RootSiblingParent } from 'react-native-root-siblings'
-import TrackPlayer from 'react-native-track-player'
 
 import ChangelogModal from '~common/Changelog'
 import ColorChangeModal from '~common/ColorChangeModal'
@@ -28,7 +27,6 @@ import { StrongAudioProvider } from '~features/bible/StrongAudioProvider'
 import { appLogger } from '~helpers/agentObservability'
 import { createFormSheetOptions } from '~navigation/formSheetOptions'
 import type { Theme } from '~themes/index'
-import { PlaybackService } from '../../../playbackService'
 
 const NavigationTracking = () => {
   const pathname = usePathname()
@@ -55,10 +53,6 @@ const NavigationTracking = () => {
 /** `children` mount inside the workspace providers: the desktop app adds its shell there. */
 const FullAppRuntime = ({ theme, children }: { theme: Theme; children?: ReactNode }) => {
   const panel = useWorkspaceRoutePanel()
-  useEffect(() => {
-    void TrackPlayer.registerPlaybackService(() => PlaybackService)
-  }, [])
-
   return (
     <AppSwitcherProvider>
       <RootSiblingParent>

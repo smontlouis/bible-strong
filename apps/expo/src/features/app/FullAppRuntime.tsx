@@ -11,7 +11,6 @@ import type { ReactNode } from 'react'
 import { runAfterInteractions } from '~helpers/runAfterInteractions'
 import { RootSiblingParent } from 'react-native-root-siblings'
 import { useKeepAwake } from 'expo-keep-awake'
-import TrackPlayer from 'react-native-track-player'
 import { PortalProvider } from 'react-native-teleport'
 
 import ChangelogModal from '~common/Changelog'
@@ -32,7 +31,6 @@ import { appLogger } from '~helpers/agentObservability'
 import { createFormSheetOptions } from '~navigation/formSheetOptions'
 import { isPageOverSheet } from '~navigation/sheetPresentation'
 import { Theme } from '~themes/index'
-import { PlaybackService } from '../../../playbackService'
 import { downloadManager } from '~helpers/downloadManager'
 import { loadMobileResourceCatalog } from '~helpers/mobileResourceCatalog'
 import { useAutomaticUpdates } from '~helpers/useAutomaticUpdates'
@@ -142,12 +140,6 @@ const AutomaticUpdates = () => {
 const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
   // On Android the activity can be gone when the root unmounts; releasing the lock then rejects.
   useKeepAwake(undefined, { suppressDeactivateWarnings: true })
-
-  useEffect(() => {
-    runAfterInteractions(() => {
-      TrackPlayer.registerPlaybackService(() => PlaybackService)
-    })
-  }, [])
 
   return (
     <LocalMigrationGate>

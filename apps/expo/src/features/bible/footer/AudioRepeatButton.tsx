@@ -1,34 +1,25 @@
 import { twMerge } from '~common/ui/classNames'
 
 import { useAtom } from 'jotai/react'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
-import TrackPlayer, { RepeatMode } from 'react-native-track-player'
 import { BoxProps, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { audioRepeatAtom } from './atom'
 import AudioChip from './AudioChip'
+import { getBibleAudioPlaylist } from './bibleAudioPlaylist'
 export type AudioRepeatButtonProps = BoxProps
 
 const AudioRepeatButton = (props: AudioRepeatButtonProps) => {
   const { t } = useTranslation()
-  const [repeatMode, setRepeatMode] = useAtom(audioRepeatAtom)
+  const [isActive, setIsActive] = useAtom(audioRepeatAtom)
 
-  useEffect(() => {
-    ;(async () => {
-      setRepeatMode(await TrackPlayer.getRepeatMode())
-    })()
-  }, [setRepeatMode])
-
-  const onToggle = async () => {
-    const newValue = repeatMode === RepeatMode.Off ? RepeatMode.Track : RepeatMode.Off
-
-    setRepeatMode(newValue)
-    await TrackPlayer.setRepeatMode(newValue)
+  const onToggle = () => {
+    const nextValue = !isActive
+    setIsActive(nextValue)
+    getBibleAudioPlaylist().loop = nextValue ? 'single' : 'none'
   }
-
-  const isActive = repeatMode === RepeatMode.Track
 
   return (
     <TouchableBox
