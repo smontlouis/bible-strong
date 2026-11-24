@@ -2982,7 +2982,7 @@ __metadata:
     phaser: "npm:3.90.0"
     react: "npm:19.2.3"
     react-dom: "npm:19.2.3"
-    sharp: "npm:^0.35.2"
+    sharp: "npm:^0.35.5"
     typescript: "npm:~6.0.3"
     vite: "npm:^7.3.7"
     vitest: "npm:^4.1.10"
@@ -31770,7 +31770,7 @@ multer@emadalam/multer:
   languageName: node
   linkType: hard
 
-"sharp@npm:0.35.4, sharp@npm:^0.35.2":
+"sharp@npm:0.35.4":
   version: 0.35.4
   resolution: "sharp@npm:0.35.4"
   dependencies:
@@ -31860,7 +31860,7 @@ multer@emadalam/multer:
   languageName: node
   linkType: hard
 
-"sharp@npm:0.35.5":
+"sharp@npm:0.35.5, sharp@npm:^0.35.5":
   version: 0.35.5
   resolution: "sharp@npm:0.35.5"
   dependencies:
