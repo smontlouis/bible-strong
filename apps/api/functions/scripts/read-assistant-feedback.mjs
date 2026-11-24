@@ -70,9 +70,10 @@ const opinions = all
 
 const count = (items, key) => {
   const counts = {}
-  for (const item of items) for (const value of [item[key]].flat()) {
-    if (value) counts[value] = (counts[value] || 0) + 1
-  }
+  for (const item of items)
+    for (const value of [item[key]].flat()) {
+      if (value) counts[value] = (counts[value] || 0) + 1
+    }
   return Object.entries(counts)
     .sort((a, b) => b[1] - a[1])
     .map(([value, total]) => `${value} ${total}`)
