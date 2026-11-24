@@ -23,7 +23,7 @@ import { useAssistantQuota } from './useAssistantQuota'
 const ROUND_BUTTON = 'h-[34px] w-[34px] items-center justify-center rounded-full'
 
 /** Stopping is a filled square, on native as on the web (Feather draws only an outline). */
-const StopSquare = () => <Box className="bg-reverse h-[11px] w-[11px] rounded-[2px]" />
+const StopSquare = () => <Box className="bg-reverse h-[11px] w-[11px]" />
 
 /**
  * What the reader is looking at goes with the question, as an attachment would: its mark and
