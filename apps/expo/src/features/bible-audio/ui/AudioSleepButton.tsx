@@ -8,7 +8,7 @@ import { BoxProps } from '~common/ui/Box'
 import { IonIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { secondsToMinutes } from '~helpers/secondsToMinutes'
-import { audioSleepMinutesAtom, audioSleepTimeAtom } from './atom'
+import { audioSleepMinutesAtom, audioSleepTimeAtom } from '../atoms'
 import AudioChip from './AudioChip'
 import { useMountTime } from '~helpers/useMountTime'
 export type AudioSleepButtonProps = BoxProps

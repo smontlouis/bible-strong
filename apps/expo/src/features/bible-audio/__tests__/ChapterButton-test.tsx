@@ -1,7 +1,7 @@
 import React from 'react'
 import { act, create } from 'react-test-renderer'
 
-import ChapterButton from '../ChapterButton'
+import ChapterButton from '../ui/ChapterButton'
 
 jest.mock('~common/ui/Box', () => {
   const ReactModule = jest.requireActual<typeof React>('react')

@@ -13,6 +13,7 @@ import Box, { AnimatedBox, FadingBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
+import { useBibleAudioMiniPlayerHeight } from '~features/bible-audio/ui/useBibleAudioMiniPlayerHeight'
 import { getContrastTextColor } from '~helpers/highlightUtils'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { useAddTabToGroup } from '../../../state/tabGroups'
@@ -98,6 +99,7 @@ const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGrou
   const { PADDING_HORIZONTAL } = useAppSwitcher()
   const { flashListRefs, tabPreviews } = useAppSwitcherContext()
   const insets = useSafeAreaInsets()
+  const miniPlayerHeight = useBibleAudioMiniPlayerHeight()
   const theme = useTheme()
 
   // Track visible indices for virtualization detection
@@ -155,7 +157,8 @@ const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGrou
   const contentContainerStyle: ViewStyle = {
     paddingTop: group.isDefault ? SCREEN_MARGIN + insets.top : 0,
     paddingHorizontal: PADDING_HORIZONTAL,
-    paddingBottom: TAB_ICON_SIZE + 60,
+    // The tab bar holds the small audio player while a passage is loaded.
+    paddingBottom: TAB_ICON_SIZE + miniPlayerHeight + 60,
   }
 
   const renderActiveItem = ({

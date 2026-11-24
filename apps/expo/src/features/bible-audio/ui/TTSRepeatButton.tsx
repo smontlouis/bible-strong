@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { BoxProps, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { ttsRepeatAtom } from './atom'
+import { ttsRepeatAtom } from '../atoms'
 import AudioChip from './AudioChip'
 export type TTSRepeatButtonProps = BoxProps
 

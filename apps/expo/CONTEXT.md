@@ -68,6 +68,8 @@
 
 **Tab** — One open working surface in the study workspace.
 
+**Bible audio player** — The one player of the app that voices a Bible chapter, with the version's recording or the device's voice. It holds its own passage, whatever the Tabs show; a Bible Tab starts it on the passage it shows and turns its pages with it until its reader goes elsewhere (ADR-0116).
+
 **Tab group** — A persisted collection of Tabs with one active Tab.
 
 **Incoming link** — The address a browser page of the workspace was opened on from elsewhere (another site, a message, the address bar), not by a reload. When it names a resource a Tab can show, it opens as a Tab, or selects the Tab already showing it, and leaves the address (ADR-0108).

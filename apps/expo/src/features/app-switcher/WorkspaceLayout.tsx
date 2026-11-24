@@ -19,6 +19,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import SharedBibleDOM from '~features/bible/SharedBibleDOM'
 import CachedTabScreens from './CachedTabScreens'
 import WorkspaceSidebar from './WorkspaceSidebar'
+import BibleAudioMiniPlayer from '~features/bible-audio/ui/BibleAudioMiniPlayer'
 import { TabContextProvider } from './context/TabContext'
 import { radii } from '~common/ui/surfaces'
 import {
@@ -38,6 +39,8 @@ import { useWindowControlsInset, useWindowMaterial } from './windowChrome'
 
 /** Room between the sidebar button's edge and its icon. */
 const SIDEBAR_BUTTON_ICON_INSET = 12
+/** The small audio player's width when it floats over a page, the sidebar hidden. */
+const FLOATING_MINI_PLAYER_WIDTH = 300
 
 // global.web.css animates the sidebar on the web; native runs the same motion through Reanimated.
 const SidebarMotionBox = Platform.OS === 'web' ? Box : AnimatedBox
@@ -278,6 +281,15 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
             </Box>
           </Box>
         </WorkspaceHeaderInsetProvider>
+        {/* With the sidebar hidden, the small audio player floats where it would be. */}
+        {isWide && !sidebarVisible && (
+          <Box
+            className="absolute z-20"
+            style={{ left: 12, bottom: 12 + insets.bottom, width: FLOATING_MINI_PLAYER_WIDTH }}
+          >
+            <BibleAudioMiniPlayer variant="card" />
+          </Box>
+        )}
       </Box>
     </HStack>
   )

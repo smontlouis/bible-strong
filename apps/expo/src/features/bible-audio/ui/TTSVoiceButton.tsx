@@ -12,7 +12,7 @@ import Text from '~common/ui/Text'
 import { versions } from '~helpers/bibleVersions'
 import { timeout } from '~helpers/timeout'
 import { appLogger } from '~helpers/agentObservability'
-import { ttsVoiceAtom } from './atom'
+import { ttsVoiceAtom } from '../atoms'
 import AudioChip from './AudioChip'
 export interface TTSVoiceButtonProps extends BoxProps {
   currentVersion: VersionCode

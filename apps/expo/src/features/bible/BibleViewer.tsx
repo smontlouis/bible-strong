@@ -139,6 +139,7 @@ import { getColumnTextModeControls } from './columnTextModeControls'
 import { getCanonicalChapterPericope } from '~helpers/canonicalBibleHeadings'
 import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
 import BibleFooter from './footer/BibleFooter'
+import { useFollowBibleAudio } from '~features/bible-audio/useFollowBibleAudio'
 import { FooterInSheetProvider } from './footer/footerFullScreen'
 import {
   getChapterEntityQueryPlan,
@@ -381,6 +382,16 @@ const BibleViewer = ({
     if (isInPlanPassage(planPassage, { book: target.book.Numero, chapter: target.chapter }))
       actions.goToChapter(target)
   }
+  // The tab the audio was started from turns its pages with it, until its reader goes elsewhere.
+  useFollowBibleAudio({
+    tabId: bible.id,
+    enabled: !!isInTab,
+    version,
+    book,
+    chapter,
+    planPassage,
+    goToChapter,
+  })
 
   const mainChapterRequest = {
     book: book.Numero,
@@ -1840,13 +1851,9 @@ const BibleViewer = ({
               disabled={isLoading}
               book={book}
               chapter={chapter}
-              chapterVerses={
-                mainReadingQuery.isPlaceholderData || !mainChapterData ? undefined : verses
-              }
               coverage={coverageData}
               goToPrevChapter={goToPrevAvailableChapter}
               goToNextChapter={goToNextAvailableChapter}
-              goToChapter={goToChapter}
               version={version}
               isInTab={isInTab}
             />

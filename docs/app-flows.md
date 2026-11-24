@@ -269,7 +269,7 @@ Structure:
 |---|---|
 | Header | Livre/chapitre/version, retour, menus, historique, favoris, paramètres, comparaison. |
 | BibleDOM | Rendu du chapitre, versets, interlinéaire, tags, notes, liens, sélection et annotations. |
-| Footer | Navigation chapitre, audio/TTS, retour audio, contrôles contextuels. |
+| Footer | Navigation chapitre et bouton d'écoute du passage affiché. |
 | Bottom sheets | Sélecteur livre/chapitre/verset, version, paramètres, ressources, sélection. |
 
 Écrans auxiliaires:
@@ -292,7 +292,7 @@ Structure:
 | Mode sélection depuis étude | Bible ouverte pour choisir un passage à insérer dans une étude. |
 | Mode parallèle | Versions additionnelles affichées côte à côte ou verticalement. |
 | Interlinéaire | Texte original avec éléments Strong et alignements. |
-| Audio actif | Footer audio remplace ou enrichit la navigation. |
+| Audio actif | Le petit lecteur apparaît dans la barre d'onglets ; l'onglet qui a lancé l'audio le suit. |
 
 Navigation biblique:
 
@@ -456,31 +456,30 @@ Flows:
 
 ## Audio Bible
 
-Composants principaux: `src/features/bible/footer/`.
+Composants principaux: `src/features/bible-audio/` (ADR-0116).
 
-But: écouter un chapitre via TTS ou audio distant avec contrôle depuis la Bible.
+But: écouter un chapitre, enregistré ou lu par la voix de l'appareil, avec un lecteur global que les onglets lancent.
 
-Modes:
+Surfaces:
 
-| Mode | Description |
+| Surface | Description |
 |---|---|
-| TTS | Synthèse vocale native, voix, vitesse, pitch, répétition. |
-| URL audio | Lecture distante avec une playlist `expo-audio`, vitesse, seek, répétition, minuterie et écran verrouillé. |
-| Compact | Footer réduit intégré à la lecture. |
-| Étendu | Contrôles détaillés et navigation audio. |
-| Retour audio | Footer permettant de revenir à l'audio actif depuis une autre navigation. |
+| Bouton du footer Bible | Écoute le passage affiché ; pause si ce passage joue déjà. |
+| Petit lecteur | Rangée en haut de la barre d'onglets (carte dans la barre latérale sur grand écran) : titre, lecture/pause, arrêt. Ouvre le grand lecteur. |
+| Grand lecteur | Feuille glissée vers le haut (panneau en bas à gauche sur grand écran) : source, livre, chapitre, version, progression, ±10 s ou ±1 verset, chapitres, vitesse, répétition, minuterie, voix, « Afficher le texte ». |
 
 États:
 
 | État | Description |
 |---|---|
-| Inactif | Footer basique chapitre précédent/suivant. |
-| Buffering | Icône/état de chargement audio. |
-| Playing | Lecture active, verset courant synchronisé si possible. |
-| Paused | Lecture suspendue. |
-| Sleep timer actif | Arrêt programmé. |
-| Repeat actif | Répète verset, chapitre ou livre. |
-| Erreur audio | Fallback vers TTS ou message selon source. |
+| Inactif | Aucun passage : pas de petit lecteur. |
+| Chargement | Indicateur sur le bouton de lecture. |
+| Lecture | Le passage joue ; l'onglet qui l'a lancé le suit. |
+| Pause | Le passage reste chargé dans le petit lecteur. |
+| Onglet détaché | Le lecteur de l'onglet est allé ailleurs : l'audio continue sans lui. |
+| Minuterie active | Arrêt programmé, annulé par une pause. |
+| Répétition active | Le chapitre recommence. |
+| Erreur | « Audio indisponible pour ce chapitre » ; lecture recharge le chapitre. |
 
 ## Plans De Lecture
 

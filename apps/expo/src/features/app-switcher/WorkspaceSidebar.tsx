@@ -1,4 +1,5 @@
 import SidebarAccountCard from './SidebarAccountCard'
+import BibleAudioMiniPlayer from '~features/bible-audio/ui/BibleAudioMiniPlayer'
 import { resolveUniverseColors } from '~themes/universeColors'
 import {
   SidebarDragProvider,
@@ -462,6 +463,7 @@ const WorkspaceSidebar = ({
                 </Text>
               </TouchableBox>
             </HStack>
+            <BibleAudioMiniPlayer variant="card" className="mt-[4px]" />
             <Box className="mt-[4px]">
               <SidebarAccountCard openSettings={openMenu} onNavigate={onNavigate} />
             </Box>

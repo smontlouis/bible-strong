@@ -6,12 +6,12 @@ import { useTranslation } from 'react-i18next'
 import DropdownMenu from '~common/DropdownMenu'
 import { BoxProps } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { audioSpeedAtom } from './atom'
+import { ttsSpeedAtom } from '../atoms'
 import AudioChip from './AudioChip'
-import { getBibleAudioPlaylist } from './bibleAudioPlaylist'
-export type AudioSpeedButtonProps = BoxProps
+export type TTSSpeedButtonProps = BoxProps
 
 const choices = [
+  { value: '0.5', label: '0.5x' },
   { value: '0.75', label: '0.75x' },
   { value: '1', label: '1x' },
   { value: '1.25', label: '1.25x' },
@@ -19,28 +19,22 @@ const choices = [
   { value: '1.75', label: '1.75x' },
   { value: '2', label: '2x' },
 ]
-const AudioSpeedButton = (props: AudioSpeedButtonProps) => {
+const TTSSpeedButton = (props: TTSSpeedButtonProps) => {
   const { t } = useTranslation()
-  const [rate, setRate] = useAtom(audioSpeedAtom)
-
-  const onChange = (value: string) => {
-    const nextRate = Number(value)
-    setRate(nextRate)
-    getBibleAudioPlaylist().playbackRate = nextRate
-  }
-
-  const isActive = rate !== 1
+  const [speed, setSpeed] = useAtom(ttsSpeedAtom)
+  const isActive = speed !== 1
+  const choice = choices.find(c => c.value === speed.toString())
 
   return (
     <DropdownMenu
       title={t('audio.speed')}
-      currentValue={rate.toString()}
-      setValue={onChange}
+      currentValue={speed.toString()}
+      setValue={v => setSpeed(Number(v))}
       choices={choices}
       customRender={
         <AudioChip isActive={isActive} {...props}>
           <Text className={twMerge(isActive ? 'text-link' : 'text-grey', 'font-bold text-[10px]')}>
-            {rate}x
+            {t('audio.speed')} {choice?.label}
           </Text>
         </AudioChip>
       }
@@ -48,4 +42,4 @@ const AudioSpeedButton = (props: AudioSpeedButtonProps) => {
   )
 }
 
-export default AudioSpeedButton
+export default TTSSpeedButton

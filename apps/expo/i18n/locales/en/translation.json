@@ -3105,5 +3105,15 @@
   "faq.category.assistant": "Assistant and Premium",
   "faq.category.assistantSummary": "Strobi and the subscription",
   "faq.category.assistantTitle": "Study with Strobi.",
-  "faq.category.assistantDescription": "What the study assistant does, its limits and the Premium subscription."
+  "faq.category.assistantDescription": "What the study assistant does, its limits and the Premium subscription.",
+  "bibleAudio.recorded": "Audio",
+  "bibleAudio.speech": "Synthetic voice",
+  "bibleAudio.open": "Open the audio player",
+  "bibleAudio.stop": "Stop playback",
+  "bibleAudio.showText": "Show the text",
+  "bibleAudio.chooseChapter": "Choose the book and chapter",
+  "bibleAudio.chooseVersion": "Choose the version",
+  "bibleAudio.unavailable": "Audio unavailable for this chapter. Tap play to try again.",
+  "bibleAudio.verse": "Verse {{verse}}",
+  "bibleAudio.verseCount": "{{index}} of {{count}}"
 }

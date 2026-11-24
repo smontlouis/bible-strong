@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Platform, StyleSheet } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { FullWindowOverlay } from 'react-native-screens'
+import { bibleAudioPlayerOpenAtom } from '~features/bible-audio/atoms'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { useAtomValue, useSetAtom } from 'jotai'
@@ -53,6 +54,8 @@ function GuestAssistant() {
   const { t } = useTranslation()
   const router = useRouter()
   const pathname = usePathname()
+  // The large audio player covers the bottom of the screen, where the bubble rests.
+  const isAudioPlayerOpen = useAtomValue(bibleAudioPlayerOpenAtom)
   const open = pathname === ASSISTANT_PATH
   const bubble = useStrobiBubble()
   const [asleep, setAsleep] = useState(false)
@@ -62,7 +65,7 @@ function GuestAssistant() {
       <AssistantLauncherButton
         animation={dragged ? 'excited' : asleep ? 'sleeping' : 'idle'}
         accessibilityLabel={t('assistant.modal.open')}
-        hidden={open || pathname === PREMIUM_PATH}
+        hidden={open || pathname === PREMIUM_PATH || isAudioPlayerOpen}
         onPress={() => {
           if (!open) router.push(ASSISTANT_PATH)
         }}
@@ -88,6 +91,8 @@ function AccountAssistant({ account }: { account: string }) {
   const { t } = useTranslation()
   const router = useRouter()
   const pathname = usePathname()
+  // The large audio player covers the bottom of the screen, where the bubble rests.
+  const isAudioPlayerOpen = useAtomValue(bibleAudioPlayerOpenAtom)
   const open = pathname === ASSISTANT_PATH
   const liveContext = useReadingContext()
   const openInNewTab = useOpenInNewTab()
@@ -217,7 +222,7 @@ function AccountAssistant({ account }: { account: string }) {
         animation={avatarAnimation}
         accessibilityLabel={t('assistant.modal.open')}
         // The Premium page has its own Strobi.
-        hidden={open || pathname === PREMIUM_PATH}
+        hidden={open || pathname === PREMIUM_PATH || isAudioPlayerOpen}
         onPress={() => {
           if (!open) router.push(ASSISTANT_PATH)
         }}

@@ -51,6 +51,7 @@ jest.mock('~common/ui/Icon', () => ({ FeatherIcon: 'Icon' }))
 jest.mock('~features/bible/SharedBibleDOM', () => 'SharedBibleDOM')
 jest.mock('../CachedTabScreens', () => 'CachedTabScreens')
 jest.mock('../WorkspaceSidebar', () => 'WorkspaceSidebar')
+jest.mock('~features/bible-audio/ui/BibleAudioMiniPlayer', () => 'BibleAudioMiniPlayer')
 jest.mock('../commandPalette/GlobalCommandPalette', () => 'GlobalCommandPalette')
 jest.mock('../context/TabContext', () => ({ TabContextProvider: 'TabContextProvider' }))
 jest.mock('../utils/useResponsiveWorkspace', () => ({

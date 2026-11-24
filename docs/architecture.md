@@ -119,7 +119,7 @@ Changes to sync, auth, backup, import/export, and migrations are sensitive. See 
 
 ## Audio
 
-Audio is integrated mainly under `src/features/bible/footer/`. The app supports TTS through Expo Speech and remote audio through `expo-audio`: one playlist holds the chapters of the book being heard and drives the lock screen controls (`bibleAudioPlaylist.ts`), and the Strong words play on a separate `expo-audio` player.
+One Bible audio player serves the whole app (`src/features/bible-audio/`, ADR-0116). It holds its own passage and voices it through two engines behind the same calls: the recordings of the version in an `expo-audio` playlist, which drives the lock screen controls, and the device's voice through Expo Speech. A small player sits on top of the tab bar (or in the sidebar on a wide screen) and opens a large one; Bible Tabs start it and follow it loosely. The Strong words play on a separate `expo-audio` player.
 
 ## Observability
 

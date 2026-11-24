@@ -23,6 +23,7 @@ import { AppRatingModal } from '~features/app-rating'
 import { AppSwitcherProvider } from '~features/app-switcher/AppSwitcherProvider'
 import { BookSelectorSheetProvider } from '~features/bible/BookSelectorSheet/BookSelectorSheetProvider'
 import { StrongAudioProvider } from '~features/bible/StrongAudioProvider'
+import BibleAudioPlayerSheet from '~features/bible-audio/ui/BibleAudioPlayerSheet'
 import { FeatureOnboardingModal } from '~features/feature-onboarding'
 import OnBoardingModal from '~features/onboarding/OnBoarding'
 import StrobiTrialHandoff from '~features/onboarding/StrobiTrialHandoff'
@@ -228,6 +229,8 @@ const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
                       </Stack>
                     </WorkspaceLayout>
                     <AssistantLauncher />
+                    {/* Above the assistant's button, under the toasts. */}
+                    <BibleAudioPlayerSheet />
                     <ThemedToaster />
                     <AutomaticUpdates />
                     <DeferredModals />

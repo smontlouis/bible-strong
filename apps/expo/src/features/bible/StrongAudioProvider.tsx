@@ -5,7 +5,7 @@ import {
   type AudioStatus as ExpoAudioStatus,
 } from 'expo-audio'
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
-import { interruptBibleAudio } from './footer/bibleAudioPlaylist'
+import { interruptBibleAudio } from '~features/bible-audio/bibleAudioPlayer'
 
 type StrongAudioState = 'Idle' | 'Loading' | 'Playing'
 

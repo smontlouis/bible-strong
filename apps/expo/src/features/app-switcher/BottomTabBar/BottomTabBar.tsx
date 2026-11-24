@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next'
 import { isFullScreenBibleAtom } from 'src/state/app'
 import { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import BibleAudioMiniPlayer from '~features/bible-audio/ui/BibleAudioMiniPlayer'
+import { useBibleAudioMiniPlayerHeight } from '~features/bible-audio/ui/useBibleAudioMiniPlayerHeight'
 import { TAB_ICON_SIZE } from '../utils/constants'
 import AddTabButton from './Buttons/AddTabButton'
 import BibleButton from './Buttons/BibleButton'
@@ -26,7 +28,9 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
   const { onPress, isViewMode, listStyles, viewStyles } = useBottomTabBar()
   const { panGesture } = useTabBarSwipeGesture()
   const insets = useSafeAreaInsets()
-  const bottomBarHeight = TAB_ICON_SIZE + insets.bottom
+  // The small audio player is the bar's top row while a passage is loaded.
+  const miniPlayerHeight = useBibleAudioMiniPlayerHeight()
+  const bottomBarHeight = TAB_ICON_SIZE + miniPlayerHeight + insets.bottom
   const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
 
   return (
@@ -45,10 +49,11 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
         },
       ]}
     >
+      <BibleAudioMiniPlayer variant="bar" />
       <GestureDetector gesture={panGesture}>
         <AnimatedBox
-          className="overflow-hidden border-continuous flex-row items-center justify-around px-[20px] absolute left-[0px] top-[0px] right-[0px] bottom-[0px]"
-          style={[{ paddingBottom: insets.bottom }, viewStyles]}
+          className="overflow-hidden border-continuous flex-row items-center justify-around px-[20px] absolute left-[0px] right-[0px] bottom-[0px]"
+          style={[{ top: miniPlayerHeight, paddingBottom: insets.bottom }, viewStyles]}
           accessibilityElementsHidden={!isViewMode}
           importantForAccessibility={isViewMode ? 'auto' : 'no-hide-descendants'}
           key="view"
@@ -61,8 +66,8 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
         </AnimatedBox>
       </GestureDetector>
       <AnimatedBox
-        className="overflow-hidden border-continuous flex-row items-center justify-around px-[20px] absolute left-[0px] top-[0px] right-[0px] bottom-[0px]"
-        style={[{ paddingBottom: insets.bottom }, listStyles]}
+        className="overflow-hidden border-continuous flex-row items-center justify-around px-[20px] absolute left-[0px] right-[0px] bottom-[0px]"
+        style={[{ top: miniPlayerHeight, paddingBottom: insets.bottom }, listStyles]}
         accessibilityElementsHidden={isViewMode}
         importantForAccessibility={isViewMode ? 'no-hide-descendants' : 'auto'}
         key="list"

@@ -24,6 +24,7 @@ import UnifiedTagsModal from '~common/UnifiedTagsModal'
 import { AppSwitcherProvider } from '~features/app-switcher/AppSwitcherProvider'
 import { BookSelectorSheetProvider } from '~features/bible/BookSelectorSheet/BookSelectorSheetProvider'
 import { StrongAudioProvider } from '~features/bible/StrongAudioProvider'
+import BibleAudioPlayerSheet from '~features/bible-audio/ui/BibleAudioPlayerSheet'
 import { appLogger } from '~helpers/agentObservability'
 import { createFormSheetOptions } from '~navigation/formSheetOptions'
 import type { Theme } from '~themes/index'
@@ -99,6 +100,8 @@ const FullAppRuntime = ({ theme, children }: { theme: Theme; children?: ReactNod
               <IncomingLinkTab />
               <WorkspaceAnalytics />
               <AssistantLauncher />
+              {/* Above the assistant's button, under the toasts. */}
+              <BibleAudioPlayerSheet />
               <ConfirmDialogHost />
               <PrintPreparation />
               <ThemedToaster />

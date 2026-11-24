@@ -3,6 +3,7 @@ import { TabContextType } from './type'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useResponsiveWorkspace } from '../utils/useResponsiveWorkspace'
 import { TAB_ICON_SIZE } from '../utils/constants'
+import { useBibleAudioMiniPlayerHeight } from '~features/bible-audio/ui/useBibleAudioMiniPlayerHeight'
 
 const TabContext = createContext<TabContextType>({
   isInTab: false,
@@ -20,7 +21,10 @@ export const useBottomBarHeightInTab = () => {
   const insets = useSafeAreaInsets()
   const { isInTab } = useTabContext()
   const isWide = useResponsiveWorkspace()
-  const bottomBarHeight = isInTab && !isWide ? TAB_ICON_SIZE + insets.bottom : insets.bottom
+  // The small audio player sits in the tab bar, which grows by its height.
+  const miniPlayerHeight = useBibleAudioMiniPlayerHeight()
+  const bottomBarHeight =
+    isInTab && !isWide ? TAB_ICON_SIZE + miniPlayerHeight + insets.bottom : insets.bottom
 
   return { bottomBarHeight }
 }

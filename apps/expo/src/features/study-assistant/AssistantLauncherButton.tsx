@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { runOnJS } from 'react-native-worklets'
 import { FeatherIcon } from '~common/ui/Icon'
 import { TAB_ICON_SIZE } from '~features/app-switcher/utils/constants'
+import { useBibleAudioMiniPlayerHeight } from '~features/bible-audio/ui/useBibleAudioMiniPlayerHeight'
 import { storage } from '~helpers/storage'
 import StrobiAvatar, { type StrobiAnimation } from './StrobiAvatar'
 
@@ -119,6 +120,8 @@ export default function AssistantLauncherButton({
   onAsleepChange,
 }: Props) {
   const insets = useSafeAreaInsets()
+  // The small audio player raises the tab bar: the bubble and its cross stay above it.
+  const miniPlayerHeight = useBibleAudioMiniPlayerHeight()
   const [layout, setLayout] = useState<LayoutRectangle | null>(null)
   const [asleep, setAsleep] = useState(false)
   const [idle, setIdle] = useState(false)
@@ -233,14 +236,23 @@ export default function AssistantLauncherButton({
   const maxY = (layout?.height ?? 0) - insets.bottom - EDGE_MARGIN - BUTTON_SIZE
 
   const targetX = (layout?.width ?? 0) / 2
-  const targetY = (layout?.height ?? 0) - insets.bottom - TARGET_CENTER_ABOVE_BOTTOM
+  const targetY =
+    (layout?.height ?? 0) - insets.bottom - TARGET_CENTER_ABOVE_BOTTOM - miniPlayerHeight
 
   // Where it rests: where it was left, or, until it is moved, bottom right above the tab bar.
   const restingPoint = () => {
     const travel = Math.max(maxY - minY, 1)
     const stored = readPosition() ?? {
       side: 'right',
-      y: ((layout?.height ?? 0) - insets.bottom - TAB_ICON_SIZE - 62 - BUTTON_SIZE - minY) / travel,
+      y:
+        ((layout?.height ?? 0) -
+          insets.bottom -
+          TAB_ICON_SIZE -
+          miniPlayerHeight -
+          62 -
+          BUTTON_SIZE -
+          minY) /
+        travel,
     }
     return {
       x: stored.side === 'left' ? minX : maxX,
@@ -255,7 +267,7 @@ export default function AssistantLauncherButton({
     x.set(point.x)
     y.set(point.y)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layout, minX, maxX, minY, maxY, insets.bottom, x, y])
+  }, [layout, minX, maxX, minY, maxY, insets.bottom, miniPlayerHeight, x, y])
 
   // A firm knock when it is drawn onto the cross, a light tick when it leaves it.
   const feelTarget = (near: boolean) => {
