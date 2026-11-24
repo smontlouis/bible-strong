@@ -57,6 +57,18 @@ module.exports = [
       'ios/**',
       'builds/**',
       'dist/**',
+      // Local artefacts, all git-ignored. Flat config does not read .gitignore, and a desktop
+      // export or a saved bundle (tens of MB of minified JS) keeps ESLint busy for many minutes.
+      'dist-desktop/**',
+      '.scratch/**',
+      '.wrangler/**',
+      '.sim-fleet/**',
+      '.playwright-cli/**',
+      'coverage/**',
+      'modules/*/android/build/**',
+      'modules/*/android/.gradle/**',
+      'modules/*/android/src/main/java/**/generated/**',
+      'modules/*/ios/Generated/**',
       'docs/assets/app-flows/dist/**',
       'docs/research/data/bible-project/presentation-data.js',
       '.agents/**',

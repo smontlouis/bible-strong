@@ -24,7 +24,7 @@
     "dev:resources": "yarn workspace @bible-strong/resource-service dev",
     "build": "yarn workspace @bible-strong/api-functions build && yarn workspace @bible-strong/site build && yarn workspace @bible-strong/world build",
     "typecheck": "yarn workspace @bible-strong/resource-domain typecheck && yarn workspace @bible-strong/resource-catalog typecheck && yarn workspace @bible-strong/expo typecheck && yarn workspace @bible-strong/site typecheck && yarn workspace @bible-strong/api-functions typecheck && yarn workspace @bible-strong/resource-studio typecheck && yarn workspace @bible-strong/resource-service typecheck && yarn workspace @bible-strong/share-card-service typecheck && yarn workspace @bible-strong/world typecheck",
-    "lint": "yarn workspace @bible-strong/expo lint && yarn workspace @bible-strong/site lint && yarn workspace @bible-strong/api-functions lint && yarn workspace @bible-strong/world lint",
+    "lint": "yarn workspaces foreach -A -p -v --include @bible-strong/expo --include @bible-strong/site --include @bible-strong/api-functions --include @bible-strong/world run lint",
     "test": "yarn workspace @bible-strong/resource-domain test && yarn workspace @bible-strong/resource-catalog test && yarn workspace @bible-strong/expo test && yarn workspace @bible-strong/site test && yarn workspace @bible-strong/resource-service test && yarn workspace @bible-strong/share-card-service test && yarn workspace @bible-strong/world test",
     "format:check": "yarn workspace @bible-strong/expo format:check",
     "resources:test": "yarn workspace @bible-strong/resource-service test",
