@@ -1,10 +1,12 @@
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet } from 'react-native'
-import Box, { TouchableBox } from '~common/ui/Box'
+import { LayoutAnimationConfig } from 'react-native-reanimated'
+import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { twMerge } from '~common/ui/classNames'
+import { popIn } from '~common/ui/motion'
 import { radii } from '~common/ui/surfaces'
 import { backgroundMusicStateAtom, bibleAudioMusicAtom } from '../atoms'
 import { getMusicName, useBackgroundMusicList } from '../audioCatalog'
@@ -44,7 +46,7 @@ const MusicMiniPlayer = ({ variant }: { variant: 'bar' | 'card' }) => {
           placement="top start"
           trigger={
             <Box className="flex-row items-center h-full">
-              <MusicDisc id={current.id} size={40} />
+              <MusicDisc id={current.id} size={40} isPlaying={isPlaying} />
               <Box className="flex-[1] min-w-0 ml-[10px]">
                 <Text className="text-[14px] font-bold" numberOfLines={1}>
                   {getMusicName(current)}
@@ -63,7 +65,11 @@ const MusicMiniPlayer = ({ variant }: { variant: 'bar' | 'card' }) => {
         accessibilityRole="button"
         accessibilityLabel={t(isPlaying ? 'bibleAudio.music.pause' : 'bibleAudio.music.play')}
       >
-        <IonIcon name={isPlaying ? 'pause' : 'play'} size={24} color="default" />
+        <LayoutAnimationConfig skipEntering>
+          <AnimatedBox key={isPlaying ? 'pause' : 'play'} entering={popIn}>
+            <IonIcon name={isPlaying ? 'pause' : 'play'} size={24} color="default" />
+          </AnimatedBox>
+        </LayoutAnimationConfig>
       </TouchableBox>
       <TouchableBox
         className="w-[44px] h-[44px] items-center justify-center"

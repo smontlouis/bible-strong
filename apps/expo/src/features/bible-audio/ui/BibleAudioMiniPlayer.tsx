@@ -2,21 +2,33 @@ import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, StyleSheet } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
+import {
+  FadeIn,
+  FadeInDown,
+  FadeOut,
+  FadeOutDown,
+  LayoutAnimationConfig,
+} from 'react-native-reanimated'
 import { runOnJS } from 'react-native-worklets'
 import { twMerge } from '~common/ui/classNames'
-import Box, { TouchableBox } from '~common/ui/Box'
+import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
+import { popIn } from '~common/ui/motion'
 import { floatingShadow, radii } from '~common/ui/surfaces'
 import { getBiblePart, getBiblePartColors } from '~themes/bibleBookColors'
 import { useTheme } from '~themes/ThemeProvider'
-import { backgroundMusicStateAtom, bibleAudioStateAtom } from '../atoms'
+import { backgroundMusicStateAtom, bibleAudioPassageAtom, bibleAudioStateAtom } from '../atoms'
 import { openBibleAudioPlayer, stop, togglePlay } from '../bibleAudioPlayer'
 import BibleAudioCover from './BibleAudioCover'
 import MusicMiniPlayer from './MusicMiniPlayer'
 import { BibleAudioProgressLine } from './BibleAudioProgressBar'
 import { useBibleAudioLabels } from './useBibleAudioLabels'
 import { MINI_PLAYER_HEIGHT } from './useBibleAudioMiniPlayerHeight'
+
+// In the tab bar the row fades while the bar folds or unfolds over its height.
+const miniPlayerIn = FadeIn.duration(220).delay(80)
+const miniPlayerOut = FadeOut.duration(140)
 
 type BibleAudioMiniPlayerProps = {
   /** `bar`: the top row of the tab bar. `card`: a floating card, in the sidebar or beside it. */
@@ -25,8 +37,7 @@ type BibleAudioMiniPlayerProps = {
   className?: string
 }
 
-/** The player while it is small: what plays, play and pause, and a way out. Opens the large one. */
-const BibleAudioMiniPlayer = ({ variant, className }: BibleAudioMiniPlayerProps) => {
+const MiniPlayerContent = ({ variant, className }: BibleAudioMiniPlayerProps) => {
   const { t } = useTranslation()
   const { passage, status } = useAtomValue(bibleAudioStateAtom)
   const musicState = useAtomValue(backgroundMusicStateAtom)
@@ -100,7 +111,9 @@ const BibleAudioMiniPlayer = ({ variant, className }: BibleAudioMiniPlayerProps)
         {isLoading ? (
           <ActivityIndicator />
         ) : (
-          <IonIcon name={isPlaying ? 'pause' : 'play'} size={24} color="default" />
+          <AnimatedBox key={isPlaying ? 'pause' : 'play'} entering={popIn}>
+            <IonIcon name={isPlaying ? 'pause' : 'play'} size={24} color="default" />
+          </AnimatedBox>
         )}
       </TouchableBox>
       <TouchableBox
@@ -121,6 +134,28 @@ const BibleAudioMiniPlayer = ({ variant, className }: BibleAudioMiniPlayerProps)
     <Box className={className} style={{ borderRadius: radii.card, ...floatingShadow }}>
       {row}
     </Box>
+  )
+}
+
+/**
+ * The player while it is small: what plays, play and pause, and a way out. Opens the large one.
+ * It fades in and out as it comes and goes, while the tab bar folds and unfolds around it.
+ */
+const BibleAudioMiniPlayer = (props: BibleAudioMiniPlayerProps) => {
+  const passage = useAtomValue(bibleAudioPassageAtom)
+  const musicState = useAtomValue(backgroundMusicStateAtom)
+  const mode = passage ? 'passage' : musicState !== 'off' ? 'music' : null
+  if (!mode) return null
+  return (
+    <AnimatedBox
+      key={mode}
+      entering={props.variant === 'bar' ? miniPlayerIn : FadeInDown.duration(240)}
+      exiting={props.variant === 'bar' ? miniPlayerOut : FadeOutDown.duration(200)}
+    >
+      <LayoutAnimationConfig skipEntering>
+        <MiniPlayerContent {...props} />
+      </LayoutAnimationConfig>
+    </AnimatedBox>
   )
 }
 

@@ -1,42 +1,37 @@
-import { LinearGradient } from 'expo-linear-gradient'
 import type { ReactNode } from 'react'
 import Box from '~common/ui/Box'
+import NebulaOrb from '~common/ui/effects/NebulaOrb'
 
-// A colour for each piece of the catalog; another piece takes the first.
-const DISC_COLORS: Record<string, [string, string]> = {
-  piano: ['#c9b6f2', '#f3c4dd'],
-  strings: ['#f2c6a0', '#e98f8f'],
-  ambient: ['#9ecbe8', '#c3b4f0'],
-  guitar: ['#f0d59a', '#d8a774'],
-  harp: ['#a8e0c8', '#8ec5e6'],
-  organ: ['#d7c1f0', '#9fa8e8'],
+// The colours of each piece of the catalog, deep at the foot and light at the top; another piece
+// takes the first.
+const ORB_COLORS: Record<string, { color: string; highlight: string }> = {
+  piano: { color: '#9a82e6', highlight: '#fbe4f0' },
+  strings: { color: '#e5876f', highlight: '#fde8d2' },
+  ambient: { color: '#6f9fdc', highlight: '#e8e2fb' },
+  guitar: { color: '#cf9654', highlight: '#fbedc9' },
+  harp: { color: '#55ad94', highlight: '#dff2fa' },
+  organ: { color: '#7f86dc', highlight: '#f0e5fb' },
 }
 
-type MusicDiscProps = { id: string | null | undefined; size: number; children?: ReactNode }
+type MusicDiscProps = {
+  id: string | null | undefined
+  size: number
+  /** The orb swirls while the music plays and rests while it is paused. */
+  isPlaying?: boolean
+  children?: ReactNode
+}
 
-/** The disc of a piece of music, in its colours, as HelloBible shows it. */
-const MusicDisc = ({ id, size, children }: MusicDiscProps) => {
-  const colors = DISC_COLORS[id ?? ''] ?? DISC_COLORS.piano!
+/** A piece of music as a sphere of its colours, which swirl while it plays. */
+const MusicDisc = ({ id, size, isPlaying = false, children }: MusicDiscProps) => {
+  const colors = ORB_COLORS[id ?? ''] ?? ORB_COLORS.piano!
   return (
-    <Box
-      className="overflow-hidden items-center justify-center"
-      style={{ width: size, height: size, borderRadius: size / 2 }}
-    >
-      <LinearGradient
-        colors={colors}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      {/* The label of the record. */}
-      <Box
-        className="absolute"
-        style={{
-          width: size * 0.3,
-          height: size * 0.3,
-          borderRadius: size * 0.15,
-          backgroundColor: 'rgba(255,255,255,0.35)',
-        }}
+    <Box className="items-center justify-center" style={{ width: size, height: size }}>
+      <NebulaOrb
+        size={size}
+        color={colors.color}
+        highlightColor={colors.highlight}
+        paused={!isPlaying}
+        style={{ position: 'absolute', top: 0, left: 0 }}
       />
       {children}
     </Box>

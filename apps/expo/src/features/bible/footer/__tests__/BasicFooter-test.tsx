@@ -40,12 +40,17 @@ jest.mock('~common/ui/Box', () => {
   return {
     __esModule: true,
     default: host('Box'),
+    AnimatedBox: host('AnimatedBox'),
     AnimatedHStack: host('AnimatedHStack'),
     AnimatedTouchableBox: host('AnimatedTouchableBox'),
     TouchableBox: host('TouchableBox'),
   }
 })
 jest.mock('~common/ui/Icon', () => ({ FeatherIcon: () => null }))
+jest.mock('react-native-reanimated', () => ({
+  LayoutAnimationConfig: ({ children }: React.PropsWithChildren) => children,
+}))
+jest.mock('~common/ui/motion', () => ({ colorTransition: {}, popIn: undefined }))
 jest.mock('../AudioButton', () => () => null)
 
 jest.mock('react-i18next', () => ({

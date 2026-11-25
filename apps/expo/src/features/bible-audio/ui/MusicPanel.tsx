@@ -1,12 +1,14 @@
 import { useAtomValue } from 'jotai/react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { LayoutAnimationConfig } from 'react-native-reanimated'
 import ContextualPanel from '~common/ContextualPanel'
 import type { PanelPlacement } from '~common/ContextualPanel/types'
-import Box, { HStack, TouchableBox } from '~common/ui/Box'
+import Box, { AnimatedBox, HStack, TouchableBox } from '~common/ui/Box'
 import { IonIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { twMerge } from '~common/ui/classNames'
+import { fadeIn, popIn } from '~common/ui/motion'
 import { colorWithOpacity } from '~themes/colorValues'
 import { useTheme } from '~themes/ThemeProvider'
 import { backgroundMusicStateAtom, bibleAudioMusicAtom, type BackgroundMusicVolume } from '../atoms'
@@ -18,41 +20,54 @@ const VOLUMES: BackgroundMusicVolume[] = ['low', 'medium', 'high']
 const DISC_SIZE = 150
 const DISC_INK = '#2b2340'
 
-/** Low, medium or high. */
+/** Low, medium or high, with the choice sliding from one to the other. */
 const VolumeChoice = () => {
   const { t } = useTranslation()
   const theme = useTheme()
   const music = useAtomValue(bibleAudioMusicAtom)
+  const selectedIndex = Math.max(0, VOLUMES.indexOf(music.volume))
   return (
-    <HStack
+    <Box
       className="rounded-full p-[3px]"
       style={{ backgroundColor: colorWithOpacity(theme.colors.default, 0.07) }}
-      accessibilityRole="radiogroup"
-      accessibilityLabel={t('bibleAudio.music.volume')}
     >
-      {VOLUMES.map(volume => {
-        const isSelected = music.volume === volume
-        return (
-          <TouchableBox
-            key={volume}
-            className="flex-[1] h-[32px] rounded-full items-center justify-center"
-            style={isSelected ? { backgroundColor: theme.colors.reverse } : undefined}
-            onPress={() => setMusicVolume(volume)}
-            accessibilityRole="radio"
-            accessibilityState={{ checked: isSelected }}
-          >
-            <Text
-              className={twMerge(
-                isSelected ? 'text-default font-semibold' : 'text-grey',
-                'text-[13px]'
-              )}
+      <HStack accessibilityRole="radiogroup" accessibilityLabel={t('bibleAudio.music.volume')}>
+        <AnimatedBox
+          pointerEvents="none"
+          importantForAccessibility="no-hide-descendants"
+          className="absolute top-[0px] bottom-[0px] rounded-full"
+          style={{
+            width: `${100 / VOLUMES.length}%`,
+            left: `${(100 / VOLUMES.length) * selectedIndex}%`,
+            backgroundColor: theme.colors.reverse,
+            transitionProperty: 'left',
+            transitionDuration: 240,
+            transitionTimingFunction: 'ease-out',
+          }}
+        />
+        {VOLUMES.map(volume => {
+          const isSelected = music.volume === volume
+          return (
+            <TouchableBox
+              key={volume}
+              className="flex-[1] h-[32px] rounded-full items-center justify-center"
+              onPress={() => setMusicVolume(volume)}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: isSelected }}
             >
-              {t(`bibleAudio.music.${volume}`)}
-            </Text>
-          </TouchableBox>
-        )
-      })}
-    </HStack>
+              <Text
+                className={twMerge(
+                  isSelected ? 'text-default font-semibold' : 'text-grey',
+                  'text-[13px]'
+                )}
+              >
+                {t(`bibleAudio.music.${volume}`)}
+              </Text>
+            </TouchableBox>
+          )
+        })}
+      </HStack>
+    </Box>
   )
 }
 
@@ -66,56 +81,64 @@ const MusicPlayerContent = () => {
   const isPlaying = state === 'playing'
 
   return (
-    <Box className="px-[16px] pb-[16px] items-center">
-      <TouchableBox
-        className="mt-[8px]"
-        onPress={toggleMusic}
-        accessibilityRole="button"
-        accessibilityLabel={t(isPlaying ? 'bibleAudio.music.pause' : 'bibleAudio.music.play')}
-      >
-        <MusicDisc id={current?.id} size={DISC_SIZE}>
-          <Box
-            className="w-[56px] h-[56px] rounded-full items-center justify-center"
-            style={{ backgroundColor: 'rgba(255,255,255,0.55)' }}
+    <LayoutAnimationConfig skipEntering>
+      <Box className="px-[16px] pb-[16px] items-center">
+        <TouchableBox
+          className="mt-[8px]"
+          onPress={toggleMusic}
+          accessibilityRole="button"
+          accessibilityLabel={t(isPlaying ? 'bibleAudio.music.pause' : 'bibleAudio.music.play')}
+        >
+          <MusicDisc id={current?.id} size={DISC_SIZE} isPlaying={isPlaying}>
+            <Box
+              className="w-[56px] h-[56px] rounded-full items-center justify-center"
+              style={{ backgroundColor: 'rgba(255,255,255,0.55)' }}
+            >
+              <AnimatedBox key={isPlaying ? 'pause' : 'play'} entering={popIn}>
+                <IonIcon
+                  name={isPlaying ? 'pause' : 'play'}
+                  size={26}
+                  // The orb is light in either theme: a dark ink reads on it.
+                  color={DISC_INK}
+                  style={isPlaying ? undefined : { marginLeft: 3 }}
+                />
+              </AnimatedBox>
+            </Box>
+          </MusicDisc>
+        </TouchableBox>
+        <HStack className="items-center self-stretch mt-[14px]">
+          <TouchableBox
+            className="w-[44px] h-[44px] items-center justify-center"
+            onPress={() => stepMusic(-1)}
+            accessibilityRole="button"
+            accessibilityLabel={t('bibleAudio.music.previous')}
           >
-            <IonIcon
-              name={isPlaying ? 'pause' : 'play'}
-              size={26}
-              // The disc is light in either theme: a dark ink reads on it.
-              color={DISC_INK}
-              style={isPlaying ? undefined : { marginLeft: 3 }}
-            />
+            <IonIcon name="play-skip-back-outline" size={22} color="default" />
+          </TouchableBox>
+          <Box className="flex-[1] items-center min-w-0">
+            <AnimatedBox key={current?.id} entering={fadeIn} className="max-w-full">
+              <Text className="text-[17px] font-bold" numberOfLines={1}>
+                {current ? getMusicName(current) : ''}
+              </Text>
+            </AnimatedBox>
+            <Text className="text-[13px] text-grey mt-[2px]">
+              {t('bibleAudio.music.panelTitle')}
+            </Text>
           </Box>
-        </MusicDisc>
-      </TouchableBox>
-      <HStack className="items-center self-stretch mt-[14px]">
-        <TouchableBox
-          className="w-[44px] h-[44px] items-center justify-center"
-          onPress={() => stepMusic(-1)}
-          accessibilityRole="button"
-          accessibilityLabel={t('bibleAudio.music.previous')}
-        >
-          <IonIcon name="play-skip-back-outline" size={22} color="default" />
-        </TouchableBox>
-        <Box className="flex-[1] items-center min-w-0">
-          <Text className="text-[17px] font-bold" numberOfLines={1}>
-            {current ? getMusicName(current) : ''}
-          </Text>
-          <Text className="text-[13px] text-grey mt-[2px]">{t('bibleAudio.music.panelTitle')}</Text>
+          <TouchableBox
+            className="w-[44px] h-[44px] items-center justify-center"
+            onPress={() => stepMusic(1)}
+            accessibilityRole="button"
+            accessibilityLabel={t('bibleAudio.music.next')}
+          >
+            <IonIcon name="play-skip-forward-outline" size={22} color="default" />
+          </TouchableBox>
+        </HStack>
+        <Box className="self-stretch mt-[16px]">
+          <VolumeChoice />
         </Box>
-        <TouchableBox
-          className="w-[44px] h-[44px] items-center justify-center"
-          onPress={() => stepMusic(1)}
-          accessibilityRole="button"
-          accessibilityLabel={t('bibleAudio.music.next')}
-        >
-          <IonIcon name="play-skip-forward-outline" size={22} color="default" />
-        </TouchableBox>
-      </HStack>
-      <Box className="self-stretch mt-[16px]">
-        <VolumeChoice />
       </Box>
-    </Box>
+    </LayoutAnimationConfig>
   )
 }
 

@@ -1,4 +1,5 @@
 import { Platform } from 'react-native'
+import { LayoutAnimationConfig } from 'react-native-reanimated'
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 import { colorWithOpacity, resolveThemeColor } from '~themes/colorValues'
 import { floatingShadow } from '~common/ui/surfaces'
@@ -13,7 +14,8 @@ import {
   chapterNavButtonStyle,
   chapterNavSideOffset,
 } from './chapterNavButton'
-import Box, { AnimatedHStack, AnimatedTouchableBox, TouchableBox } from '~common/ui/Box'
+import Box, { AnimatedBox, AnimatedHStack, AnimatedTouchableBox } from '~common/ui/Box'
+import { colorTransition, popIn } from '~common/ui/motion'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
@@ -84,7 +86,7 @@ const BasicFooter = ({
             },
             {
               transform: [{ translateY: fullScreenTranslateY }],
-              transitionProperty: 'transform',
+              transitionProperty: ['transform', 'bottom'],
               transitionDuration: 300,
             },
           ],
@@ -121,7 +123,7 @@ const BasicFooter = ({
             },
             {
               transform: [{ translateY: fullScreenTranslateY }],
-              transitionProperty: 'transform',
+              transitionProperty: ['transform', 'bottom'],
               transitionDuration: 300,
             },
           ],
@@ -173,12 +175,12 @@ const PlayableButtons = ({
         },
         {
           transform: [{ translateY: centerTranslateY }],
-          transitionProperty: 'transform',
+          transitionProperty: ['transform', 'bottom'],
           transitionDuration: 300,
         },
       ]}
     >
-      <TouchableBox
+      <AnimatedTouchableBox
         className="border-continuous overflow-visible items-center justify-center rounded-full relative"
         disabled={isDisabled}
         activeOpacity={0.5}
@@ -187,6 +189,7 @@ const PlayableButtons = ({
         accessibilityLabel={accessibilityLabel}
         accessibilityState={{ disabled: isDisabled, busy: isLoading }}
         style={{
+          ...colorTransition,
           width: MUSIC_BUTTON_SIZE,
           height: MUSIC_BUTTON_SIZE,
           opacity: isDisabled ? 0.6 : 1,
@@ -195,8 +198,16 @@ const PlayableButtons = ({
             : (colorWithOpacity(stylingTheme.colors.default, 0.06) ?? 'transparent'),
         }}
       >
-        <AudioButton isPlaying={isPlaying} isLoading={isLoading} error={hasError} type={type} />
-      </TouchableBox>
+        {/* The speaker turns white on blue with a small pop when the passage plays. */}
+        <LayoutAnimationConfig skipEntering>
+          <AnimatedBox
+            key={hasError ? 'error' : isPlaying && isLoading ? 'loading' : isPlaying ? 'on' : 'off'}
+            entering={popIn}
+          >
+            <AudioButton isPlaying={isPlaying} isLoading={isLoading} error={hasError} type={type} />
+          </AnimatedBox>
+        </LayoutAnimationConfig>
+      </AnimatedTouchableBox>
       <MusicButton />
     </AnimatedHStack>
   )

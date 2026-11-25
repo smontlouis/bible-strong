@@ -1,0 +1,83 @@
+/* The Web drawing of the Nebula Orb and the Chroma Ring, which Skia draws on a phone. */
+
+@keyframes bs-effect-spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes bs-orb-drift {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(180deg) scale(1.12);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg) scale(1);
+  }
+}
+
+.bs-orb {
+  position: relative;
+  overflow: hidden;
+  border-radius: 50%;
+  isolation: isolate;
+  transition: background-color 700ms ease-in-out;
+}
+
+.bs-orb-swirl {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  width: 150%;
+  height: 150%;
+  transform: translate(-50%, -50%);
+  animation: bs-orb-drift 14s linear infinite;
+}
+
+.bs-orb-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(var(--bs-orb-blur));
+  transition: background-color 700ms ease-in-out;
+}
+
+.bs-orb-light {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: -30%;
+  height: 75%;
+  border-radius: 50%;
+  filter: blur(var(--bs-orb-blur));
+  transition: background-color 700ms ease-in-out;
+}
+
+.bs-orb[data-paused='true'] .bs-orb-swirl,
+.bs-chroma[data-active='false'] .bs-chroma-spin {
+  animation-play-state: paused;
+}
+
+.bs-chroma {
+  position: relative;
+  overflow: hidden;
+  transition: opacity 300ms ease-out;
+}
+
+.bs-chroma-spin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 160%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  animation: bs-effect-spin 3.2s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bs-orb-swirl,
+  .bs-chroma-spin {
+    animation-play-state: paused;
+  }
+}

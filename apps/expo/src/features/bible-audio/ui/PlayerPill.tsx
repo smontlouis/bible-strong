@@ -1,8 +1,9 @@
 import type { ComponentProps } from 'react'
-import Box from '~common/ui/Box'
+import { AnimatedBox } from '~common/ui/Box'
 import { IonIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { twMerge } from '~common/ui/classNames'
+import { colorTransition } from '~common/ui/motion'
 import { colorWithOpacity } from '~themes/colorValues'
 import { useTheme } from '~themes/ThemeProvider'
 
@@ -20,9 +21,10 @@ type PlayerPillProps = {
 const PlayerPill = ({ icon, label, isActive }: PlayerPillProps) => {
   const theme = useTheme()
   return (
-    <Box
+    <AnimatedBox
       className="flex-row items-center h-[36px] pl-[12px] pr-[10px] rounded-full max-w-[220px]"
       style={{
+        ...colorTransition,
         backgroundColor: isActive
           ? (colorWithOpacity(theme.colors.primary, 0.14) ?? theme.colors.lightPrimary)
           : (colorWithOpacity(theme.colors.default, 0.07) ?? 'transparent'),
@@ -44,7 +46,7 @@ const PlayerPill = ({ icon, label, isActive }: PlayerPillProps) => {
         color={isActive ? 'primary' : 'grey'}
         style={{ marginLeft: 4 }}
       />
-    </Box>
+    </AnimatedBox>
   )
 }
 

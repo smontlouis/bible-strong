@@ -44,8 +44,10 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
         },
         {
           transform: [{ translateY: isFullScreenBible ? bottomBarHeight : 0 }],
-          transitionProperty: 'transform',
+          // The bar unfolds and folds as the small audio player comes and goes.
+          transitionProperty: ['transform', 'height'],
           transitionDuration: 300,
+          transitionTimingFunction: 'ease-out',
         },
       ]}
     >
@@ -53,7 +55,11 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
       <GestureDetector gesture={panGesture}>
         <AnimatedBox
           className="overflow-hidden border-continuous flex-row items-center justify-around px-[20px] absolute left-[0px] right-[0px] bottom-[0px]"
-          style={[{ top: miniPlayerHeight, paddingBottom: insets.bottom }, viewStyles]}
+          // The rows sit on the bar's foot at their own height, so it folds above them.
+          style={[
+            { height: TAB_ICON_SIZE + insets.bottom, paddingBottom: insets.bottom },
+            viewStyles,
+          ]}
           accessibilityElementsHidden={!isViewMode}
           importantForAccessibility={isViewMode ? 'auto' : 'no-hide-descendants'}
           key="view"
@@ -67,7 +73,10 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
       </GestureDetector>
       <AnimatedBox
         className="overflow-hidden border-continuous flex-row items-center justify-around px-[20px] absolute left-[0px] right-[0px] bottom-[0px]"
-        style={[{ top: miniPlayerHeight, paddingBottom: insets.bottom }, listStyles]}
+        style={[
+          { height: TAB_ICON_SIZE + insets.bottom, paddingBottom: insets.bottom },
+          listStyles,
+        ]}
         accessibilityElementsHidden={isViewMode}
         importantForAccessibility={isViewMode ? 'no-hide-descendants' : 'auto'}
         key="list"

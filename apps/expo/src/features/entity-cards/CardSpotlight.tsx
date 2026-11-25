@@ -29,6 +29,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { scheduleOnRN } from 'react-native-worklets'
 
 import { backgroundImage } from '~common/ui/backgroundImage'
+import ChromaRing from '~common/ui/effects/ChromaRing'
 import { FeatherIcon } from '~common/ui/Icon'
 
 import type { EntityCardView } from './cardCatalog'
@@ -480,20 +481,34 @@ export const CardSpotlight = ({
                 disabled={!ready}
                 onPress={collect}
                 style={({ pressed }) => ({
-                  minWidth: 200,
-                  alignItems: 'center',
-                  paddingHorizontal: 28,
-                  paddingVertical: 14,
                   borderRadius: 999,
-                  backgroundColor: '#f2c14e',
                   opacity: !ready ? 0.45 : pressed ? 0.8 : 1,
                   transform: [{ scale: pressed ? 0.97 : 1 }],
                   boxShadow: ready ? '0 6px 18px rgba(242, 193, 78, 0.35)' : undefined,
                 })}
               >
-                <Text style={{ color: '#2a1d05', fontSize: 17, fontWeight: '700' }}>
-                  {t('entityCards.collect')}
-                </Text>
+                {/* A light runs round the gold while the card waits to be taken. */}
+                <ChromaRing
+                  borderRadius={999}
+                  borderWidth={3}
+                  base="#8a6414"
+                  glow="#fffbe8"
+                  background="#f2c14e"
+                  active={ready}
+                >
+                  <View
+                    style={{
+                      minWidth: 195,
+                      alignItems: 'center',
+                      paddingHorizontal: 26,
+                      paddingVertical: 12,
+                    }}
+                  >
+                    <Text style={{ color: '#2a1d05', fontSize: 17, fontWeight: '700' }}>
+                      {t('entityCards.collect')}
+                    </Text>
+                  </View>
+                </ChromaRing>
               </Pressable>
               <Pressable accessibilityRole="button" onPress={() => leave()} style={{ padding: 10 }}>
                 <Text style={{ color: 'rgba(246, 239, 224, 0.7)', fontSize: 15 }}>

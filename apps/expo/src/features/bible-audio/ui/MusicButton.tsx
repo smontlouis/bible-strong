@@ -1,8 +1,10 @@
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
+import { LayoutAnimationConfig } from 'react-native-reanimated'
 import type { PanelPlacement } from '~common/ContextualPanel/types'
-import Box from '~common/ui/Box'
+import { AnimatedBox } from '~common/ui/Box'
 import { IonIcon } from '~common/ui/Icon'
+import { colorTransition, popIn } from '~common/ui/motion'
 import { colorWithOpacity } from '~themes/colorValues'
 import { useTheme } from '~themes/ThemeProvider'
 import { backgroundMusicStateAtom } from '../atoms'
@@ -30,9 +32,10 @@ const MusicButton = ({ size = MUSIC_BUTTON_SIZE, placement }: MusicButtonProps) 
     <MusicPanel
       placement={placement}
       trigger={
-        <Box
+        <AnimatedBox
           className="border-continuous items-center justify-center rounded-full"
           style={{
+            ...colorTransition,
             width: size,
             height: size,
             backgroundColor: isPlaying
@@ -41,12 +44,20 @@ const MusicButton = ({ size = MUSIC_BUTTON_SIZE, placement }: MusicButtonProps) 
           }}
           accessibilityLabel={t('bibleAudio.music.panelTitle')}
         >
-          {isPlaying ? (
-            <MusicEqualizer color={theme.colors.primary} size={Math.round(size * 0.36)} />
-          ) : (
-            <IonIcon name="musical-notes-outline" size={Math.round(size * 0.43)} color="default" />
-          )}
-        </Box>
+          <LayoutAnimationConfig skipEntering>
+            <AnimatedBox key={isPlaying ? 'playing' : 'idle'} entering={popIn}>
+              {isPlaying ? (
+                <MusicEqualizer color={theme.colors.primary} size={Math.round(size * 0.36)} />
+              ) : (
+                <IonIcon
+                  name="musical-notes-outline"
+                  size={Math.round(size * 0.43)}
+                  color="default"
+                />
+              )}
+            </AnimatedBox>
+          </LayoutAnimationConfig>
+        </AnimatedBox>
       }
     />
   )
