@@ -12,11 +12,14 @@ import {
 } from '~features/app-switcher/workspaceHeaderInset'
 import { windowDragRegion } from '~features/app-switcher/windowChrome'
 import useLogin from '~helpers/useLogin'
+import { colorWithOpacity } from '~themes/colorValues'
 import { useTheme } from '~themes/ThemeProvider'
 import MusicButton from '~features/bible-audio/ui/MusicButton'
 import HomeSearch from './HomeSearch'
 
 const AVATAR_SIZE = 44
+// A drawn avatar is square: it sits inside the circle with room around it.
+const DRAWN_AVATAR_SIZE = 28
 
 /**
  * Date, greeting with the first name, the background music and the avatar that opens the profile.
@@ -74,12 +77,22 @@ const HomeHeader = () => {
           <MusicButton size={AVATAR_SIZE} placement="bottom" />
           {isLogged && (
             <Link route="Profile" accessibilityLabel={t('workspace.profile')} size={AVATAR_SIZE}>
-              <UserAvatar
-                size={AVATAR_SIZE}
-                photoURL={user.photoURL}
-                displayName={user.displayName}
-                email={user.email}
-              />
+              {/* A circle like the music's beside it: a photo fills it, a drawn avatar sits in it. */}
+              <Box
+                className="border-continuous items-center justify-center rounded-full overflow-hidden"
+                style={{
+                  width: AVATAR_SIZE,
+                  height: AVATAR_SIZE,
+                  backgroundColor: colorWithOpacity(theme.colors.default, 0.06) ?? 'transparent',
+                }}
+              >
+                <UserAvatar
+                  size={user.photoURL ? AVATAR_SIZE : DRAWN_AVATAR_SIZE}
+                  photoURL={user.photoURL}
+                  displayName={user.displayName}
+                  email={user.email}
+                />
+              </Box>
             </Link>
           )}
         </Box>
