@@ -137,9 +137,15 @@ than being greyed.
   music, 6 to 45 % without): Trésor sonore avec musique, the KJV and BSB musical versions and Jordan
   Gilbert with music have it throughout; Trésor sonore has none in its 1,189 chapters; the NIV's
   ambience and WordPocket's are not music and take some.
-- **The player loops the music chosen under the voice**, of a recording or of the device alike, at
-  a low, medium or high volume, playing and pausing with the passage and flowing on from chapter to
-  chapter; a chapter that already has music gets none.
-- **Two pills above the transport**, as in Audibible: the microphone with the name of what is heard,
-  opening « Écouter avec », and the music, in the accent while a piece plays and hidden where the
-  chapter already has music. « Écouter avec » leaves the row of options below.
+- **The music is a player of its own, apart from the Bible audio**, as in HelloBible: the reader
+  plays it to read, pray or listen, from a note beside the play button of the reading footer
+  (bars that move while it plays), and pauses it by its own button; the Bible audio's pause leaves
+  it playing. Its panel shows the piece's disc to play and pause, the piece before and after, and a
+  low, medium or high volume. With no passage loaded, the small player shows the music alone; the
+  lock screen shows it then, and the Bible audio's player takes it back.
+- **It fades down under a voice**: when the Bible audio starts, recorded or read by the device, the
+  music fades in under a second to 45 % of its volume, and back up when the voice stops; under a
+  chapter that already has music it fades out. The sleep timer stops it with the voice.
+- **Two pills above the transport of the large player**, as in Audibible: the microphone with the
+  name of what is heard, opening « Écouter avec », and the music, in the accent while it plays,
+  opening the music's panel. « Écouter avec » leaves the row of options below.

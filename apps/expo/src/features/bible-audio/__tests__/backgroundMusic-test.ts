@@ -1,32 +1,31 @@
 import type { BibleAudioState } from '../types'
-import { getWantedMusicUrl } from '../backgroundMusic'
+import { getMusicTargetVolume, UNDER_VOICE } from '../backgroundMusic'
 
-jest.mock('expo-audio', () => ({ createAudioPlayer: jest.fn() }))
+jest.mock('expo-audio', () => ({ createAudioPlayer: jest.fn(), setAudioModeAsync: jest.fn() }))
 jest.mock('../audioCatalog', () => ({}))
 jest.mock('../atoms', () => ({}))
 
-const PIANO = 'https://media.example.org/piano.mp3'
-const state = (status: BibleAudioState['status']) =>
+const state = (status: BibleAudioState['status'], passage = true) =>
   ({
-    passage: { version: 'LSG', chapter: 1 },
+    passage: passage ? { version: 'LSG', chapter: 1 } : null,
     source: 'recorded',
     recordingId: 'r',
     status,
   }) as BibleAudioState
 
-describe('getWantedMusicUrl', () => {
-  it('plays the music chosen while the passage plays', () => {
-    expect(getWantedMusicUrl(state('playing'), PIANO, false, false)).toBe(PIANO)
-    expect(getWantedMusicUrl(state('paused'), PIANO, true, false)).toBeUndefined()
-    expect(getWantedMusicUrl(state('playing'), undefined, false, false)).toBeUndefined()
+describe('getMusicTargetVolume', () => {
+  it('plays the music at its own volume while no voice speaks', () => {
+    expect(getMusicTargetVolume(true, 0.6, state('idle', false), false)).toBe(0.6)
+    expect(getMusicTargetVolume(true, 0.6, state('paused'), false)).toBe(0.6)
   })
 
-  it('flows on while the next chapter loads, without starting on a load', () => {
-    expect(getWantedMusicUrl(state('loading'), PIANO, true, false)).toBe(PIANO)
-    expect(getWantedMusicUrl(state('loading'), PIANO, false, false)).toBeUndefined()
+  it('fades down under a voice, and out under a chapter that has music', () => {
+    expect(getMusicTargetVolume(true, 0.6, state('playing'), false)).toBeCloseTo(0.6 * UNDER_VOICE)
+    expect(getMusicTargetVolume(true, 0.6, state('loading'), false)).toBeCloseTo(0.6 * UNDER_VOICE)
+    expect(getMusicTargetVolume(true, 0.6, state('playing'), true)).toBe(0)
   })
 
-  it('adds nothing to a chapter that already has music', () => {
-    expect(getWantedMusicUrl(state('playing'), PIANO, true, true)).toBeUndefined()
+  it('stays silent while the reader has paused or closed it', () => {
+    expect(getMusicTargetVolume(false, 0.6, state('playing'), false)).toBe(0)
   })
 })

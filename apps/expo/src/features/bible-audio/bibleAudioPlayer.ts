@@ -22,7 +22,7 @@ import {
   type BibleAudioChoice,
   type BibleAudioRecording,
 } from './audioCatalog'
-import { watchBackgroundMusic } from './backgroundMusic'
+import { pauseMusic, watchBackgroundMusic } from './backgroundMusic'
 import { countBibleAudioListen } from './listenStats'
 import { createRecordedEngine } from './recordedEngine'
 import { getAdjacentLocation, getFirstCoveredLocation } from './recordingNavigation'
@@ -88,7 +88,11 @@ const watchSleepTimer = (isPlaying: boolean) => {
   if (!isPlaying) return
   sleepCheck = setInterval(() => {
     const sleepTime = store.get(audioSleepTimeAtom)
-    if (sleepTime && Date.now() >= sleepTime) pause()
+    if (sleepTime && Date.now() >= sleepTime) {
+      // Going to sleep, the reader wants silence: the music stops too.
+      pauseMusic()
+      pause()
+    }
   }, 1000)
 }
 

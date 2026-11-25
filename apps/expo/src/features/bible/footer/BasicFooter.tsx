@@ -18,6 +18,9 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import AudioButton from './AudioButton'
+import MusicFooterButton, {
+  MUSIC_FOOTER_BUTTON_SIZE,
+} from '~features/bible-audio/ui/MusicFooterButton'
 export interface BasicFooterProps {
   isParallel?: boolean
   onPlay: () => void
@@ -162,7 +165,7 @@ const PlayableButtons = ({
 
   return (
     <AnimatedHStack
-      className="border-continuous overflow-visible absolute self-center flex-row"
+      className="border-continuous overflow-visible absolute self-center flex-row items-center"
       style={[
         { bottom: 10 + bottomBarHeight },
         {
@@ -172,6 +175,7 @@ const PlayableButtons = ({
         },
       ]}
     >
+      <Box style={{ width: MUSIC_FOOTER_BUTTON_SIZE, marginRight: 12 }} pointerEvents="none" />
       <TouchableBox
         className="border-continuous overflow-visible items-center justify-center w-[50px] h-[50px] rounded-full relative"
         disabled={isDisabled}
@@ -196,6 +200,10 @@ const PlayableButtons = ({
       >
         <AudioButton isPlaying={isPlaying} isLoading={isLoading} error={hasError} type={type} />
       </TouchableBox>
+      {/* The music sits beside the play button; an empty twin on the other side keeps it centred. */}
+      <Box style={{ width: MUSIC_FOOTER_BUTTON_SIZE, marginLeft: 12 }}>
+        <MusicFooterButton />
+      </Box>
     </AnimatedHStack>
   )
 }

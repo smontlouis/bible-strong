@@ -32,11 +32,15 @@ suivent, ils ne le possèdent pas.
   depuis un livre qu'il ne couvre pas ouvre le premier chapitre qu'il couvre. Pour en ajouter un : éditer
   `packages/resource-catalog/src/bibleAudioCatalog.json`, puis `yarn resources:audio check` et
   `yarn resources:audio publish`.
-- **Pastilles et musique de fond.** Au-dessus du transport, comme dans Audibible : la voix (micro et
-  nom de ce qu'on écoute, ouvre « Écouter avec ») et la musique (`BackgroundMusicButton`), masquée
-  quand le chapitre a déjà de la musique (`music` d'un enregistrement). `backgroundMusic.ts` boucle
-  la musique choisie sous la voix et la met en pause avec elle ; les musiques viennent du catalogue
+- **Musique de fond.** Un lecteur à part (`backgroundMusic.ts`), comme dans HelloBible : la note à
+  côté du play du footer de lecture (`MusicFooterButton`, un égaliseur pendant la lecture) ouvre
+  `MusicPanel` (disque, précédent/suivant, volume) ; sa pause est la sienne. Quand la Bible parle,
+  la musique baisse en fondu à 45 % et remonte quand elle se tait ; sous un chapitre qui a déjà de
+  la musique (`music` d'un enregistrement), elle s'efface. Sans passage chargé, le petit lecteur la
+  montre seule (`MusicMiniPlayer`). Les musiques viennent du catalogue
   (`yarn resources:audio music generate|host`).
+- **Pastilles.** Au-dessus du transport du grand lecteur : la voix (micro et nom, ouvre « Écouter
+  avec ») et la musique (`BackgroundMusicButton`, ouvre `MusicPanel`).
 - **Mention de l'éditeur.** Un enregistrement peut porter une `attribution` (texte, lien, logo) que
   l'éditeur exige : `RecordingAttribution` l'affiche sous les options du grand lecteur, et l'écran de
   verrouillage la reprend. Chaque chapitre qui commence compte un événement `bible_audio_listen`

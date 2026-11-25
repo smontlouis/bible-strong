@@ -10,9 +10,10 @@ import Text from '~common/ui/Text'
 import { floatingShadow, radii } from '~common/ui/surfaces'
 import { getBiblePart, getBiblePartColors } from '~themes/bibleBookColors'
 import { useTheme } from '~themes/ThemeProvider'
-import { bibleAudioStateAtom } from '../atoms'
+import { backgroundMusicStateAtom, bibleAudioStateAtom } from '../atoms'
 import { openBibleAudioPlayer, stop, togglePlay } from '../bibleAudioPlayer'
 import BibleAudioCover from './BibleAudioCover'
+import MusicMiniPlayer from './MusicMiniPlayer'
 import { BibleAudioProgressLine } from './BibleAudioProgressBar'
 import { useBibleAudioLabels } from './useBibleAudioLabels'
 import { MINI_PLAYER_HEIGHT } from './useBibleAudioMiniPlayerHeight'
@@ -28,6 +29,7 @@ type BibleAudioMiniPlayerProps = {
 const BibleAudioMiniPlayer = ({ variant, className }: BibleAudioMiniPlayerProps) => {
   const { t } = useTranslation()
   const { passage, status } = useAtomValue(bibleAudioStateAtom)
+  const musicState = useAtomValue(backgroundMusicStateAtom)
   const { title, subtitle } = useBibleAudioLabels()
   const theme = useTheme()
 
@@ -41,7 +43,16 @@ const BibleAudioMiniPlayer = ({ variant, className }: BibleAudioMiniPlayerProps)
       if (event.translationY < -24 || event.velocityY < -400) runOnJS(openBibleAudioPlayer)()
     })
 
-  if (!passage) return null
+  // With no passage loaded, the row shows the background music if the reader plays some.
+  if (!passage) {
+    if (musicState === 'off') return null
+    if (variant === 'bar') return <MusicMiniPlayer variant="bar" />
+    return (
+      <Box className={className} style={{ borderRadius: radii.card, ...floatingShadow }}>
+        <MusicMiniPlayer variant="card" />
+      </Box>
+    )
+  }
 
   const partColors = getBiblePartColors(getBiblePart(passage.book.Numero), theme)
   const isPlaying = status === 'playing'

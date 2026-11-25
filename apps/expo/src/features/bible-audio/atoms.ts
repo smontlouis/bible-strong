@@ -44,8 +44,14 @@ export const audioSleepMinutesAtom = atom('off')
 
 export type BackgroundMusicVolume = 'low' | 'medium' | 'high'
 
-/** The background music the reader chose, by its id in the catalog, or none, and how loud. */
+/** The background music the reader chose last, by its id in the catalog, and how loud. */
 export const bibleAudioMusicAtom = atomWithAsyncStorage<{
   id: string | null
   volume: BackgroundMusicVolume
 }>('bibleAudioMusic', { id: null, volume: 'medium' })
+
+/**
+ * The background music's own state, apart from the Bible audio's: `off` until the reader plays it
+ * and after they close it, then `playing` or `paused` by its own button.
+ */
+export const backgroundMusicStateAtom = atom<'off' | 'playing' | 'paused'>('off')
