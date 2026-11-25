@@ -1,4 +1,4 @@
-import { Easing, FadeIn, Keyframe } from 'react-native-reanimated'
+import { Easing, FadeIn, FadeOut, Keyframe } from 'react-native-reanimated'
 
 /**
  * Short motions of the controls (design system: about 180 ms, ease-out). Reanimated leaves them
@@ -20,3 +20,9 @@ export const colorTransition = {
   transitionDuration: 220,
   transitionTimingFunction: 'ease-out',
 } as const
+
+/** A label that leaves, before the next one fades in. */
+export const fadeOut = FadeOut.duration(160)
+
+/** A label that fades in where another has just left. */
+export const fadeInAfter = FadeIn.duration(220).delay(120)

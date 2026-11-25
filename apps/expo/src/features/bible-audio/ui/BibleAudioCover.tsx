@@ -2,11 +2,12 @@ import { getChapterPlace, getChapterScene } from '@bible-strong/resource-domain/
 import { Image } from 'expo-image'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useAtomValue } from 'jotai/react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet } from 'react-native'
-import Box, { AnimatedBox } from '~common/ui/Box'
-import { colorTransition } from '~common/ui/motion'
-import Swap from '~common/ui/Swap'
+import { FadeIn, FadeOut } from 'react-native-reanimated'
+import Box, { AnimatedBox, FadingBox } from '~common/ui/Box'
+import { colorTransition, fadeInAfter, fadeOut } from '~common/ui/motion'
 import Text from '~common/ui/Text'
 import { radii } from '~common/ui/surfaces'
 import { getEntityPortraitUri } from '~features/lexique/entityPortraits'
@@ -27,10 +28,6 @@ type BibleAudioCoverProps = {
   size: number
 }
 
-// Where a leaving title and a leaving number stay while they fade.
-const TOP_ANCHOR = { left: 0, top: 0, right: 0 }
-const NUMBER_ANCHOR = { right: 0, bottom: 0 }
-
 const getNameSize = (name: string) => (name.length > 12 ? 32 : name.length > 9 ? 38 : 44)
 const getNumberSize = (chapter: number) => (chapter >= 100 ? 160 : chapter >= 10 ? 210 : 250)
 
@@ -50,13 +47,13 @@ const PlacePainting = ({
 }) => (
   <>
     <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={300} />
-    <AnimatedBox
+    <Box
       className="absolute inset-0"
-      style={{ ...colorTransition, backgroundColor: colors.accent, mixBlendMode: 'color' }}
+      style={{ backgroundColor: colors.accent, mixBlendMode: 'color' }}
     />
-    <AnimatedBox
+    <Box
       className="absolute inset-0"
-      style={{ ...colorTransition, backgroundColor: colors.ground, opacity: dark ? 0.35 : 0.42 }}
+      style={{ backgroundColor: colors.ground, opacity: dark ? 0.35 : 0.42 }}
     />
     <LinearGradient
       pointerEvents="none"
@@ -88,6 +85,16 @@ const useChapterPainting = (passage: BibleAudioPassage, wanted: boolean) => {
   return undefined
 }
 
+/** Whether the passage moved forward (1) or back (-1) in the Bible since the last one. */
+const useChapterDirection = (passage: BibleAudioPassage) => {
+  const order = passage.book.Numero * 1000 + passage.chapter
+  const [last, setLast] = useState({ order, direction: 1 as 1 | -1 })
+  if (last.order === order) return last.direction
+  const direction = order > last.order ? 1 : -1
+  setLast({ order, direction })
+  return direction
+}
+
 /**
  * The cover of the passage heard: the name of the book and a large chapter number, cropped by the
  * edge, in the colours of the book's part of the Bible, over the painting of the chapter's scene
@@ -103,8 +110,7 @@ const BibleAudioCover = ({ passage, size }: BibleAudioCoverProps) => {
   const numberSize = getNumberSize(passage.chapter) * scale * (isThumbnail ? 1.15 : 1)
   const name = t(passage.book.Nom)
   const painting = useChapterPainting(passage, !isThumbnail)
-  // The passage's place in the Bible: a later one comes up from below, an earlier one from above.
-  const order = passage.book.Numero * 1000 + passage.chapter
+  const direction = useChapterDirection(passage)
 
   return (
     <AnimatedBox
@@ -112,7 +118,6 @@ const BibleAudioCover = ({ passage, size }: BibleAudioCoverProps) => {
       style={{
         // Another part of the Bible: the ground passes to its colour.
         ...colorTransition,
-        transitionDuration: 340,
         width: size,
         height: size,
         backgroundColor: colors.ground,
@@ -121,21 +126,26 @@ const BibleAudioCover = ({ passage, size }: BibleAudioCoverProps) => {
       accessible={false}
       importantForAccessibility="no-hide-descendants"
     >
-      {/* A painting fades in and out as a chapter has one or none; from one painting to the next,
-          the image keeps the last one until the new one has loaded, and crossfades. */}
-      <Swap
-        id={painting ? 'painting' : 'none'}
-        order={0}
-        distance={0}
-        style={StyleSheet.absoluteFill}
-        anchor={StyleSheet.absoluteFill}
-      >
-        {!!painting && <PlacePainting uri={painting} colors={colors} dark={isDarkTheme(theme)} />}
-      </Swap>
+      {/* A painting fades in or out as a chapter has one or none; from one to the next, the image
+          crossfades by itself. */}
+      {!!painting && (
+        <AnimatedBox
+          style={StyleSheet.absoluteFill}
+          entering={FadeIn.duration(300)}
+          exiting={FadeOut.duration(300)}
+        >
+          <PlacePainting uri={painting} colors={colors} dark={isDarkTheme(theme)} />
+        </AnimatedBox>
+      )}
       {!isThumbnail && (
         <Box className="absolute" style={{ left: 24 * scale, top: 24 * scale, right: 24 * scale }}>
           {size >= 200 && (
-            <Swap id={part} order={order} distance={6 * scale} anchor={TOP_ANCHOR}>
+            <FadingBox
+              keyProp={part}
+              entering={fadeInAfter}
+              exiting={fadeOut}
+              animateLayout={false}
+            >
               <Text
                 className="uppercase"
                 style={{
@@ -149,58 +159,53 @@ const BibleAudioCover = ({ passage, size }: BibleAudioCoverProps) => {
               >
                 {t(`bibleAudio.part.${part}`)}
               </Text>
-            </Swap>
+            </FadingBox>
           )}
-          <Box style={{ marginTop: size >= 200 ? 8 * scale : 0 }}>
-            <Swap
-              id={String(passage.book.Numero)}
-              order={order}
-              distance={10 * scale}
-              anchor={TOP_ANCHOR}
+          <FadingBox
+            keyProp={String(passage.book.Numero)}
+            entering={fadeInAfter}
+            exiting={fadeOut}
+            animateLayout={false}
+          >
+            <Text
+              numberOfLines={2}
+              style={{
+                color: colors.ink,
+                fontSize: getNameSize(name) * scale,
+                lineHeight: getNameSize(name) * scale * 1.05,
+                letterSpacing: -getNameSize(name) * scale * 0.02,
+                fontWeight: '800',
+                marginTop: size >= 200 ? 8 * scale : 0,
+              }}
             >
-              <Text
-                numberOfLines={2}
-                style={{
-                  color: colors.ink,
-                  fontSize: getNameSize(name) * scale,
-                  lineHeight: getNameSize(name) * scale * 1.05,
-                  letterSpacing: -getNameSize(name) * scale * 0.02,
-                  fontWeight: '800',
-                }}
-              >
-                {name}
-              </Text>
-            </Swap>
-          </Box>
+              {name}
+            </Text>
+          </FadingBox>
         </Box>
       )}
-      {/* The number turns like a counter: up to the next chapter, down to the one before. */}
-      <Box
+      {/* The number turns a little, up to the next chapter and down to the one before. */}
+      <FadingBox
+        keyProp={`${passage.book.Numero}-${passage.chapter}`}
+        direction={direction === 1 ? 'top' : 'bottom'}
+        animateLayout={false}
         className="absolute"
         style={{ right: (isThumbnail ? -2 : -8) * scale, bottom: -numberSize * 0.2 }}
       >
-        <Swap
-          id={`${passage.book.Numero}-${passage.chapter}`}
-          order={order}
-          distance={numberSize * 0.45}
-          anchor={NUMBER_ANCHOR}
+        <Text
+          numberOfLines={1}
+          style={{
+            // Over a painting, the number takes the ink, which the painting's hue would swallow.
+            color: painting ? colors.ink : colors.accent,
+            fontSize: numberSize,
+            lineHeight: numberSize,
+            letterSpacing: -numberSize * 0.05,
+            fontWeight: '800',
+            includeFontPadding: false,
+          }}
         >
-          <Text
-            numberOfLines={1}
-            style={{
-              // Over a painting, the number takes the ink, which the painting's hue would swallow.
-              color: painting ? colors.ink : colors.accent,
-              fontSize: numberSize,
-              lineHeight: numberSize,
-              letterSpacing: -numberSize * 0.05,
-              fontWeight: '800',
-              includeFontPadding: false,
-            }}
-          >
-            {passage.chapter}
-          </Text>
-        </Swap>
-      </Box>
+          {passage.chapter}
+        </Text>
+      </FadingBox>
       {size >= 200 && (
         <Text
           className="absolute"
