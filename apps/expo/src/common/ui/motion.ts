@@ -1,4 +1,4 @@
-import { Easing, FadeIn, FadeOut, Keyframe, withTiming } from 'react-native-reanimated'
+import { Easing, FadeIn, FadeOut, Keyframe } from 'react-native-reanimated'
 
 /**
  * Short motions of the controls (design system: about 180 ms, ease-out). Reanimated leaves them
@@ -24,20 +24,5 @@ export const colorTransition = {
 /** A label that leaves, before the next one fades in. */
 export const fadeOut = FadeOut.duration(160)
 
-// FadingBox's slide of 5 points, with no wait for the leaving one.
-const turnIn = (from: number) => () => {
-  'worklet'
-  return {
-    initialValues: { opacity: 0, transform: [{ translateY: from }] },
-    animations: {
-      opacity: withTiming(1, { duration: 200 }),
-      transform: [{ translateY: withTiming(0, { duration: 200 }) }],
-    },
-  }
-}
-
-/** A number that turns up into place, as the one before leaves. */
-export const turnUpIn = turnIn(5)
-
-/** A number that turns down into place. */
-export const turnDownIn = turnIn(-5)
+/** A label that fades in where another has just left. */
+export const fadeInAfter = FadeIn.duration(220).delay(120)
