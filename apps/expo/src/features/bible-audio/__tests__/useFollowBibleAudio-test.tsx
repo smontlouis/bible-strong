@@ -92,6 +92,46 @@ describe('useFollowBibleAudio', () => {
     expect(goToChapter).not.toHaveBeenCalled()
   })
 
+  it('follows again when the reader comes back to the passage heard', () => {
+    const goToChapter = jest.fn()
+    setAudioPassage(genesis, 3)
+    let renderer: ReturnType<typeof create>
+    act(() => {
+      renderer = create(<Reader book={genesis} chapter={3} goToChapter={goToChapter} />)
+    })
+    act(() => {
+      renderer.update(<Reader book={exodus} chapter={1} goToChapter={goToChapter} />)
+    })
+    expect(store.get(bibleAudioFollowingTabIdAtom)).toBe('')
+
+    act(() => {
+      renderer.update(<Reader book={genesis} chapter={3} goToChapter={goToChapter} />)
+    })
+    expect(store.get(bibleAudioFollowingTabIdAtom)).toBe('tab-1')
+
+    setAudioPassage(genesis, 4)
+    expect(goToChapter).toHaveBeenCalledWith({ book: genesis, chapter: 4 })
+    act(() => renderer.unmount())
+  })
+
+  it('does not follow by coming back in another version', () => {
+    const goToChapter = jest.fn()
+    setAudioPassage(genesis, 3)
+    let renderer: ReturnType<typeof create>
+    act(() => {
+      renderer = create(<Reader book={genesis} chapter={3} goToChapter={goToChapter} />)
+    })
+    act(() => {
+      renderer.update(<Reader book={exodus} chapter={1} goToChapter={goToChapter} />)
+    })
+    act(() => {
+      renderer.update(<Reader book={genesis} chapter={3} version="KJV" goToChapter={goToChapter} />)
+    })
+
+    expect(store.get(bibleAudioFollowingTabIdAtom)).toBe('')
+    act(() => renderer.unmount())
+  })
+
   it('stays with the audio when its own page turn brings it along', () => {
     const goToChapter = jest.fn()
     setAudioPassage(genesis, 3)

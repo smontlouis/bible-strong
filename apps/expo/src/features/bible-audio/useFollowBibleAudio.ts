@@ -18,7 +18,8 @@ type FollowBibleAudioParams = {
 
 /**
  * The soft link between a Bible tab and the audio player. The following tab turns its pages with
- * the audio; as soon as its reader goes to another passage, it lets go and the audio plays on.
+ * the audio; as soon as its reader goes to another passage, it lets go and the audio plays on, and
+ * a tab whose reader comes back to the passage heard follows it again.
  */
 export const useFollowBibleAudio = ({
   tabId,
@@ -55,14 +56,15 @@ export const useFollowBibleAudio = ({
     follow()
   }, [isFollowing, passage?.version, passage?.book.Numero, passage?.chapter])
 
-  // The reader moved: unless it went where the audio is, the page lets go.
+  // The reader moved: going elsewhere, the page lets go; coming back to what plays, it follows again.
   const lastLocation = useRef<string | null>(null)
   const checkReaderMove = useEffectEvent((location: string) => {
     const previous = lastLocation.current
     lastLocation.current = location
-    if (previous === null || previous === location || !isFollowing || !passage) return
+    if (previous === null || previous === location || !enabled || !passage) return
     const audioLocation = `${passage.version}:${passage.book.Numero}:${passage.chapter}`
     if (location !== audioLocation) letGo()
+    else if (!isFollowing) setFollowingTabId(tabId)
   })
 
   useEffect(() => {
