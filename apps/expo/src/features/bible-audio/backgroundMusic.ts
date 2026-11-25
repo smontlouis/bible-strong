@@ -58,6 +58,10 @@ let ownsLockScreen = false
 let audioModeSet = false
 // Set while this module pauses the player itself, so that its status is not taken for the lock screen's.
 let pausingOnPurpose = false
+// A new piece stops the player for a moment while it loads: that stop is not the reader's either.
+let switchingUntil = 0
+const SWITCH_GRACE_MS = 2000
+let wasPlaying = false
 
 const pausePlayer = () => {
   if (!player?.playing) return
@@ -92,7 +96,10 @@ const ensurePlayer = () => {
   player.volume = 0
   // A pause from the lock screen or the control centre pauses the music for the reader too.
   player.addListener('playbackStatusUpdate', status => {
-    if (pausingOnPurpose || !status.isLoaded || status.playing || status.isBuffering) return
+    const stopped = wasPlaying && !status.playing
+    wasPlaying = status.playing
+    if (!stopped || pausingOnPurpose || Date.now() < switchingUntil) return
+    if (!status.isLoaded || status.isBuffering) return
     if (store.get(backgroundMusicStateAtom) === 'playing' && currentVolume > 0)
       store.set(backgroundMusicStateAtom, 'paused')
   })
@@ -120,6 +127,7 @@ const sync = () => {
       })
     }
     if (loadedUrl !== piece.url) {
+      switchingUntil = Date.now() + SWITCH_GRACE_MS
       musicPlayer.replace({ uri: piece.url })
       loadedUrl = piece.url
       // A new source starts at full volume on the web: it takes the fade's.
@@ -181,19 +189,16 @@ export const toggleMusic = () =>
 /** Stops the music and hides it from the small player. */
 export const closeMusic = () => store.set(backgroundMusicStateAtom, 'off')
 
-/** Plays a piece of the catalog. */
-export const chooseMusic = (id: string) => {
-  store.set(bibleAudioMusicAtom, { ...store.get(bibleAudioMusicAtom), id })
-  playMusic()
-}
-
-/** The piece before or after in the catalog, round the list. */
+/**
+ * The piece before or after in the catalog, round the list. Playing music goes on with it; paused
+ * music only takes it, for the next play.
+ */
 export const stepMusic = (direction: -1 | 1) => {
   const pieces = store.get(bibleAudioCatalogAtom).music ?? []
   if (!pieces.length) return
   const index = pieces.findIndex(piece => piece.id === store.get(bibleAudioMusicAtom).id)
   const next = pieces[(index + direction + pieces.length) % pieces.length]!
-  chooseMusic(next.id)
+  store.set(bibleAudioMusicAtom, { ...store.get(bibleAudioMusicAtom), id: next.id })
 }
 
 export const setMusicVolume = (volume: BackgroundMusicVolume) =>
