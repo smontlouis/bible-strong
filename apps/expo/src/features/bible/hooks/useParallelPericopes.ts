@@ -6,24 +6,21 @@ import { localQueryOptions } from '~helpers/queryOptions'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { useStableValue } from '~helpers/useStableList'
 import type { ParallelVerse, PericopeChapter } from '../BibleDOM/BibleDOMWrapper'
+import { getVersesPericopeChapter } from '../chapterPericope'
 
 const isCanonicalParallel = (parallel: ParallelVerse) =>
   parallel.verses.some(verse => verse.TextRevision)
 
 /**
- * The section headings of every parallel version, for the displayed chapter: canonical
+ * The section headings of every parallel version, for the chapter its verses come from: canonical
  * chapters carry them, legacy versions have a pericope file.
  */
 export const useParallelPericopes = ({
   parallelVerses,
-  book,
-  chapter,
   enabled,
   resources,
 }: {
   parallelVerses: ParallelVerse[]
-  book: number
-  chapter: number
   enabled: boolean
   resources: ResourceAccessRegistry
 }): Record<string, PericopeChapter | undefined> => {
@@ -46,7 +43,7 @@ export const useParallelPericopes = ({
     const pericope: Pericope | null | undefined = isCanonicalParallel(parallel)
       ? getCanonicalChapterPericope(parallel.verses)
       : legacyPericopes[legacyIndex]?.data
-    return [parallel.id, pericope?.[book]?.[chapter]] as const
+    return [parallel.id, getVersesPericopeChapter(pericope, parallel.verses)] as const
   })
 
   return useStableValue(Object.fromEntries(pericopes), JSON.stringify(pericopes))

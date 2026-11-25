@@ -43,7 +43,7 @@ import {
 import { useFocusVerseStudy } from './focusStudy/useFocusVerseStudy'
 import { type SheetRef } from '~common/sheet'
 import type { Bookmark } from '~common/types'
-import { BibleResource, Pericope, SelectedCode, Verse, VerseIds } from '~common/types'
+import { BibleResource, SelectedCode, Verse, VerseIds } from '~common/types'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import BookmarkModal from '~features/bookmarks/BookmarkModal'
 import { useOpenNote } from '~features/notes/useOpenNote'
@@ -147,6 +147,7 @@ import {
 } from './chapterEntityQueryPlan'
 import { useAnnotationMode, type AnnotationType } from './hooks'
 import { useParallelPericopes } from './hooks/useParallelPericopes'
+import { getVersesPericopeChapter } from './chapterPericope'
 import { useParallelRedWords } from './hooks/useParallelRedWords'
 import { useStableList, useStableValue } from '~helpers/useStableList'
 import ResourcesModal from '~features/bible/resources/ResourceModal'
@@ -192,14 +193,6 @@ const EMPTY_PASSAGE_MEDIA = {
   afterVerses: {},
   chapterResources: [],
 } satisfies ReturnType<typeof getPassageMediaForChapter>
-
-const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: number) => {
-  if (pericope && pericope[book] && pericope[book][chapter]) {
-    return pericope[book][chapter]
-  }
-
-  return {}
-}
 
 const EMPTY_VERSES: Verse[] = []
 
@@ -559,8 +552,6 @@ const BibleViewer = ({
   const redWords = usesCanonicalPresentation ? null : (redWordsQuery.data ?? null)
   const parallelPericopeChapters = useParallelPericopes({
     parallelVerses,
-    book: book.Numero,
-    chapter,
     enabled: extrasEnabled,
     resources,
   })
@@ -1566,7 +1557,7 @@ const BibleViewer = ({
     settings,
     verseToScroll: verse,
     verseNavigationRequest,
-    pericopeChapter: getPericopeChapter(pericope, displayedBook, displayedChapter),
+    pericopeChapter: getVersesPericopeChapter(pericope, verses),
     parallelPericopeChapters,
     passageMedia,
     selectedCode,

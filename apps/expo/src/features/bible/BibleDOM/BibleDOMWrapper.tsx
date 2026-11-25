@@ -24,6 +24,7 @@ import {
   VersionCode,
 } from 'src/state/tabs'
 import BibleDOMComponent from './BibleDOMComponent'
+import { useStabilizedChapterContent } from './stabilizedChapterContent'
 import {
   sortVersesToTags,
   getAnnotationNotesInfo,
@@ -136,24 +137,6 @@ const decodePageSignal = (value: unknown): ReaderPageSignal | undefined => {
     default:
       return undefined
   }
-}
-
-/**
- * Prevents rapid empty→loaded prop updates on the Expo DOM bridge.
- * Skips updates when loading with no verses, so the DOM component
- * only receives the real data once it's ready. The parallel versions travel
- * with the verses they sit next to: the reader never pairs a chapter with
- * the columns of another.
- */
-function useStabilizedVerses(verses: Verse[], parallelVerses: ParallelVerse[], isLoading: boolean) {
-  const [stable, setStable] = useState({ verses, parallelVerses })
-
-  useEffect(() => {
-    if (isLoading && verses.length === 0) return
-    setStable({ verses, parallelVerses })
-  }, [verses, parallelVerses, isLoading])
-
-  return stable
 }
 
 const DOM_WEBVIEW_BACKGROUND_COLOR = 'transparent'
@@ -407,9 +390,13 @@ export const BibleDOMWrapper = ({
         }
       : undefined
 
-  const { verses: stableVerses, parallelVerses: stableParallelVerses } = useStabilizedVerses(
-    verses,
-    parallelVerses,
+  const {
+    verses: stableVerses,
+    parallelVerses: stableParallelVerses,
+    pericopeChapter: stablePericopeChapter,
+    parallelPericopeChapters: stableParallelPericopeChapters,
+  } = useStabilizedChapterContent(
+    { verses, parallelVerses, pericopeChapter, parallelPericopeChapters },
     isLoading
   )
 
@@ -670,7 +657,7 @@ export const BibleDOMWrapper = ({
         contextDisplayMode={contextDisplayMode}
         version={version}
         interlinearMode={interlinearMode}
-        pericopeChapter={pericopeChapter}
+        pericopeChapter={stablePericopeChapter}
         passageMedia={passageMedia}
         book={book}
         chapter={chapter}
@@ -694,7 +681,7 @@ export const BibleDOMWrapper = ({
         versesWithNonHighlightTags={versesWithNonHighlightTags}
         redWords={redWords}
         parallelRedWords={parallelRedWords}
-        parallelPericopeChapters={parallelPericopeChapters}
+        parallelPericopeChapters={stableParallelPericopeChapters}
         inlineCommentaries={inlineCommentaries}
         chapterEntities={chapterEntities}
         chapterEntitiesLoaded={chapterEntitiesLoaded}
