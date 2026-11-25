@@ -22,6 +22,7 @@ import {
   type BibleAudioChoice,
   type BibleAudioRecording,
 } from './audioCatalog'
+import { watchBackgroundMusic } from './backgroundMusic'
 import { countBibleAudioListen } from './listenStats'
 import { createRecordedEngine } from './recordedEngine'
 import { getAdjacentLocation, getFirstCoveredLocation } from './recordingNavigation'
@@ -147,6 +148,7 @@ const load = async (
   options: { play: boolean; choice?: BibleAudioChoice }
 ) => {
   const token = ++loadToken
+  watchBackgroundMusic()
   const { source, recording } = resolveBibleAudio(passage, options.choice)
   const engine = getEngine(source)
   // A recording that moves to another chapter of its book plays on without a pause.

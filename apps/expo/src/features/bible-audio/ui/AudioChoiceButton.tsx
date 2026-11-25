@@ -21,7 +21,7 @@ import books from '~assets/bible_versions/books-desc'
 import { chooseBibleAudio } from '../bibleAudioPlayer'
 import { getRecordingCoverage } from '../recordingCoverage'
 import type { BibleAudioPassage } from '../types'
-import PlayerOption from './PlayerOption'
+import PlayerPill from './PlayerPill'
 
 type IconName = ComponentProps<typeof IonIcon>['name']
 
@@ -161,20 +161,10 @@ const AudioChoiceButton = ({ passage }: AudioChoiceButtonProps) => {
       accessibilityLabel={`${t('bibleAudio.listenWith')}: ${currentLabel}`}
       initialScreen="choice"
       width={340}
-      // The option sits at the bottom of the player: the web popover opens above it.
+      // The pill sits low in the player: the web popover opens above it.
       placement="top start"
-      trigger={
-        <PlayerOption
-          isActive={recordings.length > 1 || isSpeech}
-          icon={
-            isSpeech
-              ? 'chatbubble-ellipses-outline'
-              : current
-                ? getRecordingIcon(current)
-                : 'mic-outline'
-          }
-        />
-      }
+      // The same pill whatever is heard: it names it, and opens the choice.
+      trigger={<PlayerPill icon="mic-outline" label={currentLabel} />}
       screens={{
         choice: {
           title: t('bibleAudio.listenWith'),

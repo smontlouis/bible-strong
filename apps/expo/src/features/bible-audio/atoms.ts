@@ -41,3 +41,11 @@ export const ttsRepeatAtom = atomWithAsyncStorage('ttsRepeat', false)
 /** When the sleep timer stops playback, in milliseconds since the epoch; 0 when off. */
 export const audioSleepTimeAtom = atom(0)
 export const audioSleepMinutesAtom = atom('off')
+
+export type BackgroundMusicVolume = 'low' | 'medium' | 'high'
+
+/** The background music the reader chose, by its id in the catalog, or none, and how loud. */
+export const bibleAudioMusicAtom = atomWithAsyncStorage<{
+  id: string | null
+  volume: BackgroundMusicVolume
+}>('bibleAudioMusic', { id: null, volume: 'medium' })

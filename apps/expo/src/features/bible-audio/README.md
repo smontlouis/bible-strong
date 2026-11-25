@@ -32,6 +32,11 @@ suivent, ils ne le possèdent pas.
   depuis un livre qu'il ne couvre pas ouvre le premier chapitre qu'il couvre. Pour en ajouter un : éditer
   `packages/resource-catalog/src/bibleAudioCatalog.json`, puis `yarn resources:audio check` et
   `yarn resources:audio publish`.
+- **Pastilles et musique de fond.** Au-dessus du transport, comme dans Audibible : la voix (micro et
+  nom de ce qu'on écoute, ouvre « Écouter avec ») et la musique (`BackgroundMusicButton`), masquée
+  quand le chapitre a déjà de la musique (`music` d'un enregistrement). `backgroundMusic.ts` boucle
+  la musique choisie sous la voix et la met en pause avec elle ; les musiques viennent du catalogue
+  (`yarn resources:audio music generate|host`).
 - **Mention de l'éditeur.** Un enregistrement peut porter une `attribution` (texte, lien, logo) que
   l'éditeur exige : `RecordingAttribution` l'affiche sous les options du grand lecteur, et l'écran de
   verrouillage la reprend. Chaque chapitre qui commence compte un événement `bible_audio_listen`

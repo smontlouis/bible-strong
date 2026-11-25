@@ -122,3 +122,24 @@ after, and the next one at the end of a chapter, stay among its books: Proverbs 
 John 1, and playback stops after John 21. Choosing it in « Écouter avec » from a book it skips
 opens the first chapter of the first book it covers (Proverbs 1); its row shows an arrow rather
 than being greyed.
+
+## Amendment (2026-11-25): background music, and the pills above the transport
+
+- **The catalog lists background music** under `music`: an id, a name in French and English, and
+  the address of a seamless loop on the media host (`bible-audio/music/<id>-<take>.mp3`, immutable).
+  `yarn resources:audio music generate` composes the pieces of
+  `apps/resource-studio/config/bible-audio-music.json` with ElevenLabs Music (instrumental, cleared
+  for commercial use on a paid plan), fades their last six seconds into their first, and evens
+  their loudness at -23 LUFS; `music host` puts them on the media host once listened to. Six pieces
+  on 2026-11-25: soft piano, strings, ambient pad, acoustic guitar, harp, soft organ.
+- **A recording says where it already has music**: `music: "all"`, or the `book:chapter` keys of
+  the chapters that have some. Measured by the share of silence between sentences (under 3 % with
+  music, 6 to 45 % without): Trésor sonore avec musique, the KJV and BSB musical versions and Jordan
+  Gilbert with music have it throughout; Trésor sonore has none in its 1,189 chapters; the NIV's
+  ambience and WordPocket's are not music and take some.
+- **The player loops the music chosen under the voice**, of a recording or of the device alike, at
+  a low, medium or high volume, playing and pausing with the passage and flowing on from chapter to
+  chapter; a chapter that already has music gets none.
+- **Two pills above the transport**, as in Audibible: the microphone with the name of what is heard,
+  opening « Écouter avec », and the music, in the accent while a piece plays and hidden where the
+  chapter already has music. « Écouter avec » leaves the row of options below.

@@ -31,6 +31,7 @@ import AudioChoiceButton from './AudioChoiceButton'
 import AudioRepeatButton from './AudioRepeatButton'
 import AudioSleepButton from './AudioSleepButton'
 import AudioSpeedButton from './AudioSpeedButton'
+import BackgroundMusicButton from './BackgroundMusicButton'
 import BibleAudioCover from './BibleAudioCover'
 import BibleAudioProgressBar from './BibleAudioProgressBar'
 import TTSPitchButton from './TTSPitchButton'
@@ -295,14 +296,13 @@ const Transport = ({ passage, scale = 1 }: TransportProps) => {
   )
 }
 
-/** The large options: what the version is heard with, its speed and settings, repeat, the timer. */
+/** The large options: the speed and settings of what is heard, repeat, the timer. */
 const Options = ({ passage }: { passage: BibleAudioPassage }) => {
   const { source } = useAtomValue(bibleAudioStateAtom)
   const isSpeech = source === 'speech'
 
   return (
     <HStack className="items-center justify-around">
-      <AudioChoiceButton passage={passage} />
       {isSpeech ? (
         <>
           <TTSSpeedButton />
@@ -320,6 +320,14 @@ const Options = ({ passage }: { passage: BibleAudioPassage }) => {
     </HStack>
   )
 }
+
+/** As in Audibible, above the transport: what the passage is heard with, and its music. */
+const ListeningPills = ({ passage }: { passage: BibleAudioPassage }) => (
+  <HStack className="items-center justify-center gap-[8px] flex-wrap">
+    <AudioChoiceButton passage={passage} />
+    <BackgroundMusicButton />
+  </HStack>
+)
 
 const ErrorLine = () => {
   const { t } = useTranslation()
@@ -417,6 +425,9 @@ const BibleAudioPlayerContent = ({ layout }: BibleAudioPlayerContentProps) => {
           <BibleAudioProgressBar color={colors.accent} />
         </Box>
         <ErrorLine />
+        <Box className="mt-[10px]">
+          <ListeningPills passage={passage} />
+        </Box>
         <Box className="mt-[4px]">
           <Transport passage={passage} scale={0.85} />
         </Box>
@@ -461,7 +472,10 @@ const BibleAudioPlayerContent = ({ layout }: BibleAudioPlayerContentProps) => {
         <BibleAudioProgressBar color={colors.accent} />
       </Box>
       <ErrorLine />
-      <Box className="mt-[10px]">
+      <Box className="mt-[12px]">
+        <ListeningPills passage={passage} />
+      </Box>
+      <Box className="mt-[8px]">
         <Transport passage={passage} />
       </Box>
       <Box className="mt-[14px]">

@@ -20,6 +20,7 @@
     },
     {
       "id": "lsg-tresorsonore-music",
+      "music": "all",
       "version": "LSG",
       "name": { "fr": "Trésor sonore, avec musique", "en": "Trésor sonore, with music" },
       "kind": "reading",
@@ -234,6 +235,7 @@
     },
     {
       "id": "kjv-musical",
+      "music": "all",
       "version": "KJV",
       "name": {
         "fr": "Version musicale",
@@ -747,6 +749,7 @@
     },
     {
       "id": "bsb-gilbert-music",
+      "music": "all",
       "version": "BSB",
       "name": {
         "fr": "Jordan Gilbert, avec musique",
@@ -1166,6 +1169,7 @@
     },
     {
       "id": "bsb-musical",
+      "music": "all",
       "version": "BSB",
       "name": {
         "fr": "Version musicale",
@@ -1246,6 +1250,38 @@
           "url": "https://openbible.com/audio/bsb_musical/BSB_{book:2}_{bookCode}_{chapter:3}_M.mp3"
         }
       ]
+    }
+  ],
+  "music": [
+    {
+      "id": "piano",
+      "name": { "fr": "Piano doux", "en": "Soft piano" },
+      "url": "https://media.bible-strong.app/bible-audio/music/piano-v1.mp3"
+    },
+    {
+      "id": "strings",
+      "name": { "fr": "Cordes", "en": "Strings" },
+      "url": "https://media.bible-strong.app/bible-audio/music/strings-v1.mp3"
+    },
+    {
+      "id": "ambient",
+      "name": { "fr": "Nappe ambiante", "en": "Ambient pad" },
+      "url": "https://media.bible-strong.app/bible-audio/music/ambient-v1.mp3"
+    },
+    {
+      "id": "guitar",
+      "name": { "fr": "Guitare acoustique", "en": "Acoustic guitar" },
+      "url": "https://media.bible-strong.app/bible-audio/music/guitar-v1.mp3"
+    },
+    {
+      "id": "harp",
+      "name": { "fr": "Harpe", "en": "Harp" },
+      "url": "https://media.bible-strong.app/bible-audio/music/harp-v1.mp3"
+    },
+    {
+      "id": "organ",
+      "name": { "fr": "Orgue léger", "en": "Soft organ" },
+      "url": "https://media.bible-strong.app/bible-audio/music/organ-v1.mp3"
     }
   ],
   "places": {

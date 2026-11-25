@@ -36,6 +36,19 @@ export type BibleAudioRecording = {
   credit?: string
   /** What the publisher asks to be shown with every chapter heard. */
   attribution?: BibleAudioAttribution
+  /**
+   * Music already heard under the voice: in every chapter (`all`), or in the chapters listed by
+   * `book:chapter`. The player offers no music of its own there.
+   */
+  music?: 'all' | string[]
+}
+
+/** A piece of background music the player loops under the voice, hosted on the media host. */
+export type BibleAudioMusic = {
+  /** Durable: the player remembers a reader's choice by it. */
+  id: string
+  name: Record<BibleAudioLanguage, string>
+  url: string
 }
 
 /**
@@ -61,9 +74,12 @@ export type BibleAudioCatalog = {
    * whose painting the media host holds (ADR-0096). It comes before the place.
    */
   scenes?: Record<string, string>
+  /** The background music the player offers, in the order shown. */
+  music?: BibleAudioMusic[]
 }
 
 const ID_PATTERN = /^[a-z0-9][a-z0-9-]{1,63}$/
+const CHAPTER_KEY_PATTERN = /^\d{1,3}:\d{1,3}$/
 const TOKEN_PATTERN = /\{(book|chapter|testament|testamentBook|bookCode)(?::(\d))?\}/g
 const FIRST_NEW_TESTAMENT_BOOK = 40
 const LAST_NEW_TESTAMENT_BOOK = 66
@@ -103,6 +119,20 @@ const parseAttribution = (value: unknown): BibleAudioAttribution | undefined => 
   return { label, url: value.url, ...(value.logo ? { logo: value.logo } : {}) }
 }
 
+const parseMusicMark = (value: unknown): 'all' | string[] | undefined => {
+  if (value === 'all') return 'all'
+  if (!Array.isArray(value) || !value.every(key => typeof key === 'string')) return undefined
+  return value.every(key => CHAPTER_KEY_PATTERN.test(key)) ? (value as string[]) : undefined
+}
+
+const parseMusic = (value: unknown): BibleAudioMusic | undefined => {
+  if (!isRecord(value) || typeof value.id !== 'string' || !ID_PATTERN.test(value.id))
+    return undefined
+  const name = parseName(value.name)
+  if (!name || !isHttpsAddress(value.url)) return undefined
+  return { id: value.id, name, url: value.url }
+}
+
 const parseRecording = (value: unknown): BibleAudioRecording | undefined => {
   if (!isRecord(value)) return undefined
   const { id, version, kind, books, bookCodes, credit } = value
@@ -119,6 +149,8 @@ const parseRecording = (value: unknown): BibleAudioRecording | undefined => {
     (!Array.isArray(bookCodes) || !bookCodes.every(code => typeof code === 'string'))
   )
     return undefined
+  const music = parseMusicMark(value.music)
+  if (value.music !== undefined && !music) return undefined
   // A publisher's condition the app cannot show leaves the recording out rather than unmentioned.
   const attribution =
     value.attribution === undefined ? undefined : parseAttribution(value.attribution)
@@ -137,10 +169,9 @@ const parseRecording = (value: unknown): BibleAudioRecording | undefined => {
     ...(bookCodes ? { bookCodes: bookCodes as string[] } : {}),
     ...(typeof credit === 'string' && credit.trim() ? { credit } : {}),
     ...(attribution ? { attribution } : {}),
+    ...(music ? { music } : {}),
   }
 }
-
-const CHAPTER_KEY_PATTERN = /^\d{1,3}:\d{1,3}$/
 
 const parseChapterMap = (
   value: unknown,
@@ -182,17 +213,30 @@ export const parseBibleAudioCatalog = (value: unknown): BibleAudioCatalog | unde
   })
   const places = parseChapterMap(value.places, name => name.includes('@'))
   const scenes = parseChapterMap(value.scenes, name => SCENE_SLUG_PATTERN.test(name))
+  const seenMusic = new Set<string>()
+  const music = (Array.isArray(value.music) ? value.music : []).flatMap(entry => {
+    const piece = parseMusic(entry)
+    if (!piece || seenMusic.has(piece.id)) return []
+    seenMusic.add(piece.id)
+    return [piece]
+  })
   return {
     version: 1,
     recordings,
     ...(places ? { places } : {}),
     ...(scenes ? { scenes } : {}),
+    ...(music.length ? { music } : {}),
   }
 }
 
 /** The recordings of a version, in the catalog's order. */
 export const getVersionRecordings = (catalog: BibleAudioCatalog, version: string) =>
   catalog.recordings.filter(recording => recording.version === version)
+
+/** Whether a chapter of a recording already has music under the voice. */
+export const chapterHasMusic = (recording: BibleAudioRecording, book: number, chapter: number) =>
+  recording.music === 'all' ||
+  (recording.music?.includes(getBibleAudioChapterKey(book, chapter)) ?? false)
 
 export const recordingCoversBook = (recording: BibleAudioRecording, book: number) =>
   !recording.books || recording.books.includes(book)

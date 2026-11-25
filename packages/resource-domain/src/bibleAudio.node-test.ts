@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
 import {
+  chapterHasMusic,
   getBibleAudioUrl,
   getChapterPlace,
   getChapterScene,
@@ -75,6 +76,42 @@ describe('attribution', () => {
       ],
     })
     assert.deepEqual(catalog?.recordings, [])
+  })
+})
+
+describe('music', () => {
+  it('reads the music of a recording, in all its chapters or some', () => {
+    const catalog = parseBibleAudioCatalog({
+      version: 1,
+      recordings: [
+        recording({ id: 'musical', music: 'all' }),
+        recording({ id: 'mixed', music: ['40:3', '41:1'] }),
+        { ...recording({ id: 'bad-mark' }), music: ['Matthew 3'] },
+      ],
+    })
+    const [musical, mixed] = catalog?.recordings ?? []
+    assert.deepEqual(
+      catalog?.recordings.map(entry => entry.id),
+      ['musical', 'mixed']
+    )
+    assert.equal(chapterHasMusic(musical!, 1, 1), true)
+    assert.equal(chapterHasMusic(mixed!, 40, 3), true)
+    assert.equal(chapterHasMusic(mixed!, 40, 4), false)
+    assert.equal(chapterHasMusic(recording(), 40, 3), false)
+  })
+
+  it('keeps the well-formed background music, once each', () => {
+    const piano = {
+      id: 'piano',
+      name: { fr: 'Piano', en: 'Piano' },
+      url: 'https://media.example.org/piano.mp3',
+    }
+    const catalog = parseBibleAudioCatalog({
+      version: 1,
+      recordings: [],
+      music: [piano, { ...piano, name: { fr: 'Autre', en: 'Other' } }, { ...piano, id: 'x', url: 'http://a' }],
+    })
+    assert.deepEqual(catalog?.music, [piano])
   })
 })
 

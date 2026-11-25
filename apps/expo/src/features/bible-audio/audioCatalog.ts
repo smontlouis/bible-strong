@@ -1,9 +1,11 @@
 import {
+  chapterHasMusic,
   getBibleAudioUrl,
   getVersionRecordings,
   parseBibleAudioCatalog,
   recordingCoversBook,
   type BibleAudioCatalog,
+  type BibleAudioMusic,
   type BibleAudioRecording,
 } from '@bible-strong/resource-domain/bible-audio'
 import {
@@ -111,6 +113,24 @@ export const getRecordingUrl = (recording: BibleAudioRecording, book: number, ch
   getBibleAudioUrl(recording, book, chapter)
 
 export { recordingCoversBook }
+
+export type { BibleAudioMusic }
+
+/** The background music the catalog offers, in its order. */
+export const useBackgroundMusicList = () => useAtomValue(bibleAudioCatalogAtom).music ?? []
+
+export const getBackgroundMusic = (id: string | null | undefined) =>
+  id ? store.get(bibleAudioCatalogAtom).music?.find(piece => piece.id === id) : undefined
+
+/** A piece's name in the reader's language. */
+export const getMusicName = (piece: BibleAudioMusic) =>
+  piece.name[getLanguage() === 'fr' ? 'fr' : 'en']
+
+/** Whether the chapter heard already has music under the voice, where the player adds none. */
+export const passageHasMusic = (
+  passage: BibleAudioPassage,
+  recording: BibleAudioRecording | undefined
+) => !!recording && chapterHasMusic(recording, passage.book.Numero, passage.chapter)
 
 export type ResolvedBibleAudio =
   | { source: 'recorded'; recording: BibleAudioRecording }

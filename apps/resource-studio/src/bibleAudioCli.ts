@@ -18,6 +18,12 @@ import {
   type TimelineScene
 } from "./bibleAudioPlaces.js";
 import {
+  generateMusic,
+  hostMusic,
+  musicKey,
+  type MusicConfig
+} from "./bibleAudioMusic.js";
+import {
   hostedTemplate,
   planHostedChapters,
   type HostedRecordingConfig
@@ -63,6 +69,10 @@ const FIRST_CATALOG_ONLY_FILE = path.join(
   "config/bible-audio-first-catalog-only.json"
 );
 const MEDIA_ORIGIN = "https://media.bible-strong.app";
+const MUSIC_CONFIG_FILE = path.join(
+  STUDIO_DIR,
+  "config/bible-audio-music.json"
+);
 const PORTRAIT_CATALOG_URL =
   "https://media.bible-strong.app/entity-images/catalog.json";
 const PAINTING_CATALOG_URL =
@@ -93,6 +103,12 @@ const USAGE = `Usage:
       doubled chapter, then puts the chapters and the publisher's logo in the bucket. A ledger in
       <folder> lets an interrupted upload resume. The publisher's download link stays out of the
       repository.
+  yarn resources:audio music generate --out <folder> [--only <id>]
+      Composes with ElevenLabs (ELEVENLABS_API_KEY) each piece of config/bible-audio-music.json
+      not composed yet in <folder>, then turns it into a seamless loop at an even loudness.
+  yarn resources:audio music host --from <folder> [--bucket <name>] [--dry-run]
+      Refuses a piece the catalog does not name at its address, then puts the loops in the
+      bucket.
   yarn resources:audio publish [--bucket <name>] [--dry-run]
       Checks, then puts the file at ${CATALOG_KEY} in ${BUCKET} through the operator's wrangler
       session, and at ${FIRST_CATALOG_KEY} without the recordings that ask for a mention but with
@@ -317,6 +333,49 @@ const host = async (args: string[]) => {
   console.log(`Put ${pending.length} chapters under ${config.prefix}.`);
 };
 
+const flag = (args: string[], name: string) => {
+  const index = args.indexOf(name);
+  return index >= 0 ? args[index + 1] : undefined;
+};
+
+const music = async (args: string[]) => {
+  const [action] = args;
+  const config = JSON.parse(
+    await readFile(MUSIC_CONFIG_FILE, "utf8")
+  ) as MusicConfig;
+  if (action === "generate") {
+    const folder = flag(args, "--out");
+    if (!folder) throw new Error(USAGE);
+    return generateMusic(config, folder, flag(args, "--only"));
+  }
+  if (action === "host") {
+    const folder = flag(args, "--from");
+    const bucket = flag(args, "--bucket") ?? BUCKET;
+    if (!folder) throw new Error(USAGE);
+    const catalog = parseBibleAudioCatalog(
+      JSON.parse(await readFile(CATALOG_FILE, "utf8"))
+    );
+    const unnamed = config.pieces.filter(
+      (piece) =>
+        catalog?.music?.find((entry) => entry.id === piece.id)?.url !==
+        `${MEDIA_ORIGIN}/${musicKey(config, piece.id)}`
+    );
+    if (unnamed.length)
+      throw new Error(
+        `BIBLE_AUDIO_MUSIC_CATALOG: the catalog must name ${unnamed.map((piece) => piece.id).join(", ")} at their addresses.`
+      );
+    await hostMusic(
+      config,
+      folder,
+      bucket,
+      MEDIA_ORIGIN,
+      args.includes("--dry-run")
+    );
+    return;
+  }
+  throw new Error(USAGE);
+};
+
 const publish = async (args: string[]) => {
   const bucketFlag = args.indexOf("--bucket");
   const bucket = bucketFlag >= 0 ? args[bucketFlag + 1] : BUCKET;
@@ -383,6 +442,7 @@ const main = async () => {
   }
   if (command === "covers") return buildCovers();
   if (command === "host") return host(args);
+  if (command === "music") return music(args);
   if (command === "publish") return publish(args);
   console.log(USAGE);
 };

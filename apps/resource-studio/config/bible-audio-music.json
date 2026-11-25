@@ -1,0 +1,42 @@
+{
+  "prefix": "bible-audio/music",
+  "take": "v1",
+  "pieces": [
+    {
+      "id": "piano",
+      "name": { "fr": "Piano doux", "en": "Soft piano" },
+      "lengthMs": 150000,
+      "prompt": "Warm, peaceful and comforting solo piano, like a gentle hymn played softly at home. Bright major harmonies only, in C major, simple consonant chords (I, IV, V, vi) with a tender singing melody, slow around 70 BPM. Serene, hopeful and reassuring: no suspense, no tension, no minor or dissonant chords, no dramatic or cinematic mood. Even and calm from start to finish with no build-up or ending. Quiet background for listening to the Bible being read aloud. No drums, no vocals."
+    },
+    {
+      "id": "strings",
+      "name": { "fr": "Cordes", "en": "Strings" },
+      "lengthMs": 150000,
+      "prompt": "Gentle string ensemble, warm cellos and violas holding long slow chords with soft violin lines, hopeful and reverent, around 60 BPM, in G major. Even dynamics from start to finish with no big swell or ending. Quiet background for listening to the Bible being read aloud. No percussion, no vocals."
+    },
+    {
+      "id": "ambient",
+      "name": { "fr": "Nappe ambiante", "en": "Ambient pad" },
+      "lengthMs": 150000,
+      "prompt": "Calm ambient pad, soft slowly evolving warm synth textures, airy and peaceful, in C major, like a quiet place of prayer. No beat, no lead melody, no sudden changes, steady from start to finish. Very quiet background for listening to the Bible being read aloud. No vocals."
+    },
+    {
+      "id": "guitar",
+      "name": { "fr": "Guitare acoustique", "en": "Acoustic guitar" },
+      "lengthMs": 150000,
+      "prompt": "Fingerpicked acoustic guitar, soft and intimate, slow around 70 BPM, in E major, warm hymn-like folk feel. Steady gentle pattern from start to finish with no build-up or ending. Quiet background for listening to the Bible being read aloud. No drums, no vocals."
+    },
+    {
+      "id": "harp",
+      "name": { "fr": "Harpe", "en": "Harp" },
+      "lengthMs": 150000,
+      "prompt": "Gentle harp arpeggios with a soft wooden flute, peaceful and pastoral with a faint ancient Middle Eastern colour, slow around 64 BPM, in F major. Even and calm from start to finish with no build-up or ending. Quiet background for listening to the Bible being read aloud. No drums, no vocals."
+    },
+    {
+      "id": "organ",
+      "name": { "fr": "Orgue léger", "en": "Soft organ" },
+      "lengthMs": 150000,
+      "prompt": "Soft warm pipe organ playing slow hymn-like chords on quiet flute stops, reverent and peaceful, around 60 BPM, in B flat major. Even dynamics from start to finish with no big climax or ending. Quiet background for listening to the Bible being read aloud. No percussion, no choir, no vocals."
+    }
+  ]
+}
