@@ -1,10 +1,10 @@
 import React from 'react'
 import { act, create } from 'react-test-renderer'
 import BasicFooter from '../BasicFooter'
-jest.mock('~features/bible-audio/ui/MusicFooterButton', () => ({
+jest.mock('~features/bible-audio/ui/MusicButton', () => ({
   __esModule: true,
   default: () => null,
-  FOOTER_CIRCLE_SIZE: 44,
+  MUSIC_BUTTON_SIZE: 44,
 }))
 jest.mock('~themes/ThemeProvider', () => ({
   useTheme: () => jest.requireActual('../../../../../test/themeFixture').themeFixture,

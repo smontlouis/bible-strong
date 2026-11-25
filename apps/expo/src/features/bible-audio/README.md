@@ -32,8 +32,9 @@ suivent, ils ne le possèdent pas.
   depuis un livre qu'il ne couvre pas ouvre le premier chapitre qu'il couvre. Pour en ajouter un : éditer
   `packages/resource-catalog/src/bibleAudioCatalog.json`, puis `yarn resources:audio check` et
   `yarn resources:audio publish`.
-- **Musique de fond.** Un lecteur à part (`backgroundMusic.ts`), comme dans HelloBible : la note à
-  côté du play du footer de lecture (`MusicFooterButton`, un égaliseur pendant la lecture) ouvre
+- **Musique de fond.** Un lecteur à part (`backgroundMusic.ts`), comme dans HelloBible : la note de
+  `MusicButton` (un égaliseur pendant la lecture), dans le bloc audio du footer de lecture et dans
+  l'en-tête de l'accueil, ouvre
   `MusicPanel` (disque, précédent/suivant, volume) ; sa pause est la sienne. Quand la Bible parle,
   la musique baisse en fondu à 45 % et remonte quand elle se tait ; sous un chapitre qui a déjà de
   la musique (`music` d'un enregistrement), elle s'efface. Sans passage chargé, le petit lecteur la

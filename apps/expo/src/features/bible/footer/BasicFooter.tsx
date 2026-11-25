@@ -18,7 +18,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import AudioButton from './AudioButton'
-import MusicFooterButton, { FOOTER_CIRCLE_SIZE } from '~features/bible-audio/ui/MusicFooterButton'
+import MusicButton, { MUSIC_BUTTON_SIZE } from '~features/bible-audio/ui/MusicButton'
 export interface BasicFooterProps {
   isParallel?: boolean
   onPlay: () => void
@@ -187,8 +187,8 @@ const PlayableButtons = ({
         accessibilityLabel={accessibilityLabel}
         accessibilityState={{ disabled: isDisabled, busy: isLoading }}
         style={{
-          width: FOOTER_CIRCLE_SIZE,
-          height: FOOTER_CIRCLE_SIZE,
+          width: MUSIC_BUTTON_SIZE,
+          height: MUSIC_BUTTON_SIZE,
           opacity: isDisabled ? 0.6 : 1,
           backgroundColor: isPlaying
             ? resolveThemeColor(stylingTheme, 'primary')
@@ -197,7 +197,7 @@ const PlayableButtons = ({
       >
         <AudioButton isPlaying={isPlaying} isLoading={isLoading} error={hasError} type={type} />
       </TouchableBox>
-      <MusicFooterButton />
+      <MusicButton />
     </AnimatedHStack>
   )
 }

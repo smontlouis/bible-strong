@@ -13,14 +13,15 @@ import {
 import { windowDragRegion } from '~features/app-switcher/windowChrome'
 import useLogin from '~helpers/useLogin'
 import { useTheme } from '~themes/ThemeProvider'
+import MusicButton from '~features/bible-audio/ui/MusicButton'
 import HomeSearch from './HomeSearch'
 
 const AVATAR_SIZE = 44
 
 /**
- * Date, greeting with the first name, and the avatar that opens the profile. The wide Web home
- * already shows the account in its sidebar, so the search takes the avatar's place and wraps
- * below the greeting when the column is narrow.
+ * Date, greeting with the first name, the background music and the avatar that opens the profile.
+ * The wide Web home already shows the account in its sidebar, so the search takes the avatar's
+ * place and wraps below the greeting when the column is narrow.
  */
 const HomeHeader = () => {
   const { t, i18n } = useTranslation()
@@ -58,20 +59,30 @@ const HomeHeader = () => {
         </Text>
       </Box>
       {search ? (
-        <Box style={{ flexGrow: 1, flexBasis: 340, maxWidth: '100%' }}>
-          <HomeSearch />
+        <Box
+          className="flex-row items-center gap-[10px]"
+          style={{ flexGrow: 1, flexBasis: 340, maxWidth: '100%' }}
+        >
+          <Box className="flex-[1] min-w-0">
+            <HomeSearch />
+          </Box>
+          <MusicButton placement="bottom" />
         </Box>
       ) : (
-        isLogged && (
-          <Link route="Profile" accessibilityLabel={t('workspace.profile')} size={AVATAR_SIZE}>
-            <UserAvatar
-              size={AVATAR_SIZE}
-              photoURL={user.photoURL}
-              displayName={user.displayName}
-              email={user.email}
-            />
-          </Link>
-        )
+        <Box className="flex-row items-center gap-[10px]">
+          {/* The background music plays anywhere: the home is where a reader starts it. */}
+          <MusicButton size={AVATAR_SIZE} placement="bottom" />
+          {isLogged && (
+            <Link route="Profile" accessibilityLabel={t('workspace.profile')} size={AVATAR_SIZE}>
+              <UserAvatar
+                size={AVATAR_SIZE}
+                photoURL={user.photoURL}
+                displayName={user.displayName}
+                email={user.email}
+              />
+            </Link>
+          )}
+        </Box>
       )}
     </Box>
   )
