@@ -6,7 +6,7 @@ import {
   bibleAudioSourceTabIdAtom,
   bibleAudioStateAtom,
 } from '~features/bible-audio/atoms'
-import { listenToPassage, pause, play } from '~features/bible-audio/bibleAudioPlayer'
+import { listenToPassage, openBibleAudioPlayer, play } from '~features/bible-audio/bibleAudioPlayer'
 import { isSamePassage } from '~features/bible-audio/samePassage'
 import {
   bibleAudioCatalogAtom,
@@ -38,7 +38,8 @@ type BibleFooterProps = {
 
 /**
  * The reader's footer: the previous and next chapter, and the way into the audio player, which
- * plays the passage shown. The player belongs to the app, not to the tab (ADR-0116).
+ * plays the passage shown, or opens on it once it is the one heard. The player belongs to the app,
+ * not to the tab (ADR-0116).
  */
 const BibleFooter = ({
   bibleAtom,
@@ -87,16 +88,14 @@ const BibleFooter = ({
       listenToPassage(shown, { tabId })
       return
     }
-    if (isPlaying || isLoading) {
-      pause()
-      return
-    }
-    // Playing the passage shown again ties the tab back to the audio.
+    // The passage shown is the one heard: the button opens the player, which holds its controls,
+    // and ties the tab back to the audio; a paused passage plays again.
     if (tabId) {
       store.set(bibleAudioSourceTabIdAtom, tabId)
       store.set(bibleAudioFollowingTabIdAtom, tabId)
     }
-    void play()
+    if (!isPlaying && !isLoading) void play()
+    openBibleAudioPlayer()
   }
 
   return (

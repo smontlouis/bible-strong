@@ -1,13 +1,15 @@
 import React from 'react'
 import { act, create } from 'react-test-renderer'
-import { atom } from 'jotai/vanilla'
+import { atom, getDefaultStore } from 'jotai/vanilla'
 
 import type { BibleTab } from '~state/tabs'
+import { bibleAudioStateAtom } from '~features/bible-audio/atoms'
 import BibleFooter from '../BibleFooter'
 
 const mockListenToPassage = jest.fn()
 const mockPause = jest.fn()
 const mockPlay = jest.fn()
+const mockOpenPlayer = jest.fn()
 let mockIsCurrentTab = false
 
 jest.mock('~helpers/atomWithAsyncStorage', () => {
@@ -42,6 +44,7 @@ jest.mock('~features/bible-audio/bibleAudioPlayer', () => ({
   listenToPassage: (...args: unknown[]) => mockListenToPassage(...args),
   pause: () => mockPause(),
   play: () => mockPlay(),
+  openBibleAudioPlayer: () => mockOpenPlayer(),
 }))
 
 jest.mock('../BasicFooter', () => {
@@ -78,6 +81,12 @@ describe('BibleFooter', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockIsCurrentTab = false
+    getDefaultStore().set(bibleAudioStateAtom, {
+      passage: null,
+      source: 'recorded',
+      recordingId: null,
+      status: 'idle',
+    })
   })
 
   it('listens to the chapter of a page opened over the app, without a tab to follow it', () => {
@@ -105,6 +114,44 @@ describe('BibleFooter', () => {
       { version: 'LSG', book, chapter: 2 },
       { tabId: 'bible-tab' }
     )
+  })
+
+  it('opens the player on the passage heard, without pausing it', () => {
+    mockIsCurrentTab = true
+    getDefaultStore().set(bibleAudioStateAtom, {
+      passage: { version: 'LSG', book, chapter: 2 },
+      source: 'recorded',
+      recordingId: 'lsg-tresorsonore',
+      status: 'playing',
+    })
+    const footer = renderFooter({ isInTab: true }).root.find(
+      node => String(node.type) === 'BasicFooter'
+    )
+
+    act(() => footer.props.onPlay())
+
+    expect(mockOpenPlayer).toHaveBeenCalled()
+    expect(mockPause).not.toHaveBeenCalled()
+    expect(mockPlay).not.toHaveBeenCalled()
+    expect(mockListenToPassage).not.toHaveBeenCalled()
+  })
+
+  it('plays the passage heard again when it is paused, and opens the player', () => {
+    mockIsCurrentTab = true
+    getDefaultStore().set(bibleAudioStateAtom, {
+      passage: { version: 'LSG', book, chapter: 2 },
+      source: 'recorded',
+      recordingId: 'lsg-tresorsonore',
+      status: 'paused',
+    })
+    const footer = renderFooter({ isInTab: true }).root.find(
+      node => String(node.type) === 'BasicFooter'
+    )
+
+    act(() => footer.props.onPlay())
+
+    expect(mockPlay).toHaveBeenCalled()
+    expect(mockOpenPlayer).toHaveBeenCalled()
   })
 
   it('draws nothing in a tab that is not the current one', () => {

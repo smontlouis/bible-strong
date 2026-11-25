@@ -4,7 +4,7 @@ import BasicFooter from '../BasicFooter'
 jest.mock('~features/bible-audio/ui/MusicFooterButton', () => ({
   __esModule: true,
   default: () => null,
-  MUSIC_FOOTER_BUTTON_SIZE: 40,
+  FOOTER_CIRCLE_SIZE: 44,
 }))
 jest.mock('~themes/ThemeProvider', () => ({
   useTheme: () => jest.requireActual('../../../../../test/themeFixture').themeFixture,

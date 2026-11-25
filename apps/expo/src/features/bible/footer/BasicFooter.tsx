@@ -1,6 +1,6 @@
 import { Platform } from 'react-native'
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
-import { resolveThemeColor } from '~themes/colorValues'
+import { colorWithOpacity, resolveThemeColor } from '~themes/colorValues'
 import { floatingShadow } from '~common/ui/surfaces'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { useAtomValue } from 'jotai/react'
@@ -18,9 +18,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { HEADER_HEIGHT } from '~features/app-switcher/utils/constants'
 import AudioButton from './AudioButton'
-import MusicFooterButton, {
-  MUSIC_FOOTER_BUTTON_SIZE,
-} from '~features/bible-audio/ui/MusicFooterButton'
+import MusicFooterButton, { FOOTER_CIRCLE_SIZE } from '~features/bible-audio/ui/MusicFooterButton'
 export interface BasicFooterProps {
   isParallel?: boolean
   onPlay: () => void
@@ -160,14 +158,19 @@ const PlayableButtons = ({
     : isLoading
       ? t('accessibility.audioLoading')
       : isPlaying
-        ? t('accessibility.pauseAudio')
+        ? t('bibleAudio.open')
         : t('accessibility.playAudio')
 
   return (
+    // One block floats over the text: the Bible audio and the music, each in its own circle.
     <AnimatedHStack
-      className="border-continuous overflow-visible absolute self-center flex-row items-center"
+      className="border-continuous overflow-visible absolute self-center flex-row items-center rounded-full p-[5px] gap-[6px]"
       style={[
-        { bottom: 10 + bottomBarHeight },
+        {
+          bottom: 10 + bottomBarHeight,
+          backgroundColor: resolveThemeColor(stylingTheme, 'surfaceRaised'),
+          ...floatingShadow,
+        },
         {
           transform: [{ translateY: centerTranslateY }],
           transitionProperty: 'transform',
@@ -175,35 +178,26 @@ const PlayableButtons = ({
         },
       ]}
     >
-      <Box style={{ width: MUSIC_FOOTER_BUTTON_SIZE, marginRight: 12 }} pointerEvents="none" />
       <TouchableBox
-        className="border-continuous overflow-visible items-center justify-center w-[50px] h-[50px] rounded-full relative"
+        className="border-continuous overflow-visible items-center justify-center rounded-full relative"
         disabled={isDisabled}
         activeOpacity={0.5}
         onPress={onPlay}
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
         accessibilityState={{ disabled: isDisabled, busy: isLoading }}
-        // The play button floats over the text: the one shadow, no ring around it.
-        style={[
-          { opacity: isDisabled ? 0.6 : 1, ...floatingShadow },
-          [
-            {
-              backgroundColor: resolveThemeColor(
-                stylingTheme,
-                isPlaying ? 'primary' : 'surfaceRaised'
-              ),
-              opacity: isDisabled ? 0.6 : 1,
-            },
-          ],
-        ]}
+        style={{
+          width: FOOTER_CIRCLE_SIZE,
+          height: FOOTER_CIRCLE_SIZE,
+          opacity: isDisabled ? 0.6 : 1,
+          backgroundColor: isPlaying
+            ? resolveThemeColor(stylingTheme, 'primary')
+            : (colorWithOpacity(stylingTheme.colors.default, 0.06) ?? 'transparent'),
+        }}
       >
         <AudioButton isPlaying={isPlaying} isLoading={isLoading} error={hasError} type={type} />
       </TouchableBox>
-      {/* The music sits beside the play button; an empty twin on the other side keeps it centred. */}
-      <Box style={{ width: MUSIC_FOOTER_BUTTON_SIZE, marginLeft: 12 }}>
-        <MusicFooterButton />
-      </Box>
+      <MusicFooterButton />
     </AnimatedHStack>
   )
 }
