@@ -42,7 +42,7 @@ const setAudioPassage = (book: Book, chapter: number, version = 'LSG') =>
     store.set(bibleAudioStateAtom, {
       passage: { version, book, chapter },
       source: 'recorded',
-      recordingId: 'lsg-topchretien',
+      recordingId: 'lsg-tresorsonore',
       status: 'playing',
     })
   })

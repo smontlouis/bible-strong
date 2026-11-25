@@ -111,3 +111,8 @@ Proverbs (Alain Moreau) and John (Jean-Micaël Saltzmann) make a second, partial
 three by name, a whole testament as such, more by their count): « Proverbes et Jean » where it can
 be heard, « Seulement Proverbes et Jean » where it is greyed, so that a reader neither takes it for
 the whole Bible nor wonders why it is unavailable.
+
+TopChrétien's LSG (`lsg-topchretien`) is the same Trésor sonore reading, so `catalog-v2.json` no
+longer names it. It stays in `catalog.json` only, through
+`apps/resource-studio/config/bible-audio-first-catalog-only.json`, so that the applications older
+than 28.2.8, which never hear Trésor sonore, keep a recording of the LSG.

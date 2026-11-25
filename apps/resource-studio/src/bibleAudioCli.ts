@@ -57,6 +57,11 @@ const SCENE_OVERRIDES_FILE = path.join(
   "config/bible-audio-scene-overrides.json"
 );
 const HOSTED_CONFIG_DIR = path.join(STUDIO_DIR, "config/bible-audio-hosted");
+// Recordings kept for the applications older than 28.2.8 only, through FIRST_CATALOG_KEY.
+const FIRST_CATALOG_ONLY_FILE = path.join(
+  STUDIO_DIR,
+  "config/bible-audio-first-catalog-only.json"
+);
 const MEDIA_ORIGIN = "https://media.bible-strong.app";
 const PORTRAIT_CATALOG_URL =
   "https://media.bible-strong.app/entity-images/catalog.json";
@@ -90,8 +95,8 @@ const USAGE = `Usage:
       repository.
   yarn resources:audio publish [--bucket <name>] [--dry-run]
       Checks, then puts the file at ${CATALOG_KEY} in ${BUCKET} through the operator's wrangler
-      session, and at ${FIRST_CATALOG_KEY} without the recordings that ask for a mention, for the
-      applications older than 28.2.8. The application reads it within a day.`;
+      session, and at ${FIRST_CATALOG_KEY} without the recordings that ask for a mention but with
+      those of config/bible-audio-first-catalog-only.json, for the applications older than 28.2.8. The application reads it within a day.`;
 
 /** The first chapter a recording covers, to ask its host for. */
 const probeAddress = (recording: BibleAudioRecording) => {
@@ -336,12 +341,22 @@ const publish = async (args: string[]) => {
   const raw = JSON.parse(await readFile(CATALOG_FILE, "utf8")) as {
     recordings: { attribution?: unknown }[];
   };
+  const firstOnly = JSON.parse(
+    await readFile(FIRST_CATALOG_ONLY_FILE, "utf8")
+  ) as { recordings: { attribution?: unknown }[] };
   const first = {
     ...raw,
-    recordings: raw.recordings.filter(
-      (entry) => entry.attribution === undefined
-    )
+    recordings: [
+      ...firstOnly.recordings,
+      ...raw.recordings.filter((entry) => entry.attribution === undefined)
+    ]
   };
+  if (
+    parseBibleAudioCatalog(first)?.recordings.length !== first.recordings.length
+  )
+    throw new Error(
+      "BIBLE_AUDIO_CATALOG_INVALID: the catalog of the older applications would leave out an entry."
+    );
   const firstFile = path.join(
     STUDIO_DIR,
     "output/bible-audio-first-catalog.json"
