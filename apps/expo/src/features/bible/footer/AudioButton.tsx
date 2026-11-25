@@ -1,56 +1,61 @@
+import { ActivityIndicator } from 'react-native'
+import { VStack } from '~common/ui/Box'
+import { FeatherIcon, IonIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
+import MusicEqualizer from '~features/bible-audio/ui/MusicEqualizer'
 import { resolveThemeColor } from '~themes/colorValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
-import React from 'react'
-import { ActivityIndicator } from 'react-native'
-import { FeatherIcon } from '~common/ui/Icon'
-import Text from '~common/ui/Text'
+
 type AudioButtonProps = {
   error: boolean
   isPlaying: boolean
-  isBuffering?: boolean
   isLoading?: boolean
+  /** `tts`: the device's voice reads, which a small « TTS » under the icon says. */
   type?: 'url' | 'tts'
 }
 
-const AudioButton = ({
-  error,
-  isPlaying,
-  isBuffering,
-  isLoading,
-  type = 'url',
-}: AudioButtonProps) => {
+/**
+ * The footer's way to listen: play while nothing plays, bars that move while the passage is
+ * heard. Its press then opens the player rather than pausing, so it never shows a pause.
+ */
+const AudioButton = ({ error, isPlaying, isLoading, type = 'url' }: AudioButtonProps) => {
   const stylingTheme = useStylingTheme()
+  const ink = isPlaying
+    ? resolveThemeColor(stylingTheme, 'reverse') || stylingTheme.colors.reverse
+    : stylingTheme.colors.default
 
   if (error) {
-    return <FeatherIcon name="x" size={20} color={isPlaying || isBuffering ? 'reverse' : ''} />
+    return <FeatherIcon name="x" size={20} color={isPlaying ? 'reverse' : ''} />
   }
 
-  if (isPlaying && (isLoading || isBuffering)) {
+  if (isPlaying && isLoading) {
     return <ActivityIndicator color="white" />
   }
 
-  if (type === 'tts') {
-    return (
+  const isSpeech = type === 'tts'
+  const icon = isPlaying ? (
+    <MusicEqualizer color={ink} size={isSpeech ? 12 : 16} />
+  ) : (
+    // The triangle sits a little right of the centre, where the eye expects it.
+    <IonIcon
+      name="play"
+      size={isSpeech ? 15 : 19}
+      color={isPlaying ? 'reverse' : 'default'}
+      style={{ marginLeft: 2 }}
+    />
+  )
+  if (!isSpeech) return icon
+
+  return (
+    <VStack className="items-center">
+      {icon}
       <Text
-        className="text-[12px] font-bold"
-        style={{
-          color:
-            resolveThemeColor(stylingTheme, isPlaying || isBuffering ? 'reverse' : '') ||
-            stylingTheme.colors.default,
-        }}
+        className="text-[8px] leading-[9px] font-bold mt-[2px]"
+        style={{ color: ink, letterSpacing: 0.4 }}
       >
         TTS
       </Text>
-    )
-  }
-
-  return (
-    <FeatherIcon
-      name={isPlaying || isBuffering ? 'volume-2' : 'volume-1'}
-      style={{ marginLeft: 3 }}
-      size={20}
-      color={isPlaying || isBuffering ? 'reverse' : ''}
-    />
+    </VStack>
   )
 }
 
