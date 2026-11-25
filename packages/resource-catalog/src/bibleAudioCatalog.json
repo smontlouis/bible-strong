@@ -53,6 +53,104 @@
       ]
     },
     {
+      "id": "dby-bpc",
+      "version": "DBY",
+      "name": { "fr": "Lecture", "en": "Reading" },
+      "kind": "reading",
+      "sources": [
+        {
+          "books": [19],
+          "url": "https://audios.editeurbpc.com/bible/JND/A19_Psaumes/AT19_{chapter:3}_Psaume_{chapter}.mp3"
+        },
+        {
+          "books": [
+            40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+            60, 61, 62, 63, 64, 65, 66
+          ],
+          "url": "https://audios.editeurbpc.com/bible/JND/N{testamentBook:2}_{bookCode}/NT{testamentBook:2}_{chapter:3}_{bookCode}_Ch{chapter}.mp3"
+        },
+        {
+          "url": "https://audios.editeurbpc.com/bible/JND/A{testamentBook:2}_{bookCode}/AT{testamentBook:2}_{chapter:3}_{bookCode}_Ch{chapter}.mp3"
+        }
+      ],
+      "bookCodes": [
+        "Genese",
+        "Exode",
+        "Levitique",
+        "Nombres",
+        "Deuteronome",
+        "Josue",
+        "Juges",
+        "Ruth",
+        "1Samuel",
+        "2Samuel",
+        "1Rois",
+        "2Rois",
+        "1Chroniques",
+        "2Chroniques",
+        "Esdras",
+        "Nehemie",
+        "Esther",
+        "Job",
+        "Psaumes",
+        "Proverbes",
+        "Ecclesiaste",
+        "Cantique",
+        "Esaie",
+        "Jeremie",
+        "Lamentations",
+        "Ezechiel",
+        "Daniel",
+        "Osee",
+        "Joel",
+        "Amos",
+        "Abdias",
+        "Jonas",
+        "Michee",
+        "Nahum",
+        "Habakuk",
+        "Sophonie",
+        "Aggee",
+        "Zacharie",
+        "Malachie",
+        "Matthieu",
+        "Marc",
+        "Luc",
+        "Jean",
+        "Actes",
+        "Romains",
+        "1Corinthiens",
+        "2Corinthiens",
+        "Galates",
+        "Ephesiens",
+        "Philippiens",
+        "Colossiens",
+        "1Thessaloniciens",
+        "2Thessaloniciens",
+        "1Timothee",
+        "2Timothee",
+        "Tite",
+        "Philemon",
+        "Hebreux",
+        "Jacques",
+        "1Pierre",
+        "2Pierre",
+        "1Jean",
+        "2Jean",
+        "3Jean",
+        "Jude",
+        "Apocalypse"
+      ],
+      "credit": "Bibles et Publications Chrétiennes",
+      "attribution": {
+        "label": {
+          "fr": "© Bibles et Publications Chrétiennes, editeurbpc.com",
+          "en": "© Bibles et Publications Chrétiennes, editeurbpc.com"
+        },
+        "url": "https://editeurbpc.com"
+      }
+    },
+    {
       "id": "kjv-wordpocket",
       "version": "KJV",
       "name": {

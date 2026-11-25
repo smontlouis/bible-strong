@@ -149,3 +149,16 @@ than being greyed.
 - **Two pills above the transport of the large player**, as in Audibible: the microphone with the
   name of what is heard, opening « Écouter avec », and the music, in the accent while it plays,
   opening the music's panel. « Écouter avec » leaves the row of options below.
+
+## Amendment (2026-11-25): a recording streamed with its publisher's mention
+
+Bibles et Publications Chrétiennes (editeurbpc.com) let Bible Strong use its reading of the Darby
+in writing, as long as the application and the site stay free for the reader, with the mention
+« © Bibles et Publications Chrétiennes, editeurbpc.com ». Its chapters have public addresses, so
+the recording (`dby-bpc`) is streamed from its host like any other, not hosted: a written leave
+does not by itself make a recording hosted. It carries the mention as its `attribution`, without a
+logo, so it reaches only the applications from 28.2.8.
+
+Its addresses were checked once against the publisher's 1,189 chapter pages: all match, but for
+Malachi 4, whose page plays chapter 1 while the file of chapter 4 exists at its own address; the
+catalog names that one.
