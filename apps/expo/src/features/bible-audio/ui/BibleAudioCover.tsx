@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { StyleSheet } from 'react-native'
 import { FadeIn, FadeOut } from 'react-native-reanimated'
 import Box, { AnimatedBox, FadingBox } from '~common/ui/Box'
-import { colorTransition, fadeInAfter, fadeOut } from '~common/ui/motion'
+import { colorTransition, fadeIn, fadeOut, turnDownIn, turnUpIn } from '~common/ui/motion'
 import Text from '~common/ui/Text'
 import { radii } from '~common/ui/surfaces'
 import { getEntityPortraitUri } from '~features/lexique/entityPortraits'
@@ -140,12 +140,7 @@ const BibleAudioCover = ({ passage, size }: BibleAudioCoverProps) => {
       {!isThumbnail && (
         <Box className="absolute" style={{ left: 24 * scale, top: 24 * scale, right: 24 * scale }}>
           {size >= 200 && (
-            <FadingBox
-              keyProp={part}
-              entering={fadeInAfter}
-              exiting={fadeOut}
-              animateLayout={false}
-            >
+            <FadingBox keyProp={part} entering={fadeIn} exiting={fadeOut} animateLayout={false}>
               <Text
                 className="uppercase"
                 style={{
@@ -163,7 +158,7 @@ const BibleAudioCover = ({ passage, size }: BibleAudioCoverProps) => {
           )}
           <FadingBox
             keyProp={String(passage.book.Numero)}
-            entering={fadeInAfter}
+            entering={fadeIn}
             exiting={fadeOut}
             animateLayout={false}
           >
@@ -187,6 +182,7 @@ const BibleAudioCover = ({ passage, size }: BibleAudioCoverProps) => {
       <FadingBox
         keyProp={`${passage.book.Numero}-${passage.chapter}`}
         direction={direction === 1 ? 'top' : 'bottom'}
+        entering={direction === 1 ? turnUpIn : turnDownIn}
         animateLayout={false}
         className="absolute"
         style={{ right: (isThumbnail ? -2 : -8) * scale, bottom: -numberSize * 0.2 }}

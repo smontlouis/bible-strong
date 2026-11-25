@@ -5,7 +5,7 @@ import { ActivityIndicator, Linking } from 'react-native'
 import { useAnimatedStyle, withSpring } from 'react-native-reanimated'
 import DropdownMenu from '~common/DropdownMenu'
 import Box, { AnimatedBox, FadingBox, HStack, TouchableBox } from '~common/ui/Box'
-import { fadeInAfter, fadeOut } from '~common/ui/motion'
+import { fadeIn, fadeOut } from '~common/ui/motion'
 import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { floatingShadow, radii } from '~common/ui/surfaces'
@@ -164,7 +164,7 @@ const PassageTitle = ({ passage, size }: PassageTitleProps) => {
         accessibilityHint={title}
         className="flex-row items-center self-start"
       >
-        <FadingBox keyProp={title} entering={fadeInAfter} exiting={fadeOut} animateLayout={false}>
+        <FadingBox keyProp={title} entering={fadeIn} exiting={fadeOut} animateLayout={false}>
           <Text
             className={size === 'large' ? 'text-[20px] font-bold' : 'text-[18px] font-bold'}
             numberOfLines={1}
@@ -398,12 +398,7 @@ const BibleAudioPlayerContent = ({ layout }: BibleAudioPlayerContentProps) => {
             <BibleAudioCover passage={passage} size={104} />
           </Box>
           <Box className="flex-[1] min-w-0 ml-[14px]">
-            <FadingBox
-              keyProp={part}
-              entering={fadeInAfter}
-              exiting={fadeOut}
-              animateLayout={false}
-            >
+            <FadingBox keyProp={part} entering={fadeIn} exiting={fadeOut} animateLayout={false}>
               <Text
                 className="text-[11px] text-grey uppercase font-medium"
                 style={{ letterSpacing: 1.5 }}
@@ -462,7 +457,7 @@ const BibleAudioPlayerContent = ({ layout }: BibleAudioPlayerContentProps) => {
         </TouchableBox>
         <FadingBox
           keyProp={part}
-          entering={fadeInAfter}
+          entering={fadeIn}
           exiting={fadeOut}
           animateLayout={false}
           className="flex-[1]"
