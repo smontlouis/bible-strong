@@ -150,11 +150,19 @@ export const AnimatedSafeAreaBox = ({
   )
 }
 
+// React Native's 0.2 all but hides a large surface under the finger: a press only dims it.
+const PRESSED_OPACITY = 0.6
+
 export const TouchableBox = ({
   as: _as,
   ...props
 }: BoxProps & Omit<React.ComponentPropsWithRef<typeof TouchableOpacity>, keyof BoxProps>) => (
-  <Box as={TouchableOpacity} accessibilityRole="button" {...props} />
+  <Box
+    as={TouchableOpacity}
+    accessibilityRole="button"
+    activeOpacity={PRESSED_OPACITY}
+    {...props}
+  />
 )
 
 export const AnimatedBox = Animated.createAnimatedComponent(Box)
