@@ -9,6 +9,7 @@ import SheetWell from '~common/ui/SheetWell'
 import Text from '~common/ui/Text'
 import { bibleAudioStateAtom } from '../atoms'
 import {
+  getRecordingAttribution,
   getRecordingName,
   recordingCoversBook,
   SPEECH_CHOICE,
@@ -16,7 +17,9 @@ import {
   type BibleAudioChoice,
   type BibleAudioRecording,
 } from '../audioCatalog'
+import books from '~assets/bible_versions/books-desc'
 import { chooseBibleAudio } from '../bibleAudioPlayer'
+import { getRecordingCoverage } from '../recordingCoverage'
 import type { BibleAudioPassage } from '../types'
 import PlayerOption from './PlayerOption'
 
@@ -53,7 +56,7 @@ const ChoiceRow = ({ icon, label, detail, isSelected, isDisabled, onPress }: Cho
         {label}
       </Text>
       {!!detail && (
-        <Text className="text-[12px] text-grey mt-[1px]" numberOfLines={1}>
+        <Text className="text-[12px] text-grey mt-[1px]" numberOfLines={2}>
           {detail}
         </Text>
       )}
@@ -61,6 +64,44 @@ const ChoiceRow = ({ icon, label, detail, isSelected, isDisabled, onPress }: Cho
     {isSelected && <IonIcon name="checkmark" size={20} color="primary" />}
   </TouchableBox>
 )
+
+/**
+ * What a partial recording covers, said in its row whether the book heard is among them or not:
+ * « Proverbes et Jean », or « Seulement Proverbes et Jean » when it is not.
+ */
+const useCoverageText = () => {
+  const { t } = useTranslation()
+  return (recording: BibleAudioRecording, covers: boolean) => {
+    const coverage = getRecordingCoverage(recording)
+    switch (coverage.kind) {
+      case 'all':
+        return undefined
+      case 'testament':
+        return coverage.testament === 'old'
+          ? t(covers ? 'bibleAudio.coverage.old' : 'bibleAudio.coverage.onlyOld')
+          : t(covers ? 'bibleAudio.coverage.new' : 'bibleAudio.coverage.onlyNew')
+      default: {
+        const names =
+          coverage.kind === 'books'
+            ? coverage.books.map(number => {
+                const book = books.find(candidate => candidate.Numero === number)
+                return book ? t(book.Nom) : String(number)
+              })
+            : []
+        const text =
+          coverage.kind === 'count'
+            ? t('bibleAudio.coverage.bookCount', { count: coverage.count })
+            : names.length > 1
+              ? t('bibleAudio.coverage.and', {
+                  list: names.slice(0, -1).join(', '),
+                  last: names.at(-1),
+                })
+              : (names[0] ?? '')
+        return covers ? text : t('bibleAudio.coverage.only', { coverage: text })
+      }
+    }
+  }
+}
 
 const Hairline = () => (
   <Box
@@ -77,6 +118,7 @@ type AudioChoiceButtonProps = { passage: BibleAudioPassage }
  */
 const AudioChoiceButton = ({ passage }: AudioChoiceButtonProps) => {
   const { t } = useTranslation()
+  const coverageText = useCoverageText()
   const { source, recordingId } = useAtomValue(bibleAudioStateAtom)
   const recordings = useVersionRecordings(passage.version)
   const isSpeech = source === 'speech'
@@ -127,9 +169,17 @@ const AudioChoiceButton = ({ passage }: AudioChoiceButtonProps) => {
                       const covers = recordingCoversBook(recording, passage.book.Numero)
                       const kind =
                         recording.kind === 'drama' ? t('bibleAudio.kind.drama') : undefined
+                      const coverage = coverageText(recording, covers)
+                      // The publisher's mention, when it asks for one, says who it is.
                       const detail = covers
-                        ? [kind, recording.credit].filter(Boolean).join(' · ')
-                        : t('bibleAudio.notThisBook', { book: t(passage.book.Nom) })
+                        ? [
+                            kind,
+                            coverage,
+                            getRecordingAttribution(recording)?.label ?? recording.credit,
+                          ]
+                            .filter(Boolean)
+                            .join(' · ')
+                        : coverage
                       return (
                         <Box key={recording.id}>
                           {index > 0 && <Hairline />}

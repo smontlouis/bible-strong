@@ -38,7 +38,8 @@ const bundledCatalog: BibleAudioCatalog = parseBibleAudioCatalog(BUNDLED_BIBLE_A
 const storedCatalogAtom = atomWithAsyncStorage<{
   fetchedAt: number
   catalog: BibleAudioCatalog
-} | null>('bibleAudioCatalog', null)
+  // Renamed with the second catalog: a copy of the first must not hide its recordings for a day.
+} | null>('bibleAudioCatalogV2', null)
 
 /** The catalog in use: the last one read, or the one this release carries. */
 export const bibleAudioCatalogAtom = atom(get => get(storedCatalogAtom)?.catalog ?? bundledCatalog)
@@ -98,6 +99,13 @@ export const useVersionRecordings = (version: string | undefined) => {
 /** A recording's name in the reader's language. */
 export const getRecordingName = (recording: BibleAudioRecording) =>
   recording.name[getLanguage() === 'fr' ? 'fr' : 'en']
+
+/** The mention its publisher asks for, in the reader's language, if it asks for one. */
+export const getRecordingAttribution = (recording: BibleAudioRecording | undefined) => {
+  if (!recording?.attribution) return undefined
+  const { label, url, logo } = recording.attribution
+  return { label: label[getLanguage() === 'fr' ? 'fr' : 'en'], url, logo }
+}
 
 export const getRecordingUrl = (recording: BibleAudioRecording, book: number, chapter: number) =>
   getBibleAudioUrl(recording, book, chapter)

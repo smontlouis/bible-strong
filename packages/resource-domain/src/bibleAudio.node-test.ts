@@ -50,6 +50,34 @@ describe('parseBibleAudioCatalog', () => {
   })
 })
 
+describe('attribution', () => {
+  const attribution = {
+    label: { fr: 'Voix : tresorsonore.com', en: 'Voice: tresorsonore.com' },
+    url: 'https://www.tresorsonore.com',
+    logo: 'https://media.example.org/logo.png',
+  }
+
+  it('keeps the mention a publisher asks for', () => {
+    const catalog = parseBibleAudioCatalog({
+      version: 1,
+      recordings: [recording({ attribution })],
+    })
+    assert.deepEqual(catalog?.recordings[0]?.attribution, attribution)
+  })
+
+  it('leaves out a recording whose mention cannot be shown', () => {
+    const catalog = parseBibleAudioCatalog({
+      version: 1,
+      recordings: [
+        recording({ id: 'no-link', attribution: { ...attribution, url: 'tresorsonore.com' } }),
+        recording({ id: 'plain-logo', attribution: { ...attribution, logo: 'http://x.org/a.png' } }),
+        { ...recording({ id: 'no-label' }), attribution: { url: attribution.url } },
+      ],
+    })
+    assert.deepEqual(catalog?.recordings, [])
+  })
+})
+
 describe('getBibleAudioUrl', () => {
   it('pads the numbers to the width asked', () => {
     assert.equal(getBibleAudioUrl(recording(), 1, 7), 'https://example.org/01_007.mp3')

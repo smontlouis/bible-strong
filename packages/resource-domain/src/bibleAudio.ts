@@ -34,6 +34,18 @@ export type BibleAudioRecording = {
   bookCodes?: string[]
   /** Who publishes the recording, shown with it. */
   credit?: string
+  /** What the publisher asks to be shown with every chapter heard. */
+  attribution?: BibleAudioAttribution
+}
+
+/**
+ * The mention a publisher sets as a condition of its recording: a label (« Voix : tresorsonore.com »),
+ * the address it opens, and the publisher's logo beside it.
+ */
+export type BibleAudioAttribution = {
+  label: Record<BibleAudioLanguage, string>
+  url: string
+  logo?: string
 }
 
 export type BibleAudioCatalog = {
@@ -80,6 +92,17 @@ const parseName = (value: unknown): Record<BibleAudioLanguage, string> | undefin
   return { fr: value.fr, en: value.en }
 }
 
+const isHttpsAddress = (value: unknown): value is string =>
+  typeof value === 'string' && /^https:\/\/[^\s]+$/.test(value)
+
+const parseAttribution = (value: unknown): BibleAudioAttribution | undefined => {
+  if (!isRecord(value)) return undefined
+  const label = parseName(value.label)
+  if (!label || !isHttpsAddress(value.url)) return undefined
+  if (value.logo !== undefined && !isHttpsAddress(value.logo)) return undefined
+  return { label, url: value.url, ...(value.logo ? { logo: value.logo } : {}) }
+}
+
 const parseRecording = (value: unknown): BibleAudioRecording | undefined => {
   if (!isRecord(value)) return undefined
   const { id, version, kind, books, bookCodes, credit } = value
@@ -96,6 +119,10 @@ const parseRecording = (value: unknown): BibleAudioRecording | undefined => {
     (!Array.isArray(bookCodes) || !bookCodes.every(code => typeof code === 'string'))
   )
     return undefined
+  // A publisher's condition the app cannot show leaves the recording out rather than unmentioned.
+  const attribution =
+    value.attribution === undefined ? undefined : parseAttribution(value.attribution)
+  if (value.attribution !== undefined && !attribution) return undefined
   const usesBookCodes = (sources as BibleAudioAddress[]).some(source =>
     source.url.includes('{bookCode')
   )
@@ -109,6 +136,7 @@ const parseRecording = (value: unknown): BibleAudioRecording | undefined => {
     sources: sources as BibleAudioAddress[],
     ...(bookCodes ? { bookCodes: bookCodes as string[] } : {}),
     ...(typeof credit === 'string' && credit.trim() ? { credit } : {}),
+    ...(attribution ? { attribution } : {}),
   }
 }
 

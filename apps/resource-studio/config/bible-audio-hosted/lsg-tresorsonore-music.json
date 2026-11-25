@@ -1,0 +1,12 @@
+{
+  "recording": "lsg-tresorsonore-music",
+  "prefix": "bible-audio/lsg-tresorsonore-music/v1",
+  "covers": [
+    20,
+    43
+  ],
+  "books": {
+    "bible_moreau_proverbe": 20,
+    "as_acp_jean": 43
+  }
+}

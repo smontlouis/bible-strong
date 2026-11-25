@@ -1,4 +1,5 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -16,7 +17,18 @@ import {
   parseTipnrPlaces,
   type TimelineScene
 } from "./bibleAudioPlaces.js";
-import { CATALOG_CACHE_CONTROL, wranglerPut } from "./mediaUpload.js";
+import {
+  hostedTemplate,
+  planHostedChapters,
+  type HostedRecordingConfig
+} from "./bibleAudioHosting.js";
+import {
+  CATALOG_CACHE_CONTROL,
+  pendingUploads,
+  putImmutableCopies,
+  wranglerPut,
+  type MediaUpload
+} from "./mediaUpload.js";
 
 /**
  * Publishes the catalog of the recordings of Bible versions on the public media host (ADR-0117).
@@ -24,7 +36,9 @@ import { CATALOG_CACHE_CONTROL, wranglerPut } from "./mediaUpload.js";
  */
 
 const BUCKET = "bible-strong-media-prod";
-const CATALOG_KEY = "bible-audio/catalog.json";
+const CATALOG_KEY = "bible-audio/catalog-v2.json";
+// Read by the applications older than 28.2.8, which cannot show a publisher's mention.
+const FIRST_CATALOG_KEY = "bible-audio/catalog.json";
 const CATALOG_FILE = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../../../packages/resource-catalog/src/bibleAudioCatalog.json"
@@ -42,6 +56,8 @@ const SCENE_OVERRIDES_FILE = path.join(
   STUDIO_DIR,
   "config/bible-audio-scene-overrides.json"
 );
+const HOSTED_CONFIG_DIR = path.join(STUDIO_DIR, "config/bible-audio-hosted");
+const MEDIA_ORIGIN = "https://media.bible-strong.app";
 const PORTRAIT_CATALOG_URL =
   "https://media.bible-strong.app/entity-images/catalog.json";
 const PAINTING_CATALOG_URL =
@@ -66,9 +82,16 @@ const USAGE = `Usage:
       (STEPBible's TIPNR in data/external/stepbible/TIPNR.txt,
       config/bible-audio-place-overrides.json); then the picture of a chapter of the book at
       most three chapters away.
+  yarn resources:audio host <recording> --from <folder> [--bucket <name>] [--dry-run]
+      For a recording its publisher lets Bible Strong host: finds each chapter in the publisher's
+      files under <folder> by config/bible-audio-hosted/<recording>.json, refuses a missing or
+      doubled chapter, then puts the chapters and the publisher's logo in the bucket. A ledger in
+      <folder> lets an interrupted upload resume. The publisher's download link stays out of the
+      repository.
   yarn resources:audio publish [--bucket <name>] [--dry-run]
       Checks, then puts the file at ${CATALOG_KEY} in ${BUCKET} through the operator's wrangler
-      session. The application reads it within a day.`;
+      session, and at ${FIRST_CATALOG_KEY} without the recordings that ask for a mention, for the
+      applications older than 28.2.8. The application reads it within a day.`;
 
 /** The first chapter a recording covers, to ask its host for. */
 const probeAddress = (recording: BibleAudioRecording) => {
@@ -210,6 +233,85 @@ const buildCovers = async () => {
   );
 };
 
+const listFiles = async (folder: string): Promise<string[]> =>
+  (await readdir(folder, { recursive: true }))
+    .filter((name) => name.toLowerCase().endsWith(".mp3"))
+    .map((name) => path.join(folder, name))
+    .sort();
+
+const sha256 = async (file: string) =>
+  createHash("sha256")
+    .update(await readFile(file))
+    .digest("hex");
+
+const host = async (args: string[]) => {
+  const [recordingId] = args;
+  const fromFlag = args.indexOf("--from");
+  const folder = fromFlag >= 0 ? args[fromFlag + 1] : undefined;
+  const bucketFlag = args.indexOf("--bucket");
+  const bucket = bucketFlag >= 0 ? args[bucketFlag + 1] : BUCKET;
+  if (!recordingId || !folder || !bucket) throw new Error(USAGE);
+
+  const config = JSON.parse(
+    await readFile(path.join(HOSTED_CONFIG_DIR, `${recordingId}.json`), "utf8")
+  ) as HostedRecordingConfig;
+  const catalog = parseBibleAudioCatalog(
+    JSON.parse(await readFile(CATALOG_FILE, "utf8"))
+  );
+  const recording = catalog?.recordings.find(
+    (entry) => entry.id === recordingId
+  );
+  const template = hostedTemplate(MEDIA_ORIGIN, config.prefix);
+  const sameBooks =
+    JSON.stringify([...(recording?.books ?? [])].sort((a, b) => a - b)) ===
+    JSON.stringify([...(config.covers ?? [])].sort((a, b) => a - b));
+  if (
+    !recording ||
+    !sameBooks ||
+    recording.sources.some((source) => source.url !== template)
+  )
+    throw new Error(
+      `BIBLE_AUDIO_HOSTED_CATALOG: the catalog must name ${recordingId} with the address ${template} and the books of covers.`
+    );
+
+  const files = await listFiles(folder);
+  const hashes = new Map<string, string>();
+  for (const file of files) hashes.set(file, await sha256(file));
+  const { chapters, unknown } = planHostedChapters(
+    config,
+    files,
+    (a, b) => hashes.get(a) === hashes.get(b)
+  );
+  for (const file of unknown) console.log(`Not in the plan: ${file}`);
+
+  const uploads: MediaUpload[] = chapters.map((chapter) => ({
+    key: chapter.key,
+    file: chapter.file,
+    sha256: hashes.get(chapter.file)!,
+    url: `${MEDIA_ORIGIN}/${chapter.key}`
+  }));
+  const logos: MediaUpload[] = config.logo
+    ? [
+        {
+          key: config.logo.key,
+          file: path.join(HOSTED_CONFIG_DIR, config.logo.file),
+          sha256: await sha256(path.join(HOSTED_CONFIG_DIR, config.logo.file)),
+          url: `${MEDIA_ORIGIN}/${config.logo.key}`
+        }
+      ]
+    : [];
+  const ledgerPath = path.join(folder, `uploaded.${bucket}.json`);
+  const pending = await pendingUploads(uploads, ledgerPath);
+  const pendingLogos = await pendingUploads(logos, ledgerPath);
+  console.log(
+    `${chapters.length} chapters found, ${pending.length} to put, ${pendingLogos.length} logo to put, in ${bucket}.`
+  );
+  if (args.includes("--dry-run")) return;
+  await putImmutableCopies(bucket, pendingLogos, ledgerPath, "image/png");
+  await putImmutableCopies(bucket, pending, ledgerPath, "audio/mpeg");
+  console.log(`Put ${pending.length} chapters under ${config.prefix}.`);
+};
+
 const publish = async (args: string[]) => {
   const bucketFlag = args.indexOf("--bucket");
   const bucket = bucketFlag >= 0 ? args[bucketFlag + 1] : BUCKET;
@@ -217,7 +319,7 @@ const publish = async (args: string[]) => {
   const catalog = await check();
   if (args.includes("--dry-run")) {
     console.log(
-      `Would put ${CATALOG_KEY} in ${bucket}, naming ${catalog.recordings.length} recordings.`
+      `Would put ${CATALOG_KEY} in ${bucket}, naming ${catalog.recordings.length} recordings, and ${FIRST_CATALOG_KEY} without those asking for a mention.`
     );
     return;
   }
@@ -231,6 +333,31 @@ const publish = async (args: string[]) => {
   console.log(
     `Put ${CATALOG_KEY} in ${bucket}, naming ${catalog.recordings.length} recordings.`
   );
+  const raw = JSON.parse(await readFile(CATALOG_FILE, "utf8")) as {
+    recordings: { attribution?: unknown }[];
+  };
+  const first = {
+    ...raw,
+    recordings: raw.recordings.filter(
+      (entry) => entry.attribution === undefined
+    )
+  };
+  const firstFile = path.join(
+    STUDIO_DIR,
+    "output/bible-audio-first-catalog.json"
+  );
+  await mkdir(path.dirname(firstFile), { recursive: true });
+  await writeFile(firstFile, `${JSON.stringify(first, null, 2)}\n`);
+  await wranglerPut(
+    bucket,
+    FIRST_CATALOG_KEY,
+    firstFile,
+    "application/json",
+    CATALOG_CACHE_CONTROL
+  );
+  console.log(
+    `Put ${FIRST_CATALOG_KEY} in ${bucket}, naming ${first.recordings.length} recordings.`
+  );
 };
 
 const main = async () => {
@@ -240,6 +367,7 @@ const main = async () => {
     return;
   }
   if (command === "covers") return buildCovers();
+  if (command === "host") return host(args);
   if (command === "publish") return publish(args);
   console.log(USAGE);
 };

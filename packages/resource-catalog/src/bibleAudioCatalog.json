@@ -2,6 +2,41 @@
   "version": 1,
   "recordings": [
     {
+      "id": "lsg-tresorsonore",
+      "version": "LSG",
+      "name": { "fr": "Trésor sonore", "en": "Trésor sonore" },
+      "kind": "reading",
+      "sources": [
+        {
+          "url": "https://media.bible-strong.app/bible-audio/lsg-tresorsonore/v1/{book:2}_{chapter:3}.mp3"
+        }
+      ],
+      "credit": "Jean-Micaël Saltzmann, Alain Moreau",
+      "attribution": {
+        "label": { "fr": "Voix : tresorsonore.com", "en": "Voice: tresorsonore.com" },
+        "url": "https://www.tresorsonore.com",
+        "logo": "https://media.bible-strong.app/bible-audio/logos/tresorsonore-v1.png"
+      }
+    },
+    {
+      "id": "lsg-tresorsonore-music",
+      "version": "LSG",
+      "name": { "fr": "Trésor sonore, avec musique", "en": "Trésor sonore, with music" },
+      "kind": "reading",
+      "books": [20, 43],
+      "sources": [
+        {
+          "url": "https://media.bible-strong.app/bible-audio/lsg-tresorsonore-music/v1/{book:2}_{chapter:3}.mp3"
+        }
+      ],
+      "credit": "Alain Moreau, Jean-Micaël Saltzmann",
+      "attribution": {
+        "label": { "fr": "Voix : tresorsonore.com", "en": "Voice: tresorsonore.com" },
+        "url": "https://www.tresorsonore.com",
+        "logo": "https://media.bible-strong.app/bible-audio/logos/tresorsonore-v1.png"
+      }
+    },
+    {
       "id": "lsg-topchretien",
       "version": "LSG",
       "name": {

@@ -11,6 +11,7 @@ import { getAvailableChapters } from '~helpers/bibleCoverage'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
 import { audioRepeatAtom, audioSpeedAtom } from './atoms'
 import {
+  getRecordingAttribution,
   getRecordingName,
   getRecordingUrl,
   getVersionName,
@@ -40,6 +41,8 @@ type RecordedTrack = {
   url: string
   title: string
   artist?: string
+  /** The publisher's mention, where the lock screen has room for it. */
+  albumTitle?: string
 }
 
 export const getRecordedTracks = (
@@ -48,6 +51,7 @@ export const getRecordedTracks = (
   coverage?: BibleVersionCoverage
 ): RecordedTrack[] => {
   const artist = `${getVersionName(passage.version)} · ${getRecordingName(recording)}`
+  const albumTitle = getRecordingAttribution(recording)?.label
   return getAvailableChapters(passage.book, coverage).flatMap(chapter => {
     const url = getRecordingUrl(recording, passage.book.Numero, chapter)
     return url
@@ -57,6 +61,7 @@ export const getRecordedTracks = (
             url,
             title: `${i18n.t(passage.book.Nom)} ${chapter} ${passage.version}`,
             artist,
+            ...(albumTitle ? { albumTitle } : {}),
           },
         ]
       : []
@@ -108,6 +113,7 @@ export const createRecordedEngine = (
   const getMetadata = (index: number): AudioMetadata => ({
     title: tracks[index]?.title,
     artist: tracks[index]?.artist,
+    albumTitle: tracks[index]?.albumTitle,
     artworkUrl: ARTWORK_URL,
   })
 

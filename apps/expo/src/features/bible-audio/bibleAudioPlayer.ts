@@ -23,6 +23,7 @@ import {
   SPEECH_CHOICE,
   type BibleAudioChoice,
 } from './audioCatalog'
+import { countBibleAudioListen } from './listenStats'
 import { createRecordedEngine } from './recordedEngine'
 import { createSpeechEngine } from './speechEngine'
 import type {
@@ -96,6 +97,8 @@ const createEvents = (source: BibleAudioSource): BibleAudioEngineEvents => ({
     const previous = getState().status
     setState({ status })
     watchSleepTimer(status === 'playing')
+    const { passage, recordingId } = getState()
+    if (status === 'playing' && passage) countBibleAudioListen(passage, recordingId)
     // A pause from the lock screen also cancels the timer, as a pause in the app does.
     if (previous === 'playing' && status === 'paused') resetSleepTimer()
   },
@@ -106,6 +109,9 @@ const createEvents = (source: BibleAudioSource): BibleAudioEngineEvents => ({
     const { passage } = getState()
     if (current?.source !== source || !passage || passage.chapter === chapter) return
     setState({ passage: { ...passage, chapter } })
+    // The playlist moves to the next chapter while playing, without a new status.
+    if (getState().status === 'playing')
+      countBibleAudioListen({ ...passage, chapter }, getState().recordingId)
   },
   onEnded: () => {
     if (current?.source !== source) return

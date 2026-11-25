@@ -20,8 +20,9 @@ suivent, ils ne le possèdent pas.
 
 ## Comportement
 
-- **Enregistrements (ADR-0117).** Une version a de 0 à N enregistrements, tous streamés depuis leur
-  éditeur. `audioCatalog.ts` lit `bible-audio/catalog.json` sur l'hôte média une fois par jour et
+- **Enregistrements (ADR-0117).** Une version a de 0 à N enregistrements, streamés depuis leur
+  éditeur, ou hébergés sur l'hôte média quand l'éditeur l'a permis par écrit (Trésor sonore).
+  `audioCatalog.ts` lit `bible-audio/catalog-v2.json` sur l'hôte média une fois par jour et
   garde la dernière copie ; l'app embarque le même fichier (`@bible-strong/resource-catalog/bible-audio`)
   pour le premier lancement. Les adresses se construisent dans le domaine
   (`@bible-strong/resource-domain/bible-audio`). Le lecteur retient un enregistrement par son id, ou
@@ -29,6 +30,10 @@ suivent, ils ne le possèdent pas.
   livre laisse la place à un autre de la version, puis à la voix. Pour en ajouter un : éditer
   `packages/resource-catalog/src/bibleAudioCatalog.json`, puis `yarn resources:audio check` et
   `yarn resources:audio publish`.
+- **Mention de l'éditeur.** Un enregistrement peut porter une `attribution` (texte, lien, logo) que
+  l'éditeur exige : `RecordingAttribution` l'affiche sous les options du grand lecteur, et l'écran de
+  verrouillage la reprend. Chaque chapitre qui commence compte un événement `bible_audio_listen`
+  (`listenStats.ts`), d'où l'on tire les écoutes annuelles demandées par l'éditeur.
 - **Petit lecteur.** Tant qu'un passage est chargé, une rangée en haut de la barre d'onglets
   (`variant="bar"`) : titre, lecture/pause, croix qui arrête et cache le lecteur. La barre grandit de
   `MINI_PLAYER_HEIGHT` ; tout ce qui se place au-dessus d'elle lit `useBottomBarHeightInTab`, la bulle

@@ -74,3 +74,40 @@ neighbour's: 1,110 of the 1,189 chapters have a picture (93 %).
 The application lays the painting under the cover, in the part's hue: the accent over it in the
 « color » blend, the ground washing it, a fade clearing the top for the book's name; the chapter
 number then takes the ink. A thumbnail keeps the number alone.
+
+## Amendment (2026-11-25): a recording hosted with its publisher's leave, and its mention
+
+Trésors Média (tresorsonore.com) lent its reading of the Louis Segond 1910 in writing, with leave
+to host it, on three conditions: « Voix : tresorsonore.com » with a link and its logo with every
+chapter heard, listening free of charge, and the number of listens once a year. Its files have no
+address by chapter, so Bible Strong hosts them:
+
+- **A hosted recording is the exception, not the rule**: only with the publisher's written leave.
+  Its chapters go once in the media bucket under `bible-audio/<recording>/v1/{book:2}_{chapter:3}.mp3`,
+  cached as immutable (a new take gets a new `v<n>`); its address template names the media host like
+  any other. `yarn resources:audio host <recording> --from <folder>` finds each chapter in the
+  publisher's files by `apps/resource-studio/config/bible-audio-hosted/<recording>.json`, refuses a
+  missing or doubled chapter, and puts the chapters and the logo. The publisher's download link is
+  never written in the repository.
+- **A recording may carry an `attribution`**: a label in French and English, the address it opens
+  and a logo. The large player shows it under its controls, linked, while one of its chapters plays,
+  and the lock screen names it. An entry whose attribution is malformed is left out, never played
+  without it.
+- **The catalog moves to `bible-audio/catalog-v2.json`.** `catalog.json` stays published for the
+  applications older than 28.2.8, without the recordings that carry an attribution: those
+  applications cannot show it, so they never offer them. `publish` writes both.
+- **Every chapter heard is counted** by recording in the application's analytics
+  (`bible_audio_listen`: recording, version, book, chapter), once each time a chapter starts. The
+  yearly figure a publisher asks for is read there.
+- **Such a recording stays free**: it is never put behind Premium.
+
+The Trésor sonore recording (`lsg-tresorsonore`) is read by Jean-Micaël Saltzmann (Old Testament but
+Genesis; Proverbs and John in their versions without music) and Alain Moreau (Genesis, the New
+Testament but John). It comes first among the recordings of the LSG. The takes with music of
+Proverbs (Alain Moreau) and John (Jean-Micaël Saltzmann) make a second, partial recording,
+`lsg-tresorsonore-music`, with `books`; `host` takes a partial recording through `covers`.
+
+**A partial recording says what it covers.** In « Écouter avec », its row names its books (one to
+three by name, a whole testament as such, more by their count): « Proverbes et Jean » where it can
+be heard, « Seulement Proverbes et Jean » where it is greyed, so that a reader neither takes it for
+the whole Bible nor wonders why it is unavailable.

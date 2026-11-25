@@ -36,6 +36,7 @@ import TTSPitchButton from './TTSPitchButton'
 import TTSRepeatButton from './TTSRepeatButton'
 import TTSSpeedButton from './TTSSpeedButton'
 import TTSVoiceButton from './TTSVoiceButton'
+import RecordingAttribution from './RecordingAttribution'
 import { useBibleAudioLabels } from './useBibleAudioLabels'
 
 const AUDIBIBLE_URL = 'https://click.audibible.app/5nmN/stephane30'
@@ -416,6 +417,7 @@ const BibleAudioPlayerContent = ({ layout }: BibleAudioPlayerContentProps) => {
         <Box className="mt-[6px]">
           <Options passage={passage} />
         </Box>
+        <RecordingAttribution />
       </Box>
     )
   }
@@ -458,6 +460,9 @@ const BibleAudioPlayerContent = ({ layout }: BibleAudioPlayerContentProps) => {
       </Box>
       <Box className="mt-[14px]">
         <Options passage={passage} />
+      </Box>
+      <Box className="mt-[6px]">
+        <RecordingAttribution />
       </Box>
     </Box>
   )
