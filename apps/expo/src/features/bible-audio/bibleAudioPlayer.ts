@@ -1,10 +1,6 @@
 import { getDefaultStore } from 'jotai/vanilla'
 import type { Verse } from '~common/types'
-import {
-  getNextAvailableChapterLocation,
-  getPreviousAvailableChapterLocation,
-  resolveBibleCoverageCanonId,
-} from '~helpers/bibleCoverage'
+import { resolveBibleCoverageCanonId } from '~helpers/bibleCoverage'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
 import { getBibleVersionCanonId } from '~helpers/bibleVersions'
 import { defaultResourceAccess } from '~features/resources/resourceAccess'
@@ -18,13 +14,17 @@ import {
   bibleAudioStateAtom,
 } from './atoms'
 import {
+  getRecording,
+  recordingCoversBook,
   rememberBibleAudioChoice,
   resolveBibleAudio,
   SPEECH_CHOICE,
   type BibleAudioChoice,
+  type BibleAudioRecording,
 } from './audioCatalog'
 import { countBibleAudioListen } from './listenStats'
 import { createRecordedEngine } from './recordedEngine'
+import { getAdjacentLocation, getFirstCoveredLocation } from './recordingNavigation'
 import { createSpeechEngine } from './speechEngine'
 import type {
   BibleAudioEngine,
@@ -231,16 +231,30 @@ export const skip = (direction: -1 | 1) => current?.skip(direction)
 /** A point of the chapter, from 0 to 1, as the progress bar gives it. */
 export const seekTo = (ratio: number) => current?.seekTo(Math.max(0, Math.min(ratio, 1)))
 
+/** The recording heard, when it covers only some books: the player keeps to them. */
+const getPartialRecording = (recordingId: string | null) => {
+  const recording = getRecording(recordingId)
+  return recording?.books ? recording : undefined
+}
+
+/**
+ * The chapter before or after, following the Bible, or the books of a partial recording when
+ * `recording` is one: Proverbs 31 then John 1.
+ */
 export const getAdjacentPassage = async (
   passage: BibleAudioPassage,
-  direction: 'previous' | 'next'
+  direction: 'previous' | 'next',
+  recording?: BibleAudioRecording
 ): Promise<BibleAudioPassage | null> => {
   const coverage = await loadBibleAudioCoverage(passage.version)
   const canonId = resolveBibleCoverageCanonId(coverage, getBibleVersionCanonId(passage.version))
-  const target =
-    direction === 'next'
-      ? getNextAvailableChapterLocation(passage.book, passage.chapter, coverage, canonId)
-      : getPreviousAvailableChapterLocation(passage.book, passage.chapter, coverage, canonId)
+  const target = getAdjacentLocation(
+    passage,
+    direction,
+    coverage,
+    canonId,
+    recording?.books ? book => recordingCoversBook(recording, book) : undefined
+  )
   return target ? { version: passage.version, book: target.book, chapter: target.chapter } : null
 }
 
@@ -251,16 +265,19 @@ export async function goToAdjacentChapter(
   const { passage } = getState()
   if (!passage) return
   const shouldPlay = options.play ?? isActive()
-  const target = await getAdjacentPassage(passage, direction)
+  const { source, recordingId } = getState()
+  const partial = source === 'recorded' ? getPartialRecording(recordingId) : undefined
+  const target = await getAdjacentPassage(passage, direction, partial)
   if (!target) {
     // The end of the Bible.
     if (direction === 'next' && options.play) setState({ status: 'ended' })
     return
   }
-  // Within a book, the recording heard plays on; another book takes the reader's choice again.
+  // Within a book, or through the books of a partial recording, the recording heard plays on;
+  // another book takes the reader's choice again.
   await load(target, {
     play: shouldPlay,
-    choice: target.book.Numero === passage.book.Numero ? currentChoice() : undefined,
+    choice: partial || target.book.Numero === passage.book.Numero ? currentChoice() : undefined,
   })
 }
 
@@ -279,11 +296,21 @@ function currentChoice(): BibleAudioChoice {
  * Listens to the passage with another recording of its version or with the device's voice, and
  * remembers it for the version.
  */
-export const chooseBibleAudio = (choice: BibleAudioChoice) => {
+export const chooseBibleAudio = async (choice: BibleAudioChoice) => {
   const { passage } = getState()
   if (!passage) return
   rememberBibleAudioChoice(passage.version, choice)
   if (choice === currentChoice()) return
+  const recording = getRecording(choice)
+  if (recording && !recordingCoversBook(recording, passage.book.Numero) && recording.books) {
+    // A recording that skips the book heard opens on the first chapter it covers.
+    const play = isActive()
+    const coverage = await loadBibleAudioCoverage(passage.version)
+    const canonId = resolveBibleCoverageCanonId(coverage, getBibleVersionCanonId(passage.version))
+    const first = getFirstCoveredLocation(recording.books, coverage, canonId)
+    if (first) void load({ version: passage.version, ...first }, { play, choice })
+    return
+  }
   void load(passage, { play: isActive(), choice })
 }
 

@@ -3129,6 +3129,7 @@
   "bibleAudio.coverage.only": "Only {{coverage}}",
   "bibleAudio.coverage.onlyOld": "Only the Old Testament",
   "bibleAudio.coverage.onlyNew": "Only the New Testament",
+  "bibleAudio.coverage.opens": "Opens {{book}}",
   "bibleAudio.deviceVoice": "Device voice",
   "bibleAudio.speechDetail": "Reads the version’s text",
   "bibleAudio.recordingCount": "{{count}} recordings",

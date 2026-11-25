@@ -27,7 +27,9 @@ suivent, ils ne le possèdent pas.
   pour le premier lancement. Les adresses se construisent dans le domaine
   (`@bible-strong/resource-domain/bible-audio`). Le lecteur retient un enregistrement par son id, ou
   la voix de l'appareil, et mémorise le choix par version. Un enregistrement qui ne couvre pas un
-  livre laisse la place à un autre de la version, puis à la voix. Pour en ajouter un : éditer
+  livre laisse la place à un autre de la version, puis à la voix. Un enregistrement partiel
+  enchaîne ses propres livres (Proverbes 31 puis Jean 1, `recordingNavigation.ts`) ; le choisir
+  depuis un livre qu'il ne couvre pas ouvre le premier chapitre qu'il couvre. Pour en ajouter un : éditer
   `packages/resource-catalog/src/bibleAudioCatalog.json`, puis `yarn resources:audio check` et
   `yarn resources:audio publish`.
 - **Mention de l'éditeur.** Un enregistrement peut porter une `attribution` (texte, lien, logo) que

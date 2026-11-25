@@ -15,6 +15,7 @@ import { useBookAndVersionSelector } from '~features/bible/BookSelectorSheet/Boo
 import type { Book } from '~assets/bible_versions/books-desc'
 import { getDefaultBibleTab, type BibleTab, type BibleTabActions } from '~state/tabs'
 import { bibleAudioStateAtom } from '../atoms'
+import { getRecording } from '../audioCatalog'
 import {
   changePassage,
   closeBibleAudioPlayer,
@@ -51,19 +52,24 @@ const getSelectorData = (passage: BibleAudioPassage): BibleTab['data'] => ({
 
 const useAdjacentChapters = (passage: BibleAudioPassage | null) => {
   const [adjacent, setAdjacent] = useState({ previous: false, next: false })
+  const { source, recordingId } = useAtomValue(bibleAudioStateAtom)
+  // A partial recording keeps to its books: Proverbs 31 has John 1 after it.
+  const recording = source === 'recorded' ? getRecording(recordingId) : undefined
+  const partial = recording?.books ? recording : undefined
   useEffect(() => {
     if (!passage) return
     let cancelled = false
     void Promise.all([
-      getAdjacentPassage(passage, 'previous'),
-      getAdjacentPassage(passage, 'next'),
+      getAdjacentPassage(passage, 'previous', partial),
+      getAdjacentPassage(passage, 'next', partial),
     ]).then(([previous, next]) => {
       if (!cancelled) setAdjacent({ previous: !!previous, next: !!next })
     })
     return () => {
       cancelled = true
     }
-  }, [passage])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [passage, partial?.id])
   return adjacent
 }
 

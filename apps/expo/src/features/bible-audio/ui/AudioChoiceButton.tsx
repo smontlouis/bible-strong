@@ -33,19 +33,26 @@ type ChoiceRowProps = {
   label: string
   detail?: string
   isSelected: boolean
-  isDisabled?: boolean
+  /** Not for the book heard: choosing it opens the first chapter it covers. */
+  opensElsewhere?: string
   onPress: () => void
 }
 
-const ChoiceRow = ({ icon, label, detail, isSelected, isDisabled, onPress }: ChoiceRowProps) => (
+const ChoiceRow = ({
+  icon,
+  label,
+  detail,
+  isSelected,
+  opensElsewhere,
+  onPress,
+}: ChoiceRowProps) => (
   <TouchableBox
     className="flex-row items-center px-[14px] min-h-[56px] py-[10px]"
-    style={{ opacity: isDisabled ? 0.45 : 1 }}
-    disabled={isDisabled}
     onPress={onPress}
     accessibilityRole="radio"
     accessibilityLabel={detail ? `${label}, ${detail}` : label}
-    accessibilityState={{ checked: isSelected, disabled: isDisabled }}
+    accessibilityHint={opensElsewhere}
+    accessibilityState={{ checked: isSelected }}
   >
     <IonIcon name={icon} size={22} color={isSelected ? 'primary' : 'default'} />
     <Box className="flex-[1] min-w-0 ml-[12px]">
@@ -62,6 +69,9 @@ const ChoiceRow = ({ icon, label, detail, isSelected, isDisabled, onPress }: Cho
       )}
     </Box>
     {isSelected && <IonIcon name="checkmark" size={20} color="primary" />}
+    {!isSelected && !!opensElsewhere && (
+      <IonIcon name="arrow-forward-outline" size={18} color="grey" />
+    )}
   </TouchableBox>
 )
 
@@ -103,6 +113,16 @@ const useCoverageText = () => {
   }
 }
 
+/** « Opens Proverbs »: where a recording that skips the book heard takes the reader. */
+const useOpensFirstBook = () => {
+  const { t } = useTranslation()
+  return (recording: BibleAudioRecording) => {
+    const first = [...(recording.books ?? [])].sort((a, b) => a - b)[0]
+    const book = books.find(candidate => candidate.Numero === first)
+    return book ? t('bibleAudio.coverage.opens', { book: t(book.Nom) }) : undefined
+  }
+}
+
 const Hairline = () => (
   <Box
     className="ml-[48px] border-separator"
@@ -119,13 +139,14 @@ type AudioChoiceButtonProps = { passage: BibleAudioPassage }
 const AudioChoiceButton = ({ passage }: AudioChoiceButtonProps) => {
   const { t } = useTranslation()
   const coverageText = useCoverageText()
+  const opensFirstBook = useOpensFirstBook()
   const { source, recordingId } = useAtomValue(bibleAudioStateAtom)
   const recordings = useVersionRecordings(passage.version)
   const isSpeech = source === 'speech'
   const current = recordings.find(recording => recording.id === recordingId)
 
   const choose = (choice: BibleAudioChoice, close: () => void) => {
-    chooseBibleAudio(choice)
+    void chooseBibleAudio(choice)
     close()
   }
 
@@ -188,7 +209,7 @@ const AudioChoiceButton = ({ passage }: AudioChoiceButtonProps) => {
                             label={getRecordingName(recording)}
                             detail={detail || undefined}
                             isSelected={!isSpeech && recording.id === recordingId}
-                            isDisabled={!covers}
+                            opensElsewhere={covers ? undefined : opensFirstBook(recording)}
                             onPress={() => choose(recording.id, navigation.close)}
                           />
                         </Box>

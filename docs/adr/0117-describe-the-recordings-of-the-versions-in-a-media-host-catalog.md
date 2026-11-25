@@ -116,3 +116,9 @@ TopChrétien's LSG (`lsg-topchretien`) is the same Trésor sonore reading, so `c
 longer names it. It stays in `catalog.json` only, through
 `apps/resource-studio/config/bible-audio-first-catalog-only.json`, so that the applications older
 than 28.2.8, which never hear Trésor sonore, keep a recording of the LSG.
+
+**A partial recording is heard through its own books.** While one plays, the chapter before and
+after, and the next one at the end of a chapter, stay among its books: Proverbs 31 is followed by
+John 1, and playback stops after John 21. Choosing it in « Écouter avec » from a book it skips
+opens the first chapter of the first book it covers (Proverbs 1); its row shows an arrow rather
+than being greyed.
