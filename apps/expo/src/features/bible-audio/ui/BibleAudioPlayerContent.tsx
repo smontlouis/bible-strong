@@ -6,6 +6,7 @@ import { useAnimatedStyle, withSpring } from 'react-native-reanimated'
 import DropdownMenu from '~common/DropdownMenu'
 import Box, { AnimatedBox, HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon, IonIcon } from '~common/ui/Icon'
+import Swap from '~common/ui/Swap'
 import Text from '~common/ui/Text'
 import { floatingShadow, radii } from '~common/ui/surfaces'
 import { colorWithOpacity } from '~themes/colorValues'
@@ -150,6 +151,10 @@ const MoreMenu = () => {
 type PassageTitleProps = { passage: BibleAudioPassage; size: 'large' | 'medium' }
 
 /** « Genèse 1 » and the version, each opening its selector. */
+// Where a leaving title and a leaving part of the Bible stay while they fade.
+const TITLE_ANCHOR = { left: 0, top: 0 }
+const PART_ANCHOR = { left: 0, top: 0, right: 0 }
+
 const PassageTitle = ({ passage, size }: PassageTitleProps) => {
   const { t } = useTranslation()
   const { title, subtitle, shortSubtitle } = useBibleAudioLabels()
@@ -163,12 +168,20 @@ const PassageTitle = ({ passage, size }: PassageTitleProps) => {
         accessibilityHint={title}
         className="flex-row items-center self-start"
       >
-        <Text
-          className={size === 'large' ? 'text-[20px] font-bold' : 'text-[18px] font-bold'}
-          numberOfLines={1}
+        {/* The title turns with the chapter, as the cover's number does. */}
+        <Swap
+          id={`${passage.book.Numero}-${passage.chapter}`}
+          order={passage.book.Numero * 1000 + passage.chapter}
+          distance={8}
+          anchor={TITLE_ANCHOR}
         >
-          {title}
-        </Text>
+          <Text
+            className={size === 'large' ? 'text-[20px] font-bold' : 'text-[18px] font-bold'}
+            numberOfLines={1}
+          >
+            {title}
+          </Text>
+        </Swap>
         <FeatherIcon name="chevron-down" size={16} color="grey" style={{ marginLeft: 4 }} />
       </TouchableBox>
       <TouchableBox
@@ -395,13 +408,15 @@ const BibleAudioPlayerContent = ({ layout }: BibleAudioPlayerContentProps) => {
             <BibleAudioCover passage={passage} size={104} />
           </Box>
           <Box className="flex-[1] min-w-0 ml-[14px]">
-            <Text
-              className="text-[11px] text-grey uppercase font-medium"
-              style={{ letterSpacing: 1.5 }}
-              numberOfLines={1}
-            >
-              {t(`bibleAudio.part.${part}`)}
-            </Text>
+            <Swap id={part} order={0} distance={0} anchor={PART_ANCHOR}>
+              <Text
+                className="text-[11px] text-grey uppercase font-medium"
+                style={{ letterSpacing: 1.5 }}
+                numberOfLines={1}
+              >
+                {t(`bibleAudio.part.${part}`)}
+              </Text>
+            </Swap>
             <Box className="mt-[2px]">
               <PassageTitle passage={passage} size="medium" />
             </Box>
@@ -450,13 +465,17 @@ const BibleAudioPlayerContent = ({ layout }: BibleAudioPlayerContentProps) => {
         >
           <FeatherIcon name="chevron-down" size={26} color="default" />
         </TouchableBox>
-        <Text
-          className="flex-[1] text-center text-[11px] text-grey uppercase font-medium"
-          style={{ letterSpacing: 1.5 }}
-          numberOfLines={1}
-        >
-          {t(`bibleAudio.part.${part}`)}
-        </Text>
+        <Box className="flex-[1]">
+          <Swap id={part} order={0} distance={0} anchor={PART_ANCHOR}>
+            <Text
+              className="text-center text-[11px] text-grey uppercase font-medium"
+              style={{ letterSpacing: 1.5 }}
+              numberOfLines={1}
+            >
+              {t(`bibleAudio.part.${part}`)}
+            </Text>
+          </Swap>
+        </Box>
         <MoreMenu />
       </HStack>
       <Box className="flex-[1] py-[12px]">
