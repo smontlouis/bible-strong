@@ -190,7 +190,7 @@ pub fn run() {
             files::fs_disk_space,
             files::fs_sha256,
             kv::kv_apply,
-            menu::menu_set_language,
+            menu::menu_update,
             sign_in::sign_in_start,
             sign_in::sign_in_result,
             sign_in::sign_in_cancel,
@@ -219,7 +219,13 @@ pub fn run() {
                 bootstrap::platform()
             )));
 
-            let menu = menu::build(&handle, "fr")?;
+            let menu = menu::build(
+                &handle,
+                &menu::MenuState {
+                    language: "fr".into(),
+                    ..Default::default()
+                },
+            )?;
             app.set_menu(menu)?;
             app.on_menu_event(|app, event| menu::forward(app, event.id().as_ref()));
 
