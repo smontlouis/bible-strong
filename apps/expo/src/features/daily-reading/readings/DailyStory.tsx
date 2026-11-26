@@ -567,10 +567,15 @@ const DailyStory = ({
               left: 0,
               right: 0,
               top: insets.top + 64,
-              // A reading card scrolls down to the bottom edge, behind the near layer.
-              bottom: isOpening ? insets.bottom + 132 : 0,
+              // The area stays the same from card to card, down to the bottom edge, so a card
+              // that leaves never moves: each card keeps its own room at the bottom instead.
+              bottom: 0,
               alignItems: 'center',
             },
+            // The browser draws the text once on its own layer and slides that layer, as it
+            // does the scene's pictures: drawn again at each step, the lines snapped to the
+            // pixels one after the other and the text moved in small jumps (2026-11-26).
+            native ? null : ({ willChange: 'transform' } as object),
             textTilt,
           ]}
         >
@@ -593,7 +598,9 @@ const DailyStory = ({
                   style={{ width: '100%', maxWidth: 560 }}
                   contentContainerStyle={{
                     flexGrow: 1,
-                    paddingBottom: isOpening ? 0 : insets.bottom + 96,
+                    // The verse leaves room for « Changer de verset »; a reading card scrolls
+                    // behind the near layer, its last line stopping above it.
+                    paddingBottom: insets.bottom + (isOpening ? 132 : 96),
                   }}
                   showsVerticalScrollIndicator={false}
                 >
