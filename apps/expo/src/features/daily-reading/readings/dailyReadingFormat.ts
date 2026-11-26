@@ -52,7 +52,8 @@ export type DailyCatalogCollection = {
   days: number
 }
 
-export type DailyScene = { hash: string; widths: number[] }
+/** `thumbhash`: a ThumbHash of the background, drawn at once while the scene loads (2026-11-26). */
+export type DailyScene = { hash: string; widths: number[]; thumbhash?: string }
 
 export type DailyCatalog = {
   generatedAt: string
@@ -87,13 +88,24 @@ const parseCatalogCollection = (value: unknown): DailyCatalogCollection | undefi
   }
 }
 
+const THUMBHASH_PATTERN = /^[A-Za-z0-9+/]{8,64}={0,2}$/
+
 const parseScene = (value: unknown): DailyScene | undefined => {
   if (!isRecord(value) || typeof value.hash !== 'string' || !HASH_PATTERN.test(value.hash))
     return undefined
   const widths = Array.isArray(value.widths)
     ? value.widths.filter((width): width is number => typeof width === 'number' && width > 0)
     : []
-  return widths.length ? { hash: value.hash, widths: [...widths].sort((a, b) => a - b) } : undefined
+  if (!widths.length) return undefined
+  const thumbhash =
+    typeof value.thumbhash === 'string' && THUMBHASH_PATTERN.test(value.thumbhash)
+      ? value.thumbhash
+      : undefined
+  return {
+    hash: value.hash,
+    widths: [...widths].sort((a, b) => a - b),
+    ...(thumbhash ? { thumbhash } : {}),
+  }
 }
 
 /** Keeps the well-formed collections and scenes of a published catalog, or nothing. */

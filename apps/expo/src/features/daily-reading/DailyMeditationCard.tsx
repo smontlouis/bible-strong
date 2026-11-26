@@ -32,6 +32,8 @@ export interface DailyMeditationCardProps {
   footer?: React.ReactNode
   style?: ViewStyle
   onContentHeight?: (height: number) => void
+  /** Whether the card is in front of the carousel: one behind loads its scene once in front. */
+  active?: boolean
 }
 
 const DailyMeditationCard = ({
@@ -43,6 +45,7 @@ const DailyMeditationCard = ({
   footer,
   style,
   onContentHeight,
+  active,
 }: DailyMeditationCardProps) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
@@ -105,6 +108,7 @@ const DailyMeditationCard = ({
           footer={footer}
           style={style}
           onContentHeight={onContentHeight}
+          active={active}
           onChange={() => router.push('/daily-reading')}
           actions={
             <>

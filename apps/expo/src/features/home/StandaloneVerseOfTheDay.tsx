@@ -32,6 +32,8 @@ export interface VerseCardProps {
   footer?: React.ReactNode
   style?: ViewStyle
   onContentHeight?: (height: number) => void
+  /** Whether the card is in front of the carousel: one behind loads its scene once in front. */
+  active?: boolean
 }
 
 const dayToAgo = (day: number, t: TFunction<'translation'>) => {

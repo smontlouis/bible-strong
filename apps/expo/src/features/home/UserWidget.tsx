@@ -122,6 +122,8 @@ const UserWidget = () => {
               >
                 <VerseOfTheDay
                   addDay={addDay}
+                  // The days behind today's load their scene only once they come in front.
+                  active={index === activeVerseIndex}
                   style={{ height: '100%' }}
                   onContentHeight={height => reportCardHeight(addDay, height)}
                 />

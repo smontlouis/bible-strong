@@ -36,7 +36,7 @@ const DAY_LABELS = [
 
 /** The verse of the day of the home, from the verse meditations: tapping it opens the meditation. */
 const VerseMeditationCard = (props: VerseCardProps) => {
-  const { addDay, desktop = false, navigation, footer, style, onContentHeight } = props
+  const { addDay, desktop = false, navigation, footer, style, onContentHeight, active } = props
   const { t } = useTranslation()
   const router = useRouter()
   const dispatch = useDispatch()
@@ -100,6 +100,7 @@ const VerseMeditationCard = (props: VerseCardProps) => {
           footer={footer}
           style={style}
           onContentHeight={onContentHeight}
+          active={active}
           onChange={() => router.push('/daily-reading')}
           actions={
             <>

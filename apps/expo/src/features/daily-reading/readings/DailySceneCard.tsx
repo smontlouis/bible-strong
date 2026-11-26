@@ -1,9 +1,10 @@
 import { Image } from 'expo-image'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Link, type Href } from 'expo-router'
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  PixelRatio,
   Platform,
   Pressable,
   StyleSheet,
@@ -19,7 +20,7 @@ import { radii } from '~common/ui/surfaces'
 import { getVerseCardHeight, VERSE_CARD_HEIGHT } from '~features/home/verseCardLayout'
 import { selectFontFamily } from '~redux/selectors/user'
 import { resolveFontFamily } from '~themes/styleValues'
-import { useDailySceneUri } from './useDailyReadings'
+import { useDailySceneThumbhash, useDailySceneUri } from './useDailyReadings'
 
 const INK = '#ffffff'
 const SOFT_INK = 'rgba(255,255,255,0.82)'
@@ -45,6 +46,11 @@ export type DailySceneCardProps = {
   style?: ViewStyle
   onContentHeight?: (height: number) => void
   onChange: () => void
+  /**
+   * Whether the card is in front: a day stacked behind today's shows its scene's ThumbHash and
+   * loads its picture only once it comes in front (2026-11-26). In front by default.
+   */
+  active?: boolean
 }
 
 /**
@@ -63,14 +69,21 @@ const DailySceneCard = ({
   style,
   onContentHeight,
   onChange,
+  active = true,
 }: DailySceneCardProps) => {
   const { t } = useTranslation()
   const fontFamily = resolveFontFamily(useSelector(selectFontFamily))
-  // The small file, drawn at the size the stories give it: the card's middle sits three
-  // quarters down the full-screen scene, at its scale, where the horizon meets the ground.
-  const background = useDailySceneUri(sceneId, 'bg', 768)
+  // The scene at the size and in the file the stories give it, so opening them reuses the
+  // picture: the card's middle sits three quarters down the full-screen scene, where the horizon
+  // meets the ground.
   const { width, height } = useWindowDimensions()
   const sceneSize = Math.max(width, height)
+  const background = useDailySceneUri(sceneId, 'bg', sceneSize * Math.min(3, PixelRatio.get()))
+  const thumbhash = useDailySceneThumbhash(sceneId)
+  // Once in front, a card keeps its picture when it goes back behind.
+  const [seen, setSeen] = useState(active)
+  if (active && !seen) setSeen(true)
+  const showPicture = Boolean(background) && seen
   return (
     <Link href={href} asChild>
       <Pressable
@@ -92,9 +105,11 @@ const DailySceneCard = ({
               backgroundColor: '#1b1a22',
             }}
           >
-            {background ? (
+            {showPicture || thumbhash ? (
               <Image
-                source={{ uri: background }}
+                source={showPicture ? { uri: background } : null}
+                placeholder={thumbhash ? { thumbhash } : undefined}
+                placeholderContentFit="cover"
                 contentFit="cover"
                 // A light blur, computed once at decoding: the text reads better over the scene.
                 // The web counts it in CSS pixels of the drawn image, iOS and Android in a smaller
@@ -120,6 +135,8 @@ const DailySceneCard = ({
             />
             <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 20, paddingBottom: 16 }}>
               <View
+                // Room after the reference: the verse breathes before the actions.
+                style={{ paddingBottom: 20 }}
                 onLayout={({ nativeEvent }) =>
                   onContentHeight?.(getVerseCardHeight(nativeEvent.layout.height))
                 }
@@ -155,7 +172,8 @@ const DailySceneCard = ({
                     color: INK,
                     fontSize: 19,
                     lineHeight: 28,
-                    marginTop: 10,
+                    // Room under the label: the verse starts apart from it.
+                    marginTop: 24,
                     ...SHADOW,
                   }}
                 >

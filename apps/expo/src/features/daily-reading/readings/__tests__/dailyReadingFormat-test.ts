@@ -72,6 +72,24 @@ describe('parseDailyCatalog', () => {
     expect(catalog!.scenes).toEqual({ 'champ-a': { hash: '0123456789ab', widths: [768, 1254] } })
   })
 
+  it('keeps a scene’s ThumbHash, and drops one that is not base64', () => {
+    const catalog = parseDailyCatalog({
+      format: 'bible-strong-daily-readings-catalog',
+      version: 1,
+      collections: {},
+      scenes: {
+        'champ-a': {
+          hash: '0123456789ab',
+          widths: [768],
+          thumbhash: '5fcJPwR4iHh/iIhxiGh3h4eYlQl4u4AE',
+        },
+        'champ-b': { hash: '0123456789ab', widths: [768], thumbhash: '<svg onload=x>' },
+      },
+    })
+    expect(catalog!.scenes['champ-a']!.thumbhash).toBe('5fcJPwR4iHh/iIhxiGh3h4eYlQl4u4AE')
+    expect(catalog!.scenes['champ-b']).toEqual({ hash: '0123456789ab', widths: [768] })
+  })
+
   it('refuses another document', () => {
     expect(parseDailyCatalog({ version: 1, collections: {}, scenes: {} })).toBeUndefined()
   })
