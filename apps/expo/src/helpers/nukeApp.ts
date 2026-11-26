@@ -4,7 +4,7 @@ import * as FileSystem from 'expo-file-system/legacy'
 import * as Updates from 'expo-updates'
 
 import { closeBiblesDb } from '~helpers/biblesDb'
-import { storage } from '~helpers/storage'
+import { flushStorage, storage } from '~helpers/storage'
 import { persistor } from '~redux/store'
 
 /**
@@ -55,6 +55,8 @@ export const nukeApp = async (): Promise<void> => {
   // folder while this instance is open can make later writes fail.
   try {
     storage.clearAll()
+    // The browser empties IndexedDB in the background: done before the reload reads it again.
+    await flushStorage()
   } catch (e) {
     console.log('[Nuke] storage.clearAll failed:', e)
   }
