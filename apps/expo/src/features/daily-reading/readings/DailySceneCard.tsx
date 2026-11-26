@@ -3,7 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { Link, type Href } from 'expo-router'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native'
+import { Pressable, StyleSheet, useWindowDimensions, View, type ViewStyle } from 'react-native'
 import { useSelector } from 'react-redux'
 import CommonLink from '~common/Link'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -59,7 +59,11 @@ const DailySceneCard = ({
 }: DailySceneCardProps) => {
   const { t } = useTranslation()
   const fontFamily = resolveFontFamily(useSelector(selectFontFamily))
+  // The small file, drawn at the size the stories give it: the card shows the middle of the
+  // full-screen scene, at its scale, and the zoom into the stories keeps the same picture.
   const background = useDailySceneUri(sceneId, 'bg', 768)
+  const { width, height } = useWindowDimensions()
+  const sceneSize = Math.max(width, height)
   return (
     <Link href={href} asChild>
       <Pressable
@@ -85,9 +89,16 @@ const DailySceneCard = ({
               <Image
                 source={{ uri: background }}
                 contentFit="cover"
-                contentPosition="bottom center"
                 transition={300}
-                style={StyleSheet.absoluteFill}
+                style={{
+                  position: 'absolute',
+                  left: '50%',
+                  top: '50%',
+                  width: sceneSize,
+                  height: sceneSize,
+                  marginLeft: -sceneSize / 2,
+                  marginTop: -sceneSize / 2,
+                }}
                 accessibilityIgnoresInvertColors
               />
             ) : null}
