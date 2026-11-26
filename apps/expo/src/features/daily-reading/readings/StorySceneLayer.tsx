@@ -7,7 +7,13 @@ import Animated, {
   useDerivedValue,
   type SharedValue,
 } from 'react-native-reanimated'
-import { useTiltStyle, type SceneDepth, type Tilt } from './storySceneMotion'
+import {
+  focusTransformOf,
+  useTiltStyle,
+  verticalShiftOf,
+  type SceneDepth,
+  type Tilt,
+} from './storySceneMotion'
 
 export type StorySceneLayerProps = {
   uri: string
@@ -79,17 +85,8 @@ const StorySceneLayer = ({
   still,
   cutOut = false,
 }: StorySceneLayerProps) => {
-  const tiltStyle = useTiltStyle(tilt, depth.shift, depth.direction, still)
-  const focusStyle = useAnimatedStyle(() => {
-    const amount = focus.get()
-    if (still) return { transform: [{ translateY: 0 }, { scale: 1 }] }
-    return {
-      transform: [
-        { translateY: depth.focusLift * amount },
-        { scale: depth.scale * (1 + (depth.focusScale - 1) * amount) },
-      ],
-    }
-  })
+  const tiltStyle = useTiltStyle(tilt, depth.shift, depth.direction, still, verticalShiftOf(depth))
+  const focusStyle = useAnimatedStyle(() => focusTransformOf(depth, focus.get(), still))
   const blur = useDerivedValue(() => depth.blur + (depth.focusBlur - depth.blur) * focus.get())
   const loaded = usePicture(uri)
   const [size, setSize] = useState<{ width: number; height: number } | null>(null)

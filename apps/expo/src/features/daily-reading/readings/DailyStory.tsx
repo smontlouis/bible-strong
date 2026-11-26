@@ -12,11 +12,7 @@ import {
   type GestureResponderEvent,
 } from 'react-native'
 import Animated, {
-  cubicBezier,
   Easing,
-  FadeOut,
-  FadeOutUp,
-  LinearTransition,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -37,12 +33,15 @@ import {
 import { selectFontFamily } from '~redux/selectors/user'
 import { resolveFontFamily } from '~themes/styleValues'
 import type { DailyCard, DailyEntry, DailyStrongWord } from './dailyReadingFormat'
+import StoryMotion, { StoryPresence } from './StoryMotion'
 import StorySceneLayer from './StorySceneLayer'
 import {
   BACKGROUND_DEPTH,
   FOCUS_DURATION,
   FOCUS_EASING,
   FOREGROUND_DEPTH,
+  TEXT_FOCUS_SCALE,
+  TEXT_MOTION,
   TEXT_SHIFT,
   useTiltStyle,
 } from './storySceneMotion'
@@ -64,50 +63,7 @@ const READING_FADE = {
   transitionTimingFunction: 'ease-in-out',
 } as const
 
-/**
- * A text that arrives: it rises a little as it appears. A CSS animation, played on mount: the
- * layout animations (`entering`) froze the texts in absolute positions on the web a few seconds
- * after they came, and moved them (2026-11-26).
- */
-const RISE = {
-  from: { opacity: 0, transform: [{ translateY: 12 }] },
-  to: { opacity: 1, transform: [{ translateY: 0 }] },
-}
-const EASE_OUT_CUBIC = cubicBezier(0.33, 1, 0.68, 1)
-const rise = (delay = 0) =>
-  ({
-    animationName: RISE,
-    animationDuration: 380,
-    animationDelay: delay,
-    animationTimingFunction: EASE_OUT_CUBIC,
-    animationFillMode: 'backwards',
-  }) as const
-
-/** A small badge that pops in. */
-const POP = {
-  from: { opacity: 0, transform: [{ scale: 0.6 }] },
-  to: { opacity: 1, transform: [{ scale: 1 }] },
-}
-const popIn = (delay = 0) =>
-  ({
-    animationName: POP,
-    animationDuration: 200,
-    animationDelay: delay,
-    animationTimingFunction: EASE_OUT_CUBIC,
-    animationFillMode: 'backwards',
-  }) as const
-
-/** A button that fades in. */
-const FADE = { from: { opacity: 0 }, to: { opacity: 1 } }
-const fadeIn = (delay = 0) =>
-  ({
-    animationName: FADE,
-    animationDuration: 300,
-    animationDelay: delay,
-    animationFillMode: 'backwards',
-  }) as const
-
-/** Leaving animations run on iOS and Android; the web has no way to keep a removed element. */
+/** iOS and Android: what is not the web. */
 const native = Platform.OS !== 'web'
 
 type StoryCard = Exclude<DailyCard, { type: 'questions' }> | { type: 'end' }
@@ -175,10 +131,13 @@ const DailyStory = ({
   const wide = native ? Boolean(stageWidth) : !area || area.width > area.height
   // Another verse or another day starts again on its first card; its scene fades in over the last.
   const [shownEntry, setShownEntry] = useState(entry)
+  // Each day or verse shown counts a round: its first card comes as a new one.
+  const [round, setRound] = useState(0)
   if (shownEntry !== entry) {
     setShownEntry(entry)
     setIndex(0)
     setDeeper(false)
+    setRound(round + 1)
   }
   const questions = entry.cards.find(card => card.type === 'questions')?.items ?? []
   const cards: StoryCard[] = [
@@ -186,6 +145,7 @@ const DailyStory = ({
     { type: 'end' },
   ]
   const card = cards[Math.min(index, cards.length - 1)]!
+
   const isOpening = card.type === 'verse' || card.type === 'opening'
   const isEnd = card.type === 'end'
   // The verse and the closing blessing sit on the sharp scene; reading cards on the blurred one.
@@ -202,6 +162,9 @@ const DailyStory = ({
   const tilt = useEntityPortraitTilt()
   const pointer = useEntityPortraitPointer(tilt)
   const textTilt = useTiltStyle(tilt, TEXT_SHIFT, 1, still)
+  const textFocus = useAnimatedStyle(() => ({
+    transform: [{ scale: still ? 1 : 1 + (TEXT_FOCUS_SCALE - 1) * focus.get() }],
+  }))
 
   const go = (step: number) => {
     // The last card ends with « Terminer », never with a stray tap.
@@ -238,37 +201,41 @@ const DailyStory = ({
             : split?.reference
         return (
           <>
-            <Animated.View style={rise()}>
+            <StoryMotion>
               <Text style={[reading, { fontSize: 22, lineHeight: 32, textAlign: 'center' }]}>
                 {quote}
               </Text>
-            </Animated.View>
+            </StoryMotion>
             {reference ? (
-              <Animated.View style={rise(160)}>
+              <StoryMotion delay={TEXT_MOTION.step}>
                 <Text
                   className="text-[12px] uppercase tracking-[1.2px] mt-[16px] text-center"
                   style={{ color: SOFT_INK, ...SHADOW }}
                 >
                   {reference}
                 </Text>
-              </Animated.View>
+              </StoryMotion>
             ) : null}
           </>
         )
       }
       case 'hook':
         return (
-          <Animated.View style={rise()}>
+          <StoryMotion>
             <Text style={[reading, { fontSize: 25, lineHeight: 35, textAlign: 'center' }]}>
               {current.text}
             </Text>
-          </Animated.View>
+          </StoryMotion>
         )
       case 'part':
         return (
           <>
             {current.strong ? (
-              <Animated.View style={[popIn(220), { alignSelf: 'flex-start' }]}>
+              <StoryMotion
+                enter="pop"
+                delay={TEXT_MOTION.popDelay}
+                style={{ alignSelf: 'flex-start' }}
+              >
                 <Pressable
                   disabled={!onOpenStrong}
                   onPress={() => current.strong && onOpenStrong?.(current.strong)}
@@ -295,27 +262,27 @@ const DailyStory = ({
                     {current.strong.code}
                   </Text>
                 </Pressable>
-              </Animated.View>
+              </StoryMotion>
             ) : null}
-            <Animated.View style={rise()}>
+            <StoryMotion>
               <Text style={[reading, { fontSize: 23, lineHeight: 30, marginBottom: 14 }]}>
                 {current.title}
               </Text>
-            </Animated.View>
-            <Animated.View style={rise(110)}>
+            </StoryMotion>
+            <StoryMotion delay={TEXT_MOTION.step}>
               <Text style={[reading, { fontSize: 17, lineHeight: 28 }]}>{current.text}</Text>
-            </Animated.View>
+            </StoryMotion>
           </>
         )
       case 'prayer':
         return (
           <>
-            <Animated.View style={rise()}>
+            <StoryMotion>
               <Kicker>{t('dailyReading.prayer')}</Kicker>
-            </Animated.View>
-            <Animated.View style={rise(110)}>
+            </StoryMotion>
+            <StoryMotion delay={TEXT_MOTION.step}>
               <Text style={[reading, { fontSize: 19, lineHeight: 31 }]}>{current.text}</Text>
-            </Animated.View>
+            </StoryMotion>
           </>
         )
       case 'text':
@@ -327,7 +294,10 @@ const DailyStory = ({
               const source =
                 lines.length > 1 && SOURCE_LINE.test(lines.at(-1)!) ? lines.pop() : undefined
               return (
-                <Animated.View key={paragraphIndex} style={rise(paragraphIndex * 90)}>
+                <StoryMotion
+                  key={paragraphIndex}
+                  delay={paragraphIndex * TEXT_MOTION.paragraphStep}
+                >
                   <Text style={[reading, { fontSize: 17, lineHeight: 28 }]}>
                     {lines.join('\n')}
                   </Text>
@@ -336,7 +306,7 @@ const DailyStory = ({
                       {source}
                     </Text>
                   ) : null}
-                </Animated.View>
+                </StoryMotion>
               )
             })}
           </Box>
@@ -344,12 +314,12 @@ const DailyStory = ({
       case 'end':
         return deeper ? (
           <>
-            <Animated.View style={rise()}>
+            <StoryMotion>
               <Kicker>{t('dailyReading.goDeeper')}</Kicker>
-            </Animated.View>
+            </StoryMotion>
             <Box className={onAskQuestion ? 'gap-[12px]' : 'gap-[20px]'}>
               {questions.map((item, itemIndex) => (
-                <Animated.View key={item} style={rise(140 + itemIndex * 140)}>
+                <StoryMotion key={item} delay={(itemIndex + 1) * TEXT_MOTION.questionStep}>
                   {onAskQuestion ? (
                     <Pressable
                       onPress={() => onAskQuestion(item)}
@@ -378,36 +348,36 @@ const DailyStory = ({
                   ) : (
                     <Text style={[reading, { fontSize: 20, lineHeight: 29 }]}>{item}</Text>
                   )}
-                </Animated.View>
+                </StoryMotion>
               ))}
             </Box>
             {onAskQuestion ? (
-              <Animated.View style={rise(140 + questions.length * 140)}>
+              <StoryMotion delay={(questions.length + 1) * TEXT_MOTION.questionStep}>
                 <Text
                   className="text-[13px] mt-[16px] text-center"
                   style={{ color: SOFT_INK, ...SHADOW }}
                 >
                   {t('dailyReading.askStrobiHint')}
                 </Text>
-              </Animated.View>
+              </StoryMotion>
             ) : null}
           </>
         ) : (
-          <Animated.View exiting={native ? FadeOutUp.duration(220) : undefined}>
-            <Animated.View style={rise()}>
+          <View>
+            <StoryMotion>
               <Text
                 className="text-[11px] font-semibold uppercase tracking-[1.4px] mb-[16px] text-center"
                 style={{ color: SOFT_INK, ...SHADOW }}
               >
                 {t('dailyReading.forTheRoad')}
               </Text>
-            </Animated.View>
-            <Animated.View style={rise(120)}>
+            </StoryMotion>
+            <StoryMotion delay={TEXT_MOTION.step}>
               <Text style={[reading, { fontSize: 25, lineHeight: 36, textAlign: 'center' }]}>
                 {blessing}
               </Text>
-            </Animated.View>
-          </Animated.View>
+            </StoryMotion>
+          </View>
         )
     }
   }
@@ -498,26 +468,43 @@ const DailyStory = ({
             textTilt,
           ]}
         >
-          <ScrollView
-            key={index}
-            style={{ width: '100%', maxWidth: 560 }}
-            contentContainerStyle={{ flexGrow: 1 }}
-            showsVerticalScrollIndicator={false}
+          {/* The focus: the text comes a little closer on the reading cards. */}
+          <Animated.View
+            pointerEvents="box-none"
+            style={[{ flex: 1, alignSelf: 'stretch', alignItems: 'center' }, textFocus]}
           >
-            {/* The whole height answers a tap, above and below a short text too. */}
-            <Pressable
-              onPress={tap}
-              accessible={false}
-              style={{
-                flexGrow: 1,
-                justifyContent: 'center',
-                paddingHorizontal: 28,
-                paddingVertical: 12,
-              }}
-            >
-              <View accessibilityLiveRegion="polite">{renderCard(card)}</View>
-            </Pressable>
-          </ScrollView>
+            {/* One card at a time: the one that leaves fades out, then the next one's texts rise. */}
+            <StoryPresence>
+              <StoryMotion
+                key={`${round}:${index}:${deeper ? 'deeper' : ''}`}
+                enter="none"
+                leave
+                // A click beside the text, on a wide screen, reaches the tap area under it.
+                pointerEvents="box-none"
+                style={{ position: 'absolute', inset: 0, alignItems: 'center' }}
+              >
+                <ScrollView
+                  style={{ width: '100%', maxWidth: 560 }}
+                  contentContainerStyle={{ flexGrow: 1 }}
+                  showsVerticalScrollIndicator={false}
+                >
+                  {/* The whole height answers a tap, above and below a short text too. */}
+                  <Pressable
+                    onPress={tap}
+                    accessible={false}
+                    style={{
+                      flexGrow: 1,
+                      justifyContent: 'center',
+                      paddingHorizontal: 28,
+                      paddingVertical: 12,
+                    }}
+                  >
+                    <View accessibilityLiveRegion="polite">{renderCard(card)}</View>
+                  </Pressable>
+                </ScrollView>
+              </StoryMotion>
+            </StoryPresence>
+          </Animated.View>
         </Animated.View>
 
         {/* The near layer passes in front of the text. */}
@@ -602,72 +589,71 @@ const DailyStory = ({
           </View>
         </View>
 
-        {index === 0 && onChangeVerse ? (
-          <Animated.View
-            pointerEvents="box-none"
-            style={[
-              fadeIn(250),
-              {
-                position: 'absolute',
-                left: 24,
-                right: 24,
-                bottom: insets.bottom + 28,
-                alignItems: 'center',
-              },
-            ]}
-          >
-            <StoryButton
-              icon="refresh-cw"
-              label={t('dailyReading.changeVerse')}
-              onPress={onChangeVerse}
-            />
-          </Animated.View>
-        ) : null}
+        {/* Shown on the verse only: it fades in with it and out as the reading starts. */}
+        <View
+          pointerEvents="box-none"
+          style={{
+            position: 'absolute',
+            left: 24,
+            right: 24,
+            bottom: insets.bottom + 28,
+            alignItems: 'center',
+          }}
+        >
+          <StoryPresence>
+            {index === 0 && onChangeVerse ? (
+              <StoryMotion key="change-verse" enter="fade" delay={TEXT_MOTION.buttonsDelay} leave>
+                <StoryButton
+                  icon="refresh-cw"
+                  label={t('dailyReading.changeVerse')}
+                  onPress={onChangeVerse}
+                />
+              </StoryMotion>
+            ) : null}
+          </StoryPresence>
+        </View>
 
-        {isEnd ? (
-          <Animated.View
-            pointerEvents="box-none"
-            style={[
-              rise(260),
-              {
-                position: 'absolute',
-                left: 24,
-                right: 24,
-                bottom: insets.bottom + 24,
-                alignItems: 'center',
-              },
-            ]}
-          >
-            <View style={{ width: '100%', maxWidth: 420, gap: 10 }}>
-              <Animated.View
-                layout={native ? LinearTransition.duration(240) : undefined}
-                style={{ flexDirection: 'row', gap: 10 }}
+        {/* The closing buttons; « Aller plus loin » turns them over with the card. */}
+        <View
+          pointerEvents="box-none"
+          style={{
+            position: 'absolute',
+            left: 24,
+            right: 24,
+            bottom: insets.bottom + 24,
+            alignItems: 'center',
+          }}
+        >
+          <StoryPresence>
+            {isEnd ? (
+              <StoryMotion
+                key={deeper ? 'end-deeper' : 'end'}
+                delay={TEXT_MOTION.buttonsDelay}
+                duration={TEXT_MOTION.buttonsDuration}
+                leave
+                style={{ width: '100%', maxWidth: 420, gap: 10 }}
               >
-                {onShare ? (
-                  <Animated.View
-                    layout={native ? LinearTransition.duration(240) : undefined}
-                    style={{ flex: 1 }}
-                  >
-                    <StoryButton icon="share-2" label={t('Partager')} onPress={onShare} />
-                  </Animated.View>
-                ) : null}
-                {questions.length && !deeper ? (
-                  <Animated.View
-                    exiting={native ? FadeOut.duration(160) : undefined}
-                    style={{ flex: 1 }}
-                  >
-                    <StoryButton
-                      icon="compass"
-                      label={t('dailyReading.goFurther')}
-                      onPress={() => setDeeper(true)}
-                    />
-                  </Animated.View>
-                ) : null}
-              </Animated.View>
-              <StoryButton solid label={t('dailyReading.finish')} onPress={onClose} />
-            </View>
-          </Animated.View>
-        ) : null}
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  {onShare ? (
+                    <View style={{ flex: 1 }}>
+                      <StoryButton icon="share-2" label={t('Partager')} onPress={onShare} />
+                    </View>
+                  ) : null}
+                  {questions.length && !deeper ? (
+                    <View style={{ flex: 1 }}>
+                      <StoryButton
+                        icon="compass"
+                        label={t('dailyReading.goFurther')}
+                        onPress={() => setDeeper(true)}
+                      />
+                    </View>
+                  ) : null}
+                </View>
+                <StoryButton solid label={t('dailyReading.finish')} onPress={onClose} />
+              </StoryMotion>
+            ) : null}
+          </StoryPresence>
+        </View>
       </View>
     </View>
   )

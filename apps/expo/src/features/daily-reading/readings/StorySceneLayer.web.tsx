@@ -1,7 +1,13 @@
 import { Image } from 'expo-image'
 import { StyleSheet } from 'react-native'
 import Animated from 'react-native-reanimated'
-import { FOCUS_CSS_EASING, FOCUS_DURATION, useTiltStyle } from './storySceneMotion'
+import {
+  FOCUS_CSS_EASING,
+  FOCUS_DURATION,
+  focusTransformOf,
+  useTiltStyle,
+  verticalShiftOf,
+} from './storySceneMotion'
 import type { StorySceneLayerProps } from './StorySceneLayer'
 
 /**
@@ -10,7 +16,7 @@ import type { StorySceneLayerProps } from './StorySceneLayer'
  * No Skia here, which the web would have to download.
  */
 const StorySceneLayer = ({ uri, depth, focused, tilt, still }: StorySceneLayerProps) => {
-  const tiltStyle = useTiltStyle(tilt, depth.shift, depth.direction, still)
+  const tiltStyle = useTiltStyle(tilt, depth.shift, depth.direction, still, verticalShiftOf(depth))
   const amount = focused ? 1 : 0
   return (
     <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, tiltStyle]}>
@@ -18,12 +24,7 @@ const StorySceneLayer = ({ uri, depth, focused, tilt, still }: StorySceneLayerPr
         style={[
           StyleSheet.absoluteFill,
           {
-            transform: still
-              ? [{ translateY: 0 }, { scale: 1 }]
-              : [
-                  { translateY: depth.focusLift * amount },
-                  { scale: depth.scale * (1 + (depth.focusScale - 1) * amount) },
-                ],
+            ...focusTransformOf(depth, amount, still),
             filter: `blur(${depth.blur + (depth.focusBlur - depth.blur) * amount}px)`,
             transitionProperty: ['transform', 'filter'],
             transitionDuration: FOCUS_DURATION,
