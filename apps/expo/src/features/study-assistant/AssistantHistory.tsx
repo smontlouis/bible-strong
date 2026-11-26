@@ -6,6 +6,7 @@ import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useAssistantSheet } from './assistantSheetContext'
+import { MAX_CONVERSATIONS } from './conversations'
 
 function HistoryRow({ threadId }: { threadId: string }) {
   const { t } = useTranslation()
@@ -63,12 +64,25 @@ function EmptyHistory() {
   )
 }
 
+/** Under a full list: a new conversation replaces the oldest one. */
+function HistoryLimit() {
+  const { t } = useTranslation()
+  const { session } = useAssistantSheet()
+  if (session.conversations.length < MAX_CONVERSATIONS) return null
+  return (
+    <Box className="px-5 py-4">
+      <Text className="text-grey text-[13px]">{t('assistant.modal.historyLimit')}</Text>
+    </Box>
+  )
+}
+
 export default function AssistantHistory() {
   const insets = useSafeAreaInsets()
   return (
     <ThreadListPrimitive.Items
       contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}
       ListEmptyComponent={EmptyHistory}
+      ListFooterComponent={HistoryLimit}
       renderItem={({ threadId }) => <HistoryRow threadId={threadId} />}
     />
   )

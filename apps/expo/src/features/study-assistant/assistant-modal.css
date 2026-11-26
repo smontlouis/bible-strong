@@ -753,6 +753,11 @@
 .bs-assistant-empty-history {
   padding: 35px 0;
 }
+.bs-assistant-history-limit {
+  padding: 16px 0 4px;
+  font-size: 13px;
+  color: var(--as-muted);
+}
 @keyframes bs-assistant-enter {
   from {
     opacity: 0;

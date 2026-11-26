@@ -45,5 +45,12 @@ failed request. A browser closed during an active stream may lose that unfinishe
 durable partial streaming would require an explicit checkpoint policy rather than token-level
 writes.
 
+Amendment (2026-11-26): an account keeps its 50 most recently updated conversations. The number
+of conversations never blocks a question. Saving the first exchange of a new conversation deletes
+the oldest ones beyond 50, turns included, counting every stored conversation rather than the
+listened index. A failed deletion leaves one conversation too many and is not shown to the reader.
+A full list says that a new conversation replaces the oldest one. A single conversation still
+stops at 300 messages.
+
 This decision supersedes the local-persistence parts of ADR-0048, ADR-0049, ADR-0050 and ADR-0051;
 their assistant-service separation and conversation-memory decisions remain in force.

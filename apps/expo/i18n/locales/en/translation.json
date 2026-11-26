@@ -2514,6 +2514,7 @@
   "assistant.modal.close": "Close assistant",
   "assistant.modal.back": "Back to conversation",
   "assistant.modal.noHistory": "Your next question starts the first conversation.",
+  "assistant.modal.historyLimit": "Only the 50 most recent conversations are kept: a new conversation replaces the oldest one.",
   "assistant.modal.delete": "Delete",
   "assistant.modal.eyebrow": "A MOMENT TO UNDERSTAND",
   "assistant.modal.welcome": "How can I help you today?",

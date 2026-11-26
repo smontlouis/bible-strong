@@ -155,6 +155,18 @@ export async function renameAssistantConversation(
   await setDoc(conversationRef(account, conversationId), { title, updatedAt }, { merge: true })
 }
 
+/**
+ * Keeps the `keep` most recently updated conversations and deletes the older ones with their
+ * turns. Counts every stored conversation, not only the index the app listens to, so a surplus
+ * left by another device goes too.
+ */
+export async function pruneAssistantConversations(account: string, keep: number) {
+  const snapshot = await getDocs(query(conversationsRef(account), orderBy('updatedAt', 'desc')))
+  const older: SnapshotItem[] = snapshot.docs.slice(keep)
+  for (const item of older) await deleteAssistantConversation(account, item.id)
+  return older.length
+}
+
 export async function deleteAssistantConversation(account: string, conversationId: string) {
   const parent = conversationRef(account, conversationId)
   const turns = await getDocs(turnsRef(account, conversationId))

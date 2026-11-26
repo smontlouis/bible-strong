@@ -50,6 +50,7 @@ import {
   useEmailVerificationWatch,
 } from './useAssistantQuota'
 import { useAssistantSession } from './useAssistantSession'
+import { MAX_CONVERSATIONS } from './conversations'
 import { useReadingContext } from './useReadingContext.web'
 import './assistant-modal.css'
 import { OPEN_ASSISTANT_EVENT } from './returnToAssistant'
@@ -634,6 +635,9 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                   }}
                 </ThreadListPrimitive.Items>
               </ThreadListPrimitive.Root>
+              {conversations.length >= MAX_CONVERSATIONS && (
+                <p className="bs-assistant-history-limit">{t('assistant.modal.historyLimit')}</p>
+              )}
             </section>
           ) : (
             <ThreadPrimitive.Root

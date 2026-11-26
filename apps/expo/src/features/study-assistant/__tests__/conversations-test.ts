@@ -102,10 +102,19 @@ describe('cloud assistant conversations', () => {
     expect(history.flatMap(item => item.content).join('')).not.toContain('interrompue')
   })
 
-  it('enforces conversation and message limits', () => {
+  it('lets a new conversation start whatever the number of conversations', () => {
     const initial: Conversation = { id: 'c', title: 'x', updatedAt: 1, messages: [] }
-    expect(() => assertConversationCapacity(Array(50).fill(initial), initial)).toThrow(
-      'CLOUD_HISTORY_FULL'
-    )
+    expect(() => assertConversationCapacity(initial)).not.toThrow()
+  })
+
+  it('refuses a question once a conversation is full', () => {
+    const message = { id: 'm', role: 'user', content: 'x', createdAt: 1, state: 'complete' }
+    const full = {
+      id: 'c',
+      title: 'x',
+      updatedAt: 1,
+      messages: Array(299).fill(message),
+    } as Conversation
+    expect(() => assertConversationCapacity(full)).toThrow('CLOUD_HISTORY_FULL')
   })
 })

@@ -281,12 +281,12 @@ export function conversationMetadata(conversation: Conversation): ConversationMe
   })
 }
 
-export function assertConversationCapacity(conversations: Conversation[], current: Conversation) {
-  if (
-    current.messages.length > MAX_MESSAGES - 2 ||
-    (!current.messages.length && conversations.length >= MAX_CONVERSATIONS)
-  )
-    throw new Error('CLOUD_HISTORY_FULL')
+/**
+ * A conversation holds at most MAX_MESSAGES messages. The number of conversations is not checked
+ * here: saving a new one deletes the oldest beyond MAX_CONVERSATIONS (conversationRepository).
+ */
+export function assertConversationCapacity(current: Conversation) {
+  if (current.messages.length > MAX_MESSAGES - 2) throw new Error('CLOUD_HISTORY_FULL')
 }
 
 export function newConversation(): Conversation {

@@ -2542,6 +2542,7 @@
   "assistant.modal.close": "Fermer l’assistant",
   "assistant.modal.back": "Retour à la discussion",
   "assistant.modal.noHistory": "Votre prochaine question ouvre la première conversation.",
+  "assistant.modal.historyLimit": "Seules les 50 conversations les plus récentes sont conservées : une nouvelle conversation remplace la plus ancienne.",
   "assistant.modal.delete": "Supprimer",
   "assistant.modal.eyebrow": "PRENDRE LE TEMPS DE COMPRENDRE",
   "assistant.modal.welcome": "Comment puis-je vous aider ?",

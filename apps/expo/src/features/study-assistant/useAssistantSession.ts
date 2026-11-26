@@ -208,7 +208,7 @@ export function useAssistantSession({
       return
     }
     try {
-      assertConversationCapacity(conversations, current)
+      assertConversationCapacity(current)
     } catch {
       setStorageError(true)
       return

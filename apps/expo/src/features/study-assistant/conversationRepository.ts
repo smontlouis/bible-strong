@@ -3,6 +3,7 @@ import {
   observeAssistantConversation,
   observeAssistantConversationIndex,
   pinAssistantConversationContext,
+  pruneAssistantConversations,
   renameAssistantConversation,
   saveAssistantConversationTurn,
 } from '~helpers/assistantConversationFirestore'
@@ -115,6 +116,12 @@ export async function saveConversation(account: string, conversation: Conversati
     turn.user.id,
     turn
   )
+  // The first exchange of a new conversation makes room by deleting the oldest ones beyond the
+  // limit. A failure here leaves one conversation too many, never a lost question.
+  if (metadata.messageCount === 2)
+    await pruneAssistantConversations(account, MAX_CONVERSATIONS).catch(error =>
+      console.warn('[Assistant] Could not delete the oldest conversations', error)
+    )
 }
 
 /** Pins a context to a saved conversation, or unpins it (`null`), without moving it in the list. */
