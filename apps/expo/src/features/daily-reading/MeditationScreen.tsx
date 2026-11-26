@@ -23,7 +23,7 @@ import { getMeditationTitle, toCivilDate, isCivilDate } from '~features/plans/re
 import { useReadingContent, useLocalReadingDate } from './useDailyMeditation'
 import { resolveMeditationReading } from './resolveMeditationReading'
 import { useRecordHistory } from '~features/history/useRecordHistory'
-import { useDailyCatalog } from './readings/useDailyReadings'
+import { useDailyCatalog, useDailyCollection } from './readings/useDailyReadings'
 
 interface MeditationReaderProps {
   assistantScope?: string
@@ -86,7 +86,10 @@ export const MeditationReader = ({
     changeDate(toCivilDate(current))
   }
   // The day as stories, when the book is published as a daily-reading file.
-  const hasStory = Boolean(useDailyCatalog().catalog?.collections[collectionId])
+  const storyCatalog = useDailyCatalog().catalog
+  const hasStory = Boolean(
+    useDailyCollection(storyCatalog?.collections[collectionId] ? collectionId : undefined).data
+  )
   const browseCollection =
     onBrowse ??
     (() => router.push({ pathname: '/meditation-collection', params: { collectionId } }))

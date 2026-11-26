@@ -97,7 +97,7 @@ export const dailyCollectionQueryKey = (id: string | undefined, hash: string | u
 export const useDailyCollection = (id: string | undefined) => {
   const { catalog, settled } = useDailyCatalog()
   const hash = id ? catalog?.collections[id]?.hash : undefined
-  return useQuery({
+  const query = useQuery({
     queryKey: dailyCollectionQueryKey(id, hash),
     queryFn: () => loadDailyCollection(id!, hash),
     // A catalog kept from an earlier launch is enough to start; a first launch waits for it.
@@ -107,19 +107,28 @@ export const useDailyCollection = (id: string | undefined) => {
     retry: 1,
     ...localQueryOptions,
   })
+  // A first launch waits for the catalog before it can tell whether the collection exists.
+  const waiting = Boolean(id) && !hash && !settled
+  return { ...query, isWaiting: waiting || (query.isPending && query.fetchStatus !== 'idle') }
 }
 
 /** The entry of a civil date in a collection, with the key that identifies it. */
 export const useDailyEntry = (id: string | undefined, date: string, override?: string) => {
   const query = useDailyCollection(id)
   const collection = query.data
-  const key = collection ? (override ?? getDailyEntryKey(collection, date)) : undefined
+  // A verse kept from an older file that no longer has it gives way to the day's own.
+  const key =
+    collection && override && collection.entries[override]
+      ? override
+      : collection
+        ? getDailyEntryKey(collection, date)
+        : undefined
   const entry = key ? collection?.entries[key] : undefined
   return {
     collection,
     key: entry ? key : undefined,
     entry,
-    isLoading: query.isPending && query.fetchStatus !== 'idle',
+    isLoading: query.isWaiting,
     isError: query.isError,
     retry: query.refetch,
   }

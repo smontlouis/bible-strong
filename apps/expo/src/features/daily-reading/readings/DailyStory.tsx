@@ -307,7 +307,18 @@ const DailyStory = ({
           top: insets.top + 10,
         }}
       >
-        <View style={{ flexDirection: 'row', gap: 4 }}>
+        <View
+          style={{ flexDirection: 'row', gap: 4 }}
+          // With a screen reader, the bars move from card to card (swipe up or down).
+          accessible
+          accessibilityRole="adjustable"
+          accessibilityLabel={t('dailyReading.cardPosition', {
+            index: index + 1,
+            count: cards.length,
+          })}
+          accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
+          onAccessibilityAction={event => go(event.nativeEvent.actionName === 'increment' ? 1 : -1)}
+        >
           {cards.map((item, cardIndex) => (
             <View
               key={cardIndex}

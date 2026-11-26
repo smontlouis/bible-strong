@@ -20,7 +20,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { radii } from '~common/ui/surfaces'
 import { getVerseCardHeight, VERSE_CARD_HEIGHT } from '~features/home/verseCardLayout'
 import { useDailyMeditation, useLocalReadingDate } from './useDailyMeditation'
-import { useDailyCatalog } from './readings/useDailyReadings'
+import { useDailyCatalog, useDailyEntry } from './readings/useDailyReadings'
 
 export interface DailyMeditationCardProps {
   onFallback?: () => void
@@ -62,9 +62,11 @@ const DailyMeditationCard = ({
     'Il y a trois jours',
     'Il y a quatre jours',
   ]
-  // A book whose day is cut into cards opens as stories; the page stays a tap away from there.
+  // A book whose day is cut into cards opens as stories, once the day is on this device (reading
+  // it here also fetches the file); the page stays a tap away from there.
   const { catalog } = useDailyCatalog()
-  const immersive = Boolean(catalog?.collections[collectionId])
+  const story = useDailyEntry(catalog?.collections[collectionId] ? collectionId : undefined, date)
+  const immersive = Boolean(story.entry)
   const open = () =>
     router.push(
       immersive

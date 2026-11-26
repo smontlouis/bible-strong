@@ -23,15 +23,7 @@ import { selectFontFamily } from '~redux/selectors/user'
 import { resolveFontFamily } from '~themes/styleValues'
 import ReminderSettings from '../ReminderSettings'
 import { useLocalReadingDate } from '../useDailyMeditation'
-import { getVerseMeditationsId, type DailyCard } from './dailyReadingFormat'
-import { useDailyEntry } from './useDailyReadings'
-import { useVerseSwap } from './useVerseSwap'
-import books from '~assets/bible_versions/books-desc-2'
-
-const VERSIONS: Record<string, string> = {
-  'verse-meditations-fr': 'LSG',
-  'verse-meditations-en': 'BSB',
-}
+import { getVerseKeys, useVerseMeditation, type VerseCard } from './useVerseMeditation'
 
 const DAY_LABELS = [
   "Aujourd'hui",
@@ -44,20 +36,13 @@ const DAY_LABELS = [
 /** The verse of the day of the home, from the verse meditations: tapping it opens the meditation. */
 const VerseMeditationCard = (props: VerseCardProps) => {
   const { addDay, desktop = false, navigation, footer, style, onContentHeight } = props
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const router = useRouter()
   const dispatch = useDispatch()
   const fontFamily = resolveFontFamily(useSelector(selectFontFamily))
   const reminderTime = useSelector((state: RootState) => state.user.notifications.verseOfTheDay)
   const date = useLocalReadingDate(addDay)
-  const collectionId = getVerseMeditationsId(i18n.language)
-  const version = VERSIONS[collectionId]
-  const first = useDailyEntry(collectionId, date)
-  const { swappedKey } = useVerseSwap(first.collection, date)
-  const { entry, isError, isLoading } = useDailyEntry(collectionId, date, swappedKey)
-  const verse = entry?.cards.find(
-    (card): card is Extract<DailyCard, { type: 'verse' }> => card.type === 'verse'
-  )
+  const { collectionId, version, entry, verse, isError, isLoading } = useVerseMeditation(date)
   const imageSource = entry?.ref ? toImageSource(entry.ref, verse, version) : undefined
   const imageUrls = useImageUrls(imageSource ?? false)
   const imageModalRef = useRef<SheetRef>(null)
@@ -200,18 +185,17 @@ const VerseMeditationCard = (props: VerseCardProps) => {
 /** The verse in the shape the image of the verse reads (its first verse locates it). */
 const toImageSource = (
   ref: string,
-  verse: Extract<DailyCard, { type: 'verse' }> | undefined,
+  verse: VerseCard | undefined,
   version: string
 ): VerseOfTheDayData | undefined => {
-  const [code, chapter, verses] = ref.split('.')
-  const book = books.find(candidate => candidate[1] === code)?.[0]
-  const first = Number(verses?.split('-')[0])
-  if (!verse || !book || !Number(chapter) || !first) return undefined
+  const [first] = getVerseKeys(ref)
+  if (!verse || !first) return undefined
+  const [book, chapter, verseNumber] = first.split('-').map(Number)
   return {
     v: ref,
-    book: Number(book),
-    chapter: Number(chapter),
-    verse: first,
+    book,
+    chapter,
+    verse: verseNumber,
     title: verse.label,
     version,
     content: verse.text,

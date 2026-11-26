@@ -3158,5 +3158,6 @@
   "dailyReading.meditate": "Meditate",
   "dailyReading.storyUnavailable": "This meditation is not available right now. Check your connection and try again.",
   "dailyReading.readAsPage": "Read as a page",
-  "dailyReading.readAsStory": "Read full screen"
+  "dailyReading.readAsStory": "Read full screen",
+  "dailyReading.cardPosition": "Card {{index}} of {{count}}"
 }

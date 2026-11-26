@@ -9,6 +9,7 @@ import DailyMeditationCard from '../DailyMeditationCard'
 jest.mock('~helpers/useConnection', () => ({ useConnectionStatus: () => 'internet' }))
 jest.mock('../readings/useDailyReadings', () => ({
   useDailyCatalog: () => ({ catalog: undefined, settled: true }),
+  useDailyEntry: () => ({ entry: undefined, isLoading: false }),
 }))
 
 jest.mock('react-native', () => ({

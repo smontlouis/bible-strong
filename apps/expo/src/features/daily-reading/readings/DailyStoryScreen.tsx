@@ -8,17 +8,13 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { isCivilDate } from '~features/plans/readingCalendar'
 import { resolveMeditationOpening } from '../meditationPassage'
-import { useLocalReadingDate } from '../useDailyMeditation'
+import { useLocalReadingDate, useReadingContent } from '../useDailyMeditation'
 import DailyStory from './DailyStory'
 import { getVerseMeditationsId, type DailyCard, type DailyStrongWord } from './dailyReadingFormat'
 import { useDailyEntry } from './useDailyReadings'
 import { useVerseSwap } from './useVerseSwap'
-
-/** The version each verse meditation is written on: the text its Strong words and questions quote. */
-const VERSE_VERSIONS: Record<string, string> = {
-  'verse-meditations-fr': 'LSG',
-  'verse-meditations-en': 'BSB',
-}
+import { VERSE_MEDITATION_VERSIONS } from './useVerseMeditation'
+import { useRecordHistory } from '~features/history/useRecordHistory'
 
 /**
  * `/daily-story?collectionId=…&date=…&entry=…`: the verse meditation of the day (by default, in
@@ -31,12 +27,26 @@ const DailyStoryScreen = () => {
   const today = useLocalReadingDate()
   const date = params.date && isCivilDate(params.date) ? params.date : today
   const collectionId = params.collectionId || getVerseMeditationsId(i18n.language)
-  const version = VERSE_VERSIONS[collectionId]
+  const version = VERSE_MEDITATION_VERSIONS[collectionId]
   const isVerse = Boolean(version)
   const first = useDailyEntry(collectionId, date)
   const swap = useVerseSwap(isVerse ? first.collection : undefined, date)
   const chosen = params.entry ?? (isVerse ? swap.swappedKey : undefined)
   const { collection, key, entry, isError, retry } = useDailyEntry(collectionId, date, chosen)
+  // A book's day read as stories enters the history like its page: « Reprendre » finds it.
+  const book = useReadingContent(isVerse ? '' : collectionId).collection
+  useRecordHistory(
+    !isVerse && book && key && entry?.title
+      ? {
+          type: 'meditation',
+          collectionId,
+          readingId: key,
+          title: entry.title,
+          collectionTitle: book.title,
+          readingDate: date,
+        }
+      : null
+  )
 
   useEffect(() => {
     if (Platform.OS === 'web') return

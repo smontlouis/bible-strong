@@ -7,7 +7,8 @@ import Container from '~common/ui/Container'
 import Card from '~common/ui/Card'
 import { useTheme } from '~themes/ThemeProvider'
 import { pageContentStyle } from '~common/ui/PageContent'
-import StandaloneVerseOfTheDay from '~features/home/StandaloneVerseOfTheDay'
+import VerseMeditationCard from './readings/VerseMeditationCard'
+import { getVerseKeys, useVerseMeditation } from './readings/useVerseMeditation'
 import { getScheduledPlanDay, isCivilDate } from '~features/plans/readingCalendar'
 import ReadingDatePicker from './ReadingDatePicker'
 import { useLocalReadingDate } from './useDailyMeditation'
@@ -21,17 +22,25 @@ const DailyVerseScreen = () => {
   const today = useLocalReadingDate()
   const date = requestedDate && isCivilDate(requestedDate) ? requestedDate : today
   const offset = (getScheduledPlanDay(today, date) ?? 1) - 1
-  // The same query as the card below, so the assistant sees the verse it shows.
+  // The verse the card below shows: the meditation's, else the standalone verse it falls back on.
+  const meditation = useVerseMeditation(date)
   const verseOfTheDay = useVerseOfTheDay(offset)
+  const meditationVerses = meditation.entry?.ref ? getVerseKeys(meditation.entry.ref) : []
   useAssistantResourceContext(
     'panel',
-    verseOfTheDay && !('error' in verseOfTheDay)
+    meditationVerses.length
       ? passageContext({
-          verses: [`${verseOfTheDay.book}-${verseOfTheDay.chapter}-${verseOfTheDay.verse}`],
-          version: verseOfTheDay.version,
+          verses: meditationVerses,
+          version: meditation.version,
           surface: 'Verset du jour',
         })
-      : null
+      : verseOfTheDay && !('error' in verseOfTheDay)
+        ? passageContext({
+            verses: [`${verseOfTheDay.book}-${verseOfTheDay.chapter}-${verseOfTheDay.verse}`],
+            version: verseOfTheDay.version,
+            surface: 'Verset du jour',
+          })
+        : null
   )
   const router = useRouter()
   const { t } = useTranslation()
@@ -52,7 +61,7 @@ const DailyVerseScreen = () => {
           />
         </Box>
         <Card className="rounded-[24px]">
-          <StandaloneVerseOfTheDay addDay={offset} desktop />
+          <VerseMeditationCard addDay={offset} desktop />
         </Card>
       </ScrollView>
     </Container>
