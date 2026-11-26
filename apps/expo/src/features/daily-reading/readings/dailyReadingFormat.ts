@@ -1,8 +1,8 @@
 /**
  * The daily-reading files of the public media host: one file per collection (the verse
  * meditations of Bible Strong in French and English, each devotional book of the plans), and one
- * catalog that says which file is current. The format is described in
- * `portraits/verse-of-the-day/collections-1/FORMAT.md`, where the files are built.
+ * catalog that says which file is current (ADR-0118). The format is described, and the files are
+ * built, in `apps/resource-studio/workflows/daily-readings/`.
  */
 
 export const DAILY_READINGS_BASE_URL = 'https://media.bible-strong.app/daily-readings'

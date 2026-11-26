@@ -38,7 +38,11 @@
 
 **Meditation collection** — An editorial book of daily readings assigned to calendar dates rather than to a reader's start date.
 
-**Daily-reading source** — The reader's choice between the standalone verse of the day and the opening passage from one Meditation collection.
+**Daily-reading source** — The reader's choice between the verse meditation of the day and one Meditation collection.
+
+**Verse meditation** — A meditation written for Bible Strong on one passage of up to three verses: a hook, two parts with an original-language word, a prayer and two or three open questions, in French on the Louis Segond and in English on the BSB. One a day, from a calendar of 366 days and a reserve for « Changer de verset ».
+
+**Daily-reading file** — One collection of daily readings (the verse meditations of a language, or one Meditation collection cut into cards) as published on the media host and kept by the device (ADR-0118).
 
 **Plan slice** — One reading or teaching unit inside a Reading plan.
 
