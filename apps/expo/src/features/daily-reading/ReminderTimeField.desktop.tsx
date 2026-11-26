@@ -25,7 +25,7 @@ const ReminderTimeField = ({
         alignSelf: 'flex-start',
         minHeight: 44,
         padding: '0 12px',
-        borderRadius: 10,
+        borderRadius: 12,
         border: '1px solid var(--color-border)',
         background: 'transparent',
         color: 'var(--color-link)',

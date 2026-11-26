@@ -410,6 +410,17 @@ mod platform {
             .map_err(|error| error.to_string())
     }
 
+    /// A toast's tag holds 64 characters: a longer reminder id (a plan with a long id) is
+    /// shortened to a hash of itself, the same for scheduling and cancelling.
+    fn tag(id: &str) -> HSTRING {
+        if id.chars().count() <= 64 {
+            return HSTRING::from(id);
+        }
+        use sha2::{Digest, Sha256};
+        let digest = hex::encode(Sha256::digest(id.as_bytes()));
+        HSTRING::from(format!("reading:{}", &digest[..40]))
+    }
+
     fn escape(text: &str) -> String {
         text.replace('&', "&amp;")
             .replace('<', "&lt;")
@@ -472,7 +483,7 @@ mod platform {
         let toast = ScheduledToastNotification::CreateScheduledToastNotification(&document, when)
             .map_err(|error| error.to_string())?;
         toast
-            .SetTag(&HSTRING::from(reminder.id.as_str()))
+            .SetTag(&tag(&reminder.id))
             .map_err(|error| error.to_string())?;
         toast
             .SetGroup(&HSTRING::from(GROUP))
@@ -487,8 +498,9 @@ mod platform {
         let toasts = notifier
             .GetScheduledToastNotifications()
             .map_err(|error| error.to_string())?;
+        let wanted = tag(id);
         for toast in toasts {
-            if toast.Tag().is_ok_and(|tag| tag == id) {
+            if toast.Tag().is_ok_and(|existing| existing == wanted) {
                 notifier
                     .RemoveFromSchedule(&toast)
                     .map_err(|error| error.to_string())?;
@@ -517,7 +529,7 @@ mod platform {
     pub fn remove_displayed(id: &str) -> Result<(), String> {
         let history = ToastNotificationManager::History().map_err(|error| error.to_string())?;
         history
-            .RemoveGroupedTagWithId(&HSTRING::from(id), &HSTRING::from(GROUP), &app_id())
+            .RemoveGroupedTagWithId(&tag(id), &HSTRING::from(GROUP), &app_id())
             .map_err(|error| error.to_string())
     }
 }
