@@ -3188,5 +3188,8 @@
   "dailyReading.storyUnavailable": "Cette méditation n’est pas disponible pour le moment. Vérifiez votre connexion et réessayez.",
   "dailyReading.readAsPage": "Lire en page",
   "dailyReading.readAsStory": "Lire en plein écran",
-  "dailyReading.cardPosition": "Carte {{index}} sur {{count}}"
+  "dailyReading.cardPosition": "Carte {{index}} sur {{count}}",
+  "dailyReading.finish": "Terminer",
+  "dailyReading.forTheRoad": "Pour la route",
+  "dailyReading.goFurther": "Aller plus loin"
 }

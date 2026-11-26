@@ -1,0 +1,77 @@
+/**
+ * The words that close a daily reading, before « Terminer »: a blessing or a wish for the day,
+ * in « vous », without an exclamation mark. One a day, the same all day long.
+ */
+const BLESSINGS: Record<'fr' | 'en', string[]> = {
+  fr: [
+    'Que le Seigneur vous bénisse et vous garde aujourd’hui.',
+    'Allez en paix : il marche devant vous.',
+    'Que sa paix garde votre cœur tout au long de ce jour.',
+    'Bonne journée sous son regard.',
+    'Que sa parole vous accompagne jusqu’au soir.',
+    'Le Seigneur est avec vous, aujourd’hui comme hier.',
+    'Que sa grâce vous suffise pour chaque heure de ce jour.',
+    'Que la joie du Seigneur soit votre force aujourd’hui.',
+    'Avancez en paix : vous ne marchez pas sans lui.',
+    'Que sa lumière éclaire chacun de vos pas.',
+    'Que l’Éternel fasse luire sa face sur vous et vous accorde sa grâce.',
+    'Gardez ce verset avec vous : il vous attend en chemin.',
+    'Que Dieu vous donne un cœur paisible et des mains ouvertes.',
+    'Que son amour vous précède dans chaque rencontre.',
+    'Reposez-vous en lui : il prend soin de vous.',
+    'Que l’espérance vous porte tout au long de ce jour.',
+    'Belle journée dans sa présence.',
+    'Que le Dieu de paix soit avec vous.',
+    'Que sa fidélité vous rassure à chaque pas.',
+    'Qu’il vous donne la sagesse dont ce jour aura besoin.',
+    'Allez avec la force que vous venez de recevoir.',
+    'Que sa douceur habite vos paroles aujourd’hui.',
+    'Que ce jour soit rempli de sa présence.',
+    'Que le Seigneur affermisse l’ouvrage de vos mains.',
+    'Il veille sur vous, que vous marchiez ou que vous vous reposiez.',
+    'Que la paix de Dieu, qui surpasse toute intelligence, garde votre cœur.',
+    'Bonne route avec lui.',
+    'Que la grâce du Seigneur Jésus soit avec vous.',
+    'Que ce que vous avez lu ce matin vous revienne au bon moment.',
+    'Que Dieu vous rende attentif à ceux qu’il placera sur votre route.',
+  ],
+  en: [
+    'May the Lord bless you and keep you today.',
+    'Go in peace: he walks ahead of you.',
+    'May his peace guard your heart all day long.',
+    'Have a good day under his gaze.',
+    'May his word stay with you until evening.',
+    'The Lord is with you, today as yesterday.',
+    'May his grace be enough for every hour of this day.',
+    'May the joy of the Lord be your strength today.',
+    'Walk on in peace: you do not walk without him.',
+    'May his light shine on each of your steps.',
+    'May the LORD make his face shine on you and be gracious to you.',
+    'Keep this verse with you: it is waiting for you along the way.',
+    'May God give you a quiet heart and open hands.',
+    'May his love go before you in every meeting.',
+    'Rest in him: he cares for you.',
+    'May hope carry you through this day.',
+    'Have a beautiful day in his presence.',
+    'May the God of peace be with you.',
+    'May his faithfulness steady every step you take.',
+    'May he give you the wisdom this day will need.',
+    'Go with the strength you have just received.',
+    'May his gentleness live in your words today.',
+    'May this day be full of his presence.',
+    'May the Lord establish the work of your hands.',
+    'He watches over you, whether you walk or rest.',
+    'May the peace of God, which surpasses all understanding, guard your heart.',
+    'Have a good journey with him.',
+    'May the grace of the Lord Jesus be with you.',
+    'May what you read this morning come back to you at the right moment.',
+    'May God make you attentive to those he places on your path.',
+  ],
+}
+
+/** The blessing of a civil date (`YYYY-MM-DD`), in French for French and in English otherwise. */
+export const getDailyBlessing = (date: string, language: string) => {
+  const list = BLESSINGS[language.toLowerCase().startsWith('fr') ? 'fr' : 'en']
+  const seed = [...date].reduce((sum, char) => (sum * 33 + char.charCodeAt(0)) % 1_000_003, 5)
+  return list[seed % list.length]!
+}

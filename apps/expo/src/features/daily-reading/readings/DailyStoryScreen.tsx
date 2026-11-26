@@ -10,6 +10,8 @@ import { isCivilDate } from '~features/plans/readingCalendar'
 import { resolveMeditationOpening } from '../meditationPassage'
 import { useLocalReadingDate, useReadingContent } from '../useDailyMeditation'
 import DailyStory from './DailyStory'
+import { getDailyBlessing } from './dailyBlessings'
+import { StoryMusicButton, useStoryMusic } from './storyMusic'
 import { getVerseMeditationsId, type DailyCard, type DailyStrongWord } from './dailyReadingFormat'
 import { useDailyEntry } from './useDailyReadings'
 import { useVerseSwap } from './useVerseSwap'
@@ -48,6 +50,8 @@ const DailyStoryScreen = () => {
       : null
   )
 
+  useStoryMusic()
+
   useEffect(() => {
     if (Platform.OS === 'web') return
     const bars = SystemBars.pushStackEntry({ style: 'light' })
@@ -58,11 +62,18 @@ const DailyStoryScreen = () => {
   const verse = entry?.cards.find(
     (card): card is Extract<DailyCard, { type: 'verse' }> => card.type === 'verse'
   )
-  const share = verse
+  const opening = entry?.cards.find(
+    (card): card is Extract<DailyCard, { type: 'opening' }> => card.type === 'opening'
+  )
+  // The verse of a meditation, or the opening of a book's day with the day's title.
+  const shareMessage = verse
+    ? `${verse.text}\n${verse.label}${version ? ` (${version})` : ''}`
+    : opening
+      ? [opening.text, entry?.title].filter(Boolean).join('\n')
+      : undefined
+  const share = shareMessage
     ? () => {
-        void Share.share({
-          message: `${verse.text}\n${verse.label}${version ? ` (${version})` : ''}`,
-        })
+        void Share.share({ message: shareMessage })
       }
     : undefined
   const openStrong = (word: DailyStrongWord) => {
@@ -89,8 +100,9 @@ const DailyStoryScreen = () => {
 
   return (
     <DailyStory
-      key={`${collectionId}:${date}:${key}`}
       entry={entry}
+      blessing={getDailyBlessing(date, collection?.language ?? i18n.language)}
+      music={<StoryMusicButton />}
       kicker={isVerse ? t('dailyReading.title') : (entry.title ?? '')}
       version={version}
       splitOpening={isVerse ? undefined : splitOpening}
