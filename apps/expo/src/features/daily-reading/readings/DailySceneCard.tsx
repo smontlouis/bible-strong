@@ -66,8 +66,8 @@ const DailySceneCard = ({
 }: DailySceneCardProps) => {
   const { t } = useTranslation()
   const fontFamily = resolveFontFamily(useSelector(selectFontFamily))
-  // The small file, drawn at the size the stories give it: the card shows the bottom of the
-  // full-screen scene, at its scale, centred across, where the ground and the light sit.
+  // The small file, drawn at the size the stories give it: the card's middle sits three
+  // quarters down the full-screen scene, at its scale, where the horizon meets the ground.
   const background = useDailySceneUri(sceneId, 'bg', 768)
   const { width, height } = useWindowDimensions()
   const sceneSize = Math.max(width, height)
@@ -99,15 +99,16 @@ const DailySceneCard = ({
                 // A light blur, computed once at decoding: the text reads better over the scene.
                 // The web counts it in CSS pixels of the drawn image, iOS and Android in a smaller
                 // unit: the same softness takes a larger number there.
-                blurRadius={Platform.OS === 'web' ? 4 : 1}
+                blurRadius={Platform.OS === 'web' ? 4 : 0}
                 transition={300}
                 style={{
                   position: 'absolute',
                   left: '50%',
-                  bottom: 0,
+                  top: '50%',
                   width: sceneSize,
                   height: sceneSize,
                   marginLeft: -sceneSize / 2,
+                  marginTop: -sceneSize * 0.75,
                 }}
                 accessibilityIgnoresInvertColors
               />
