@@ -12,11 +12,10 @@ import {
   type GestureResponderEvent,
 } from 'react-native'
 import Animated, {
+  cubicBezier,
   Easing,
-  FadeIn,
   FadeOut,
   FadeOutUp,
-  Keyframe,
   LinearTransition,
   useAnimatedStyle,
   useSharedValue,
@@ -27,7 +26,6 @@ import { useSelector } from 'react-redux'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { popIn } from '~common/ui/motion'
 import { transliterationTextStyle } from '~common/ui/textTypography'
 import { useWorkspaceHeaderInset } from '~features/app-switcher/workspaceHeaderInset'
 import { selectFontFamily } from '~redux/selectors/user'
@@ -51,14 +49,51 @@ const READING_FADE = {
   transitionTimingFunction: 'ease-out',
 } as const
 
-/** A text that arrives: it rises a little as it appears. */
+/**
+ * A text that arrives: it rises a little as it appears. A CSS animation, played on mount: the
+ * layout animations (`entering`) froze the texts in absolute positions on the web a few seconds
+ * after they came, and moved them (2026-11-26).
+ */
+const RISE = {
+  from: { opacity: 0, transform: [{ translateY: 12 }] },
+  to: { opacity: 1, transform: [{ translateY: 0 }] },
+}
+const EASE_OUT_CUBIC = cubicBezier(0.33, 1, 0.68, 1)
 const rise = (delay = 0) =>
-  new Keyframe({
-    0: { opacity: 0, transform: [{ translateY: 12 }] },
-    100: { opacity: 1, transform: [{ translateY: 0 }], easing: Easing.out(Easing.cubic) },
-  })
-    .duration(380)
-    .delay(delay)
+  ({
+    animationName: RISE,
+    animationDuration: 380,
+    animationDelay: delay,
+    animationTimingFunction: EASE_OUT_CUBIC,
+    animationFillMode: 'backwards',
+  }) as const
+
+/** A small badge that pops in. */
+const POP = {
+  from: { opacity: 0, transform: [{ scale: 0.6 }] },
+  to: { opacity: 1, transform: [{ scale: 1 }] },
+}
+const popIn = (delay = 0) =>
+  ({
+    animationName: POP,
+    animationDuration: 200,
+    animationDelay: delay,
+    animationTimingFunction: EASE_OUT_CUBIC,
+    animationFillMode: 'backwards',
+  }) as const
+
+/** A button that fades in. */
+const FADE = { from: { opacity: 0 }, to: { opacity: 1 } }
+const fadeIn = (delay = 0) =>
+  ({
+    animationName: FADE,
+    animationDuration: 300,
+    animationDelay: delay,
+    animationFillMode: 'backwards',
+  }) as const
+
+/** Leaving animations run on iOS and Android; the web has no way to keep a removed element. */
+const native = Platform.OS !== 'web'
 
 type StoryCard = Exclude<DailyCard, { type: 'questions' }> | { type: 'end' }
 
@@ -120,6 +155,9 @@ const DailyStory = ({
   // blurred and dark, so a 21:9 screen does not stretch it into a strip (2026-11-26).
   const [area, setArea] = useState<{ width: number; height: number } | null>(null)
   const stageWidth = area && area.width > area.height ? area.height : undefined
+  // The web draws the blurred sides until it knows the area is not wide; the square itself is
+  // CSS there (as tall as the area, at most as wide), so the first frame is already right.
+  const wide = native ? Boolean(stageWidth) : !area || area.width > area.height
   // Another verse or another day starts again on its first card; its scene fades in over the last.
   const [shownEntry, setShownEntry] = useState(entry)
   if (shownEntry !== entry) {
@@ -173,13 +211,13 @@ const DailyStory = ({
             : split?.reference
         return (
           <>
-            <Animated.View entering={rise()}>
+            <Animated.View style={rise()}>
               <Text style={[reading, { fontSize: 22, lineHeight: 32, textAlign: 'center' }]}>
                 {quote}
               </Text>
             </Animated.View>
             {reference ? (
-              <Animated.View entering={rise(160)}>
+              <Animated.View style={rise(160)}>
                 <Text
                   className="text-[12px] uppercase tracking-[1.2px] mt-[16px] text-center"
                   style={{ color: SOFT_INK, ...SHADOW }}
@@ -193,7 +231,7 @@ const DailyStory = ({
       }
       case 'hook':
         return (
-          <Animated.View entering={rise()}>
+          <Animated.View style={rise()}>
             <Text style={[reading, { fontSize: 25, lineHeight: 35, textAlign: 'center' }]}>
               {current.text}
             </Text>
@@ -203,7 +241,7 @@ const DailyStory = ({
         return (
           <>
             {current.strong ? (
-              <Animated.View entering={popIn.delay(220)} style={{ alignSelf: 'flex-start' }}>
+              <Animated.View style={[popIn(220), { alignSelf: 'flex-start' }]}>
                 <Pressable
                   disabled={!onOpenStrong}
                   onPress={() => current.strong && onOpenStrong?.(current.strong)}
@@ -232,12 +270,12 @@ const DailyStory = ({
                 </Pressable>
               </Animated.View>
             ) : null}
-            <Animated.View entering={rise()}>
+            <Animated.View style={rise()}>
               <Text style={[reading, { fontSize: 23, lineHeight: 30, marginBottom: 14 }]}>
                 {current.title}
               </Text>
             </Animated.View>
-            <Animated.View entering={rise(110)}>
+            <Animated.View style={rise(110)}>
               <Text style={[reading, { fontSize: 17, lineHeight: 28 }]}>{current.text}</Text>
             </Animated.View>
           </>
@@ -245,10 +283,10 @@ const DailyStory = ({
       case 'prayer':
         return (
           <>
-            <Animated.View entering={rise()}>
+            <Animated.View style={rise()}>
               <Kicker>{t('dailyReading.prayer')}</Kicker>
             </Animated.View>
-            <Animated.View entering={rise(110)}>
+            <Animated.View style={rise(110)}>
               <Text style={[reading, { fontSize: 19, lineHeight: 31 }]}>{current.text}</Text>
             </Animated.View>
           </>
@@ -262,7 +300,7 @@ const DailyStory = ({
               const source =
                 lines.length > 1 && SOURCE_LINE.test(lines.at(-1)!) ? lines.pop() : undefined
               return (
-                <Animated.View key={paragraphIndex} entering={rise(paragraphIndex * 90)}>
+                <Animated.View key={paragraphIndex} style={rise(paragraphIndex * 90)}>
                   <Text style={[reading, { fontSize: 17, lineHeight: 28 }]}>
                     {lines.join('\n')}
                   </Text>
@@ -279,12 +317,12 @@ const DailyStory = ({
       case 'end':
         return deeper ? (
           <>
-            <Animated.View entering={rise()}>
+            <Animated.View style={rise()}>
               <Kicker>{t('dailyReading.goDeeper')}</Kicker>
             </Animated.View>
             <Box className={onAskQuestion ? 'gap-[12px]' : 'gap-[20px]'}>
               {questions.map((item, itemIndex) => (
-                <Animated.View key={item} entering={rise(140 + itemIndex * 140)}>
+                <Animated.View key={item} style={rise(140 + itemIndex * 140)}>
                   {onAskQuestion ? (
                     <Pressable
                       onPress={() => onAskQuestion(item)}
@@ -317,7 +355,7 @@ const DailyStory = ({
               ))}
             </Box>
             {onAskQuestion ? (
-              <Animated.View entering={rise(140 + questions.length * 140)}>
+              <Animated.View style={rise(140 + questions.length * 140)}>
                 <Text
                   className="text-[13px] mt-[16px] text-center"
                   style={{ color: SOFT_INK, ...SHADOW }}
@@ -328,8 +366,8 @@ const DailyStory = ({
             ) : null}
           </>
         ) : (
-          <Animated.View exiting={FadeOutUp.duration(220)}>
-            <Animated.View entering={rise()}>
+          <Animated.View exiting={native ? FadeOutUp.duration(220) : undefined}>
+            <Animated.View style={rise()}>
               <Text
                 className="text-[11px] font-semibold uppercase tracking-[1.4px] mb-[16px] text-center"
                 style={{ color: SOFT_INK, ...SHADOW }}
@@ -337,7 +375,7 @@ const DailyStory = ({
                 {t('dailyReading.forTheRoad')}
               </Text>
             </Animated.View>
-            <Animated.View entering={rise(120)}>
+            <Animated.View style={rise(120)}>
               <Text style={[reading, { fontSize: 25, lineHeight: 36, textAlign: 'center' }]}>
                 {blessing}
               </Text>
@@ -359,7 +397,7 @@ const DailyStory = ({
         )
       }}
     >
-      {stageWidth && background ? (
+      {wide && background ? (
         <>
           <Image
             source={{ uri: background }}
@@ -375,7 +413,13 @@ const DailyStory = ({
           />
         </>
       ) : null}
-      <View style={{ flex: 1, width: stageWidth ?? '100%', overflow: 'hidden' }}>
+      <View
+        style={
+          native
+            ? { flex: 1, width: stageWidth ?? '100%', overflow: 'hidden' }
+            : { height: '100%', aspectRatio: 1, maxWidth: '100%', overflow: 'hidden' }
+        }
+      >
         {/* The far layer: sharp on the verse, blurred and darker behind the text. */}
         {background ? (
           <>
@@ -467,7 +511,7 @@ const DailyStory = ({
           style={{
             position: 'absolute',
             // Centred in a wide area, the scene leaves the sidebar button its corner.
-            left: 16 + (stageWidth ? 0 : workspaceInset),
+            left: 16 + (wide ? 0 : workspaceInset),
             right: 16,
             top: insets.top + 10,
           }}
@@ -533,15 +577,17 @@ const DailyStory = ({
 
         {index === 0 && onChangeVerse ? (
           <Animated.View
-            entering={FadeIn.duration(300).delay(250)}
             pointerEvents="box-none"
-            style={{
-              position: 'absolute',
-              left: 24,
-              right: 24,
-              bottom: insets.bottom + 28,
-              alignItems: 'center',
-            }}
+            style={[
+              fadeIn(250),
+              {
+                position: 'absolute',
+                left: 24,
+                right: 24,
+                bottom: insets.bottom + 28,
+                alignItems: 'center',
+              },
+            ]}
           >
             <StoryButton
               icon="refresh-cw"
@@ -553,28 +599,36 @@ const DailyStory = ({
 
         {isEnd ? (
           <Animated.View
-            entering={rise(260)}
             pointerEvents="box-none"
-            style={{
-              position: 'absolute',
-              left: 24,
-              right: 24,
-              bottom: insets.bottom + 24,
-              alignItems: 'center',
-            }}
+            style={[
+              rise(260),
+              {
+                position: 'absolute',
+                left: 24,
+                right: 24,
+                bottom: insets.bottom + 24,
+                alignItems: 'center',
+              },
+            ]}
           >
             <View style={{ width: '100%', maxWidth: 420, gap: 10 }}>
               <Animated.View
-                layout={LinearTransition.duration(240)}
+                layout={native ? LinearTransition.duration(240) : undefined}
                 style={{ flexDirection: 'row', gap: 10 }}
               >
                 {onShare ? (
-                  <Animated.View layout={LinearTransition.duration(240)} style={{ flex: 1 }}>
+                  <Animated.View
+                    layout={native ? LinearTransition.duration(240) : undefined}
+                    style={{ flex: 1 }}
+                  >
                     <StoryButton icon="share-2" label={t('Partager')} onPress={onShare} />
                   </Animated.View>
                 ) : null}
                 {questions.length && !deeper ? (
-                  <Animated.View exiting={FadeOut.duration(160)} style={{ flex: 1 }}>
+                  <Animated.View
+                    exiting={native ? FadeOut.duration(160) : undefined}
+                    style={{ flex: 1 }}
+                  >
                     <StoryButton
                       icon="compass"
                       label={t('dailyReading.goFurther')}
