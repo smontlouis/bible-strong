@@ -23,6 +23,7 @@ import { selectFontFamily } from '~redux/selectors/user'
 import { resolveFontFamily } from '~themes/styleValues'
 import ReminderSettings from '../ReminderSettings'
 import { useLocalReadingDate } from '../useDailyMeditation'
+import DailySceneCard from './DailySceneCard'
 import { getVerseKeys, useVerseMeditation, type VerseCard } from './useVerseMeditation'
 
 const DAY_LABELS = [
@@ -55,6 +56,72 @@ const VerseMeditationCard = (props: VerseCardProps) => {
   const open = () => router.push({ pathname: '/daily-story', params: { collectionId, date } })
   const label =
     addDay === 0 ? t('dailyReading.title') : DAY_LABELS[-addDay] ? t(DAY_LABELS[-addDay]) : date
+
+  const sheets = (
+    <>
+      {imageSource && (
+        <VerseImageModal
+          modalRef={imageModalRef}
+          imageUrls={imageUrls}
+          verseOfTheDay={imageSource}
+        />
+      )}
+      <Sheet modalTitle={t('Recevoir une notification quotidienne')} ref={notificationModalRef}>
+        <SheetView className="px-[20px] py-[30px]">
+          <ReminderSettings
+            time={reminderTime}
+            onChange={time => dispatch(setNotificationVOD(time ?? ''))}
+          />
+        </SheetView>
+      </Sheet>
+    </>
+  )
+
+  // On a phone the card is a window on the day's scene, which grows into the stories.
+  if (!desktop && entry && verse) {
+    const icon = (
+      name: 'bell' | 'share-2' | 'image',
+      accessibilityLabel: string,
+      onPress: () => void
+    ) => (
+      <Link accessibilityLabel={accessibilityLabel} size={44} onPress={onPress}>
+        <FeatherIcon size={16} name={name} color="#ffffff" />
+      </Link>
+    )
+    return (
+      <>
+        <DailySceneCard
+          href={{ pathname: '/daily-story', params: { collectionId, date } }}
+          sceneId={entry.scene}
+          label={label}
+          text={verse.text}
+          reference={`${verse.label} - ${version}`}
+          navigation={navigation}
+          footer={footer}
+          style={style}
+          onContentHeight={onContentHeight}
+          onChange={() => router.push('/daily-reading')}
+          actions={
+            <>
+              {!addDay &&
+                Platform.OS !== 'web' &&
+                icon('bell', t('Recevoir une notification quotidienne'), () =>
+                  notificationModalRef.current?.present()
+                )}
+              {icon('share-2', t('Partager'), () => {
+                void Share.share({ message: `${verse.text}\n${verse.label} (${version})` })
+              })}
+              {imageSource &&
+                icon('image', t('accessibility.createVerseImage'), () =>
+                  imageModalRef.current?.present()
+                )}
+            </>
+          }
+        />
+        {sheets}
+      </>
+    )
+  }
 
   return (
     <Box
@@ -163,21 +230,7 @@ const VerseMeditationCard = (props: VerseCardProps) => {
         )}
         {footer}
       </Box>
-      {imageSource && (
-        <VerseImageModal
-          modalRef={imageModalRef}
-          imageUrls={imageUrls}
-          verseOfTheDay={imageSource}
-        />
-      )}
-      <Sheet modalTitle={t('Recevoir une notification quotidienne')} ref={notificationModalRef}>
-        <SheetView className="px-[20px] py-[30px]">
-          <ReminderSettings
-            time={reminderTime}
-            onChange={time => dispatch(setNotificationVOD(time ?? ''))}
-          />
-        </SheetView>
-      </Sheet>
+      {sheets}
     </Box>
   )
 }

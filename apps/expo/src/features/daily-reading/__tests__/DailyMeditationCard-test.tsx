@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router'
 import type { Plan } from '~common/types'
 import DailyMeditationCard from '../DailyMeditationCard'
 jest.mock('~helpers/useConnection', () => ({ useConnectionStatus: () => 'internet' }))
+jest.mock('../readings/DailySceneCard', () => 'DailySceneCard')
 jest.mock('../readings/useDailyReadings', () => ({
   useDailyCatalog: () => ({ catalog: undefined, settled: true }),
   useDailyEntry: () => ({ entry: undefined, isLoading: false }),
