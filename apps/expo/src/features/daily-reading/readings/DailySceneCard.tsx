@@ -131,7 +131,7 @@ const DailySceneCard = ({
           // A light blur, computed once at decoding: the text reads better over the scene.
           // The web counts it in CSS pixels of the drawn image, iOS and Android in a smaller
           // unit: the same softness takes a larger number there.
-          blurRadius={Platform.OS === 'web' ? 4 : 0}
+          blurRadius={Platform.OS === 'web' ? 0 : 0}
           transition={300}
           style={{
             position: 'absolute',
