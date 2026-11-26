@@ -1,3 +1,4 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { Image } from 'expo-image'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useEffect, useState, type ReactNode } from 'react'
@@ -33,6 +34,7 @@ import {
 import { selectFontFamily } from '~redux/selectors/user'
 import { resolveFontFamily } from '~themes/styleValues'
 import type { DailyCard, DailyEntry, DailyStrongWord } from './dailyReadingFormat'
+import PrayerMedallion from './PrayerMedallion'
 import StoryMotion, { StoryPresence } from './StoryMotion'
 import StorySceneLayer from './StorySceneLayer'
 import {
@@ -52,6 +54,13 @@ const INK = '#ffffff'
 const SOFT_INK = 'rgba(255,255,255,0.78)'
 const GLASS = 'rgba(255,255,255,0.16)'
 const GLASS_EDGE = 'rgba(255,255,255,0.3)'
+/**
+ * The reading texts all have the verse's size (2026-11-26), and the titles more: the cards scroll,
+ * behind the near layer of the scene, so a long text has room.
+ */
+const BODY = { fontSize: 22, lineHeight: 36 }
+/** The closing buttons stay narrow, on a wide screen too. */
+const CLOSING_BUTTONS_WIDTH = 360
 const SOURCE_LINE = /^[A-Z][A-Za-z]{0,6}\s+\d+[.:]\d+\s*$/
 const SHADOW = {
   textShadowColor: 'rgba(0,0,0,0.45)',
@@ -123,6 +132,7 @@ const DailyStory = ({
   const foreground = useDailySceneUri(entry.scene, 'fg', sceneWidth)
   const [index, setIndex] = useState(0)
   const [deeper, setDeeper] = useState(false)
+  const [prayerOpen, setPrayerOpen] = useState(false)
   // Wider than tall, the scene keeps its square and stands in the middle: the sides show it
   // blurred and dark, so a 21:9 screen does not stretch it into a strip (2026-11-26).
   const [area, setArea] = useState<{ width: number; height: number } | null>(null)
@@ -139,6 +149,7 @@ const DailyStory = ({
     setShownEntry(entry)
     setIndex(0)
     setDeeper(false)
+    setPrayerOpen(false)
     setRound(round + 1)
   }
   const questions = entry.cards.find(card => card.type === 'questions')?.items ?? []
@@ -190,6 +201,7 @@ const DailyStory = ({
   const go = (step: number) => {
     // The last card ends with « Terminer », never with a stray tap.
     if (step > 0 && isEnd) return
+    setPrayerOpen(false)
     setIndex(current => Math.max(0, Math.min(cards.length - 1, current + step)))
   }
   const tap = (event: GestureResponderEvent) => go(event.nativeEvent.pageX < width * 0.35 ? -1 : 1)
@@ -209,6 +221,42 @@ const DailyStory = ({
 
   const reading = { fontFamily, color: INK, ...SHADOW }
 
+  /**
+   * The closing buttons, just under the blessing or the questions (2026-11-26): they come after
+   * the text and leave with the card.
+   */
+  const closingButtons = (delay: number) => (
+    <StoryMotion
+      delay={delay}
+      duration={TEXT_MOTION.buttonsDuration}
+      style={{
+        alignSelf: 'center',
+        width: '100%',
+        maxWidth: CLOSING_BUTTONS_WIDTH,
+        gap: 10,
+        marginTop: 36,
+      }}
+    >
+      <View style={{ flexDirection: 'row', gap: 10 }}>
+        {onShare ? (
+          <View style={{ flex: 1 }}>
+            <StoryButton icon="share-2" label={t('Partager')} onPress={onShare} />
+          </View>
+        ) : null}
+        {questions.length && !deeper ? (
+          <View style={{ flex: 1 }}>
+            <StoryButton
+              icon="compass"
+              label={t('dailyReading.goFurther')}
+              onPress={() => setDeeper(true)}
+            />
+          </View>
+        ) : null}
+      </View>
+      <StoryButton solid label={t('dailyReading.finish')} onPress={onClose} />
+    </StoryMotion>
+  )
+
   const renderCard = (current: StoryCard) => {
     switch (current.type) {
       case 'verse':
@@ -223,7 +271,7 @@ const DailyStory = ({
         return (
           <>
             <StoryMotion>
-              <Text style={[reading, { fontSize: 22, lineHeight: 32, textAlign: 'center' }]}>
+              <Text style={[reading, { fontSize: 22, lineHeight: 36, textAlign: 'center' }]}>
                 {quote}
               </Text>
             </StoryMotion>
@@ -243,7 +291,7 @@ const DailyStory = ({
       case 'hook':
         return (
           <StoryMotion>
-            <Text style={[reading, { fontSize: 25, lineHeight: 35, textAlign: 'center' }]}>
+            <Text style={[reading, { fontSize: 28, lineHeight: 40, textAlign: 'center' }]}>
               {current.text}
             </Text>
           </StoryMotion>
@@ -286,29 +334,62 @@ const DailyStory = ({
               </StoryMotion>
             ) : null}
             <StoryMotion>
-              <Text style={[reading, { fontSize: 23, lineHeight: 30, marginBottom: 14 }]}>
+              <Text style={[reading, { fontSize: 30, lineHeight: 40, marginBottom: 18 }]}>
                 {current.title}
               </Text>
             </StoryMotion>
             <StoryMotion delay={TEXT_MOTION.step}>
-              <Text style={[reading, { fontSize: 17, lineHeight: 28 }]}>{current.text}</Text>
+              <Text style={[reading, BODY]}>{current.text}</Text>
             </StoryMotion>
           </>
         )
       case 'prayer':
-        return (
+        // A time of prayer (2026-11-26): the prayer shows when the reader asks for it, and a tap
+        // elsewhere goes on without it.
+        return prayerOpen ? (
           <>
+            <StoryMotion enter="fade">
+              <MaterialCommunityIcons
+                name="hands-pray"
+                size={22}
+                color={SOFT_INK}
+                style={{ marginBottom: 10 }}
+              />
+            </StoryMotion>
             <StoryMotion>
               <Kicker>{t('dailyReading.prayer')}</Kicker>
             </StoryMotion>
             <StoryMotion delay={TEXT_MOTION.step}>
-              <Text style={[reading, { fontSize: 19, lineHeight: 31 }]}>{current.text}</Text>
+              <Text style={[reading, BODY]}>{current.text}</Text>
             </StoryMotion>
           </>
+        ) : (
+          <View style={{ alignItems: 'center' }}>
+            <StoryMotion enter="pop" duration={TEXT_MOTION.riseDuration}>
+              <PrayerMedallion
+                label={t('dailyReading.pray')}
+                still={still}
+                onPress={() => setPrayerOpen(true)}
+              />
+            </StoryMotion>
+            <StoryMotion delay={TEXT_MOTION.step} style={{ marginTop: 32 }}>
+              <Text style={[reading, { fontSize: 30, lineHeight: 40, textAlign: 'center' }]}>
+                {t('dailyReading.prayerTime')}
+              </Text>
+            </StoryMotion>
+            <StoryMotion delay={TEXT_MOTION.step * 2}>
+              <Text
+                className="text-[13px] mt-[12px] text-center"
+                style={{ color: SOFT_INK, ...SHADOW }}
+              >
+                {t('dailyReading.prayHint')}
+              </Text>
+            </StoryMotion>
+          </View>
         )
       case 'text':
         return (
-          <Box className="gap-[14px]">
+          <Box className="gap-[20px]">
             {current.text.split(/\n\s*\n/).map((paragraph, paragraphIndex) => {
               // A publisher's source line (« AD 351.2 ») closes its paragraph, set as a source.
               const lines = paragraph.split('\n')
@@ -319,9 +400,7 @@ const DailyStory = ({
                   key={paragraphIndex}
                   delay={paragraphIndex * TEXT_MOTION.paragraphStep}
                 >
-                  <Text style={[reading, { fontSize: 17, lineHeight: 28 }]}>
-                    {lines.join('\n')}
-                  </Text>
+                  <Text style={[reading, BODY]}>{lines.join('\n')}</Text>
                   {source ? (
                     <Text className="text-[12px] mt-[4px]" style={{ color: SOFT_INK, ...SHADOW }}>
                       {source}
@@ -361,13 +440,11 @@ const DailyStory = ({
                         opacity: pressed ? 0.9 : 1,
                       })}
                     >
-                      <Text style={[reading, { flex: 1, fontSize: 19, lineHeight: 27 }]}>
-                        {item}
-                      </Text>
+                      <Text style={[reading, BODY, { flex: 1 }]}>{item}</Text>
                       <FeatherIcon name="message-circle" size={18} color={INK} />
                     </Pressable>
                   ) : (
-                    <Text style={[reading, { fontSize: 20, lineHeight: 29 }]}>{item}</Text>
+                    <Text style={[reading, BODY]}>{item}</Text>
                   )}
                 </StoryMotion>
               ))}
@@ -382,6 +459,7 @@ const DailyStory = ({
                 </Text>
               </StoryMotion>
             ) : null}
+            {closingButtons((questions.length + 2) * TEXT_MOTION.questionStep)}
           </>
         ) : (
           <View>
@@ -394,10 +472,11 @@ const DailyStory = ({
               </Text>
             </StoryMotion>
             <StoryMotion delay={TEXT_MOTION.step}>
-              <Text style={[reading, { fontSize: 25, lineHeight: 36, textAlign: 'center' }]}>
+              <Text style={[reading, { fontSize: 28, lineHeight: 40, textAlign: 'center' }]}>
                 {blessing}
               </Text>
             </StoryMotion>
+            {closingButtons(TEXT_MOTION.buttonsDelay)}
           </View>
         )
     }
@@ -488,7 +567,8 @@ const DailyStory = ({
               left: 0,
               right: 0,
               top: insets.top + 64,
-              bottom: insets.bottom + (isEnd ? 156 : isOpening ? 132 : 96),
+              // A reading card scrolls down to the bottom edge, behind the near layer.
+              bottom: isOpening ? insets.bottom + 132 : 0,
               alignItems: 'center',
             },
             textTilt,
@@ -502,7 +582,7 @@ const DailyStory = ({
             {/* One card at a time: the one that leaves fades out, then the next one's texts rise. */}
             <StoryPresence>
               <StoryMotion
-                key={`${round}:${index}:${deeper ? 'deeper' : ''}`}
+                key={`${round}:${index}:${deeper ? 'deeper' : ''}:${prayerOpen ? 'prayer' : ''}`}
                 enter="none"
                 leave
                 // A click beside the text, on a wide screen, reaches the tap area under it.
@@ -511,7 +591,10 @@ const DailyStory = ({
               >
                 <ScrollView
                   style={{ width: '100%', maxWidth: 560 }}
-                  contentContainerStyle={{ flexGrow: 1 }}
+                  contentContainerStyle={{
+                    flexGrow: 1,
+                    paddingBottom: isOpening ? 0 : insets.bottom + 96,
+                  }}
                   showsVerticalScrollIndicator={false}
                 >
                   {/* The whole height answers a tap, above and below a short text too. */}
@@ -637,48 +720,6 @@ const DailyStory = ({
                   label={t('dailyReading.changeVerse')}
                   onPress={onChangeVerse}
                 />
-              </StoryMotion>
-            ) : null}
-          </StoryPresence>
-        </View>
-
-        {/* The closing buttons; « Aller plus loin » turns them over with the card. */}
-        <View
-          pointerEvents="box-none"
-          style={{
-            position: 'absolute',
-            left: 24,
-            right: 24,
-            bottom: insets.bottom + 24,
-            alignItems: 'center',
-          }}
-        >
-          <StoryPresence>
-            {isEnd ? (
-              <StoryMotion
-                key={deeper ? 'end-deeper' : 'end'}
-                delay={TEXT_MOTION.buttonsDelay}
-                duration={TEXT_MOTION.buttonsDuration}
-                leave
-                style={{ width: '100%', maxWidth: 420, gap: 10 }}
-              >
-                <View style={{ flexDirection: 'row', gap: 10 }}>
-                  {onShare ? (
-                    <View style={{ flex: 1 }}>
-                      <StoryButton icon="share-2" label={t('Partager')} onPress={onShare} />
-                    </View>
-                  ) : null}
-                  {questions.length && !deeper ? (
-                    <View style={{ flex: 1 }}>
-                      <StoryButton
-                        icon="compass"
-                        label={t('dailyReading.goFurther')}
-                        onPress={() => setDeeper(true)}
-                      />
-                    </View>
-                  ) : null}
-                </View>
-                <StoryButton solid label={t('dailyReading.finish')} onPress={onClose} />
               </StoryMotion>
             ) : null}
           </StoryPresence>

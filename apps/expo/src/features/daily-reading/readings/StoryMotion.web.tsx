@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion, type MotionStyle } from 'motion/react'
-import type { ReactNode, Ref } from 'react'
+import type { ReactNode } from 'react'
 import { StyleSheet } from 'react-native'
 import type { StoryMotionProps } from './StoryMotion'
 import { TEXT_MOTION } from './storySceneMotion'
@@ -10,11 +10,12 @@ import { TEXT_MOTION } from './storySceneMotion'
  */
 
 /**
- * Keeps a view taken away until it has faded, out of the layout meanwhile, so that what stays
- * or arrives does not move.
+ * Keeps a view taken away until it has faded, where it was: what comes and goes together stands
+ * on top of each other (the cards are absolute), so nothing is pushed. motion's `popLayout` made
+ * a leaving button jump before it faded (2026-11-26).
  */
 export const StoryPresence = ({ children }: { children?: ReactNode }) => (
-  <AnimatePresence mode="popLayout">{children}</AnimatePresence>
+  <AnimatePresence>{children}</AnimatePresence>
 )
 
 const EASE_OUT = [0.33, 1, 0.68, 1] as const
@@ -47,8 +48,7 @@ const StoryMotion = ({
   duration = durationOf(enter),
   leave = false,
   pointerEvents,
-  ref,
-}: StoryMotionProps & { ref?: Ref<HTMLDivElement> }) => {
+}: StoryMotionProps) => {
   // A reader who asked for less motion still sees the fades, without the movements.
   const still = useReducedMotion() ?? false
   const hidden =
@@ -59,7 +59,6 @@ const StoryMotion = ({
         : { opacity: 0 }
   return (
     <motion.div
-      ref={ref}
       style={{
         ...VIEW_BOX,
         ...(StyleSheet.flatten(style) as MotionStyle),
@@ -78,7 +77,11 @@ const StoryMotion = ({
           ? {
               opacity: 0,
               y: still ? 0 : -TEXT_MOTION.leaveDistance,
-              transition: { duration: seconds(TEXT_MOTION.leaveDuration), ease: EASE_OUT },
+              transition: {
+                duration: seconds(TEXT_MOTION.leaveDuration),
+                delay: 0,
+                ease: EASE_OUT,
+              },
             }
           : undefined
       }
