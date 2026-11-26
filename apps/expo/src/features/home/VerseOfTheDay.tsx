@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import DailyMeditationCard from '~features/daily-reading/DailyMeditationCard'
 import { useLocalReadingDate } from '~features/daily-reading/useDailyMeditation'
 import type { RootState } from '~redux/modules/reducer'
+import VerseMeditationCard from '~features/daily-reading/readings/VerseMeditationCard'
 import StandaloneVerseOfTheDay, { type VerseCardProps } from './StandaloneVerseOfTheDay'
 
 const VerseOfTheDay = (props: VerseCardProps) => {
@@ -18,8 +19,10 @@ const VerseOfTheDay = (props: VerseCardProps) => {
       collectionId={collectionId}
       onFallback={() => setFallbackKey(currentKey)}
     />
-  ) : (
+  ) : fallbackKey === currentKey ? (
     <StandaloneVerseOfTheDay {...props} />
+  ) : (
+    <VerseMeditationCard {...props} />
   )
 }
 export default VerseOfTheDay

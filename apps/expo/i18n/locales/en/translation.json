@@ -3150,5 +3150,13 @@
   "bibleAudio.part.prophets": "Prophets",
   "bibleAudio.part.gospels": "Gospels",
   "bibleAudio.part.letters": "Acts and letters",
-  "bibleAudio.part.revelation": "Revelation"
+  "bibleAudio.part.revelation": "Revelation",
+  "dailyReading.prayer": "Prayer",
+  "dailyReading.goDeeper": "Go deeper",
+  "dailyReading.shareVerse": "Share the verse",
+  "dailyReading.changeVerse": "Change the verse",
+  "dailyReading.meditate": "Meditate",
+  "dailyReading.storyUnavailable": "This meditation is not available right now. Check your connection and try again.",
+  "dailyReading.readAsPage": "Read as a page",
+  "dailyReading.readAsStory": "Read full screen"
 }

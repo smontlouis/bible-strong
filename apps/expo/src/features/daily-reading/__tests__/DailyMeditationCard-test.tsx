@@ -7,6 +7,9 @@ import { useRouter } from 'expo-router'
 import type { Plan } from '~common/types'
 import DailyMeditationCard from '../DailyMeditationCard'
 jest.mock('~helpers/useConnection', () => ({ useConnectionStatus: () => 'internet' }))
+jest.mock('../readings/useDailyReadings', () => ({
+  useDailyCatalog: () => ({ catalog: undefined, settled: true }),
+}))
 
 jest.mock('react-native', () => ({
   ActivityIndicator: 'ActivityIndicator',

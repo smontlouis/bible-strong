@@ -3178,5 +3178,13 @@
   "bibleAudio.part.prophets": "Prophètes",
   "bibleAudio.part.gospels": "Évangiles",
   "bibleAudio.part.letters": "Actes et épîtres",
-  "bibleAudio.part.revelation": "Apocalypse"
+  "bibleAudio.part.revelation": "Apocalypse",
+  "dailyReading.prayer": "Prière",
+  "dailyReading.goDeeper": "Pour aller plus loin",
+  "dailyReading.shareVerse": "Partager le verset",
+  "dailyReading.changeVerse": "Changer de verset",
+  "dailyReading.meditate": "Méditer",
+  "dailyReading.storyUnavailable": "Cette méditation n’est pas disponible pour le moment. Vérifiez votre connexion et réessayez.",
+  "dailyReading.readAsPage": "Lire en page",
+  "dailyReading.readAsStory": "Lire en plein écran"
 }

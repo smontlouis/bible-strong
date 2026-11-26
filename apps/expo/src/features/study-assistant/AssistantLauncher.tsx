@@ -40,6 +40,8 @@ import { useStrobiBubble } from './strobiBubble'
 import { useStrobiTrial } from './useStrobiTrial'
 
 const PREMIUM_PATH = '/premium'
+// The daily meditation as stories covers the whole screen; the assistant waits behind it.
+const DAILY_STORY_PATH = '/daily-story'
 
 export default function AssistantLauncher() {
   const { id } = useSelector(selectUserLoginInfo)
@@ -65,7 +67,9 @@ function GuestAssistant() {
       <AssistantLauncherButton
         animation={dragged ? 'excited' : asleep ? 'sleeping' : 'idle'}
         accessibilityLabel={t('assistant.modal.open')}
-        hidden={open || pathname === PREMIUM_PATH || isAudioPlayerOpen}
+        hidden={
+          open || pathname === PREMIUM_PATH || pathname === DAILY_STORY_PATH || isAudioPlayerOpen
+        }
         onPress={() => {
           if (!open) router.push(ASSISTANT_PATH)
         }}
@@ -222,7 +226,9 @@ function AccountAssistant({ account }: { account: string }) {
         animation={avatarAnimation}
         accessibilityLabel={t('assistant.modal.open')}
         // The Premium page has its own Strobi.
-        hidden={open || pathname === PREMIUM_PATH || isAudioPlayerOpen}
+        hidden={
+          open || pathname === PREMIUM_PATH || pathname === DAILY_STORY_PATH || isAudioPlayerOpen
+        }
         onPress={() => {
           if (!open) router.push(ASSISTANT_PATH)
         }}

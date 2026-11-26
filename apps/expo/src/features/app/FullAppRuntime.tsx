@@ -203,6 +203,11 @@ const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
                         />
                         <Stack.Screen name="(library)" options={{ contentStyle: { bottom: 0 } }} />
                         <Stack.Screen
+                          name="daily-story"
+                          // The meditations as stories cover the whole screen, over the sidebar too.
+                          options={{ presentation: 'fullScreenModal', animation: 'fade' }}
+                        />
+                        <Stack.Screen
                           name="study-assistant"
                           // A full-height form sheet on iOS; Android gets a page (createFormSheetOptions).
                           options={createFormSheetOptions(theme, {

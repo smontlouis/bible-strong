@@ -23,6 +23,7 @@ import { getMeditationTitle, toCivilDate, isCivilDate } from '~features/plans/re
 import { useReadingContent, useLocalReadingDate } from './useDailyMeditation'
 import { resolveMeditationReading } from './resolveMeditationReading'
 import { useRecordHistory } from '~features/history/useRecordHistory'
+import { useDailyCatalog } from './readings/useDailyReadings'
 
 interface MeditationReaderProps {
   assistantScope?: string
@@ -84,6 +85,8 @@ export const MeditationReader = ({
     current.setDate(current.getDate() + offset)
     changeDate(toCivilDate(current))
   }
+  // The day as stories, when the book is published as a daily-reading file.
+  const hasStory = Boolean(useDailyCatalog().catalog?.collections[collectionId])
   const browseCollection =
     onBrowse ??
     (() => router.push({ pathname: '/meditation-collection', params: { collectionId } }))
@@ -110,7 +113,7 @@ export const MeditationReader = ({
           <ContextualMenu
             panelTitle={t('dailyReading.meditationHeading') ?? ''}
             accessibilityLabel={t('accessibility.options')}
-            icons={{ format: 'type', share: 'share-2', collection: 'book-open' }}
+            icons={{ format: 'type', share: 'share-2', collection: 'book-open', story: 'maximize' }}
             screens={{
               format: { title: t('Mise en forme'), content: () => <ParamsModal inline /> },
             }}
@@ -128,11 +131,25 @@ export const MeditationReader = ({
                 image: 'book',
                 attributes: { disabled: !collection },
               },
+              ...(hasStory && reading
+                ? [
+                    {
+                      id: 'story',
+                      title: t('dailyReading.readAsStory'),
+                      image: 'arrow.up.left.and.arrow.down.right' as const,
+                    },
+                  ]
+                : []),
             ]}
             onPressAction={({ nativeEvent }) => {
               if (nativeEvent.event === 'format') paramsSheet.current?.present()
               if (nativeEvent.event === 'share') shareReading()
               if (nativeEvent.event === 'collection') browseCollection()
+              if (nativeEvent.event === 'story' && reading)
+                router.push({
+                  pathname: '/daily-story',
+                  params: { collectionId, entry: String(reading.id), ...(date ? { date } : {}) },
+                })
             }}
           >
             <Box className="w-[54px] h-[54px] items-center justify-center">

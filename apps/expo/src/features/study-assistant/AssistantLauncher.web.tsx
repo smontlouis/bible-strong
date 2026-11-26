@@ -456,7 +456,11 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
         {ready &&
           // Strobi stays out of the Premium page, the onboarding's story and the full-screen player.
           // Put away, the bubble stays mounted to shrink away and grow back (its class).
-          (open || (pathname !== '/premium' && !storyOpen && !audioScreenOpen)) &&
+          (open ||
+            (pathname !== '/premium' &&
+              pathname !== '/daily-story' &&
+              !storyOpen &&
+              !audioScreenOpen)) &&
           createPortal(
             <Modal.Anchor className="bs-assistant-anchor" style={vars}>
               <Modal.Trigger
