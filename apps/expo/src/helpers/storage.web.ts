@@ -11,7 +11,9 @@ import type { Storage } from 'redux-persist'
  * was lost.
  *
  * The first start moves the values localStorage held into IndexedDB, then removes them. Where
- * IndexedDB cannot be opened, the store stays in localStorage, as before.
+ * IndexedDB cannot be opened, the store stays in localStorage, as before. A later start where
+ * IndexedDB does not answer begins from that emptied localStorage, and what it writes there is
+ * dropped once IndexedDB answers again: a signed-in reader gets it back from the sync.
  */
 
 export type StorageOp =
@@ -82,15 +84,19 @@ export const createWebStorage = (environment: WebStorageEnvironment) => {
     const ops = queued
     queued = []
     if (!store || !ops.length) return Promise.resolve()
+    let failed = false
     inFlight = store
       .apply(ops)
       .catch(error => {
-        // Keep the writes for the next one rather than lose them.
+        // Keep the writes for the next one rather than lose them, without retrying at once.
+        failed = true
         queued = [...ops, ...queued]
         environment.onError('web.storage.write_failed', error)
       })
       .finally(() => {
         inFlight = undefined
+        // What was written meanwhile.
+        if (!failed && queued.length) void send()
       })
     return inFlight
   }
@@ -207,8 +213,8 @@ export const createWebStorage = (environment: WebStorageEnvironment) => {
 
   /** Resolves once every write made so far has reached IndexedDB, or failed to. */
   const flushStorage = async (): Promise<void> => {
-    if (inFlight) await inFlight
-    if (queued.length) await send()
+    if (!inFlight && queued.length) void send()
+    while (inFlight) await inFlight
   }
 
   const storage = {

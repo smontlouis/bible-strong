@@ -174,6 +174,33 @@ describe('the web storage over IndexedDB', () => {
     expect(durable.values.size).toBe(0)
   })
 
+  it('sends what was written while a send was on its way', async () => {
+    const durable = fakeDurable()
+    const gates: (() => void)[] = []
+    const store: DurableStore = {
+      load: durable.store.load,
+      apply: ops =>
+        new Promise<void>(resolve => gates.push(resolve)).then(() => durable.store.apply(ops)),
+    }
+    const { storage, prepareStorage, flushStorage } = webStorageWith({
+      openDurable: async () => store,
+    })
+    await prepareStorage()
+
+    storage.set('a', '1')
+    await Promise.resolve()
+    expect(gates).toHaveLength(1)
+    storage.set('b', '2')
+    gates[0]()
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(gates).toHaveLength(2)
+    gates[1]()
+    await flushStorage()
+
+    expect(durable.values.get('a')).toBe('1')
+    expect(durable.values.get('b')).toBe('2')
+  })
+
   it('keeps a failed write for the next one', async () => {
     const durable = fakeDurable()
     const onError = jest.fn()
