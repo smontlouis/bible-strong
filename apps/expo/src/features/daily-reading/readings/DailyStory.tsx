@@ -37,6 +37,7 @@ import StoryMotion, { StoryPresence } from './StoryMotion'
 import StorySceneLayer from './StorySceneLayer'
 import {
   BACKGROUND_DEPTH,
+  cameraOf,
   FOCUS_DURATION,
   FOCUS_EASING,
   FOREGROUND_DEPTH,
@@ -126,8 +127,9 @@ const DailyStory = ({
   // blurred and dark, so a 21:9 screen does not stretch it into a strip (2026-11-26).
   const [area, setArea] = useState<{ width: number; height: number } | null>(null)
   const stageWidth = area && area.width > area.height ? area.height : undefined
-  // The web draws the blurred sides until it knows the area is not wide; the square itself is
-  // CSS there (as tall as the area, at most as wide), so the first frame is already right.
+  // The web draws the blurred sides and the square until it knows the area is not wide; the
+  // square itself is CSS there (as tall as the area), so the first frame of a wide window is
+  // already right.
   const wide = native ? Boolean(stageWidth) : !area || area.width > area.height
   // Another verse or another day starts again on its first card; its scene fades in over the last.
   const [shownEntry, setShownEntry] = useState(entry)
@@ -159,6 +161,25 @@ const DailyStory = ({
   // The tilt of the phone, or the pointer on a wide screen; nothing moves for a reader who asked
   // for less motion.
   const still = useReducedMotion()
+  // The journey through the scene: the eye goes from its left edge on the first reading card to
+  // its right one on the last, and comes back to the middle for the closing blessing.
+  const readingCards = cards.filter(
+    current => current.type !== 'verse' && current.type !== 'opening' && current.type !== 'end'
+  )
+  const cameraAt = still
+    ? 0
+    : cameraOf(
+        sharpScene ? -1 : isEnd ? readingCards.length - 1 : readingCards.indexOf(card),
+        readingCards.length
+      )
+  const camera = useSharedValue(cameraAt)
+  useEffect(() => {
+    camera.set(withTiming(cameraAt, { duration: FOCUS_DURATION, easing: FOCUS_EASING }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cameraAt])
+  // The stage, once measured: the whole area when it is taller than wide (a phone, a narrow
+  // window), or the square in the middle of a wide one.
+  const stage = area ? { width: stageWidth ?? area.width, height: area.height } : null
   const tilt = useEntityPortraitTilt()
   const pointer = useEntityPortraitPointer(tilt)
   const textTilt = useTiltStyle(tilt, TEXT_SHIFT, 1, still)
@@ -415,9 +436,11 @@ const DailyStory = ({
       ) : null}
       <View
         style={
-          native
+          native || !wide
             ? { flex: 1, width: stageWidth ?? '100%', overflow: 'hidden' }
-            : { height: '100%', aspectRatio: 1, maxWidth: '100%', overflow: 'hidden' }
+            : // A narrow window fills its whole height like a phone (2026-11-26); a wide one
+              // keeps the square in the middle.
+              { height: '100%', aspectRatio: 1, maxWidth: '100%', overflow: 'hidden' }
         }
       >
         {/* The far layer: sharp on the verse, blurred and darker behind the text. */}
@@ -427,6 +450,9 @@ const DailyStory = ({
             depth={BACKGROUND_DEPTH}
             focus={focus}
             focused={!sharpScene}
+            camera={camera}
+            cameraAt={cameraAt}
+            stage={stage}
             tilt={tilt}
             still={still}
           />
@@ -514,6 +540,9 @@ const DailyStory = ({
             depth={FOREGROUND_DEPTH}
             focus={focus}
             focused={!sharpScene}
+            camera={camera}
+            cameraAt={cameraAt}
+            stage={stage}
             tilt={tilt}
             still={still}
             cutOut

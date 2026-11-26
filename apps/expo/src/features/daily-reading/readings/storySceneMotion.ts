@@ -35,7 +35,16 @@ export type SceneDepth = {
   /** Its blur at rest, and once the eye is in the scene. */
   blur: number
   focusBlur: number
+  /**
+   * The journey through the scene (2026-11-26): the share of the layer's hidden margin, once the
+   * eye is in the scene, that it crosses from the first reading card to the last. The near layer
+   * crosses more of its own than the far one, so the scene opens in depth as the reading goes.
+   */
+  travel: number
 }
+
+/** The stage the scene is drawn on, in points: what the screen shows of the square scene. */
+export type SceneStage = { width: number; height: number }
 
 export const BACKGROUND_DEPTH: SceneDepth = {
   shift: 8,
@@ -45,6 +54,7 @@ export const BACKGROUND_DEPTH: SceneDepth = {
   anchor: 'center',
   blur: 0,
   focusBlur: 2.5,
+  travel: 0.5,
 }
 
 export const FOREGROUND_DEPTH: SceneDepth = {
@@ -55,6 +65,7 @@ export const FOREGROUND_DEPTH: SceneDepth = {
   anchor: 'bottom',
   blur: 0.6,
   focusBlur: 2,
+  travel: 0.9,
 }
 
 /** The text moves a little with the tilt, between the two layers. */
@@ -108,14 +119,62 @@ export const verticalShiftOf = (depth: SceneDepth) => {
   return depth.anchor === 'bottom' ? depth.shift / 2 : depth.shift
 }
 
-/** How the layer comes closer: from where it grows, how low it sits, and its scale. */
-export const focusTransformOf = (depth: SceneDepth, amount: number, still: boolean) => {
+/**
+ * The square the layer is drawn in: as tall as the stage and centred on it, so that the sides
+ * a phone in portrait does not show are there to travel to.
+ */
+export const layerBoxOf = (stage: SceneStage) => {
+  const side = Math.max(stage.width, stage.height)
+  return {
+    position: 'absolute',
+    top: 0,
+    height: stage.height,
+    width: side,
+    left: (stage.width - side) / 2,
+  } as const
+}
+
+/**
+ * How far the journey takes a layer each way, in points: its share of the margin the closer
+ * layer hides beyond the stage, less the room the tilt needs.
+ */
+export const travelOf = (depth: SceneDepth, stage: SceneStage | null) => {
+  if (!stage) return 0
+  const side = Math.max(stage.width, stage.height)
+  const margin = (side * depth.scale * depth.focusScale - stage.width) / 2 - depth.shift
+  return Math.max(0, margin) * depth.travel
+}
+
+/**
+ * Where the eye stands in the scene for a card: in the middle on the verse and on the closing
+ * blessing, then from the left edge (-1) on the first reading card to the right one (1) on the
+ * last, a step per card whatever their number.
+ */
+export const cameraOf = (readingIndex: number, readingCount: number) =>
+  readingIndex < 0
+    ? 0
+    : readingCount < 2
+      ? 0
+      : -1 + (2 * Math.min(readingIndex, readingCount - 1)) / (readingCount - 1)
+
+/**
+ * How the layer comes closer and where the eye stands: from where it grows, how low it sits, its
+ * scale, and how far it slides, against the eye's way, for `camera` between -1 and 1.
+ */
+export const focusTransformOf = (
+  depth: SceneDepth,
+  amount: number,
+  still: boolean,
+  camera = 0,
+  travel = 0
+) => {
   'worklet'
   return {
     transformOrigin: depth.anchor === 'bottom' ? 'bottom' : 'center',
     transform: still
-      ? [{ translateY: 0 }, { scale: 1 }]
+      ? [{ translateX: 0 }, { translateY: 0 }, { scale: 1 }]
       : [
+          { translateX: -camera * travel },
           { translateY: depth.anchor === 'bottom' ? verticalShiftOf(depth) : 0 },
           { scale: depth.scale * (1 + (depth.focusScale - 1) * amount) },
         ],

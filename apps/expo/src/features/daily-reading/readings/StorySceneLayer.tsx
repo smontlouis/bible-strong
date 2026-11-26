@@ -9,9 +9,12 @@ import Animated, {
 } from 'react-native-reanimated'
 import {
   focusTransformOf,
+  layerBoxOf,
+  travelOf,
   useTiltStyle,
   verticalShiftOf,
   type SceneDepth,
+  type SceneStage,
   type Tilt,
 } from './storySceneMotion'
 
@@ -22,6 +25,12 @@ export type StorySceneLayerProps = {
   focus: SharedValue<number>
   /** The same, as a state: the web animates it with CSS. */
   focused: boolean
+  /** Where the eye stands in the scene, from -1 (its left edge) to 1 (its right one). */
+  camera: SharedValue<number>
+  /** The same, as a state, for the web. */
+  cameraAt: number
+  /** The stage, once measured: the layer is drawn on a square as tall as it. */
+  stage: SceneStage | null
   tilt: SharedValue<Tilt>
   /** The reader asked for less motion: the layer neither moves nor comes closer, it only blurs. */
   still: boolean
@@ -81,12 +90,17 @@ const StorySceneLayer = ({
   uri,
   depth,
   focus,
+  camera,
+  stage,
   tilt,
   still,
   cutOut = false,
 }: StorySceneLayerProps) => {
   const tiltStyle = useTiltStyle(tilt, depth.shift, depth.direction, still, verticalShiftOf(depth))
-  const focusStyle = useAnimatedStyle(() => focusTransformOf(depth, focus.get(), still))
+  const travel = travelOf(depth, stage)
+  const focusStyle = useAnimatedStyle(() =>
+    focusTransformOf(depth, focus.get(), still, camera.get(), travel)
+  )
   const blur = useDerivedValue(() => depth.blur + (depth.focusBlur - depth.blur) * focus.get())
   const loaded = usePicture(uri)
   const [size, setSize] = useState<{ width: number; height: number } | null>(null)
@@ -94,7 +108,10 @@ const StorySceneLayer = ({
   const picture = loaded?.uri === uri ? loaded.picture : null
   const ready = picture && size
   return (
-    <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, tiltStyle]}>
+    <Animated.View
+      pointerEvents="none"
+      style={[stage ? layerBoxOf(stage) : StyleSheet.absoluteFill, tiltStyle]}
+    >
       <Animated.View
         style={[StyleSheet.absoluteFill, focusStyle]}
         onLayout={({ nativeEvent }) =>
