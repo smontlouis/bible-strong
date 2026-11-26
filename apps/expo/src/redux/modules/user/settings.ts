@@ -29,6 +29,7 @@ export const SET_DEFAULT_BIBLE_VERSION = 'user/SET_DEFAULT_BIBLE_VERSION'
 export const SET_DEFAULT_STRONG_BIBLE_VERSION = 'user/SET_DEFAULT_STRONG_BIBLE_VERSION'
 export const SET_SETTINGS_RED_WORDS_DISPLAY = 'user/SET_SETTINGS_RED_WORDS_DISPLAY'
 export const SET_SETTINGS_CARD_COLLECTION = 'user/SET_SETTINGS_CARD_COLLECTION'
+export const SET_SETTINGS_FOOTER_AUDIO = 'user/SET_SETTINGS_FOOTER_AUDIO'
 export const SET_SETTINGS_CONTEXTUAL_INFORMATION_DISPLAY =
   'user/SET_SETTINGS_CONTEXTUAL_INFORMATION_DISPLAY'
 export const SET_SETTINGS_COMMENTARY_SELECTION = 'user/SET_SETTINGS_COMMENTARY_SELECTION'
@@ -175,6 +176,17 @@ export const setSettingsCardCollection = createAction(
 
 /** On unless the reader turned it off: a reader from before the setting collects cards. */
 export const isCardCollectionEnabled = (value?: boolean): boolean => value !== false
+
+/** The block that floats under the Bible text: the play button of the chapter and the music. */
+export const setSettingsFooterAudio = createAction(
+  SET_SETTINGS_FOOTER_AUDIO,
+  (payload: boolean) => ({
+    payload,
+  })
+)
+
+/** On unless the reader turned it off. */
+export const isFooterAudioEnabled = (value?: boolean): boolean => value !== false
 
 export const setSettingsInlineCommentaries = createAction<string[]>(
   'user/SET_SETTINGS_INLINE_COMMENTARIES'

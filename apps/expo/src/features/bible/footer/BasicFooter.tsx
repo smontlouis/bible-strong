@@ -6,6 +6,9 @@ import { floatingShadow } from '~common/ui/surfaces'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
+import type { RootState } from '~redux/modules/reducer'
+import { isFooterAudioEnabled } from '~redux/modules/user'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isBibleOverlayOpenAtom } from 'src/state/app'
 import { useFooterFullScreen } from './footerFullScreen'
@@ -50,6 +53,10 @@ const BasicFooter = ({
   const insets = useSafeAreaInsets()
   const isFullScreenBible = useFooterFullScreen()
   const isBibleOverlayOpen = useAtomValue(isBibleOverlayOpenAtom)
+  // The reader can hide the play and music block in the Bible settings; the chapter arrows stay.
+  const showAudio = useSelector((state: RootState) =>
+    isFooterAudioEnabled(state.user.bible.settings.footerAudio)
+  )
 
   // In full screen the tab bar, with the small audio player in it, slides away: the chapter
   // buttons leave the screen and the play button comes down where the bar was.
@@ -94,15 +101,17 @@ const BasicFooter = ({
       >
         <FeatherIcon name="chevron-left" size={CHAPTER_NAV_ICON_SIZE} color="tertiary" />
       </AnimatedTouchableBox>
-      <PlayableButtons
-        onPlay={onPlay}
-        isPlaying={isPlaying}
-        isDisabled={isDisabled}
-        isLoading={isLoading}
-        hasError={hasError}
-        type={type}
-        centerTranslateY={centerTranslateY}
-      />
+      {showAudio && (
+        <PlayableButtons
+          onPlay={onPlay}
+          isPlaying={isPlaying}
+          isDisabled={isDisabled}
+          isLoading={isLoading}
+          hasError={hasError}
+          type={type}
+          centerTranslateY={centerTranslateY}
+        />
+      )}
       <AnimatedTouchableBox
         className="border-continuous overflow-visible items-center justify-center bg-surface-raised absolute"
         disabled={isDisabled || !onNextChapter}

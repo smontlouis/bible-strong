@@ -31,9 +31,11 @@ import {
   increaseSettingsFontSizeScale,
   isCardCollectionEnabled,
   isContextualInformationDisplayEnabled,
+  isFooterAudioEnabled,
   setSettingsAlignContent,
   setSettingsCardCollection,
   setSettingsContextualInformationDisplay,
+  setSettingsFooterAudio,
   setSettingsLineHeight,
   setSettingsPreferredColorScheme,
   setSettingsPreferredDarkTheme,
@@ -226,6 +228,9 @@ const BibleParamsModal = ({
   )
   const cardCollection = useSelector((state: RootState) =>
     isCardCollectionEnabled(state.user.bible.settings.cardCollection)
+  )
+  const footerAudio = useSelector((state: RootState) =>
+    isFooterAudioEnabled(state.user.bible.settings.footerAudio)
   )
   const contextualInformationDisplay = useSelector((state: RootState) =>
     isContextualInformationDisplayEnabled(state.user.bible.settings.contextualInformationDisplay)
@@ -529,6 +534,20 @@ const BibleParamsModal = ({
               isSelected={cardCollection}
               name="copy"
               onPress={() => dispatch(setSettingsCardCollection(!cardCollection))}
+            />
+          </HalfContainer>
+          <HalfContainer border>
+            <Text className={inline ? 'flex-[5] text-[14px]' : 'flex-[5]'}>
+              {t('bible.settings.footerAudio')}
+            </Text>
+            <Text className="ml-[5px] text-[12px] font-bold">
+              {footerAudio ? t('Activé') : t('Désactivé')}
+            </Text>
+            <TouchableIcon
+              accessibilityLabel={t('bible.settings.footerAudio')}
+              isSelected={footerAudio}
+              name="headphones"
+              onPress={() => dispatch(setSettingsFooterAudio(!footerAudio))}
             />
           </HalfContainer>
           <HalfContainer border>
