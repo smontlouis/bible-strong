@@ -134,13 +134,13 @@ export const useDailyEntry = (id: string | undefined, date: string, override?: s
   }
 }
 
-/** The address of one layer of a scene, at the smallest width that covers `minWidth`. */
 /** The ThumbHash of a scene's background, to draw while its picture loads. */
 export const useDailySceneThumbhash = (sceneId: string | undefined) => {
   const { catalog } = useDailyCatalog()
   return sceneId ? catalog?.scenes[sceneId]?.thumbhash : undefined
 }
 
+/** The address of one layer of a scene, at the smallest width that covers `minWidth`. */
 export const useDailySceneUri = (
   sceneId: string | undefined,
   layer: DailySceneLayer,
