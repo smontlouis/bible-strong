@@ -79,8 +79,10 @@ const DailySceneCard = ({
   // The scene at the size and in the file the stories give it, so opening them reuses the
   // picture: the card's middle sits three quarters down the full-screen scene, where the horizon
   // meets the ground.
-  const { width, height } = useWindowDimensions()
-  const sceneSize = Math.max(width, height)
+  // The stories draw the square scene at the screen's height: a phone in portrait fills its
+  // height, a wide screen keeps the square in the middle.
+  const { height } = useWindowDimensions()
+  const sceneSize = height
   const background = useDailySceneUri(sceneId, 'bg', sceneSize * Math.min(3, PixelRatio.get()))
   const thumbhash = useDailySceneThumbhash(sceneId)
   // Once in front, a card keeps its picture when it goes back behind.
@@ -161,7 +163,9 @@ const DailySceneCard = ({
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'space-between',
-              gap: 12,
+              // A narrow card (the wide home's column) puts the day arrows on their own line.
+              flexWrap: 'wrap',
+              columnGap: 12,
             }}
           >
             <Text
@@ -174,7 +178,7 @@ const DailySceneCard = ({
             <CommonLink
               onPress={onChange}
               accessibilityLabel={t('dailyReading.change')}
-              className="min-h-[44px] justify-center"
+              className="ml-auto min-h-[44px] justify-center"
             >
               <Text className="font-bold text-[13px]" style={{ color: INK, ...SHADOW }}>
                 {t('dailyReading.changeShort')}

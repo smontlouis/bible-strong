@@ -116,6 +116,10 @@ const DailyStory = ({
   const foreground = useDailySceneUri(entry.scene, 'fg', sceneWidth)
   const [index, setIndex] = useState(0)
   const [deeper, setDeeper] = useState(false)
+  // Wider than tall, the scene keeps its square and stands in the middle: the sides show it
+  // blurred and dark, so a 21:9 screen does not stretch it into a strip (2026-11-26).
+  const [area, setArea] = useState<{ width: number; height: number } | null>(null)
+  const stageWidth = area && area.width > area.height ? area.height : undefined
   // Another verse or another day starts again on its first card; its scene fades in over the last.
   const [shownEntry, setShownEntry] = useState(entry)
   if (shownEntry !== entry) {
@@ -344,210 +348,246 @@ const DailyStory = ({
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#1b1a22' }}>
-      {/* The far layer: sharp on the verse, blurred and darker behind the text. */}
-      {background ? (
+    <View
+      style={{ flex: 1, backgroundColor: '#1b1a22', alignItems: 'center' }}
+      onLayout={({ nativeEvent }) => {
+        const { width: areaWidth, height: areaHeight } = nativeEvent.layout
+        setArea(previous =>
+          previous?.width === areaWidth && previous.height === areaHeight
+            ? previous
+            : { width: areaWidth, height: areaHeight }
+        )
+      }}
+    >
+      {stageWidth && background ? (
         <>
           <Image
             source={{ uri: background }}
             contentFit="cover"
+            blurRadius={Platform.OS === 'web' ? 48 : 30}
+            transition={{ duration: 500, effect: 'cross-dissolve' }}
+            style={{ position: 'absolute', inset: 0, transform: [{ scale: 1.15 }] }}
+            accessibilityIgnoresInvertColors
+          />
+          <View
+            pointerEvents="none"
+            style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)' }}
+          />
+        </>
+      ) : null}
+      <View style={{ flex: 1, width: stageWidth ?? '100%', overflow: 'hidden' }}>
+        {/* The far layer: sharp on the verse, blurred and darker behind the text. */}
+        {background ? (
+          <>
+            <Image
+              source={{ uri: background }}
+              contentFit="cover"
+              style={{ position: 'absolute', inset: 0 }}
+              transition={{ duration: 500, effect: 'cross-dissolve' }}
+              accessibilityIgnoresInvertColors
+            />
+            <Animated.View
+              pointerEvents="none"
+              style={[
+                { position: 'absolute', inset: 0, opacity: sharpScene ? 0 : 1 },
+                READING_FADE,
+              ]}
+            >
+              <Image
+                source={{ uri: background }}
+                contentFit="cover"
+                blurRadius={18}
+                transition={{ duration: 500, effect: 'cross-dissolve' }}
+                style={{ position: 'absolute', inset: 0, transform: [{ scale: 1.1 }] }}
+                accessibilityIgnoresInvertColors
+              />
+              <View
+                style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.36)' }}
+              />
+            </Animated.View>
+          </>
+        ) : null}
+        <LinearGradient
+          pointerEvents="none"
+          colors={['rgba(0,0,0,0.34)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.3)']}
+          locations={[0, 0.22, 0.75, 1]}
+          style={{ position: 'absolute', inset: 0 }}
+        />
+
+        <Pressable onPress={tap} accessible={false} style={{ position: 'absolute', inset: 0 }} />
+
+        <View
+          pointerEvents="box-none"
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: insets.top + 64,
+            bottom: insets.bottom + (isEnd ? 156 : isOpening ? 132 : 96),
+            alignItems: 'center',
+          }}
+        >
+          <ScrollView
+            key={index}
+            style={{ width: '100%', maxWidth: 560 }}
+            contentContainerStyle={{ flexGrow: 1 }}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* The whole height answers a tap, above and below a short text too. */}
+            <Pressable
+              onPress={tap}
+              accessible={false}
+              style={{
+                flexGrow: 1,
+                justifyContent: 'center',
+                paddingHorizontal: 28,
+                paddingVertical: 12,
+              }}
+            >
+              <View accessibilityLiveRegion="polite">{renderCard(card)}</View>
+            </Pressable>
+          </ScrollView>
+        </View>
+
+        {/* The near layer passes in front of the text. */}
+        {foreground ? (
+          <Image
+            source={{ uri: foreground }}
+            contentFit="cover"
+            blurRadius={sharpScene ? 1 : 3}
+            pointerEvents="none"
             style={{ position: 'absolute', inset: 0 }}
             transition={{ duration: 500, effect: 'cross-dissolve' }}
             accessibilityIgnoresInvertColors
           />
-          <Animated.View
-            pointerEvents="none"
-            style={[{ position: 'absolute', inset: 0, opacity: sharpScene ? 0 : 1 }, READING_FADE]}
-          >
-            <Image
-              source={{ uri: background }}
-              contentFit="cover"
-              blurRadius={18}
-              transition={{ duration: 500, effect: 'cross-dissolve' }}
-              style={{ position: 'absolute', inset: 0, transform: [{ scale: 1.1 }] }}
-              accessibilityIgnoresInvertColors
-            />
-            <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.36)' }} />
-          </Animated.View>
-        </>
-      ) : null}
-      <LinearGradient
-        pointerEvents="none"
-        colors={['rgba(0,0,0,0.34)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.3)']}
-        locations={[0, 0.22, 0.75, 1]}
-        style={{ position: 'absolute', inset: 0 }}
-      />
+        ) : null}
 
-      <Pressable onPress={tap} accessible={false} style={{ position: 'absolute', inset: 0 }} />
-
-      <View
-        pointerEvents="box-none"
-        style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          top: insets.top + 64,
-          bottom: insets.bottom + (isEnd ? 156 : isOpening ? 132 : 96),
-          alignItems: 'center',
-        }}
-      >
-        <ScrollView
-          key={index}
-          style={{ width: '100%', maxWidth: 560 }}
-          contentContainerStyle={{ flexGrow: 1 }}
-          showsVerticalScrollIndicator={false}
+        <View
+          pointerEvents="box-none"
+          style={{
+            position: 'absolute',
+            // Centred in a wide area, the scene leaves the sidebar button its corner.
+            left: 16 + (stageWidth ? 0 : workspaceInset),
+            right: 16,
+            top: insets.top + 10,
+          }}
         >
-          {/* The whole height answers a tap, above and below a short text too. */}
-          <Pressable
-            onPress={tap}
-            accessible={false}
+          <View
+            style={{ flexDirection: 'row', gap: 4 }}
+            // With a screen reader, the bars move from card to card (swipe up or down).
+            accessible
+            accessibilityRole="adjustable"
+            accessibilityLabel={t('dailyReading.cardPosition', {
+              index: index + 1,
+              count: cards.length,
+            })}
+            accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
+            onAccessibilityAction={event =>
+              go(event.nativeEvent.actionName === 'increment' ? 1 : -1)
+            }
+          >
+            {cards.map((item, cardIndex) => (
+              <ProgressBar key={cardIndex} filled={cardIndex <= index} />
+            ))}
+          </View>
+          <View
             style={{
-              flexGrow: 1,
-              justifyContent: 'center',
-              paddingHorizontal: 28,
-              paddingVertical: 12,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginTop: 6,
             }}
           >
-            <View accessibilityLiveRegion="polite">{renderCard(card)}</View>
-          </Pressable>
-        </ScrollView>
-      </View>
-
-      {/* The near layer passes in front of the text. */}
-      {foreground ? (
-        <Image
-          source={{ uri: foreground }}
-          contentFit="cover"
-          blurRadius={sharpScene ? 1 : 3}
-          pointerEvents="none"
-          style={{ position: 'absolute', inset: 0 }}
-          transition={{ duration: 500, effect: 'cross-dissolve' }}
-          accessibilityIgnoresInvertColors
-        />
-      ) : null}
-
-      <View
-        pointerEvents="box-none"
-        style={{
-          position: 'absolute',
-          left: 16 + workspaceInset,
-          right: 16,
-          top: insets.top + 10,
-        }}
-      >
-        <View
-          style={{ flexDirection: 'row', gap: 4 }}
-          // With a screen reader, the bars move from card to card (swipe up or down).
-          accessible
-          accessibilityRole="adjustable"
-          accessibilityLabel={t('dailyReading.cardPosition', {
-            index: index + 1,
-            count: cards.length,
-          })}
-          accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
-          onAccessibilityAction={event => go(event.nativeEvent.actionName === 'increment' ? 1 : -1)}
-        >
-          {cards.map((item, cardIndex) => (
-            <ProgressBar key={cardIndex} filled={cardIndex <= index} />
-          ))}
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginTop: 6,
-          }}
-        >
-          <Text
-            numberOfLines={1}
-            className="text-[12px] font-semibold uppercase tracking-[1px] shrink"
-            style={{ color: INK, ...SHADOW }}
-          >
-            {kicker}
-          </Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            {music}
-            {onOpenPage ? (
+            <Text
+              numberOfLines={1}
+              className="text-[12px] font-semibold uppercase tracking-[1px] shrink"
+              style={{ color: INK, ...SHADOW }}
+            >
+              {kicker}
+            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              {music}
+              {onOpenPage ? (
+                <Pressable
+                  onPress={onOpenPage}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('dailyReading.readAsPage')}
+                  hitSlop={8}
+                  style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <FeatherIcon name="file-text" size={19} color={INK} />
+                </Pressable>
+              ) : null}
               <Pressable
-                onPress={onOpenPage}
+                onPress={onClose}
                 accessibilityRole="button"
-                accessibilityLabel={t('dailyReading.readAsPage')}
+                accessibilityLabel={t('Fermer')}
                 hitSlop={8}
-                style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
+                style={{ width: 44, height: 44, alignItems: 'flex-end', justifyContent: 'center' }}
               >
-                <FeatherIcon name="file-text" size={19} color={INK} />
+                <FeatherIcon name="x" size={22} color={INK} />
               </Pressable>
-            ) : null}
-            <Pressable
-              onPress={onClose}
-              accessibilityRole="button"
-              accessibilityLabel={t('Fermer')}
-              hitSlop={8}
-              style={{ width: 44, height: 44, alignItems: 'flex-end', justifyContent: 'center' }}
-            >
-              <FeatherIcon name="x" size={22} color={INK} />
-            </Pressable>
+            </View>
           </View>
         </View>
+
+        {index === 0 && onChangeVerse ? (
+          <Animated.View
+            entering={FadeIn.duration(300).delay(250)}
+            pointerEvents="box-none"
+            style={{
+              position: 'absolute',
+              left: 24,
+              right: 24,
+              bottom: insets.bottom + 28,
+              alignItems: 'center',
+            }}
+          >
+            <StoryButton
+              icon="refresh-cw"
+              label={t('dailyReading.changeVerse')}
+              onPress={onChangeVerse}
+            />
+          </Animated.View>
+        ) : null}
+
+        {isEnd ? (
+          <Animated.View
+            entering={rise(260)}
+            pointerEvents="box-none"
+            style={{
+              position: 'absolute',
+              left: 24,
+              right: 24,
+              bottom: insets.bottom + 24,
+              alignItems: 'center',
+            }}
+          >
+            <View style={{ width: '100%', maxWidth: 420, gap: 10 }}>
+              <Animated.View
+                layout={LinearTransition.duration(240)}
+                style={{ flexDirection: 'row', gap: 10 }}
+              >
+                {onShare ? (
+                  <Animated.View layout={LinearTransition.duration(240)} style={{ flex: 1 }}>
+                    <StoryButton icon="share-2" label={t('Partager')} onPress={onShare} />
+                  </Animated.View>
+                ) : null}
+                {questions.length && !deeper ? (
+                  <Animated.View exiting={FadeOut.duration(160)} style={{ flex: 1 }}>
+                    <StoryButton
+                      icon="compass"
+                      label={t('dailyReading.goFurther')}
+                      onPress={() => setDeeper(true)}
+                    />
+                  </Animated.View>
+                ) : null}
+              </Animated.View>
+              <StoryButton solid label={t('dailyReading.finish')} onPress={onClose} />
+            </View>
+          </Animated.View>
+        ) : null}
       </View>
-
-      {index === 0 && onChangeVerse ? (
-        <Animated.View
-          entering={FadeIn.duration(300).delay(250)}
-          pointerEvents="box-none"
-          style={{
-            position: 'absolute',
-            left: 24,
-            right: 24,
-            bottom: insets.bottom + 28,
-            alignItems: 'center',
-          }}
-        >
-          <StoryButton
-            icon="refresh-cw"
-            label={t('dailyReading.changeVerse')}
-            onPress={onChangeVerse}
-          />
-        </Animated.View>
-      ) : null}
-
-      {isEnd ? (
-        <Animated.View
-          entering={rise(260)}
-          pointerEvents="box-none"
-          style={{
-            position: 'absolute',
-            left: 24,
-            right: 24,
-            bottom: insets.bottom + 24,
-            alignItems: 'center',
-          }}
-        >
-          <View style={{ width: '100%', maxWidth: 420, gap: 10 }}>
-            <Animated.View
-              layout={LinearTransition.duration(240)}
-              style={{ flexDirection: 'row', gap: 10 }}
-            >
-              {onShare ? (
-                <Animated.View layout={LinearTransition.duration(240)} style={{ flex: 1 }}>
-                  <StoryButton icon="share-2" label={t('Partager')} onPress={onShare} />
-                </Animated.View>
-              ) : null}
-              {questions.length && !deeper ? (
-                <Animated.View exiting={FadeOut.duration(160)} style={{ flex: 1 }}>
-                  <StoryButton
-                    icon="compass"
-                    label={t('dailyReading.goFurther')}
-                    onPress={() => setDeeper(true)}
-                  />
-                </Animated.View>
-              ) : null}
-            </Animated.View>
-            <StoryButton solid label={t('dailyReading.finish')} onPress={onClose} />
-          </View>
-        </Animated.View>
-      ) : null}
     </View>
   )
 }
