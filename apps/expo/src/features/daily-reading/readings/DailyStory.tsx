@@ -31,11 +31,13 @@ import {
   useEntityPortraitPointer,
   useEntityPortraitTilt,
 } from '~features/lexique/EntityPortraitParallax'
+import StrobiAvatar from '~features/study-assistant/StrobiAvatar'
 import { selectFontFamily } from '~redux/selectors/user'
 import { resolveFontFamily } from '~themes/styleValues'
 import type { DailyCard, DailyEntry, DailyStrongWord } from './dailyReadingFormat'
 import PrayerMedallion from './PrayerMedallion'
 import StoryMotion, { StoryPresence } from './StoryMotion'
+import StoryStrobi from './StoryStrobi'
 import StorySceneLayer from './StorySceneLayer'
 import {
   BACKGROUND_DEPTH,
@@ -59,6 +61,8 @@ const GLASS_EDGE = 'rgba(255,255,255,0.3)'
  * behind the near layer of the scene, so a long text has room.
  */
 const BODY = { fontSize: 22, lineHeight: 36 }
+/** The questions of « Aller plus loin » are smaller: they hold together on one screen. */
+const QUESTION = { fontSize: 18, lineHeight: 27 }
 /** The closing buttons stay narrow, on a wide screen too. */
 const CLOSING_BUTTONS_WIDTH = 360
 const SOURCE_LINE = /^[A-Z][A-Za-z]{0,6}\s+\d+[.:]\d+\s*$/
@@ -133,6 +137,8 @@ const DailyStory = ({
   const [index, setIndex] = useState(0)
   const [deeper, setDeeper] = useState(false)
   const [prayerOpen, setPrayerOpen] = useState(false)
+  // The question of « Aller plus loin » being opened: Strobi turns to it before it opens.
+  const [asking, setAsking] = useState<number | null>(null)
   // Wider than tall, the scene keeps its square and stands in the middle: the sides show it
   // blurred and dark, so a 21:9 screen does not stretch it into a strip (2026-11-26).
   const [area, setArea] = useState<{ width: number; height: number } | null>(null)
@@ -222,6 +228,22 @@ const DailyStory = ({
   const reading = { fontFamily, color: INK, ...SHADOW }
 
   /**
+   * A question of « Aller plus loin » opens Strobi on it: Strobi turns to it, nods and lights up
+   * first, so the reader sees who it talks to.
+   */
+  const askQuestion = (question: string, questionIndex: number) => {
+    if (!onAskQuestion || asking != null) return
+    setAsking(questionIndex)
+    setTimeout(
+      () => {
+        onAskQuestion(question)
+        setAsking(null)
+      },
+      still ? 0 : 650
+    )
+  }
+
+  /**
    * The closing buttons, just under the blessing or the questions (2026-11-26): they come after
    * the text and leave with the card.
    */
@@ -246,7 +268,13 @@ const DailyStory = ({
         {questions.length && !deeper ? (
           <View style={{ flex: 1 }}>
             <StoryButton
-              icon="compass"
+              // Strobi, for a reader it is open to: the questions talk to it (2026-11-26).
+              icon={onAskQuestion ? undefined : 'compass'}
+              leading={
+                onAskQuestion ? (
+                  <StrobiAvatar animation="idle" size={24} lookAt={[0, 0.5]} settleAfterMs={2500} />
+                ) : undefined
+              }
               label={t('dailyReading.goFurther')}
               onPress={() => setDeeper(true)}
             />
@@ -414,15 +442,34 @@ const DailyStory = ({
       case 'end':
         return deeper ? (
           <>
-            <StoryMotion>
-              <Kicker>{t('dailyReading.goDeeper')}</Kicker>
-            </StoryMotion>
+            {/* Strobi floats on the right of the questions, its eyes on them. */}
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'flex-end',
+                justifyContent: 'space-between',
+              }}
+            >
+              <StoryMotion>
+                <Kicker>{t('dailyReading.goDeeper')}</Kicker>
+              </StoryMotion>
+              {onAskQuestion ? (
+                <StoryMotion
+                  enter="pop"
+                  delay={TEXT_MOTION.questionStep}
+                  duration={TEXT_MOTION.riseDuration}
+                  style={{ marginBottom: 8 }}
+                >
+                  <StoryStrobi size={64} asking={asking} still={still} />
+                </StoryMotion>
+              ) : null}
+            </View>
             <Box className={onAskQuestion ? 'gap-[12px]' : 'gap-[20px]'}>
               {questions.map((item, itemIndex) => (
                 <StoryMotion key={item} delay={(itemIndex + 1) * TEXT_MOTION.questionStep}>
                   {onAskQuestion ? (
                     <Pressable
-                      onPress={() => onAskQuestion(item)}
+                      onPress={() => askQuestion(item, itemIndex)}
                       accessibilityRole="button"
                       accessibilityHint={t('dailyReading.askStrobiHint')}
                       style={({ pressed }) => ({
@@ -440,11 +487,11 @@ const DailyStory = ({
                         opacity: pressed ? 0.9 : 1,
                       })}
                     >
-                      <Text style={[reading, BODY, { flex: 1 }]}>{item}</Text>
+                      <Text style={[reading, QUESTION, { flex: 1 }]}>{item}</Text>
                       <FeatherIcon name="message-circle" size={18} color={INK} />
                     </Pressable>
                   ) : (
-                    <Text style={[reading, BODY]}>{item}</Text>
+                    <Text style={[reading, QUESTION]}>{item}</Text>
                   )}
                 </StoryMotion>
               ))}
@@ -766,11 +813,14 @@ type FeatherName = 'refresh-cw' | 'share-2' | 'compass'
 const StoryButton = ({
   label,
   icon,
+  leading,
   solid = false,
   onPress,
 }: {
   label: string
   icon?: FeatherName
+  /** Drawn before the label in the place of an icon. */
+  leading?: ReactNode
   solid?: boolean
   onPress: () => void
 }) => (
@@ -792,7 +842,8 @@ const StoryButton = ({
       opacity: pressed ? 0.92 : 1,
     })}
   >
-    {icon ? <FeatherIcon name={icon} size={15} color={solid ? '#1c1d22' : INK} /> : null}
+    {leading ??
+      (icon ? <FeatherIcon name={icon} size={15} color={solid ? '#1c1d22' : INK} /> : null)}
     <Text
       numberOfLines={1}
       className="text-[15px] font-medium"

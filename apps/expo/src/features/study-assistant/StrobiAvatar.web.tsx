@@ -1,7 +1,10 @@
-import { useRef } from 'react'
+import { useRef, type Ref } from 'react'
 import { createAvatar, type AvatarHandle } from '@bible-strong/avatar-react'
 import strobiDefinition from './strobi.avatar.json'
 import type { StrobiAnimation } from './StrobiAvatar'
+
+/** What can be asked of Strobi through `avatarRef`: a gesture over what it plays. */
+export type { AvatarHandle as StrobiHandle }
 
 export type { StrobiAnimation }
 
@@ -18,6 +21,9 @@ export default function StrobiAvatar({
   settleAfterMs = 0,
   pettable = false,
   onPet,
+  lookAt = null,
+  followPointer = false,
+  avatarRef,
 }: {
   animation: StrobiAnimation
   size: number
@@ -26,8 +32,14 @@ export default function StrobiAvatar({
   /** Touched, Strobi spins, as in the onboarding (the browser has no haptics). */
   pettable?: boolean
   onPet?: () => void
+  /** Where Strobi looks; it comes before the pointer. */
+  lookAt?: readonly [number, number] | null
+  /** Strobi follows the pointer with its head while it looks nowhere else. */
+  followPointer?: boolean
+  avatarRef?: Ref<AvatarHandle>
 }) {
-  const handle = useRef<AvatarHandle>(null)
+  const own = useRef<AvatarHandle>(null)
+  const handle = (avatarRef ?? own) as typeof own
   const avatar = (
     <Avatar
       ref={handle}
@@ -36,6 +48,8 @@ export default function StrobiAvatar({
       ariaLabel="Strobi"
       muted={muted}
       settleAfterMs={muted ? 1 : settleAfterMs}
+      lookAt={lookAt}
+      followPointer={followPointer}
       style={{ pointerEvents: 'none' }}
     />
   )

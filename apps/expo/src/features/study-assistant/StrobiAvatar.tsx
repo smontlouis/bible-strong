@@ -1,9 +1,12 @@
-import { useRef } from 'react'
+import { useRef, type Ref } from 'react'
 import { Pressable } from 'react-native'
 import * as Haptics from 'expo-haptics'
 import { createAvatar, type AvatarHandle } from '@bible-strong/avatar-react-native'
 import strobiDefinition from './strobi.avatar.json'
 import type { StrobiMood } from './strobiMood'
+
+/** What can be asked of Strobi through `avatarRef`: a gesture over what it plays. */
+export type { AvatarHandle as StrobiHandle }
 
 /**
  * What Strobi can be asked to play: the animations of its file of the first version, each of
@@ -29,6 +32,8 @@ export default function StrobiAvatar({
   settleAfterMs = 0,
   pettable = false,
   onPet,
+  lookAt = null,
+  avatarRef,
 }: {
   /** An animation of its file, or a state of the catalogue the conversation uses. */
   animation: StrobiAnimation | StrobiMood | CatalogueState
@@ -52,8 +57,18 @@ export default function StrobiAvatar({
   pettable?: boolean
   /** Also told when Strobi is touched, for a reaction of the screen's own. */
   onPet?: () => void
+  /**
+   * Where Strobi looks, `[x, y]` to the right and up, each from -1 to 1: its head turns there
+   * smoothly, and back when null (2026-11-26).
+   */
+  lookAt?: readonly [number, number] | null
+  /** Only the web follows the pointer; a phone has none. */
+  followPointer?: boolean
+  /** For a gesture laid over what it plays (`nod`, `bounce`, `spin`). */
+  avatarRef?: Ref<AvatarHandle>
 }) {
-  const handle = useRef<AvatarHandle>(null)
+  const own = useRef<AvatarHandle>(null)
+  const handle = (avatarRef ?? own) as typeof own
   const avatar = (
     <Avatar
       ref={handle}
@@ -63,6 +78,7 @@ export default function StrobiAvatar({
       muted={muted}
       paused={muted}
       settleAfterMs={settleAfterMs}
+      lookAt={lookAt}
     />
   )
   if (!pettable) return avatar
