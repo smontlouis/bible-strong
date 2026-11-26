@@ -11,6 +11,20 @@ jest.mock('~features/print/markForPrint', () => ({ markForPrint: jest.fn() }))
 jest.mock('~helpers/storage.desktop', () => ({ flushStorage: jest.fn() }))
 jest.mock('~helpers/agentObservability', () => ({ appLogger: {} }))
 jest.mock('expo-router', () => ({ useRouter: jest.fn() }))
+jest.mock('~features/app-switcher/utils/useOpenTargetInTab', () => ({
+  useOpenTargetInTab: jest.fn(),
+}))
+jest.mock('~features/app-switcher/utils/useSlideNewTab', () => ({ useSlideNewTab: jest.fn() }))
+jest.mock('~features/app-switcher/utils/useOpenInNewTab', () => ({ useOpenInNewTab: jest.fn() }))
+jest.mock('~state/useDefaultBibleVersion', () => ({ useDefaultBibleVersion: jest.fn() }))
+jest.mock('../lookUp', () => ({ lookUpPassage: jest.fn() }))
+jest.mock('../readingReminders', () => ({ takeReadingReminderUrl: jest.fn() }))
+jest.mock('~state/tabGroups', () => ({ useSwitchGroup: jest.fn() }))
+jest.mock('~state/tabs', () => ({ activeGroupAtom: {} }))
+jest.mock('../useDesktopMenu', () => ({
+  useDesktopMenu: jest.fn(),
+  desktopRecentsClearedAtAtom: {},
+}))
 
 import { desktopLinkRoute } from '../DesktopShell'
 

@@ -1,7 +1,8 @@
+import { IS_BROWSER } from '~desktop/isDesktop'
 import { Image } from 'expo-image'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
-import { Platform, ScrollView } from 'react-native'
+import { ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import type { ComputedPlan, ComputedReadingSlice, EntitySlice } from '~common/types'
@@ -405,7 +406,7 @@ const ScheduledPlanContent = ({ plan, initialReadingSliceId }: Props) => {
       onSelect={setChosenDay}
     />
   )
-  const reminder = started && startDate && Platform.OS !== 'web' && (
+  const reminder = started && startDate && !IS_BROWSER && (
     <ReminderSettings
       surface="card"
       showIcon

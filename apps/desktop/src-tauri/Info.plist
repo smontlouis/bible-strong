@@ -5,5 +5,29 @@
 	<!-- The icon drawn to the macOS grid, from Assets.car (scripts/icons.mjs). -->
 	<key>CFBundleIconName</key>
 	<string>AppIcon</string>
+	<!-- « Look Up in Bible Strong » on text selected in any app (services.rs). Its name is
+	     translated by localization/*.lproj/ServicesMenu.strings. An empty NSRequiredContext
+	     keeps the service on by default. -->
+	<key>NSServices</key>
+	<array>
+		<dict>
+			<key>NSMenuItem</key>
+			<dict>
+				<key>default</key>
+				<string>Look Up in Bible Strong</string>
+			</dict>
+			<key>NSMessage</key>
+			<string>lookUpInBibleStrong</string>
+			<key>NSPortName</key>
+			<string>Bible Strong</string>
+			<key>NSRequiredContext</key>
+			<dict/>
+			<key>NSSendTypes</key>
+			<array>
+				<string>NSStringPboardType</string>
+				<string>public.utf8-plain-text</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

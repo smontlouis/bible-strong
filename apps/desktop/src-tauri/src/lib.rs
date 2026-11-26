@@ -9,10 +9,13 @@ mod bootstrap;
 mod devtools;
 mod download;
 mod files;
+mod inbox;
 mod kv;
 mod material;
 mod menu;
 mod paths;
+mod reminders;
+mod services;
 mod sign_in;
 mod sqlite;
 
@@ -130,7 +133,7 @@ fn keep_minimum_size(window: &tauri::Window, size: PhysicalSize<u32>) {
     }
 }
 
-fn focus_main_window(app: &tauri::AppHandle) {
+pub(crate) fn focus_main_window(app: &tauri::AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.unminimize();
         let _ = window.show();
@@ -189,8 +192,17 @@ pub fn run() {
             files::fs_read_dir,
             files::fs_disk_space,
             files::fs_sha256,
+            inbox::inbox_take,
             kv::kv_apply,
-            menu::menu_set_language,
+            menu::menu_update,
+            reminders::reminders_permission,
+            reminders::reminders_request_permission,
+            reminders::reminders_scheduled,
+            reminders::reminders_schedule,
+            reminders::reminders_cancel,
+            reminders::reminders_displayed,
+            reminders::reminders_remove_displayed,
+            reminders::reminders_open_settings,
             sign_in::sign_in_start,
             sign_in::sign_in_result,
             sign_in::sign_in_cancel,
@@ -213,13 +225,20 @@ pub fn run() {
             app.manage(bootstrap::AppDirectories { documents, cache });
             app.manage(sqlite::Databases::default());
             app.manage(sign_in::SignIn::default());
+            app.manage(inbox::Inbox::default());
             app.manage(download::Downloads::new(format!(
                 "BibleStrongDesktop/{} ({})",
                 app.package_info().version,
                 bootstrap::platform()
             )));
 
-            let menu = menu::build(&handle, "fr")?;
+            let menu = menu::build(
+                &handle,
+                &menu::MenuState {
+                    language: "fr".into(),
+                    ..Default::default()
+                },
+            )?;
             app.set_menu(menu)?;
             app.on_menu_event(|app, event| menu::forward(app, event.id().as_ref()));
 
@@ -232,6 +251,24 @@ pub fn run() {
                 focus_main_window(&links);
                 let _ = links.emit_to("main", OPEN_URL_EVENT, urls);
             });
+            // Windows and Linux hand the address that launched the app (a clicked reading
+            // reminder, a link) as an argument, before the page listens: it waits in the inbox.
+            #[cfg(any(windows, target_os = "linux"))]
+            if let Ok(Some(urls)) = app.deep_link().get_current() {
+                for url in urls {
+                    inbox::deliver(
+                        &handle,
+                        inbox::Delivery::Open {
+                            url: url.to_string(),
+                        },
+                    );
+                }
+            }
+
+            // macOS: « Look Up in Bible Strong » from the selection of any app.
+            services::register(&handle);
+            // Reading reminders: the delegate that receives a click (macOS), the clock (Linux).
+            reminders::start(&handle);
 
             create_main_window(&handle)?;
             Ok(())
