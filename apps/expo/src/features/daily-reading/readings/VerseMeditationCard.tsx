@@ -77,8 +77,9 @@ const VerseMeditationCard = (props: VerseCardProps) => {
     </>
   )
 
-  // On a phone the card is a window on the day's scene, which grows into the stories.
-  if (!desktop && entry && verse) {
+  // The card is a window on the day's scene, on a phone as on a wide screen (2026-11-26); on iOS
+  // it grows into the stories.
+  if (entry && verse) {
     const icon = (
       name: 'bell' | 'share-2' | 'image',
       accessibilityLabel: string,

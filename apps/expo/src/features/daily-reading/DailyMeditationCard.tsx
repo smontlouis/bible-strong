@@ -88,8 +88,9 @@ const DailyMeditationCard = ({
     </Sheet>
   )
 
-  // On a phone, a book whose day is on this device shows it over its scene, and grows into it.
-  if (!desktop && immersive && opening && story.entry) {
+  // A book whose day is on this device shows it over its scene, on a phone as on a wide screen;
+  // on iOS the card grows into it.
+  if (immersive && opening && story.entry) {
     return (
       <>
         <DailySceneCard
