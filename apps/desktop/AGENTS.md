@@ -7,6 +7,10 @@ Bible Strong for macOS, Windows and Linux: a Tauri 2 shell (`src-tauri/`, Rust) 
 | What | Where |
 | --- | --- |
 | Rust commands: files, downloads, archives, SQLite, key-value store, browser sign-in, menu | `src-tauri/src/` |
+| Native menu, rebuilt from what the page sends (language, tabs, recent passages) | `src-tauri/src/menu.rs`; the page side: `apps/expo/src/desktop/useDesktopMenu.ts` |
+| What the system hands the app before the page listens (Service text, clicked reminders, launch links) | `src-tauri/src/inbox.rs`, taken by `DesktopShell` |
+| macOS Service « Look Up in Bible Strong » | `src-tauri/src/services.rs`, `Info.plist` (`NSServices`), `src-tauri/localization/*.lproj/ServicesMenu.strings` |
+| Reading reminders scheduled by the system (ADR-0119) | `src-tauri/src/reminders.rs`; the page side: `apps/expo/src/desktop/readingReminders.ts`, `ReadingReminders.desktop.tsx` |
 | Archive keys compiled into the binary | `src-tauri/build.rs` (from `BIBLE_STRONG_ARCHIVE_KEYS`) |
 | Shims of `expo-file-system/legacy`, `expo-sqlite`, `rn-fetch-blob`, `react-native-zip-archive` | `apps/expo/src/desktop/shims/` |
 | Desktop module resolution, and the `.web` files the desktop takes the shared file for | `apps/expo/desktopResolution.cjs` |
@@ -41,6 +45,7 @@ Bible Strong for macOS, Windows and Linux: a Tauri 2 shell (`src-tauri/`, Rust) 
 - The window's origin (`tauri://localhost`, `https://tauri.localhost` on Windows) is permanent: changing it loses the webview's stored data.
 - On macOS the window has no title bar: its buttons sit over the sidebar's header (`create_main_window` in `lib.rs`, `WINDOW_CONTROLS_INSET` and `WINDOW_CONTROLS_STRIP_HEIGHT` in `src/desktop/windowControls.ts`; move them together), and the workspace's page headers drag the window. A new page header passes `dataSet={windowDragRegion(useWorkspaceHeaderInset())}` from `~features/app-switcher/windowChrome`. The window is never narrower than 800 points, so the narrow layout, which leaves no room for the buttons, never shows.
 - On macOS the window is also transparent over the system's sidebar material, tinted with the theme's canvas at 40% in a light theme and 65% in a dark one by a native view between the material and the webview (`material.rs`, the tint from `src/desktop/windowMaterial.ts` through `window_set_appearance`). The page never paints that tint: WebKit redrew it whenever an animated layer came or went, and it flickered. The shell marks the page `data-window-material` before the bundle runs, `windowMaterial.css` clears the page's grounds, and the workspace's shell and docked sidebar paint none. The main panel and the overlay sidebar stay opaque; a new full-window surface outside the main panel needs a ground of its own.
+- The macOS Service and the reading reminders only work in an app bundle: macOS registers a Service from an installed bundle's `Info.plist`, and `UNUserNotificationCenter` throws outside a bundle (`reminders.rs` reads « denied » there). Check them on a built `.app`, with the dev identifier so the installed app's data stays untouched. On Windows, reminders show only for the identifier the installer gives the Start menu shortcut.
 - The Bible menu's items carry no native key equivalent: their shortcuts are bare keys (arrows, letters), which a native menu would take from every text field.
 
 ## Testing
