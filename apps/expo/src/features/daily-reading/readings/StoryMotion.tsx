@@ -1,6 +1,7 @@
-import type { ReactNode } from 'react'
+import { use, type ReactNode } from 'react'
 import type { StyleProp, ViewStyle } from 'react-native'
 import Animated, { Easing, Keyframe, ReduceMotion, useReducedMotion } from 'react-native-reanimated'
+import { StoryArrival } from './storyArrival'
 import { TEXT_MOTION } from './storySceneMotion'
 
 /**
@@ -42,7 +43,8 @@ const arrival = (
   enter: StoryMotionProps['enter'],
   delay: number,
   duration: number,
-  still: boolean
+  still: boolean,
+  wait: number
 ) => {
   const frames =
     enter === 'rise' && !still
@@ -58,7 +60,7 @@ const arrival = (
         : { 0: { opacity: 0 }, 100: { opacity: 1, easing: EASE_OUT } }
   return new Keyframe(frames)
     .duration(duration)
-    .delay(TEXT_MOTION.arriveDelay + delay)
+    .delay(wait + delay)
     .reduceMotion(ReduceMotion.Never)
 }
 
@@ -88,11 +90,12 @@ const StoryMotion = ({
   pointerEvents,
 }: StoryMotionProps) => {
   const still = useReducedMotion()
+  const wait = use(StoryArrival)
   return (
     <Animated.View
       pointerEvents={pointerEvents}
       style={style}
-      entering={enter === 'none' ? undefined : arrival(enter, delay, duration, still)}
+      entering={enter === 'none' ? undefined : arrival(enter, delay, duration, still, wait)}
       exiting={leave ? departure(still) : undefined}
     >
       {children}

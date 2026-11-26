@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { use, useEffect, useRef, useState } from 'react'
 import { Platform } from 'react-native'
 import Animated, { css } from 'react-native-reanimated'
 import StrobiAvatar, { type StrobiHandle } from '~features/study-assistant/StrobiAvatar'
-import { TEXT_MOTION } from './storySceneMotion'
+import { StoryArrival } from './storyArrival'
 
 /** It floats, gently: a little higher, then back. Declared once, so it never restarts. */
 const FLOAT = css.keyframes({
@@ -34,9 +34,11 @@ const StoryStrobi = ({
 }) => {
   const handle = useRef<StrobiHandle>(null)
   const [rested, setRested] = useState(false)
+  const wait = use(StoryArrival)
   useEffect(() => {
-    const timer = setTimeout(() => setRested(true), TEXT_MOTION.arriveDelay + CURIOUS_MS)
+    const timer = setTimeout(() => setRested(true), wait + CURIOUS_MS)
     return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   useEffect(() => {
     if (asking != null) handle.current?.poke('nod')
