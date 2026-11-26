@@ -1,7 +1,8 @@
 import { AnimatePresence, motion, useReducedMotion, type MotionStyle } from 'motion/react'
-import type { ReactNode } from 'react'
+import { use, type ReactNode } from 'react'
 import { StyleSheet } from 'react-native'
 import type { StoryMotionProps } from './StoryMotion'
+import { StoryArrival } from './storyArrival'
 import { TEXT_MOTION } from './storySceneMotion'
 
 /**
@@ -51,6 +52,7 @@ const StoryMotion = ({
 }: StoryMotionProps) => {
   // A reader who asked for less motion still sees the fades, without the movements.
   const still = useReducedMotion() ?? false
+  const wait = use(StoryArrival)
   const hidden =
     enter === 'rise' && !still
       ? { opacity: 0, y: TEXT_MOTION.riseDistance }
@@ -69,7 +71,7 @@ const StoryMotion = ({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{
         duration: seconds(duration),
-        delay: seconds(TEXT_MOTION.arriveDelay + delay),
+        delay: seconds(wait + delay),
         ease: EASE_OUT,
       }}
       exit={

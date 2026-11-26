@@ -11,6 +11,11 @@ const deepmerge = require('@fastify/deepmerge')()
 
 export const storage = createMMKV()
 
+// MMKV reads and writes its file at once: nothing to load first nor to wait for. The browser's
+// store loads from IndexedDB (`storage.web.ts`).
+export const prepareStorage = async (): Promise<void> => undefined
+export const flushStorage = async (): Promise<void> => undefined
+
 // TODO: Remove `hasMigratedFromAsyncStorage` after a while (when everyone has migrated)
 export const hasMigratedFromAsyncStorage = storage.getBoolean('hasMigratedFromAsyncStorage')
 

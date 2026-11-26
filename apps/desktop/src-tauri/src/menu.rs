@@ -6,9 +6,17 @@
 //! menu's shortcuts are bare keys (arrows, letters): a native key equivalent would take them
 //! from every text field, so its items carry none. The desktop app follows the system's
 //! conventions for its tabs (⌘T, ⌘W, ⌃⇥) and its search (⌘F), so closing the window takes ⇧⌘W.
+//!
+//! The page sends what the menu lists of the workspace (`useDesktopMenu.ts`): its language, the
+//! tabs of the active group for the Window menu, and the last passages read for File › Open
+//! Recent. The menu is rebuilt from it whenever it changes.
 
+use serde::Deserialize;
 use tauri::{
-    menu::{AboutMetadataBuilder, Menu, MenuBuilder, MenuItem, PredefinedMenuItem, SubmenuBuilder},
+    menu::{
+        AboutMetadataBuilder, CheckMenuItem, Menu, MenuBuilder, MenuItem, PredefinedMenuItem,
+        SubmenuBuilder,
+    },
     AppHandle, Emitter, Manager, Runtime,
 };
 
@@ -45,6 +53,9 @@ struct Labels {
     website: &'static str,
     support: &'static str,
     check_updates: &'static str,
+    open_recent: &'static str,
+    no_recents: &'static str,
+    clear_recents: &'static str,
 }
 
 const FRENCH: Labels = Labels {
@@ -78,6 +89,9 @@ const FRENCH: Labels = Labels {
     website: "Site de Bible Strong",
     support: "Nous contacter",
     check_updates: "Rechercher les mises à jour…",
+    open_recent: "Passages récents",
+    no_recents: "Aucun passage récent",
+    clear_recents: "Effacer le menu",
 };
 
 const ENGLISH: Labels = Labels {
@@ -111,13 +125,80 @@ const ENGLISH: Labels = Labels {
     website: "Bible Strong Website",
     support: "Contact Us",
     check_updates: "Check for Updates…",
+    open_recent: "Open Recent",
+    no_recents: "No Recent Passages",
+    clear_recents: "Clear Menu",
 };
 
-pub fn build<R: Runtime>(app: &AppHandle<R>, language: &str) -> tauri::Result<Menu<R>> {
-    let labels = if language == "en" { &ENGLISH } else { &FRENCH };
+/// A tab of the active group, as the Window menu lists it.
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct MenuTab {
+    pub id: String,
+    pub title: String,
+    pub active: bool,
+}
+
+/// A passage read recently, as File › Open Recent lists it.
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct MenuRecent {
+    pub id: String,
+    pub label: String,
+}
+
+/// What the menu shows of the workspace (`desktopMenuState.ts`).
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct MenuState {
+    pub language: String,
+    pub tabs: Vec<MenuTab>,
+    pub recents: Vec<MenuRecent>,
+}
+
+/// Text from the workspace, shown as it is: Windows and Linux read `&` as the mark of a mnemonic.
+fn literal(text: &str) -> String {
+    if cfg!(target_os = "macos") {
+        text.to_owned()
+    } else {
+        text.replace('&', "&&")
+    }
+}
+
+pub fn build<R: Runtime>(app: &AppHandle<R>, state: &MenuState) -> tauri::Result<Menu<R>> {
+    let labels = if state.language == "en" {
+        &ENGLISH
+    } else {
+        &FRENCH
+    };
     let item = |id: &str, label: &str, accelerator: Option<String>| {
         MenuItem::with_id(app, id, label, true, accelerator.as_deref())
     };
+
+    let mut recent = SubmenuBuilder::new(app, labels.open_recent);
+    if state.recents.is_empty() {
+        recent = recent.item(&MenuItem::with_id(
+            app,
+            "recents:none",
+            labels.no_recents,
+            false,
+            None::<&str>,
+        )?);
+    }
+    for passage in &state.recents {
+        recent = recent.item(&item(
+            &format!("recent:{}", passage.id),
+            &literal(&passage.label),
+            None,
+        )?);
+    }
+    let recent = recent
+        .separator()
+        .item(&MenuItem::with_id(
+            app,
+            "recents:clear",
+            labels.clear_recents,
+            !state.recents.is_empty(),
+            None::<&str>,
+        )?)
+        .build()?;
 
     let file = SubmenuBuilder::new(app, labels.file)
         .item(&item(
@@ -130,6 +211,8 @@ pub fn build<R: Runtime>(app: &AppHandle<R>, language: &str) -> tauri::Result<Me
             labels.close_tab,
             Some("CmdOrCtrl+W".into()),
         )?)
+        .separator()
+        .item(&recent)
         .separator()
         .item(&item(
             "shortcut:palette",
@@ -204,7 +287,7 @@ pub fn build<R: Runtime>(app: &AppHandle<R>, language: &str) -> tauri::Result<Me
         .separator()
         .item(&item("shortcut:compare", labels.compare, None)?);
 
-    let window = SubmenuBuilder::new(app, labels.window)
+    let mut window = SubmenuBuilder::new(app, labels.window)
         .item(&PredefinedMenuItem::minimize(app, None)?)
         .item(&PredefinedMenuItem::maximize(app, None)?)
         .separator()
@@ -225,6 +308,20 @@ pub fn build<R: Runtime>(app: &AppHandle<R>, language: &str) -> tauri::Result<Me
             labels.close_window,
             Some("CmdOrCtrl+Shift+W".into()),
         )?);
+    // The open tabs of the active group, the active one checked, as a browser lists its tabs.
+    if !state.tabs.is_empty() {
+        window = window.separator();
+        for tab in &state.tabs {
+            window = window.item(&CheckMenuItem::with_id(
+                app,
+                format!("tab:{}", tab.id),
+                literal(&tab.title),
+                true,
+                tab.active,
+                None::<&str>,
+            )?);
+        }
+    }
 
     let mut help = SubmenuBuilder::new(app, labels.help)
         .item(&item(
@@ -295,8 +392,23 @@ pub fn forward<R: Runtime>(app: &AppHandle<R>, id: &str) {
 }
 
 #[tauri::command]
-pub fn menu_set_language(app: AppHandle, language: String) -> Result<(), String> {
-    let menu = build(&app, &language).map_err(|error| error.to_string())?;
+pub fn menu_update(app: AppHandle, state: MenuState) -> Result<(), String> {
+    let menu = build(&app, &state).map_err(|error| error.to_string())?;
     app.set_menu(menu).map_err(|error| error.to_string())?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::literal;
+
+    #[test]
+    fn keeps_an_ampersand_of_the_workspace_literal() {
+        let expected = if cfg!(target_os = "macos") {
+            "Notes & études"
+        } else {
+            "Notes && études"
+        };
+        assert_eq!(literal("Notes & études"), expected);
+    }
 }

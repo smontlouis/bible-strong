@@ -40,6 +40,9 @@ const enqueue = (op: KvOp) => {
   if (!inFlight) queueMicrotask(() => !inFlight && queued.length && void send())
 }
 
+/** The snapshot is served with the page (`desktopBootstrap`): nothing to load first. */
+export const prepareStorage = async (): Promise<void> => undefined
+
 /** Resolves once every write made so far has reached the shell. */
 export const flushStorage = async (): Promise<void> => {
   while (inFlight || queued.length) {

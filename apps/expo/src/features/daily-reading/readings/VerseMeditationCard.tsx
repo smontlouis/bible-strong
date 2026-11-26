@@ -1,7 +1,8 @@
+import { IS_BROWSER } from '~desktop/isDesktop'
 import { useRouter } from 'expo-router'
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, Platform, Share } from 'react-native'
+import { ActivityIndicator, Share } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import Link from '~common/Link'
 import Sheet from '~common/ModalSheet'
@@ -106,7 +107,7 @@ const VerseMeditationCard = (props: VerseCardProps) => {
           actions={
             <>
               {!addDay &&
-                Platform.OS !== 'web' &&
+                !IS_BROWSER &&
                 icon('bell', t('Recevoir une notification quotidienne'), () =>
                   notificationModalRef.current?.present()
                 )}
@@ -191,7 +192,7 @@ const VerseMeditationCard = (props: VerseCardProps) => {
         }
       >
         <Box className="overflow-hidden border-continuous flex-row items-center justify-center opacity-[0.5]">
-          {!addDay && Platform.OS !== 'web' && (
+          {!addDay && !IS_BROWSER && (
             <Link
               accessibilityLabel={t('Recevoir une notification quotidienne')}
               onPress={() => notificationModalRef.current?.present()}

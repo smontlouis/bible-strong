@@ -1,0 +1,21 @@
+diff --git a/dist/cli.js b/dist/cli.js
+index 54d67a0072d7c6150fd225d3dbab256f85f20871..72e3ca60e2ca5009325cc83b93481e663c59178f 100755
+--- a/dist/cli.js
++++ b/dist/cli.js
+@@ -1258,7 +1258,15 @@ var contentTypes = {
+   mp3: "audio/mpeg",
+   mp4: "video/mp4",
+   wav: "audio/wav",
+-  txt: "text/plain"
++  txt: "text/plain",
++  // Text assets (DOM component bundles and pages) must carry their real type:
++  // Cloudflare compresses only these at the edge, never application/octet-stream.
++  js: "application/javascript",
++  mjs: "application/javascript",
++  html: "text/html",
++  htm: "text/html",
++  css: "text/css",
++  xml: "application/xml"
+ };
+ var PlatformFiles = Schema7.Struct({
+   bundle: Schema7.String,

@@ -414,6 +414,7 @@
   "Polices": "Polices",
   "bible.settings.shareOptions": "Options de partage",
   "bible.settings.cardCollection": "Collection de cartes",
+  "bible.settings.footerAudio": "Audio et musique",
   "resource.strong.offlineCopyNeeded": "Ces données Strong ne sont pas encore disponibles en ligne. Ajoutez leur copie hors ligne pour les utiliser maintenant.",
   "resource.strong.temporarilyUnavailable": "Le lexique Strong n’a pas pu être ouvert.",
   "resource.strong.noLexiconForVerse": "Aucune donnée de lexique Strong pour ce verset.",

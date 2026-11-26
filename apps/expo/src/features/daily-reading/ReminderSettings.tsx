@@ -1,15 +1,19 @@
 import Card from '~common/ui/Card'
 import SheetWell from '~common/ui/SheetWell'
-import { DateTimePicker } from '@expo/ui/community/datetime-picker'
 import { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Platform } from 'react-native'
+import { ActivityIndicator } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import Switch from '~common/ui/Switch'
+import { IS_BROWSER } from '~desktop/isDesktop'
+import ReminderTimeField from './ReminderTimeField'
 import { useReadingReminderPermission } from './useReadingReminderPermission'
+
+// iOS, Android and the desktop app deliver reminders; the browser points to them.
+const DELIVERS_REMINDERS = !IS_BROWSER
 
 const ReminderSettings = ({
   time,
@@ -26,7 +30,6 @@ const ReminderSettings = ({
   onChange: (time: string | null) => void
 }) => {
   const { t } = useTranslation()
-  const [open, setOpen] = useState(false)
   const [pending, setPending] = useState(false)
   const mounted = useRef(true)
   useEffect(() => {
@@ -37,9 +40,6 @@ const ReminderSettings = ({
   }, [])
   const delivery = useReadingReminderPermission()
   const validTime = /^([01]\d|2[0-3]):[0-5]\d$/.test(time ?? '') ? time : undefined
-  const [hours, minutes] = (validTime || '07:00').split(':').map(Number)
-  const date = new Date()
-  date.setHours(hours, minutes, 0, 0)
   const through = delivery.through[scope]
   const toggle = async (enabled: boolean) => {
     if (!enabled) {
@@ -57,12 +57,10 @@ const ReminderSettings = ({
     <Container className={surface === 'card' ? 'p-[16px] gap-[12px]' : 'p-[20px] gap-[12px]'}>
       <Box className="flex-row items-center justify-between gap-[16px]">
         <Box className="flex-1 flex-row items-center gap-[8px]">
-          {showIcon && Platform.OS !== 'web' && (
-            <FeatherIcon name="bell" size={18} color="primary" />
-          )}
+          {showIcon && DELIVERS_REMINDERS && <FeatherIcon name="bell" size={18} color="primary" />}
           <Text className="text-default font-bold flex-1">{t('dailyReading.reminder')}</Text>
         </Box>
-        {Platform.OS !== 'web' && (
+        {DELIVERS_REMINDERS && (
           <Switch
             disabled={pending}
             value={Boolean(time)}
@@ -71,7 +69,7 @@ const ReminderSettings = ({
           />
         )}
       </Box>
-      {Platform.OS === 'web' ? (
+      {!DELIVERS_REMINDERS ? (
         <Text className="text-grey text-[13px] leading-[20px]">
           {t('dailyReading.mobileReminders')}
         </Text>
@@ -79,32 +77,7 @@ const ReminderSettings = ({
         <>
           {pending && <ActivityIndicator accessibilityLabel={t('Chargement...')} />}
           {time ? (
-            <>
-              {Platform.OS !== 'ios' && (
-                <Link
-                  onPress={() => setOpen(true)}
-                  className="min-h-[44px] justify-center"
-                  accessibilityLabel={t("Choisir l'heure")}
-                >
-                  <Text className="text-link text-[18px] font-bold">{validTime ?? '07:00'}</Text>
-                </Link>
-              )}
-              {(Platform.OS === 'ios' || open) && (
-                <DateTimePicker
-                  value={date}
-                  mode="time"
-                  is24Hour
-                  presentation="dialog"
-                  onValueChange={(_, next) => {
-                    onChange(
-                      `${String(next.getHours()).padStart(2, '0')}:${String(next.getMinutes()).padStart(2, '0')}`
-                    )
-                    setOpen(false)
-                  }}
-                  onDismiss={() => setOpen(false)}
-                />
-              )}
-            </>
+            <ReminderTimeField time={validTime ?? '07:00'} onChange={onChange} />
           ) : (
             delivery.permission !== 'denied' && (
               <Text className="text-grey text-[13px]">{t('dailyReading.reminderOptional')}</Text>

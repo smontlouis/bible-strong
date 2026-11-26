@@ -409,6 +409,7 @@
   "Polices": "Fonts",
   "bible.settings.shareOptions": "Share options",
   "bible.settings.cardCollection": "Card collection",
+  "bible.settings.footerAudio": "Audio and music",
   "resource.strong.offlineCopyNeeded": "This Strong content is not available online yet. Add its Offline copy to use it now.",
   "resource.strong.temporarilyUnavailable": "The Strong lexicon could not be opened.",
   "resource.strong.noLexiconForVerse": "No Strong lexicon data is available for this verse.",

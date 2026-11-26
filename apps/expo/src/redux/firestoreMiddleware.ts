@@ -75,6 +75,7 @@ import {
   setSettingsPress,
   setSettingsRedWordsDisplay,
   setSettingsCardCollection,
+  setSettingsFooterAudio,
   setSettingsRelationsDisplay,
   setSettingsTagsDisplay,
   setSettingsTextDisplay,
@@ -539,7 +540,8 @@ const isSettingsAction = isAnyOf(
   isSyncedDefaultBibleVersionAction,
   setDefaultStrongBibleVersion,
   setSettingsRedWordsDisplay,
-  setSettingsCardCollection
+  setSettingsCardCollection,
+  setSettingsFooterAudio
 )
 
 const isCustomColorAction = isAnyOf(addCustomColor, updateCustomColor, deleteCustomColor)

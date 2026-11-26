@@ -28276,6 +28276,18 @@ multer@emadalam/multer:
   languageName: node
   linkType: hard
 
+"open-ota@patch:open-ota@npm%3A0.3.0#~/.yarn/patches/open-ota-npm-0.3.0-4606f145ac.patch":
+  version: 0.3.0
+  resolution: "open-ota@patch:open-ota@npm%3A0.3.0#~/.yarn/patches/open-ota-npm-0.3.0-4606f145ac.patch::version=0.3.0&hash=b1dad5"
+  dependencies:
+    "@effect/platform-node": "npm:4.0.0-rc.112"
+    effect: "npm:4.0.0-rc.112"
+  bin:
+    open-ota: dist/cli.js
+  checksum: 10c0/ff001bffb9e00531f85f01b0f61bb7abc46be2ba03efda00825e81b40e62f43ec70612581a070e3bc44e138e6a3a32eca513b944879514829def48851f7478da
+  languageName: node
+  linkType: hard
+
 "open@npm:^6.2.0":
   version: 6.4.0
   resolution: "open@npm:6.4.0"

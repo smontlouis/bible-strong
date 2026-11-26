@@ -36,6 +36,7 @@ import { selectFontFamily } from '~redux/selectors/user'
 import { resolveFontFamily } from '~themes/styleValues'
 import type { DailyCard, DailyEntry, DailyStrongWord } from './dailyReadingFormat'
 import PrayerMedallion from './PrayerMedallion'
+import { StoryArrival } from './storyArrival'
 import StoryMotion, { StoryPresence } from './StoryMotion'
 import StoryStrobi from './StoryStrobi'
 import StorySceneLayer from './StorySceneLayer'
@@ -137,6 +138,8 @@ const DailyStory = ({
   const [index, setIndex] = useState(0)
   const [deeper, setDeeper] = useState(false)
   const [prayerOpen, setPrayerOpen] = useState(false)
+  // How long the texts of the card that arrives wait before they rise (storyArrival).
+  const [arrival, setArrival] = useState<number>(TEXT_MOTION.arriveDelay)
   // The question of « Aller plus loin » being opened: Strobi turns to it before it opens.
   const [asking, setAsking] = useState<number | null>(null)
   // Wider than tall, the scene keeps its square and stands in the middle: the sides show it
@@ -157,6 +160,7 @@ const DailyStory = ({
     setDeeper(false)
     setPrayerOpen(false)
     setRound(round + 1)
+    setArrival(TEXT_MOTION.arriveDelay)
   }
   const questions = entry.cards.find(card => card.type === 'questions')?.items ?? []
   const cards: StoryCard[] = [
@@ -207,8 +211,12 @@ const DailyStory = ({
   const go = (step: number) => {
     // The last card ends with « Terminer », never with a stray tap.
     if (step > 0 && isEnd) return
+    const next = Math.max(0, Math.min(cards.length - 1, index + step))
+    if (next === index) return
     setPrayerOpen(false)
-    setIndex(current => Math.max(0, Math.min(cards.length - 1, current + step)))
+    // The eye travels to the new card; its text waits until it has arrived.
+    setArrival(TEXT_MOTION.travelDelay)
+    setIndex(next)
   }
   const tap = (event: GestureResponderEvent) => go(event.nativeEvent.pageX < width * 0.35 ? -1 : 1)
 
@@ -276,7 +284,11 @@ const DailyStory = ({
                 ) : undefined
               }
               label={t('dailyReading.goFurther')}
-              onPress={() => setDeeper(true)}
+              onPress={() => {
+                // The eye goes back into the scene, to its right edge.
+                setArrival(TEXT_MOTION.travelDelay)
+                setDeeper(true)
+              }}
             />
           </View>
         ) : null}
@@ -397,7 +409,10 @@ const DailyStory = ({
               <PrayerMedallion
                 label={t('dailyReading.pray')}
                 still={still}
-                onPress={() => setPrayerOpen(true)}
+                onPress={() => {
+                  setArrival(TEXT_MOTION.arriveDelay)
+                  setPrayerOpen(true)
+                }}
               />
             </StoryMotion>
             <StoryMotion delay={TEXT_MOTION.step} style={{ marginTop: 32 }}>
@@ -530,256 +545,269 @@ const DailyStory = ({
   }
 
   return (
-    <View
-      style={{ flex: 1, backgroundColor: '#1b1a22', alignItems: 'center' }}
-      // On a wide screen the pointer stands for the tilt of a phone.
-      {...(!native && !still ? pointer : {})}
-      onLayout={({ nativeEvent }) => {
-        const { width: areaWidth, height: areaHeight } = nativeEvent.layout
-        setArea(previous =>
-          previous?.width === areaWidth && previous.height === areaHeight
-            ? previous
-            : { width: areaWidth, height: areaHeight }
-        )
-      }}
-    >
-      {native && !still ? <EntityPortraitTiltSensor tilt={tilt} /> : null}
-      {wide && background ? (
-        <>
-          <Image
-            source={{ uri: background }}
-            contentFit="cover"
-            blurRadius={Platform.OS === 'web' ? 48 : 30}
-            transition={{ duration: 500, effect: 'cross-dissolve' }}
-            style={{ position: 'absolute', inset: 0, transform: [{ scale: 1.15 }] }}
-            accessibilityIgnoresInvertColors
-          />
-          <View
-            pointerEvents="none"
-            style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)' }}
-          />
-        </>
-      ) : null}
+    // How long the arriving texts wait: the eye travels to a new card, or stays.
+    <StoryArrival value={arrival}>
       <View
-        style={
-          native || !wide
-            ? { flex: 1, width: stageWidth ?? '100%', overflow: 'hidden' }
-            : // A narrow window fills its whole height like a phone (2026-11-26); a wide one
-              // keeps the square in the middle.
-              { height: '100%', aspectRatio: 1, maxWidth: '100%', overflow: 'hidden' }
-        }
+        style={{ flex: 1, backgroundColor: '#1b1a22', alignItems: 'center' }}
+        // On a wide screen the pointer stands for the tilt of a phone.
+        {...(!native && !still ? pointer : {})}
+        onLayout={({ nativeEvent }) => {
+          const { width: areaWidth, height: areaHeight } = nativeEvent.layout
+          setArea(previous =>
+            previous?.width === areaWidth && previous.height === areaHeight
+              ? previous
+              : { width: areaWidth, height: areaHeight }
+          )
+        }}
       >
-        {/* The far layer: sharp on the verse, blurred and darker behind the text. */}
-        {background ? (
-          <StorySceneLayer
-            uri={background}
-            depth={BACKGROUND_DEPTH}
-            focus={focus}
-            focused={!sharpScene}
-            camera={camera}
-            cameraAt={cameraAt}
-            stage={stage}
-            tilt={tilt}
-            still={still}
-          />
+        {native && !still ? <EntityPortraitTiltSensor tilt={tilt} /> : null}
+        {wide && background ? (
+          <>
+            <Image
+              source={{ uri: background }}
+              contentFit="cover"
+              blurRadius={Platform.OS === 'web' ? 48 : 30}
+              transition={{ duration: 500, effect: 'cross-dissolve' }}
+              style={{ position: 'absolute', inset: 0, transform: [{ scale: 1.15 }] }}
+              accessibilityIgnoresInvertColors
+            />
+            <View
+              pointerEvents="none"
+              style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)' }}
+            />
+          </>
         ) : null}
-        {/* Darker behind the reading cards, as the scene blurs. */}
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            {
-              position: 'absolute',
-              inset: 0,
-              backgroundColor: 'rgba(0,0,0,0.36)',
-              opacity: sharpScene ? 0 : 1,
-            },
-            READING_FADE,
-          ]}
-        />
-        <LinearGradient
-          pointerEvents="none"
-          colors={['rgba(0,0,0,0.34)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.3)']}
-          locations={[0, 0.22, 0.75, 1]}
-          style={{ position: 'absolute', inset: 0 }}
-        />
-
-        <Pressable onPress={tap} accessible={false} style={{ position: 'absolute', inset: 0 }} />
-
-        {/* The text floats a little with the tilt, between the far and the near layer. */}
-        <Animated.View
-          pointerEvents="box-none"
-          style={[
-            {
-              position: 'absolute',
-              left: 0,
-              right: 0,
-              top: insets.top + 64,
-              // The area stays the same from card to card, down to the bottom edge, so a card
-              // that leaves never moves: each card keeps its own room at the bottom instead.
-              bottom: 0,
-              alignItems: 'center',
-            },
-            // The browser draws the text once on its own layer and slides that layer, as it
-            // does the scene's pictures: drawn again at each step, the lines snapped to the
-            // pixels one after the other and the text moved in small jumps (2026-11-26).
-            native ? null : ({ willChange: 'transform' } as object),
-            textTilt,
-          ]}
+        <View
+          style={
+            native || !wide
+              ? { flex: 1, width: stageWidth ?? '100%', overflow: 'hidden' }
+              : // A narrow window fills its whole height like a phone (2026-11-26); a wide one
+                // keeps the square in the middle.
+                { height: '100%', aspectRatio: 1, maxWidth: '100%', overflow: 'hidden' }
+          }
         >
-          {/* The focus: the text comes a little closer on the reading cards. */}
+          {/* The far layer: sharp on the verse, blurred and darker behind the text. */}
+          {background ? (
+            <StorySceneLayer
+              uri={background}
+              depth={BACKGROUND_DEPTH}
+              focus={focus}
+              focused={!sharpScene}
+              camera={camera}
+              cameraAt={cameraAt}
+              stage={stage}
+              tilt={tilt}
+              still={still}
+            />
+          ) : null}
+          {/* Darker behind the reading cards, as the scene blurs. */}
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              {
+                position: 'absolute',
+                inset: 0,
+                backgroundColor: 'rgba(0,0,0,0.36)',
+                opacity: sharpScene ? 0 : 1,
+              },
+              READING_FADE,
+            ]}
+          />
+          <LinearGradient
+            pointerEvents="none"
+            colors={['rgba(0,0,0,0.34)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.3)']}
+            locations={[0, 0.22, 0.75, 1]}
+            style={{ position: 'absolute', inset: 0 }}
+          />
+
+          <Pressable onPress={tap} accessible={false} style={{ position: 'absolute', inset: 0 }} />
+
+          {/* The text floats a little with the tilt, between the far and the near layer. */}
           <Animated.View
             pointerEvents="box-none"
-            style={[{ flex: 1, alignSelf: 'stretch', alignItems: 'center' }, textFocus]}
+            style={[
+              {
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                top: insets.top + 64,
+                // The area stays the same from card to card, down to the bottom edge, so a card
+                // that leaves never moves: each card keeps its own room at the bottom instead.
+                bottom: 0,
+                alignItems: 'center',
+              },
+              // The browser draws the text once on its own layer and slides that layer, as it
+              // does the scene's pictures: drawn again at each step, the lines snapped to the
+              // pixels one after the other and the text moved in small jumps (2026-11-26).
+              native ? null : ({ willChange: 'transform' } as object),
+              textTilt,
+            ]}
           >
-            {/* One card at a time: the one that leaves fades out, then the next one's texts rise. */}
-            <StoryPresence>
-              <StoryMotion
-                key={`${round}:${index}:${deeper ? 'deeper' : ''}:${prayerOpen ? 'prayer' : ''}`}
-                enter="none"
-                leave
-                // A click beside the text, on a wide screen, reaches the tap area under it.
-                pointerEvents="box-none"
-                style={{ position: 'absolute', inset: 0, alignItems: 'center' }}
-              >
-                <ScrollView
-                  style={{ width: '100%', maxWidth: 560 }}
-                  contentContainerStyle={{
-                    flexGrow: 1,
-                    // The verse leaves room for « Changer de verset »; a reading card scrolls
-                    // behind the near layer, its last line stopping above it.
-                    paddingBottom: insets.bottom + (isOpening ? 132 : 96),
-                  }}
-                  showsVerticalScrollIndicator={false}
+            {/* The focus: the text comes a little closer on the reading cards. */}
+            <Animated.View
+              pointerEvents="box-none"
+              style={[{ flex: 1, alignSelf: 'stretch', alignItems: 'center' }, textFocus]}
+            >
+              {/* One card at a time: the one that leaves fades out, then the next one's texts rise. */}
+              <StoryPresence>
+                <StoryMotion
+                  key={`${round}:${index}:${deeper ? 'deeper' : ''}:${prayerOpen ? 'prayer' : ''}`}
+                  enter="none"
+                  leave
+                  // A click beside the text, on a wide screen, reaches the tap area under it.
+                  pointerEvents="box-none"
+                  style={{ position: 'absolute', inset: 0, alignItems: 'center' }}
                 >
-                  {/* The whole height answers a tap, above and below a short text too. */}
-                  <Pressable
-                    onPress={tap}
-                    accessible={false}
-                    style={{
+                  <ScrollView
+                    style={{ width: '100%', maxWidth: 560 }}
+                    contentContainerStyle={{
                       flexGrow: 1,
-                      justifyContent: 'center',
-                      paddingHorizontal: 28,
-                      paddingVertical: 12,
+                      // The verse leaves room for « Changer de verset »; a reading card scrolls
+                      // behind the near layer, its last line stopping above it.
+                      paddingBottom: insets.bottom + (isOpening ? 132 : 96),
                     }}
+                    showsVerticalScrollIndicator={false}
                   >
-                    <View accessibilityLiveRegion="polite">{renderCard(card)}</View>
-                  </Pressable>
-                </ScrollView>
-              </StoryMotion>
-            </StoryPresence>
+                    {/* The whole height answers a tap, above and below a short text too. */}
+                    <Pressable
+                      onPress={tap}
+                      accessible={false}
+                      style={{
+                        flexGrow: 1,
+                        justifyContent: 'center',
+                        paddingHorizontal: 28,
+                        paddingVertical: 12,
+                      }}
+                    >
+                      <View accessibilityLiveRegion="polite">{renderCard(card)}</View>
+                    </Pressable>
+                  </ScrollView>
+                </StoryMotion>
+              </StoryPresence>
+            </Animated.View>
           </Animated.View>
-        </Animated.View>
 
-        {/* The near layer passes in front of the text. */}
-        {foreground ? (
-          <StorySceneLayer
-            uri={foreground}
-            depth={FOREGROUND_DEPTH}
-            focus={focus}
-            focused={!sharpScene}
-            camera={camera}
-            cameraAt={cameraAt}
-            stage={stage}
-            tilt={tilt}
-            still={still}
-            cutOut
-          />
-        ) : null}
+          {/* The near layer passes in front of the text. */}
+          {foreground ? (
+            <StorySceneLayer
+              uri={foreground}
+              depth={FOREGROUND_DEPTH}
+              focus={focus}
+              focused={!sharpScene}
+              camera={camera}
+              cameraAt={cameraAt}
+              stage={stage}
+              tilt={tilt}
+              still={still}
+              cutOut
+            />
+          ) : null}
 
-        <View
-          pointerEvents="box-none"
-          style={{
-            position: 'absolute',
-            // Centred in a wide area, the scene leaves the sidebar button its corner.
-            left: 16 + (wide ? 0 : workspaceInset),
-            right: 16,
-            top: insets.top + 10,
-          }}
-        >
           <View
-            style={{ flexDirection: 'row', gap: 4 }}
-            // With a screen reader, the bars move from card to card (swipe up or down).
-            accessible
-            accessibilityRole="adjustable"
-            accessibilityLabel={t('dailyReading.cardPosition', {
-              index: index + 1,
-              count: cards.length,
-            })}
-            accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
-            onAccessibilityAction={event =>
-              go(event.nativeEvent.actionName === 'increment' ? 1 : -1)
-            }
-          >
-            {cards.map((item, cardIndex) => (
-              <ProgressBar key={cardIndex} filled={cardIndex <= index} />
-            ))}
-          </View>
-          <View
+            pointerEvents="box-none"
             style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginTop: 6,
+              position: 'absolute',
+              // Centred in a wide area, the scene leaves the sidebar button its corner.
+              left: 16 + (wide ? 0 : workspaceInset),
+              right: 16,
+              top: insets.top + 10,
             }}
           >
-            <Text
-              numberOfLines={1}
-              className="text-[12px] font-semibold uppercase tracking-[1px] shrink"
-              style={{ color: INK, ...SHADOW }}
+            <View
+              style={{ flexDirection: 'row', gap: 4 }}
+              // With a screen reader, the bars move from card to card (swipe up or down).
+              accessible
+              accessibilityRole="adjustable"
+              accessibilityLabel={t('dailyReading.cardPosition', {
+                index: index + 1,
+                count: cards.length,
+              })}
+              accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
+              onAccessibilityAction={event =>
+                go(event.nativeEvent.actionName === 'increment' ? 1 : -1)
+              }
             >
-              {kicker}
-            </Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              {music}
-              {onOpenPage ? (
-                <Pressable
-                  onPress={onOpenPage}
-                  accessibilityRole="button"
-                  accessibilityLabel={t('dailyReading.readAsPage')}
-                  hitSlop={8}
-                  style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
-                >
-                  <FeatherIcon name="file-text" size={19} color={INK} />
-                </Pressable>
-              ) : null}
-              <Pressable
-                onPress={onClose}
-                accessibilityRole="button"
-                accessibilityLabel={t('Fermer')}
-                hitSlop={8}
-                style={{ width: 44, height: 44, alignItems: 'flex-end', justifyContent: 'center' }}
+              {cards.map((item, cardIndex) => (
+                <ProgressBar key={cardIndex} filled={cardIndex <= index} />
+              ))}
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: 6,
+              }}
+            >
+              <Text
+                numberOfLines={1}
+                className="text-[12px] font-semibold uppercase tracking-[1px] shrink"
+                style={{ color: INK, ...SHADOW }}
               >
-                <FeatherIcon name="x" size={22} color={INK} />
-              </Pressable>
+                {kicker}
+              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                {music}
+                {onOpenPage ? (
+                  <Pressable
+                    onPress={onOpenPage}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('dailyReading.readAsPage')}
+                    hitSlop={8}
+                    style={{
+                      width: 44,
+                      height: 44,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <FeatherIcon name="file-text" size={19} color={INK} />
+                  </Pressable>
+                ) : null}
+                <Pressable
+                  onPress={onClose}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('Fermer')}
+                  hitSlop={8}
+                  style={{
+                    width: 44,
+                    height: 44,
+                    alignItems: 'flex-end',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <FeatherIcon name="x" size={22} color={INK} />
+                </Pressable>
+              </View>
             </View>
           </View>
-        </View>
 
-        {/* Shown on the verse only: it fades in with it and out as the reading starts. */}
-        <View
-          pointerEvents="box-none"
-          style={{
-            position: 'absolute',
-            left: 24,
-            right: 24,
-            bottom: insets.bottom + 28,
-            alignItems: 'center',
-          }}
-        >
-          <StoryPresence>
-            {index === 0 && onChangeVerse ? (
-              <StoryMotion key="change-verse" enter="fade" delay={TEXT_MOTION.buttonsDelay} leave>
-                <StoryButton
-                  icon="refresh-cw"
-                  label={t('dailyReading.changeVerse')}
-                  onPress={onChangeVerse}
-                />
-              </StoryMotion>
-            ) : null}
-          </StoryPresence>
+          {/* Shown on the verse only: it fades in with it and out as the reading starts. */}
+          <View
+            pointerEvents="box-none"
+            style={{
+              position: 'absolute',
+              left: 24,
+              right: 24,
+              bottom: insets.bottom + 28,
+              alignItems: 'center',
+            }}
+          >
+            <StoryPresence>
+              {index === 0 && onChangeVerse ? (
+                <StoryMotion key="change-verse" enter="fade" delay={TEXT_MOTION.buttonsDelay} leave>
+                  <StoryButton
+                    icon="refresh-cw"
+                    label={t('dailyReading.changeVerse')}
+                    onPress={onChangeVerse}
+                  />
+                </StoryMotion>
+              ) : null}
+            </StoryPresence>
+          </View>
         </View>
       </View>
-    </View>
+    </StoryArrival>
   )
 }
 

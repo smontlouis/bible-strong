@@ -53,6 +53,15 @@ jest.mock('react-native-reanimated', () => ({
 jest.mock('~common/ui/motion', () => ({ colorTransition: {}, popIn: undefined }))
 jest.mock('../AudioButton', () => () => null)
 
+let mockFooterAudio: boolean | undefined
+jest.mock('react-redux', () => ({
+  useSelector: (selector: (state: unknown) => unknown) =>
+    selector({ user: { bible: { settings: { footerAudio: mockFooterAudio } } } }),
+}))
+jest.mock('~redux/modules/user', () => ({
+  isFooterAudioEnabled: (value?: boolean) => value !== false,
+}))
+
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }))
@@ -89,5 +98,29 @@ describe('BasicFooter accessibility', () => {
     expect(next.props.accessibilityRole).toBe('button')
     expect(next.props.accessibilityState).toEqual({ disabled: false })
     expect(play.props.accessibilityRole).toBe('button')
+  })
+
+  it('hides the play and music block when the reader turned it off, keeping the chapter arrows', () => {
+    mockFooterAudio = false
+    let renderer: ReturnType<typeof create>
+
+    act(() => {
+      renderer = create(
+        <BasicFooter
+          onPlay={jest.fn()}
+          onNextChapter={jest.fn()}
+          isPlaying={false}
+          hasError={false}
+        />
+      )
+    })
+
+    expect(
+      renderer!.root.findAllByProps({ accessibilityLabel: 'accessibility.playAudio' })
+    ).toHaveLength(0)
+    expect(
+      renderer!.root.findAllByProps({ accessibilityLabel: 'accessibility.nextChapter' })
+    ).not.toHaveLength(0)
+    mockFooterAudio = undefined
   })
 })

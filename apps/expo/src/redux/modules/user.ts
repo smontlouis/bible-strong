@@ -108,6 +108,7 @@ import {
   setSettingsPress,
   setSettingsRedWordsDisplay,
   setSettingsCardCollection,
+  setSettingsFooterAudio,
   setSettingsRelationsDisplay,
   setSettingsTagsDisplay,
   setSettingsTextDisplay,
@@ -565,6 +566,8 @@ export interface UserState {
       contextualInformationDisplay?: boolean
       /** The collectible cards (ADR-0090); absent means on. */
       cardCollection?: boolean
+      /** The play and music block under the text; absent means on. */
+      footerAudio?: boolean
       redWordsDisplay: boolean
       shareVerses: {
         hasVerseNumbers: boolean
@@ -662,6 +665,7 @@ const getInitialState = (): UserState => ({
           : ['barnes:fr', 'acbc:fr', 'mhy-fr:fr'],
       contextualInformationDisplay: true,
       cardCollection: true,
+      footerAudio: true,
       redWordsDisplay: true,
       shareVerses: {
         hasVerseNumbers: true,
@@ -1352,6 +1356,9 @@ const userSlice = createSlice({
     })
     builder.addCase(setSettingsCardCollection, (state, action) => {
       state.bible.settings.cardCollection = action.payload
+    })
+    builder.addCase(setSettingsFooterAudio, (state, action) => {
+      state.bible.settings.footerAudio = action.payload
     })
     builder.addCase(setSettingsRedWordsDisplay, (state, action) => {
       state.bible.settings.redWordsDisplay = action.payload

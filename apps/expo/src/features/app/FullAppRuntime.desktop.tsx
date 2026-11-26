@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react'
 
 import DesktopShell from '~desktop/DesktopShell'
+import ReadingReminders from '~features/daily-reading/ReadingReminders'
 import { offlineResourceRegistry } from '~features/resources/resourceAvailability'
 import LocalMigrationGate from '~features/migrations/LocalMigrationGate'
 import { appLogger } from '~helpers/agentObservability'
@@ -11,7 +12,8 @@ import type { Theme } from '~themes/index'
 import WebFullAppRuntime from './FullAppRuntime.web'
 
 /**
- * The desktop app (ADR-0107): the web workspace, plus the native startup of Offline copies.
+ * The desktop app (ADR-0107): the web workspace, plus the native startup of Offline copies and
+ * the reading reminders the system delivers (ADR-0119).
  * The migration gate recovers an interrupted installation from its journal; then the catalog
  * loads, the download queue resumes and every installed copy is checked once.
  */
@@ -35,6 +37,7 @@ const FullAppRuntime = ({ theme }: { theme: Theme }) => (
     <OfflineCopiesStartup>
       <WebFullAppRuntime theme={theme}>
         <DesktopShell />
+        <ReadingReminders />
       </WebFullAppRuntime>
     </OfflineCopiesStartup>
   </LocalMigrationGate>

@@ -49,7 +49,9 @@
       "entitlements": "Entitlements.plist",
       "hardenedRuntime": true,
       "files": {
-        "Resources/Assets.car": "icons/Assets.car"
+        "Resources/Assets.car": "icons/Assets.car",
+        "Resources/en.lproj/ServicesMenu.strings": "localization/en.lproj/ServicesMenu.strings",
+        "Resources/fr.lproj/ServicesMenu.strings": "localization/fr.lproj/ServicesMenu.strings"
       },
       "dmg": {
         "background": "installer/dmg-background.tiff",

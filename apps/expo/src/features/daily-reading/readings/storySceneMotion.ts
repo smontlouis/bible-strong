@@ -85,28 +85,36 @@ export const TEXT_FOCUS_SCALE = 1.03
  */
 export const TEXT_MOTION = {
   /** How long a text takes to rise into place, and from how low it starts. */
-  riseDuration: 600,
+  riseDuration: 1300,
   riseDistance: 14,
   /** How long the card that leaves takes to fade out, and how far it lifts as it goes. */
   leaveDuration: 420,
   leaveDistance: 8,
-  /** How long a new card waits for the old one to fade before its first text rises. */
+  /**
+   * How long a new card waits for the old one to fade before its first text rises, when the eye
+   * stays where it is (the prayer opens, another verse).
+   */
   arriveDelay: 360,
+  /**
+   * The same when the eye travels to another card (2026-11-26): the card fades, the eye moves
+   * through the scene (FOCUS_DURATION), and the text comes once it has nearly arrived.
+   */
+  travelDelay: 1200,
   /** The pause between the texts of a card: the reference after the verse, the text after its title. */
   step: 160,
   /** The pause between the paragraphs of a page. */
-  paragraphStep: 130,
+  paragraphStep: 300,
   /** The pause between the questions of « Aller plus loin ». */
   questionStep: 180,
   /** The Strong word's badge pops in, after this pause and in this time. */
-  popDelay: 300,
+  popDelay: 800,
   popDuration: 260,
   /** The buttons at the bottom (« Changer de verset », « Terminer ») come after this pause, in this time. */
   buttonsDelay: 360,
   buttonsDuration: 400,
 }
 
-export const FOCUS_DURATION = 1500
+export const FOCUS_DURATION = 1800
 export const FOCUS_EASING = Easing.inOut(Easing.cubic)
 /** The same curve for the web's CSS transitions. */
 export const FOCUS_CSS_EASING = cubicBezier(0.65, 0, 0.35, 1)
