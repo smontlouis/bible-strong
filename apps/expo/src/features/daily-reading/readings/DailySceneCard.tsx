@@ -3,7 +3,14 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { Link, type Href } from 'expo-router'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, StyleSheet, useWindowDimensions, View, type ViewStyle } from 'react-native'
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+  type ViewStyle,
+} from 'react-native'
 import { useSelector } from 'react-redux'
 import CommonLink from '~common/Link'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -89,6 +96,10 @@ const DailySceneCard = ({
               <Image
                 source={{ uri: background }}
                 contentFit="cover"
+                // A light blur, computed once at decoding: the text reads better over the scene.
+                // The web counts it in CSS pixels of the drawn image, which is about four times
+                // the file's size.
+                blurRadius={Platform.OS === 'web' ? 4 : 1}
                 transition={300}
                 style={{
                   position: 'absolute',
