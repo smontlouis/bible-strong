@@ -10,7 +10,6 @@ import Box from '~common/ui/Box'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { chapterReading } from '~state/tabs'
-import { HelpTip } from '~features/tips/HelpTip'
 import { bookSelectorSelectionModeAtom, bookSelectorSortAtom, bookSelectorVersesAtom } from './atom'
 import {
   getBookListScrollOffset,
@@ -330,32 +329,27 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
           setRenderedChapterBookNumbers([])
         }}
         header={
-          <>
-            <SheetHeader
-              title={
-                isGridChapterPicker ? getReadingBookName(gridBook, selectedVersion) : t('Livres')
-              }
-              subTitle={isGridChapterPicker ? t('Chapitres') : undefined}
-              centerTitle
-              hasBackButton={isGridChapterPicker}
-              leftComponent={
-                isGridChapterPicker ? undefined : (
-                  <Box className="overflow-hidden border-continuous w-[60px]" />
-                )
-              }
-              onBackPress={isGridChapterPicker ? () => setGridBook(null) : undefined}
-              rightComponent={
-                isGridChapterPicker ? (
-                  <Box className="overflow-hidden border-continuous w-[54px]" />
-                ) : (
-                  <BookSelectorParams />
-                )
-              }
-            />
-            {!isGridChapterPicker && (
-              <HelpTip id="chapter-selector" description={t('tips.chapterSelector')} />
-            )}
-          </>
+          <SheetHeader
+            title={
+              isGridChapterPicker ? getReadingBookName(gridBook, selectedVersion) : t('Livres')
+            }
+            subTitle={isGridChapterPicker ? t('Chapitres') : undefined}
+            centerTitle
+            hasBackButton={isGridChapterPicker}
+            leftComponent={
+              isGridChapterPicker ? undefined : (
+                <Box className="overflow-hidden border-continuous w-[60px]" />
+              )
+            }
+            onBackPress={isGridChapterPicker ? () => setGridBook(null) : undefined}
+            rightComponent={
+              isGridChapterPicker ? (
+                <Box className="overflow-hidden border-continuous w-[54px]" />
+              ) : (
+                <BookSelectorParams />
+              )
+            }
+          />
         }
       >
         <BookSelectorList

@@ -38,7 +38,6 @@ import {
   BIBLE_FORM_SHEET_HEADER_HEIGHT,
   HEADER_HEIGHT,
 } from '~features/app-switcher/utils/constants'
-import { HelpTip } from '~features/tips/HelpTip'
 import { appLogger } from '~helpers/agentObservability'
 import { BibleError } from '~helpers/bibleErrors'
 import type { InterlinearMode } from '~helpers/interlinearDisplayMode'
