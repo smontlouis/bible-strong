@@ -17,6 +17,11 @@ import { useDailyEntry } from './useDailyReadings'
 import { useVerseSwap } from './useVerseSwap'
 import { VERSE_MEDITATION_VERSIONS } from './useVerseMeditation'
 import { useRecordHistory } from '~features/history/useRecordHistory'
+import { useSelector } from 'react-redux'
+import { selectUserLoginInfo } from '~redux/selectors/user'
+import { useAssistantAccessible } from '~features/study-assistant/assistantConfig'
+import { requestAssistantConversation } from '~features/study-assistant/assistantLaunch'
+import { meditationReadingContext } from './meditationContext'
 
 /**
  * `/daily-story?collectionId=…&date=…&entry=…`: the verse meditation of the day (by default, in
@@ -51,6 +56,9 @@ const DailyStoryScreen = () => {
   )
 
   useStoryMusic()
+  // A question at the end of a verse meditation opens Strobi on it, for a reader it is open to.
+  const { id: uid } = useSelector(selectUserLoginInfo)
+  const strobiOpen = useAssistantAccessible(uid) && Boolean(uid)
 
   useEffect(() => {
     if (Platform.OS === 'web') return
@@ -93,6 +101,24 @@ const DailyStoryScreen = () => {
     return { quote: opening?.quote ?? text, reference: opening?.reference }
   }
 
+  const askStrobi =
+    isVerse && strobiOpen && collection && key && entry && verse && version
+      ? (question: string) => {
+          const context = meditationReadingContext({
+            collection,
+            entryKey: key,
+            entry,
+            question,
+            version,
+            label: t('dailyReading.strobiTitle', { reference: verse.label }),
+          })
+          if (!context) return
+          // The meditation closes; Strobi opens once it has gone back to its card.
+          requestAssistantConversation(context, context.label)
+          close()
+        }
+      : undefined
+
   if (!entry || !key)
     return (
       <StoryPlaceholder failed={isError || Boolean(collection)} onRetry={retry} onClose={close} />
@@ -110,6 +136,7 @@ const DailyStoryScreen = () => {
       onChangeVerse={isVerse && collection?.reserve.length ? () => swap.change(key) : undefined}
       onShare={share}
       onOpenStrong={openStrong}
+      onAskQuestion={askStrobi}
       onOpenPage={
         isVerse
           ? undefined

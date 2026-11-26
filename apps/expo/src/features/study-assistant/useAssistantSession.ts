@@ -257,6 +257,14 @@ export function useAssistantSession({
     setCurrent(newConversation())
     setError('')
   }
+  /** Opens a new conversation pinned to a context, under a title (a verse meditation's). */
+  const startPinnedThread = (pin: ReadingContext, title: string) => {
+    if (working) return false
+    onThreadSwitch?.()
+    setCurrent({ ...newConversation(), title, pinnedContext: pin })
+    setError('')
+    return true
+  }
   const switchToThread = (id: string) => {
     if (working) return
     const conversation = conversations.find(item => item.id === id)
@@ -396,6 +404,7 @@ export function useAssistantSession({
           ) ?? null),
     markOpened,
     markClosed,
+    startPinnedThread,
     send,
     /** Stops the run and shows at once everything it received. */
     cancel: () => {

@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useEffectEvent, useState, type ReactNode } from 'react'
 import { Platform, StyleSheet } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { FullWindowOverlay } from 'react-native-screens'
@@ -17,6 +17,7 @@ import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { selectUserLoginInfo } from '~redux/selectors/user'
 import { premiumStatusAtom } from '~features/premium/premiumStatus'
 import { createTabForAssistantAction } from './assistantActions'
+import { assistantLaunchAtom, LAUNCH_TTL_MS, type AssistantLaunch } from './assistantLaunch'
 import { useAssistantAccessible } from './assistantConfig'
 import { nextQuotaReset } from './assistantQuota'
 import AssistantLauncherButton from './AssistantLauncherButton'
@@ -173,6 +174,21 @@ function AccountAssistant({ account }: { account: string }) {
     return () => clearTimeout(timer)
   }, [restingUntil])
   const resting = restingUntil !== null && premium.kind !== 'active'
+  // A page asked for a new conversation on its question (a verse meditation): the meditation
+  // closes first, and the sheet rises once its zoom has gone back to the card.
+  const launch = useAtomValue(assistantLaunchAtom)
+  const setLaunch = useSetAtom(assistantLaunchAtom)
+  const startLaunch = useEffectEvent((request: AssistantLaunch) => {
+    setLaunch(null)
+    if (Date.now() - request.requestedAt > LAUNCH_TTL_MS) return
+    if (!session.startPinnedThread(request.context, request.title)) return
+    if (!open) router.push(ASSISTANT_PATH)
+  })
+  useEffect(() => {
+    if (!launch || !ready || pathname === DAILY_STORY_PATH) return
+    const timer = setTimeout(() => startLaunch(launch), 450)
+    return () => clearTimeout(timer)
+  }, [launch, ready, pathname])
   const onNew = async (message: AppendMessage) => {
     await send(message.content.flatMap(p => (p.type === 'text' ? [p.text] : [])).join('\n'))
   }

@@ -20,6 +20,11 @@ export type ReadingContext = {
   detail: string
   content?: string
   activeContext?: StudySurfaceContext
+  /**
+   * The question Strobi opens a conversation with, shown as its first line (a verse meditation's
+   * question, 2026-11-26). It is not a message: the history starts with the reader's answer.
+   */
+  opening?: string
   kind:
     | 'passage'
     | 'word'
@@ -99,6 +104,8 @@ const isContext = (value: unknown): value is ReadingContext => {
     context.detail.length <= 500 &&
     (context.content === undefined ||
       (typeof context.content === 'string' && context.content.length <= 12000)) &&
+    (context.opening === undefined ||
+      (typeof context.opening === 'string' && context.opening.length <= 500)) &&
     [
       'passage',
       'word',

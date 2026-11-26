@@ -43,6 +43,8 @@ function ThreadStatus() {
   const paused = freeQuestionsPaused(error, quota)
   // Nothing can be asked: the card that says why stands in the composer's place, not here.
   const composerDocked = (verification || questionsSpent(quota)) && !busy
+  // A conversation opened on Strobi's question waits for the reader's answer, nothing else.
+  const opening = session.pinnedContext?.opening
   return (
     <Box>
       <ThreadStrobi />
@@ -78,7 +80,7 @@ function ThreadStatus() {
       {!!followUps.length && !error && !composerDocked && (
         <FollowUpQuestions questions={followUps} disabled={busy || !ready} />
       )}
-      {!!session.resumable && !busy && (
+      {!!session.resumable && !busy && !opening && (
         // A new conversation offers to go back to the last one, before the starting points.
         <TouchableBox
           accessibilityRole="button"
@@ -93,22 +95,41 @@ function ThreadStatus() {
           </Text>
         </TouchableBox>
       )}
-      {!current.messages.length && session.consent.status === 'granted' && !composerDocked && (
-        <Box className="mt-2 gap-2">
-          {shortcutsFor(context).map(key => (
-            <ThreadPrimitive.Suggestion
-              key={key}
-              prompt={t(`assistant.modal.prompt.${key}`)}
-              send
-              disabled={busy || !ready}
-              className="bg-light-grey flex-row items-center gap-2 rounded-[12px] px-4 py-3"
-            >
-              <Text className="text-link">›</Text>
-              <Text className="flex-1 text-[15px]">{t(`assistant.modal.action.${key}`)}</Text>
-            </ThreadPrimitive.Suggestion>
-          ))}
-        </Box>
-      )}
+      {!current.messages.length &&
+        !opening &&
+        session.consent.status === 'granted' &&
+        !composerDocked && (
+          <Box className="mt-2 gap-2">
+            {shortcutsFor(context).map(key => (
+              <ThreadPrimitive.Suggestion
+                key={key}
+                prompt={t(`assistant.modal.prompt.${key}`)}
+                send
+                disabled={busy || !ready}
+                className="bg-light-grey flex-row items-center gap-2 rounded-[12px] px-4 py-3"
+              >
+                <Text className="text-link">›</Text>
+                <Text className="flex-1 text-[15px]">{t(`assistant.modal.action.${key}`)}</Text>
+              </ThreadPrimitive.Suggestion>
+            ))}
+          </Box>
+        )}
+    </Box>
+  )
+}
+
+/**
+ * A conversation opened on a question (a verse meditation's): Strobi's question stands at its
+ * top, where the welcome would be, and stays there above the reader's answers.
+ */
+function Opening({ question }: { question: string }) {
+  const { t } = useTranslation()
+  return (
+    <Box className="pb-5 pt-6">
+      <Text className="text-grey text-[12px] font-semibold uppercase tracking-[1px]">
+        {t('assistant.modal.openingFrom')}
+      </Text>
+      <Text className="mt-2 text-[20px] font-semibold leading-[28px]">{question}</Text>
     </Box>
   )
 }
@@ -116,6 +137,8 @@ function ThreadStatus() {
 function Welcome() {
   const { t } = useTranslation()
   const { session } = useAssistantSheet()
+  const opening = session.pinnedContext?.opening
+  if (opening) return <Opening question={opening} />
   return (
     <Box className="pb-4 pt-8">
       <Text className="text-[24px] font-bold">{t('assistant.modal.welcome')}</Text>
@@ -404,7 +427,7 @@ export default function AssistantThread() {
             // The composer already clears the home indicator within its own height.
             paddingBottom,
           }}
-          ListHeaderComponent={messages.length ? null : Welcome}
+          ListHeaderComponent={messages.length && !session.pinnedContext?.opening ? null : Welcome}
           ListFooterComponent={
             <>
               <View

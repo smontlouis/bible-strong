@@ -80,6 +80,11 @@ export type DailyStoryProps = {
   onOpenStrong?: (word: DailyStrongWord) => void
   /** The music's button, at the top right. */
   music?: ReactNode
+  /**
+   * Opens Strobi on one of the meditation's questions (2026-11-26); without it, the questions
+   * stay text, for a reader to whom Strobi is not open.
+   */
+  onAskQuestion?: (question: string) => void
 }
 
 /**
@@ -98,6 +103,7 @@ const DailyStory = ({
   onShare,
   onOpenStrong,
   music,
+  onAskQuestion,
 }: DailyStoryProps) => {
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
@@ -272,13 +278,50 @@ const DailyStory = ({
             <Animated.View entering={rise()}>
               <Kicker>{t('dailyReading.goDeeper')}</Kicker>
             </Animated.View>
-            <Box className="gap-[20px]">
+            <Box className={onAskQuestion ? 'gap-[12px]' : 'gap-[20px]'}>
               {questions.map((item, itemIndex) => (
                 <Animated.View key={item} entering={rise(140 + itemIndex * 140)}>
-                  <Text style={[reading, { fontSize: 20, lineHeight: 29 }]}>{item}</Text>
+                  {onAskQuestion ? (
+                    <Pressable
+                      onPress={() => onAskQuestion(item)}
+                      accessibilityRole="button"
+                      accessibilityHint={t('dailyReading.askStrobiHint')}
+                      style={({ pressed }) => ({
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 14,
+                        paddingVertical: 14,
+                        paddingLeft: 18,
+                        paddingRight: 14,
+                        borderRadius: 20,
+                        backgroundColor: GLASS,
+                        borderWidth: 1,
+                        borderColor: GLASS_EDGE,
+                        transform: [{ scale: pressed ? 0.98 : 1 }],
+                        opacity: pressed ? 0.9 : 1,
+                      })}
+                    >
+                      <Text style={[reading, { flex: 1, fontSize: 19, lineHeight: 27 }]}>
+                        {item}
+                      </Text>
+                      <FeatherIcon name="message-circle" size={18} color={INK} />
+                    </Pressable>
+                  ) : (
+                    <Text style={[reading, { fontSize: 20, lineHeight: 29 }]}>{item}</Text>
+                  )}
                 </Animated.View>
               ))}
             </Box>
+            {onAskQuestion ? (
+              <Animated.View entering={rise(140 + questions.length * 140)}>
+                <Text
+                  className="text-[13px] mt-[16px] text-center"
+                  style={{ color: SOFT_INK, ...SHADOW }}
+                >
+                  {t('dailyReading.askStrobiHint')}
+                </Text>
+              </Animated.View>
+            ) : null}
           </>
         ) : (
           <Animated.View exiting={FadeOutUp.duration(220)}>

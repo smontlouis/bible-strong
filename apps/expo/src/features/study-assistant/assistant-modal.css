@@ -294,6 +294,20 @@
   letter-spacing: -0.035em;
   margin: 0 0 25px;
 }
+.bs-assistant-opening {
+  padding-top: 8px;
+}
+.bs-assistant-opening-from {
+  margin: 0 0 8px;
+  color: var(--as-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.bs-assistant-opening h2 {
+  margin-bottom: 20px;
+}
 .bs-assistant-suggestions {
   display: grid;
   gap: 4px;

@@ -205,6 +205,8 @@ export default function AssistantComposer() {
           maxLength={4000}
           placeholder={t('assistant.modal.placeholder')}
           placeholderTextColor={colors.grey}
+          // Opened on Strobi's question, the conversation waits for the reader's answer.
+          autoFocus={!!session.pinnedContext?.opening && !session.current.messages.length}
           accessibilityLabel={t('assistant.modal.placeholder')}
           editable={ready && assistantAvailable && !dictationActive}
           style={{

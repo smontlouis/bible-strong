@@ -3,7 +3,7 @@ import ErrorState from './ErrorState.web'
 import { createPortal } from 'react-dom'
 import { useEffect, useEffectEvent, useRef, useState, type CSSProperties } from 'react'
 import { useSelector } from 'react-redux'
-import { useAtomValue } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { workspaceStoryOpenAtom } from '~features/onboarding/workspace/state'
 import { useTranslation } from 'react-i18next'
 import { usePathname, useRouter } from 'expo-router'
@@ -63,6 +63,7 @@ import { AssistantMessage, UserMessage } from './MessageRenderer.web'
 import strobiDefinition from './strobi.avatar.json'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { createTabForAssistantAction } from './assistantActions'
+import { assistantLaunchAtom, LAUNCH_TTL_MS, type AssistantLaunch } from './assistantLaunch'
 import { bibleAudioPlayerOpenAtom } from '~features/bible-audio/atoms'
 import { useResponsiveWorkspace } from '~features/app-switcher/utils/useResponsiveWorkspace'
 
@@ -287,6 +288,21 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
   useEffect(() => {
     noteOpening(open)
   }, [open])
+  // A page asked for a new conversation on its question (a verse meditation): the meditation
+  // closes first, then the window opens on that conversation.
+  const launch = useAtomValue(assistantLaunchAtom)
+  const setLaunch = useSetAtom(assistantLaunchAtom)
+  const startLaunch = useEffectEvent((request: AssistantLaunch) => {
+    setLaunch(null)
+    if (!signedIn || Date.now() - request.requestedAt > LAUNCH_TTL_MS) return
+    if (!session.startPinnedThread(request.context, request.title)) return
+    changeOpen(true)
+  })
+  useEffect(() => {
+    if (!launch || !ready || pathname === '/daily-story') return
+    const timer = setTimeout(() => startLaunch(launch), 250)
+    return () => clearTimeout(timer)
+  }, [launch, ready, pathname])
   // Put away on this device, the bubble shows only while its window is open.
   const bubble = useStrobiBubble()
   const bubbleHidden = bubble.hidden
@@ -430,6 +446,8 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
     '--as-line': colors.separator,
     '--as-floating-shadow': floatingShadow.boxShadow,
   } as CSSProperties
+  // A conversation opened on Strobi's question waits for the reader's answer, nothing else.
+  const opening = session.pinnedContext?.opening
   const shortcuts =
     context &&
     ['plan', 'meditation', 'entity', 'person', 'place', 'timeline'].includes(context.kind)
@@ -652,11 +670,19 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                 scrollToBottomOnInitialize={false}
                 scrollToBottomOnThreadSwitch={false}
               >
-                {!current.messages.length && (
-                  <div className="bs-assistant-welcome">
-                    <h2>{t('assistant.modal.welcome')}</h2>
-                    <p className="bs-assistant-beta-note">{t('assistant.betaNote')}</p>
+                {opening ? (
+                  // Opened on Strobi's question, which stays above the reader's answers.
+                  <div className="bs-assistant-welcome bs-assistant-opening">
+                    <p className="bs-assistant-opening-from">{t('assistant.modal.openingFrom')}</p>
+                    <h2>{opening}</h2>
                   </div>
+                ) : (
+                  !current.messages.length && (
+                    <div className="bs-assistant-welcome">
+                      <h2>{t('assistant.modal.welcome')}</h2>
+                      <p className="bs-assistant-beta-note">{t('assistant.betaNote')}</p>
+                    </div>
+                  )
                 )}
                 <ThreadPrimitive.Messages>
                   {({ message }) =>
@@ -1010,7 +1036,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                       {t('assistant.modal.login')}
                     </button>
                   )}
-                  {session.resumable && !busy && (
+                  {session.resumable && !busy && !opening && (
                     // A new conversation offers to go back to the last one, before the starting points.
                     <div className="bs-assistant-suggestions">
                       <button
@@ -1029,6 +1055,7 @@ function AccountAssistant({ account, signedIn }: { account: string; signedIn: bo
                     </div>
                   )}
                   {!current.messages.length &&
+                    !opening &&
                     !docked &&
                     (!signedIn || session.consent.status === 'granted') && (
                       <div className="bs-assistant-suggestions">

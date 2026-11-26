@@ -142,3 +142,35 @@ it('reads a pin from the saved conversation, and keeps an unpin', () => {
     parseConversationMetadata('a', { ...stored, pinnedContext: { kind: 'nothing' } })
   ).not.toHaveProperty('pinnedContext')
 })
+
+it('opens a new conversation on a meditation’s question, which opening the page keeps', async () => {
+  await act(async () => {
+    create(<Assistant liveContext={passage('Jacques 2')} />)
+  })
+  await act(async () => session.threadList.onSwitchToThread('sabbath'))
+  const meditation: ReadingContext = {
+    key: 'meditation:verse-meditations-fr:1347',
+    kind: 'meditation',
+    label: 'Méditation · Ésaïe 30:21',
+    detail: 'Méditation du verset de Bible Strong : Ésaïe 30:21.',
+    opening: 'Que remarquez-vous dans le lieu d’où vient la voix ?',
+  }
+  await act(async () => {
+    expect(session.startPinnedThread(meditation, meditation.label)).toBe(true)
+  })
+  expect(session.current.id).not.toBe('sabbath')
+  expect(session.current.title).toBe('Méditation · Ésaïe 30:21')
+  expect(session.context).toEqual(meditation)
+  await act(async () => session.markOpened())
+  expect(session.pinnedContext?.opening).toBe(meditation.opening)
+  expect(
+    parseConversationMetadata('a', {
+      schemaVersion: 1,
+      title: meditation.label,
+      createdAt: 1,
+      updatedAt: 2,
+      messageCount: 2,
+      pinnedContext: meditation,
+    }).pinnedContext
+  ).toEqual(meditation)
+})
