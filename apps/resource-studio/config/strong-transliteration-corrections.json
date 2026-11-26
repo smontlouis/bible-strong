@@ -1,0 +1,5767 @@
+{
+  "description": "Corrections of StepEntries.classicTransliteration in data/dictionaries/strong_lexicon.en-fr.full.production.sqlite: the Hebrew letter ś had been stored as the Greek « ώ » (legacy English Firebase lexicon), and some values were doubled (« gôy gôy », « zerôa‛ zerôa‛ zerô‛âh zerô‛âh »). Applied by src/applyStrongTransliterationCorrections.ts before rebuilding the Strong lexicon publications.",
+  "field": "classicTransliteration",
+  "corrections": [
+    {
+      "id": 4728,
+      "eStrong": "G4672",
+      "dStrong": "G4672G = the Greek of",
+      "from": "Solomōn Solomōn",
+      "to": "Solomōn"
+    },
+    {
+      "id": 4729,
+      "eStrong": "G4672",
+      "dStrong": "G4672H =",
+      "from": "Solomōn Solomōn",
+      "to": "Solomōn"
+    },
+    {
+      "id": 5453,
+      "eStrong": "G5381",
+      "dStrong": "G5381 =",
+      "from": "philonexia",
+      "to": "philoxenia"
+    },
+    {
+      "id": 11180,
+      "eStrong": "H0113",
+      "dStrong": "H0113 =",
+      "from": "'âdôn 'âdôn",
+      "to": "'âdôn"
+    },
+    {
+      "id": 11193,
+      "eStrong": "H0123",
+      "dStrong": "H0123G =",
+      "from": "'ĕdôm 'ĕdôm",
+      "to": "'ĕdôm"
+    },
+    {
+      "id": 11194,
+      "eStrong": "H0123",
+      "dStrong": "H0123H = a Name of",
+      "from": "'ĕdôm 'ĕdôm",
+      "to": "'ĕdôm"
+    },
+    {
+      "id": 11205,
+      "eStrong": "H0132",
+      "dStrong": "H0132 =",
+      "from": "'admônîy 'admônîy",
+      "to": "'admônîy"
+    },
+    {
+      "id": 11263,
+      "eStrong": "H0180",
+      "dStrong": "H0180 =",
+      "from": "'ûbâl 'ûbâl",
+      "to": "'ûbâl"
+    },
+    {
+      "id": 11265,
+      "eStrong": "H0182",
+      "dStrong": "H0182 =",
+      "from": "'ôdôth 'ôdôth",
+      "to": "'ôdôth"
+    },
+    {
+      "id": 11279,
+      "eStrong": "H0194",
+      "dStrong": "H0194 =",
+      "from": "'ûlay 'ûlay",
+      "to": "'ûlay"
+    },
+    {
+      "id": 11282,
+      "eStrong": "H0197",
+      "dStrong": "H0197G =",
+      "from": "'ûlâm 'ûlâm",
+      "to": "'ûlâm"
+    },
+    {
+      "id": 11283,
+      "eStrong": "H0197",
+      "dStrong": "H0197H =",
+      "from": "'ûlâm 'ûlâm",
+      "to": "'ûlâm"
+    },
+    {
+      "id": 11284,
+      "eStrong": "H0197",
+      "dStrong": "H0197I =",
+      "from": "'ûlâm 'ûlâm",
+      "to": "'ûlâm"
+    },
+    {
+      "id": 11285,
+      "eStrong": "H0197",
+      "dStrong": "H0197J =",
+      "from": "'ûlâm 'ûlâm",
+      "to": "'ûlâm"
+    },
+    {
+      "id": 11293,
+      "eStrong": "H0204",
+      "dStrong": "H0204 =",
+      "from": "'ôn 'ôn",
+      "to": "'ôn"
+    },
+    {
+      "id": 11298,
+      "eStrong": "H0207",
+      "dStrong": "H0207 =",
+      "from": "'ônô 'ônô",
+      "to": "'ônô"
+    },
+    {
+      "id": 11305,
+      "eStrong": "H0212",
+      "dStrong": "H0212 =",
+      "from": "'ôphân 'ôphân",
+      "to": "'ôphân"
+    },
+    {
+      "id": 11380,
+      "eStrong": "H0268",
+      "dStrong": "H0268 =",
+      "from": "'âchôr 'âchôr",
+      "to": "'âchôr"
+    },
+    {
+      "id": 11482,
+      "eStrong": "H0341",
+      "dStrong": "H0341 =",
+      "from": "'ôyêb 'ôyêb",
+      "to": "'ôyêb"
+    },
+    {
+      "id": 11578,
+      "eStrong": "H0415",
+      "dStrong": "H0415 =",
+      "from": "'êl 'ĕlôhêy yiώrâ'êl",
+      "to": "'êl 'ĕlôhêy yiśrâ'êl"
+    },
+    {
+      "id": 11603,
+      "eStrong": "H0433",
+      "dStrong": "H0433 =",
+      "from": "'ĕlôahh 'ĕlôahh",
+      "to": "'ĕlôahh"
+    },
+    {
+      "id": 11612,
+      "eStrong": "H0440",
+      "dStrong": "H0440 = a group of",
+      "from": "'êlônîy 'êlônîy",
+      "to": "'êlônîy"
+    },
+    {
+      "id": 11750,
+      "eStrong": "H0501",
+      "dStrong": "H0501G =",
+      "from": "'el‛âώâh",
+      "to": "'el‛âśâh"
+    },
+    {
+      "id": 11751,
+      "eStrong": "H0501",
+      "dStrong": "H0501H =",
+      "from": "'el‛âώâh",
+      "to": "'el‛âśâh"
+    },
+    {
+      "id": 11752,
+      "eStrong": "H0501",
+      "dStrong": "H0501I =",
+      "from": "'el‛âώâh",
+      "to": "'el‛âśâh"
+    },
+    {
+      "id": 11753,
+      "eStrong": "H0501",
+      "dStrong": "H0501J =",
+      "from": "'el‛âώâh",
+      "to": "'el‛âśâh"
+    },
+    {
+      "id": 11797,
+      "eStrong": "H0530",
+      "dStrong": "H0530 =",
+      "from": "'ĕmûnâh 'ĕmûnâh",
+      "to": "'ĕmûnâh"
+    },
+    {
+      "id": 11944,
+      "eStrong": "H0646",
+      "dStrong": "H0646 =",
+      "from": "'êphôd 'êphôd",
+      "to": "'êphôd"
+    },
+    {
+      "id": 11984,
+      "eStrong": "H0675",
+      "dStrong": "H0675G =",
+      "from": "'etsbôn 'etsbôn",
+      "to": "'etsbôn"
+    },
+    {
+      "id": 11985,
+      "eStrong": "H0675",
+      "dStrong": "H0675H =",
+      "from": "'etsbôn 'etsbôn",
+      "to": "'etsbôn"
+    },
+    {
+      "id": 12038,
+      "eStrong": "H0724",
+      "dStrong": "H0724 =",
+      "from": "'ărûkâh 'ărûkâh",
+      "to": "'ărûkâh"
+    },
+    {
+      "id": 12041,
+      "eStrong": "H0727",
+      "dStrong": "H0727 =",
+      "from": "'ârôn 'ârôn",
+      "to": "'ârôn"
+    },
+    {
+      "id": 12101,
+      "eStrong": "H0769",
+      "dStrong": "H0769 =",
+      "from": "'arnôn 'arnôn",
+      "to": "'arnôn"
+    },
+    {
+      "id": 12116,
+      "eStrong": "H0781",
+      "dStrong": "H0781 =",
+      "from": "'âraώ",
+      "to": "'âraś"
+    },
+    {
+      "id": 12144,
+      "eStrong": "H0804",
+      "dStrong": "H0804G =",
+      "from": "'ashshûr 'ashshûr",
+      "to": "'ashshûr"
+    },
+    {
+      "id": 12145,
+      "eStrong": "H0804",
+      "dStrong": "H0804H =",
+      "from": "'ashshûr 'ashshûr",
+      "to": "'ashshûr"
+    },
+    {
+      "id": 12153,
+      "eStrong": "H0811",
+      "dStrong": "H0811 =",
+      "from": "'eshkôl 'eshkôl",
+      "to": "'eshkôl"
+    },
+    {
+      "id": 12189,
+      "eStrong": "H0840",
+      "dStrong": "H0840 =",
+      "from": "'ăώar'êl",
+      "to": "'ăśar'êl"
+    },
+    {
+      "id": 12190,
+      "eStrong": "H0841",
+      "dStrong": "H0841 =",
+      "from": "'ăώar'êlâh",
+      "to": "'ăśar'êlâh"
+    },
+    {
+      "id": 12193,
+      "eStrong": "H0844",
+      "dStrong": "H0844G =",
+      "from": "'aώrîy'êl",
+      "to": "'aśrîy'êl"
+    },
+    {
+      "id": 12194,
+      "eStrong": "H0844",
+      "dStrong": "H0844H =",
+      "from": "'aώrîy'êl",
+      "to": "'aśrîy'êl"
+    },
+    {
+      "id": 12195,
+      "eStrong": "H0845",
+      "dStrong": "H0845 = a group of",
+      "from": "'aώri'êlîy",
+      "to": "'aśri'êlîy"
+    },
+    {
+      "id": 12197,
+      "eStrong": "H0847",
+      "dStrong": "H0847 =",
+      "from": "'eshtâ'ôl 'eshtâ'ôl",
+      "to": "'eshtâ'ôl"
+    },
+    {
+      "id": 12351,
+      "eStrong": "H0970",
+      "dStrong": "H0970 =",
+      "from": "bâchûr bâchûr",
+      "to": "bâchûr"
+    },
+    {
+      "id": 12362,
+      "eStrong": "H0980",
+      "dStrong": "H0980 =",
+      "from": "bachûrîym bachûrîym",
+      "to": "bachûrîym"
+    },
+    {
+      "id": 12468,
+      "eStrong": "H1062",
+      "dStrong": "H1062 =",
+      "from": "bekôrâh bekôrâh",
+      "to": "bekôrâh"
+    },
+    {
+      "id": 12689,
+      "eStrong": "H1202",
+      "dStrong": "H1202 =",
+      "from": "ba‛ăώêyâh",
+      "to": "ba‛ăśêyâh"
+    },
+    {
+      "id": 12823,
+      "eStrong": "H1304a",
+      "dStrong": "H1304A =",
+      "from": "bâreqath bâreqath",
+      "to": "bâreqath"
+    },
+    {
+      "id": 12824,
+      "eStrong": "H1304b",
+      "dStrong": "H1304B = a Spelling of",
+      "from": "bâreqath bâreqath",
+      "to": "bâreqath"
+    },
+    {
+      "id": 12828,
+      "eStrong": "H1308",
+      "dStrong": "H1308 =",
+      "from": "beώôr",
+      "to": "beśôr"
+    },
+    {
+      "id": 12829,
+      "eStrong": "H1309",
+      "dStrong": "H1309 =",
+      "from": "beώôrâh beώôrâh",
+      "to": "beśôrâh"
+    },
+    {
+      "id": 12833,
+      "eStrong": "H1313",
+      "dStrong": "H1313 =",
+      "from": "bâώâm",
+      "to": "bâśâm"
+    },
+    {
+      "id": 12834,
+      "eStrong": "H1314",
+      "dStrong": "H1314 =",
+      "from": "beώem bôώem",
+      "to": "beśem bôśem"
+    },
+    {
+      "id": 12835,
+      "eStrong": "H1315",
+      "dStrong": "H1315G =",
+      "from": "boώmath",
+      "to": "bośmath"
+    },
+    {
+      "id": 12836,
+      "eStrong": "H1315",
+      "dStrong": "H1315H = a Name of",
+      "from": "boώmath",
+      "to": "bośmath"
+    },
+    {
+      "id": 12837,
+      "eStrong": "H1315",
+      "dStrong": "H1315I = a Name of",
+      "from": "boώmath",
+      "to": "bośmath"
+    },
+    {
+      "id": 12841,
+      "eStrong": "H1319",
+      "dStrong": "H1319 =",
+      "from": "bâώar",
+      "to": "bâśar"
+    },
+    {
+      "id": 12842,
+      "eStrong": "H1320",
+      "dStrong": "H1320 =",
+      "from": "bâώâr",
+      "to": "bâśâr"
+    },
+    {
+      "id": 12843,
+      "eStrong": "H1321",
+      "dStrong": "H1321 = in Aramaic of",
+      "from": "beώar",
+      "to": "beśar"
+    },
+    {
+      "id": 12888,
+      "eStrong": "H1359",
+      "dStrong": "H1359 = a Name of",
+      "from": "gôb gôb",
+      "to": "gôb"
+    },
+    {
+      "id": 12893,
+      "eStrong": "H1364",
+      "dStrong": "H1364 =",
+      "from": "gâbôhha gâbôhha",
+      "to": "gâbôhha"
+    },
+    {
+      "id": 12895,
+      "eStrong": "H1366",
+      "dStrong": "H1366G =",
+      "from": "gebûl gebûl",
+      "to": "gebûl"
+    },
+    {
+      "id": 12896,
+      "eStrong": "H1366",
+      "dStrong": "H1366H = a Meaning of",
+      "from": "gebûl gebûl",
+      "to": "gebûl"
+    },
+    {
+      "id": 12897,
+      "eStrong": "H1367",
+      "dStrong": "H1367 =",
+      "from": "gebûlâh gebûlâh",
+      "to": "gebûlâh"
+    },
+    {
+      "id": 12898,
+      "eStrong": "H1368",
+      "dStrong": "H1368 =",
+      "from": "gibbôr gibbôr",
+      "to": "gibbôr"
+    },
+    {
+      "id": 12958,
+      "eStrong": "H1419a",
+      "dStrong": "H1419A =",
+      "from": "gâdôl gâdôl",
+      "to": "gâdôl"
+    },
+    {
+      "id": 12959,
+      "eStrong": "H1419b",
+      "dStrong": "H1419B =",
+      "from": "gâdôl gâdôl",
+      "to": "gâdôl"
+    },
+    {
+      "id": 12960,
+      "eStrong": "H1419a",
+      "dStrong": "H1419J =",
+      "from": "gâdôl gâdôl",
+      "to": "gâdôl"
+    },
+    {
+      "id": 12961,
+      "eStrong": "H1419a",
+      "dStrong": "H1419K = a Meaning of",
+      "from": "gâdôl gâdôl",
+      "to": "gâdôl"
+    },
+    {
+      "id": 12963,
+      "eStrong": "H1421",
+      "dStrong": "H1421 =",
+      "from": "giddûph giddûph giddûphâh giddûphâh",
+      "to": "giddûph giddûphâh"
+    },
+    {
+      "id": 12995,
+      "eStrong": "H1446",
+      "dStrong": "H1446G =",
+      "from": "gedôr gedôr",
+      "to": "gedôr"
+    },
+    {
+      "id": 12996,
+      "eStrong": "H1446",
+      "dStrong": "H1446H =",
+      "from": "gedôr gedôr",
+      "to": "gedôr"
+    },
+    {
+      "id": 12997,
+      "eStrong": "H1446",
+      "dStrong": "H1446I =",
+      "from": "gedôr gedôr",
+      "to": "gedôr"
+    },
+    {
+      "id": 13023,
+      "eStrong": "H1469",
+      "dStrong": "H1469 =",
+      "from": "gôzâl gôzâl",
+      "to": "gôzâl"
+    },
+    {
+      "id": 13025,
+      "eStrong": "H1471a",
+      "dStrong": "H1471A =",
+      "from": "gôy gôy",
+      "to": "gôy"
+    },
+    {
+      "id": 13026,
+      "eStrong": "H1471b",
+      "dStrong": "H1471B =",
+      "from": "gôy gôy",
+      "to": "gôy"
+    },
+    {
+      "id": 13027,
+      "eStrong": "H1471a",
+      "dStrong": "H1471G =",
+      "from": "gôy gôy",
+      "to": "gôy"
+    },
+    {
+      "id": 13028,
+      "eStrong": "H1471a",
+      "dStrong": "H1471H = a Part of",
+      "from": "gôy gôy",
+      "to": "gôy"
+    },
+    {
+      "id": 13030,
+      "eStrong": "H1473",
+      "dStrong": "H1473 =",
+      "from": "gôlâh gôlâh",
+      "to": "gôlâh"
+    },
+    {
+      "id": 13042,
+      "eStrong": "H1482",
+      "dStrong": "H1482 =",
+      "from": "gûr gûr",
+      "to": "gûr"
+    },
+    {
+      "id": 13046,
+      "eStrong": "H1486",
+      "dStrong": "H1486 =",
+      "from": "gôrâl gôrâl",
+      "to": "gôrâl"
+    },
+    {
+      "id": 13126,
+      "eStrong": "H1544",
+      "dStrong": "H1544 =",
+      "from": "gillûl gillûl",
+      "to": "gillûl"
+    },
+    {
+      "id": 13225,
+      "eStrong": "H1627",
+      "dStrong": "H1627 =",
+      "from": "gârôn gârôn",
+      "to": "gârôn"
+    },
+    {
+      "id": 13242,
+      "eStrong": "H1643",
+      "dStrong": "H1643 =",
+      "from": "gereώ",
+      "to": "gereś"
+    },
+    {
+      "id": 13277,
+      "eStrong": "H1673",
+      "dStrong": "H1673 =",
+      "from": "dô'êg dô'êg",
+      "to": "dô'êg"
+    },
+    {
+      "id": 13281,
+      "eStrong": "H1677",
+      "dStrong": "H1677 =",
+      "from": "dôb dôb",
+      "to": "dôb"
+    },
+    {
+      "id": 13286,
+      "eStrong": "H1682",
+      "dStrong": "H1682 =",
+      "from": "debôrâh debôrâh",
+      "to": "debôrâh"
+    },
+    {
+      "id": 13287,
+      "eStrong": "H1683",
+      "dStrong": "H1683G =",
+      "from": "debôrâh debôrâh",
+      "to": "debôrâh"
+    },
+    {
+      "id": 13288,
+      "eStrong": "H1683",
+      "dStrong": "H1683H =",
+      "from": "debôrâh debôrâh",
+      "to": "debôrâh"
+    },
+    {
+      "id": 13353,
+      "eStrong": "H1730",
+      "dStrong": "H1730G =",
+      "from": "dôd dôd",
+      "to": "dôd"
+    },
+    {
+      "id": 13354,
+      "eStrong": "H1730",
+      "dStrong": "H1730H = a Meaning of",
+      "from": "dôd dôd",
+      "to": "dôd"
+    },
+    {
+      "id": 13355,
+      "eStrong": "H1730",
+      "dStrong": "H1730I = a Meaning of",
+      "from": "dôd dôd",
+      "to": "dôd"
+    },
+    {
+      "id": 13384,
+      "eStrong": "H1755",
+      "dStrong": "H1755 =",
+      "from": "dôr dôr",
+      "to": "dôr"
+    },
+    {
+      "id": 13400,
+      "eStrong": "H1769",
+      "dStrong": "H1769G =",
+      "from": "dîybôn dîybôn",
+      "to": "dîybôn"
+    },
+    {
+      "id": 13401,
+      "eStrong": "H1769",
+      "dStrong": "H1769H =",
+      "from": "dîybôn dîybôn",
+      "to": "dîybôn"
+    },
+    {
+      "id": 13402,
+      "eStrong": "H1769",
+      "dStrong": "H1769I = a Name of",
+      "from": "dîybôn dîybôn",
+      "to": "dîybôn"
+    },
+    {
+      "id": 13420,
+      "eStrong": "H1787",
+      "dStrong": "H1787G =",
+      "from": "dîyshôn dîyshôn dishôn dishôn",
+      "to": "dîyshôn dishôn"
+    },
+    {
+      "id": 13421,
+      "eStrong": "H1787",
+      "dStrong": "H1787H =",
+      "from": "dîyshôn dîyshôn dishôn dishôn",
+      "to": "dîyshôn dishôn"
+    },
+    {
+      "id": 13422,
+      "eStrong": "H1787",
+      "dStrong": "H1787I = a Spelling of",
+      "from": "dîyshôn dîyshôn dishôn dishôn",
+      "to": "dîyshôn dishôn"
+    },
+    {
+      "id": 13482,
+      "eStrong": "H1834",
+      "dStrong": "H1834 =",
+      "from": "dammeώeq dûmeώeq darmeώeq",
+      "to": "dammeśeq dûmeśeq darmeśeq"
+    },
+    {
+      "id": 13577,
+      "eStrong": "H1913a",
+      "dStrong": "H1913A =",
+      "from": "hădôrâm hădôrâm",
+      "to": "hădôrâm"
+    },
+    {
+      "id": 13578,
+      "eStrong": "H1913b",
+      "dStrong": "H1913B = a Name of",
+      "from": "hădôrâm hădôrâm",
+      "to": "hădôrâm"
+    },
+    {
+      "id": 13579,
+      "eStrong": "H1913a",
+      "dStrong": "H1913G = a Name of",
+      "from": "hădôrâm hădôrâm",
+      "to": "hădôrâm"
+    },
+    {
+      "id": 13689,
+      "eStrong": "H1995a",
+      "dStrong": "H1995A =",
+      "from": "hâmôn hâmôn",
+      "to": "hâmôn"
+    },
+    {
+      "id": 13690,
+      "eStrong": "H1995b",
+      "dStrong": "H1995B =",
+      "from": "hâmôn hâmôn",
+      "to": "hâmôn"
+    },
+    {
+      "id": 13794,
+      "eStrong": "H2073",
+      "dStrong": "H2073 =",
+      "from": "zebûl zebûl",
+      "to": "zebûl"
+    },
+    {
+      "id": 14011,
+      "eStrong": "H2220",
+      "dStrong": "H2220 =",
+      "from": "zerôa‛ zerôa‛ zerô‛âh zerô‛âh",
+      "to": "zerôa‛ zerô‛âh"
+    },
+    {
+      "id": 14091,
+      "eStrong": "H2276",
+      "dStrong": "H2276 = a group of",
+      "from": "chebrônîy chebrônîy",
+      "to": "chebrônîy"
+    },
+    {
+      "id": 14106,
+      "eStrong": "H2290a",
+      "dStrong": "H2290A = a Spelling of",
+      "from": "chăgôr chăgôr chăgôrâh chăgôrâh",
+      "to": "chăgôr chăgôrâh"
+    },
+    {
+      "id": 14107,
+      "eStrong": "H2290b",
+      "dStrong": "H2290B =",
+      "from": "chăgôr chăgôr chăgôrâh chăgôrâh",
+      "to": "chăgôr chăgôrâh"
+    },
+    {
+      "id": 14181,
+      "eStrong": "H2351",
+      "dStrong": "H2351 =",
+      "from": "chûts chûts",
+      "to": "chûts"
+    },
+    {
+      "id": 14182,
+      "eStrong": "H2352",
+      "dStrong": "H2352 =",
+      "from": "chûr chûr",
+      "to": "chûr"
+    },
+    {
+      "id": 14188,
+      "eStrong": "H2356",
+      "dStrong": "H2356 =",
+      "from": "chôr chôr",
+      "to": "chôr"
+    },
+    {
+      "id": 14205,
+      "eStrong": "H2367",
+      "dStrong": "H2367 =",
+      "from": "chûshâm chûshâm",
+      "to": "chûshâm"
+    },
+    {
+      "id": 14206,
+      "eStrong": "H2368",
+      "dStrong": "H2368 =",
+      "from": "chôthâm chôthâm",
+      "to": "chôthâm"
+    },
+    {
+      "id": 14344,
+      "eStrong": "H2472",
+      "dStrong": "H2472 =",
+      "from": "chălôm chălôm",
+      "to": "chălôm"
+    },
+    {
+      "id": 14345,
+      "eStrong": "H2473",
+      "dStrong": "H2473G =",
+      "from": "chôlôn chôlôn",
+      "to": "chôlôn"
+    },
+    {
+      "id": 14346,
+      "eStrong": "H2473",
+      "dStrong": "H2473H =",
+      "from": "chôlôn chôlôn",
+      "to": "chôlôn"
+    },
+    {
+      "id": 14438,
+      "eStrong": "H2543",
+      "dStrong": "H2543 =",
+      "from": "chămôr chămôr",
+      "to": "chămôr"
+    },
+    {
+      "id": 14440,
+      "eStrong": "H2545",
+      "dStrong": "H2545 =",
+      "from": "chămôth chămôth",
+      "to": "chămôth"
+    },
+    {
+      "id": 14614,
+      "eStrong": "H2664",
+      "dStrong": "H2664 =",
+      "from": "châphaώ",
+      "to": "châphaś"
+    },
+    {
+      "id": 14615,
+      "eStrong": "H2665",
+      "dStrong": "H2665 =",
+      "from": "chêpheώ",
+      "to": "chêpheś"
+    },
+    {
+      "id": 14678,
+      "eStrong": "H2715",
+      "dStrong": "H2715 =",
+      "from": "chôr chôr",
+      "to": "chôr"
+    },
+    {
+      "id": 14706,
+      "eStrong": "H2738",
+      "dStrong": "H2738 =",
+      "from": "chârûl chârûl",
+      "to": "chârûl"
+    },
+    {
+      "id": 14708,
+      "eStrong": "H2740",
+      "dStrong": "H2740 =",
+      "from": "chârôn chârôn",
+      "to": "chârôn"
+    },
+    {
+      "id": 14710,
+      "eStrong": "H2742a",
+      "dStrong": "H2742A =",
+      "from": "chârûts chârûts",
+      "to": "chârûts"
+    },
+    {
+      "id": 14711,
+      "eStrong": "H2742b",
+      "dStrong": "H2742B =",
+      "from": "chârûts chârûts",
+      "to": "chârûts"
+    },
+    {
+      "id": 14712,
+      "eStrong": "H2742c",
+      "dStrong": "H2742C =",
+      "from": "chârûts chârûts",
+      "to": "chârûts"
+    },
+    {
+      "id": 14713,
+      "eStrong": "H2742d",
+      "dStrong": "H2742D =",
+      "from": "chârûts chârûts",
+      "to": "chârûts"
+    },
+    {
+      "id": 14724,
+      "eStrong": "H2753",
+      "dStrong": "H2753G =",
+      "from": "chôrîy chôrîy",
+      "to": "chôrîy"
+    },
+    {
+      "id": 14725,
+      "eStrong": "H2753",
+      "dStrong": "H2753H =",
+      "from": "chôrîy chôrîy",
+      "to": "chôrîy"
+    },
+    {
+      "id": 14773,
+      "eStrong": "H2789",
+      "dStrong": "H2789 =",
+      "from": "chereώ",
+      "to": "chereś"
+    },
+    {
+      "id": 14820,
+      "eStrong": "H2817",
+      "dStrong": "H2817 =",
+      "from": "chăώûphâ' chăώûphâ'",
+      "to": "chăśûphâ'"
+    },
+    {
+      "id": 14824,
+      "eStrong": "H2820",
+      "dStrong": "H2820 =",
+      "from": "châώak",
+      "to": "châśak"
+    },
+    {
+      "id": 14840,
+      "eStrong": "H2834",
+      "dStrong": "H2834 =",
+      "from": "châώaph",
+      "to": "châśaph"
+    },
+    {
+      "id": 14841,
+      "eStrong": "H2835",
+      "dStrong": "H2835 =",
+      "from": "châώiph",
+      "to": "châśiph"
+    },
+    {
+      "id": 14845,
+      "eStrong": "H2838",
+      "dStrong": "H2838 =",
+      "from": "châshûq châshûq",
+      "to": "châshûq"
+    },
+    {
+      "id": 14899,
+      "eStrong": "H2889",
+      "dStrong": "H2889 =",
+      "from": "ţâhôr ţâhôr",
+      "to": "ţâhôr"
+    },
+    {
+      "id": 14924,
+      "eStrong": "H2907",
+      "dStrong": "H2907 =",
+      "from": "ţûώ",
+      "to": "ţûś"
+    },
+    {
+      "id": 15036,
+      "eStrong": "H3004",
+      "dStrong": "H3004 =",
+      "from": "yabbâώâh",
+      "to": "yabbâshâh"
+    },
+    {
+      "id": 15037,
+      "eStrong": "H3005",
+      "dStrong": "H3005 =",
+      "from": "yibώâm",
+      "to": "yibśâm"
+    },
+    {
+      "id": 15060,
+      "eStrong": "H3026a",
+      "dStrong": "H3026A = in Aramaic of",
+      "from": "yegar ώahădûthâ'",
+      "to": "yegar śahădûthâ'"
+    },
+    {
+      "id": 15061,
+      "eStrong": "H3026b",
+      "dStrong": "H3026B = a Part of",
+      "from": "yegar ώahădûthâ'",
+      "to": "yegar śahădûthâ'"
+    },
+    {
+      "id": 15201,
+      "eStrong": "H3091",
+      "dStrong": "H3091G =",
+      "from": "yehôshûa‛ yehôshûa‛",
+      "to": "yehôshûa‛"
+    },
+    {
+      "id": 15202,
+      "eStrong": "H3091",
+      "dStrong": "H3091H =",
+      "from": "yehôshûa‛ yehôshûa‛",
+      "to": "yehôshûa‛"
+    },
+    {
+      "id": 15203,
+      "eStrong": "H3091",
+      "dStrong": "H3091I =",
+      "from": "yehôshûa‛ yehôshûa‛",
+      "to": "yehôshûa‛"
+    },
+    {
+      "id": 15204,
+      "eStrong": "H3091",
+      "dStrong": "H3091J =",
+      "from": "yehôshûa‛ yehôshûa‛",
+      "to": "yehôshûa‛"
+    },
+    {
+      "id": 15243,
+      "eStrong": "H3101",
+      "dStrong": "H3101G =",
+      "from": "yô'âsh yô'âsh",
+      "to": "yô'âsh"
+    },
+    {
+      "id": 15244,
+      "eStrong": "H3101",
+      "dStrong": "H3101H =",
+      "from": "yô'âsh yô'âsh",
+      "to": "yô'âsh"
+    },
+    {
+      "id": 15245,
+      "eStrong": "H3101",
+      "dStrong": "H3101I =",
+      "from": "yô'âsh yô'âsh",
+      "to": "yô'âsh"
+    },
+    {
+      "id": 15246,
+      "eStrong": "H3101",
+      "dStrong": "H3101J =",
+      "from": "yô'âsh yô'âsh",
+      "to": "yô'âsh"
+    },
+    {
+      "id": 15247,
+      "eStrong": "H3101",
+      "dStrong": "H3101K =",
+      "from": "yô'âsh yô'âsh",
+      "to": "yô'âsh"
+    },
+    {
+      "id": 15248,
+      "eStrong": "H3101",
+      "dStrong": "H3101L =",
+      "from": "yô'âsh yô'âsh",
+      "to": "yô'âsh"
+    },
+    {
+      "id": 15255,
+      "eStrong": "H3104",
+      "dStrong": "H3104 =",
+      "from": "yôbêl yôbêl",
+      "to": "yôbêl"
+    },
+    {
+      "id": 15413,
+      "eStrong": "H3187",
+      "dStrong": "H3187 =",
+      "from": "yâchaώ",
+      "to": "yâchaś"
+    },
+    {
+      "id": 15414,
+      "eStrong": "H3188",
+      "dStrong": "H3188 =",
+      "from": "yachaώ",
+      "to": "yachaś"
+    },
+    {
+      "id": 15436,
+      "eStrong": "H3201",
+      "dStrong": "H3201 =",
+      "from": "yâkôl yâkôl",
+      "to": "yâkôl"
+    },
+    {
+      "id": 15569,
+      "eStrong": "H3299",
+      "dStrong": "H3299 =",
+      "from": "ya‛ăώû",
+      "to": "ya‛ăśû"
+    },
+    {
+      "id": 15570,
+      "eStrong": "H3300",
+      "dStrong": "H3300G =",
+      "from": "ya‛ăώîy'êl",
+      "to": "ya‛ăśîy'êl"
+    },
+    {
+      "id": 15571,
+      "eStrong": "H3300",
+      "dStrong": "H3300H =",
+      "from": "ya‛ăώîy'êl",
+      "to": "ya‛ăśîy'êl"
+    },
+    {
+      "id": 15790,
+      "eStrong": "H3446",
+      "dStrong": "H3446 = a Spelling of",
+      "from": "yiώchâq",
+      "to": "yiśchâq"
+    },
+    {
+      "id": 15798,
+      "eStrong": "H3450",
+      "dStrong": "H3450 =",
+      "from": "yeώîymi'êl",
+      "to": "yeśîymi'êl"
+    },
+    {
+      "id": 15804,
+      "eStrong": "H3455",
+      "dStrong": "H3455 =",
+      "from": "yâώam",
+      "to": "yâśam"
+    },
+    {
+      "id": 15846,
+      "eStrong": "H3478",
+      "dStrong": "H3478 =",
+      "from": "yiώrâ'êl",
+      "to": "yiśrâ'êl"
+    },
+    {
+      "id": 15847,
+      "eStrong": "H3479",
+      "dStrong": "H3479 = in Aramaic of",
+      "from": "yiώrâ'êl",
+      "to": "yiśrâ'êl"
+    },
+    {
+      "id": 15848,
+      "eStrong": "H3480",
+      "dStrong": "H3480 = a Name of",
+      "from": "yeώar'êlâh",
+      "to": "yeśar'êlâh"
+    },
+    {
+      "id": 15849,
+      "eStrong": "H3481",
+      "dStrong": "H3481G = a group of",
+      "from": "yiώre'êlîy",
+      "to": "yiśre'êlîy"
+    },
+    {
+      "id": 15850,
+      "eStrong": "H3481",
+      "dStrong": "H3481H = a group of",
+      "from": "yiώre'êlîy",
+      "to": "yiśre'êlîy"
+    },
+    {
+      "id": 15851,
+      "eStrong": "H3482",
+      "dStrong": "H3482 = a group of",
+      "from": "yiώre'êlîyth",
+      "to": "yiśre'êlîyth"
+    },
+    {
+      "id": 15854,
+      "eStrong": "H3485",
+      "dStrong": "H3485G =",
+      "from": "yiώώâώkâr",
+      "to": "yiśśâśkâr"
+    },
+    {
+      "id": 15855,
+      "eStrong": "H3485",
+      "dStrong": "H3485H =",
+      "from": "yiώώâώkâr",
+      "to": "yiśśâśkâr"
+    },
+    {
+      "id": 15900,
+      "eStrong": "H3519",
+      "dStrong": "H3519 =",
+      "from": "kâbôd kâbôd",
+      "to": "kâbôd"
+    },
+    {
+      "id": 15916,
+      "eStrong": "H3532",
+      "dStrong": "H3532 =",
+      "from": "kebeώ",
+      "to": "kebeś"
+    },
+    {
+      "id": 15919,
+      "eStrong": "H3535",
+      "dStrong": "H3535 =",
+      "from": "kibώâh kabώâh",
+      "to": "kibśâh kabśâh"
+    },
+    {
+      "id": 15957,
+      "eStrong": "H3566",
+      "dStrong": "H3566 =",
+      "from": "kôresh kôresh",
+      "to": "kôresh"
+    },
+    {
+      "id": 15977,
+      "eStrong": "H3581a",
+      "dStrong": "H3581A =",
+      "from": "kôach kôach",
+      "to": "kôach"
+    },
+    {
+      "id": 15978,
+      "eStrong": "H3581b",
+      "dStrong": "H3581B =",
+      "from": "kôach kôach",
+      "to": "kôach"
+    },
+    {
+      "id": 15994,
+      "eStrong": "H3595",
+      "dStrong": "H3595 =",
+      "from": "kîyôr kîyôr",
+      "to": "kîyôr"
+    },
+    {
+      "id": 16005,
+      "eStrong": "H3605",
+      "dStrong": "H3605 =",
+      "from": "kôl kôl",
+      "to": "kôl"
+    },
+    {
+      "id": 16131,
+      "eStrong": "H3708a",
+      "dStrong": "H3708A =",
+      "from": "ka‛as ka‛aώ",
+      "to": "ka‛as ka‛aś"
+    },
+    {
+      "id": 16132,
+      "eStrong": "H3708b",
+      "dStrong": "H3708B = a Spelling of",
+      "from": "ka‛as ka‛aώ",
+      "to": "ka‛as ka‛aś"
+    },
+    {
+      "id": 16164,
+      "eStrong": "H3730",
+      "dStrong": "H3730 =",
+      "from": "kaphtôr kaphtôr",
+      "to": "kaphtôr"
+    },
+    {
+      "id": 16165,
+      "eStrong": "H3731",
+      "dStrong": "H3731 =",
+      "from": "kaphtôr kaphtôr",
+      "to": "kaphtôr"
+    },
+    {
+      "id": 16212,
+      "eStrong": "H3770",
+      "dStrong": "H3770 =",
+      "from": "kerêώ",
+      "to": "kerêś"
+    },
+    {
+      "id": 16221,
+      "eStrong": "H3775",
+      "dStrong": "H3775 =",
+      "from": "keώeb",
+      "to": "keśeb"
+    },
+    {
+      "id": 16222,
+      "eStrong": "H3776",
+      "dStrong": "H3776 =",
+      "from": "kiώbâh",
+      "to": "kiśbâh"
+    },
+    {
+      "id": 16223,
+      "eStrong": "H3777",
+      "dStrong": "H3777 =",
+      "from": "keώed",
+      "to": "keśed"
+    },
+    {
+      "id": 16224,
+      "eStrong": "H3778",
+      "dStrong": "H3778 =",
+      "from": "kaώdîy kaώdîymâh",
+      "to": "kaśdîy kaśdîymâh"
+    },
+    {
+      "id": 16225,
+      "eStrong": "H3779",
+      "dStrong": "H3779 = a group of",
+      "from": "kaώday",
+      "to": "kaśday"
+    },
+    {
+      "id": 16226,
+      "eStrong": "H3780",
+      "dStrong": "H3780 =",
+      "from": "kâώâh",
+      "to": "kâśâh"
+    },
+    {
+      "id": 16263,
+      "eStrong": "H3816",
+      "dStrong": "H3816 =",
+      "from": "le'ôm le'ôm",
+      "to": "le'ôm"
+    },
+    {
+      "id": 16277,
+      "eStrong": "H3828",
+      "dStrong": "H3828 =",
+      "from": "lebônâh lebônâh",
+      "to": "lebônâh"
+    },
+    {
+      "id": 16279,
+      "eStrong": "H3830",
+      "dStrong": "H3830 =",
+      "from": "lebûsh lebûsh",
+      "to": "lebûsh"
+    },
+    {
+      "id": 16333,
+      "eStrong": "H3871",
+      "dStrong": "H3871 =",
+      "from": "lûach lûach",
+      "to": "lûach"
+    },
+    {
+      "id": 16358,
+      "eStrong": "H3894",
+      "dStrong": "H3894 =",
+      "from": "lâchûm lâchûm",
+      "to": "lâchûm"
+    },
+    {
+      "id": 16399,
+      "eStrong": "H3928",
+      "dStrong": "H3928 =",
+      "from": "limmûd limmûd",
+      "to": "limmûd"
+    },
+    {
+      "id": 16455,
+      "eStrong": "H3974",
+      "dStrong": "H3974 =",
+      "from": "mâ'ôr mâ'ôr me'ôrâh me'ôrâh",
+      "to": "mâ'ôr me'ôrâh"
+    },
+    {
+      "id": 16499,
+      "eStrong": "H4017",
+      "dStrong": "H4017G =",
+      "from": "mibώâm",
+      "to": "mibśâm"
+    },
+    {
+      "id": 16500,
+      "eStrong": "H4017",
+      "dStrong": "H4017H =",
+      "from": "mibώâm",
+      "to": "mibśâm"
+    },
+    {
+      "id": 16507,
+      "eStrong": "H4024a",
+      "dStrong": "H4024A =",
+      "from": "migdôl migdôl",
+      "to": "migdôl"
+    },
+    {
+      "id": 16508,
+      "eStrong": "H4024b",
+      "dStrong": "H4024B =",
+      "from": "migdôl migdôl",
+      "to": "migdôl"
+    },
+    {
+      "id": 16521,
+      "eStrong": "H4033",
+      "dStrong": "H4033 =",
+      "from": "mâgûr mâgûr",
+      "to": "mâgûr"
+    },
+    {
+      "id": 16561,
+      "eStrong": "H4069",
+      "dStrong": "H4069 =",
+      "from": "maddûa‛ maddûa‛",
+      "to": "maddûa‛"
+    },
+    {
+      "id": 16564,
+      "eStrong": "H4071",
+      "dStrong": "H4071 =",
+      "from": "medûrâh medûrâh",
+      "to": "medûrâh"
+    },
+    {
+      "id": 16647,
+      "eStrong": "H4142",
+      "dStrong": "H4142 =",
+      "from": "mûsabbâh mûsabbâh",
+      "to": "mûsabbâh"
+    },
+    {
+      "id": 16651,
+      "eStrong": "H4146",
+      "dStrong": "H4146 = a Spelling of",
+      "from": "môsâdâh môsâdâh",
+      "to": "môsâdâh"
+    },
+    {
+      "id": 16670,
+      "eStrong": "H4159",
+      "dStrong": "H4159 =",
+      "from": "môphêth môphêth",
+      "to": "môphêth"
+    },
+    {
+      "id": 16672,
+      "eStrong": "H4161",
+      "dStrong": "H4161 =",
+      "from": "môtsâ' môtsâ'",
+      "to": "môtsâ'"
+    },
+    {
+      "id": 16678,
+      "eStrong": "H4166",
+      "dStrong": "H4166 =",
+      "from": "mûtsâqâh mûtsâqâh",
+      "to": "mûtsâqâh"
+    },
+    {
+      "id": 16682,
+      "eStrong": "H4170",
+      "dStrong": "H4170 =",
+      "from": "môqêsh môqêsh",
+      "to": "môqêsh"
+    },
+    {
+      "id": 16686,
+      "eStrong": "H4173",
+      "dStrong": "H4173 =",
+      "from": "môrag môrag",
+      "to": "môrag"
+    },
+    {
+      "id": 16689,
+      "eStrong": "H4176",
+      "dStrong": "H4176G =",
+      "from": "môreh môreh",
+      "to": "môreh"
+    },
+    {
+      "id": 16690,
+      "eStrong": "H4176",
+      "dStrong": "H4176H =",
+      "from": "môreh môreh",
+      "to": "môreh"
+    },
+    {
+      "id": 16693,
+      "eStrong": "H4179",
+      "dStrong": "H4179 =",
+      "from": "môrîyâh môrîyâh",
+      "to": "môrîyâh"
+    },
+    {
+      "id": 16700,
+      "eStrong": "H4186",
+      "dStrong": "H4186 =",
+      "from": "môshâb môshâb",
+      "to": "môshâb"
+    },
+    {
+      "id": 16715,
+      "eStrong": "H4201",
+      "dStrong": "H4201 =",
+      "from": "mezûzâh mezûzâh",
+      "to": "mezûzâh"
+    },
+    {
+      "id": 16719,
+      "eStrong": "H4205",
+      "dStrong": "H4205 =",
+      "from": "mâzôr mâzôr",
+      "to": "mâzôr"
+    },
+    {
+      "id": 16786,
+      "eStrong": "H4262",
+      "dStrong": "H4262 =",
+      "from": "machmûd machmûd",
+      "to": "machmûd"
+    },
+    {
+      "id": 16794,
+      "eStrong": "H4270",
+      "dStrong": "H4270 =",
+      "from": "machsôr machsôr",
+      "to": "machsôr"
+    },
+    {
+      "id": 16810,
+      "eStrong": "H4286",
+      "dStrong": "H4286 =",
+      "from": "machώôph",
+      "to": "machśôph"
+    },
+    {
+      "id": 16897,
+      "eStrong": "H4334",
+      "dStrong": "H4334 =",
+      "from": "mîyshôr mîyshôr",
+      "to": "mîyshôr"
+    },
+    {
+      "id": 16913,
+      "eStrong": "H4350",
+      "dStrong": "H4350 =",
+      "from": "mekônâh mekônâh",
+      "to": "mekônâh"
+    },
+    {
+      "id": 16949,
+      "eStrong": "H4383",
+      "dStrong": "H4383 =",
+      "from": "mikshôl mikshôl",
+      "to": "mikshôl"
+    },
+    {
+      "id": 16970,
+      "eStrong": "H4403",
+      "dStrong": "H4403 =",
+      "from": "malbûsh malbûsh",
+      "to": "malbûsh"
+    },
+    {
+      "id": 16974,
+      "eStrong": "H4407",
+      "dStrong": "H4407 =",
+      "from": "millô' millô'",
+      "to": "millô'"
+    },
+    {
+      "id": 17097,
+      "eStrong": "H4496",
+      "dStrong": "H4496G = a Name of",
+      "from": "menûchâh menûchâh",
+      "to": "menûchâh"
+    },
+    {
+      "id": 17098,
+      "eStrong": "H4496",
+      "dStrong": "H4496H =",
+      "from": "menûchâh menûchâh",
+      "to": "menûchâh"
+    },
+    {
+      "id": 17101,
+      "eStrong": "H4499",
+      "dStrong": "H4499 =",
+      "from": "menûsâh menûsâh",
+      "to": "menûsâh"
+    },
+    {
+      "id": 17103,
+      "eStrong": "H4501",
+      "dStrong": "H4501 =",
+      "from": "menôrâh menôrâh",
+      "to": "menôrâh"
+    },
+    {
+      "id": 17123,
+      "eStrong": "H4514",
+      "dStrong": "H4514 =",
+      "from": "man‛ûl man‛ûl",
+      "to": "man‛ûl"
+    },
+    {
+      "id": 17203,
+      "eStrong": "H4585",
+      "dStrong": "H4585 =",
+      "from": "me‛ônâh me‛ônâh",
+      "to": "me‛ônâh"
+    },
+    {
+      "id": 17271,
+      "eStrong": "H4639",
+      "dStrong": "H4639G = a Meaning of",
+      "from": "ma‛ăώeh",
+      "to": "ma‛ăśeh"
+    },
+    {
+      "id": 17272,
+      "eStrong": "H4639",
+      "dStrong": "H4639H = a Meaning of",
+      "from": "ma‛ăώeh",
+      "to": "ma‛ăśeh"
+    },
+    {
+      "id": 17273,
+      "eStrong": "H4639",
+      "dStrong": "H4639I =",
+      "from": "ma‛ăώeh",
+      "to": "ma‛ăśeh"
+    },
+    {
+      "id": 17274,
+      "eStrong": "H4639",
+      "dStrong": "H4639J = a Meaning of",
+      "from": "ma‛ăώeh",
+      "to": "ma‛ăśeh"
+    },
+    {
+      "id": 17275,
+      "eStrong": "H4639",
+      "dStrong": "H4639K = a Meaning of",
+      "from": "ma‛ăώeh",
+      "to": "ma‛ăśeh"
+    },
+    {
+      "id": 17276,
+      "eStrong": "H4640",
+      "dStrong": "H4640 =",
+      "from": "ma‛ăώay",
+      "to": "ma‛ăśay"
+    },
+    {
+      "id": 17277,
+      "eStrong": "H4641",
+      "dStrong": "H4641G =",
+      "from": "ma‛ăώêyâh ma‛ăώêyâhû",
+      "to": "ma‛ăśêyâh ma‛ăśêyâhû"
+    },
+    {
+      "id": 17278,
+      "eStrong": "H4641",
+      "dStrong": "H4641H =",
+      "from": "ma‛ăώêyâh ma‛ăώêyâhû",
+      "to": "ma‛ăśêyâh ma‛ăśêyâhû"
+    },
+    {
+      "id": 17279,
+      "eStrong": "H4641",
+      "dStrong": "H4641I =",
+      "from": "ma‛ăώêyâh ma‛ăώêyâhû",
+      "to": "ma‛ăśêyâh ma‛ăśêyâhû"
+    },
+    {
+      "id": 17280,
+      "eStrong": "H4641",
+      "dStrong": "H4641J =",
+      "from": "ma‛ăώêyâh ma‛ăώêyâhû",
+      "to": "ma‛ăśêyâh ma‛ăśêyâhû"
+    },
+    {
+      "id": 17281,
+      "eStrong": "H4641",
+      "dStrong": "H4641K =",
+      "from": "ma‛ăώêyâh ma‛ăώêyâhû",
+      "to": "ma‛ăśêyâh ma‛ăśêyâhû"
+    },
+    {
+      "id": 17282,
+      "eStrong": "H4641",
+      "dStrong": "H4641L =",
+      "from": "ma‛ăώêyâh ma‛ăώêyâhû",
+      "to": "ma‛ăśêyâh ma‛ăśêyâhû"
+    },
+    {
+      "id": 17283,
+      "eStrong": "H4641",
+      "dStrong": "H4641M =",
+      "from": "ma‛ăώêyâh ma‛ăώêyâhû",
+      "to": "ma‛ăśêyâh ma‛ăśêyâhû"
+    },
+    {
+      "id": 17284,
+      "eStrong": "H4641",
+      "dStrong": "H4641N =",
+      "from": "ma‛ăώêyâh ma‛ăώêyâhû",
+      "to": "ma‛ăśêyâh ma‛ăśêyâhû"
+    },
+    {
+      "id": 17285,
+      "eStrong": "H4641",
+      "dStrong": "H4641O =",
+      "from": "ma‛ăώêyâh ma‛ăώêyâhû",
+      "to": "ma‛ăśêyâh ma‛ăśêyâhû"
+    },
+    {
+      "id": 17286,
+      "eStrong": "H4641",
+      "dStrong": "H4641P =",
+      "from": "ma‛ăώêyâh ma‛ăώêyâhû",
+      "to": "ma‛ăśêyâh ma‛ăśêyâhû"
+    },
+    {
+      "id": 17287,
+      "eStrong": "H4641",
+      "dStrong": "H4641Q =",
+      "from": "ma‛ăώêyâh ma‛ăώêyâhû",
+      "to": "ma‛ăśêyâh ma‛ăśêyâhû"
+    },
+    {
+      "id": 17288,
+      "eStrong": "H4641",
+      "dStrong": "H4641R =",
+      "from": "ma‛ăώêyâh ma‛ăώêyâhû",
+      "to": "ma‛ăśêyâh ma‛ăśêyâhû"
+    },
+    {
+      "id": 17289,
+      "eStrong": "H4641",
+      "dStrong": "H4641S =",
+      "from": "ma‛ăώêyâh ma‛ăώêyâhû",
+      "to": "ma‛ăśêyâh ma‛ăśêyâhû"
+    },
+    {
+      "id": 17290,
+      "eStrong": "H4641",
+      "dStrong": "H4641T =",
+      "from": "ma‛ăώêyâh ma‛ăώêyâhû",
+      "to": "ma‛ăśêyâh ma‛ăśêyâhû"
+    },
+    {
+      "id": 17291,
+      "eStrong": "H4641",
+      "dStrong": "H4641U =",
+      "from": "ma‛ăώêyâh ma‛ăώêyâhû",
+      "to": "ma‛ăśêyâh ma‛ăśêyâhû"
+    },
+    {
+      "id": 17292,
+      "eStrong": "H4641",
+      "dStrong": "H4641V =",
+      "from": "ma‛ăώêyâh ma‛ăώêyâhû",
+      "to": "ma‛ăśêyâh ma‛ăśêyâhû"
+    },
+    {
+      "id": 17293,
+      "eStrong": "H4641",
+      "dStrong": "H4641W =",
+      "from": "ma‛ăώêyâh ma‛ăώêyâhû",
+      "to": "ma‛ăśêyâh ma‛ăśêyâhû"
+    },
+    {
+      "id": 17294,
+      "eStrong": "H4641",
+      "dStrong": "H4641X =",
+      "from": "ma‛ăώêyâh ma‛ăώêyâhû",
+      "to": "ma‛ăśêyâh ma‛ăśêyâhû"
+    },
+    {
+      "id": 17295,
+      "eStrong": "H4641",
+      "dStrong": "H4641Y =",
+      "from": "ma‛ăώêyâh ma‛ăώêyâhû",
+      "to": "ma‛ăśêyâh ma‛ăśêyâhû"
+    },
+    {
+      "id": 17296,
+      "eStrong": "H4641",
+      "dStrong": "H4641Z =",
+      "from": "ma‛ăώêyâh ma‛ăώêyâhû",
+      "to": "ma‛ăśêyâh ma‛ăśêyâhû"
+    },
+    {
+      "id": 17298,
+      "eStrong": "H4643",
+      "dStrong": "H4643 =",
+      "from": "ma‛ăώêr ma‛ăώar ma‛aώrâh",
+      "to": "ma‛ăśêr ma‛ăśar ma‛aśrâh"
+    },
+    {
+      "id": 17314,
+      "eStrong": "H4657",
+      "dStrong": "H4657 =",
+      "from": "miphlâώ",
+      "to": "miphlâś"
+    },
+    {
+      "id": 17325,
+      "eStrong": "H4666",
+      "dStrong": "H4666 =",
+      "from": "miphrâώ",
+      "to": "miphrâś"
+    },
+    {
+      "id": 17326,
+      "eStrong": "H4667",
+      "dStrong": "H4667 =",
+      "from": "miphώâ‛âh",
+      "to": "miphśâ‛âh"
+    },
+    {
+      "id": 17330,
+      "eStrong": "H4671",
+      "dStrong": "H4671 =",
+      "from": "môts môts",
+      "to": "môts"
+    },
+    {
+      "id": 17351,
+      "eStrong": "H4688",
+      "dStrong": "H4688 =",
+      "from": "metsôlâh metsôlâh metsûlâh metsûlâh",
+      "to": "metsôlâh metsûlâh"
+    },
+    {
+      "id": 17353,
+      "eStrong": "H4690",
+      "dStrong": "H4690 =",
+      "from": "mâtsûq mâtsûq",
+      "to": "mâtsûq"
+    },
+    {
+      "id": 17354,
+      "eStrong": "H4691",
+      "dStrong": "H4691 =",
+      "from": "metsûqâh metsûqâh",
+      "to": "metsûqâh"
+    },
+    {
+      "id": 17357,
+      "eStrong": "H4694",
+      "dStrong": "H4694 =",
+      "from": "metsûrâh metsûrâh",
+      "to": "metsûrâh"
+    },
+    {
+      "id": 17400,
+      "eStrong": "H4725",
+      "dStrong": "H4725 =",
+      "from": "mâqôm mâqôm meqômâh meqômâh",
+      "to": "mâqôm meqômâh"
+    },
+    {
+      "id": 17401,
+      "eStrong": "H4726",
+      "dStrong": "H4726 =",
+      "from": "mâqôr mâqôr",
+      "to": "mâqôr"
+    },
+    {
+      "id": 17430,
+      "eStrong": "H4753",
+      "dStrong": "H4753 =",
+      "from": "môr môr",
+      "to": "môr"
+    },
+    {
+      "id": 17474,
+      "eStrong": "H4794",
+      "dStrong": "H4794 =",
+      "from": "merûtsâh merûtsâh",
+      "to": "merûtsâh"
+    },
+    {
+      "id": 17518,
+      "eStrong": "H4833",
+      "dStrong": "H4833 =",
+      "from": "mirpâώ",
+      "to": "mirpâś"
+    },
+    {
+      "id": 17529,
+      "eStrong": "H4844",
+      "dStrong": "H4844 =",
+      "from": "merôr merôr",
+      "to": "merôr"
+    },
+    {
+      "id": 17531,
+      "eStrong": "H4846",
+      "dStrong": "H4846 =",
+      "from": "merôrâh merôrâh",
+      "to": "merôrâh"
+    },
+    {
+      "id": 17538,
+      "eStrong": "H4853a",
+      "dStrong": "H4853A =",
+      "from": "maώώâ'",
+      "to": "maśśâ'"
+    },
+    {
+      "id": 17539,
+      "eStrong": "H4853b",
+      "dStrong": "H4853B =",
+      "from": "maώώâ'",
+      "to": "maśśâ'"
+    },
+    {
+      "id": 17540,
+      "eStrong": "H4854",
+      "dStrong": "H4854 =",
+      "from": "maώώâ'",
+      "to": "maśśâ'"
+    },
+    {
+      "id": 17542,
+      "eStrong": "H4856",
+      "dStrong": "H4856 =",
+      "from": "maώώô'",
+      "to": "maśśô'"
+    },
+    {
+      "id": 17544,
+      "eStrong": "H4858",
+      "dStrong": "H4858 =",
+      "from": "maώώâ'âh",
+      "to": "maśśâ'âh"
+    },
+    {
+      "id": 17550,
+      "eStrong": "H4864",
+      "dStrong": "H4864 =",
+      "from": "maώ'êth",
+      "to": "maś'êth"
+    },
+    {
+      "id": 17555,
+      "eStrong": "H4869a",
+      "dStrong": "H4869A =",
+      "from": "miώgâb",
+      "to": "miśgâb"
+    },
+    {
+      "id": 17556,
+      "eStrong": "H4869b",
+      "dStrong": "H4869B =",
+      "from": "miώgâb",
+      "to": "miśgâb"
+    },
+    {
+      "id": 17562,
+      "eStrong": "H4875",
+      "dStrong": "H4875 =",
+      "from": "meshô'âh meshô'âh",
+      "to": "meshô'âh"
+    },
+    {
+      "id": 17563,
+      "eStrong": "H4876",
+      "dStrong": "H4876 =",
+      "from": "mashshû'âh mashshû'âh",
+      "to": "mashshû'âh"
+    },
+    {
+      "id": 17565,
+      "eStrong": "H4878",
+      "dStrong": "H4878 =",
+      "from": "meshûbâh meshûbâh",
+      "to": "meshûbâh"
+    },
+    {
+      "id": 17569,
+      "eStrong": "H4881a",
+      "dStrong": "H4881A =",
+      "from": "meώûkâh meώûkâh",
+      "to": "meśûkâh"
+    },
+    {
+      "id": 17570,
+      "eStrong": "H4881b",
+      "dStrong": "H4881B =",
+      "from": "meώûkâh meώûkâh",
+      "to": "meśûkâh"
+    },
+    {
+      "id": 17572,
+      "eStrong": "H4883",
+      "dStrong": "H4883 =",
+      "from": "maώώôr",
+      "to": "maśśôr"
+    },
+    {
+      "id": 17573,
+      "eStrong": "H4884",
+      "dStrong": "H4884 =",
+      "from": "meώûrâh",
+      "to": "meśûrâh"
+    },
+    {
+      "id": 17574,
+      "eStrong": "H4885",
+      "dStrong": "H4885 =",
+      "from": "mâώôώ",
+      "to": "mâśôś"
+    },
+    {
+      "id": 17580,
+      "eStrong": "H4890",
+      "dStrong": "H4890 =",
+      "from": "miώchâq",
+      "to": "miśchâq"
+    },
+    {
+      "id": 17587,
+      "eStrong": "H4895",
+      "dStrong": "H4895 =",
+      "from": "maώţêmâh",
+      "to": "maśţêmâh"
+    },
+    {
+      "id": 17602,
+      "eStrong": "H4905",
+      "dStrong": "H4905 =",
+      "from": "maώkîyl",
+      "to": "maśkîyl"
+    },
+    {
+      "id": 17603,
+      "eStrong": "H4906",
+      "dStrong": "H4906 =",
+      "from": "maώkîyth",
+      "to": "maśkîyth"
+    },
+    {
+      "id": 17606,
+      "eStrong": "H4909",
+      "dStrong": "H4909 =",
+      "from": "maώkôreth",
+      "to": "maśkôreth"
+    },
+    {
+      "id": 17654,
+      "eStrong": "H4930",
+      "dStrong": "H4930 =",
+      "from": "maώmerâh",
+      "to": "maśmerâh"
+    },
+    {
+      "id": 17666,
+      "eStrong": "H4939",
+      "dStrong": "H4939 =",
+      "from": "miώpâch",
+      "to": "miśpâch"
+    },
+    {
+      "id": 17683,
+      "eStrong": "H4951",
+      "dStrong": "H4951 =",
+      "from": "miώrâh",
+      "to": "miśrâh"
+    },
+    {
+      "id": 17687,
+      "eStrong": "H4955",
+      "dStrong": "H4955 =",
+      "from": "miώrâphâh",
+      "to": "miśrâphâh"
+    },
+    {
+      "id": 17688,
+      "eStrong": "H4956",
+      "dStrong": "H4956 =",
+      "from": "miώrephôth mayim",
+      "to": "miśrephôth mayim"
+    },
+    {
+      "id": 17689,
+      "eStrong": "H4957",
+      "dStrong": "H4957 =",
+      "from": "maώrêqâh",
+      "to": "maśrêqâh"
+    },
+    {
+      "id": 17690,
+      "eStrong": "H4958",
+      "dStrong": "H4958 =",
+      "from": "maώrêth",
+      "to": "maśrêth"
+    },
+    {
+      "id": 17729,
+      "eStrong": "H4984",
+      "dStrong": "H4984 = a form of",
+      "from": "mithnaώώê'",
+      "to": "mithnaśśê'"
+    },
+    {
+      "id": 17756,
+      "eStrong": "H5007a",
+      "dStrong": "H5007A = a Spelling of",
+      "from": "ne'âtsâh ne'âtsâh",
+      "to": "ne'âtsâh"
+    },
+    {
+      "id": 17757,
+      "eStrong": "H5007b",
+      "dStrong": "H5007B =",
+      "from": "ne'âtsâh ne'âtsâh",
+      "to": "ne'âtsâh"
+    },
+    {
+      "id": 17786,
+      "eStrong": "H5032",
+      "dStrong": "H5032 =",
+      "from": "nebâyôth nebâyôth",
+      "to": "nebâyôth"
+    },
+    {
+      "id": 17822,
+      "eStrong": "H5065",
+      "dStrong": "H5065 =",
+      "from": "nâgaώ",
+      "to": "nâgaś"
+    },
+    {
+      "id": 17881,
+      "eStrong": "H5112",
+      "dStrong": "H5112 =",
+      "from": "nôd nôd",
+      "to": "nôd"
+    },
+    {
+      "id": 17907,
+      "eStrong": "H5133",
+      "dStrong": "H5133 =",
+      "from": "nôtsâh nôtsâh",
+      "to": "nôtsâh"
+    },
+    {
+      "id": 17928,
+      "eStrong": "H5150",
+      "dStrong": "H5150 =",
+      "from": "nichûm nichûm",
+      "to": "nichûm"
+    },
+    {
+      "id": 17933,
+      "eStrong": "H5154",
+      "dStrong": "H5154 =",
+      "from": "nechûshâh nechûshâh",
+      "to": "nechûshâh"
+    },
+    {
+      "id": 18008,
+      "eStrong": "H5207",
+      "dStrong": "H5207 =",
+      "from": "nîychôach nîychôach",
+      "to": "nîychôach"
+    },
+    {
+      "id": 18009,
+      "eStrong": "H5208",
+      "dStrong": "H5208 = in Aramaic of",
+      "from": "nîychôach nîychôach",
+      "to": "nîychôach"
+    },
+    {
+      "id": 18055,
+      "eStrong": "H5248",
+      "dStrong": "H5248 =",
+      "from": "nimrôd nimrôd",
+      "to": "nimrôd"
+    },
+    {
+      "id": 18201,
+      "eStrong": "H5356a",
+      "dStrong": "H5356A =",
+      "from": "niqqâyôn niqqâyôn",
+      "to": "niqqâyôn"
+    },
+    {
+      "id": 18202,
+      "eStrong": "H5356b",
+      "dStrong": "H5356B =",
+      "from": "niqqâyôn niqqâyôn",
+      "to": "niqqâyôn"
+    },
+    {
+      "id": 18224,
+      "eStrong": "H5375",
+      "dStrong": "H5375G =",
+      "from": "nâώâ' nâsâh",
+      "to": "nâśâ' nâsâh"
+    },
+    {
+      "id": 18225,
+      "eStrong": "H5375",
+      "dStrong": "H5375H = a Meaning of",
+      "from": "nâώâ' nâsâh",
+      "to": "nâśâ' nâsâh"
+    },
+    {
+      "id": 18226,
+      "eStrong": "H5375",
+      "dStrong": "H5375I = a Meaning of",
+      "from": "nâώâ' nâsâh",
+      "to": "nâśâ' nâsâh"
+    },
+    {
+      "id": 18227,
+      "eStrong": "H5375",
+      "dStrong": "H5375J = a Meaning of",
+      "from": "nâώâ' nâsâh",
+      "to": "nâśâ' nâsâh"
+    },
+    {
+      "id": 18228,
+      "eStrong": "H5375",
+      "dStrong": "H5375K = a Meaning of",
+      "from": "nâώâ' nâsâh",
+      "to": "nâśâ' nâsâh"
+    },
+    {
+      "id": 18229,
+      "eStrong": "H5375",
+      "dStrong": "H5375L = a Meaning of",
+      "from": "nâώâ' nâsâh",
+      "to": "nâśâ' nâsâh"
+    },
+    {
+      "id": 18230,
+      "eStrong": "H5375",
+      "dStrong": "H5375M = a Meaning of",
+      "from": "nâώâ' nâsâh",
+      "to": "nâśâ' nâsâh"
+    },
+    {
+      "id": 18231,
+      "eStrong": "H5375",
+      "dStrong": "H5375N = a Meaning of",
+      "from": "nâώâ' nâsâh",
+      "to": "nâśâ' nâsâh"
+    },
+    {
+      "id": 18232,
+      "eStrong": "H5375",
+      "dStrong": "H5375O = a Meaning of",
+      "from": "nâώâ' nâsâh",
+      "to": "nâśâ' nâsâh"
+    },
+    {
+      "id": 18233,
+      "eStrong": "H5375",
+      "dStrong": "H5375P = a Meaning of",
+      "from": "nâώâ' nâsâh",
+      "to": "nâśâ' nâsâh"
+    },
+    {
+      "id": 18234,
+      "eStrong": "H5375",
+      "dStrong": "H5375Q = a Meaning of",
+      "from": "nâώâ' nâsâh",
+      "to": "nâśâ' nâsâh"
+    },
+    {
+      "id": 18235,
+      "eStrong": "H5375",
+      "dStrong": "H5375R = a Meaning of",
+      "from": "nâώâ' nâsâh",
+      "to": "nâśâ' nâsâh"
+    },
+    {
+      "id": 18236,
+      "eStrong": "H5375",
+      "dStrong": "H5375S = a Meaning of",
+      "from": "nâώâ' nâsâh",
+      "to": "nâśâ' nâsâh"
+    },
+    {
+      "id": 18237,
+      "eStrong": "H5375",
+      "dStrong": "H5375T = a Meaning of",
+      "from": "nâώâ' nâsâh",
+      "to": "nâśâ' nâsâh"
+    },
+    {
+      "id": 18238,
+      "eStrong": "H5375",
+      "dStrong": "H5375U = a Meaning of",
+      "from": "nâώâ' nâsâh",
+      "to": "nâśâ' nâsâh"
+    },
+    {
+      "id": 18239,
+      "eStrong": "H5375",
+      "dStrong": "H5375V = a Meaning of",
+      "from": "nâώâ' nâsâh",
+      "to": "nâśâ' nâsâh"
+    },
+    {
+      "id": 18240,
+      "eStrong": "H5375",
+      "dStrong": "H5375W = a Meaning of",
+      "from": "nâώâ' nâsâh",
+      "to": "nâśâ' nâsâh"
+    },
+    {
+      "id": 18241,
+      "eStrong": "H5375",
+      "dStrong": "H5375X = a Meaning of",
+      "from": "nâώâ' nâsâh",
+      "to": "nâśâ' nâsâh"
+    },
+    {
+      "id": 18242,
+      "eStrong": "H5376",
+      "dStrong": "H5376 = in Aramaic of",
+      "from": "neώâ'",
+      "to": "neśâ'"
+    },
+    {
+      "id": 18245,
+      "eStrong": "H5379",
+      "dStrong": "H5379 =",
+      "from": "niώώê'th",
+      "to": "niśśê'th"
+    },
+    {
+      "id": 18247,
+      "eStrong": "H5381",
+      "dStrong": "H5381 =",
+      "from": "nâώag",
+      "to": "nâśag"
+    },
+    {
+      "id": 18251,
+      "eStrong": "H5385",
+      "dStrong": "H5385 =",
+      "from": "neώû'âh neώû'âh",
+      "to": "neśû'âh"
+    },
+    {
+      "id": 18253,
+      "eStrong": "H5387a",
+      "dStrong": "H5387A =",
+      "from": "nâώîy' nâώi'",
+      "to": "nâśîy' nâśi'"
+    },
+    {
+      "id": 18254,
+      "eStrong": "H5387b",
+      "dStrong": "H5387B =",
+      "from": "nâώîy' nâώi'",
+      "to": "nâśîy' nâśi'"
+    },
+    {
+      "id": 18268,
+      "eStrong": "H5400",
+      "dStrong": "H5400 =",
+      "from": "nâώaq",
+      "to": "nâśaq"
+    },
+    {
+      "id": 18352,
+      "eStrong": "H5443",
+      "dStrong": "H5443 =",
+      "from": "sabbekâ' ώabbekâ'",
+      "to": "sabbekâ' śabbekâ'"
+    },
+    {
+      "id": 18392,
+      "eStrong": "H5483a",
+      "dStrong": "H5483A =",
+      "from": "sûs sûs",
+      "to": "sûs"
+    },
+    {
+      "id": 18393,
+      "eStrong": "H5483b",
+      "dStrong": "H5483B =",
+      "from": "sûs sûs",
+      "to": "sûs"
+    },
+    {
+      "id": 18394,
+      "eStrong": "H5483b",
+      "dStrong": "H5483M =",
+      "from": "sûs sûs",
+      "to": "sûs"
+    },
+    {
+      "id": 18406,
+      "eStrong": "H5493",
+      "dStrong": "H5493G =",
+      "from": "sûr ώûr",
+      "to": "sûr śûr"
+    },
+    {
+      "id": 18407,
+      "eStrong": "H5493",
+      "dStrong": "H5493H = a Meaning of",
+      "from": "sûr ώûr",
+      "to": "sûr śûr"
+    },
+    {
+      "id": 18408,
+      "eStrong": "H5493",
+      "dStrong": "H5493I = a Meaning of",
+      "from": "sûr ώûr",
+      "to": "sûr śûr"
+    },
+    {
+      "id": 18426,
+      "eStrong": "H5511",
+      "dStrong": "H5511 =",
+      "from": "sîychôn sîychôn",
+      "to": "sîychôn"
+    },
+    {
+      "id": 18442,
+      "eStrong": "H5523",
+      "dStrong": "H5523G =",
+      "from": "sûkkôth sûkkôth",
+      "to": "sûkkôth"
+    },
+    {
+      "id": 18443,
+      "eStrong": "H5523",
+      "dStrong": "H5523H =",
+      "from": "sûkkôth sûkkôth",
+      "to": "sûkkôth"
+    },
+    {
+      "id": 18446,
+      "eStrong": "H5526a",
+      "dStrong": "H5526A =",
+      "from": "sâkak ώâkak",
+      "to": "sâkak śâkak"
+    },
+    {
+      "id": 18447,
+      "eStrong": "H5526b",
+      "dStrong": "H5526B =",
+      "from": "sâkak ώâkak",
+      "to": "sâkak śâkak"
+    },
+    {
+      "id": 18448,
+      "eStrong": "H5526c",
+      "dStrong": "H5526C =",
+      "from": "sâkak ώâkak",
+      "to": "sâkak śâkak"
+    },
+    {
+      "id": 18449,
+      "eStrong": "H5526d",
+      "dStrong": "H5526D =",
+      "from": "sâkak ώâkak",
+      "to": "sâkak śâkak"
+    },
+    {
+      "id": 18450,
+      "eStrong": "H5526e",
+      "dStrong": "H5526E =",
+      "from": "sâkak ώâkak",
+      "to": "sâkak śâkak"
+    },
+    {
+      "id": 18451,
+      "eStrong": "H5526f",
+      "dStrong": "H5526F =",
+      "from": "sâkak ώâkak",
+      "to": "sâkak śâkak"
+    },
+    {
+      "id": 18456,
+      "eStrong": "H5531a",
+      "dStrong": "H5531A = a Spelling of",
+      "from": "siklûth ώiklûth",
+      "to": "siklûth śiklûth"
+    },
+    {
+      "id": 18457,
+      "eStrong": "H5531b",
+      "dStrong": "H5531B =",
+      "from": "siklûth ώiklûth",
+      "to": "siklûth śiklûth"
+    },
+    {
+      "id": 18483,
+      "eStrong": "H5550",
+      "dStrong": "H5550 =",
+      "from": "sôlelâh sôlelâh",
+      "to": "sôlelâh"
+    },
+    {
+      "id": 18509,
+      "eStrong": "H5574",
+      "dStrong": "H5574 =",
+      "from": "senû'âh senû'âh",
+      "to": "senû'âh"
+    },
+    {
+      "id": 18522,
+      "eStrong": "H5587a",
+      "dStrong": "H5587A =",
+      "from": "sâ‛iph ώâ‛iph",
+      "to": "sâ‛iph śâ‛iph"
+    },
+    {
+      "id": 18523,
+      "eStrong": "H5587b",
+      "dStrong": "H5587B =",
+      "from": "sâ‛iph ώâ‛iph",
+      "to": "sâ‛iph śâ‛iph"
+    },
+    {
+      "id": 18534,
+      "eStrong": "H5596a",
+      "dStrong": "H5596A =",
+      "from": "sâphach ώâphach",
+      "to": "sâphach śâphach"
+    },
+    {
+      "id": 18535,
+      "eStrong": "H5596b",
+      "dStrong": "H5596B =",
+      "from": "sâphach ώâphach",
+      "to": "sâphach śâphach"
+    },
+    {
+      "id": 18546,
+      "eStrong": "H5606a",
+      "dStrong": "H5606A =",
+      "from": "sâphaq ώâphaq",
+      "to": "sâphaq śâphaq"
+    },
+    {
+      "id": 18547,
+      "eStrong": "H5606b",
+      "dStrong": "H5606B =",
+      "from": "sâphaq ώâphaq",
+      "to": "sâphaq śâphaq"
+    },
+    {
+      "id": 18548,
+      "eStrong": "H5607a",
+      "dStrong": "H5607A =",
+      "from": "sêpheq ώepheq",
+      "to": "sêpheq śepheq"
+    },
+    {
+      "id": 18549,
+      "eStrong": "H5607b",
+      "dStrong": "H5607B =",
+      "from": "sêpheq ώepheq",
+      "to": "sêpheq śepheq"
+    },
+    {
+      "id": 18587,
+      "eStrong": "H5640a",
+      "dStrong": "H5640A =",
+      "from": "sâtham ώâtham",
+      "to": "sâtham śâtham"
+    },
+    {
+      "id": 18588,
+      "eStrong": "H5640b",
+      "dStrong": "H5640B =",
+      "from": "sâtham ώâtham",
+      "to": "sâtham śâtham"
+    },
+    {
+      "id": 18611,
+      "eStrong": "H5656",
+      "dStrong": "H5656G =",
+      "from": "‛ăbôdâh ‛ăbôdâh",
+      "to": "‛ăbôdâh"
+    },
+    {
+      "id": 18612,
+      "eStrong": "H5656",
+      "dStrong": "H5656H = a Meaning of",
+      "from": "‛ăbôdâh ‛ăbôdâh",
+      "to": "‛ăbôdâh"
+    },
+    {
+      "id": 18613,
+      "eStrong": "H5656",
+      "dStrong": "H5656I = a Meaning of",
+      "from": "‛ăbôdâh ‛ăbôdâh",
+      "to": "‛ăbôdâh"
+    },
+    {
+      "id": 18641,
+      "eStrong": "H5667",
+      "dStrong": "H5667 =",
+      "from": "‛ăbôţ ‛ăbôţ",
+      "to": "‛ăbôţ"
+    },
+    {
+      "id": 18642,
+      "eStrong": "H5668",
+      "dStrong": "H5668 =",
+      "from": "‛âbûr ‛âbûr",
+      "to": "‛âbûr"
+    },
+    {
+      "id": 18672,
+      "eStrong": "H5687",
+      "dStrong": "H5687 =",
+      "from": "‛âbôth ‛âbôth",
+      "to": "‛âbôth"
+    },
+    {
+      "id": 18681,
+      "eStrong": "H5696",
+      "dStrong": "H5696 =",
+      "from": "‛âgôl ‛âgôl",
+      "to": "‛âgôl"
+    },
+    {
+      "id": 18768,
+      "eStrong": "H5750",
+      "dStrong": "H5750 =",
+      "from": "‛ôd ‛ôd",
+      "to": "‛ôd"
+    },
+    {
+      "id": 18770,
+      "eStrong": "H5752",
+      "dStrong": "H5752G =",
+      "from": "‛ôdêd ‛ôdêd",
+      "to": "‛ôdêd"
+    },
+    {
+      "id": 18771,
+      "eStrong": "H5752",
+      "dStrong": "H5752H =",
+      "from": "‛ôdêd ‛ôdêd",
+      "to": "‛ôdêd"
+    },
+    {
+      "id": 18792,
+      "eStrong": "H5769",
+      "dStrong": "H5769G = a Meaning of",
+      "from": "‛ôlâm ‛ôlâm",
+      "to": "‛ôlâm"
+    },
+    {
+      "id": 18793,
+      "eStrong": "H5769",
+      "dStrong": "H5769H = a Name of",
+      "from": "‛ôlâm ‛ôlâm",
+      "to": "‛ôlâm"
+    },
+    {
+      "id": 18794,
+      "eStrong": "H5769",
+      "dStrong": "H5769I = a Meaning of",
+      "from": "‛ôlâm ‛ôlâm",
+      "to": "‛ôlâm"
+    },
+    {
+      "id": 18795,
+      "eStrong": "H5769",
+      "dStrong": "H5769J = in Hebrew of",
+      "from": "‛ôlâm ‛ôlâm",
+      "to": "‛ôlâm"
+    },
+    {
+      "id": 18797,
+      "eStrong": "H5771",
+      "dStrong": "H5771G =",
+      "from": "‛âvôn ‛âvôn",
+      "to": "‛âvôn"
+    },
+    {
+      "id": 18798,
+      "eStrong": "H5771",
+      "dStrong": "H5771H = a Meaning of",
+      "from": "‛âvôn ‛âvôn",
+      "to": "‛âvôn"
+    },
+    {
+      "id": 18799,
+      "eStrong": "H5771",
+      "dStrong": "H5771I = a Meaning of",
+      "from": "‛âvôn ‛âvôn",
+      "to": "‛âvôn"
+    },
+    {
+      "id": 18806,
+      "eStrong": "H5777",
+      "dStrong": "H5777 =",
+      "from": "‛ôphereth ‛ôphereth",
+      "to": "‛ôphereth"
+    },
+    {
+      "id": 18831,
+      "eStrong": "H5797",
+      "dStrong": "H5797 =",
+      "from": "‛ôz ‛ôz",
+      "to": "‛ôz"
+    },
+    {
+      "id": 18853,
+      "eStrong": "H5809",
+      "dStrong": "H5809G =",
+      "from": "‛azzûr ‛azzûr",
+      "to": "‛azzûr"
+    },
+    {
+      "id": 18854,
+      "eStrong": "H5809",
+      "dStrong": "H5809H =",
+      "from": "‛azzûr ‛azzûr",
+      "to": "‛azzûr"
+    },
+    {
+      "id": 18855,
+      "eStrong": "H5809",
+      "dStrong": "H5809I =",
+      "from": "‛azzûr ‛azzûr",
+      "to": "‛azzûr"
+    },
+    {
+      "id": 18961,
+      "eStrong": "H5852",
+      "dStrong": "H5852G =",
+      "from": "‛ăţârôth ‛ăţârôth",
+      "to": "‛ăţârôth"
+    },
+    {
+      "id": 18962,
+      "eStrong": "H5852",
+      "dStrong": "H5852H =",
+      "from": "‛ăţârôth ‛ăţârôth",
+      "to": "‛ăţârôth"
+    },
+    {
+      "id": 19070,
+      "eStrong": "H5923",
+      "dStrong": "H5923 =",
+      "from": "‛ôl ‛ôl",
+      "to": "‛ôl"
+    },
+    {
+      "id": 19083,
+      "eStrong": "H5930a",
+      "dStrong": "H5930A =",
+      "from": "‛ôlâh ‛ôlâh",
+      "to": "‛ôlâh"
+    },
+    {
+      "id": 19084,
+      "eStrong": "H5930b",
+      "dStrong": "H5930B =",
+      "from": "‛ôlâh ‛ôlâh",
+      "to": "‛ôlâh"
+    },
+    {
+      "id": 19155,
+      "eStrong": "H5982",
+      "dStrong": "H5982G =",
+      "from": "‛ammûd ‛ammûd",
+      "to": "‛ammûd"
+    },
+    {
+      "id": 19156,
+      "eStrong": "H5982",
+      "dStrong": "H5982H = a Part of",
+      "from": "‛ammûd ‛ammûd",
+      "to": "‛ammûd"
+    },
+    {
+      "id": 19192,
+      "eStrong": "H6006",
+      "dStrong": "H6006 =",
+      "from": "‛âmas ‛âmaώ",
+      "to": "‛âmas ‛âmaś"
+    },
+    {
+      "id": 19224,
+      "eStrong": "H6021",
+      "dStrong": "H6021G =",
+      "from": "‛ămâώâ'",
+      "to": "‛ămâśâ'"
+    },
+    {
+      "id": 19225,
+      "eStrong": "H6021",
+      "dStrong": "H6021H =",
+      "from": "‛ămâώâ'",
+      "to": "‛ămâśâ'"
+    },
+    {
+      "id": 19226,
+      "eStrong": "H6022",
+      "dStrong": "H6022G =",
+      "from": "‛ămâώay",
+      "to": "‛ămâśay"
+    },
+    {
+      "id": 19227,
+      "eStrong": "H6022",
+      "dStrong": "H6022H =",
+      "from": "‛ămâώay",
+      "to": "‛ămâśay"
+    },
+    {
+      "id": 19228,
+      "eStrong": "H6022",
+      "dStrong": "H6022I =",
+      "from": "‛ămâώay",
+      "to": "‛ămâśay"
+    },
+    {
+      "id": 19229,
+      "eStrong": "H6022",
+      "dStrong": "H6022J =",
+      "from": "‛ămâώay",
+      "to": "‛ămâśay"
+    },
+    {
+      "id": 19335,
+      "eStrong": "H6099",
+      "dStrong": "H6099 =",
+      "from": "‛âtsûm ‛âtsûm",
+      "to": "‛âtsûm"
+    },
+    {
+      "id": 19350,
+      "eStrong": "H6111",
+      "dStrong": "H6111 =",
+      "from": "‛atsmôn ‛atsmôn",
+      "to": "‛atsmôn"
+    },
+    {
+      "id": 19384,
+      "eStrong": "H6139",
+      "dStrong": "H6139 = a Spelling of",
+      "from": "‛eqrônîy ‛eqrônîy",
+      "to": "‛eqrônîy"
+    },
+    {
+      "id": 19408,
+      "eStrong": "H6158",
+      "dStrong": "H6158 =",
+      "from": "‛ôrêb ‛ôrêb",
+      "to": "‛ôrêb"
+    },
+    {
+      "id": 19409,
+      "eStrong": "H6159",
+      "dStrong": "H6159 =",
+      "from": "‛ôrêb ‛ôrêb",
+      "to": "‛ôrêb"
+    },
+    {
+      "id": 19427,
+      "eStrong": "H6170",
+      "dStrong": "H6170 =",
+      "from": "‛ărûgâh ‛ărûgâh",
+      "to": "‛ărûgâh"
+    },
+    {
+      "id": 19431,
+      "eStrong": "H6174",
+      "dStrong": "H6174 =",
+      "from": "‛ârôm ‛ârôm",
+      "to": "‛ârôm"
+    },
+    {
+      "id": 19471,
+      "eStrong": "H6210",
+      "dStrong": "H6210 =",
+      "from": "‛ereώ",
+      "to": "‛ereś"
+    },
+    {
+      "id": 19474,
+      "eStrong": "H6212",
+      "dStrong": "H6212 =",
+      "from": "‛eώeb",
+      "to": "‛eśeb"
+    },
+    {
+      "id": 19475,
+      "eStrong": "H6213a",
+      "dStrong": "H6213A = a Meaning of",
+      "from": "‛âώâh",
+      "to": "‛âśâh"
+    },
+    {
+      "id": 19476,
+      "eStrong": "H6213b",
+      "dStrong": "H6213B =",
+      "from": "‛âώâh",
+      "to": "‛âśâh"
+    },
+    {
+      "id": 19477,
+      "eStrong": "H6213a",
+      "dStrong": "H6213H =",
+      "from": "‛âώâh",
+      "to": "‛âśâh"
+    },
+    {
+      "id": 19478,
+      "eStrong": "H6213a",
+      "dStrong": "H6213I = a Meaning of",
+      "from": "‛âώâh",
+      "to": "‛âśâh"
+    },
+    {
+      "id": 19479,
+      "eStrong": "H6213a",
+      "dStrong": "H6213J = a Meaning of",
+      "from": "‛âώâh",
+      "to": "‛âśâh"
+    },
+    {
+      "id": 19480,
+      "eStrong": "H6214",
+      "dStrong": "H6214G =",
+      "from": "‛ăώâh'êl",
+      "to": "‛ăśâh'êl"
+    },
+    {
+      "id": 19481,
+      "eStrong": "H6214",
+      "dStrong": "H6214H =",
+      "from": "‛ăώâh'êl",
+      "to": "‛ăśâh'êl"
+    },
+    {
+      "id": 19482,
+      "eStrong": "H6214",
+      "dStrong": "H6214I =",
+      "from": "‛ăώâh'êl",
+      "to": "‛ăśâh'êl"
+    },
+    {
+      "id": 19483,
+      "eStrong": "H6214",
+      "dStrong": "H6214J =",
+      "from": "‛ăώâh'êl",
+      "to": "‛ăśâh'êl"
+    },
+    {
+      "id": 19484,
+      "eStrong": "H6215",
+      "dStrong": "H6215G =",
+      "from": "‛êώâv",
+      "to": "‛êśâv"
+    },
+    {
+      "id": 19485,
+      "eStrong": "H6215",
+      "dStrong": "H6215H = a group of",
+      "from": "‛êώâv",
+      "to": "‛êśâv"
+    },
+    {
+      "id": 19486,
+      "eStrong": "H6215",
+      "dStrong": "H6215I =",
+      "from": "‛êώâv",
+      "to": "‛êśâv"
+    },
+    {
+      "id": 19488,
+      "eStrong": "H6217",
+      "dStrong": "H6217 =",
+      "from": "‛âshûq ‛âshûq",
+      "to": "‛âshûq"
+    },
+    {
+      "id": 19489,
+      "eStrong": "H6218",
+      "dStrong": "H6218 =",
+      "from": "‛âώôr ‛âώôr",
+      "to": "‛âśôr"
+    },
+    {
+      "id": 19492,
+      "eStrong": "H6221",
+      "dStrong": "H6221 =",
+      "from": "‛ăώîy'êl",
+      "to": "‛ăśîy'êl"
+    },
+    {
+      "id": 19493,
+      "eStrong": "H6222",
+      "dStrong": "H6222G =",
+      "from": "‛ăώâyâh",
+      "to": "‛ăśâyâh"
+    },
+    {
+      "id": 19494,
+      "eStrong": "H6222",
+      "dStrong": "H6222H =",
+      "from": "‛ăώâyâh",
+      "to": "‛ăśâyâh"
+    },
+    {
+      "id": 19495,
+      "eStrong": "H6222",
+      "dStrong": "H6222I =",
+      "from": "‛ăώâyâh",
+      "to": "‛ăśâyâh"
+    },
+    {
+      "id": 19496,
+      "eStrong": "H6222",
+      "dStrong": "H6222J =",
+      "from": "‛ăώâyâh",
+      "to": "‛ăśâyâh"
+    },
+    {
+      "id": 19497,
+      "eStrong": "H6222",
+      "dStrong": "H6222K =",
+      "from": "‛ăώâyâh",
+      "to": "‛ăśâyâh"
+    },
+    {
+      "id": 19499,
+      "eStrong": "H6224",
+      "dStrong": "H6224 =",
+      "from": "‛ăώîyrîy",
+      "to": "‛ăśîyrîy"
+    },
+    {
+      "id": 19504,
+      "eStrong": "H6229",
+      "dStrong": "H6229 =",
+      "from": "‛âώaq",
+      "to": "‛âśaq"
+    },
+    {
+      "id": 19505,
+      "eStrong": "H6230",
+      "dStrong": "H6230 =",
+      "from": "‛êώeq",
+      "to": "‛êśeq"
+    },
+    {
+      "id": 19510,
+      "eStrong": "H6235",
+      "dStrong": "H6235 =",
+      "from": "‛eώer ‛ăώârâh",
+      "to": "‛eśer ‛ăśârâh"
+    },
+    {
+      "id": 19511,
+      "eStrong": "H6236",
+      "dStrong": "H6236 = in Aramaic of",
+      "from": "‛ăώar ‛ăώrâh",
+      "to": "‛ăśar ‛ăśrâh"
+    },
+    {
+      "id": 19512,
+      "eStrong": "H6237",
+      "dStrong": "H6237 =",
+      "from": "‛âώar",
+      "to": "‛âśar"
+    },
+    {
+      "id": 19515,
+      "eStrong": "H6240",
+      "dStrong": "H6240 =",
+      "from": "‛âώâr",
+      "to": "‛âśâr"
+    },
+    {
+      "id": 19516,
+      "eStrong": "H6241",
+      "dStrong": "H6241 =",
+      "from": "‛iώώârôn ‛iώώârôn",
+      "to": "‛iśśârôn"
+    },
+    {
+      "id": 19517,
+      "eStrong": "H6242",
+      "dStrong": "H6242 =",
+      "from": "‛eώrîym",
+      "to": "‛eśrîym"
+    },
+    {
+      "id": 19518,
+      "eStrong": "H6243",
+      "dStrong": "H6243 = in Aramaic of",
+      "from": "‛eώrîyn",
+      "to": "‛eśrîyn"
+    },
+    {
+      "id": 19528,
+      "eStrong": "H6252",
+      "dStrong": "H6252G =",
+      "from": "‛ashtârôth ‛ashtârôth",
+      "to": "‛ashtârôth"
+    },
+    {
+      "id": 19529,
+      "eStrong": "H6252",
+      "dStrong": "H6252H =",
+      "from": "‛ashtârôth ‛ashtârôth",
+      "to": "‛ashtârôth"
+    },
+    {
+      "id": 19537,
+      "eStrong": "H6260",
+      "dStrong": "H6260 =",
+      "from": "‛attûd ‛attûd",
+      "to": "‛attûd"
+    },
+    {
+      "id": 19577,
+      "eStrong": "H6292",
+      "dStrong": "H6292 =",
+      "from": "piggûl piggûl",
+      "to": "piggûl"
+    },
+    {
+      "id": 19589,
+      "eStrong": "H6304",
+      "dStrong": "H6304 =",
+      "from": "pedûth pedûth",
+      "to": "pedûth"
+    },
+    {
+      "id": 19597,
+      "eStrong": "H6306a",
+      "dStrong": "H6306A = a Spelling of",
+      "from": "pidyôm pidyôm pidyôn pidyôn",
+      "to": "pidyôm pidyôn"
+    },
+    {
+      "id": 19598,
+      "eStrong": "H6306b",
+      "dStrong": "H6306B =",
+      "from": "pidyôm pidyôm pidyôn pidyôn",
+      "to": "pidyôm pidyôn"
+    },
+    {
+      "id": 19831,
+      "eStrong": "H6490",
+      "dStrong": "H6490 =",
+      "from": "piqqûd piqqûd",
+      "to": "piqqûd"
+    },
+    {
+      "id": 19912,
+      "eStrong": "H6553",
+      "dStrong": "H6553 = a Spelling of",
+      "from": "pir‛âthônîy pir‛âthônîy",
+      "to": "pir‛âthônîy"
+    },
+    {
+      "id": 19927,
+      "eStrong": "H6566",
+      "dStrong": "H6566 =",
+      "from": "pâraώ",
+      "to": "pâraś"
+    },
+    {
+      "id": 19945,
+      "eStrong": "H6581",
+      "dStrong": "H6581 =",
+      "from": "pâώâh",
+      "to": "pâśâh"
+    },
+    {
+      "id": 19953,
+      "eStrong": "H6585",
+      "dStrong": "H6585 =",
+      "from": "pâώa‛",
+      "to": "pâśa‛"
+    },
+    {
+      "id": 19955,
+      "eStrong": "H6587",
+      "dStrong": "H6587 =",
+      "from": "peώa‛",
+      "to": "peśa‛"
+    },
+    {
+      "id": 19957,
+      "eStrong": "H6589",
+      "dStrong": "H6589 =",
+      "from": "pâώaq",
+      "to": "pâśaq"
+    },
+    {
+      "id": 19966,
+      "eStrong": "H6597",
+      "dStrong": "H6597 =",
+      "from": "pith'ôm pith'ôm",
+      "to": "pith'ôm"
+    },
+    {
+      "id": 19973,
+      "eStrong": "H6603",
+      "dStrong": "H6603 =",
+      "from": "pittûach pittûach",
+      "to": "pittûach"
+    },
+    {
+      "id": 19998,
+      "eStrong": "H6623",
+      "dStrong": "H6623 =",
+      "from": "pithrôn pithrôn",
+      "to": "pithrôn"
+    },
+    {
+      "id": 20072,
+      "eStrong": "H6674",
+      "dStrong": "H6674 =",
+      "from": "tsô' tsô'",
+      "to": "tsô'"
+    },
+    {
+      "id": 20073,
+      "eStrong": "H6675",
+      "dStrong": "H6675 =",
+      "from": "tsô'âh tsô'âh",
+      "to": "tsô'âh"
+    },
+    {
+      "id": 20086,
+      "eStrong": "H6685",
+      "dStrong": "H6685 =",
+      "from": "tsôm tsôm",
+      "to": "tsôm"
+    },
+    {
+      "id": 20103,
+      "eStrong": "H6697",
+      "dStrong": "H6697G = a Part of",
+      "from": "tsûr tsûr",
+      "to": "tsûr"
+    },
+    {
+      "id": 20104,
+      "eStrong": "H6697",
+      "dStrong": "H6697H =",
+      "from": "tsûr tsûr",
+      "to": "tsûr"
+    },
+    {
+      "id": 20132,
+      "eStrong": "H6721",
+      "dStrong": "H6721G =",
+      "from": "tsîydôn tsîydôn",
+      "to": "tsîydôn"
+    },
+    {
+      "id": 20133,
+      "eStrong": "H6721",
+      "dStrong": "H6721H =",
+      "from": "tsîydôn tsîydôn",
+      "to": "tsîydôn"
+    },
+    {
+      "id": 20134,
+      "eStrong": "H6721",
+      "dStrong": "H6721I = a Name of",
+      "from": "tsîydôn tsîydôn",
+      "to": "tsîydôn"
+    },
+    {
+      "id": 20173,
+      "eStrong": "H6755",
+      "dStrong": "H6755 = in Aramaic of",
+      "from": "tselem tselem",
+      "to": "tselem"
+    },
+    {
+      "id": 20256,
+      "eStrong": "H6828",
+      "dStrong": "H6828G =",
+      "from": "tsâphôn tsâphôn",
+      "to": "tsâphôn"
+    },
+    {
+      "id": 20257,
+      "eStrong": "H6828",
+      "dStrong": "H6828H =",
+      "from": "tsâphôn tsâphôn",
+      "to": "tsâphôn"
+    },
+    {
+      "id": 20262,
+      "eStrong": "H6833",
+      "dStrong": "H6833 =",
+      "from": "tsippôr tsippôr",
+      "to": "tsippôr"
+    },
+    {
+      "id": 20301,
+      "eStrong": "H6865",
+      "dStrong": "H6865 =",
+      "from": "tsôr tsôr",
+      "to": "tsôr"
+    },
+    {
+      "id": 20312,
+      "eStrong": "H6872a",
+      "dStrong": "H6872A =",
+      "from": "tserôr tserôr",
+      "to": "tserôr"
+    },
+    {
+      "id": 20313,
+      "eStrong": "H6872b",
+      "dStrong": "H6872B =",
+      "from": "tserôr tserôr",
+      "to": "tserôr"
+    },
+    {
+      "id": 20314,
+      "eStrong": "H6872c",
+      "dStrong": "H6872C =",
+      "from": "tserôr tserôr",
+      "to": "tserôr"
+    },
+    {
+      "id": 20347,
+      "eStrong": "H6900",
+      "dStrong": "H6900 =",
+      "from": "qebûrâh qebûrâh",
+      "to": "qebûrâh"
+    },
+    {
+      "id": 20367,
+      "eStrong": "H6918",
+      "dStrong": "H6918G =",
+      "from": "qâdôsh qâdôsh",
+      "to": "qâdôsh"
+    },
+    {
+      "id": 20368,
+      "eStrong": "H6918",
+      "dStrong": "H6918H = a Meaning of",
+      "from": "qâdôsh qâdôsh",
+      "to": "qâdôsh"
+    },
+    {
+      "id": 20385,
+      "eStrong": "H6931",
+      "dStrong": "H6931G =",
+      "from": "qadmônîy qadmônîy",
+      "to": "qadmônîy"
+    },
+    {
+      "id": 20386,
+      "eStrong": "H6931",
+      "dStrong": "H6931H = a Meaning of",
+      "from": "qadmônîy qadmônîy",
+      "to": "qadmônîy"
+    },
+    {
+      "id": 20431,
+      "eStrong": "H6963a",
+      "dStrong": "H6963A = a Meaning of",
+      "from": "qôl qôl",
+      "to": "qôl"
+    },
+    {
+      "id": 20432,
+      "eStrong": "H6963b",
+      "dStrong": "H6963B =",
+      "from": "qôl qôl",
+      "to": "qôl"
+    },
+    {
+      "id": 20433,
+      "eStrong": "H6963a",
+      "dStrong": "H6963H =",
+      "from": "qôl qôl",
+      "to": "qôl"
+    },
+    {
+      "id": 20434,
+      "eStrong": "H6963a",
+      "dStrong": "H6963I = a Meaning of",
+      "from": "qôl qôl",
+      "to": "qôl"
+    },
+    {
+      "id": 20435,
+      "eStrong": "H6963a",
+      "dStrong": "H6963J = a Meaning of",
+      "from": "qôl qôl",
+      "to": "qôl"
+    },
+    {
+      "id": 20436,
+      "eStrong": "H6963a",
+      "dStrong": "H6963K = a Meaning of",
+      "from": "qôl qôl",
+      "to": "qôl"
+    },
+    {
+      "id": 20437,
+      "eStrong": "H6963a",
+      "dStrong": "H6963L = a Meaning of",
+      "from": "qôl qôl",
+      "to": "qôl"
+    },
+    {
+      "id": 20453,
+      "eStrong": "H6971",
+      "dStrong": "H6971 =",
+      "from": "qôph qôph",
+      "to": "qôph"
+    },
+    {
+      "id": 20457,
+      "eStrong": "H6975",
+      "dStrong": "H6975 =",
+      "from": "qôts qôts",
+      "to": "qôts"
+    },
+    {
+      "id": 20468,
+      "eStrong": "H6981",
+      "dStrong": "H6981G =",
+      "from": "qôrê' qôrê'",
+      "to": "qôrê'"
+    },
+    {
+      "id": 20469,
+      "eStrong": "H6981",
+      "dStrong": "H6981H =",
+      "from": "qôrê' qôrê'",
+      "to": "qôrê'"
+    },
+    {
+      "id": 20470,
+      "eStrong": "H6982",
+      "dStrong": "H6982 =",
+      "from": "qôrâh qôrâh",
+      "to": "qôrâh"
+    },
+    {
+      "id": 20502,
+      "eStrong": "H7008",
+      "dStrong": "H7008 =",
+      "from": "qîyţôr qîyţôr",
+      "to": "qîyţôr"
+    },
+    {
+      "id": 20522,
+      "eStrong": "H7025",
+      "dStrong": "H7025 = a Name of",
+      "from": "qîyr chereώ qîyr chăreώeth",
+      "to": "qîyr chereś qîyr chăreśeth"
+    },
+    {
+      "id": 20608,
+      "eStrong": "H7090",
+      "dStrong": "H7090 =",
+      "from": "qippôd qippôd",
+      "to": "qippôd"
+    },
+    {
+      "id": 20670,
+      "eStrong": "H7138",
+      "dStrong": "H7138 =",
+      "from": "qârôb qârôb",
+      "to": "qârôb"
+    },
+    {
+      "id": 20724,
+      "eStrong": "H7184",
+      "dStrong": "H7184 =",
+      "from": "qâώâh qaώvâh",
+      "to": "qâśâh qaśvâh"
+    },
+    {
+      "id": 20727,
+      "eStrong": "H7187",
+      "dStrong": "H7187 = in Aramaic of",
+      "from": "qeshôţ qeshôţ",
+      "to": "qeshôţ"
+    },
+    {
+      "id": 20733,
+      "eStrong": "H7192",
+      "dStrong": "H7192 =",
+      "from": "qeώîyţâh",
+      "to": "qeśîyţâh"
+    },
+    {
+      "id": 20734,
+      "eStrong": "H7193",
+      "dStrong": "H7193 =",
+      "from": "qaώqeώeth",
+      "to": "qaśqeśeth"
+    },
+    {
+      "id": 20768,
+      "eStrong": "H7216",
+      "dStrong": "H7216G = a Name of",
+      "from": "râ'môth râ'môth",
+      "to": "râ'môth"
+    },
+    {
+      "id": 20769,
+      "eStrong": "H7216",
+      "dStrong": "H7216H = a Spelling of",
+      "from": "râ'môth râ'môth",
+      "to": "râ'môth"
+    },
+    {
+      "id": 20782,
+      "eStrong": "H7223",
+      "dStrong": "H7223G =",
+      "from": "ri'shôn ri'shôn",
+      "to": "ri'shôn"
+    },
+    {
+      "id": 20783,
+      "eStrong": "H7223",
+      "dStrong": "H7223H = a Meaning of",
+      "from": "ri'shôn ri'shôn",
+      "to": "ri'shôn"
+    },
+    {
+      "id": 20784,
+      "eStrong": "H7223",
+      "dStrong": "H7223I = a Meaning of",
+      "from": "ri'shôn ri'shôn",
+      "to": "ri'shôn"
+    },
+    {
+      "id": 20888,
+      "eStrong": "H7312",
+      "dStrong": "H7312 =",
+      "from": "rûm rûm",
+      "to": "rûm"
+    },
+    {
+      "id": 20918,
+      "eStrong": "H7339",
+      "dStrong": "H7339 =",
+      "from": "rechôb rechôb",
+      "to": "rechôb"
+    },
+    {
+      "id": 20919,
+      "eStrong": "H7340",
+      "dStrong": "H7340G =",
+      "from": "rechôb rechôb",
+      "to": "rechôb"
+    },
+    {
+      "id": 20920,
+      "eStrong": "H7340",
+      "dStrong": "H7340H =",
+      "from": "rechôb rechôb",
+      "to": "rechôb"
+    },
+    {
+      "id": 20921,
+      "eStrong": "H7340",
+      "dStrong": "H7340I =",
+      "from": "rechôb rechôb",
+      "to": "rechôb"
+    },
+    {
+      "id": 20922,
+      "eStrong": "H7340",
+      "dStrong": "H7340J =",
+      "from": "rechôb rechôb",
+      "to": "rechôb"
+    },
+    {
+      "id": 20923,
+      "eStrong": "H7340",
+      "dStrong": "H7340K = a Name of",
+      "from": "rechôb rechôb",
+      "to": "rechôb"
+    },
+    {
+      "id": 20929,
+      "eStrong": "H7344",
+      "dStrong": "H7344G =",
+      "from": "rechôbôth rechôbôth",
+      "to": "rechôbôth"
+    },
+    {
+      "id": 20930,
+      "eStrong": "H7344",
+      "dStrong": "H7344H =",
+      "from": "rechôbôth rechôbôth",
+      "to": "rechôbôth"
+    },
+    {
+      "id": 20931,
+      "eStrong": "H7344",
+      "dStrong": "H7344I = a Name of",
+      "from": "rechôbôth rechôbôth",
+      "to": "rechôbôth"
+    },
+    {
+      "id": 20940,
+      "eStrong": "H7350",
+      "dStrong": "H7350 =",
+      "from": "râchôq râchôq",
+      "to": "râchôq"
+    },
+    {
+      "id": 20997,
+      "eStrong": "H7399",
+      "dStrong": "H7399 =",
+      "from": "rekûsh rekûsh",
+      "to": "rekûsh"
+    },
+    {
+      "id": 21021,
+      "eStrong": "H7416",
+      "dStrong": "H7416 =",
+      "from": "rimmôn rimmôn",
+      "to": "rimmôn"
+    },
+    {
+      "id": 21041,
+      "eStrong": "H7430",
+      "dStrong": "H7430 =",
+      "from": "râmaώ",
+      "to": "râmaś"
+    },
+    {
+      "id": 21042,
+      "eStrong": "H7431",
+      "dStrong": "H7431 =",
+      "from": "remeώ",
+      "to": "remeś"
+    },
+    {
+      "id": 21151,
+      "eStrong": "H7515",
+      "dStrong": "H7515 =",
+      "from": "râphaώ",
+      "to": "râphaś"
+    },
+    {
+      "id": 21158,
+      "eStrong": "H7522",
+      "dStrong": "H7522 =",
+      "from": "râtsôn râtsôn",
+      "to": "râtsôn"
+    },
+    {
+      "id": 21226,
+      "eStrong": "H7585",
+      "dStrong": "H7585 =",
+      "from": "she'ôl she'ôl",
+      "to": "she'ôl"
+    },
+    {
+      "id": 21249,
+      "eStrong": "H7603",
+      "dStrong": "H7603 =",
+      "from": "ώe'ôr",
+      "to": "śe'ôr"
+    },
+    {
+      "id": 21259,
+      "eStrong": "H7613",
+      "dStrong": "H7613 =",
+      "from": "ώe'êth",
+      "to": "śe'êth"
+    },
+    {
+      "id": 21288,
+      "eStrong": "H7631",
+      "dStrong": "H7631 = in Aramaic of",
+      "from": "ώebîyb",
+      "to": "śebîyb"
+    },
+    {
+      "id": 21295,
+      "eStrong": "H7638",
+      "dStrong": "H7638 = a Spelling of",
+      "from": "ώâbâk",
+      "to": "śâbâk"
+    },
+    {
+      "id": 21296,
+      "eStrong": "H7639",
+      "dStrong": "H7639 =",
+      "from": "ώebâkâh",
+      "to": "śebâkâh"
+    },
+    {
+      "id": 21303,
+      "eStrong": "H7643",
+      "dStrong": "H7643G =",
+      "from": "ώebâm ώibmâh",
+      "to": "śebâm śibmâh"
+    },
+    {
+      "id": 21304,
+      "eStrong": "H7643",
+      "dStrong": "H7643H =",
+      "from": "ώebâm ώibmâh",
+      "to": "śebâm śibmâh"
+    },
+    {
+      "id": 21310,
+      "eStrong": "H7646",
+      "dStrong": "H7646 =",
+      "from": "ώâba‛ ώâbêa‛",
+      "to": "śâba‛ śâbêa‛"
+    },
+    {
+      "id": 21311,
+      "eStrong": "H7647",
+      "dStrong": "H7647 =",
+      "from": "ώâbâ‛",
+      "to": "śâbâ‛"
+    },
+    {
+      "id": 21312,
+      "eStrong": "H7648",
+      "dStrong": "H7648 =",
+      "from": "ώôba‛",
+      "to": "śôba‛"
+    },
+    {
+      "id": 21313,
+      "eStrong": "H7649",
+      "dStrong": "H7649 =",
+      "from": "ώâbêa‛",
+      "to": "śâbêa‛"
+    },
+    {
+      "id": 21319,
+      "eStrong": "H7653",
+      "dStrong": "H7653 =",
+      "from": "ώib‛âh",
+      "to": "śib‛âh"
+    },
+    {
+      "id": 21320,
+      "eStrong": "H7654",
+      "dStrong": "H7654 =",
+      "from": "ώob‛âh",
+      "to": "śob‛âh"
+    },
+    {
+      "id": 21329,
+      "eStrong": "H7663a",
+      "dStrong": "H7663A =",
+      "from": "ώâbar shâbar",
+      "to": "śâbar shâbar"
+    },
+    {
+      "id": 21330,
+      "eStrong": "H7663b",
+      "dStrong": "H7663B =",
+      "from": "ώâbar shâbar",
+      "to": "śâbar shâbar"
+    },
+    {
+      "id": 21331,
+      "eStrong": "H7664",
+      "dStrong": "H7664 =",
+      "from": "ώêber",
+      "to": "śêber"
+    },
+    {
+      "id": 21349,
+      "eStrong": "H7679",
+      "dStrong": "H7679 =",
+      "from": "ώâgâ'",
+      "to": "śâgâ'"
+    },
+    {
+      "id": 21350,
+      "eStrong": "H7680",
+      "dStrong": "H7680 = in Aramaic of",
+      "from": "ώegâ'",
+      "to": "śegâ'"
+    },
+    {
+      "id": 21352,
+      "eStrong": "H7682",
+      "dStrong": "H7682 =",
+      "from": "ώâgab",
+      "to": "śâgab"
+    },
+    {
+      "id": 21355,
+      "eStrong": "H7685a",
+      "dStrong": "H7685A =",
+      "from": "ώâgâh",
+      "to": "śâgâh"
+    },
+    {
+      "id": 21356,
+      "eStrong": "H7685b",
+      "dStrong": "H7685B =",
+      "from": "ώâgâh",
+      "to": "śâgâh"
+    },
+    {
+      "id": 21358,
+      "eStrong": "H7687",
+      "dStrong": "H7687G =",
+      "from": "ώegûb",
+      "to": "śegûb"
+    },
+    {
+      "id": 21359,
+      "eStrong": "H7687",
+      "dStrong": "H7687H =",
+      "from": "ώegûb",
+      "to": "śegûb"
+    },
+    {
+      "id": 21361,
+      "eStrong": "H7689",
+      "dStrong": "H7689 =",
+      "from": "ώaggîy'",
+      "to": "śaggîy'"
+    },
+    {
+      "id": 21362,
+      "eStrong": "H7690",
+      "dStrong": "H7690 = in Aramaic of",
+      "from": "ώaggîy'",
+      "to": "śaggîy'"
+    },
+    {
+      "id": 21375,
+      "eStrong": "H7701",
+      "dStrong": "H7701 =",
+      "from": "shôd shôd",
+      "to": "shôd"
+    },
+    {
+      "id": 21376,
+      "eStrong": "H7702",
+      "dStrong": "H7702 =",
+      "from": "ώâdad",
+      "to": "śâdad"
+    },
+    {
+      "id": 21378,
+      "eStrong": "H7704a",
+      "dStrong": "H7704A = a Spelling of",
+      "from": "ώâdeh ώâday",
+      "to": "śâdeh śâday"
+    },
+    {
+      "id": 21379,
+      "eStrong": "H7704b",
+      "dStrong": "H7704B =",
+      "from": "ώâdeh ώâday",
+      "to": "śâdeh śâday"
+    },
+    {
+      "id": 21380,
+      "eStrong": "H7704b",
+      "dStrong": "H7704G = a Meaning of",
+      "from": "ώâdeh ώâday",
+      "to": "śâdeh śâday"
+    },
+    {
+      "id": 21381,
+      "eStrong": "H7704b",
+      "dStrong": "H7704H = a Part of",
+      "from": "ώâdeh ώâday",
+      "to": "śâdeh śâday"
+    },
+    {
+      "id": 21382,
+      "eStrong": "H7704b",
+      "dStrong": "H7704I = a Meaning of",
+      "from": "ώâdeh ώâday",
+      "to": "śâdeh śâday"
+    },
+    {
+      "id": 21383,
+      "eStrong": "H7704a",
+      "dStrong": "H7704M = a Spelling of",
+      "from": "ώâdeh ώâday",
+      "to": "śâdeh śâday"
+    },
+    {
+      "id": 21387,
+      "eStrong": "H7708",
+      "dStrong": "H7708 =",
+      "from": "ώiddîym",
+      "to": "śiddîym"
+    },
+    {
+      "id": 21393,
+      "eStrong": "H7713",
+      "dStrong": "H7713 =",
+      "from": "ώedêrâh",
+      "to": "śedêrâh"
+    },
+    {
+      "id": 21396,
+      "eStrong": "H7716",
+      "dStrong": "H7716 =",
+      "from": "ώeh ώêy",
+      "to": "śeh śêy"
+    },
+    {
+      "id": 21397,
+      "eStrong": "H7717",
+      "dStrong": "H7717 =",
+      "from": "ώâhêd",
+      "to": "śâhêd"
+    },
+    {
+      "id": 21400,
+      "eStrong": "H7720",
+      "dStrong": "H7720 =",
+      "from": "ώahărôn",
+      "to": "śahărôn"
+    },
+    {
+      "id": 21401,
+      "eStrong": "H7721",
+      "dStrong": "H7721 = a form of",
+      "from": "ώô'",
+      "to": "śô'"
+    },
+    {
+      "id": 21422,
+      "eStrong": "H7730",
+      "dStrong": "H7730 =",
+      "from": "ώôbek",
+      "to": "śôbek"
+    },
+    {
+      "id": 21427,
+      "eStrong": "H7734",
+      "dStrong": "H7734 = a Spelling of",
+      "from": "ώûg",
+      "to": "śûg"
+    },
+    {
+      "id": 21428,
+      "eStrong": "H7735",
+      "dStrong": "H7735 =",
+      "from": "ώûg",
+      "to": "śûg"
+    },
+    {
+      "id": 21437,
+      "eStrong": "H7742",
+      "dStrong": "H7742 =",
+      "from": "ώûach",
+      "to": "śûach"
+    },
+    {
+      "id": 21445,
+      "eStrong": "H7750",
+      "dStrong": "H7750 =",
+      "from": "ώûţ sûţ",
+      "to": "śûţ sûţ"
+    },
+    {
+      "id": 21449,
+      "eStrong": "H7753",
+      "dStrong": "H7753 =",
+      "from": "ώûk",
+      "to": "śûk"
+    },
+    {
+      "id": 21450,
+      "eStrong": "H7754a",
+      "dStrong": "H7754A =",
+      "from": "ώôk ώôkâh",
+      "to": "śôk śôkâh"
+    },
+    {
+      "id": 21451,
+      "eStrong": "H7754b",
+      "dStrong": "H7754B = a Spelling of",
+      "from": "ώôk ώôkâh",
+      "to": "śôk śôkâh"
+    },
+    {
+      "id": 21452,
+      "eStrong": "H7755",
+      "dStrong": "H7755G =",
+      "from": "ώôkôh ώôkôh ώôkô",
+      "to": "śôkôh śôkôh śôkô"
+    },
+    {
+      "id": 21453,
+      "eStrong": "H7755",
+      "dStrong": "H7755H =",
+      "from": "ώôkôh ώôkôh ώôkô",
+      "to": "śôkôh śôkôh śôkô"
+    },
+    {
+      "id": 21454,
+      "eStrong": "H7755",
+      "dStrong": "H7755I =",
+      "from": "ώôkôh ώôkôh ώôkô",
+      "to": "śôkôh śôkôh śôkô"
+    },
+    {
+      "id": 21455,
+      "eStrong": "H7756",
+      "dStrong": "H7756 =",
+      "from": "ώûkâthîy",
+      "to": "śûkâthîy"
+    },
+    {
+      "id": 21459,
+      "eStrong": "H7760a",
+      "dStrong": "H7760A =",
+      "from": "ώûm ώîym",
+      "to": "śûm śîym"
+    },
+    {
+      "id": 21460,
+      "eStrong": "H7760b",
+      "dStrong": "H7760B =",
+      "from": "ώûm ώîym",
+      "to": "śûm śîym"
+    },
+    {
+      "id": 21461,
+      "eStrong": "H7760a",
+      "dStrong": "H7760H = a Meaning of",
+      "from": "ώûm ώîym",
+      "to": "śûm śîym"
+    },
+    {
+      "id": 21462,
+      "eStrong": "H7760a",
+      "dStrong": "H7760I = a Meaning of",
+      "from": "ώûm ώîym",
+      "to": "śûm śîym"
+    },
+    {
+      "id": 21463,
+      "eStrong": "H7760a",
+      "dStrong": "H7760J = a Meaning of",
+      "from": "ώûm ώîym",
+      "to": "śûm śîym"
+    },
+    {
+      "id": 21464,
+      "eStrong": "H7760a",
+      "dStrong": "H7760K = a Meaning of",
+      "from": "ώûm ώîym",
+      "to": "śûm śîym"
+    },
+    {
+      "id": 21465,
+      "eStrong": "H7760a",
+      "dStrong": "H7760L = a Meaning of",
+      "from": "ώûm ώîym",
+      "to": "śûm śîym"
+    },
+    {
+      "id": 21466,
+      "eStrong": "H7760a",
+      "dStrong": "H7760M = a Meaning of",
+      "from": "ώûm ώîym",
+      "to": "śûm śîym"
+    },
+    {
+      "id": 21467,
+      "eStrong": "H7761",
+      "dStrong": "H7761G = in Aramaic of",
+      "from": "ώûm",
+      "to": "śûm"
+    },
+    {
+      "id": 21468,
+      "eStrong": "H7761",
+      "dStrong": "H7761H = in Aramaic of",
+      "from": "ώûm",
+      "to": "śûm"
+    },
+    {
+      "id": 21469,
+      "eStrong": "H7761",
+      "dStrong": "H7761I = in Aramaic of",
+      "from": "ώûm",
+      "to": "śûm"
+    },
+    {
+      "id": 21471,
+      "eStrong": "H7763",
+      "dStrong": "H7763G =",
+      "from": "shômêr shômêr",
+      "to": "shômêr"
+    },
+    {
+      "id": 21472,
+      "eStrong": "H7763",
+      "dStrong": "H7763H =",
+      "from": "shômêr shômêr",
+      "to": "shômêr"
+    },
+    {
+      "id": 21488,
+      "eStrong": "H7776",
+      "dStrong": "H7776 =",
+      "from": "shû‛âl shû‛âl",
+      "to": "shû‛âl"
+    },
+    {
+      "id": 21491,
+      "eStrong": "H7778",
+      "dStrong": "H7778 =",
+      "from": "shô‛êr shô‛êr",
+      "to": "shô‛êr"
+    },
+    {
+      "id": 21495,
+      "eStrong": "H7782",
+      "dStrong": "H7782 =",
+      "from": "shôphâr shôphâr",
+      "to": "shôphâr"
+    },
+    {
+      "id": 21499,
+      "eStrong": "H7786",
+      "dStrong": "H7786 = a Spelling of",
+      "from": "ώûr",
+      "to": "śûr"
+    },
+    {
+      "id": 21500,
+      "eStrong": "H7787",
+      "dStrong": "H7787 =",
+      "from": "ώûr",
+      "to": "śûr"
+    },
+    {
+      "id": 21509,
+      "eStrong": "H7795",
+      "dStrong": "H7795 =",
+      "from": "ώôrâh",
+      "to": "śôrâh"
+    },
+    {
+      "id": 21510,
+      "eStrong": "H7796",
+      "dStrong": "H7796 =",
+      "from": "ώôrêq",
+      "to": "śôrêq"
+    },
+    {
+      "id": 21511,
+      "eStrong": "H7797",
+      "dStrong": "H7797 =",
+      "from": "ώûώ ώîyώ",
+      "to": "śûś śîyś"
+    },
+    {
+      "id": 21523,
+      "eStrong": "H7808",
+      "dStrong": "H7808 =",
+      "from": "ώêach",
+      "to": "śêach"
+    },
+    {
+      "id": 21526,
+      "eStrong": "H7811",
+      "dStrong": "H7811 =",
+      "from": "ώâchâh",
+      "to": "śâchâh"
+    },
+    {
+      "id": 21528,
+      "eStrong": "H7813",
+      "dStrong": "H7813 =",
+      "from": "ώâchû",
+      "to": "śâchû"
+    },
+    {
+      "id": 21529,
+      "eStrong": "H7814",
+      "dStrong": "H7814 =",
+      "from": "ώechôq ώechôq",
+      "to": "śechôq"
+    },
+    {
+      "id": 21533,
+      "eStrong": "H7818",
+      "dStrong": "H7818 =",
+      "from": "ώâchaţ",
+      "to": "śâchaţ"
+    },
+    {
+      "id": 21548,
+      "eStrong": "H7832",
+      "dStrong": "H7832 =",
+      "from": "ώâchaq",
+      "to": "śâchaq"
+    },
+    {
+      "id": 21554,
+      "eStrong": "H7838",
+      "dStrong": "H7838 =",
+      "from": "shâchôr shâchôr",
+      "to": "shâchôr"
+    },
+    {
+      "id": 21563,
+      "eStrong": "H7846",
+      "dStrong": "H7846 =",
+      "from": "ώêţ sêţ",
+      "to": "śêţ sêţ"
+    },
+    {
+      "id": 21564,
+      "eStrong": "H7847",
+      "dStrong": "H7847 =",
+      "from": "ώâţâh",
+      "to": "śâţâh"
+    },
+    {
+      "id": 21570,
+      "eStrong": "H7852",
+      "dStrong": "H7852 =",
+      "from": "ώâţam",
+      "to": "śâţam"
+    },
+    {
+      "id": 21571,
+      "eStrong": "H7853",
+      "dStrong": "H7853 =",
+      "from": "ώâţan",
+      "to": "śâţan"
+    },
+    {
+      "id": 21572,
+      "eStrong": "H7854",
+      "dStrong": "H7854 =",
+      "from": "ώâţân",
+      "to": "śâţân"
+    },
+    {
+      "id": 21573,
+      "eStrong": "H7855",
+      "dStrong": "H7855 =",
+      "from": "ώiţnâh",
+      "to": "śiţnâh"
+    },
+    {
+      "id": 21574,
+      "eStrong": "H7856",
+      "dStrong": "H7856 =",
+      "from": "ώiţnâh",
+      "to": "śiţnâh"
+    },
+    {
+      "id": 21581,
+      "eStrong": "H7863",
+      "dStrong": "H7863 =",
+      "from": "ώîy'",
+      "to": "śîy'"
+    },
+    {
+      "id": 21583,
+      "eStrong": "H7865",
+      "dStrong": "H7865 = a Name of",
+      "from": "ώîy'ôn",
+      "to": "śîy'ôn"
+    },
+    {
+      "id": 21585,
+      "eStrong": "H7867",
+      "dStrong": "H7867 =",
+      "from": "ώîyb",
+      "to": "śîyb"
+    },
+    {
+      "id": 21586,
+      "eStrong": "H7868",
+      "dStrong": "H7868 = in Aramaic of",
+      "from": "ώîyb",
+      "to": "śîyb"
+    },
+    {
+      "id": 21587,
+      "eStrong": "H7869",
+      "dStrong": "H7869 =",
+      "from": "ώêyb",
+      "to": "śêyb"
+    },
+    {
+      "id": 21590,
+      "eStrong": "H7872",
+      "dStrong": "H7872 =",
+      "from": "ώêybâh",
+      "to": "śêybâh"
+    },
+    {
+      "id": 21591,
+      "eStrong": "H7873",
+      "dStrong": "H7873 =",
+      "from": "ώîyg",
+      "to": "śîyg"
+    },
+    {
+      "id": 21592,
+      "eStrong": "H7874",
+      "dStrong": "H7874 =",
+      "from": "ώîyd",
+      "to": "śîyd"
+    },
+    {
+      "id": 21593,
+      "eStrong": "H7875",
+      "dStrong": "H7875 =",
+      "from": "ώîyd",
+      "to": "śîyd"
+    },
+    {
+      "id": 21596,
+      "eStrong": "H7878",
+      "dStrong": "H7878 =",
+      "from": "ώîyach",
+      "to": "śîyach"
+    },
+    {
+      "id": 21597,
+      "eStrong": "H7879",
+      "dStrong": "H7879 =",
+      "from": "ώîyach",
+      "to": "śîyach"
+    },
+    {
+      "id": 21598,
+      "eStrong": "H7880",
+      "dStrong": "H7880 =",
+      "from": "ώîyach",
+      "to": "śîyach"
+    },
+    {
+      "id": 21599,
+      "eStrong": "H7881",
+      "dStrong": "H7881 =",
+      "from": "ώîychâh",
+      "to": "śîychâh"
+    },
+    {
+      "id": 21623,
+      "eStrong": "H7899",
+      "dStrong": "H7899 =",
+      "from": "ώêk",
+      "to": "śêk"
+    },
+    {
+      "id": 21624,
+      "eStrong": "H7900",
+      "dStrong": "H7900 =",
+      "from": "ώôk",
+      "to": "śôk"
+    },
+    {
+      "id": 21632,
+      "eStrong": "H7905",
+      "dStrong": "H7905 =",
+      "from": "ώûkkâh",
+      "to": "śûkkâh"
+    },
+    {
+      "id": 21633,
+      "eStrong": "H7906",
+      "dStrong": "H7906 =",
+      "from": "ώêkû",
+      "to": "śêkû"
+    },
+    {
+      "id": 21634,
+      "eStrong": "H7907",
+      "dStrong": "H7907 =",
+      "from": "ώekvîy",
+      "to": "śekvîy"
+    },
+    {
+      "id": 21636,
+      "eStrong": "H7909",
+      "dStrong": "H7909 =",
+      "from": "shakkûl shakkûl",
+      "to": "shakkûl"
+    },
+    {
+      "id": 21637,
+      "eStrong": "H7910",
+      "dStrong": "H7910 =",
+      "from": "shikkôr shikkôr",
+      "to": "shikkôr"
+    },
+    {
+      "id": 21641,
+      "eStrong": "H7914",
+      "dStrong": "H7914 =",
+      "from": "ώekîyâh",
+      "to": "śekîyâh"
+    },
+    {
+      "id": 21642,
+      "eStrong": "H7915",
+      "dStrong": "H7915 =",
+      "from": "ώakkîyn",
+      "to": "śakkîyn"
+    },
+    {
+      "id": 21643,
+      "eStrong": "H7916",
+      "dStrong": "H7916 =",
+      "from": "ώâkîyr",
+      "to": "śâkîyr"
+    },
+    {
+      "id": 21644,
+      "eStrong": "H7917",
+      "dStrong": "H7917 = a form of",
+      "from": "ώekîyrâh",
+      "to": "śekîyrâh"
+    },
+    {
+      "id": 21646,
+      "eStrong": "H7919a",
+      "dStrong": "H7919A =",
+      "from": "ώâkal",
+      "to": "śâkal"
+    },
+    {
+      "id": 21647,
+      "eStrong": "H7919b",
+      "dStrong": "H7919B =",
+      "from": "ώâkal",
+      "to": "śâkal"
+    },
+    {
+      "id": 21648,
+      "eStrong": "H7920",
+      "dStrong": "H7920 = in Aramaic of",
+      "from": "ώekal",
+      "to": "śekal"
+    },
+    {
+      "id": 21652,
+      "eStrong": "H7922",
+      "dStrong": "H7922 =",
+      "from": "ώekel ώêkel",
+      "to": "śekel śêkel"
+    },
+    {
+      "id": 21654,
+      "eStrong": "H7924",
+      "dStrong": "H7924 = in Aramaic of",
+      "from": "ώoklethânû",
+      "to": "śoklethânû"
+    },
+    {
+      "id": 21675,
+      "eStrong": "H7936a",
+      "dStrong": "H7936A = a Spelling of",
+      "from": "ώâkar sâkar",
+      "to": "śâkar sâkar"
+    },
+    {
+      "id": 21676,
+      "eStrong": "H7936b",
+      "dStrong": "H7936B =",
+      "from": "ώâkar sâkar",
+      "to": "śâkar sâkar"
+    },
+    {
+      "id": 21678,
+      "eStrong": "H7938",
+      "dStrong": "H7938 =",
+      "from": "ώeker",
+      "to": "śeker"
+    },
+    {
+      "id": 21679,
+      "eStrong": "H7939",
+      "dStrong": "H7939 =",
+      "from": "ώâkâr",
+      "to": "śâkâr"
+    },
+    {
+      "id": 21680,
+      "eStrong": "H7940",
+      "dStrong": "H7940G =",
+      "from": "ώâkâr",
+      "to": "śâkâr"
+    },
+    {
+      "id": 21681,
+      "eStrong": "H7940",
+      "dStrong": "H7940H = a Name of",
+      "from": "ώâkâr",
+      "to": "śâkâr"
+    },
+    {
+      "id": 21699,
+      "eStrong": "H7958",
+      "dStrong": "H7958 =",
+      "from": "ώelâv ώelâyv",
+      "to": "śelâv śelâyv"
+    },
+    {
+      "id": 21705,
+      "eStrong": "H7964",
+      "dStrong": "H7964 =",
+      "from": "shillûach shillûach",
+      "to": "shillûach"
+    },
+    {
+      "id": 21706,
+      "eStrong": "H7965",
+      "dStrong": "H7965G =",
+      "from": "shâlôm shâlôm",
+      "to": "shâlôm"
+    },
+    {
+      "id": 21707,
+      "eStrong": "H7965",
+      "dStrong": "H7965H = a Name of",
+      "from": "shâlôm shâlôm",
+      "to": "shâlôm"
+    },
+    {
+      "id": 21708,
+      "eStrong": "H7965",
+      "dStrong": "H7965I = a Meaning of",
+      "from": "shâlôm shâlôm",
+      "to": "shâlôm"
+    },
+    {
+      "id": 21709,
+      "eStrong": "H7965",
+      "dStrong": "H7965J = a Meaning of",
+      "from": "shâlôm shâlôm",
+      "to": "shâlôm"
+    },
+    {
+      "id": 21710,
+      "eStrong": "H7965",
+      "dStrong": "H7965K = a Meaning of",
+      "from": "shâlôm shâlôm",
+      "to": "shâlôm"
+    },
+    {
+      "id": 21711,
+      "eStrong": "H7965",
+      "dStrong": "H7965L = a Meaning of",
+      "from": "shâlôm shâlôm",
+      "to": "shâlôm"
+    },
+    {
+      "id": 21712,
+      "eStrong": "H7966",
+      "dStrong": "H7966 =",
+      "from": "shillûm shillûm",
+      "to": "shillûm"
+    },
+    {
+      "id": 21713,
+      "eStrong": "H7967",
+      "dStrong": "H7967G =",
+      "from": "shallûm shallûm",
+      "to": "shallûm"
+    },
+    {
+      "id": 21714,
+      "eStrong": "H7967",
+      "dStrong": "H7967H =",
+      "from": "shallûm shallûm",
+      "to": "shallûm"
+    },
+    {
+      "id": 21715,
+      "eStrong": "H7967",
+      "dStrong": "H7967I =",
+      "from": "shallûm shallûm",
+      "to": "shallûm"
+    },
+    {
+      "id": 21716,
+      "eStrong": "H7967",
+      "dStrong": "H7967J =",
+      "from": "shallûm shallûm",
+      "to": "shallûm"
+    },
+    {
+      "id": 21717,
+      "eStrong": "H7967",
+      "dStrong": "H7967K =",
+      "from": "shallûm shallûm",
+      "to": "shallûm"
+    },
+    {
+      "id": 21718,
+      "eStrong": "H7967",
+      "dStrong": "H7967L =",
+      "from": "shallûm shallûm",
+      "to": "shallûm"
+    },
+    {
+      "id": 21719,
+      "eStrong": "H7967",
+      "dStrong": "H7967M =",
+      "from": "shallûm shallûm",
+      "to": "shallûm"
+    },
+    {
+      "id": 21720,
+      "eStrong": "H7967",
+      "dStrong": "H7967N =",
+      "from": "shallûm shallûm",
+      "to": "shallûm"
+    },
+    {
+      "id": 21721,
+      "eStrong": "H7967",
+      "dStrong": "H7967O =",
+      "from": "shallûm shallûm",
+      "to": "shallûm"
+    },
+    {
+      "id": 21722,
+      "eStrong": "H7967",
+      "dStrong": "H7967P =",
+      "from": "shallûm shallûm",
+      "to": "shallûm"
+    },
+    {
+      "id": 21723,
+      "eStrong": "H7967",
+      "dStrong": "H7967Q =",
+      "from": "shallûm shallûm",
+      "to": "shallûm"
+    },
+    {
+      "id": 21724,
+      "eStrong": "H7967",
+      "dStrong": "H7967R =",
+      "from": "shallûm shallûm",
+      "to": "shallûm"
+    },
+    {
+      "id": 21725,
+      "eStrong": "H7967",
+      "dStrong": "H7967S =",
+      "from": "shallûm shallûm",
+      "to": "shallûm"
+    },
+    {
+      "id": 21726,
+      "eStrong": "H7967",
+      "dStrong": "H7967T = a Name of",
+      "from": "shallûm shallûm",
+      "to": "shallûm"
+    },
+    {
+      "id": 21727,
+      "eStrong": "H7967",
+      "dStrong": "H7967U = a Name of",
+      "from": "shallûm shallûm",
+      "to": "shallûm"
+    },
+    {
+      "id": 21729,
+      "eStrong": "H7969",
+      "dStrong": "H7969 =",
+      "from": "shâlôsh shâlôsh shelôshâh shelôshâh",
+      "to": "shâlôsh shelôshâh"
+    },
+    {
+      "id": 21730,
+      "eStrong": "H7970",
+      "dStrong": "H7970 =",
+      "from": "shelôshîym shelôshîym",
+      "to": "shelôshîym"
+    },
+    {
+      "id": 21751,
+      "eStrong": "H7984",
+      "dStrong": "H7984 =",
+      "from": "shilţôn shilţôn",
+      "to": "shilţôn"
+    },
+    {
+      "id": 21778,
+      "eStrong": "H8007",
+      "dStrong": "H8007G =",
+      "from": "ώalmâ'",
+      "to": "śalmâ'"
+    },
+    {
+      "id": 21779,
+      "eStrong": "H8007",
+      "dStrong": "H8007H =",
+      "from": "ώalmâ'",
+      "to": "śalmâ'"
+    },
+    {
+      "id": 21780,
+      "eStrong": "H8008",
+      "dStrong": "H8008 =",
+      "from": "ώalmâh",
+      "to": "śalmâh"
+    },
+    {
+      "id": 21781,
+      "eStrong": "H8009",
+      "dStrong": "H8009 = a Spelling of",
+      "from": "ώalmâh",
+      "to": "śalmâh"
+    },
+    {
+      "id": 21784,
+      "eStrong": "H8012",
+      "dStrong": "H8012 = a Spelling of",
+      "from": "ώalmôn",
+      "to": "śalmôn"
+    },
+    {
+      "id": 21788,
+      "eStrong": "H8014",
+      "dStrong": "H8014 =",
+      "from": "ώalmay",
+      "to": "śalmay"
+    },
+    {
+      "id": 21801,
+      "eStrong": "H8019a",
+      "dStrong": "H8019A =",
+      "from": "shelômîyth shelômîyth",
+      "to": "shelômîyth"
+    },
+    {
+      "id": 21802,
+      "eStrong": "H8019b",
+      "dStrong": "H8019B =",
+      "from": "shelômîyth shelômîyth",
+      "to": "shelômîyth"
+    },
+    {
+      "id": 21803,
+      "eStrong": "H8019a",
+      "dStrong": "H8019G =",
+      "from": "shelômîyth shelômîyth",
+      "to": "shelômîyth"
+    },
+    {
+      "id": 21804,
+      "eStrong": "H8019a",
+      "dStrong": "H8019H =",
+      "from": "shelômîyth shelômîyth",
+      "to": "shelômîyth"
+    },
+    {
+      "id": 21805,
+      "eStrong": "H8019b",
+      "dStrong": "H8019I =",
+      "from": "shelômîyth shelômîyth",
+      "to": "shelômîyth"
+    },
+    {
+      "id": 21806,
+      "eStrong": "H8019a",
+      "dStrong": "H8019J = a Name of",
+      "from": "shelômîyth shelômîyth",
+      "to": "shelômîyth"
+    },
+    {
+      "id": 21807,
+      "eStrong": "H8019a",
+      "dStrong": "H8019K = a Name of",
+      "from": "shelômîyth shelômîyth",
+      "to": "shelômîyth"
+    },
+    {
+      "id": 21820,
+      "eStrong": "H8032",
+      "dStrong": "H8032 =",
+      "from": "shilshôm shilshôm",
+      "to": "shilshôm"
+    },
+    {
+      "id": 21830,
+      "eStrong": "H8040",
+      "dStrong": "H8040G =",
+      "from": "ώemô'l ώem'ôl",
+      "to": "śemô'l śem'ôl"
+    },
+    {
+      "id": 21831,
+      "eStrong": "H8040",
+      "dStrong": "H8040H = a Meaning of",
+      "from": "ώemô'l ώem'ôl",
+      "to": "śemô'l śem'ôl"
+    },
+    {
+      "id": 21832,
+      "eStrong": "H8041",
+      "dStrong": "H8041 =",
+      "from": "ώâma'l",
+      "to": "śâma'l"
+    },
+    {
+      "id": 21833,
+      "eStrong": "H8042",
+      "dStrong": "H8042G =",
+      "from": "ώemâ'lîy",
+      "to": "śemâ'lîy"
+    },
+    {
+      "id": 21834,
+      "eStrong": "H8042",
+      "dStrong": "H8042H = a Meaning of",
+      "from": "ώemâ'lîy",
+      "to": "śemâ'lîy"
+    },
+    {
+      "id": 21856,
+      "eStrong": "H8055",
+      "dStrong": "H8055 =",
+      "from": "ώâmach",
+      "to": "śâmach"
+    },
+    {
+      "id": 21857,
+      "eStrong": "H8056",
+      "dStrong": "H8056 =",
+      "from": "ώâmêach",
+      "to": "śâmêach"
+    },
+    {
+      "id": 21858,
+      "eStrong": "H8057",
+      "dStrong": "H8057 =",
+      "from": "ώimchâh",
+      "to": "śimchâh"
+    },
+    {
+      "id": 21866,
+      "eStrong": "H8063",
+      "dStrong": "H8063 =",
+      "from": "ώemîykâh",
+      "to": "śemîykâh"
+    },
+    {
+      "id": 21877,
+      "eStrong": "H8071",
+      "dStrong": "H8071 =",
+      "from": "ώimlâh",
+      "to": "śimlâh"
+    },
+    {
+      "id": 21878,
+      "eStrong": "H8072",
+      "dStrong": "H8072 =",
+      "from": "ώamlâh",
+      "to": "śamlâh"
+    },
+    {
+      "id": 21888,
+      "eStrong": "H8079",
+      "dStrong": "H8079 =",
+      "from": "ώemâmîyth",
+      "to": "śemâmîyth"
+    },
+    {
+      "id": 21892,
+      "eStrong": "H8083",
+      "dStrong": "H8083 =",
+      "from": "shemôneh shemôneh shemônâh shemônâh",
+      "to": "shemôneh shemônâh"
+    },
+    {
+      "id": 21893,
+      "eStrong": "H8084",
+      "dStrong": "H8084 =",
+      "from": "shemônîym shemônîym",
+      "to": "shemônîym"
+    },
+    {
+      "id": 22010,
+      "eStrong": "H8130",
+      "dStrong": "H8130 =",
+      "from": "ώânê'",
+      "to": "śânê'"
+    },
+    {
+      "id": 22011,
+      "eStrong": "H8131",
+      "dStrong": "H8131 = in Aramaic of",
+      "from": "ώenê'",
+      "to": "śenê'"
+    },
+    {
+      "id": 22015,
+      "eStrong": "H8135",
+      "dStrong": "H8135 =",
+      "from": "ώin'âh",
+      "to": "śin'âh"
+    },
+    {
+      "id": 22027,
+      "eStrong": "H8146",
+      "dStrong": "H8146 =",
+      "from": "ώânîy'",
+      "to": "śânîy'"
+    },
+    {
+      "id": 22030,
+      "eStrong": "H8149",
+      "dStrong": "H8149 = a Name of",
+      "from": "shenîyr ώenîyr",
+      "to": "shenîyr śenîyr"
+    },
+    {
+      "id": 22035,
+      "eStrong": "H8154",
+      "dStrong": "H8154 =",
+      "from": "shâsâh shâώâh",
+      "to": "shâsâh shâśâh"
+    },
+    {
+      "id": 22044,
+      "eStrong": "H8163a",
+      "dStrong": "H8163A =",
+      "from": "ώâ‛îyr ώâ‛ir",
+      "to": "śâ‛îyr śâ‛ir"
+    },
+    {
+      "id": 22045,
+      "eStrong": "H8163b",
+      "dStrong": "H8163B =",
+      "from": "ώâ‛îyr ώâ‛ir",
+      "to": "śâ‛îyr śâ‛ir"
+    },
+    {
+      "id": 22046,
+      "eStrong": "H8163c",
+      "dStrong": "H8163C =",
+      "from": "ώâ‛îyr ώâ‛ir",
+      "to": "śâ‛îyr śâ‛ir"
+    },
+    {
+      "id": 22047,
+      "eStrong": "H8164",
+      "dStrong": "H8164 =",
+      "from": "ώâ‛îyr",
+      "to": "śâ‛îyr"
+    },
+    {
+      "id": 22048,
+      "eStrong": "H8165a",
+      "dStrong": "H8165A =",
+      "from": "ώê‛îyr",
+      "to": "śê‛îyr"
+    },
+    {
+      "id": 22049,
+      "eStrong": "H8165b",
+      "dStrong": "H8165B =",
+      "from": "ώê‛îyr",
+      "to": "śê‛îyr"
+    },
+    {
+      "id": 22050,
+      "eStrong": "H8165a",
+      "dStrong": "H8165G =",
+      "from": "ώê‛îyr",
+      "to": "śê‛îyr"
+    },
+    {
+      "id": 22051,
+      "eStrong": "H8165a",
+      "dStrong": "H8165H =",
+      "from": "ώê‛îyr",
+      "to": "śê‛îyr"
+    },
+    {
+      "id": 22052,
+      "eStrong": "H8166",
+      "dStrong": "H8166 =",
+      "from": "ώe‛îyrâh",
+      "to": "śe‛îyrâh"
+    },
+    {
+      "id": 22053,
+      "eStrong": "H8167",
+      "dStrong": "H8167 =",
+      "from": "ώe‛îyrâh",
+      "to": "śe‛îyrâh"
+    },
+    {
+      "id": 22063,
+      "eStrong": "H8175a",
+      "dStrong": "H8175A =",
+      "from": "ώâ‛ar",
+      "to": "śâ‛ar"
+    },
+    {
+      "id": 22064,
+      "eStrong": "H8175b",
+      "dStrong": "H8175B =",
+      "from": "ώâ‛ar",
+      "to": "śâ‛ar"
+    },
+    {
+      "id": 22065,
+      "eStrong": "H8175c",
+      "dStrong": "H8175C =",
+      "from": "ώâ‛ar",
+      "to": "śâ‛ar"
+    },
+    {
+      "id": 22067,
+      "eStrong": "H8177",
+      "dStrong": "H8177 = in Aramaic of",
+      "from": "ώe‛ar",
+      "to": "śe‛ar"
+    },
+    {
+      "id": 22068,
+      "eStrong": "H8178a",
+      "dStrong": "H8178A =",
+      "from": "ώa‛ar",
+      "to": "śa‛ar"
+    },
+    {
+      "id": 22069,
+      "eStrong": "H8178b",
+      "dStrong": "H8178B =",
+      "from": "ώa‛ar",
+      "to": "śa‛ar"
+    },
+    {
+      "id": 22073,
+      "eStrong": "H8181",
+      "dStrong": "H8181 =",
+      "from": "ώê‛âr ώa‛ar",
+      "to": "śê‛âr śa‛ar"
+    },
+    {
+      "id": 22075,
+      "eStrong": "H8183",
+      "dStrong": "H8183 =",
+      "from": "ώe‛ârâh",
+      "to": "śe‛ârâh"
+    },
+    {
+      "id": 22076,
+      "eStrong": "H8184",
+      "dStrong": "H8184 =",
+      "from": "ώe‛ôrâh ώe‛ôrâh ώe‛ôr ώe‛ôr",
+      "to": "śe‛ôrâh śe‛ôr"
+    },
+    {
+      "id": 22077,
+      "eStrong": "H8185",
+      "dStrong": "H8185 =",
+      "from": "ώa‛ărâh",
+      "to": "śa‛ărâh"
+    },
+    {
+      "id": 22081,
+      "eStrong": "H8188",
+      "dStrong": "H8188 =",
+      "from": "ώe‛ôrîym",
+      "to": "śe‛ôrîym"
+    },
+    {
+      "id": 22087,
+      "eStrong": "H8193",
+      "dStrong": "H8193G =",
+      "from": "ώâphâh ώepheth",
+      "to": "śâphâh śepheth"
+    },
+    {
+      "id": 22088,
+      "eStrong": "H8193",
+      "dStrong": "H8193H = a Meaning of",
+      "from": "ώâphâh ώepheth",
+      "to": "śâphâh śepheth"
+    },
+    {
+      "id": 22089,
+      "eStrong": "H8193",
+      "dStrong": "H8193I = a Meaning of",
+      "from": "ώâphâh ώepheth",
+      "to": "śâphâh śepheth"
+    },
+    {
+      "id": 22090,
+      "eStrong": "H8193",
+      "dStrong": "H8193J = a Meaning of",
+      "from": "ώâphâh ώepheth",
+      "to": "śâphâh śepheth"
+    },
+    {
+      "id": 22091,
+      "eStrong": "H8193",
+      "dStrong": "H8193K = a Meaning of",
+      "from": "ώâphâh ώepheth",
+      "to": "śâphâh śepheth"
+    },
+    {
+      "id": 22137,
+      "eStrong": "H8222",
+      "dStrong": "H8222 =",
+      "from": "ώâphâm",
+      "to": "śâphâm"
+    },
+    {
+      "id": 22139,
+      "eStrong": "H8224",
+      "dStrong": "H8224 =",
+      "from": "ώiphmôth",
+      "to": "śiphmôth"
+    },
+    {
+      "id": 22141,
+      "eStrong": "H8226",
+      "dStrong": "H8226 =",
+      "from": "ώâphan",
+      "to": "śâphan"
+    },
+    {
+      "id": 22160,
+      "eStrong": "H8242",
+      "dStrong": "H8242 =",
+      "from": "ώaq",
+      "to": "śaq"
+    },
+    {
+      "id": 22162,
+      "eStrong": "H8244",
+      "dStrong": "H8244 =",
+      "from": "ώâqad",
+      "to": "śâqad"
+    },
+    {
+      "id": 22171,
+      "eStrong": "H8251",
+      "dStrong": "H8251 =",
+      "from": "shiqqûts shiqqûts",
+      "to": "shiqqûts"
+    },
+    {
+      "id": 22185,
+      "eStrong": "H8265",
+      "dStrong": "H8265 =",
+      "from": "ώâqar",
+      "to": "śâqar"
+    },
+    {
+      "id": 22189,
+      "eStrong": "H8269",
+      "dStrong": "H8269 =",
+      "from": "ώar",
+      "to": "śar"
+    },
+    {
+      "id": 22198,
+      "eStrong": "H8276",
+      "dStrong": "H8276 =",
+      "from": "ώârag",
+      "to": "śârag"
+    },
+    {
+      "id": 22199,
+      "eStrong": "H8277",
+      "dStrong": "H8277 =",
+      "from": "ώârad",
+      "to": "śârad"
+    },
+    {
+      "id": 22200,
+      "eStrong": "H8278",
+      "dStrong": "H8278 =",
+      "from": "ώerâd",
+      "to": "śerâd"
+    },
+    {
+      "id": 22201,
+      "eStrong": "H8279",
+      "dStrong": "H8279 =",
+      "from": "ώered",
+      "to": "śered"
+    },
+    {
+      "id": 22202,
+      "eStrong": "H8280",
+      "dStrong": "H8280 =",
+      "from": "ώârâh",
+      "to": "śârâh"
+    },
+    {
+      "id": 22204,
+      "eStrong": "H8282",
+      "dStrong": "H8282 =",
+      "from": "ώârâh",
+      "to": "śârâh"
+    },
+    {
+      "id": 22205,
+      "eStrong": "H8283",
+      "dStrong": "H8283 =",
+      "from": "ώârâh",
+      "to": "śârâh"
+    },
+    {
+      "id": 22208,
+      "eStrong": "H8286",
+      "dStrong": "H8286 =",
+      "from": "ώerûg",
+      "to": "śerûg"
+    },
+    {
+      "id": 22210,
+      "eStrong": "H8288",
+      "dStrong": "H8288 =",
+      "from": "ώerôk",
+      "to": "śerôk"
+    },
+    {
+      "id": 22215,
+      "eStrong": "H8291",
+      "dStrong": "H8291 =",
+      "from": "ώârûq",
+      "to": "śârûq"
+    },
+    {
+      "id": 22218,
+      "eStrong": "H8294",
+      "dStrong": "H8294 =",
+      "from": "ώerach",
+      "to": "śerach"
+    },
+    {
+      "id": 22219,
+      "eStrong": "H8295",
+      "dStrong": "H8295 =",
+      "from": "ώâraţ",
+      "to": "śâraţ"
+    },
+    {
+      "id": 22220,
+      "eStrong": "H8296a",
+      "dStrong": "H8296A =",
+      "from": "ώereţ ώâreţeth",
+      "to": "śereţ śâreţeth"
+    },
+    {
+      "id": 22221,
+      "eStrong": "H8296b",
+      "dStrong": "H8296B = a Spelling of",
+      "from": "ώereţ ώâreţeth",
+      "to": "śereţ śâreţeth"
+    },
+    {
+      "id": 22222,
+      "eStrong": "H8297",
+      "dStrong": "H8297 = a Name of",
+      "from": "ώâray",
+      "to": "śâray"
+    },
+    {
+      "id": 22224,
+      "eStrong": "H8299",
+      "dStrong": "H8299 =",
+      "from": "ώârîyg",
+      "to": "śârîyg"
+    },
+    {
+      "id": 22225,
+      "eStrong": "H8300",
+      "dStrong": "H8300 =",
+      "from": "ώârîyd",
+      "to": "śârîyd"
+    },
+    {
+      "id": 22226,
+      "eStrong": "H8301",
+      "dStrong": "H8301 =",
+      "from": "ώârîyd",
+      "to": "śârîyd"
+    },
+    {
+      "id": 22229,
+      "eStrong": "H8303",
+      "dStrong": "H8303 = a Spelling of",
+      "from": "shiryôn ώiryôn",
+      "to": "shiryôn śiryôn"
+    },
+    {
+      "id": 22230,
+      "eStrong": "H8304",
+      "dStrong": "H8304G =",
+      "from": "ώerâyâh ώerâyâhû",
+      "to": "śerâyâh śerâyâhû"
+    },
+    {
+      "id": 22231,
+      "eStrong": "H8304",
+      "dStrong": "H8304H =",
+      "from": "ώerâyâh ώerâyâhû",
+      "to": "śerâyâh śerâyâhû"
+    },
+    {
+      "id": 22232,
+      "eStrong": "H8304",
+      "dStrong": "H8304I =",
+      "from": "ώerâyâh ώerâyâhû",
+      "to": "śerâyâh śerâyâhû"
+    },
+    {
+      "id": 22233,
+      "eStrong": "H8304",
+      "dStrong": "H8304J =",
+      "from": "ώerâyâh ώerâyâhû",
+      "to": "śerâyâh śerâyâhû"
+    },
+    {
+      "id": 22234,
+      "eStrong": "H8304",
+      "dStrong": "H8304K =",
+      "from": "ώerâyâh ώerâyâhû",
+      "to": "śerâyâh śerâyâhû"
+    },
+    {
+      "id": 22235,
+      "eStrong": "H8304",
+      "dStrong": "H8304L =",
+      "from": "ώerâyâh ώerâyâhû",
+      "to": "śerâyâh śerâyâhû"
+    },
+    {
+      "id": 22236,
+      "eStrong": "H8304",
+      "dStrong": "H8304M =",
+      "from": "ώerâyâh ώerâyâhû",
+      "to": "śerâyâh śerâyâhû"
+    },
+    {
+      "id": 22237,
+      "eStrong": "H8304",
+      "dStrong": "H8304N =",
+      "from": "ώerâyâh ώerâyâhû",
+      "to": "śerâyâh śerâyâhû"
+    },
+    {
+      "id": 22238,
+      "eStrong": "H8305",
+      "dStrong": "H8305 =",
+      "from": "ώerîyqâh",
+      "to": "śerîyqâh"
+    },
+    {
+      "id": 22241,
+      "eStrong": "H8308",
+      "dStrong": "H8308 =",
+      "from": "ώârak",
+      "to": "śârak"
+    },
+    {
+      "id": 22243,
+      "eStrong": "H8310",
+      "dStrong": "H8310 =",
+      "from": "ώarsekîym",
+      "to": "śarsekîym"
+    },
+    {
+      "id": 22244,
+      "eStrong": "H8311",
+      "dStrong": "H8311 =",
+      "from": "ώâra‛",
+      "to": "śâra‛"
+    },
+    {
+      "id": 22245,
+      "eStrong": "H8312",
+      "dStrong": "H8312 =",
+      "from": "ώar‛aph",
+      "to": "śar‛aph"
+    },
+    {
+      "id": 22246,
+      "eStrong": "H8313",
+      "dStrong": "H8313 =",
+      "from": "ώâraph",
+      "to": "śâraph"
+    },
+    {
+      "id": 22247,
+      "eStrong": "H8314a",
+      "dStrong": "H8314A =",
+      "from": "ώârâph",
+      "to": "śârâph"
+    },
+    {
+      "id": 22248,
+      "eStrong": "H8314b",
+      "dStrong": "H8314B =",
+      "from": "ώârâph",
+      "to": "śârâph"
+    },
+    {
+      "id": 22249,
+      "eStrong": "H8315",
+      "dStrong": "H8315 =",
+      "from": "ώârâph",
+      "to": "śârâph"
+    },
+    {
+      "id": 22250,
+      "eStrong": "H8316",
+      "dStrong": "H8316 =",
+      "from": "ώerêphâh",
+      "to": "śerêphâh"
+    },
+    {
+      "id": 22254,
+      "eStrong": "H8320",
+      "dStrong": "H8320 =",
+      "from": "ώârûq",
+      "to": "śârûq"
+    },
+    {
+      "id": 22255,
+      "eStrong": "H8321a",
+      "dStrong": "H8321A =",
+      "from": "ώôrêq ώôrêq ώôrêqâh",
+      "to": "śôrêq śôrêq śôrêqâh"
+    },
+    {
+      "id": 22256,
+      "eStrong": "H8321b",
+      "dStrong": "H8321B = a Spelling of",
+      "from": "ώôrêq ώôrêq ώôrêqâh",
+      "to": "śôrêq śôrêq śôrêqâh"
+    },
+    {
+      "id": 22258,
+      "eStrong": "H8323a",
+      "dStrong": "H8323A =",
+      "from": "ώârar",
+      "to": "śârar"
+    },
+    {
+      "id": 22259,
+      "eStrong": "H8323b",
+      "dStrong": "H8323B =",
+      "from": "ώârar",
+      "to": "śârar"
+    },
+    {
+      "id": 22279,
+      "eStrong": "H8342",
+      "dStrong": "H8342 =",
+      "from": "ώâώôn ώâώôn",
+      "to": "śâśôn"
+    },
+    {
+      "id": 22305,
+      "eStrong": "H8368",
+      "dStrong": "H8368 =",
+      "from": "ώâthar",
+      "to": "śâthar"
+    },
+    {
+      "id": 22317,
+      "eStrong": "H8380",
+      "dStrong": "H8380 =",
+      "from": "tâ'ôm tâ'ôm",
+      "to": "tâ'ôm"
+    },
+    {
+      "id": 22356,
+      "eStrong": "H8415",
+      "dStrong": "H8415 =",
+      "from": "tehôm tehôm",
+      "to": "tehôm"
+    },
+    {
+      "id": 22365,
+      "eStrong": "H8422",
+      "dStrong": "H8422G =",
+      "from": "tûbal tûbal",
+      "to": "tûbal"
+    },
+    {
+      "id": 22366,
+      "eStrong": "H8422",
+      "dStrong": "H8422H =",
+      "from": "tûbal tûbal",
+      "to": "tûbal"
+    },
+    {
+      "id": 22367,
+      "eStrong": "H8422",
+      "dStrong": "H8422I = a Part of",
+      "from": "tûbal tûbal",
+      "to": "tûbal"
+    },
+    {
+      "id": 22370,
+      "eStrong": "H8425",
+      "dStrong": "H8425G =",
+      "from": "tôgarmâh tôgarmâh",
+      "to": "tôgarmâh"
+    },
+    {
+      "id": 22371,
+      "eStrong": "H8425",
+      "dStrong": "H8425H =",
+      "from": "tôgarmâh tôgarmâh",
+      "to": "tôgarmâh"
+    },
+    {
+      "id": 22382,
+      "eStrong": "H8435",
+      "dStrong": "H8435 =",
+      "from": "tôledâh tôledâh",
+      "to": "tôledâh"
+    },
+    {
+      "id": 22390,
+      "eStrong": "H8441",
+      "dStrong": "H8441 =",
+      "from": "tô‛êbah tô‛êbah",
+      "to": "tô‛êbah"
+    },
+    {
+      "id": 22393,
+      "eStrong": "H8444",
+      "dStrong": "H8444 =",
+      "from": "tôtsâ'âh tôtsâ'âh",
+      "to": "tôtsâ'âh"
+    },
+    {
+      "id": 22396,
+      "eStrong": "H8447",
+      "dStrong": "H8447 =",
+      "from": "tôr tôr",
+      "to": "tôr"
+    },
+    {
+      "id": 22398,
+      "eStrong": "H8449",
+      "dStrong": "H8449 =",
+      "from": "tôr tôr",
+      "to": "tôr"
+    },
+    {
+      "id": 22400,
+      "eStrong": "H8451",
+      "dStrong": "H8451 =",
+      "from": "tôrâh tôrâh",
+      "to": "tôrâh"
+    },
+    {
+      "id": 22402,
+      "eStrong": "H8453a",
+      "dStrong": "H8453A =",
+      "from": "tôshâb tôshâb",
+      "to": "tôshâb"
+    },
+    {
+      "id": 22403,
+      "eStrong": "H8453b",
+      "dStrong": "H8453B =",
+      "from": "tôshâb tôshâb",
+      "to": "tôshâb"
+    },
+    {
+      "id": 22404,
+      "eStrong": "H8454",
+      "dStrong": "H8454 =",
+      "from": "tûshîyâh tûshîyâh",
+      "to": "tûshîyâh"
+    },
+    {
+      "id": 22407,
+      "eStrong": "H8457",
+      "dStrong": "H8457 =",
+      "from": "taznûth taznûth",
+      "to": "taznûth"
+    },
+    {
+      "id": 22408,
+      "eStrong": "H8458",
+      "dStrong": "H8458 =",
+      "from": "tachbûlâh tachbûlâh",
+      "to": "tachbûlâh"
+    },
+    {
+      "id": 22410,
+      "eStrong": "H8460",
+      "dStrong": "H8460 = in Aramaic of",
+      "from": "techôth techôth",
+      "to": "techôth"
+    },
+    {
+      "id": 22413,
+      "eStrong": "H8463",
+      "dStrong": "H8463 =",
+      "from": "tachălû' tachălû'",
+      "to": "tachălû'"
+    },
+    {
+      "id": 22440,
+      "eStrong": "H8481",
+      "dStrong": "H8481G = a Part of",
+      "from": "tachtôn tachtôn",
+      "to": "tachtôn"
+    },
+    {
+      "id": 22441,
+      "eStrong": "H8481",
+      "dStrong": "H8481H =",
+      "from": "tachtôn tachtôn",
+      "to": "tachtôn"
+    },
+    {
+      "id": 22444,
+      "eStrong": "H8484",
+      "dStrong": "H8484 =",
+      "from": "tîykôn tîykôn",
+      "to": "tîykôn"
+    },
+    {
+      "id": 22454,
+      "eStrong": "H8492",
+      "dStrong": "H8492 =",
+      "from": "tîyrôsh tîyrôsh",
+      "to": "tîyrôsh"
+    },
+    {
+      "id": 22458,
+      "eStrong": "H8496",
+      "dStrong": "H8496 =",
+      "from": "tôk tôk",
+      "to": "tôk"
+    },
+    {
+      "id": 22462,
+      "eStrong": "H8500",
+      "dStrong": "H8500 =",
+      "from": "tûkkîy tûkkîy",
+      "to": "tûkkîy"
+    },
+    {
+      "id": 22477,
+      "eStrong": "H8515",
+      "dStrong": "H8515 =",
+      "from": "tela'ώώar telaώώar",
+      "to": "tela'śśar telaśśar"
+    },
+    {
+      "id": 22507,
+      "eStrong": "H8543",
+      "dStrong": "H8543 =",
+      "from": "temôl temôl",
+      "to": "temôl"
+    },
+    {
+      "id": 22508,
+      "eStrong": "H8544",
+      "dStrong": "H8544 =",
+      "from": "temûnâh temûnâh",
+      "to": "temûnâh"
+    },
+    {
+      "id": 22594,
+      "eStrong": "H8610",
+      "dStrong": "H8610 =",
+      "from": "tâphaώ",
+      "to": "tâphaś"
+    },
+    {
+      "id": 22607,
+      "eStrong": "H8621",
+      "dStrong": "H8621 = a Spelling of",
+      "from": "teqô‛îy teqô‛îy",
+      "to": "teqô‛îy"
+    },
+    {
+      "id": 22608,
+      "eStrong": "H8622",
+      "dStrong": "H8622 =",
+      "from": "teqûphâh teqûphâh",
+      "to": "teqûphâh"
+    },
+    {
+      "id": 22629,
+      "eStrong": "H8641",
+      "dStrong": "H8641 =",
+      "from": "terûmâh terûmâh",
+      "to": "terûmâh"
+    },
+    {
+      "id": 22659,
+      "eStrong": "H8666",
+      "dStrong": "H8666 =",
+      "from": "teshûbâh teshûbâh",
+      "to": "teshûbâh"
+    },
+    {
+      "id": 22660,
+      "eStrong": "H8667",
+      "dStrong": "H8667 =",
+      "from": "teώûmeth",
+      "to": "teśûmeth"
+    },
+    {
+      "id": 22661,
+      "eStrong": "H8668",
+      "dStrong": "H8668G =",
+      "from": "teshû‛âh teshû‛âh",
+      "to": "teshû‛âh"
+    },
+    {
+      "id": 22662,
+      "eStrong": "H8668",
+      "dStrong": "H8668H = a Meaning of",
+      "from": "teshû‛âh teshû‛âh",
+      "to": "teshû‛âh"
+    }
+  ]
+}

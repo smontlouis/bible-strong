@@ -1421,12 +1421,12 @@
   },
   {
     "id": "strong-lexicon:core",
-    "resourceRevision": "strong-lexicon-core-fe91da3f72fe28da25c60833",
+    "resourceRevision": "strong-lexicon-core-3fb2dba66a58e4b46d2a36ea",
     "artifactUrl": "https://assets.bible-strong.app/databases/strong_lexicon.core.sqlite.zip",
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "https://assets.bible-strong.app/databases/strong_lexicon.core.sqlite.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/0333d8ca2a6280cb1505678eb7efb09416a86ff6b829b61cac1d82deae5ddeaa/databases/strong_lexicon.core.sqlite.zip",
         "entry": "strong_lexicon.core.sqlite"
       }
     ],
@@ -1434,13 +1434,13 @@
   },
   {
     "id": "strong-lexicon:entities",
-    "resourceRevision": "strong-lexicon-entities-98e0d81b2004d9073eb51d6f",
-    "coreRevision": "strong-lexicon-core-fe91da3f72fe28da25c60833",
+    "resourceRevision": "strong-lexicon-entities-5ef3a982d252bad828ea3cc0",
+    "coreRevision": "strong-lexicon-core-3fb2dba66a58e4b46d2a36ea",
     "artifactUrl": "https://assets.bible-strong.app/databases/bible_entities.production.sqlite.zip",
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "https://assets.bible-strong.app/databases/bible_entities.production.sqlite.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/bce53b5ec770d44c94809aa3e659d53c266b19b9c7b465aad4c1b524cb76ba3e/databases/bible_entities.production.sqlite.zip",
         "entry": "bible_entities.production.sqlite"
       }
     ],
@@ -1448,13 +1448,13 @@
   },
   {
     "id": "strong-lexicon:resources",
-    "resourceRevision": "strong-lexicon-resources-4ad1a07442692f44a6babcfe",
-    "coreRevision": "strong-lexicon-core-fe91da3f72fe28da25c60833",
+    "resourceRevision": "strong-lexicon-resources-23ec21b35f8fee72b696ba9d",
+    "coreRevision": "strong-lexicon-core-3fb2dba66a58e4b46d2a36ea",
     "artifactUrl": "https://assets.bible-strong.app/databases/strong_lexicon.resources.sqlite.zip",
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "https://assets.bible-strong.app/databases/strong_lexicon.resources.sqlite.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/ecda9409cdd879a198dffdd0bd912eb9248645153cb627fdfc2a202d6597d9c7/databases/strong_lexicon.resources.sqlite.zip",
         "entry": "strong_lexicon.resources.sqlite"
       }
     ],
@@ -1462,12 +1462,12 @@
   },
   {
     "id": "strong-lexicon:simple-en",
-    "resourceRevision": "strong-lexicon-simple-en-784af9ff9fc29bf892cb0b55",
+    "resourceRevision": "strong-lexicon-simple-en-9e4892ee07fa50d995e3aa73",
     "artifactUrl": "https://assets.bible-strong.app/databases/strong_lexicon.simple-en.sqlite.zip",
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/a3007c4054b1dc461dd5d2deb4e94a2859224e633ee3becb806329b263a9e0db/databases/strong_lexicon.simple-en.sqlite.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/6e086125963481722d256c0f058c305913c7460fc69b62618086ad9746b8812f/databases/strong_lexicon.simple-en.sqlite.zip",
         "entry": "strong_lexicon.simple-en.sqlite"
       }
     ],
@@ -1475,12 +1475,12 @@
   },
   {
     "id": "strong-lexicon:simple-fr",
-    "resourceRevision": "strong-lexicon-simple-fr-944bd06dc903ffaf83df9b51",
+    "resourceRevision": "strong-lexicon-simple-fr-451ab51f7b7248c35ff912d8",
     "artifactUrl": "https://assets.bible-strong.app/databases/strong_lexicon.simple-fr.sqlite.zip",
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/0f0dd7545a43b732760ac49be7ca789a7787e3e9b02c39929b99cb102a84aaae/databases/strong_lexicon.simple-fr.sqlite.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/82a28ee44aa84bf973b7f31b0b497dfa5d0b5879f85afc6d0f20a1ed616e8df3/databases/strong_lexicon.simple-fr.sqlite.zip",
         "entry": "strong_lexicon.simple-fr.sqlite"
       }
     ],
