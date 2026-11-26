@@ -1,5 +1,5 @@
 import { useAtomValue } from 'jotai/react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
@@ -52,19 +52,15 @@ export const useDesktopMenu = () => {
   const clearedAt = useAtomValue(desktopRecentsClearedAtAtom)
   const [revision, setRevision] = useState(0)
 
-  const serialized = useMemo(
-    () =>
-      JSON.stringify(
-        buildDesktopMenuState({
-          language: i18n.language,
-          group,
-          history,
-          clearedAt,
-          untitledTab: t('tabs.new'),
-          passageLabel,
-        })
-      ),
-    [clearedAt, group, history, i18n.language, t]
+  const serialized = JSON.stringify(
+    buildDesktopMenuState({
+      language: i18n.language,
+      group,
+      history,
+      clearedAt,
+      untitledTab: t('tabs.new'),
+      passageLabel,
+    })
   )
 
   useEffect(() => {
@@ -75,6 +71,5 @@ export const useDesktopMenu = () => {
     return () => clearTimeout(timer)
   }, [serialized, revision])
 
-  const refresh = useCallback(() => setRevision(value => value + 1), [])
-  return { refresh }
+  return { refresh: () => setRevision(value => value + 1) }
 }

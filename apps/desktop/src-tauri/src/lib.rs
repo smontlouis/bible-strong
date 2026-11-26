@@ -14,6 +14,7 @@ mod kv;
 mod material;
 mod menu;
 mod paths;
+mod reminders;
 mod services;
 mod sign_in;
 mod sqlite;
@@ -194,6 +195,14 @@ pub fn run() {
             inbox::inbox_take,
             kv::kv_apply,
             menu::menu_update,
+            reminders::reminders_permission,
+            reminders::reminders_request_permission,
+            reminders::reminders_scheduled,
+            reminders::reminders_schedule,
+            reminders::reminders_cancel,
+            reminders::reminders_displayed,
+            reminders::reminders_remove_displayed,
+            reminders::reminders_open_settings,
             sign_in::sign_in_start,
             sign_in::sign_in_result,
             sign_in::sign_in_cancel,
@@ -242,9 +251,24 @@ pub fn run() {
                 focus_main_window(&links);
                 let _ = links.emit_to("main", OPEN_URL_EVENT, urls);
             });
+            // Windows and Linux hand the address that launched the app (a clicked reading
+            // reminder, a link) as an argument, before the page listens: it waits in the inbox.
+            #[cfg(any(windows, target_os = "linux"))]
+            if let Ok(Some(urls)) = app.deep_link().get_current() {
+                for url in urls {
+                    inbox::deliver(
+                        &handle,
+                        inbox::Delivery::Open {
+                            url: url.to_string(),
+                        },
+                    );
+                }
+            }
 
             // macOS: « Look Up in Bible Strong » from the selection of any app.
             services::register(&handle);
+            // Reading reminders: the delegate that receives a click (macOS), the clock (Linux).
+            reminders::start(&handle);
 
             create_main_window(&handle)?;
             Ok(())

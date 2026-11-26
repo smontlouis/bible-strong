@@ -1,6 +1,5 @@
 import { useRouter } from 'expo-router'
 import { useSetAtom, useStore } from 'jotai/react'
-import { useCallback } from 'react'
 
 import useLogin from '~helpers/useLogin'
 import { activeGroupAtom, tabGroupsAtom } from '~state/tabs'
@@ -26,22 +25,19 @@ export const useOpenTargetInTab = () => {
   const { triggerSlideNewTab } = useSlideNewTab()
   const { isLogged, user } = useLogin()
 
-  return useCallback(
-    (target: IncomingLinkTarget, navigation: 'replace' | 'dismiss' = 'dismiss') => {
-      const tab = createIncomingLinkTab(target)
-      const activeGroupId = store.get(activeGroupAtom).id
-      const existing = findTabWithSameContent(store.get(tabGroupsAtom), activeGroupId, tab)
-      const groupId = existing?.groupId ?? activeGroupId
-      if (!existing) {
-        addTab({ groupId, tab })
-        // Before the tab sync of the account starts, it must send the group, not replace it.
-        if (isLogged && user.id) markTabGroupChangedBeforeSync(user.id, groupId)
-      }
-      switchGroup(groupId)
-      if (navigation === 'replace') router.replace('/')
-      else router.dismissTo('/')
-      triggerSlideNewTab(existing?.tabId ?? tab.id)
-    },
-    [addTab, isLogged, router, store, switchGroup, triggerSlideNewTab, user.id]
-  )
+  return (target: IncomingLinkTarget, navigation: 'replace' | 'dismiss' = 'dismiss') => {
+    const tab = createIncomingLinkTab(target)
+    const activeGroupId = store.get(activeGroupAtom).id
+    const existing = findTabWithSameContent(store.get(tabGroupsAtom), activeGroupId, tab)
+    const groupId = existing?.groupId ?? activeGroupId
+    if (!existing) {
+      addTab({ groupId, tab })
+      // Before the tab sync of the account starts, it must send the group, not replace it.
+      if (isLogged && user.id) markTabGroupChangedBeforeSync(user.id, groupId)
+    }
+    switchGroup(groupId)
+    if (navigation === 'replace') router.replace('/')
+    else router.dismissTo('/')
+    triggerSlideNewTab(existing?.tabId ?? tab.id)
+  }
 }

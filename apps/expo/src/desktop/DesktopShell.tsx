@@ -25,6 +25,7 @@ import { desktopBootstrap, invoke } from './bridge'
 import { isMenuShortcut, runMenuShortcut } from './desktopMenuShortcuts'
 import { parseRecentPassageId } from './desktopMenuState'
 import { lookUpPassage } from './lookUp'
+import { takeReadingReminderUrl } from './readingReminders'
 import { checkDesktopUpdate } from './desktopUpdates'
 import { useDesktopDownloadProgress } from './downloadProgress'
 import { type TextSizeChange, useTextSizeChange } from './textSize'
@@ -128,15 +129,20 @@ const DesktopShell = () => {
     )
   }
 
+  // A link handed over by the system: a clicked reading reminder opens its reading
+  // (`ReadingReminders`), anything else its route.
+  const openAddress = (url: string) => {
+    if (takeReadingReminderUrl(url)) return
+    const route = desktopLinkRoute(url)
+    if (route) router.push(route as never)
+  }
+
   const takeDeliveries = async () => {
     try {
       const deliveries = await invoke<Delivery[]>('inbox_take')
       for (const delivery of deliveries) {
         if (delivery.kind === 'lookUp') lookUp(delivery.text)
-        else {
-          const route = desktopLinkRoute(delivery.url)
-          if (route) router.push(route as never)
-        }
+        else openAddress(delivery.url)
       }
     } catch (error) {
       appLogger.captureError('startup', 'desktop.inbox_failed', error)
@@ -203,8 +209,12 @@ const DesktopShell = () => {
       }),
       listen('desktop://inbox', () => void takeDeliveries()),
       listen<string[]>('desktop://open-url', ({ payload }) => {
-        const route = payload.map(desktopLinkRoute).find(Boolean)
-        if (route) router.push(route as never)
+        // The first address the workspace knows: a reading reminder or a route.
+        const url = payload.find(
+          address =>
+            address.startsWith('biblestrong://reading-reminder?') || desktopLinkRoute(address)
+        )
+        if (url) openAddress(url)
       }),
       listen('desktop://flush', async () => {
         try {

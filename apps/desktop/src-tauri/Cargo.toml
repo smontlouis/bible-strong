@@ -50,8 +50,18 @@ tauri-plugin-updater = { version = "2", optional = true }
 block2 = "0.6"
 objc2 = "0.6"
 objc2-app-kit = { version = "0.3", default-features = false, features = ["std", "NSApplication", "NSImage", "NSImageRep", "NSBitmapImageRep", "NSBox", "NSColor", "NSGraphics", "NSPasteboard", "NSResponder", "NSUserInterfaceItemIdentification", "NSView"] }
-objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSArray", "NSData", "NSDictionary", "NSError", "NSGeometry", "NSString"] }
+objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSArray", "NSBundle", "NSData", "NSDictionary", "NSError", "NSGeometry", "NSObject", "NSString"] }
 objc2-web-kit = { version = "0.3", default-features = false, features = ["std", "block2", "objc2-app-kit", "WKWebView", "WKSnapshotConfiguration"] }
+# Reading reminders scheduled by the system (`reminders.rs`).
+objc2-user-notifications = { version = "0.3", default-features = false, features = ["std", "block2", "UNNotification", "UNNotificationContent", "UNNotificationRequest", "UNNotificationResponse", "UNNotificationSettings", "UNNotificationSound", "UNNotificationTrigger", "UNUserNotificationCenter"] }
+
+# Reading reminders: toasts scheduled by Windows (`reminders.rs`), the version Tauri already uses.
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.62", features = ["Data_Xml_Dom", "Foundation", "Foundation_Collections", "UI_Notifications"] }
+
+# Reading reminders: Linux has no scheduler, the app shows them while it runs (`reminders.rs`).
+[target.'cfg(target_os = "linux")'.dependencies]
+notify-rust = "4"
 
 [features]
 default = ["updater"]
