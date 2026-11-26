@@ -1,9 +1,10 @@
+import { IS_BROWSER } from '~desktop/isDesktop'
 import { useLocalReadingDate } from '~features/daily-reading/useDailyMeditation'
 import ReminderSettings from '~features/daily-reading/ReminderSettings'
 import { useRouter } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 import { TFunction, useTranslation } from 'react-i18next'
-import { Platform, Share, View, type ViewStyle } from 'react-native'
+import { Share, View, type ViewStyle } from 'react-native'
 import { EaseView } from 'react-native-ease'
 import { useDispatch, useSelector } from 'react-redux'
 import Empty from '~common/Empty'
@@ -230,7 +231,7 @@ const StandaloneVerseOfTheDay = ({
         }
       >
         <Box className="overflow-hidden border-continuous flex-row items-center justify-center opacity-[0.5]">
-          {!addDay && Platform.OS !== 'web' && (
+          {!addDay && !IS_BROWSER && (
             <Link
               accessibilityLabel={t('Recevoir une notification quotidienne')}
               onPress={() => notificationModalRef.current?.present()}

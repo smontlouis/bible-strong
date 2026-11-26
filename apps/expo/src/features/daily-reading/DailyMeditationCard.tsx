@@ -1,3 +1,4 @@
+import { IS_BROWSER } from '~desktop/isDesktop'
 import { useRef } from 'react'
 import { Image } from 'expo-image'
 import { useDispatch, useSelector } from 'react-redux'
@@ -10,7 +11,7 @@ import type { RootState } from '~redux/modules/reducer'
 import { selectFontFamily } from '~redux/selectors/user'
 import { resolveFontFamily } from '~themes/styleValues'
 import { useRouter } from 'expo-router'
-import { ActivityIndicator, Platform, Share, type ViewStyle } from 'react-native'
+import { ActivityIndicator, Share, type ViewStyle } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
@@ -113,7 +114,7 @@ const DailyMeditationCard = ({
           onChange={() => router.push('/daily-reading')}
           actions={
             <>
-              {!addDay && Platform.OS !== 'web' && (
+              {!addDay && !IS_BROWSER && (
                 <Link
                   size={44}
                   accessibilityLabel={t('Recevoir une notification quotidienne')}
@@ -234,7 +235,7 @@ const DailyMeditationCard = ({
         }
       >
         <Box className="overflow-hidden border-continuous flex-row items-center justify-center opacity-[0.5]">
-          {!addDay && Platform.OS !== 'web' && (
+          {!addDay && !IS_BROWSER && (
             <Link
               size={44}
               accessibilityLabel={t('Recevoir une notification quotidienne')}
