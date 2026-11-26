@@ -68,6 +68,10 @@ Les recueils viennent de Firestore `plans`, lus par `extract`. Tout ce que l’a
 `hash` : les 12 premiers caractères hexadécimaux du SHA-256 des octets du fichier (pour une scène,
 de ses deux PNG et des réglages d’export).
 
+Dans le catalogue, chaque scène porte `hash`, `widths` et `thumbhash` : la ThumbHash (base64) de
+son fond, calculée par `thumbhash_scenes.py` à la suite de l’export, sur le WebP de 768 px.
+L’application la dessine tout de suite derrière une carte dont la scène n’est pas encore chargée.
+
 Une collection :
 
 ```json

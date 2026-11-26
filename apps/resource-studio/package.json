@@ -103,7 +103,7 @@
     "resources:timeline:images": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning ${NODE_OPTIONS:-}\" tsx src/timelineImagesCli.ts",
     "daily-readings:extract": "python3 workflows/daily-readings/scripts/extract.py",
     "daily-readings:normalize": "yarn workspace @bible-strong/expo exec tsx ../resource-studio/workflows/daily-readings/scripts/normalize.cts",
-    "daily-readings:scenes": "${PYTHON:-python3} workflows/daily-readings/scripts/export_scenes.py",
+    "daily-readings:scenes": "${PYTHON:-python3} workflows/daily-readings/scripts/export_scenes.py && ${PYTHON:-python3} workflows/daily-readings/scripts/thumbhash_scenes.py",
     "daily-readings:build": "python3 workflows/daily-readings/scripts/build_verses.py && python3 workflows/daily-readings/scripts/build_books.py && python3 workflows/daily-readings/scripts/build_catalog.py",
     "daily-readings:upload": "tsx workflows/daily-readings/scripts/upload.mts",
     "resources:timeline:paintings": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning ${NODE_OPTIONS:-}\" tsx src/timelinePaintingsCli.ts",
