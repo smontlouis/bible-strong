@@ -15,6 +15,9 @@ jest.mock('~features/app-switcher/utils/useOpenTargetInTab', () => ({
   useOpenTargetInTab: jest.fn(),
 }))
 jest.mock('~features/app-switcher/utils/useSlideNewTab', () => ({ useSlideNewTab: jest.fn() }))
+jest.mock('~features/app-switcher/utils/useOpenInNewTab', () => ({ useOpenInNewTab: jest.fn() }))
+jest.mock('~state/useDefaultBibleVersion', () => ({ useDefaultBibleVersion: jest.fn() }))
+jest.mock('../lookUp', () => ({ lookUpPassage: jest.fn() }))
 jest.mock('~state/tabGroups', () => ({ useSwitchGroup: jest.fn() }))
 jest.mock('~state/tabs', () => ({ activeGroupAtom: {} }))
 jest.mock('../useDesktopMenu', () => ({

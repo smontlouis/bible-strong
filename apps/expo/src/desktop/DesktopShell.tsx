@@ -4,22 +4,27 @@ import { openUrl } from '@tauri-apps/plugin-opener'
 import { useRouter } from 'expo-router'
 import { useAtomValue, useSetAtom, useStore } from 'jotai/react'
 import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { useOpenTargetInTab } from '~features/app-switcher/utils/useOpenTargetInTab'
+import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { useSlideNewTab } from '~features/app-switcher/utils/useSlideNewTab'
 import { replayWorkspaceOnboardingAtom } from '~features/onboarding/workspace/state'
 import { markForPrint } from '~features/print/markForPrint'
 import { appLogger } from '~helpers/agentObservability'
 import { getBook } from '~helpers/bibleBookCatalog'
+import generateUUID from '~helpers/generateUUID'
 import { flushStorage } from '~helpers/storage.desktop'
 import { resolveSystemPath } from '~navigation/systemLinks'
 import { isQueueProcessingAtom } from '~state/downloadQueue'
 import { useSwitchGroup } from '~state/tabGroups'
-import { activeGroupAtom } from '~state/tabs'
+import { activeGroupAtom, type TabItem } from '~state/tabs'
+import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 
 import { desktopBootstrap, invoke } from './bridge'
 import { isMenuShortcut, runMenuShortcut } from './desktopMenuShortcuts'
 import { parseRecentPassageId } from './desktopMenuState'
+import { lookUpPassage } from './lookUp'
 import { checkDesktopUpdate } from './desktopUpdates'
 import { useDesktopDownloadProgress } from './downloadProgress'
 import { type TextSizeChange, useTextSizeChange } from './textSize'
@@ -29,6 +34,9 @@ import { useDesktopWindowTitle } from './useDesktopWindowTitle'
 import { useDesktopFullscreen } from './windowControls'
 
 const APP_SCHEME = 'biblestrong://'
+
+/** What the shell kept for the page (`inbox.rs`). */
+type Delivery = { kind: 'lookUp'; text: string } | { kind: 'open'; url: string }
 const UPDATE_CHECK_DELAY_MS = 15_000
 
 /** `biblestrong://bible/LSG/…` or a page of the site, to a route of the workspace. */
@@ -52,6 +60,9 @@ export const desktopLinkRoute = (url: string): string | undefined => {
 const DesktopShell = () => {
   const router = useRouter()
   const store = useStore()
+  const { i18n } = useTranslation()
+  const version = useDefaultBibleVersion()
+  const openInNewTab = useOpenInNewTab()
   const downloading = useAtomValue(isQueueProcessingAtom)
   useDesktopAppearance()
   useDesktopWindowTitle()
@@ -66,8 +77,24 @@ const DesktopShell = () => {
   const { refresh: refreshMenu } = useDesktopMenu()
 
   // The menu's listener is set once: it reads the latest of these through the ref.
-  const actions = useRef({ openInTab, refreshMenu, switchGroup, triggerSlideNewTab })
-  actions.current = { openInTab, refreshMenu, switchGroup, triggerSlideNewTab }
+  const actions = useRef({
+    openInTab,
+    openInNewTab,
+    refreshMenu,
+    switchGroup,
+    triggerSlideNewTab,
+    version,
+    language: i18n.language,
+  })
+  actions.current = {
+    openInTab,
+    openInNewTab,
+    refreshMenu,
+    switchGroup,
+    triggerSlideNewTab,
+    version,
+    language: i18n.language,
+  }
 
   const selectTab = (tabId: string) => {
     const group = store.get(activeGroupAtom)
@@ -78,6 +105,42 @@ const DesktopShell = () => {
     }
     // The chosen item flipped its own check mark: the menu shows the active tab again.
     actions.current.refreshMenu()
+  }
+
+  // Text selected in another app and sent by the macOS Service: a reference opens in a tab, in
+  // the reader's version, anything else in a search of its own.
+  const lookUp = (text: string) => {
+    const { language, version: readerVersion } = actions.current
+    const passage = lookUpPassage(text, readerVersion, language === 'en' ? 'en' : 'fr')
+    if (passage) {
+      actions.current.openInTab(passage)
+      return
+    }
+    actions.current.openInNewTab(
+      {
+        id: `search-${generateUUID()}`,
+        type: 'search',
+        isRemovable: true,
+        title: text,
+        data: { searchValue: text },
+      } as TabItem,
+      { autoRedirect: true }
+    )
+  }
+
+  const takeDeliveries = async () => {
+    try {
+      const deliveries = await invoke<Delivery[]>('inbox_take')
+      for (const delivery of deliveries) {
+        if (delivery.kind === 'lookUp') lookUp(delivery.text)
+        else {
+          const route = desktopLinkRoute(delivery.url)
+          if (route) router.push(route as never)
+        }
+      }
+    } catch (error) {
+      appLogger.captureError('startup', 'desktop.inbox_failed', error)
+    }
   }
 
   const openRecentPassage = (id: string) => {
@@ -138,6 +201,7 @@ const DesktopShell = () => {
           )
         }
       }),
+      listen('desktop://inbox', () => void takeDeliveries()),
       listen<string[]>('desktop://open-url', ({ payload }) => {
         const route = payload.map(desktopLinkRoute).find(Boolean)
         if (route) router.push(route as never)
@@ -151,6 +215,8 @@ const DesktopShell = () => {
         await invoke('app_exit')
       }),
     ]
+    // What arrived before the page listened: the Service or a reminder that launched the app.
+    void takeDeliveries()
     const updateCheck = setTimeout(
       () => void checkDesktopUpdate({ announce: false }),
       UPDATE_CHECK_DELAY_MS

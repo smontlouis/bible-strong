@@ -9,10 +9,12 @@ mod bootstrap;
 mod devtools;
 mod download;
 mod files;
+mod inbox;
 mod kv;
 mod material;
 mod menu;
 mod paths;
+mod services;
 mod sign_in;
 mod sqlite;
 
@@ -130,7 +132,7 @@ fn keep_minimum_size(window: &tauri::Window, size: PhysicalSize<u32>) {
     }
 }
 
-fn focus_main_window(app: &tauri::AppHandle) {
+pub(crate) fn focus_main_window(app: &tauri::AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.unminimize();
         let _ = window.show();
@@ -189,6 +191,7 @@ pub fn run() {
             files::fs_read_dir,
             files::fs_disk_space,
             files::fs_sha256,
+            inbox::inbox_take,
             kv::kv_apply,
             menu::menu_update,
             sign_in::sign_in_start,
@@ -213,6 +216,7 @@ pub fn run() {
             app.manage(bootstrap::AppDirectories { documents, cache });
             app.manage(sqlite::Databases::default());
             app.manage(sign_in::SignIn::default());
+            app.manage(inbox::Inbox::default());
             app.manage(download::Downloads::new(format!(
                 "BibleStrongDesktop/{} ({})",
                 app.package_info().version,
@@ -238,6 +242,9 @@ pub fn run() {
                 focus_main_window(&links);
                 let _ = links.emit_to("main", OPEN_URL_EVENT, urls);
             });
+
+            // macOS: « Look Up in Bible Strong » from the selection of any app.
+            services::register(&handle);
 
             create_main_window(&handle)?;
             Ok(())
