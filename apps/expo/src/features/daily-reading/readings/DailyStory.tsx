@@ -18,6 +18,7 @@ import Animated, {
   FadeOutUp,
   LinearTransition,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
@@ -28,9 +29,23 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { transliterationTextStyle } from '~common/ui/textTypography'
 import { useWorkspaceHeaderInset } from '~features/app-switcher/workspaceHeaderInset'
+import {
+  EntityPortraitTiltSensor,
+  useEntityPortraitPointer,
+  useEntityPortraitTilt,
+} from '~features/lexique/EntityPortraitParallax'
 import { selectFontFamily } from '~redux/selectors/user'
 import { resolveFontFamily } from '~themes/styleValues'
 import type { DailyCard, DailyEntry, DailyStrongWord } from './dailyReadingFormat'
+import StorySceneLayer from './StorySceneLayer'
+import {
+  BACKGROUND_DEPTH,
+  FOCUS_DURATION,
+  FOCUS_EASING,
+  FOREGROUND_DEPTH,
+  TEXT_SHIFT,
+  useTiltStyle,
+} from './storySceneMotion'
 import { useDailySceneUri } from './useDailyReadings'
 
 const INK = '#ffffff'
@@ -45,8 +60,8 @@ const SHADOW = {
 }
 const READING_FADE = {
   transitionProperty: 'opacity',
-  transitionDuration: 450,
-  transitionTimingFunction: 'ease-out',
+  transitionDuration: FOCUS_DURATION,
+  transitionTimingFunction: 'ease-in-out',
 } as const
 
 /**
@@ -175,6 +190,18 @@ const DailyStory = ({
   const isEnd = card.type === 'end'
   // The verse and the closing blessing sit on the sharp scene; reading cards on the blurred one.
   const sharpScene = isOpening || (isEnd && !deeper)
+  // Going into the scene and stepping back out of it (storySceneMotion): 0 sharp, 1 in focus.
+  const focus = useSharedValue(sharpScene ? 0 : 1)
+  useEffect(() => {
+    focus.set(withTiming(sharpScene ? 0 : 1, { duration: FOCUS_DURATION, easing: FOCUS_EASING }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sharpScene])
+  // The tilt of the phone, or the pointer on a wide screen; nothing moves for a reader who asked
+  // for less motion.
+  const still = useReducedMotion()
+  const tilt = useEntityPortraitTilt()
+  const pointer = useEntityPortraitPointer(tilt)
+  const textTilt = useTiltStyle(tilt, TEXT_SHIFT, 1, still)
 
   const go = (step: number) => {
     // The last card ends with « Terminer », never with a stray tap.
@@ -388,6 +415,8 @@ const DailyStory = ({
   return (
     <View
       style={{ flex: 1, backgroundColor: '#1b1a22', alignItems: 'center' }}
+      // On a wide screen the pointer stands for the tilt of a phone.
+      {...(!native && !still ? pointer : {})}
       onLayout={({ nativeEvent }) => {
         const { width: areaWidth, height: areaHeight } = nativeEvent.layout
         setArea(previous =>
@@ -397,6 +426,7 @@ const DailyStory = ({
         )
       }}
     >
+      {native && !still ? <EntityPortraitTiltSensor tilt={tilt} /> : null}
       {wide && background ? (
         <>
           <Image
@@ -422,35 +452,28 @@ const DailyStory = ({
       >
         {/* The far layer: sharp on the verse, blurred and darker behind the text. */}
         {background ? (
-          <>
-            <Image
-              source={{ uri: background }}
-              contentFit="cover"
-              style={{ position: 'absolute', inset: 0 }}
-              transition={{ duration: 500, effect: 'cross-dissolve' }}
-              accessibilityIgnoresInvertColors
-            />
-            <Animated.View
-              pointerEvents="none"
-              style={[
-                { position: 'absolute', inset: 0, opacity: sharpScene ? 0 : 1 },
-                READING_FADE,
-              ]}
-            >
-              <Image
-                source={{ uri: background }}
-                contentFit="cover"
-                blurRadius={18}
-                transition={{ duration: 500, effect: 'cross-dissolve' }}
-                style={{ position: 'absolute', inset: 0, transform: [{ scale: 1.1 }] }}
-                accessibilityIgnoresInvertColors
-              />
-              <View
-                style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.36)' }}
-              />
-            </Animated.View>
-          </>
+          <StorySceneLayer
+            uri={background}
+            depth={BACKGROUND_DEPTH}
+            focus={focus}
+            focused={!sharpScene}
+            tilt={tilt}
+            still={still}
+          />
         ) : null}
+        {/* Darker behind the reading cards, as the scene blurs. */}
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            {
+              position: 'absolute',
+              inset: 0,
+              backgroundColor: 'rgba(0,0,0,0.36)',
+              opacity: sharpScene ? 0 : 1,
+            },
+            READING_FADE,
+          ]}
+        />
         <LinearGradient
           pointerEvents="none"
           colors={['rgba(0,0,0,0.34)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.3)']}
@@ -460,16 +483,20 @@ const DailyStory = ({
 
         <Pressable onPress={tap} accessible={false} style={{ position: 'absolute', inset: 0 }} />
 
-        <View
+        {/* The text floats a little with the tilt, between the far and the near layer. */}
+        <Animated.View
           pointerEvents="box-none"
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            top: insets.top + 64,
-            bottom: insets.bottom + (isEnd ? 156 : isOpening ? 132 : 96),
-            alignItems: 'center',
-          }}
+          style={[
+            {
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              top: insets.top + 64,
+              bottom: insets.bottom + (isEnd ? 156 : isOpening ? 132 : 96),
+              alignItems: 'center',
+            },
+            textTilt,
+          ]}
         >
           <ScrollView
             key={index}
@@ -491,18 +518,18 @@ const DailyStory = ({
               <View accessibilityLiveRegion="polite">{renderCard(card)}</View>
             </Pressable>
           </ScrollView>
-        </View>
+        </Animated.View>
 
         {/* The near layer passes in front of the text. */}
         {foreground ? (
-          <Image
-            source={{ uri: foreground }}
-            contentFit="cover"
-            blurRadius={sharpScene ? 1 : 3}
-            pointerEvents="none"
-            style={{ position: 'absolute', inset: 0 }}
-            transition={{ duration: 500, effect: 'cross-dissolve' }}
-            accessibilityIgnoresInvertColors
+          <StorySceneLayer
+            uri={foreground}
+            depth={FOREGROUND_DEPTH}
+            focus={focus}
+            focused={!sharpScene}
+            tilt={tilt}
+            still={still}
+            cutOut
           />
         ) : null}
 
