@@ -1,3 +1,4 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { Image } from 'expo-image'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useEffect, useState, type ReactNode } from 'react'
@@ -12,11 +13,7 @@ import {
   type GestureResponderEvent,
 } from 'react-native'
 import Animated, {
-  cubicBezier,
   Easing,
-  FadeOut,
-  FadeOutUp,
-  LinearTransition,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -34,15 +31,22 @@ import {
   useEntityPortraitPointer,
   useEntityPortraitTilt,
 } from '~features/lexique/EntityPortraitParallax'
+import StrobiAvatar from '~features/study-assistant/StrobiAvatar'
 import { selectFontFamily } from '~redux/selectors/user'
 import { resolveFontFamily } from '~themes/styleValues'
 import type { DailyCard, DailyEntry, DailyStrongWord } from './dailyReadingFormat'
+import PrayerMedallion from './PrayerMedallion'
+import StoryMotion, { StoryPresence } from './StoryMotion'
+import StoryStrobi from './StoryStrobi'
 import StorySceneLayer from './StorySceneLayer'
 import {
   BACKGROUND_DEPTH,
+  cameraOf,
   FOCUS_DURATION,
   FOCUS_EASING,
   FOREGROUND_DEPTH,
+  TEXT_FOCUS_SCALE,
+  TEXT_MOTION,
   TEXT_SHIFT,
   useTiltStyle,
 } from './storySceneMotion'
@@ -52,6 +56,15 @@ const INK = '#ffffff'
 const SOFT_INK = 'rgba(255,255,255,0.78)'
 const GLASS = 'rgba(255,255,255,0.16)'
 const GLASS_EDGE = 'rgba(255,255,255,0.3)'
+/**
+ * The reading texts all have the verse's size (2026-11-26), and the titles more: the cards scroll,
+ * behind the near layer of the scene, so a long text has room.
+ */
+const BODY = { fontSize: 22, lineHeight: 36 }
+/** The questions of « Aller plus loin » are smaller: they hold together on one screen. */
+const QUESTION = { fontSize: 18, lineHeight: 27 }
+/** The closing buttons stay narrow, on a wide screen too. */
+const CLOSING_BUTTONS_WIDTH = 360
 const SOURCE_LINE = /^[A-Z][A-Za-z]{0,6}\s+\d+[.:]\d+\s*$/
 const SHADOW = {
   textShadowColor: 'rgba(0,0,0,0.45)',
@@ -64,50 +77,7 @@ const READING_FADE = {
   transitionTimingFunction: 'ease-in-out',
 } as const
 
-/**
- * A text that arrives: it rises a little as it appears. A CSS animation, played on mount: the
- * layout animations (`entering`) froze the texts in absolute positions on the web a few seconds
- * after they came, and moved them (2026-11-26).
- */
-const RISE = {
-  from: { opacity: 0, transform: [{ translateY: 12 }] },
-  to: { opacity: 1, transform: [{ translateY: 0 }] },
-}
-const EASE_OUT_CUBIC = cubicBezier(0.33, 1, 0.68, 1)
-const rise = (delay = 0) =>
-  ({
-    animationName: RISE,
-    animationDuration: 380,
-    animationDelay: delay,
-    animationTimingFunction: EASE_OUT_CUBIC,
-    animationFillMode: 'backwards',
-  }) as const
-
-/** A small badge that pops in. */
-const POP = {
-  from: { opacity: 0, transform: [{ scale: 0.6 }] },
-  to: { opacity: 1, transform: [{ scale: 1 }] },
-}
-const popIn = (delay = 0) =>
-  ({
-    animationName: POP,
-    animationDuration: 200,
-    animationDelay: delay,
-    animationTimingFunction: EASE_OUT_CUBIC,
-    animationFillMode: 'backwards',
-  }) as const
-
-/** A button that fades in. */
-const FADE = { from: { opacity: 0 }, to: { opacity: 1 } }
-const fadeIn = (delay = 0) =>
-  ({
-    animationName: FADE,
-    animationDuration: 300,
-    animationDelay: delay,
-    animationFillMode: 'backwards',
-  }) as const
-
-/** Leaving animations run on iOS and Android; the web has no way to keep a removed element. */
+/** iOS and Android: what is not the web. */
 const native = Platform.OS !== 'web'
 
 type StoryCard = Exclude<DailyCard, { type: 'questions' }> | { type: 'end' }
@@ -166,19 +136,27 @@ const DailyStory = ({
   const foreground = useDailySceneUri(entry.scene, 'fg', sceneWidth)
   const [index, setIndex] = useState(0)
   const [deeper, setDeeper] = useState(false)
+  const [prayerOpen, setPrayerOpen] = useState(false)
+  // The question of « Aller plus loin » being opened: Strobi turns to it before it opens.
+  const [asking, setAsking] = useState<number | null>(null)
   // Wider than tall, the scene keeps its square and stands in the middle: the sides show it
   // blurred and dark, so a 21:9 screen does not stretch it into a strip (2026-11-26).
   const [area, setArea] = useState<{ width: number; height: number } | null>(null)
   const stageWidth = area && area.width > area.height ? area.height : undefined
-  // The web draws the blurred sides until it knows the area is not wide; the square itself is
-  // CSS there (as tall as the area, at most as wide), so the first frame is already right.
+  // The web draws the blurred sides and the square until it knows the area is not wide; the
+  // square itself is CSS there (as tall as the area), so the first frame of a wide window is
+  // already right.
   const wide = native ? Boolean(stageWidth) : !area || area.width > area.height
   // Another verse or another day starts again on its first card; its scene fades in over the last.
   const [shownEntry, setShownEntry] = useState(entry)
+  // Each day or verse shown counts a round: its first card comes as a new one.
+  const [round, setRound] = useState(0)
   if (shownEntry !== entry) {
     setShownEntry(entry)
     setIndex(0)
     setDeeper(false)
+    setPrayerOpen(false)
+    setRound(round + 1)
   }
   const questions = entry.cards.find(card => card.type === 'questions')?.items ?? []
   const cards: StoryCard[] = [
@@ -186,6 +164,7 @@ const DailyStory = ({
     { type: 'end' },
   ]
   const card = cards[Math.min(index, cards.length - 1)]!
+
   const isOpening = card.type === 'verse' || card.type === 'opening'
   const isEnd = card.type === 'end'
   // The verse and the closing blessing sit on the sharp scene; reading cards on the blurred one.
@@ -199,13 +178,36 @@ const DailyStory = ({
   // The tilt of the phone, or the pointer on a wide screen; nothing moves for a reader who asked
   // for less motion.
   const still = useReducedMotion()
+  // The journey through the scene: the eye goes from its left edge on the first reading card to
+  // its right one on the last, and comes back to the middle for the closing blessing.
+  const readingCards = cards.filter(
+    current => current.type !== 'verse' && current.type !== 'opening' && current.type !== 'end'
+  )
+  const cameraAt = still
+    ? 0
+    : cameraOf(
+        sharpScene ? -1 : isEnd ? readingCards.length - 1 : readingCards.indexOf(card),
+        readingCards.length
+      )
+  const camera = useSharedValue(cameraAt)
+  useEffect(() => {
+    camera.set(withTiming(cameraAt, { duration: FOCUS_DURATION, easing: FOCUS_EASING }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cameraAt])
+  // The stage, once measured: the whole area when it is taller than wide (a phone, a narrow
+  // window), or the square in the middle of a wide one.
+  const stage = area ? { width: stageWidth ?? area.width, height: area.height } : null
   const tilt = useEntityPortraitTilt()
   const pointer = useEntityPortraitPointer(tilt)
   const textTilt = useTiltStyle(tilt, TEXT_SHIFT, 1, still)
+  const textFocus = useAnimatedStyle(() => ({
+    transform: [{ scale: still ? 1 : 1 + (TEXT_FOCUS_SCALE - 1) * focus.get() }],
+  }))
 
   const go = (step: number) => {
     // The last card ends with « Terminer », never with a stray tap.
     if (step > 0 && isEnd) return
+    setPrayerOpen(false)
     setIndex(current => Math.max(0, Math.min(cards.length - 1, current + step)))
   }
   const tap = (event: GestureResponderEvent) => go(event.nativeEvent.pageX < width * 0.35 ? -1 : 1)
@@ -225,6 +227,64 @@ const DailyStory = ({
 
   const reading = { fontFamily, color: INK, ...SHADOW }
 
+  /**
+   * A question of « Aller plus loin » opens Strobi on it: Strobi turns to it, nods and lights up
+   * first, so the reader sees who it talks to.
+   */
+  const askQuestion = (question: string, questionIndex: number) => {
+    if (!onAskQuestion || asking != null) return
+    setAsking(questionIndex)
+    setTimeout(
+      () => {
+        onAskQuestion(question)
+        setAsking(null)
+      },
+      still ? 0 : 650
+    )
+  }
+
+  /**
+   * The closing buttons, just under the blessing or the questions (2026-11-26): they come after
+   * the text and leave with the card.
+   */
+  const closingButtons = (delay: number) => (
+    <StoryMotion
+      delay={delay}
+      duration={TEXT_MOTION.buttonsDuration}
+      style={{
+        alignSelf: 'center',
+        width: '100%',
+        maxWidth: CLOSING_BUTTONS_WIDTH,
+        gap: 10,
+        marginTop: 36,
+      }}
+    >
+      <View style={{ flexDirection: 'row', gap: 10 }}>
+        {onShare ? (
+          <View style={{ flex: 1 }}>
+            <StoryButton icon="share-2" label={t('Partager')} onPress={onShare} />
+          </View>
+        ) : null}
+        {questions.length && !deeper ? (
+          <View style={{ flex: 1 }}>
+            <StoryButton
+              // Strobi, for a reader it is open to: the questions talk to it (2026-11-26).
+              icon={onAskQuestion ? undefined : 'compass'}
+              leading={
+                onAskQuestion ? (
+                  <StrobiAvatar animation="idle" size={24} lookAt={[0, 0.5]} settleAfterMs={2500} />
+                ) : undefined
+              }
+              label={t('dailyReading.goFurther')}
+              onPress={() => setDeeper(true)}
+            />
+          </View>
+        ) : null}
+      </View>
+      <StoryButton solid label={t('dailyReading.finish')} onPress={onClose} />
+    </StoryMotion>
+  )
+
   const renderCard = (current: StoryCard) => {
     switch (current.type) {
       case 'verse':
@@ -238,37 +298,41 @@ const DailyStory = ({
             : split?.reference
         return (
           <>
-            <Animated.View style={rise()}>
-              <Text style={[reading, { fontSize: 22, lineHeight: 32, textAlign: 'center' }]}>
+            <StoryMotion>
+              <Text style={[reading, { fontSize: 22, lineHeight: 36, textAlign: 'center' }]}>
                 {quote}
               </Text>
-            </Animated.View>
+            </StoryMotion>
             {reference ? (
-              <Animated.View style={rise(160)}>
+              <StoryMotion delay={TEXT_MOTION.step}>
                 <Text
                   className="text-[12px] uppercase tracking-[1.2px] mt-[16px] text-center"
                   style={{ color: SOFT_INK, ...SHADOW }}
                 >
                   {reference}
                 </Text>
-              </Animated.View>
+              </StoryMotion>
             ) : null}
           </>
         )
       }
       case 'hook':
         return (
-          <Animated.View style={rise()}>
-            <Text style={[reading, { fontSize: 25, lineHeight: 35, textAlign: 'center' }]}>
+          <StoryMotion>
+            <Text style={[reading, { fontSize: 28, lineHeight: 40, textAlign: 'center' }]}>
               {current.text}
             </Text>
-          </Animated.View>
+          </StoryMotion>
         )
       case 'part':
         return (
           <>
             {current.strong ? (
-              <Animated.View style={[popIn(220), { alignSelf: 'flex-start' }]}>
+              <StoryMotion
+                enter="pop"
+                delay={TEXT_MOTION.popDelay}
+                style={{ alignSelf: 'flex-start' }}
+              >
                 <Pressable
                   disabled={!onOpenStrong}
                   onPress={() => current.strong && onOpenStrong?.(current.strong)}
@@ -295,48 +359,82 @@ const DailyStory = ({
                     {current.strong.code}
                   </Text>
                 </Pressable>
-              </Animated.View>
+              </StoryMotion>
             ) : null}
-            <Animated.View style={rise()}>
-              <Text style={[reading, { fontSize: 23, lineHeight: 30, marginBottom: 14 }]}>
+            <StoryMotion>
+              <Text style={[reading, { fontSize: 30, lineHeight: 40, marginBottom: 18 }]}>
                 {current.title}
               </Text>
-            </Animated.View>
-            <Animated.View style={rise(110)}>
-              <Text style={[reading, { fontSize: 17, lineHeight: 28 }]}>{current.text}</Text>
-            </Animated.View>
+            </StoryMotion>
+            <StoryMotion delay={TEXT_MOTION.step}>
+              <Text style={[reading, BODY]}>{current.text}</Text>
+            </StoryMotion>
           </>
         )
       case 'prayer':
-        return (
+        // A time of prayer (2026-11-26): the prayer shows when the reader asks for it, and a tap
+        // elsewhere goes on without it.
+        return prayerOpen ? (
           <>
-            <Animated.View style={rise()}>
+            <StoryMotion enter="fade">
+              <MaterialCommunityIcons
+                name="hands-pray"
+                size={22}
+                color={SOFT_INK}
+                style={{ marginBottom: 10 }}
+              />
+            </StoryMotion>
+            <StoryMotion>
               <Kicker>{t('dailyReading.prayer')}</Kicker>
-            </Animated.View>
-            <Animated.View style={rise(110)}>
-              <Text style={[reading, { fontSize: 19, lineHeight: 31 }]}>{current.text}</Text>
-            </Animated.View>
+            </StoryMotion>
+            <StoryMotion delay={TEXT_MOTION.step}>
+              <Text style={[reading, BODY]}>{current.text}</Text>
+            </StoryMotion>
           </>
+        ) : (
+          <View style={{ alignItems: 'center' }}>
+            <StoryMotion enter="pop" duration={TEXT_MOTION.riseDuration}>
+              <PrayerMedallion
+                label={t('dailyReading.pray')}
+                still={still}
+                onPress={() => setPrayerOpen(true)}
+              />
+            </StoryMotion>
+            <StoryMotion delay={TEXT_MOTION.step} style={{ marginTop: 32 }}>
+              <Text style={[reading, { fontSize: 30, lineHeight: 40, textAlign: 'center' }]}>
+                {t('dailyReading.prayerTime')}
+              </Text>
+            </StoryMotion>
+            <StoryMotion delay={TEXT_MOTION.step * 2}>
+              <Text
+                className="text-[13px] mt-[12px] text-center"
+                style={{ color: SOFT_INK, ...SHADOW }}
+              >
+                {t('dailyReading.prayHint')}
+              </Text>
+            </StoryMotion>
+          </View>
         )
       case 'text':
         return (
-          <Box className="gap-[14px]">
+          <Box className="gap-[20px]">
             {current.text.split(/\n\s*\n/).map((paragraph, paragraphIndex) => {
               // A publisher's source line (« AD 351.2 ») closes its paragraph, set as a source.
               const lines = paragraph.split('\n')
               const source =
                 lines.length > 1 && SOURCE_LINE.test(lines.at(-1)!) ? lines.pop() : undefined
               return (
-                <Animated.View key={paragraphIndex} style={rise(paragraphIndex * 90)}>
-                  <Text style={[reading, { fontSize: 17, lineHeight: 28 }]}>
-                    {lines.join('\n')}
-                  </Text>
+                <StoryMotion
+                  key={paragraphIndex}
+                  delay={paragraphIndex * TEXT_MOTION.paragraphStep}
+                >
+                  <Text style={[reading, BODY]}>{lines.join('\n')}</Text>
                   {source ? (
                     <Text className="text-[12px] mt-[4px]" style={{ color: SOFT_INK, ...SHADOW }}>
                       {source}
                     </Text>
                   ) : null}
-                </Animated.View>
+                </StoryMotion>
               )
             })}
           </Box>
@@ -344,15 +442,34 @@ const DailyStory = ({
       case 'end':
         return deeper ? (
           <>
-            <Animated.View style={rise()}>
-              <Kicker>{t('dailyReading.goDeeper')}</Kicker>
-            </Animated.View>
+            {/* Strobi floats on the right of the questions, its eyes on them. */}
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'flex-end',
+                justifyContent: 'space-between',
+              }}
+            >
+              <StoryMotion>
+                <Kicker>{t('dailyReading.goDeeper')}</Kicker>
+              </StoryMotion>
+              {onAskQuestion ? (
+                <StoryMotion
+                  enter="pop"
+                  delay={TEXT_MOTION.questionStep}
+                  duration={TEXT_MOTION.riseDuration}
+                  style={{ marginBottom: 8 }}
+                >
+                  <StoryStrobi size={64} asking={asking} still={still} />
+                </StoryMotion>
+              ) : null}
+            </View>
             <Box className={onAskQuestion ? 'gap-[12px]' : 'gap-[20px]'}>
               {questions.map((item, itemIndex) => (
-                <Animated.View key={item} style={rise(140 + itemIndex * 140)}>
+                <StoryMotion key={item} delay={(itemIndex + 1) * TEXT_MOTION.questionStep}>
                   {onAskQuestion ? (
                     <Pressable
-                      onPress={() => onAskQuestion(item)}
+                      onPress={() => askQuestion(item, itemIndex)}
                       accessibilityRole="button"
                       accessibilityHint={t('dailyReading.askStrobiHint')}
                       style={({ pressed }) => ({
@@ -370,44 +487,44 @@ const DailyStory = ({
                         opacity: pressed ? 0.9 : 1,
                       })}
                     >
-                      <Text style={[reading, { flex: 1, fontSize: 19, lineHeight: 27 }]}>
-                        {item}
-                      </Text>
+                      <Text style={[reading, QUESTION, { flex: 1 }]}>{item}</Text>
                       <FeatherIcon name="message-circle" size={18} color={INK} />
                     </Pressable>
                   ) : (
-                    <Text style={[reading, { fontSize: 20, lineHeight: 29 }]}>{item}</Text>
+                    <Text style={[reading, QUESTION]}>{item}</Text>
                   )}
-                </Animated.View>
+                </StoryMotion>
               ))}
             </Box>
             {onAskQuestion ? (
-              <Animated.View style={rise(140 + questions.length * 140)}>
+              <StoryMotion delay={(questions.length + 1) * TEXT_MOTION.questionStep}>
                 <Text
                   className="text-[13px] mt-[16px] text-center"
                   style={{ color: SOFT_INK, ...SHADOW }}
                 >
                   {t('dailyReading.askStrobiHint')}
                 </Text>
-              </Animated.View>
+              </StoryMotion>
             ) : null}
+            {closingButtons((questions.length + 2) * TEXT_MOTION.questionStep)}
           </>
         ) : (
-          <Animated.View exiting={native ? FadeOutUp.duration(220) : undefined}>
-            <Animated.View style={rise()}>
+          <View>
+            <StoryMotion>
               <Text
                 className="text-[11px] font-semibold uppercase tracking-[1.4px] mb-[16px] text-center"
                 style={{ color: SOFT_INK, ...SHADOW }}
               >
                 {t('dailyReading.forTheRoad')}
               </Text>
-            </Animated.View>
-            <Animated.View style={rise(120)}>
-              <Text style={[reading, { fontSize: 25, lineHeight: 36, textAlign: 'center' }]}>
+            </StoryMotion>
+            <StoryMotion delay={TEXT_MOTION.step}>
+              <Text style={[reading, { fontSize: 28, lineHeight: 40, textAlign: 'center' }]}>
                 {blessing}
               </Text>
-            </Animated.View>
-          </Animated.View>
+            </StoryMotion>
+            {closingButtons(TEXT_MOTION.buttonsDelay)}
+          </View>
         )
     }
   }
@@ -445,9 +562,11 @@ const DailyStory = ({
       ) : null}
       <View
         style={
-          native
+          native || !wide
             ? { flex: 1, width: stageWidth ?? '100%', overflow: 'hidden' }
-            : { height: '100%', aspectRatio: 1, maxWidth: '100%', overflow: 'hidden' }
+            : // A narrow window fills its whole height like a phone (2026-11-26); a wide one
+              // keeps the square in the middle.
+              { height: '100%', aspectRatio: 1, maxWidth: '100%', overflow: 'hidden' }
         }
       >
         {/* The far layer: sharp on the verse, blurred and darker behind the text. */}
@@ -457,6 +576,9 @@ const DailyStory = ({
             depth={BACKGROUND_DEPTH}
             focus={focus}
             focused={!sharpScene}
+            camera={camera}
+            cameraAt={cameraAt}
+            stage={stage}
             tilt={tilt}
             still={still}
           />
@@ -492,32 +614,60 @@ const DailyStory = ({
               left: 0,
               right: 0,
               top: insets.top + 64,
-              bottom: insets.bottom + (isEnd ? 156 : isOpening ? 132 : 96),
+              // The area stays the same from card to card, down to the bottom edge, so a card
+              // that leaves never moves: each card keeps its own room at the bottom instead.
+              bottom: 0,
               alignItems: 'center',
             },
+            // The browser draws the text once on its own layer and slides that layer, as it
+            // does the scene's pictures: drawn again at each step, the lines snapped to the
+            // pixels one after the other and the text moved in small jumps (2026-11-26).
+            native ? null : ({ willChange: 'transform' } as object),
             textTilt,
           ]}
         >
-          <ScrollView
-            key={index}
-            style={{ width: '100%', maxWidth: 560 }}
-            contentContainerStyle={{ flexGrow: 1 }}
-            showsVerticalScrollIndicator={false}
+          {/* The focus: the text comes a little closer on the reading cards. */}
+          <Animated.View
+            pointerEvents="box-none"
+            style={[{ flex: 1, alignSelf: 'stretch', alignItems: 'center' }, textFocus]}
           >
-            {/* The whole height answers a tap, above and below a short text too. */}
-            <Pressable
-              onPress={tap}
-              accessible={false}
-              style={{
-                flexGrow: 1,
-                justifyContent: 'center',
-                paddingHorizontal: 28,
-                paddingVertical: 12,
-              }}
-            >
-              <View accessibilityLiveRegion="polite">{renderCard(card)}</View>
-            </Pressable>
-          </ScrollView>
+            {/* One card at a time: the one that leaves fades out, then the next one's texts rise. */}
+            <StoryPresence>
+              <StoryMotion
+                key={`${round}:${index}:${deeper ? 'deeper' : ''}:${prayerOpen ? 'prayer' : ''}`}
+                enter="none"
+                leave
+                // A click beside the text, on a wide screen, reaches the tap area under it.
+                pointerEvents="box-none"
+                style={{ position: 'absolute', inset: 0, alignItems: 'center' }}
+              >
+                <ScrollView
+                  style={{ width: '100%', maxWidth: 560 }}
+                  contentContainerStyle={{
+                    flexGrow: 1,
+                    // The verse leaves room for « Changer de verset »; a reading card scrolls
+                    // behind the near layer, its last line stopping above it.
+                    paddingBottom: insets.bottom + (isOpening ? 132 : 96),
+                  }}
+                  showsVerticalScrollIndicator={false}
+                >
+                  {/* The whole height answers a tap, above and below a short text too. */}
+                  <Pressable
+                    onPress={tap}
+                    accessible={false}
+                    style={{
+                      flexGrow: 1,
+                      justifyContent: 'center',
+                      paddingHorizontal: 28,
+                      paddingVertical: 12,
+                    }}
+                  >
+                    <View accessibilityLiveRegion="polite">{renderCard(card)}</View>
+                  </Pressable>
+                </ScrollView>
+              </StoryMotion>
+            </StoryPresence>
+          </Animated.View>
         </Animated.View>
 
         {/* The near layer passes in front of the text. */}
@@ -527,6 +677,9 @@ const DailyStory = ({
             depth={FOREGROUND_DEPTH}
             focus={focus}
             focused={!sharpScene}
+            camera={camera}
+            cameraAt={cameraAt}
+            stage={stage}
             tilt={tilt}
             still={still}
             cutOut
@@ -602,72 +755,29 @@ const DailyStory = ({
           </View>
         </View>
 
-        {index === 0 && onChangeVerse ? (
-          <Animated.View
-            pointerEvents="box-none"
-            style={[
-              fadeIn(250),
-              {
-                position: 'absolute',
-                left: 24,
-                right: 24,
-                bottom: insets.bottom + 28,
-                alignItems: 'center',
-              },
-            ]}
-          >
-            <StoryButton
-              icon="refresh-cw"
-              label={t('dailyReading.changeVerse')}
-              onPress={onChangeVerse}
-            />
-          </Animated.View>
-        ) : null}
-
-        {isEnd ? (
-          <Animated.View
-            pointerEvents="box-none"
-            style={[
-              rise(260),
-              {
-                position: 'absolute',
-                left: 24,
-                right: 24,
-                bottom: insets.bottom + 24,
-                alignItems: 'center',
-              },
-            ]}
-          >
-            <View style={{ width: '100%', maxWidth: 420, gap: 10 }}>
-              <Animated.View
-                layout={native ? LinearTransition.duration(240) : undefined}
-                style={{ flexDirection: 'row', gap: 10 }}
-              >
-                {onShare ? (
-                  <Animated.View
-                    layout={native ? LinearTransition.duration(240) : undefined}
-                    style={{ flex: 1 }}
-                  >
-                    <StoryButton icon="share-2" label={t('Partager')} onPress={onShare} />
-                  </Animated.View>
-                ) : null}
-                {questions.length && !deeper ? (
-                  <Animated.View
-                    exiting={native ? FadeOut.duration(160) : undefined}
-                    style={{ flex: 1 }}
-                  >
-                    <StoryButton
-                      icon="compass"
-                      label={t('dailyReading.goFurther')}
-                      onPress={() => setDeeper(true)}
-                    />
-                  </Animated.View>
-                ) : null}
-              </Animated.View>
-              <StoryButton solid label={t('dailyReading.finish')} onPress={onClose} />
-            </View>
-          </Animated.View>
-        ) : null}
+        {/* Shown on the verse only: it fades in with it and out as the reading starts. */}
+        <View
+          pointerEvents="box-none"
+          style={{
+            position: 'absolute',
+            left: 24,
+            right: 24,
+            bottom: insets.bottom + 28,
+            alignItems: 'center',
+          }}
+        >
+          <StoryPresence>
+            {index === 0 && onChangeVerse ? (
+              <StoryMotion key="change-verse" enter="fade" delay={TEXT_MOTION.buttonsDelay} leave>
+                <StoryButton
+                  icon="refresh-cw"
+                  label={t('dailyReading.changeVerse')}
+                  onPress={onChangeVerse}
+                />
+              </StoryMotion>
+            ) : null}
+          </StoryPresence>
+        </View>
       </View>
     </View>
   )
@@ -703,11 +813,14 @@ type FeatherName = 'refresh-cw' | 'share-2' | 'compass'
 const StoryButton = ({
   label,
   icon,
+  leading,
   solid = false,
   onPress,
 }: {
   label: string
   icon?: FeatherName
+  /** Drawn before the label in the place of an icon. */
+  leading?: ReactNode
   solid?: boolean
   onPress: () => void
 }) => (
@@ -729,7 +842,8 @@ const StoryButton = ({
       opacity: pressed ? 0.92 : 1,
     })}
   >
-    {icon ? <FeatherIcon name={icon} size={15} color={solid ? '#1c1d22' : INK} /> : null}
+    {leading ??
+      (icon ? <FeatherIcon name={icon} size={15} color={solid ? '#1c1d22' : INK} /> : null)}
     <Text
       numberOfLines={1}
       className="text-[15px] font-medium"
