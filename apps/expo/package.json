@@ -1,6 +1,6 @@
 {
   "name": "@bible-strong/expo",
-  "version": "28.3.2",
+  "version": "28.3.3",
   "main": "index",
   "scripts": {
     "eas-build-pre-install": "corepack enable",
