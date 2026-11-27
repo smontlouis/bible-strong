@@ -4,7 +4,7 @@ Textes pour l'App Store et Google Play, en français et en anglais. Longueurs v�
 
 ## État au 27 novembre 2026
 
-- **App Store Connect** : tout est saisi dans la version 28.3.2 (build 308), en brouillon, **pas encore soumise**. Textes FR et EN, catégorie, URL, copyright, 10 captures iPhone et 10 captures iPad par langue, header et image de recherche iOS 27 (FR et EN).
+- **App Store Connect** : tout est saisi dans la version 28.3.2 (build 308), en brouillon, **pas encore soumise**. Textes FR et EN, catégorie, URL, copyright, 10 captures iPhone et 10 captures iPad par langue, header et image de recherche iOS 27 (FR et EN), 3 aperçus vidéo iPhone par langue.
 - **Google Play** : fiches FR (par défaut) et en-US publiées avec bandeau, 8 captures téléphone 9:16, 8 captures tablette 7" et 10", et vidéo YouTube. Les 8 captures desktop (Chromebook) par langue sont enregistrées en brouillon, à publier.
 - Les textes ci-dessous sont ceux qui ont été saisis.
 
@@ -35,6 +35,22 @@ Portraits adoucis : `assets/*-subject-soft.png` (fondu en bas et sur les côtés
 | Teaser EN 9:16 (Short) | `txLB_I5QJ-E` | — |
 
 Le teaser (film pitch, environ 60 s, avec l'avatar animé de Strobi) ne peut pas servir d'App Preview : Apple n'accepte que des images de l'app, de 15 à 30 s.
+
+## Aperçus vidéo App Store (App Previews, 27 novembre 2026)
+
+Trois parcours filmés dans l'app (simulateur iPhone 17), envoyés dans la 28.3.2, jeu « iPhone with Dynamic Island (medium display) », 886×1920, FR et EN, dans cet ordre :
+
+| # | Parcours | FR | EN |
+|---|---|---|---|
+| 1 | Cartes : nouvel onglet, Ruth 4, descendre, toucher un personnage, récupérer sa carte | Ruth, 22,6 s | Boaz, 21,5 s |
+| 2 | Mot à mot : Genèse 1 en interlinéaire, un mot, son étude, la concordance | « créa », 17,6 s | « God » (KJV), 18,4 s |
+| 3 | Frise : Chronologie, les patriarches, les Juges, Moïse | 16,8 s | 17,6 s |
+
+- **Son :** silencieux, par choix (la musique synthétisée faisait trop enfantin). La piste audio est vide.
+- **Titres :** en Pulp Display, sur un dégradé sombre en haut ou en bas de l'écran.
+- **Projet :** `videos/bible-strong-app-previews/`, hors git. Le README de ce dossier explique comment refaire une prise.
+- **iPad :** pas d'aperçu iPad. Ce n'est pas obligatoire : la fiche iPad montre les captures.
+- **Image d'aperçu :** c'est celle par défaut, prise à 5 s.
 
 ## App Store — français (fr-FR)
 

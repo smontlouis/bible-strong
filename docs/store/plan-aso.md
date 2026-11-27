@@ -33,7 +33,7 @@ Textes proposés pour l'étape 1 : `docs/store/fiches-stores.md`.
 
 ## Étape 3 — Vidéo
 
-- [ ] Une vidéo d'aperçu iPhone de 15 à 30 s, qui fonctionne sans le son.
+- [x] Une vidéo d'aperçu iPhone de 15 à 30 s, qui fonctionne sans le son. Trois parcours, FR et EN, envoyés dans la 28.3.2 (voir `fiches-stores.md`).
 - [ ] La même, reprise en vidéo YouTube Play et en boucle pour l'en-tête. (En attendant, la fiche Play utilise le teaser pitch sur YouTube.)
 - Le pipeline HyperFrames et `videos/bible-strong-feature-series` peuvent servir de base.
 
