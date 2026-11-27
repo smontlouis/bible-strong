@@ -1,4 +1,6 @@
 import { useBibleKeyboardShortcut } from './useBibleKeyboardShortcut'
+import { requestFeatureOnboarding } from '~features/feature-onboarding/featureOnboardingRequests'
+import { ONBOARDING_IDS } from '~features/feature-onboarding/onboardingConfig'
 import { nextAvailableStrongMode } from './bibleKeyboardActions'
 import InlineDisplayModeContent from './InlineDisplayModeContent'
 import { useAtomValue } from 'jotai/react'
@@ -115,6 +117,9 @@ const StrongModeSelectorSheet = ({
       actions.setStrongMode(mode, column)
       sheetRef?.current?.dismiss()
       onClose?.()
+      if (mode !== 'hidden') {
+        requestFeatureOnboarding(ONBOARDING_IDS.ORIGINAL_TEXT, { delayMs: 800 })
+      }
     }
   }
 

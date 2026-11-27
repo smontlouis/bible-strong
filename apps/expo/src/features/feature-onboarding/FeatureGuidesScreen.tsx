@@ -15,6 +15,8 @@ const ICONS: Record<OnboardingId, ComponentProps<typeof FeatherIcon>['name']> = 
   tabs: 'layers',
   studies: 'feather',
   'bible-audio': 'headphones',
+  'parallel-reading': 'columns',
+  'original-text': 'search',
 }
 
 /** Every explanation of the app, to see one again at will. */

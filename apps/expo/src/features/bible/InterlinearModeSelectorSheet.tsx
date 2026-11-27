@@ -1,4 +1,6 @@
 import InlineDisplayModeContent from './InlineDisplayModeContent'
+import { requestFeatureOnboarding } from '~features/feature-onboarding/featureOnboardingRequests'
+import { ONBOARDING_IDS } from '~features/feature-onboarding/onboardingConfig'
 import { twMerge } from '~common/ui/classNames'
 import { resolveThemeColor, colorWithOpacity } from '~themes/colorValues'
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
@@ -113,6 +115,7 @@ const InterlinearModeSelectorSheet = ({
       actions.setInterlinearMode(mode, selectedLocale, column)
       sheetRef?.current?.dismiss()
       onClose?.()
+      requestFeatureOnboarding(ONBOARDING_IDS.ORIGINAL_TEXT, { delayMs: 800 })
     }
   }
 

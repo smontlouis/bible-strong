@@ -1,4 +1,6 @@
 import BibleVerseKeyboardDialog from './BibleVerseKeyboardDialog'
+import { requestFeatureOnboarding } from '~features/feature-onboarding/featureOnboardingRequests'
+import { ONBOARDING_IDS } from '~features/feature-onboarding/onboardingConfig'
 import DisplayModeTrigger from './DisplayModeTrigger'
 import BibleSelectorTrigger from './BibleSelectorTrigger'
 import BibleBookmarkTrigger from '~features/bookmarks/BibleBookmarkTrigger'
@@ -198,6 +200,11 @@ const Header = ({
   }, [actions, bible])
 
   const { addParallelVersion, removeParallelVersion, removeAllParallelVersions } = actions
+  // The first time, the columns are explained once they are drawn.
+  const enterParallelReading = () => {
+    addParallelVersion()
+    requestFeatureOnboarding(ONBOARDING_IDS.PARALLEL_READING, { delayMs: 900 })
+  }
 
   const isHeaderCollapsed = !isFormSheet && isFullScreenBible
   const headerHeight = isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT
@@ -377,7 +384,7 @@ const Header = ({
     switch (id) {
       case 'parallel':
         if (isParallel) removeAllParallelVersions()
-        else addParallelVersion()
+        else enterParallelReading()
         break
       case 'history':
         router.push({ pathname: '/history', params: { filter: 'bible' } })
@@ -721,7 +728,7 @@ const Header = ({
                 {!isParallel && hasParallelButton && (
                   <AnimatedTouchableBox
                     className="overflow-hidden border-continuous items-center justify-center w-[36px] h-[40px]"
-                    onPress={addParallelVersion}
+                    onPress={enterParallelReading}
                     accessibilityRole="button"
                     accessibilityLabel={t('Affichage parallèle')}
                     style={opacityTransitionStyle}

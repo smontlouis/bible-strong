@@ -10,3 +10,6 @@ export type GestureDemoId =
   | 'audio-swipe-up'
   | 'word-double-tap'
   | 'annotation-double-tap'
+  | 'parallel-column-version'
+  | 'parallel-menu'
+  | 'strong-word-tap'

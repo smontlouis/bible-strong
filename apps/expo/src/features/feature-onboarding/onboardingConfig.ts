@@ -8,6 +8,8 @@ export const ONBOARDING_IDS = {
   TABS: 'tabs',
   STUDIES: 'studies',
   BIBLE_AUDIO: 'bible-audio',
+  PARALLEL_READING: 'parallel-reading',
+  ORIGINAL_TEXT: 'original-text',
 } as const
 
 export type OnboardingId = (typeof ONBOARDING_IDS)[keyof typeof ONBOARDING_IDS]
@@ -22,6 +24,8 @@ export const LATER_ONBOARDING_IDS: OnboardingId[] = [
   ONBOARDING_IDS.TABS,
   ONBOARDING_IDS.STUDIES,
   ONBOARDING_IDS.BIBLE_AUDIO,
+  ONBOARDING_IDS.PARALLEL_READING,
+  ONBOARDING_IDS.ORIGINAL_TEXT,
 ]
 
 /** Every explanation, in the order the settings list them to be seen again. */
@@ -29,6 +33,8 @@ export const ALL_ONBOARDING_IDS: OnboardingId[] = [
   ONBOARDING_IDS.VERSE_SELECTION,
   ONBOARDING_IDS.ANNOTATION_MODE,
   ONBOARDING_IDS.BOOK_SELECTOR,
+  ONBOARDING_IDS.ORIGINAL_TEXT,
+  ONBOARDING_IDS.PARALLEL_READING,
   ONBOARDING_IDS.TABS,
   ONBOARDING_IDS.STUDIES,
   ONBOARDING_IDS.BIBLE_AUDIO,
@@ -154,6 +160,37 @@ export const getOnboardingConfig = (id: OnboardingId, t: TFunction): OnboardingC
             title: t('onboarding.bible-audio.expand.title'),
             description: t('onboarding.bible-audio.expand.description'),
             demo: 'audio-swipe-up',
+          },
+        ],
+      }
+    case ONBOARDING_IDS.PARALLEL_READING:
+      return {
+        id,
+        steps: [
+          {
+            title: t('onboarding.parallel-reading.columns.title'),
+            description: t('onboarding.parallel-reading.columns.description'),
+            demo: 'parallel-column-version',
+          },
+          {
+            title: t('onboarding.parallel-reading.menu.title'),
+            description: t('onboarding.parallel-reading.menu.description'),
+            demo: 'parallel-menu',
+          },
+        ],
+      }
+    case ONBOARDING_IDS.ORIGINAL_TEXT:
+      return {
+        id,
+        steps: [
+          {
+            title: t('onboarding.original-text.tap.title'),
+            description: t('onboarding.original-text.tap.description'),
+            demo: 'strong-word-tap',
+          },
+          {
+            title: t('onboarding.original-text.switch.title'),
+            description: t('onboarding.original-text.switch.description'),
           },
         ],
       }

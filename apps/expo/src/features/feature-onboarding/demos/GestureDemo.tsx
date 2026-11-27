@@ -6,6 +6,7 @@ import {
   ChapterLongPressDemo,
   WordDoubleTapDemo,
 } from './readerDemos'
+import { ParallelColumnVersionDemo, ParallelMenuDemo, StrongWordTapDemo } from './readingModeDemos'
 import { ColorLongPressDemo, SelectionTabsSwipeDemo } from './selectionDemos'
 import { AudioSwipeUpDemo, StudyInsertDemo } from './studyAudioDemos'
 import { TabBarSwipeDemo, TabGroupsSwipeDemo } from './workspaceDemos'
@@ -21,6 +22,9 @@ const DEMOS: Record<GestureDemoId, (props: { label: string }) => React.JSX.Eleme
   'audio-swipe-up': AudioSwipeUpDemo,
   'word-double-tap': WordDoubleTapDemo,
   'annotation-double-tap': AnnotationDoubleTapDemo,
+  'parallel-column-version': ParallelColumnVersionDemo,
+  'parallel-menu': ParallelMenuDemo,
+  'strong-word-tap': StrongWordTapDemo,
 }
 
 /** The gesture a step teaches, drawn and played a few times; touched, it plays again. */
