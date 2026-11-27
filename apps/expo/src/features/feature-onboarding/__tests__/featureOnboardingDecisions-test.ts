@@ -1,6 +1,7 @@
 import {
   canShowFeatureOnboarding,
   decideLaterOnboardings,
+  FEATURE_ONBOARDING_GAP_MS,
   type FeatureOnboardingSituation,
 } from '../featureOnboardingDecisions'
 import {
@@ -53,7 +54,8 @@ describe('decideLaterOnboardings', () => {
 describe('canShowFeatureOnboarding', () => {
   const free: FeatureOnboardingSituation = {
     completed: [],
-    shownThisSession: false,
+    lastClosedAt: null,
+    now: 1_000_000,
     introductionOnScreen: false,
     modalOpen: false,
     platform: 'ios',
@@ -69,9 +71,11 @@ describe('canShowFeatureOnboarding', () => {
     ).toBe(false)
   })
 
-  it('shows one per session at most', () => {
-    expect(canShowFeatureOnboarding(ONBOARDING_IDS.TABS, { ...free, shownThisSession: true })).toBe(
-      false
+  it('waits a minute after the last one was closed', () => {
+    const closed = (msAgo: number) => ({ ...free, lastClosedAt: free.now - msAgo })
+    expect(canShowFeatureOnboarding(ONBOARDING_IDS.TABS, closed(30_000))).toBe(false)
+    expect(canShowFeatureOnboarding(ONBOARDING_IDS.TABS, closed(FEATURE_ONBOARDING_GAP_MS))).toBe(
+      true
     )
   })
 

@@ -4,7 +4,7 @@ import { isOnboardingCompletedAtom, onboardingOnScreenAtom } from '~features/onb
 import {
   completedOnboardingsAtom,
   featureOnboardingModalAtom,
-  featureOnboardingShownThisSessionAtom,
+  lastFeatureOnboardingClosedAtAtom,
   laterOnboardingsDecidedAtom,
 } from './atoms'
 import {
@@ -31,7 +31,8 @@ const readSituation = (): FeatureOnboardingSituation => {
   const store = getDefaultStore()
   return {
     completed: store.get(completedOnboardingsAtom),
-    shownThisSession: store.get(featureOnboardingShownThisSessionAtom),
+    lastClosedAt: store.get(lastFeatureOnboardingClosedAtAtom),
+    now: Date.now(),
     introductionOnScreen: store.get(onboardingOnScreenAtom),
     modalOpen: Boolean(store.get(featureOnboardingModalAtom)),
     platform: Platform.OS,
@@ -52,9 +53,7 @@ export function requestFeatureOnboarding(id: OnboardingId, { delayMs = 0 } = {})
   const open = () => {
     pending.delete(id)
     if (!canShowFeatureOnboarding(id, readSituation())) return
-    const store = getDefaultStore()
-    store.set(featureOnboardingShownThisSessionAtom, true)
-    store.set(featureOnboardingModalAtom, { onboardingId: id })
+    getDefaultStore().set(featureOnboardingModalAtom, { onboardingId: id })
   }
   if (delayMs <= 0) {
     open()

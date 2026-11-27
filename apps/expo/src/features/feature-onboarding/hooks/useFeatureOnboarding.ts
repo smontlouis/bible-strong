@@ -12,7 +12,7 @@ export const useFeatureOnboarding = () => {
     return !completedOnboardings.includes(id)
   }
 
-  // Shows the onboarding if it was not seen and none was shown this session.
+  // Shows the onboarding if it was not seen and none was closed in the last minute.
   // Call this AFTER triggering the action to explain what the user just did.
   const triggerIfNeeded = (id: OnboardingId, options?: { delayMs?: number }) =>
     requestFeatureOnboarding(id, options)

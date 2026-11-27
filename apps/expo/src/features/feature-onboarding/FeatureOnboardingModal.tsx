@@ -10,6 +10,7 @@ import { useSheet } from '~helpers/useSheet'
 import {
   completeOnboardingAtom,
   featureOnboardingModalAtom,
+  lastFeatureOnboardingClosedAtAtom,
   onboardingCurrentStepAtom,
 } from './atoms'
 import OnboardingFooter from './components/OnboardingFooter'
@@ -23,6 +24,7 @@ const FeatureOnboardingModal = () => {
 
   const [modalState, setModalState] = useAtom(featureOnboardingModalAtom)
   const completeOnboarding = useSetAtom(completeOnboardingAtom)
+  const setLastClosedAt = useSetAtom(lastFeatureOnboardingClosedAtAtom)
   const { ref, open, close } = useSheet()
 
   // Atoms for footer state
@@ -43,6 +45,7 @@ const FeatureOnboardingModal = () => {
   const handleNext = () => {
     if (isLast && modalState) {
       completeOnboarding(modalState.onboardingId)
+      setLastClosedAt(Date.now())
       close()
       setModalState(false)
     } else {
@@ -71,6 +74,7 @@ const FeatureOnboardingModal = () => {
   const handleClose = () => {
     if (modalState) {
       completeOnboarding(modalState.onboardingId)
+      setLastClosedAt(Date.now())
       setModalState(false)
     }
   }

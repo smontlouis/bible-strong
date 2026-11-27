@@ -13,8 +13,9 @@ export const laterOnboardingsDecidedAtom = atomWithAsyncStorage<boolean>(
   false
 )
 
-// One explanation per session at most: the next one waits for the next time its place is used.
-export const featureOnboardingShownThisSessionAtom = atom(false)
+// When the last explanation was closed, in this run of the app: the next one waits a minute after
+// it. Kept in memory only, so opening the app again starts afresh.
+export const lastFeatureOnboardingClosedAtAtom = atom<number | null>(null)
 
 // Onboarding navigation state atoms
 export const onboardingCurrentStepAtom = atom(0)

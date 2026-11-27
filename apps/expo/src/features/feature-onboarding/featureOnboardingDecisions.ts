@@ -20,9 +20,14 @@ export function decideLaterOnboardings({
   return [...completed, ...LATER_ONBOARDING_IDS.filter(id => !completed.includes(id))]
 }
 
+/** The time left between two explanations, counted from the closing of the first. */
+export const FEATURE_ONBOARDING_GAP_MS = 60_000
+
 export type FeatureOnboardingSituation = {
   completed: string[]
-  shownThisSession: boolean
+  /** When the last explanation was closed in this run of the app, if one was. */
+  lastClosedAt: number | null
+  now: number
   /** The app's introduction fills the screen. */
   introductionOnScreen: boolean
   /** An explanation is open already. */
@@ -31,12 +36,17 @@ export type FeatureOnboardingSituation = {
 }
 
 /**
- * Whether an explanation may open now: not seen yet, and none opened this session. The later ones
- * teach touch gestures, which the Web and the desktop app teach with their own tour.
+ * Whether an explanation may open now: not seen yet, and none closed in the last minute, so that
+ * two never follow each other. The later ones teach touch gestures, which the Web and the desktop
+ * app teach with their own tour.
  */
 export function canShowFeatureOnboarding(id: OnboardingId, situation: FeatureOnboardingSituation) {
   if (situation.completed.includes(id)) return false
-  if (situation.shownThisSession || situation.introductionOnScreen || situation.modalOpen) {
+  if (situation.introductionOnScreen || situation.modalOpen) return false
+  if (
+    situation.lastClosedAt !== null &&
+    situation.now - situation.lastClosedAt < FEATURE_ONBOARDING_GAP_MS
+  ) {
     return false
   }
   if (situation.platform === 'web' && id !== ONBOARDING_IDS.ANNOTATION_MODE) return false

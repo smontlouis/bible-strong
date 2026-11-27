@@ -13,7 +13,7 @@ import { useEffect } from 'react'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import {
   completedOnboardingsAtom,
-  featureOnboardingShownThisSessionAtom,
+  lastFeatureOnboardingClosedAtAtom,
   laterOnboardingsDecidedAtom,
 } from '~features/feature-onboarding/atoms'
 import { offlineResourceRegistry } from '~features/resources/resourceAvailability'
@@ -60,7 +60,7 @@ const TOOLS = {
   },
   featureOnboardings: {
     description:
-      'The explanations of the app (feature onboardings): which were seen, whether one was shown this session. With reset, makes some unseen again and frees the session.',
+      'The explanations of the app (feature onboardings): which were seen, when the last one was closed (the next waits a minute). With reset, makes some unseen again and lifts the wait.',
     arguments: {
       reset: 'Optional. Ids to make unseen (verse-selection, tabs…), or "all".',
     },
@@ -88,12 +88,12 @@ const featureOnboardings = ({ reset }: FeatureOnboardingsArgs = {}) => {
       completedOnboardingsAtom,
       planFeatureOnboardingsReset(jotai.get(completedOnboardingsAtom), reset)
     )
-    jotai.set(featureOnboardingShownThisSessionAtom, false)
+    jotai.set(lastFeatureOnboardingClosedAtAtom, null)
   }
   return {
     seen: jotai.get(completedOnboardingsAtom),
     laterDecided: jotai.get(laterOnboardingsDecidedAtom),
-    shownThisSession: jotai.get(featureOnboardingShownThisSessionAtom),
+    lastClosedAt: jotai.get(lastFeatureOnboardingClosedAtAtom),
   }
 }
 
