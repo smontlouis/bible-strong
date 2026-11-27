@@ -10,7 +10,15 @@ import { useWorkspaceRoutePanel } from '~navigation/useWorkspaceRoutePanel'
 import WorkspaceLayout from '~features/app-switcher/WorkspaceLayout'
 import IncomingLinkTab from '~features/app-switcher/IncomingLinkTab'
 import * as Sentry from '@sentry/react-native'
-import { Stack, useLocalSearchParams, usePathname, useSegments } from 'expo-router'
+import {
+  DarkTheme,
+  DefaultTheme,
+  Stack,
+  ThemeProvider as NavigationThemeProvider,
+  useLocalSearchParams,
+  usePathname,
+  useSegments,
+} from 'expo-router'
 import { useEffect, useRef, type ReactNode } from 'react'
 import { RootSiblingParent } from 'react-native-root-siblings'
 
@@ -26,7 +34,9 @@ import { BookSelectorSheetProvider } from '~features/bible/BookSelectorSheet/Boo
 import { StrongAudioProvider } from '~features/bible/StrongAudioProvider'
 import BibleAudioPlayerSheet from '~features/bible-audio/ui/BibleAudioPlayerSheet'
 import { appLogger } from '~helpers/agentObservability'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { createFormSheetOptions } from '~navigation/formSheetOptions'
+import { isDarkThemeName } from '~themes/darkThemes'
 import type { Theme } from '~themes/index'
 
 const NavigationTracking = () => {
@@ -51,9 +61,32 @@ const NavigationTracking = () => {
   return null
 }
 
+/**
+ * Every screen of the stack stands on the navigation theme's ground, which shows until the screen
+ * draws: the app's own, not the light grey React Navigation picks when it is given none.
+ */
+const useNavigationTheme = (theme: Theme) => {
+  const { theme: themeName } = useCurrentThemeSelector()
+  const dark = isDarkThemeName(themeName)
+  const base = dark ? DarkTheme : DefaultTheme
+  return {
+    ...base,
+    dark,
+    colors: {
+      ...base.colors,
+      primary: theme.colors.primary,
+      background: theme.colors.reverse,
+      card: theme.colors.reverse,
+      text: theme.colors.default,
+      border: theme.colors.border,
+    },
+  }
+}
+
 /** `children` mount inside the workspace providers: the desktop app adds its shell there. */
 const FullAppRuntime = ({ theme, children }: { theme: Theme; children?: ReactNode }) => {
   const panel = useWorkspaceRoutePanel()
+  const navigationTheme = useNavigationTheme(theme)
   return (
     <AppSwitcherProvider>
       <RootSiblingParent>
@@ -64,38 +97,40 @@ const FullAppRuntime = ({ theme, children }: { theme: Theme; children?: ReactNod
               {children}
               <NavigationTracking />
               <WorkspaceLayout>
-                <Stack
-                  screenOptions={{
-                    headerShown: false,
-                    contentStyle: {
-                      marginRight: panel.open ? panel.reservedWidth : 0,
-                      ...{
-                        transitionProperty: 'margin-right',
-                        transitionDuration: '240ms',
-                        transitionTimingFunction: 'cubic-bezier(0.2, 0, 0, 1)',
+                <NavigationThemeProvider value={navigationTheme}>
+                  <Stack
+                    screenOptions={{
+                      headerShown: false,
+                      contentStyle: {
+                        marginRight: panel.open ? panel.reservedWidth : 0,
+                        ...{
+                          transitionProperty: 'margin-right',
+                          transitionDuration: '240ms',
+                          transitionTimingFunction: 'cubic-bezier(0.2, 0, 0, 1)',
+                        },
                       },
-                    },
-                  }}
-                >
-                  <Stack.Screen name="index" />
-                  <Stack.Screen
-                    name="(timeline-search)"
-                    options={createFormSheetOptions(theme, { sheetAllowedDetents: [1] })}
-                  />
-                  <Stack.Screen
-                    name="(explore)"
-                    options={createFormSheetOptions(theme, { sheetAllowedDetents: [1] })}
-                  />
-                  <Stack.Screen
-                    name="(commentary)"
-                    options={createFormSheetOptions(theme, { sheetAllowedDetents: [1] })}
-                  />
-                  <Stack.Screen name="(library)" />
-                  <Stack.Screen
-                    name="strong"
-                    options={createFormSheetOptions(theme, { sheetAllowedDetents: [1] })}
-                  />
-                </Stack>
+                    }}
+                  >
+                    <Stack.Screen name="index" />
+                    <Stack.Screen
+                      name="(timeline-search)"
+                      options={createFormSheetOptions(theme, { sheetAllowedDetents: [1] })}
+                    />
+                    <Stack.Screen
+                      name="(explore)"
+                      options={createFormSheetOptions(theme, { sheetAllowedDetents: [1] })}
+                    />
+                    <Stack.Screen
+                      name="(commentary)"
+                      options={createFormSheetOptions(theme, { sheetAllowedDetents: [1] })}
+                    />
+                    <Stack.Screen name="(library)" />
+                    <Stack.Screen
+                      name="strong"
+                      options={createFormSheetOptions(theme, { sheetAllowedDetents: [1] })}
+                    />
+                  </Stack>
+                </NavigationThemeProvider>
               </WorkspaceLayout>
               <IncomingLinkTab />
               <WorkspaceAnalytics />
