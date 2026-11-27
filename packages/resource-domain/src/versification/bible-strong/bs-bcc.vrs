@@ -1,0 +1,97 @@
+# Versification "Bible Strong BCC1923": an overlay on Paratext org.vrs, for the Crampon Bible
+# (BCC1923).
+#
+# Crampon numbers as org (LSG), Psalm titles included, except in the chapters below: some follow
+# the Vulgate, others join or cut verses its own way. Only the 66 books are described (decided
+# 2026-11-27): the additions to Esther (10:4-16:24) and Daniel (3:24-90, 13, 14) have no
+# equivalent. Each line was checked against the LSG text (docs/research/versification.md,
+# section 2.6).
+#
+LEV 24:24
+DEU 5:30
+JOS 21:43
+JDG 5:32
+1CH 12:40
+NEH 7:73
+EST 10:13 11:12 12:6 13:18 14:19 15:19 16:24
+PSA 18:50 45:17
+ECC 7:28
+ISA 21:16 38:21
+JER 20:17 28:16 37:20
+DAN 3:100 13:65 14:42
+MAT 17:26
+MRK 4:40 8:39 9:49
+JHN 11:56
+ACT 14:27
+1CO 16:23
+HEB 13:24
+3JN 1:14
+#
+# Verses cut in two: Leviticus 24:23-24 is org 24:23, Judges 5:31-32 (5:32 "Le pays fut en
+# repos pendant quarante ans.") is org 5:31, Nehemiah 7:68-69 (horses and mules, camels and
+# asses) is org 7:68.
+#! &LEV 24:23-24 = LEV 24:23
+#! &JDG 5:31-32 = JDG 5:31
+#! &NEH 7:68-69 = NEH 7:68
+NEH 7:70-73 = NEH 7:69-72
+#
+# Deuteronomy 5:17 holds four commandments ("Tu ne tueras point. Tu ne commettras point
+# d'adultère. Tu ne déroberas point. Tu ne porteras point de faux témoignage…"), org 5:17-20.
+DEU 5:17 = DEU 5:17-20
+DEU 5:18-30 = DEU 5:21-33
+#
+# Joshua 21 has no org 21:36-37 (the cities of Reuben): Crampon 21:36 ("Et de la tribu de Gad:
+# la ville de refuge…, Ramoth en Galaad") is org 21:38.
+JOS 21:36 = JOS 21:38
+JOS 21:37 = JOS 21:38-39
+JOS 21:38-43 = JOS 21:40-45
+#
+# Verses that hold the next one: 1 Chronicles 12:4 (Samaïas…; Jérémie; Jéhéziel…) is org
+# 12:4-5, Matthew 17:14 org 17:14-15, Acts 14:6 org 14:6-7, Jeremiah 37:11 org 37:11-12.
+1CH 12:4 = 1CH 12:4-5
+1CH 12:5-40 = 1CH 12:6-41
+MAT 17:14 = MAT 17:14-15
+MAT 17:15-26 = MAT 17:16-27
+ACT 14:6 = ACT 14:6-7
+ACT 14:7-27 = ACT 14:8-28
+JER 37:11 = JER 37:11-12
+JER 37:12-20 = JER 37:13-21
+#
+# Last verses that hold the end of their chapter.
+PSA 18:50 = PSA 18:50-51
+PSA 45:17 = PSA 45:17-18
+ISA 21:16 = ISA 21:16-17
+ISA 38:21 = ISA 38:21-22
+JER 20:17 = JER 20:17-18
+JER 28:16 = JER 28:16-17
+MRK 4:40 = MRK 4:40-41
+JHN 11:56 = JHN 11:56-57
+1CO 16:23 = 1CO 16:23-24
+HEB 13:24 = HEB 13:24-25
+3JN 1:14 = 3JN 1:14-15
+#
+# Ecclesiastes 7:27 holds 7:28 ("…voici ce que mon âme cherche encore"), so 7:28 is org 7:29.
+ECC 7:27 = ECC 7:27-28
+ECC 7:28 = ECC 7:29
+#
+# Mark 9:1 ("Je vous le dis, en vérité, parmi ceux qui sont ici…") is the last verse of Mark 8,
+# as in the Vulgate.
+MRK 8:39 = MRK 9:1
+MRK 9:1-49 = MRK 9:2-50
+#
+# Esther 1-10:3 is numbered as org; 10:4-16:24 are the Greek additions.
+EST 10:4-13 =
+EST 11:1-12 =
+EST 12:1-6 =
+EST 13:1-18 =
+EST 14:1-19 =
+EST 15:1-19 =
+EST 16:1-24 =
+#
+# Daniel 3:24-90 (the Prayer of Azariah and the Song of the Three), 13 (Susanna) and 14 (Bel and
+# the Dragon) are additions; Crampon 3:91-100 ("Alors le roi Nabuchodonosor fut dans la
+# stupeur…") is org 3:24-33.
+DAN 3:24-90 =
+DAN 3:91-100 = DAN 3:24-33
+DAN 13:1-65 =
+DAN 14:1-42 =

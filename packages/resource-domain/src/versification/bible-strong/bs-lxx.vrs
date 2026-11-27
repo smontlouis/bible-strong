@@ -1,0 +1,124 @@
+# Versification "Bible Strong ThéoTeX Septuagint": an overlay on Paratext lxx.vrs, for the
+# ThéoTeX Septuagint (LXX) and its French translation (LXX_FR), which number alike.
+#
+# Only the 66 books are described (decided 2026-11-27): the additions and the books outside
+# them have no equivalent. A ThéoTeX verse that holds an addition in a lettered subdivision
+# ("(a)", folded into the verse) keeps the equivalent of its verse.
+#
+# Mapping lines go from ThéoTeX to org. They were checked against the French translation
+# (docs/research/versification.md, section 2.6).
+#
+1KI 5:31
+2CH 27:8
+EZR 11:0 12:0 13:0 14:0 15:0 16:0 17:0 18:0 19:0 20:0 21:0 22:0 23:0
+NEH 1:11 2:20 3:37 4:17 5:19 6:19 7:73 8:18 9:37 10:40 11:32 12:47 13:31
+EST 1:22 2:23 3:15 4:17 5:14 6:14 7:10 8:17 9:32 10:3
+JOB 42:19
+PRO 4:28
+JER 34:21
+DAN 1:21 2:49 3:97 4:37 5:30 6:29 7:28 8:27 9:27 10:21 11:45 12:13 13:64 14:41
+#
+# Numbers 26:1 ("Après la plaie, il advint que le Seigneur parla à Moïse…") opens with org 25:19,
+# as in the English Bibles.
+NUM 26:1 = NUM 25:19
+NUM 26:1 = NUM 26:1
+#
+# ThéoTeX splits 2 Esdras into Ezra 1-10 and Nehemiah 1-13, numbered as org. LXX Nehemiah
+# 7:68-69 ("{Sept cent trente-six chevaux…}", "{Quatre cent trente-cinq chameaux,} deux mille
+# sept cents ânes.") is org 7:68.
+#! &NEH 7:68-69 = NEH 7:68
+NEH 7:70-73 = NEH 7:69-72
+#
+# Esther 1-10 is numbered as org; the Greek additions are lettered subdivisions of its verses.
+#
+# Daniel: the Prayer of Azariah and the Song of the Three (3:24-90), Susanna (13) and Bel and
+# the Dragon (14) have no equivalent. LXX 3:91-97 is org 3:24-30, and LXX 4:1-3 ("Le roi
+# Nabuchodonosor dit à tous les peuples…") is org 3:31-33, as in the English Bibles.
+DAN 3:24-90 =
+DAN 3:91-97 = DAN 3:24-30
+DAN 4:1-3 = DAN 3:31-33
+DAN 4:4-37 = DAN 4:1-34
+DAN 13:1-64 =
+DAN 14:1-41 =
+#
+# Job 42:18-19 (the Syriac note on Job's genealogy) and Proverbs 4:28 (4:27b, "Lui-même prendra
+# soin de redresser les sentiers…") are additions.
+JOB 42:18-19 =
+PRO 4:28 =
+#
+# Jeremiah follows the Greek order, as lxx.vrs. Where lxx.vrs says a verse does not exist,
+# ThéoTeX prints one row for the range: 32:1 "(1-13) Ainsi prophétisa Jérémie sur toutes les
+# nations." is org 25:13, 32:14 "(14-15)" is org 25:15, and 46:4 "(4-14)" is org 39:14.
+JER 32:1 = JER 25:13
+JER 32:2-12 =
+JER 32:14 = JER 25:15
+JER 46:4 = JER 39:14
+JER 46:5-13 =
+#
+# Rows ThéoTeX prints for several verses, labelled "(n-m)": each goes to every org verse of
+# its range.
+1SA 13:1 = 1SA 13:1-2
+1SA 17:40 = 1SA 17:40-41
+1SA 17:49 = 1SA 17:49-50
+1SA 18:1 = 1SA 18:1-6
+1SA 18:9 = 1SA 18:9-11
+1SA 18:16 = 1SA 18:16-19
+1SA 23:11 = 1SA 23:11-12
+1KI 3:1 = 1KI 3:1-2
+1KI 5:5 = 1KI 5:5-9
+1KI 5:31 = 1KI 5:31-32
+1KI 6:11 = 1KI 6:11-15
+1KI 6:18 = 1KI 6:18-19
+1KI 8:11 = 1KI 8:11-13
+1KI 9:15 = 1KI 9:15-26
+1KI 11:3 = 1KI 11:3-4
+1KI 11:23 = 1KI 11:23-25
+1KI 11:39 = 1KI 11:39-40
+1KI 12:2 = 1KI 12:2-3
+1KI 12:17 = 1KI 12:17-18
+1KI 13:27 = 1KI 13:27-28
+1KI 14:1 = 1KI 14:1-21
+1KI 15:32 = 1KI 15:32-33
+1KI 22:47 = 1KI 22:47-51
+1CH 1:11 = 1CH 1:11-17
+1CH 1:18 = 1CH 1:18-24
+1CH 16:24 = 1CH 16:24-25
+2CH 27:8 = 2CH 27:8-9
+NEH 3:7 = NEH 3:7-8
+NEH 11:16 = NEH 11:16-17
+NEH 11:20 = NEH 11:20-22
+NEH 11:28 = NEH 11:28-30
+NEH 11:32 = NEH 11:32-36
+NEH 12:4 = NEH 12:4-7
+EST 4:6 = EST 4:6-7
+EST 9:5 = EST 9:5-6
+EST 9:30 = EST 9:30-31
+PSA 115:5 = PSA 116:14-15
+JER 2:1 = JER 2:1-2
+JER 7:1 = JER 7:1-2
+JER 8:11 = JER 8:11-13
+JER 10:6 = JER 10:6-11
+JER 11:7 = JER 11:7-8
+JER 26:26 = JER 46:26-27
+JER 28:45 = JER 51:45-49
+JER 30:22 = JER 49:6
+JER 30:22 = JER 49:28
+JER 34:1 = JER 27:1-2
+JER 34:7 = JER 27:7-8
+JER 34:13 = JER 27:13-14
+JER 34:17 = JER 27:17-18
+JER 34:21 = JER 27:21-22
+JER 36:16 = JER 29:16-21
+JER 37:10 = JER 30:10-12
+JER 37:15 = JER 30:15-16
+JER 37:22 = JER 30:22-23
+JER 52:2 = JER 52:2-4
+JER 52:15 = JER 52:15-16
+JER 52:28 = JER 52:28-31
+LAM 3:22 = LAM 3:22-25
+LAM 3:29 = LAM 3:29-30
+EZK 1:14 = EZK 1:14-15
+EZK 27:31 = EZK 27:31-32
+EZK 32:19 = EZK 32:19-20
+EZK 33:26 = EZK 33:26-27
+EZK 40:30 = EZK 40:30-31

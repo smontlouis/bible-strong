@@ -147,7 +147,7 @@ Les colonnes `org` et `eng` donnent le nombre de chapitres dont le dernier verse
 | | PDV2017 | défaut | `bs-pdv` | 15 | 150 | idem, Rm 8, Jude |
 | | TLV | défaut | `bs-tlv` | 11 | 138 | Nb 16-17 et 29-30 à l'anglaise, Dt 5, 1 S 23-24, Jr 30-31, Jon 4 |
 | | DEL | défaut | `bs-del` | 6 | 145 | Jn 1, Ac 19, Rm 7, 1 Co 13, 2 Th 3, Ap 12 |
-| | BCC1923 | `…catholic-extended-esther-daniel` | non décrite | 33 | 165 | Esther et Daniel grecs, versets isolés |
+| | BCC1923 | `…catholic-extended-esther-daniel` | `bible-strong-catholic-extended-esther-daniel` | 33 | 165 | Esther et Daniel grecs, versets isolés |
 | | SBLGNT (NT) | défaut | `bs-sblgnt` | 2 | 4 | Jn 7, Rm 16 |
 | | POV (NT) | défaut | `bs-pov` | 4 | 6 | Mt 8-9, Mc 9, Lc 1 |
 | **Anglaise** | NLT | défaut | `bs-eng` | 141 | 0 | aucun |
@@ -162,9 +162,9 @@ Les colonnes `org` et `eng` donnent le nombre de chapitres dont le dernier verse
 | **Protestante française mixte** | NEG79 | défaut | `bs-neg79` | 54 | 103 | Psaumes, Lv, Ct, Es, Éz et Mi à l'hébraïque ; Gn, Dt, Joël, Za et Mal à l'anglaise |
 | | OST | défaut | `bs-ost` | 76 | 88 | Psaumes presque hébraïques, Éz et Jon hébraïques, le reste surtout anglais |
 | | FMAR | défaut | `bs-fmar` | 78 | 81 | comme OST, Ap 12 à l'anglaise |
-| **Septante** | LXX | `theotex-septuagint` | non décrite | — | — | 55 chapitres ≠ `lxx`, dont Esdras, scindé par l'ADR-0018 |
-| | **LXX_FR** | **défaut** (à tort) | non décrite | — | — | 53 chapitres ≠ `lxx`. Psaumes numérotés comme la Septante : LXX_FR Ps 51:2 est « Quand Doeg l'Iduméen… », soit le Ps 52 hébreu (lu dans l'API) |
-| **Vulgate** | VUL | `clementine-vulgate` | non décrite | — | — | 17 chapitres ≠ `vul` (additions d'Esther, Ps 115-116, Gn 5) |
+| **Septante** | LXX | `theotex-septuagint` | `theotex-septuagint` | — | — | 55 chapitres ≠ `lxx`, dont Esdras, scindé par l'ADR-0018 |
+| | **LXX_FR** | **défaut** (à tort) | `theotex-septuagint` | — | — | 53 chapitres ≠ `lxx`. Psaumes numérotés comme la Septante : LXX_FR Ps 51:2 est « Quand Doeg l'Iduméen… », soit le Ps 52 hébreu (lu dans l'API) |
+| **Vulgate** | VUL | `clementine-vulgate` | `clementine-vulgate` | — | — | 17 chapitres ≠ `vul` (additions d'Esther, Ps 115-116, Gn 5) |
 
 **À retenir :**
 - LSG, la Bible par défaut en français, est **identique à `org`** ; KJV, la Bible par défaut en anglais, est identique à `eng` sauf en 3 Jean et en Apocalypse 12.
@@ -264,7 +264,7 @@ Sur LAU, le détecteur ne tranche pas : il déclare ambigus presque tous les liv
 
 ### 2.5 Les tables des autres Bibles
 
-Depuis le 27 novembre 2026, toutes les Bibles publiées ont une table, sauf BCC1923, LXX, LXX_FR et VUL. La colonne « Table Bible Strong » du tableau 2.2 donne la table de chacune.
+Depuis le 27 novembre 2026, toutes les Bibles publiées ont une table ; BCC1923, LXX, LXX_FR et VUL sont décrites en 2.6. La colonne « Table Bible Strong » du tableau 2.2 donne la table de chacune.
 
 | Table | Bibles | Base | Lignes | Vérification |
 |---|---|---|---:|---|
@@ -295,9 +295,51 @@ Depuis le 27 novembre 2026, toutes les Bibles publiées ont une table, sauf BCC1
 
 **Titres des psaumes.** Les Bibles anglaises modernes n'impriment pas le titre dans le verset : leur v. 1 est le premier verset du psaume, comme dans `bs-eng`, qui y replie le titre.
 
-**Non décrites :**
-- **BCC1923** suit la Vulgate dans une dizaine de chapitres (Jos 21, Jg 5, 1 Ch 12, Né 7, Mt 17, Mc 4, 8 et 9, Ac 14). Elle a ses propres coupes ailleurs : Lv 24:23 et Dt 5:17-20, et des fins de chapitre en Ps 18, Ps 45, Is 21, Jr 20, Jn 11 et He 13. Il faut aussi trancher pour les additions grecques d'Esther (10:4-16:24) et de Daniel (3:24-90, 13, 14), que `org` range dans d'autres livres.
-- **LXX, LXX_FR et VUL** demandent les tables Paratext `lxx` et `vul` et la même décision pour les livres 67 à 77 et les structures de l'ADR-0018. Je les ai laissées hors de ce travail.
+### 2.6 La Vulgate, la Septante et Crampon : les 66 livres seulement
+
+**Décision du 27 novembre 2026 (option A).** Pour VUL, LXX, LXX_FR et BCC1923, seuls les livres 1 à 66 sont décrits. Les additions et les livres hors des 66 n'ont pas d'équivalent : la conversion ne renvoie rien pour eux, et rien ne les vise. Cela couvre :
+- les livres 67 à 77, le Ps 151 et la Prière de Manassé ;
+- Esther 10:4-16:24 et Daniel 3:24-90, 13 et 14, tels que l'app les range.
+
+Les tables `org` de Paratext rangent ces textes dans d'autres livres (ESG, S3Y, SUS, BEL) : je ne les modélise pas.
+
+**Sources.** `vul.vrs` (version 1.5) et `lxx.vrs` (version 1.7) viennent de `ubsicap/versification_json`, sous licence MIT ; le commit est noté dans `paratext/README.md`. Une ligne de ces tables qui vise un livre hors des 66, ou une ligne Bible Strong sans rien à droite (`DAN 3:24-90 =`), marque un verset sans équivalent. Ce verset ne reçoit plus l'identité par défaut.
+
+| Table | Bibles | Base | Lignes | Vérification |
+|---|---|---|---:|---|
+| `clementine-vulgate` | VUL | `vul.vrs` | 15 | lu en latin aux chapitres différents |
+| `theotex-septuagint` | LXX, LXX_FR | `lxx.vrs` | 82 | lu dans la traduction française (LXX_FR), qui a la même numérotation |
+| `bible-strong-catholic-extended-esther-daniel` | BCC1923 | `org` | 43 | comparé verset par verset au texte de la LSG |
+
+**Vulgate clémentine** :
+- Elle suit `vul.vrs` (la Vulgate de Stuttgart), sauf aux endroits suivants :
+  - Gn 5:31 contient 5:32 ;
+  - Esther 1-10:3 est numérotée comme `org`, avec les additions en 10:4-16:24 ;
+  - Ps 115 et 147 sont numérotés à partir de 1 ;
+  - Jn 11:56, 2 Co 1:23 et 3 Jn 14 contiennent le verset suivant.
+- Deux lignes manquent à `vul.vrs` : Jon 2:1 (« Et præparavit Dominus piscem… ») est LSG 2:1, et Mt 17:14 est LSG 17:14-15.
+- Les incipits des psaumes confirment la table : 9:22 « Ut quid, Domine, recessisti longe » est LSG 10:1, 113:9 « Non nobis, Domine » LSG 115:1, 114:1 « Dilexi » LSG 116:1. Joël a 3 chapitres et Malachie 4, comme dans `vul.vrs`.
+
+**Septante ThéoTeX** (LXX, et LXX_FR qui a la même couverture, Suzanne et Bel en moins) :
+- **Jérémie** suit l'ordre grec de `lxx.vrs`, et non l'hébreu : 26:2 « Pour l'Égypte » est LSG 46:2, 32:14 « Prends de ma main cette coupe de vin pur » LSG 25:15, et 51:31 (Baruch) LSG 45:1.
+- **Psaumes** : 9:22, 113:9, 114-115 (Ps 116 hébreu coupé en deux) et 146-147 (Ps 147 hébreu coupé en deux) se vérifient aux incipits.
+- **3 Règnes 20 et 21** sont inversés, comme dans `lxx.vrs`.
+- **2 Esdras** est coupé en Esdras 1-10 et Néhémie 1-13, numérotés comme `org`, sauf Né 7:68-69 = LSG 7:68. Esther et Daniel, absents de `lxx.vrs` (Esther grecque et Daniel grec), sont décrits dans la surcouche : Esther comme `org`, Daniel avec 3:91-97 = LSG 3:24-30 et 4:1-3 = LSG 3:31-33.
+- **Lignes « (n-m) ».** ThéoTeX imprime 67 lignes pour plusieurs versets, notées « (n-m) ». Chacune vise tous les versets de sa plage. Trois remplacent des versets que `lxx.vrs` dit absents : Jr 32:1 « (1-13) » = LSG 25:13, Jr 32:14, Jr 46:4 « (4-14) » = LSG 39:14.
+- **Subdivisions.** Les subdivisions lettrées (« (a) », repliées dans leur verset par l'ADR-0018) restent dans le verset qui les porte. Seules les additions numérotées à part n'ont pas d'équivalent : Jb 42:18-19 et Pr 4:28.
+- **Versets LSG sans équivalent grec**, nommés par le test : 102, ceux que `lxx.vrs` n'attribue à aucun verset grec. On les trouve en Ex 36-39, Jos 8:30-35, 1 S 17:55-58, Jr 33:14-26, Jr 39:4-13, etc.
+
+**Crampon (BCC1923)** suit la LSG, avec une quarantaine de lignes :
+- **Comme la Vulgate** : Mc 8:39 = LSG 9:1, Mt 17:14 et Ac 14:6 contiennent le verset suivant, et Dn 3:91-100 = LSG 3:24-33.
+- **Ses propres coupes :**
+  - Lv 24:23-24 et Jg 5:31-32 coupent un verset LSG en deux ;
+  - Dt 5:17 réunit quatre commandements ;
+  - Jos 21 n'a pas LSG 21:36-37 (villes de Ruben) ;
+  - Jr 37:11 et Ec 7:27 contiennent le verset suivant ;
+  - onze derniers versets portent la fin de leur chapitre (Ps 18, Ps 45, Is 21, Is 38, Jr 20, Jr 28, Mc 4, Jn 11, 1 Co 16, He 13, 3 Jn).
+- **Méthode.** Chaque écart a été repéré par comparaison mot à mot avec la LSG, puis lu.
+
+Les numérotations existantes sont inchangées, verset par verset, par rapport à la version précédente.
 
 ---
 

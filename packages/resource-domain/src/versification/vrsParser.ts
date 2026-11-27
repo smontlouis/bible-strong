@@ -2,7 +2,8 @@
  * Reads the Paratext `.vrs` grammar: book lines giving the last verse of each chapter, and
  * mapping lines `BOOK c:v[-v] = BOOK c:v[-v]` from the versification to `org`. Lines starting
  * with `#!` are read as mappings (Paratext 7.3 and later); a leading `&` marks a range mapped
- * onto one verse. Other comments, excluded verses (`-`) and verse segments (`*`) are ignored:
+ * onto one verse. A verse mapped to a book outside the 66, or to nothing (`DAN 3:24-90 =`, a
+ * Bible Strong extension), has no equivalent. Other comments, excluded verses (`-`) and verse segments (`*`) are ignored:
  * none of the tables read here use them.
  *
  * Only the 66 books of the Protestant canon are read; other books are skipped.
@@ -89,6 +90,12 @@ export type VrsChapter = readonly [number, number, number]
 export interface VrsTable {
   chapters: VrsChapter[]
   mappings: VrsMapping[]
+  /**
+   * Verses with no equivalent among the 66 books: a line mapping them to another book (Vulgate
+   * Daniel 3:24-90 to the Song of the Three, `S3Y`), or a Bible Strong line with nothing on the
+   * right (`DAN 3:24-90 =`). Listed only when there are some.
+   */
+  unmapped?: VrsRange[]
 }
 
 export interface VrsParseOptions {
@@ -124,6 +131,7 @@ const length = (range: VrsRange): number => range[3] - range[2] + 1
 export const parseVrs = (source: string, options: VrsParseOptions = {}): VrsTable => {
   const chapters: VrsChapter[] = []
   const mappings: VrsMapping[] = []
+  const unmapped: VrsRange[] = []
   source.split(/\r?\n/).forEach((raw, index) => {
     const lineNumber = index + 1
     let line = raw.trim()
@@ -141,7 +149,11 @@ export const parseVrs = (source: string, options: VrsParseOptions = {}): VrsTabl
       if (rest.length > 0) throw new Error(`vrs-mapping-unreadable:${lineNumber}:${raw}`)
       const from = parseRange(left, lineNumber)
       const to = parseRange(right, lineNumber)
-      if (!from || !to) return
+      if (!from) return
+      if (!to) {
+        unmapped.push(from)
+        return
+      }
       if (length(from) !== length(to) && length(from) !== 1 && length(to) !== 1) {
         throw new Error(`vrs-mapping-lengths:${lineNumber}:${raw}`)
       }
@@ -160,7 +172,7 @@ export const parseVrs = (source: string, options: VrsParseOptions = {}): VrsTabl
       chapters.push([book, Number(match[1]), Number(match[2])])
     })
   })
-  return { chapters, mappings }
+  return unmapped.length > 0 ? { chapters, mappings, unmapped } : { chapters, mappings }
 }
 
 export type VrsVerse = readonly [number, number, number]

@@ -62,7 +62,7 @@ describe('verse keys between Bibles and resources', () => {
   })
 
   test('a Bible or resource without a known numbering keeps its keys', () => {
-    assert.deepEqual(bibleVerseKeyInResource('19-51-3', 'LXX_FR', 'cross-references:TRESOR'), [
+    assert.deepEqual(bibleVerseKeyInResource('19-51-3', 'UNKNOWN', 'cross-references:TRESOR'), [
       '19-51-3',
     ])
     assert.deepEqual(bibleVerseKeyInResource('19-51-3', 'LSG', 'commentary:aquifer-fr'), [
@@ -214,6 +214,28 @@ describe('conversions checked against the published texts', () => {
     assert.deepEqual(convertVerse('bs-tlv', 'org', v(5, 5, 18)).verses, [v(5, 5, 21)])
   })
 
+  test('the Vulgate, the Septuagint and Crampon, books 1-66 only', () => {
+    const VUL = 'clementine-vulgate'
+    const LXX = 'theotex-septuagint'
+    // Psalms 9-10 are one psalm: Vulgate and Septuagint 9:22 is LSG 10:1.
+    assert.deepEqual(toPivot(VUL, v(PSALMS, 9, 22)).verses, [v(PSALMS, 10, 1)])
+    assert.deepEqual(toPivot(LXX, v(PSALMS, 113, 9)).verses, [v(PSALMS, 115, 1)])
+    assert.deepEqual(toPivot(VUL, v(PSALMS, 147, 1)).verses, [v(PSALMS, 147, 12)])
+    // The Septuagint orders Jeremiah as the Greek: LXX 26:2 is LSG 46:2.
+    assert.deepEqual(toPivot(LXX, v(24, 26, 2)).verses, [v(24, 46, 2)])
+    assert.deepEqual(toPivot(LXX, v(16, 1, 1)).verses, [v(16, 1, 1)])
+    // Additions have no equivalent.
+    assert.deepEqual(toPivot(VUL, v(27, 3, 50)), { verses: [], exact: false })
+    assert.deepEqual(toPivot(LXX, v(27, 13, 1)), { verses: [], exact: false })
+    assert.deepEqual(convertVerse(VUL, 'org', v(27, 3, 91)).verses, [v(27, 3, 24)])
+    assert.deepEqual(toPivot('bible-strong-catholic-extended-esther-daniel', v(17, 11, 2)), {
+      verses: [],
+      exact: false,
+    })
+    assert.equal(bibleVerseKeyInBible('41-9-1', 'LSG', 'BCC1923'), '41-8-39')
+    assert.equal(bibleVerseKeyInBible('29-3-1', 'LSG', 'VUL'), '29-2-28')
+  })
+
   test('a verse that does not exist has no correspondence', () => {
     assert.deepEqual(toPivot('bs-kjv', v(39, 4, 7)), { verses: [], exact: false })
     assert.deepEqual(fromPivot('bs-kjv', v(39, 4, 1)), { verses: [], exact: false })
@@ -250,8 +272,50 @@ const allVerses = (id: VersificationId): VerseRef[] => {
   return verses
 }
 
-/** Verses with no org equivalent, keyed by versification. None so far. */
-const WITHOUT_EQUIVALENT: Readonly<Record<string, readonly string[]>> = {}
+/** The verse keys of ranges written `book-chapter-first..last`, or single keys. */
+const keysOf = (...ranges: string[]): string[] =>
+  ranges.flatMap(range => {
+    const match = /^(\d+-\d+)-(\d+)\.\.(\d+)$/.exec(range)
+    if (!match) return [range]
+    return Array.from(
+      { length: Number(match[3]) - Number(match[2]) + 1 },
+      (_, offset) => `${match[1]}-${Number(match[2]) + offset}`
+    )
+  })
+
+// The additions to Esther and Daniel of the Latin and French Catholic Bibles (books 1-66 only,
+// decided 2026-11-27).
+const LATIN_ADDITIONS = keysOf(
+  '17-10-4..13',
+  '17-11-1..12',
+  '17-12-1..6',
+  '17-13-1..18',
+  '17-14-1..19',
+  '17-15-1..19',
+  '17-16-1..24',
+  '27-3-24..90'
+)
+
+/** Verses with no org equivalent, keyed by versification: additions to the 66 books. */
+const WITHOUT_EQUIVALENT: Readonly<Record<string, readonly string[]>> = {
+  'clementine-vulgate': [...LATIN_ADDITIONS, ...keysOf('27-13-1..65', '27-14-1..42')],
+  'bible-strong-catholic-extended-esther-daniel': [
+    ...LATIN_ADDITIONS,
+    ...keysOf('27-13-1..65', '27-14-1..42'),
+  ],
+  // Job's genealogy, Psalm 151, Proverbs 4:27b, the verses lxx.vrs says Jeremiah lacks, and the
+  // additions to Daniel.
+  'theotex-septuagint': keysOf(
+    '18-42-18..19',
+    '19-151-1..7',
+    '20-4-28',
+    '24-32-2..12',
+    '24-46-5..13',
+    '27-3-24..90',
+    '27-13-1..64',
+    '27-14-1..41'
+  ),
+}
 
 /** Org verses a numbering has no verse for, keyed by versification: verses its text lacks. */
 const ORG_WITHOUT_EQUIVALENT: Readonly<Record<string, readonly string[]>> = {
@@ -263,6 +327,35 @@ const ORG_WITHOUT_EQUIVALENT: Readonly<Record<string, readonly string[]>> = {
   'bs-chu': ['19-119-8', '43-7-53'],
   // The published SBLGNT leaves out John 7:53 and the doxology of Romans 16:25-27.
   'bs-sblgnt': ['43-7-53', '45-16-25', '45-16-26', '45-16-27'],
+  // Crampon has no Joshua 21:36-37 (the cities of Reuben).
+  'bible-strong-catholic-extended-esther-daniel': ['6-21-36', '6-21-37'],
+  // Hebrew verses lxx.vrs gives no Septuagint verse: absent from the Greek, or only in a
+  // lettered subdivision (1 Kings 4:20 in 2:46a).
+  'theotex-septuagint': keysOf(
+    '2-36-9..17',
+    '2-36-20..23',
+    '2-36-25..38',
+    '2-37-22..29',
+    '2-38-28..31',
+    '2-39-31..43',
+    '4-6-27',
+    '6-8-30..35',
+    '6-10-43',
+    '6-13-33',
+    '9-17-55..58',
+    '9-18-30',
+    '11-4-20',
+    '11-6-37..38',
+    '11-7-51',
+    '16-3-38',
+    '20-18-23..24',
+    '23-2-22',
+    '23-56-12',
+    '24-25-14',
+    '24-33-14..26',
+    '24-39-4..13',
+    '24-48-45..47'
+  ),
 }
 
 describe('every verse goes to org and back', () => {
@@ -303,6 +396,7 @@ const KNOWN_DIFFERENCES: Readonly<Record<string, readonly string[]>> = {
   BDS: ['13-25'], // 1 Chronicles 25 ends with a merged verse
   BHS: ['29-4'], // Joel 4 is missing from the publication
   CHU: ['14-36', '29-4'], // 2 Chronicles 36 and Joel 4 are missing from the publication
+  LXX_FR: ['27-13', '27-14'], // Susanna and Bel are not translated
 }
 
 describe('every declared Bible matches its versification', () => {

@@ -1,7 +1,7 @@
 import { parseVrs, type VrsTable } from './vrsParser'
 
 /** The Paratext tables, unchanged (MIT, see paratext/README.md). */
-export const PARATEXT_TABLES = ['eng', 'org'] as const
+export const PARATEXT_TABLES = ['eng', 'org', 'vul', 'lxx'] as const
 export type ParatextTableId = (typeof PARATEXT_TABLES)[number]
 
 /** The Bible Strong overlays, each listing only what differs from its base. */
@@ -28,6 +28,9 @@ export const BIBLE_STRONG_OVERLAYS = [
   'bs-chu',
   'bs-sblgnt',
   'bs-pov',
+  'bs-vul',
+  'bs-lxx',
+  'bs-bcc',
 ] as const
 export type BibleStrongOverlayId = (typeof BIBLE_STRONG_OVERLAYS)[number]
 

@@ -1,0 +1,47 @@
+# Versification "Bible Strong Clementine Vulgate": an overlay on Paratext vul.vrs, for the
+# Clementine Vulgate (VUL).
+#
+# Only the 66 books are described (decided 2026-11-27): the additions to Esther (10:4-16:24)
+# and Daniel (3:24-90, 13, 14) and the books outside them have no equivalent. vul.vrs maps
+# Daniel's additions to other books, which are not read; Esther 10:4-16:24 has no org verse.
+#
+# The Clementine text differs from vul.vrs (the Stuttgart Vulgate) in the chapters below.
+#
+GEN 5:31
+EST 1:22 4:17 5:14 8:17 11:12 12:6 13:18 14:19 15:19 16:24
+PSA 115:10 147:9
+DAN 14:42
+JHN 11:56
+2CO 1:23
+3JN 1:14
+#
+# Genesis 5:31 ends with "Noë vero cum quingentorum esset annorum, genuit Sem, Cham et Japheth",
+# org 5:32.
+GEN 5:31 = GEN 5:31-32
+#
+# Esther 1-10:3 is numbered as org: the Clementine puts the additions in 10:4-16:24.
+EST 10:4-13 =
+EST 11:1-12 =
+EST 12:1-6 =
+EST 13:1-18 =
+EST 14:1-19 =
+EST 15:1-19 =
+EST 16:1-24 =
+#
+# Psalm 115 ("Alleluja. Credidi, propter quod locutus sum…") is numbered 1-10, org 116:10-19;
+# Psalm 147 ("Alleluja. Lauda, Jerusalem, Dominum…") 1-9, org 147:12-20.
+PSA 115:1-10 = PSA 116:10-19
+PSA 147:1-9 = PSA 147:12-20
+#
+# John 11:56 ends with "Dederant autem pontifices et pharisæi mandatum…" (org 11:57),
+# 2 Corinthians 1:23 with "non quia dominamur fidei vestræ…" (org 1:24), and 3 John 14 with
+# "Pax tibi. Salutant te amici…" (org 15).
+JHN 11:56 = JHN 11:56-57
+2CO 1:23 = 2CO 1:23-24
+3JN 1:14 = 3JN 1:14-15
+#
+# Two lines vul.vrs leaves out: Jonah 2:1 ("Et præparavit Dominus piscem grandem…") is org 2:1,
+# not 2:2 (vul.vrs maps a verse 1:17 its own chapter list does not have), and Matthew 17:14
+# ("…Domine, miserere filio meo, quia lunaticus est…") is org 17:14-15, as its comment says.
+JON 2:1-10 = JON 2:1-10
+MAT 17:14 = MAT 17:14-15

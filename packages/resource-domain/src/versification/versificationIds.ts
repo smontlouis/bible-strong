@@ -25,6 +25,9 @@ export const VERSIFICATION_ID_LIST = [
   'bs-chu',
   'bs-sblgnt',
   'bs-pov',
+  'clementine-vulgate',
+  'theotex-septuagint',
+  'bible-strong-catholic-extended-esther-daniel',
 ] as const
 
 export type VersificationId = (typeof VERSIFICATION_ID_LIST)[number]

@@ -110,6 +110,11 @@ const DEFINITIONS: Record<VersificationId, VersificationDefinition> = {
   'bs-chu': { table: 'org', overlays: ['bs-chu'] },
   'bs-sblgnt': { table: 'org', overlays: ['bs-sblgnt'] },
   'bs-pov': { table: 'org', overlays: ['bs-pov'] },
+  // The Vulgate and the Septuagint, books 1-66 only: additions and books outside them have no
+  // equivalent (decided 2026-11-27).
+  'clementine-vulgate': { table: 'vul', foldPsalmTitlesIntoVerse1: true, overlays: ['bs-vul'] },
+  'theotex-septuagint': { table: 'lxx', foldPsalmTitlesIntoVerse1: true, overlays: ['bs-lxx'] },
+  'bible-strong-catholic-extended-esther-daniel': { table: 'org', overlays: ['bs-bcc'] },
 }
 
 export const VERSIFICATION_IDS = Object.keys(DEFINITIONS) as VersificationId[]
@@ -165,6 +170,10 @@ export const BIBLE_VERSIFICATIONS: Readonly<Record<string, VersificationId>> = {
   CHU: 'bs-chu',
   SBLGNT: 'bs-sblgnt',
   POV: 'bs-pov',
+  VUL: 'clementine-vulgate',
+  LXX: 'theotex-septuagint',
+  LXX_FR: 'theotex-septuagint',
+  BCC1923: 'bible-strong-catholic-extended-esther-daniel',
 }
 
 /**
@@ -264,22 +273,26 @@ const addTo = (map: Map<string, VerseRef[]>, key: string, ref: VerseRef): void =
 
 const buildIndex = (definition: VersificationDefinition): VersificationIndex => {
   const lastVerses = new Map<number, number[]>()
+  // A pair whose target is null marks a verse with no equivalent among the 66 books.
+  type Pair = readonly [VrsVerse, VrsVerse | null]
+  const pairsOf = (table: VrsTable): Pair[] => [
+    ...table.mappings.flatMap(expandVrsMapping),
+    ...(table.unmapped ?? []).flatMap(([book, chapter, first, last]) =>
+      Array.from(
+        { length: last - first + 1 },
+        (_, offset) => [[book, chapter, first + offset] as VrsVerse, null] as const
+      )
+    ),
+  ]
   applyChapters(lastVerses, tables.paratext[definition.table])
-  let pairs = tables.paratext[definition.table].mappings
-    .flatMap(expandVrsMapping)
-    .map(
-      ([from, to]) =>
-        [
-          definition.foldPsalmTitlesIntoVerse1 && from[2] === 0
-            ? ([from[0], from[1], 1] as const)
-            : from,
-          to,
-        ] as const
-    )
+  let pairs: Pair[] = pairsOf(tables.paratext[definition.table]).map(([from, to]) => [
+    definition.foldPsalmTitlesIntoVerse1 && from[2] === 0 ? ([from[0], from[1], 1] as const) : from,
+    to,
+  ])
   for (const overlayId of definition.overlays ?? []) {
     const overlay = tables.overlays[overlayId]
     applyChapters(lastVerses, overlay)
-    const overlayPairs = overlay.mappings.flatMap(expandVrsMapping)
+    const overlayPairs = pairsOf(overlay)
     const replaced = new Set(overlayPairs.map(([from]) => formatVerseKey(toRef(from))))
     pairs = [
       ...pairs.filter(([from]) => !replaced.has(formatVerseKey(toRef(from)))),
@@ -302,20 +315,24 @@ const buildIndex = (definition: VersificationDefinition): VersificationIndex => 
     addTo(index.forward, formatVerseKey(source), target)
     addTo(index.reverse, formatVerseKey(target), source)
   }
+  // A verse a line names takes only the targets of its lines: one with no target, or only a
+  // target org does not have (the verse 0 of a Psalm in vul.vrs), has no equivalent.
+  const named = new Set(pairs.map(([from]) => formatVerseKey(toRef(from))))
+  const org = definition.table === 'org' && !definition.overlays ? undefined : indexOf('org')
   for (const [from, to] of pairs) {
     const source = toRef(from)
+    if (!to || (org && !existsIn(org, toRef(to)))) continue
     if (source.verse === 0) index.zeroVerses.add(formatVerseKey(source))
     link(source, toRef(to))
   }
   // As in Paratext, a verse no mapping names is the org verse of the same number, even when
   // another verse maps there too (KJV Nehemiah 7:68 and 7:69 are both LSG 7:68).
-  if (definition.table !== 'org' || definition.overlays) {
-    const org = indexOf('org')
+  if (org) {
     for (const [book, chapters] of lastVerses) {
       chapters.forEach((lastVerse, chapterIndex) => {
         for (let verse = 1; verse <= lastVerse; verse++) {
           const ref = { book, chapter: chapterIndex + 1, verse }
-          if (!index.forward.has(formatVerseKey(ref)) && existsIn(org, ref)) link(ref, ref)
+          if (!named.has(formatVerseKey(ref)) && existsIn(org, ref)) link(ref, ref)
         }
       })
     }
