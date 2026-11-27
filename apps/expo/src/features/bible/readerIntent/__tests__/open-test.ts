@@ -31,6 +31,7 @@ jest.mock('~i18n', () => ({
 jest.mock('@bible-strong/resource-catalog/commentaries', () => ({
   getCommentaryByPublicationId: (resourceId: string) =>
     resourceId === 'matthew-henry' ? { id: 'mhy', shortName: 'Matthew Henry' } : undefined,
+  COMMENTARY_CATALOG_BY_ID: new Map([['barnes', { id: 'barnes', publicationId: 'barnes' }]]),
 }))
 
 import { previewHistoryAtom } from '~features/bibleReferencePreview/previewHistory'
@@ -459,6 +460,52 @@ describe('open intents on a native platform', () => {
       {
         pathname: '/commentary-entry',
         params: { projectionId: 'mhy:fr', book: '1', chapter: '22', atVerse: '2' },
+      },
+    ])
+  })
+
+  it('opens a commentary of the study at its own verse: LSG Malachi 3:23 is KJV 4:5', async () => {
+    const reader = setup()
+
+    await reader.send({
+      kind: 'open',
+      origin: 'focus-study',
+      verseKey: '39-3-23',
+      target: { kind: 'commentary-entry', projectionId: 'barnes:en' },
+    })
+    expect(reader.routes).toEqual([
+      {
+        pathname: '/commentary-entry',
+        params: { projectionId: 'barnes:en', book: '39', chapter: '4', atVerse: '5' },
+      },
+    ])
+  })
+
+  it('opens the chip of a section numbered in another chapter in that chapter', async () => {
+    const reader = setup({
+      reader: {
+        inlineCommentaries: {
+          chips: [{ ...commentaryChip, sectionId: 'gen-2-1', chapter: 2 }],
+          indexes: [],
+        },
+      },
+    })
+
+    await reader.send({
+      kind: 'open',
+      origin: 'inline-commentary',
+      target: {
+        kind: 'commentary-section',
+        resourceId: 'matthew-henry',
+        language: 'en',
+        revision: 'r2',
+        sectionId: 'gen-2-1',
+      },
+    })
+    expect(reader.routes).toEqual([
+      {
+        pathname: '/commentary-entry',
+        params: expect.objectContaining({ book: '1', chapter: '2', sectionId: 'gen-2-1' }),
       },
     ])
   })

@@ -10,6 +10,8 @@ jest.mock('~assets/bible_versions/books-desc', () => {
     Chapitres: 1,
   }))
   books[39] = { Numero: 40, Nom: 'Matthieu', Chapitres: 28 }
+  books[38] = { Numero: 39, Nom: 'Malachie', Chapitres: 4 }
+  books[18] = { Numero: 19, Nom: 'Psaumes', Chapitres: 150 }
   return books
 })
 
@@ -102,5 +104,35 @@ describe('commentary reference navigation in the version being read', () => {
     ).toMatchObject({
       params: { verse: '13', version: 'NBS' },
     })
+  })
+
+  it('opens a passage of a KJV-numbered commentary at the verses of the Bible shown', () => {
+    const numbering = { resource: 'commentary:barnes', shownVersion: 'LSG' }
+    expect(
+      getCommentaryPassageBibleViewRoute({
+        book: 39,
+        chapter: 4,
+        startVerse: 5,
+        endVerse: 6,
+        numbering,
+      })?.params
+    ).toMatchObject({ chapter: '3', verse: '23', focusVerses: JSON.stringify([23, 24]) })
+    expect(getCommentaryBibleViewRoute('Mal.4.5', 'LSG', numbering)?.params).toMatchObject({
+      book: JSON.stringify({ Numero: 39, Nom: 'Malachie', Chapitres: 4 }),
+      chapter: '3',
+      verse: '23',
+      focusVerses: JSON.stringify([23]),
+      version: 'LSG',
+    })
+    // The title of the psalm, held by the KJV verse 1, is not where the passage opens.
+    expect(
+      getCommentaryBibleViewRoute('Ps.51.1-Ps.51.4', undefined, numbering)?.params
+    ).toMatchObject({ chapter: '51', verse: '3', focusVerses: JSON.stringify([3, 4, 5, 6]) })
+  })
+
+  it('keeps the passage when the Bible shown numbers it as the commentary', () => {
+    expect(
+      getCommentaryBibleViewRoute('Mal.4.5', 'KJV', { resource: 'commentary:barnes' })?.params
+    ).toMatchObject({ chapter: '4', verse: '5', focusVerses: JSON.stringify([5]) })
   })
 })

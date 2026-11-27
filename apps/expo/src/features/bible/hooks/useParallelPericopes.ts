@@ -6,7 +6,7 @@ import { localQueryOptions } from '~helpers/queryOptions'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { useStableValue } from '~helpers/useStableList'
 import type { ParallelVerse, PericopeChapter } from '../BibleDOM/BibleDOMWrapper'
-import { getVersesPericopeChapter } from '../chapterPericope'
+import { getParallelPericopeChapter } from '../chapterPericope'
 
 const isCanonicalParallel = (parallel: ParallelVerse) =>
   parallel.verses.some(verse => verse.TextRevision)
@@ -43,7 +43,7 @@ export const useParallelPericopes = ({
     const pericope: Pericope | null | undefined = isCanonicalParallel(parallel)
       ? getCanonicalChapterPericope(parallel.verses)
       : legacyPericopes[legacyIndex]?.data
-    return [parallel.id, getVersesPericopeChapter(pericope, parallel.verses)] as const
+    return [parallel.id, getParallelPericopeChapter(pericope, parallel)] as const
   })
 
   return useStableValue(Object.fromEntries(pericopes), JSON.stringify(pericopes))

@@ -57,7 +57,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
 
   const {
     hasBackButton,
-    data: { selectedVerses, strongMode = false },
+    data: { selectedVerses, strongMode = false, sourceVersion },
   } = compareTab
 
   const title = verseToReference(selectedVerses)
@@ -148,6 +148,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
                       data: {
                         selectedVerses,
                         strongMode,
+                        sourceVersion,
                       },
                     })
                     break
@@ -166,6 +167,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
       >
         <CompareCard
           selectedVerses={selectedVerses}
+          sourceVersion={sourceVersion}
           strongMode={strongMode}
           onChangeVerse={verse => setSelectedVerses({ [verse]: true })}
           onChooseVersions={() => compareVersionSelectorRef.current?.present()}

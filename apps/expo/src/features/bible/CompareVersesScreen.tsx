@@ -7,7 +7,7 @@ import { CompareTab } from '../../state/tabs'
 import CompareVersesTabScreen from './CompareVersesTabScreen'
 
 const CompareVersesScreen = () => {
-  const params = useLocalSearchParams<{ selectedVerses?: string }>()
+  const params = useLocalSearchParams<{ selectedVerses?: string; sourceVersion?: string }>()
 
   // Parse params from URL strings
   const selectedVerses = params.selectedVerses ? JSON.parse(params.selectedVerses) : undefined
@@ -21,6 +21,7 @@ const CompareVersesScreen = () => {
       type: 'compare',
       data: {
         selectedVerses,
+        ...(params.sourceVersion ? { sourceVersion: params.sourceVersion } : {}),
       },
     } as CompareTab)
   )

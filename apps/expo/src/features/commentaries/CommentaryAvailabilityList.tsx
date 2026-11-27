@@ -119,7 +119,10 @@ const CommentaryAvailabilityList = ({ items, headerTitle, onManage, onOpen }: Pr
                     </Text>
                     {item.comment ? (
                       <Text className="mt-[3px] text-grey text-[12px]" numberOfLines={1}>
-                        {formatCommentaryPassageLabel(headerTitle, item.comment)}
+                        {formatCommentaryPassageLabel(
+                          headerTitle,
+                          item.passageRange ?? item.comment
+                        )}
                         {(item.comment.matchingSectionCount ?? 1) > 1
                           ? ` · ${t('commentaries.resource.sectionCount', {
                               count: item.comment.matchingSectionCount,

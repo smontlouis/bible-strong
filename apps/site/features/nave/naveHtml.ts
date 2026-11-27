@@ -1,5 +1,6 @@
 import { editorialHtmlToText, sanitizeEditorialHtml } from '../resources/editorialHtml'
 import {
+  naveReferenceInBible,
   naveReferenceLinks,
   parseNaveVerseTarget,
   resolveNaveHref,
@@ -32,7 +33,10 @@ export type NaveDescription = {
   headings: string[]
   /** How many Bible references the topic cites. */
   referenceCount: number
-  /** The passages it cites, in the order of the outline. */
+  /**
+   * The passages it cites, in the order of the outline, numbered as the Bible of the page
+   * language numbers them.
+   */
   references: NaveVerseReference[]
 }
 
@@ -46,11 +50,12 @@ export type NaveDescription = {
 const parseNaveOutline = (
   html: string,
   language: NaveLinkContext['language']
-): { blocks: NaveBlock[]; references: NaveVerseReference[] } => {
+): { blocks: NaveBlock[]; references: NaveVerseReference[]; referenceCount: number } => {
   const root: NaveEntry = { blocks: [] }
   const stack: NaveFrame[] = [{ kind: 'root', entry: root }]
   let line = ''
   const references: NaveVerseReference[] = []
+  let referenceCount = 0
 
   // The entry text and lists are added to. What a list holds between two of its entries
   // continues the one before it.
@@ -99,13 +104,23 @@ const parseNaveOutline = (
       const end = reference ? LINK_END_PATTERN.exec(html.slice(position)) : null
       if (reference && end) {
         // The label of a verse link is rebuilt from its target: both publications print the
-        // French book names, and a list of verses becomes one link per passage.
-        line += naveReferenceLinks(reference, language)
-          .map(link => `<a href="v=${link.target}">${link.label}</a>`)
-          .join(',')
+        // French book names, and a list of verses becomes one link per passage. The target is
+        // first read in the numbering of the Bible it opens in, once: the links and the
+        // quoted verses use it as it is. Verses without an equivalent keep their text.
+        const converted = naveReferenceInBible(reference, language)
+        line += converted.length
+          ? converted
+              .map(passage =>
+                naveReferenceLinks(passage, language)
+                  .map(link => `<a href="v=${link.target}">${link.label}</a>`)
+                  .join(',')
+              )
+              .join('; ')
+          : html.slice(position, position + end.index)
         position += end.index + end[0].length
         pattern.lastIndex = position
-        references.push(reference)
+        references.push(...converted)
+        referenceCount += 1
         continue
       }
     }
@@ -150,7 +165,7 @@ const parseNaveOutline = (
   line += html.slice(position)
   endLine()
 
-  return { blocks: tidyBlocks(root.blocks), references }
+  return { blocks: tidyBlocks(root.blocks), references, referenceCount }
 }
 
 /** Drops empty entries, lifts the ones that only wrap lists and merges adjacent lists. */
@@ -196,7 +211,7 @@ const renderBlocks = (blocks: NaveBlock[], inEntry: boolean): string =>
  * that resolves to no site page is dropped and its text kept.
  */
 export const renderNaveDescription = (html: string, context: NaveLinkContext): NaveDescription => {
-  const { blocks, references } = parseNaveOutline(html, context.language)
+  const { blocks, references, referenceCount } = parseNaveOutline(html, context.language)
   const entries = blocks.flatMap(block => (typeof block === 'string' ? [] : block))
   return {
     html: sanitizeEditorialHtml(renderBlocks(blocks, false), {
@@ -206,7 +221,7 @@ export const renderNaveDescription = (html: string, context: NaveLinkContext): N
       const heading = headingOf(entry.blocks)
       return heading ? [editorialHtmlToText(heading)] : []
     }),
-    referenceCount: references.length,
+    referenceCount,
     references,
   }
 }

@@ -1,9 +1,12 @@
 import { getCommentaryByPublicationId } from '@bible-strong/resource-catalog/commentaries'
 import { getInlineCommentaryResources } from '~features/commentaries/inlineCommentarySelection'
 import {
+  loadReaderInlineCommentaries,
   placeInlineCommentaries,
   summarizeInlineCommentaryChip,
 } from '~features/commentaries/inlineCommentaryPlacement'
+import { bibleVersification } from '@bible-strong/resource-domain/versification'
+import { loadReaderChapterEntities } from '~features/resources/resourceNumbering'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import * as Sentry from '@sentry/react-native'
 import { useCallback, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react'
@@ -148,6 +151,12 @@ import {
 import { useAnnotationMode, type AnnotationType } from './hooks'
 import { useParallelPericopes } from './hooks/useParallelPericopes'
 import { getVersesPericopeChapter } from './chapterPericope'
+import { getAlignedRowVerseNumber } from './BibleDOM/verseRenderingModel'
+import {
+  getAlignedVerseKeysOutsideChapter,
+  withAlignedColumnHighlights,
+  withAlignedColumnWordAnnotations,
+} from './parallelVersification'
 import { useParallelRedWords } from './hooks/useParallelRedWords'
 import { useStableList, useStableValue } from '~helpers/useStableList'
 import ResourcesModal from '~features/bible/resources/ResourceModal'
@@ -476,6 +485,7 @@ const BibleViewer = ({
     queryKey: resourceQueryKeys.bibleParallel({
       book: book.Numero,
       chapter,
+      mainVersion: version,
       columns: parallelColumns,
       defaultInterlinearLocale: lang,
     }),
@@ -484,6 +494,7 @@ const BibleViewer = ({
         {
           book: book.Numero,
           chapter,
+          mainVersion: version,
           parallelColumns,
           defaultInterlinearLocale: lang,
         },
@@ -579,13 +590,15 @@ const BibleViewer = ({
           ...resource,
         })
       ),
+      // The sections come back in the reader's numbering.
+      bibleVersification(version) ?? null,
     ],
     queryFn: () =>
-      resources.commentaryReading.loadIndex({
-        book: book.Numero,
-        chapter,
-        resources: readingCommentaries,
-      }),
+      loadReaderInlineCommentaries(
+        { version, book: book.Numero, chapter },
+        readingCommentaries,
+        resources.commentaryReading.loadIndex
+      ),
     enabled: extrasEnabled && readingCommentaries.length > 0,
     staleTime: 5 * 60 * 1000,
     retry: false,
@@ -711,18 +724,25 @@ const BibleViewer = ({
     (contextualInformationDisplay || isContextFocused) &&
     chapterEntityAvailabilityQuery.data?.status === 'available'
   const chapterEntitiesQuery = useQuery({
-    queryKey: resourceQueryKeys.strongLexiconChapterEntities({
-      language: lang,
-      book: book.Numero,
-      chapter,
-      strongCodes: chapterEntityStrongCodes,
-    }),
-    queryFn: () =>
-      resources.strongLexicon.loadChapterEntities(
-        book.Numero,
+    queryKey: [
+      ...resourceQueryKeys.strongLexiconChapterEntities({
+        language: lang,
+        book: book.Numero,
         chapter,
-        lang,
-        chapterEntityStrongCodes
+        strongCodes: chapterEntityStrongCodes,
+      }),
+      // The entities' verses come back in the reader's numbering.
+      bibleVersification(version) ?? null,
+    ],
+    // The publication numbers verses as the KJV: LSG Malachi 3:23 is read in its Malachi 4.
+    queryFn: () =>
+      loadReaderChapterEntities({ version, book: book.Numero, chapter }, entityChapter =>
+        resources.strongLexicon.loadChapterEntities(
+          book.Numero,
+          entityChapter,
+          lang,
+          chapterEntityStrongCodes
+        )
       ),
     enabled: chapterEntitiesAvailable && chapterEntityQueryPlan.shouldLoadEntities,
     staleTime: Infinity,
@@ -970,8 +990,21 @@ const BibleViewer = ({
   }, [selectedVerses, isAnnotating, hidePersonalBibleData, selectionSheet])
 
   // Use displayed values for selectors to keep annotations in sync with verses
-  const highlightedVersesByChapter = useSelector((state: RootState) =>
+  const highlightsInChapter = useSelector((state: RootState) =>
     selectHighlightsByChapter(state, displayedBook, displayedChapter)
+  )
+  const allHighlights = useSelector((state: RootState) => state.user.bible.highlights)
+  // An aligned parallel column can show verses of another chapter (KJV Malachi 4:1 beside LSG
+  // 3:19): their personal data comes with the chapter's
+  const alignedVerseKeysOutsideChapter = getAlignedVerseKeysOutsideChapter(
+    parallelVerses,
+    displayedBook,
+    displayedChapter
+  )
+  const highlightedVersesByChapter = withAlignedColumnHighlights(
+    highlightsInChapter,
+    allHighlights,
+    alignedVerseKeysOutsideChapter
   )
 
   const notesByChapter = useSelector((state: RootState) =>
@@ -1006,8 +1039,14 @@ const BibleViewer = ({
   })
   const previousStrongSelectionDOMContextKey = usePrevious(strongSelectionDOMContextKey)
 
-  const wordAnnotationsByChapter = useSelector((state: RootState) =>
+  const wordAnnotationsInChapter = useSelector((state: RootState) =>
     selectWordAnnotationsByChapter(state, displayedBook, displayedChapter, displayedVersions)
+  )
+  const allWordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
+  const wordAnnotationsByChapter = withAlignedColumnWordAnnotations(
+    wordAnnotationsInChapter,
+    allWordAnnotations,
+    alignedVerseKeysOutsideChapter
   )
   const relationCountsByEndpointIdentity = useSelector(selectRelationCountsByEndpointIdentity)
 
@@ -1086,7 +1125,12 @@ const BibleViewer = ({
   // Studying the words: their verses come in focus, where their study gathers, and the annotation
   // session ends so that it shows.
   const handleFocusAnnotatedVerses = (verseKeys: string[]) => {
-    const verseNumbers = verseKeys.map(verseKey => Number(verseKey.split('-')[2]))
+    // Focus is in main verses: an aligned column's verse stands for the row it is shown in
+    const verseNumbers = verseKeys.map(
+      verseKey =>
+        getAlignedRowVerseNumber(parallelVerses, annotationMode.version, verseKey) ??
+        Number(verseKey.split('-')[2])
+    )
     if (verseNumbers.some(verse => (focusVerses ?? []).map(Number).includes(verse))) {
       actions.clearFocusVerses()
       return

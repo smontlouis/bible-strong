@@ -11,7 +11,6 @@ import type { SelectedCode, StudyNavigateBibleType, Verse as TVerse } from '~com
 import type { BibleError } from '~helpers/bibleErrors'
 import type { ParallelDisplayMode } from 'src/state/tabs'
 import type { ColumnTextModeControls, PericopeChapter, RootStyles } from './BibleDOMWrapper'
-import type { VerseTarget } from './AnnotationMode/verseTargets'
 import InlineCommentaryChips, { type LabeledCommentaryChip } from './InlineCommentaryChips'
 import { PericopeHeaders, getPericopeVerse, hasPericopeHeadings } from './PericopeHeaders'
 import VersionChip from './VersionChip'
@@ -26,8 +25,16 @@ import Verse, {
   hasVerseMarkers,
   type VerseContentProps,
 } from './Verse'
-import type { FadePosition, ParallelVerseRow as ParallelVerseCell } from './verseRenderingModel'
+import {
+  createVerseKey,
+  getParallelCellVerseNumber,
+  type FadePosition,
+  type ParallelVerseRow as ParallelVerseCell,
+  type ParallelVerseState,
+} from './verseRenderingModel'
 import { scaleFontSize } from './scaleFontSize'
+import { scaleLineHeight } from './scaleLineHeight'
+import { getBibleTextFontSize } from './verseTypography'
 
 type RedWords = Record<string, { start: number; end: number }[]> | null | undefined
 type HighlightColor = keyof RootStyles['settings']['colors'][keyof RootStyles['settings']['colors']]
@@ -45,6 +52,17 @@ const ParallelError = styled('div')<RootStyles>(
     textAlign: 'center',
     fontStyle: 'italic',
     lineHeight: 1.4,
+  })
+)
+
+// A column numbered differently with no verse of its own opposite this row: « — » when it has
+// no equivalent, nothing when its verse is merged into another row. It is no verse: taps go
+// through it.
+const AlignedGap = styled('span')<RootStyles>(
+  ({ settings: { theme, colors, fontSizeScale, lineHeight } }) => ({
+    color: colors[theme].grey,
+    fontSize: getBibleTextFontSize(fontSizeScale),
+    lineHeight: scaleLineHeight(32, lineHeight, fontSizeScale),
   })
 )
 
@@ -178,10 +196,10 @@ export interface ParallelVerseRowProps {
   selectedCode: SelectedCode | null
   isSelectionMode: StudyNavigateBibleType | undefined
   annotationMode: boolean
-  // The version this verse is selected in, if it is
-  selectedVersion: string | null
-  // This verse under the reader's finger, in the version and column touched, if any
-  touchedCell: VerseTarget | null
+  // The selection, highlight, touch and word annotations of a verse shown in a column, by its
+  // own key: an aligned column shows verses numbered otherwise than the row (ADR-0030)
+  getVerseState: (verse: TVerse, version: string, column: number) => ParallelVerseState
+  // The main verse's highlight, for the number of a vertical verse group
   highlightedColor?: HighlightColor
   isVerseToScroll: boolean
   isFocused?: boolean
@@ -189,8 +207,6 @@ export interface ParallelVerseRowProps {
   pericopeByVersion: Record<string, PericopeChapter | undefined>
   navigateToPericope: () => void
   redWordsByVersion: Record<string, RedWords>
-  // Versions in which word annotations mark this verse
-  versionsWithWordAnnotations: Set<string>
   // Verse-level content: shown once for the verse, whatever the number of versions
   verseContent: VerseContentProps
   commentaryChips?: readonly LabeledCommentaryChip[]
@@ -214,8 +230,7 @@ const ParallelVerseRow = ({
   selectedCode,
   isSelectionMode,
   annotationMode,
-  selectedVersion,
-  touchedCell,
+  getVerseState,
   highlightedColor,
   isVerseToScroll,
   isFocused,
@@ -223,7 +238,6 @@ const ParallelVerseRow = ({
   pericopeByVersion,
   navigateToPericope,
   redWordsByVersion,
-  versionsWithWordAnnotations,
   verseContent,
   commentaryChips,
   textModeControls,
@@ -278,37 +292,45 @@ const ParallelVerseRow = ({
         <ParallelError settings={settings}>
           {getParallelErrorMessage(cell.error, translations)}
         </ParallelError>
+      ) : cell.isAligned && (cell.isMissing || cell.isContinued) ? (
+        <AlignedGap settings={settings} aria-hidden={cell.isContinued}>
+          {cell.isMissing ? '—' : ''}
+        </AlignedGap>
       ) : (
-        <Verse
-          isParallelCell
-          hideNumber={isVertical}
-          isHebreu={isHebreu}
-          verse={cell.verse}
-          version={cell.version}
-          column={index}
-          loadingPlaceholderText={cell.isLoading ? verse.Texte : undefined}
-          interlinearMode={cell.interlinearMode}
-          settings={settings}
-          isSelected={selectedVersion === cell.version}
-          isSelectionMode={isSelectionMode}
-          highlightedColor={holdsPersonalData(cell) ? highlightedColor : undefined}
-          hasWordAnnotations={
-            holdsPersonalData(cell) && versionsWithWordAnnotations.has(cell.version)
-          }
-          isVerseToScroll={index === 0 && isVerseToScroll}
-          selectedCode={selectedCode}
-          isFocused={isFocused}
-          fadePosition={fadePosition}
-          tag={undefined}
-          isTouched={
-            touchedCell?.version === cell.version &&
-            (touchedCell.column === undefined || touchedCell.column === index)
-          }
-          isMissingVerse={cell.isMissing}
-          annotationMode={annotationMode}
-          redWords={redWordsByVersion[cell.version]}
-          passageMediaGallerySections={verseContent.passageMediaGallerySections}
-        />
+        (cell.verses ?? [cell.verse]).map(cellVerse => {
+          const state = getVerseState(cellVerse, cell.version, index)
+          return (
+            <Verse
+              key={createVerseKey(cellVerse)}
+              isParallelCell
+              hideNumber={isVertical && !cell.showsOwnNumber}
+              numberLabel={
+                cell.isAligned ? getParallelCellVerseNumber(cellVerse, verse) : undefined
+              }
+              isHebreu={isHebreu}
+              verse={cellVerse}
+              version={cell.version}
+              column={index}
+              loadingPlaceholderText={cell.isLoading ? verse.Texte : undefined}
+              interlinearMode={cell.interlinearMode}
+              settings={settings}
+              isSelected={state.isSelected}
+              isSelectionMode={isSelectionMode}
+              highlightedColor={holdsPersonalData(cell) ? state.highlightedColor : undefined}
+              hasWordAnnotations={holdsPersonalData(cell) && state.hasWordAnnotations}
+              isVerseToScroll={index === 0 && isVerseToScroll}
+              selectedCode={selectedCode}
+              isFocused={isFocused}
+              fadePosition={fadePosition}
+              tag={undefined}
+              isTouched={state.isTouched}
+              isMissingVerse={cell.isMissing}
+              annotationMode={annotationMode}
+              redWords={redWordsByVersion[cell.version]}
+              passageMediaGallerySections={verseContent.passageMediaGallerySections}
+            />
+          )
+        })
       )}
     </>
   )

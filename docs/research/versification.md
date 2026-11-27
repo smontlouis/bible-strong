@@ -171,7 +171,7 @@ Les colonnes `org` et `eng` donnent le nombre de chapitres dont le dernier verse
 - Selon le décodage de la recherche web, que je n'ai pas refait, la table SWORD « Segond » décrit Joël en 3 chapitres et Malachie en 4. Notre texte LSG ne suit pas cette structure. Le même décodage relève une incohérence interne (Ex 7:26). C'est une raison de plus de partir de nos données.
 - **Titres des psaumes.** Seules BHG, LXX et LXX_FR publient un verset 0 (respectivement 116 chapitres, 1 et 1). Les autres Bibles anglaises n'ont pas de verset 0 : la KJF met le titre dans le v. 1 (« Au chef de musique… Use de miséricorde envers moi »), et la page KJV n'affiche pas de titre. La table `eng`, elle, place le titre au verset 0. La famille anglaise de Bible Strong n'est donc pas `eng` telle quelle : le titre y appartient au v. 1, comme dans la tradition « EngTitleMerged » de TVTMS. Le contrôle par dernier verset ne voit pas cet écart.
 - **LXX_FR** déclare `bible-strong-default` alors que ses Psaumes suivent la numérotation de la Septante.
-- **NEG79, OST et FMAR** ne suivent aucune table publique. Il leur faut une table propre, que les manifestes de la section 1.3 fournissent déjà pour NEG79 et FMAR.
+- **NEG79, OST et FMAR** ne suivent aucune table publique. Il leur faut une table propre : elles l'ont depuis le 27 novembre 2026, avec LAU (section 2.4). Le manifeste local de FMAR ne décrit pas le texte publié.
 - **Trous de source, hors versification** :
   - BHS et CHU n'ont pas Joël 4 (21 versets). L'API renvoie 404 sur `BHS/books/29/chapters/4`.
   - Dans CHU, 2 Chroniques 36 est vide dans la source historique `bible-chu.json`.
@@ -217,6 +217,50 @@ Liste tirée des lignes de correspondance de `eng.vrs`. LSG y correspond chapitr
 | Ap 12:17 ; 13:1 (KJV) | Ap 12:17-18 ; 13:1 | idem : `eng` et LSG ont 12:18, la KJV non |
 
 **Ampleur :** 143 chapitres ont un dernier verset différent. La LSG y compte 3 158 versets, dont 1 049 dans 62 psaumes. C'est un majorant des clés mal alignées, environ 10 % de la Bible.
+
+### 2.4 Les tables de NEG79, OST, FMAR et LAU
+
+Les quatre Bibles protestantes françaises ont chacune leur table Bible Strong, déclarée dans `BIBLE_VERSIFICATIONS` : `bible-strong/bs-neg79.vrs`, `bs-ost.vrs`, `bs-fmar.vrs` et `bs-lau.vrs`. Chaque ligne y porte en commentaire le texte qui la justifie.
+
+| Bible | Base | Lignes de correspondance | Accord du détecteur | Écarts propres au texte publié |
+|---|---|---:|---:|---|
+| NEG79 | `org` | 57 | 31 052 / 31 113 (99,8 %) | Mc 9:44 et 9:46 non imprimés (vides aussi dans la LSG) |
+| OST | `org` | 86 | 30 957 / 31 073 (99,6 %) | **Ps 40:17 LSG absent** ; Mt 11:2 et Rm 3:22 contiennent le verset suivant |
+| FMAR | `bs-ost` | 29 | 30 863 / 31 039 (99,4 %) | Rm 3:22 et 8:20 contiennent le verset suivant ; fusions Ps 69:2, Ec 12:14, Os 12:14, Jon 2:10, Ap 12:17 |
+| LAU | `bs-kjv` | 4 | non mesurable (voir plus bas) | aucun |
+
+**Choix de la base.** J'ai estimé, verset par verset, les lignes qu'il faudrait sur chaque base. L'estimation est comparable d'une base à l'autre, à une ou deux lignes près du fichier écrit :
+- NEG79 et OST partent de `org`, parce que leurs Psaumes sont numérotés comme la LSG, titres compris. Sur une base anglaise, chaque psaume coûterait une ligne. NEG79 demande 57 lignes sur `org` contre 92 sur `bs-eng`, OST 85 contre 92.
+- FMAR part de `bs-ost` : Martin numérote comme Ostervald, sauf dans une dizaine de chapitres. Il faut 27 lignes sur `bs-ost`, contre 101 sur `org` et 96 sur `bs-eng`.
+- LAU part de `bs-kjv` et n'en diffère qu'en Joël (4 chapitres, à l'hébraïque), en Mc 9:50 et 10:52 (coupés en deux) et en 3 Jean (15 versets).
+
+**Ce que les textes montrent :**
+- **Une numérotation française traditionnelle**, commune à NEG79, OST et FMAR. LAU l'imprime entre parenthèses, mais numérote elle-même ces passages comme la KJV :
+  - Jb 39:1 = LSG 38:39, Jb 39:34 = LSG 40:1 et Jb 40:28 = LSG 41:1 ;
+  - Ec 12 commence deux versets plus tôt : Ec 12:1 = LSG 11:9 ;
+  - 1 S 20 a 43 versets, et 20:43 = LSG 21:1.
+- **OST et FMAR ouvrent Nb 13 sur LSG 12:16**, comme les numéros entre parenthèses de LAU.
+- **NEG79, OST et LAU coupent en deux** Mc 9:50 et Mc 10:52. OST coupe aussi Ps 30:13.
+- **FMAR met le titre dans le v. 1** en Ps 102, 108 et 140, comme les Bibles anglaises, mais pas dans les autres psaumes.
+- **OST publié n'a pas Ps 40:17** (« Que tous ceux qui te cherchent… »). C'est le seul verset LSG sans équivalent dans ces quatre tables, et le test le nomme.
+
+**Mesure.** Le détecteur de Resource Studio a aligné le texte publié de NEG79, OST et FMAR, téléchargé chapitre par chapitre depuis l'API, sur la numérotation LSG, pour les 66 livres. Le tableau donne les blocs dont la table donne les mêmes versets LSG que le détecteur. Les accords comptent 670 blocs qui ne sont pas des identités pour NEG79, 796 pour OST et 784 pour FMAR.
+
+Les désaccords se rangent en trois groupes :
+- **Fusions ou divisions locales** de deux versets voisins. J'ai lu tous ceux dont le score atteint 0,75 (NEG79 Gn 32, Nb 16-17, 1 R 5, 1 Ch 6, 2 Ch 2, Dn 4 et 6, Za 1 ; OST Ex 8, Lv 6, Nb 13, Os 1-2, Jl 3 ; FMAR Ex 8, Né 10). La table est juste à chaque fois : le détecteur colle un verset court à son voisin, ou suit une coupe déplacée (Nb 17:2-3, 2 Ch 2:13-14, Né 7:68-69).
+- **Identités à score faible** au milieu d'un passage décalé, dans le français ancien de Martin : FMAR Jb 41 et Na 2, plus quelques versets d'Ex 22 et 1 Ch 12. Le texte suit la table.
+- **Repli du détecteur sur l'identité** quand il ne résout pas un passage : FMAR Né 7:69-71 et 10:25-26. Le texte suit là aussi la table.
+
+**Pièges de mesure.** Les témoins du détecteur ont Ac 19:41 comme la KJV : leur 19:41 se lit LSG 19:40. La copie locale `bible-neg79.json` est identique au texte publié, mais pas `bible-fmar.json`, qui numérote les Psaumes à l'anglaise.
+
+**LAU.** Le texte imprime la numérotation traditionnelle entre parenthèses (« (51:3) ») dans 1 324 versets.
+- 1 182 de ces versets donnent exactement les versets LSG de la table.
+- Les 142 autres sont en Nb 12-13, 1 S 20:42, Jb 38-41 et Ec 11-12, où ces numéros ne sont pas ceux de la LSG.
+- Lus comme des numéros NEG79, ils retombent sur les mêmes versets LSG en Jb, Ec et 1 S. C'est une confirmation de ces trois passages indépendante du détecteur.
+
+Sur LAU, le détecteur ne tranche pas : il déclare ambigus presque tous les livres où LAU diffère de la LSG, faute de témoin aussi littéral. J'ai donc lu Joël 2-4, Mc 9-10, 3 Jean et Ap 12-13 : la table suit le texte.
+
+**Mécanique.** Une surcouche peut retirer un chapitre (`JOL 4:0`), une ligne dont le verset sort du chapitre est abandonnée, et une surcouche posée sur `org` reçoit l'identité par défaut. `bs-eng`, `bs-kjv` et `bs-nrsv` en sortent inchangés, verset par verset.
 
 ---
 

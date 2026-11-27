@@ -1,0 +1,71 @@
+# Versification "Bible Strong FMAR": an overlay on bs-ost, for the Martin Bible (FMAR).
+#
+# Martin numbers as Ostervald, its revision's neighbour, except in the chapters below. Lines
+# that bs-ost gives to a verse FMAR does not have are dropped with it (Mark 9:51 and 10:53).
+#
+# Mapping lines go from FMAR to org. Each was checked against the alignment of the FMAR text
+# with the LSG text (docs/research/versification.md, section 2.4).
+#
+PSA 30:13 40:18 69:36 102:28 108:13 140:13
+ECC 12:14
+HOS 12:14
+JON 2:10
+MRK 9:50 10:52
+ACT 24:28
+1CO 3:23
+REV 12:17
+#
+# Psalms 30 and 40, Matthew 11, Mark 9-10 and 1 Corinthians 3 are numbered as org.
+PSA 40:17 = PSA 40:17
+MAT 11:2 = MAT 11:2
+1CO 3:22 = 1CO 3:22
+#
+# Romans 3:22 holds 3:23, as in OST, and Romans 8:20 ("…dans l'espérance qu'elles seront aussi
+# délivrées de la servitude de la corruption…") holds 8:21, whose number FMAR does not print.
+ROM 8:20 = ROM 8:20
+ROM 8:20 = ROM 8:21
+#
+# Psalm 69: FMAR 69:2 ("Délivre-moi, ô Dieu, car les eaux me sont entrées jusque dans l'âme. Je
+# suis enfoncé dans un bourbier profond…") is org 69:2 and 69:3.
+PSA 69:2 = PSA 69:2
+PSA 69:2 = PSA 69:3
+PSA 69:3-36 = PSA 69:4-37
+#
+# Psalms 102, 108 and 140 put the title in verse 1, as the English Bibles: FMAR 102:1 ("Prière
+# de l'affligé… Éternel ! écoute ma prière…") is org 102:1 and 102:2.
+PSA 102:1 = PSA 102:1
+PSA 102:1 = PSA 102:2
+PSA 102:2-28 = PSA 102:3-29
+PSA 108:1 = PSA 108:1
+PSA 108:1 = PSA 108:2
+PSA 108:2-13 = PSA 108:3-14
+PSA 140:1 = PSA 140:1
+PSA 140:1 = PSA 140:2
+PSA 140:2-13 = PSA 140:3-14
+#
+# Ecclesiastes 12 opens two verses earlier, as in OST, and its last verse ("Mon fils garde-toi
+# de ce qui est au-delà de ceci… Crains Dieu… Parce que Dieu amènera toute oeuvre en jugement…")
+# is org 12:12, 12:13 and 12:14.
+ECC 12:3-13 = ECC 12:1-11
+ECC 12:14 = ECC 12:12
+ECC 12:14 = ECC 12:13
+ECC 12:14 = ECC 12:14
+#
+# Hosea 12:14 ("Puis l'Éternel fit remonter Israël hors d'Égypte… Mais Éphraïm a provoqué Dieu…")
+# is org 12:14 and 12:15.
+HOS 12:14 = HOS 12:14
+HOS 12:14 = HOS 12:15
+#
+# Jonah 2:10 ("Mais moi, je te sacrifierai… Alors l'Éternel fit commandement au poisson…") is
+# org 2:10 and 2:11.
+JON 2:10 = JON 2:10
+JON 2:10 = JON 2:11
+#
+# Acts 24 has 28 verses: FMAR cuts org 24:18 in two (24:19 "Et c'étaient de certains Juifs
+# d'Asie,").
+#! &ACT 24:18-19 = ACT 24:18
+ACT 24:20-28 = ACT 24:19-27
+#
+# Revelation 12:17 ends with "Et je me tins sur le sable de la mer": it is org 12:17 and 12:18.
+REV 12:17 = REV 12:17
+REV 12:17 = REV 12:18

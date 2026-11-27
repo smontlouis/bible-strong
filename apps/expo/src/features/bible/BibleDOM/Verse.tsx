@@ -579,6 +579,8 @@ interface Props {
   isParallelCell?: boolean
   // Vertical parallel display: the verse group header shows the number
   hideNumber?: boolean
+  // Parallel display: the number shown, when it is not the verse's alone (« 4:1 »)
+  numberLabel?: string
   isSelected: boolean
   highlightedColor?: keyof RootStyles['settings']['colors'][keyof RootStyles['settings']['colors']]
   annotationNotesCount?: number
@@ -632,6 +634,7 @@ const Verse = ({
   loadingPlaceholderText,
   isParallelCell = false,
   hideNumber = false,
+  numberLabel,
   tag,
   bookmark,
   fadePosition,
@@ -738,7 +741,7 @@ const Verse = ({
               highlightBg={numberHighlight.bg}
               highlightColor={numberHighlight.color}
             >
-              {verse.Verset}{' '}
+              {numberLabel ?? verse.Verset}{' '}
             </NumberText>
           )}
           {!isParallelCell && <VerseMarkers {...verseContent} />}

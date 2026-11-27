@@ -44,7 +44,9 @@ import { type HTMLViewLinkPayload } from '~common/htmlContentTypes'
 import { RootState } from '~redux/modules/reducer'
 import { makeNaveTagsSelector } from '~redux/selectors/bible'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
-import { NaveTab } from '../../state/tabs'
+import { NaveTab, activeBibleTabVersionAtom } from '../../state/tabs'
+import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
+import { naveHtmlInBible } from './naveBibleNumbering'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { createNaveEndpoint } from '~features/studyRelations/endpoints'
@@ -89,6 +91,11 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     requestedLanguage === 'fr' || requestedLanguage === 'en'
       ? requestedLanguage
       : preferredNaveLanguage
+  // Its verses open in the version being read, else the default one, numbered as that Bible
+  // numbers them: the Nave follows the KJV numbering.
+  const readingVersion = useAtomValue(activeBibleTabVersionAtom)
+  const defaultVersion = useDefaultBibleVersion()
+  const verseVersion = readingVersion || defaultVersion
 
   // Go back to list view (for tab context)
   const goBack = useCallback(() => {
@@ -126,6 +133,9 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     ...localQueryOptions,
   })
   const naveItem = naveQuery.data ?? null
+  const description = naveItem
+    ? naveHtmlInBible(naveItem.description, naveResourceLanguage, verseVersion)
+    : ''
   useAssistantResourceContext(
     isInTab ? `tab:${naveTab.id}` : 'panel',
     naveContext({
@@ -188,6 +198,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
             chapter: String(chapter),
             verse: String(verse),
             focusVerses: JSON.stringify(verses?.split(',').map(Number)),
+            version: verseVersion,
           },
         })
       } catch (e) {
@@ -214,7 +225,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
           buildPublicNavePath({ language: naveResourceLanguage, topic: naveItem.normalizedName })
         ),
         text: () =>
-          `${naveItem.name || name}\n\n${truncHTML(naveItem.description, 4000)
+          `${naveItem.name || name}\n\n${truncHTML(description, 4000)
             .text.replace(/&#/g, '\\')
             .replace(/\\x([0-9A-F]+);/gi, (_, hex: string) => {
               return String.fromCharCode(parseInt(hex, 16))
@@ -387,12 +398,12 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
                     {naveItem.name || name}
                   </Text>
                 </VStack>
-                {naveItem.description ? (
+                {description ? (
                   <StudySection title={t('Références')}>
                     <SwitchableHTMLView
                       selectable
                       previewSource={{ kind: 'nave', language: naveResourceLanguage }}
-                      value={naveItem.description}
+                      value={description}
                       onLinkClicked={openLink}
                     />
                   </StudySection>
@@ -425,12 +436,12 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
                 {naveItem.name || name}
               </Text>
             </VStack>
-            {naveItem.description ? (
+            {description ? (
               <StudySection title={t('Références')}>
                 <SwitchableHTMLView
                   selectable
                   previewSource={{ kind: 'nave', language: naveResourceLanguage }}
-                  value={naveItem.description}
+                  value={description}
                   onLinkClicked={openLink}
                 />
               </StudySection>

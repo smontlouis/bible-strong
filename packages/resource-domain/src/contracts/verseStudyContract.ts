@@ -1,5 +1,6 @@
 import * as Schema from 'effect/Schema'
 
+import { VERSIFICATION_ID_LIST } from '../versification/versificationIds'
 import { DictionaryPassageDiscoveryEntryDto } from './dictionaryContract'
 import { NaveTopicReferenceDto } from './naveContract'
 import { StrongLexiconChapterEntityDto, StrongLexiconIdentityKind } from './strongLexiconContract'
@@ -32,7 +33,7 @@ export class VerseStudyQuery extends Schema.Class<VerseStudyQuery>('VerseStudyQu
    * known is read at the reader's verse, as without `numbering`. Without it, such a resource is
    * read at the `org` verse.
    */
-  reader: Schema.optional(Schema.Literal('org', 'bs-eng', 'bs-kjv', 'bs-nrsv')),
+  reader: Schema.optional(Schema.Literal(...VERSIFICATION_ID_LIST)),
   /**
    * The commentaries whose section on the verse is read, separated by commas, in the order of
    * the answer. Without it, no commentary is read. The site names those that comment the

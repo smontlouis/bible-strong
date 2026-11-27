@@ -6,7 +6,7 @@ import { useAssistantResourceContext } from '~features/study-assistant/useAssist
 import { commentaryCollectionContext } from '~features/study-assistant/resourceContext'
 import CommentIcon from '~common/CommentIcon'
 import { pageContentStyle } from '~common/ui/PageContent'
-import { useQuery } from '@tanstack/react-query'
+import { useQueries } from '@tanstack/react-query'
 import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import MenuView from '~features/commentaries/CommentaryMenu'
 import React, { useEffect, useEffectEvent } from 'react'
@@ -33,10 +33,12 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { resourceFailureFromAccessError } from '~features/resources/resourceFailure'
 import CommentarySelectorSheet from './CommentarySelectorSheet'
-import { parseCommentaryProjectionId } from './commentarySelection'
 import type { SheetRef } from '~common/sheet'
 import CommentaryAvailabilityList from './CommentaryAvailabilityList'
-import { buildCommentaryVerseAvailability } from './commentaryVerseAvailability'
+import {
+  buildReaderCommentaryVerseAvailability,
+  getCommentaryChaptersForVerse,
+} from './commentaryVerseAvailability'
 import { useSelector } from 'react-redux'
 import type { RootState } from '~redux/modules/reducer'
 import useRetainedCommentaryContent from './useRetainedCommentaryContent'
@@ -51,39 +53,63 @@ import ResourceVerseContext, {
 /** Width of the column of a commentary. */
 const COMMENTARY_COLUMN_WIDTH = 600
 
-const useComments = (verse: string) => {
+/**
+ * The commentaries on a verse of a Bible: each commentary is read at the verse that stands for it
+ * in its numbering, one chapter request for the commentaries that share a chapter.
+ */
+const useComments = (verse: string, version: string | undefined) => {
   const resources = useResourceAccess()
   const selectedProjectionIds = useSelector(
     (state: RootState) => state.user.bible.settings.commentarySelection
   )
-  const selectedResources = selectedProjectionIds.flatMap(projectionId => {
-    const projection = parseCommentaryProjectionId(projectionId)
-    return projection ? [{ resourceId: projection.resourceId, language: projection.language }] : []
-  })
   const [book, chapter, verseNumber] = verse.split('-').map(Number)
   const validVerse = [book, chapter, verseNumber].every(Number.isSafeInteger)
-  const query = useQuery({
-    queryKey: ['commentaries', book, chapter, selectedProjectionIds.join(',')],
-    queryFn: () =>
-      resources.commentary.loadChapter({
+  const chapters = validVerse
+    ? getCommentaryChaptersForVerse({ selectedProjectionIds, verse, version })
+    : []
+  const queries = useQueries({
+    queries: chapters.map(group => ({
+      queryKey: [
+        'commentaries',
         book,
-        chapter,
-        resources: selectedResources,
-      }),
-    enabled: validVerse && selectedResources.length > 0,
-    networkMode: 'always',
-    retry: false,
-    ...staticResourceQueryOptions,
+        group.chapter,
+        group.items.map(item => item.projectionId).join(','),
+      ],
+      queryFn: () =>
+        resources.commentary.loadChapter({
+          book,
+          chapter: group.chapter,
+          resources: group.items.map(({ resourceId, language }) => ({ resourceId, language })),
+        }),
+      networkMode: 'always' as const,
+      retry: false,
+      ...staticResourceQueryOptions,
+    })),
   })
+  const failed = queries.find(query => query.isError)
 
   return {
-    commentsByVerse: query.data?.commentsByVerse ?? {},
-    unavailableResources: query.data?.unavailableResources ?? [],
+    commentaryAvailability: buildReaderCommentaryVerseAvailability({
+      selectedProjectionIds,
+      verse,
+      version,
+      chapters: queries.flatMap((query, index) =>
+        query.data
+          ? [
+              {
+                chapter: chapters[index].chapter,
+                commentsByVerse: query.data.commentsByVerse,
+                unavailableResources: query.data.unavailableResources,
+              },
+            ]
+          : []
+      ),
+    }),
     selectedResourceIds: selectedProjectionIds,
-    error: query.error,
-    isPending: query.isPending && query.fetchStatus === 'fetching',
-    isError: query.isError,
-    retry: query.refetch,
+    error: failed?.error ?? null,
+    isPending: queries.some(query => query.isPending && query.fetchStatus === 'fetching'),
+    isError: Boolean(failed),
+    retry: () => Promise.all(queries.map(query => query.refetch())),
   }
 }
 
@@ -113,7 +139,7 @@ const CommentariesTabScreen = ({
 
   const {
     hasBackButton,
-    data: { verse },
+    data: { verse, version: readerVersion },
   } = commentaryTab
 
   const setVerse = (v: string) =>
@@ -130,27 +156,15 @@ const CommentariesTabScreen = ({
       })
     )
 
-  const {
-    commentsByVerse,
-    unavailableResources,
-    selectedResourceIds,
-    error,
-    isPending,
-    isError,
-    retry,
-  } = useComments(verse)
+  // The verse belongs to the Bible it was opened from; the default one shows it otherwise.
+  const verseContext = useResourceVerseContext(verse, preferredVersion ?? readerVersion)
+  const { commentaryAvailability, selectedResourceIds, error, isPending, isError, retry } =
+    useComments(verse, verseContext.requestedVersion)
   const { isInTab } = useTabContext()
   useAssistantResourceContext(
     isInTab ? `tab:${commentaryTab.id}` : 'panel',
     commentaryCollectionContext(verse, selectedResourceIds)
   )
-  const currentVerseNumber = Number(verse.split('-')[2])
-  const commentaryAvailability = buildCommentaryVerseAvailability({
-    selectedProjectionIds: selectedResourceIds,
-    commentsByVerse,
-    verseNumber: currentVerseNumber,
-    unavailableResources,
-  })
   const verseFormatted = verseStringToObject([verse])
   // The verse resources sheet embeds this screen without its header: only a full screen is a visit.
   useRecordHistory(hasHeader && verseFormatted ? { type: 'commentary', verse } : null)
@@ -159,7 +173,6 @@ const CommentariesTabScreen = ({
     ? formatVerseContent([verse])
     : { title: t('Chargement') }
 
-  const verseContext = useResourceVerseContext(verse, preferredVersion)
   const requestedContent = {
     verse,
     headerTitle: requestedHeaderTitle,
@@ -229,6 +242,7 @@ const CommentariesTabScreen = ({
                       type: 'commentary',
                       data: {
                         verse,
+                        version: verseContext.requestedVersion,
                       },
                     })
                   }
@@ -299,11 +313,11 @@ const CommentariesTabScreen = ({
                         const [book, chapter, verseNumber] = displayedContent.verse
                           .split('-')
                           .map(Number)
-                        const route = getCommentaryResourceRoute(item, {
-                          book,
-                          chapter,
-                          verse: verseNumber,
-                        })
+                        // At the commentary's own verse, which its numbering may place elsewhere.
+                        const route = getCommentaryResourceRoute(
+                          item,
+                          item.location ?? { book, chapter, verse: verseNumber }
+                        )
                         if (route) pushRouteOnce(route)
                       }}
                     />
@@ -350,11 +364,11 @@ const CommentariesTabScreen = ({
                     const [book, chapter, verseNumber] = displayedContent.verse
                       .split('-')
                       .map(Number)
-                    const route = getCommentaryResourceRoute(item, {
-                      book,
-                      chapter,
-                      verse: verseNumber,
-                    })
+                    // At the commentary's own verse, which its numbering may place elsewhere.
+                    const route = getCommentaryResourceRoute(
+                      item,
+                      item.location ?? { book, chapter, verse: verseNumber }
+                    )
                     if (route) pushRouteOnce(route)
                   }}
                 />

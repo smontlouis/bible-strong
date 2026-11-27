@@ -51,7 +51,11 @@ export function createPassageTab(request: PassageTabOpenRequest): TabItem | unde
       title,
       isRemovable: true,
       type: 'compare',
-      data: { selectedVerses: Object.fromEntries(keys.map(key => [key, true])) },
+      data: {
+        selectedVerses: Object.fromEntries(keys.map(key => [key, true])),
+        // The reference is read in the version the request names
+        sourceVersion: request.version as VersionCode,
+      },
     }
 
   const tab = getDefaultBibleTab(request.version as VersionCode)

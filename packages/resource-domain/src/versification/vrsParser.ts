@@ -94,7 +94,7 @@ export interface VrsTable {
 export interface VrsParseOptions {
   /**
    * An overlay lists only the chapters it changes: its book lines are read as `c:v` pairs for
-   * any chapters, not as every chapter from 1.
+   * any chapters, not as every chapter from 1. `c:0` takes a chapter of the base away.
    */
   overlay?: boolean
 }

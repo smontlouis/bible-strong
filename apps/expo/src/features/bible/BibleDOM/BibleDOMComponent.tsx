@@ -64,7 +64,7 @@ import { getVerseSelectionBlocks } from './verseSelectionBlocks'
 import { UnifiedVersesRenderer } from './UnifiedVersesRenderer'
 import AnnotationInlineItems from './AnnotationInlineItems'
 import { withColorAlpha } from './themeOverlayColor'
-import { getScrollTargetVerse } from './verseRenderingModel'
+import { getAlignedRowVerseNumber, getScrollTargetVerse } from './verseRenderingModel'
 import { shouldSuppressVerseGestures } from '~helpers/interlinearDisplayMode'
 import ChapterEntities from './ChapterEntities'
 import FocusVerseStudy from './FocusVerseStudy'
@@ -1341,11 +1341,19 @@ const LoadedBibleContent = ({
     ? selectedVerseKey.split('-').map(value => Number(value))
     : []
   const [selectedBook, selectedChapter, selectedVerseNumber] = selectedVerseLocation
+  // A verse selected in an aligned column sits in the row of the main verse it stands opposite,
+  // whatever its own number or chapter (KJV Malachi 4:1 beside LSG 3:19)
+  const selectedAlignedRow =
+    selectedVerseKey && selectedVersesVersion && selectedVersesVersion !== version
+      ? getAlignedRowVerseNumber(parallelVerses, selectedVersesVersion, selectedVerseKey)
+      : undefined
   const canScrollToSelectedVerse =
     selectedBook === book.Numero && selectedChapter === chapter && Boolean(selectedVerseNumber)
-  const selectedVerseElementId = canScrollToSelectedVerse
-    ? `verset-${selectedVerseNumber}`
-    : undefined
+  const selectedVerseElementId = selectedAlignedRow
+    ? `verset-${selectedAlignedRow}`
+    : canScrollToSelectedVerse
+      ? `verset-${selectedVerseNumber}`
+      : undefined
 
   const getSelectedVerseElement = () =>
     selectedVerseElementId ? document.getElementById(selectedVerseElementId) : null

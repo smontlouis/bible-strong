@@ -62,7 +62,7 @@ describe('verse keys between Bibles and resources', () => {
   })
 
   test('a Bible or resource without a known numbering keeps its keys', () => {
-    assert.deepEqual(bibleVerseKeyInResource('19-51-3', 'NEG79', 'cross-references:TRESOR'), [
+    assert.deepEqual(bibleVerseKeyInResource('19-51-3', 'LXX_FR', 'cross-references:TRESOR'), [
       '19-51-3',
     ])
     assert.deepEqual(bibleVerseKeyInResource('19-51-3', 'LSG', 'commentary:aquifer-fr'), [
@@ -170,6 +170,36 @@ describe('conversions checked against the published texts', () => {
     assert.deepEqual(convertVerse('bs-kjv', 'org', v(44, 19, 41)).verses, [v(44, 19, 40)])
   })
 
+  test('the French Protestant Bibles', () => {
+    // Job 39:1 of NEG79, OST and FMAR ("Chasses-tu la proie pour la lionne…") is LSG 38:39.
+    for (const id of ['bs-neg79', 'bs-ost', 'bs-fmar'] as const) {
+      assert.deepEqual(toPivot(id, v(18, 39, 1)).verses, [v(18, 38, 39)])
+      assert.deepEqual(toPivot(id, v(21, 12, 1)).verses, [v(21, 11, 9)])
+    }
+    // NEG79 numbers the Psalms as LSG, and Genesis 32 as the KJV.
+    assert.deepEqual(convertVerse('bs-neg79', 'org', v(PSALMS, 51, 3)).verses, [v(PSALMS, 51, 3)])
+    assert.deepEqual(convertVerse('bs-neg79', 'bs-kjv', v(1, 32, 1)).verses, [v(1, 32, 1)])
+    assert.equal(lastVerseOfChapter('bs-neg79', 29, 4), undefined)
+    // OST and FMAR open Numbers 13 with LSG 12:16; FMAR puts some Psalm titles in verse 1.
+    assert.deepEqual(toPivot('bs-ost', v(4, 13, 1)).verses, [v(4, 12, 16)])
+    assert.deepEqual(toPivot('bs-fmar', v(PSALMS, 102, 1)).verses, [
+      v(PSALMS, 102, 1),
+      v(PSALMS, 102, 2),
+    ])
+    assert.deepEqual(toPivot('bs-fmar', v(40, 11, 2)).verses, [v(40, 11, 2)])
+    assert.deepEqual(toPivot('bs-ost', v(40, 11, 2)).verses, [v(40, 11, 2), v(40, 11, 3)])
+    // Lausanne follows the KJV, but Joel in 4 chapters and Mark 9:50 in two verses.
+    assert.deepEqual(convertVerse('bs-lau', 'org', v(29, 3, 1)).verses, [v(29, 3, 1)])
+    assert.deepEqual(convertVerse('bs-lau', 'org', v(29, 4, 21)).verses, [v(29, 4, 21)])
+    assert.deepEqual(convertVerse('bs-lau', 'org', v(41, 9, 51)).verses, [v(41, 9, 50)])
+    assert.deepEqual(convertVerse('bs-lau', 'org', v(PSALMS, 51, 1)).verses, [
+      v(PSALMS, 51, 1),
+      v(PSALMS, 51, 2),
+      v(PSALMS, 51, 3),
+    ])
+    assert.equal(bibleVerseKeyInBible('29-3-1', 'LAU', 'KJV'), '29-2-28')
+  })
+
   test('a verse that does not exist has no correspondence', () => {
     assert.deepEqual(toPivot('bs-kjv', v(39, 4, 7)), { verses: [], exact: false })
     assert.deepEqual(fromPivot('bs-kjv', v(39, 4, 1)), { verses: [], exact: false })
@@ -209,6 +239,12 @@ const allVerses = (id: VersificationId): VerseRef[] => {
 /** Verses with no org equivalent, keyed by versification. None so far. */
 const WITHOUT_EQUIVALENT: Readonly<Record<string, readonly string[]>> = {}
 
+/** Org verses a numbering has no verse for, keyed by versification: verses its text lacks. */
+const ORG_WITHOUT_EQUIVALENT: Readonly<Record<string, readonly string[]>> = {
+  // The published Ostervald has no Psalm 40:17 ("Que tous ceux qui te cherchent…").
+  'bs-ost': ['19-40-17'],
+}
+
 describe('every verse goes to org and back', () => {
   for (const id of VERSIFICATION_IDS) {
     test(id, () => {
@@ -229,7 +265,11 @@ describe('every verse goes to org and back', () => {
       const orgWithoutEquivalent = allVerses('org')
         .filter(pivotRef => fromPivot(id, pivotRef).verses.length === 0)
         .map(ref => `${ref.book}-${ref.chapter}-${ref.verse}`)
-      assert.deepEqual(orgWithoutEquivalent, [], `org verses with no verse in ${id}`)
+      assert.deepEqual(
+        orgWithoutEquivalent,
+        ORG_WITHOUT_EQUIVALENT[id] ?? [],
+        `org verses with no verse in ${id}`
+      )
     })
   }
 })

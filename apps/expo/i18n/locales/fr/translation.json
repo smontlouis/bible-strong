@@ -467,6 +467,7 @@
   "Mode Strong": "Mode Strong",
   "Comparer": "Comparer",
   "common.chooseCompareVersions": "Choisir les versions à comparer",
+  "compare.noEquivalentVerse": "Ce verset n’a pas d’équivalent dans cette version.",
   "Sélectionner les versions": "Sélectionner les versions",
   "Impossible de charger les occurrences suivantes.": "Impossible de charger les occurrences suivantes.",
   "menu.languageChanged": "Langue de la ressource changée en {{language}}",

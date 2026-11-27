@@ -18,8 +18,11 @@ import { localQueryOptions } from '~helpers/queryOptions'
 import { useSheet } from '~helpers/useSheet'
 import type { StrongSelection } from '~helpers/strongSelection'
 import StrongSelectionSheet from '../StrongSelectionSheet'
+import { getVersionChapterVerseCount } from '../parallelVersification'
 interface CompareCardProps {
   selectedVerses: VerseIds
+  // The version the verses were selected in: each version shows its own corresponding verses
+  sourceVersion?: string
   onChangeVerse: (verse: string) => void
   strongMode?: boolean
   onChooseVersions?: () => void
@@ -27,6 +30,7 @@ interface CompareCardProps {
 
 const CompareCard = ({
   selectedVerses,
+  sourceVersion,
   onChangeVerse,
   strongMode = false,
   onChooseVersions,
@@ -39,10 +43,17 @@ const CompareCard = ({
 
   const selectedVerseKeys = Object.keys(selectedVerses)
   const { data: prevNextItems = null } = useQuery({
-    queryKey: ['resource-compare-prev-next', selectedVerseKeys[0], versionsToCompare],
+    queryKey: [
+      'resource-compare-prev-next',
+      selectedVerseKeys[0],
+      versionsToCompare,
+      sourceVersion,
+    ],
     queryFn: async () => {
       const [livre, chapitre, verse] = selectedVerseKeys[0].split('-')
+      // The verses are numbered as the source version numbers them (KJV Malachi 4 has 6)
       const versesInCurrentChapter =
+        getVersionChapterVerseCount(sourceVersion, Number(livre), Number(chapitre)) ||
         (await getMaxChapterVerseCount(versionsToCompare, Number(livre), Number(chapitre))) ||
         countLsgChapters[`${livre}-${chapitre}`]
       return { verseNumber: verse, versesInCurrentChapter }
@@ -106,6 +117,7 @@ const CompareCard = ({
             versionId={versionId}
             name={obj.name}
             selectedVerses={selectedVerses}
+            sourceVersion={sourceVersion}
             position={position}
             strongMode={strongMode}
             selectedStrongReference={strongSelection?.reference}

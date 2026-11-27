@@ -1,0 +1,108 @@
+# Versification "Bible Strong NEG79": an overlay on Paratext org.vrs, for the Nouvelle Édition
+# de Genève 1979 (NEG79).
+#
+# NEG79 numbers as org (LSG) in the Psalms, whose titles are verses, and in Exodus 7-8,
+# Leviticus 5-6, Numbers 29-30, 1 Samuel 23-24, 1 Kings 22, 2 Chronicles 13-14, Ecclesiastes
+# 4-5, the Song of Songs, Isaiah, Ezekiel 20-21, Hosea 1-2 and 11-12, Jonah, Micah, Nahum and
+# the New Testament but Mark 9-10. Elsewhere it numbers as the English Bibles, or in its own way.
+#
+# Mapping lines go from NEG79 to org. Each was checked against the alignment of the NEG79 text
+# with the LSG text (docs/research/versification.md, section 2.4).
+#
+GEN 31:55 32:32
+EXO 21:36 22:31
+NUM 16:50 17:13 25:18
+DEU 12:32 13:18 22:30 23:25 28:68 29:29
+1SA 20:43 21:15
+2SA 18:33 19:43
+1KI 4:34 5:18
+2KI 11:21 12:21
+1CH 5:26 6:81 12:40
+2CH 1:17 2:18
+NEH 3:32 4:23 7:73 9:38 10:39
+JOB 38:38 39:38 40:28 41:25
+ECC 11:8 12:16
+JER 8:22 9:26
+DAN 3:30 4:37 5:31 6:28
+HOS 13:16 14:9
+JOL 2:32 3:21 4:0
+ZEC 1:21 2:13
+MAL 3:18 4:6
+MRK 9:51 10:53
+#
+# As in the English Bibles (eng.vrs with the corrections of eng-fixes.vrs):
+GEN 31:55 = GEN 32:1
+GEN 32:1-32 = GEN 32:2-33
+EXO 22:1 = EXO 21:37
+EXO 22:2-31 = EXO 22:1-30
+NUM 16:36-50 = NUM 17:1-15
+NUM 17:1-13 = NUM 17:16-28
+NUM 26:1 = NUM 25:19
+NUM 26:1 = NUM 26:1
+DEU 12:32 = DEU 13:1
+DEU 13:1-18 = DEU 13:2-19
+DEU 22:30 = DEU 23:1
+DEU 23:1-25 = DEU 23:2-26
+DEU 29:1 = DEU 28:69
+DEU 29:2-29 = DEU 29:1-28
+2SA 18:33 = 2SA 19:1
+2SA 19:1-43 = 2SA 19:2-44
+1KI 4:21-34 = 1KI 5:1-14
+1KI 5:1-18 = 1KI 5:15-32
+2KI 11:21 = 2KI 12:1
+2KI 12:1-21 = 2KI 12:2-22
+1CH 6:1-15 = 1CH 5:27-41
+1CH 6:16-81 = 1CH 6:1-66
+1CH 12:4 = 1CH 12:4
+1CH 12:4 = 1CH 12:5
+1CH 12:5-40 = 1CH 12:6-41
+2CH 2:1 = 2CH 1:18
+2CH 2:2-18 = 2CH 2:1-17
+NEH 4:1-6 = NEH 3:33-38
+NEH 4:7-23 = NEH 4:1-17
+NEH 7:69-73 = NEH 7:68-72
+NEH 9:38 = NEH 10:1
+NEH 10:1-39 = NEH 10:2-40
+JER 9:1 = JER 8:23
+JER 9:2-26 = JER 9:1-25
+DAN 4:1-3 = DAN 3:31-33
+DAN 4:4-37 = DAN 4:1-34
+DAN 5:31 = DAN 6:1
+DAN 6:1-28 = DAN 6:2-29
+HOS 13:16 = HOS 14:1
+HOS 14:1-9 = HOS 14:2-10
+JOL 2:28-32 = JOL 3:1-5
+JOL 3:1-21 = JOL 4:1-21
+ZEC 1:18-21 = ZEC 2:1-4
+ZEC 2:1-13 = ZEC 2:5-17
+MAL 4:1-6 = MAL 3:19-24
+#
+# 1 Samuel 20 has 43 verses: NEG79 20:42 ("Et Jonathan dit à David : Va en paix…") is org 20:42
+# alone, and NEG79 20:43 ("David se leva, et s'en alla…") is org 21:1. 1 Samuel 21 then
+# follows the English Bibles.
+1SA 20:43 = 1SA 21:1
+1SA 21:1-15 = 1SA 21:2-16
+#
+# Job 38-41, numbered as OST and FMAR, and as the numbers Lausanne prints in brackets: NEG79
+# 39:1 ("Chasses-tu la proie pour la lionne…") is org 38:39, NEG79 39:34 ("L'Éternel,
+# s'adressant à Job, dit") is org 40:1, and NEG79 40:28 ("Voici, on est trompé dans son
+# attente…") is org 41:1.
+JOB 39:1-3 = JOB 38:39-41
+JOB 39:4-33 = JOB 39:1-30
+JOB 39:34-38 = JOB 40:1-5
+JOB 40:1-27 = JOB 40:6-32
+JOB 40:28 = JOB 41:1
+JOB 41:1-25 = JOB 41:2-26
+#
+# Ecclesiastes 12 opens two verses earlier: NEG79 12:1 ("Jeune homme, réjouis-toi dans ta
+# jeunesse…") is org 11:9.
+ECC 12:1-2 = ECC 11:9-10
+ECC 12:3-16 = ECC 12:1-14
+#
+# Mark 9 has 51 verses and Mark 10 has 53: NEG79 cuts in two the verse that ends each chapter.
+# NEG79 9:50-51 ("Le sel est une bonne chose…", "Ayez du sel en vous-mêmes…") is org 9:50;
+# NEG79 10:52-53 ("Et Jésus lui dit : Va, ta foi t'a sauvé.", "Aussitôt il recouvra la vue…")
+# is org 10:52.
+# NEG79 prints no verse 9:44 and 9:46, which LSG keeps empty: the numbers keep their org verse.
+#! &MRK 9:50-51 = MRK 9:50
+#! &MRK 10:52-53 = MRK 10:52

@@ -8,8 +8,10 @@ import type { BibleResource, Bookmark, Verse } from '~common/types'
 import type { ConfirmDialogOptions } from '~common/ConfirmDialog/types'
 import { useConfirmDialog } from '~common/ConfirmDialog/useConfirmDialog'
 import { useUnifiedTagsModal } from '~common/UnifiedTagsModalProvider'
-import type { InlineCommentaryChip } from '~features/commentaries/inlineCommentaryPlacement'
-import type { ReadingIndex } from '~features/resources/commentaryReadingAccess'
+import type {
+  InlineCommentaryChip,
+  InlineCommentaryIndex,
+} from '~features/commentaries/inlineCommentaryPlacement'
 import type { RelationEndpoint } from '~features/studyRelations/domain'
 import { useOpenStudyObject } from '~features/studyRelations/useOpenStudyObject'
 import { resetBiblesDb, type BibleVersionCoverage } from '~helpers/biblesDb'
@@ -61,8 +63,11 @@ export type ReaderSnapshot = {
   interlinearReadingVersions: VersionCode[]
   /** The versions of the parallel columns on screen, after the main one. */
   parallelColumnVersions: VersionCode[]
-  /** The commentaries shown within the text, and the indexes of the chapter they come from. */
-  inlineCommentaries: { chips: InlineCommentaryChip[]; indexes: ReadingIndex[] }
+  /**
+   * The commentaries shown within the text, and the indexes of the commentary chapters they come
+   * from, their ranges in the reader's numbering.
+   */
+  inlineCommentaries: { chips: InlineCommentaryChip[]; indexes: InlineCommentaryIndex[] }
   /** The bookmarks of the chapter, by verse, as the page shows them. */
   bookmarks: Record<number, Bookmark>
   /**

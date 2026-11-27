@@ -653,12 +653,12 @@ describe('a verse page of a Bible that numbers differently', () => {
 
   it('reads another Bible in another chapter when its numbering puts the verse there', async () => {
     answerWith(fakeApi)
-    // LSG Malachi 3:23 is the KJV's Malachi 4:5.
+    // LSG Malachi 3:23 is Malachi 4:5 in BHG and NEG79, which number Malachi as the KJV.
     await studyOf('LSG', { book: 39, chapter: 3, verse: 23 })
     const chapterReads = vi
       .mocked(readResource)
       .mock.calls.filter(([path]) => path === '/v1/bibles/chapters')
       .map(([, query]) => `${query?.versions}:${query?.book}-${query?.chapter}`)
-    expect(chapterReads).toContain('BHG:39-4')
+    expect(chapterReads).toContain('BHG,NEG79:39-4')
   })
 })

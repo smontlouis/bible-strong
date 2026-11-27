@@ -188,7 +188,7 @@ it('keeps the excerpt and refreshes chapter indexes when the requested edition i
   await act(async () => {
     refresh.props.onPress()
   })
-  expect(invalidate).toHaveBeenCalledWith({ queryKey: ['inline-commentary-index', 1, 1] })
+  expect(invalidate).toHaveBeenCalledWith({ queryKey: ['inline-commentary-index', 1] })
   expect(mockDismiss).toHaveBeenCalledTimes(1)
   expect(mockLoadSection).toHaveBeenCalledTimes(1)
 })

@@ -1,0 +1,22 @@
+# Versification "Bible Strong Lausanne": an overlay on bs-kjv, for the Lausanne Bible (LAU).
+#
+# Lausanne numbers as the KJV, a Psalm title in verse 1 included, except in three books. Its
+# text gives in brackets the number of the traditional French Bibles where it differs ("(51:3)"):
+# those are not org numbers in Numbers 12-13, 1 Samuel 20, Job 38-41 and Ecclesiastes 11-12.
+#
+# Joel has 4 chapters, as in org: LAU 3:1 ("Et il arrivera, après cela, que je verserai mon
+# Esprit…") is org 3:1, and LAU 4:1 ("Car voici, en ces jours-là…") is org 4:1.
+JOL 2:27 3:5 4:21
+JOL 3:1-5 = JOL 3:1-5
+#
+# Mark 9 has 51 verses and Mark 10 has 53: LAU cuts in two the verse that ends each chapter.
+# LAU 9:50-51 ("C'est une bonne chose que le sel…", "Ayez du sel en vous-mêmes…") is org 9:50;
+# LAU 10:52-53 ("Va, ta foi t'a sauvé.", "Et aussitôt il recouvra la vue…") is org 10:52.
+MRK 9:51 10:53
+#! &MRK 9:50-51 = MRK 9:50
+#! &MRK 10:52-53 = MRK 10:52
+#
+# 3 John has 15 verses, as in org: LAU 14 ("et j'espère te voir bientôt…") is org 14, and LAU 15
+# ("Paix te soit !…") is org 15.
+3JN 1:15
+3JN 1:14 = 3JN 1:14

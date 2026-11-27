@@ -44,6 +44,7 @@ export const resourceQueryKeys = {
   bibleParallel: (request: {
     book: number
     chapter: number
+    mainVersion?: string
     columns: readonly {
       version: string
       strongMode?: string

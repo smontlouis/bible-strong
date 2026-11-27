@@ -218,7 +218,7 @@ const ResourcesModal = ({
             title: t('tabs.new'),
             isRemovable: true,
             type: 'commentary',
-            data: { verse: selectedVerse },
+            data: { verse: selectedVerse, version: effectiveSelectedVersion },
           })
         }
         if (resourceType === 'compare') {
@@ -227,7 +227,11 @@ const ResourcesModal = ({
             title: t('tabs.new'),
             isRemovable: true,
             type: 'compare',
-            data: { selectedVerses, strongMode: compareStrongMode },
+            data: {
+              selectedVerses,
+              strongMode: compareStrongMode,
+              sourceVersion: effectiveSelectedVersion,
+            },
           })
         }
         break
@@ -456,6 +460,7 @@ const Resource = ({
         <SheetScrollView contentContainerStyle={{ paddingBottom: 20, flexGrow: 1 }}>
           <CompareCard
             selectedVerses={selectedVerses}
+            sourceVersion={selectedVersion}
             strongMode={compareStrongMode}
             onChangeVerse={onChangeVerse ?? actions.selectSelectedVerse}
             onChooseVersions={onChooseCompareVersions}

@@ -16,8 +16,9 @@ import type {
   VersificationTables,
 } from './versification/versificationSources'
 import compiledTables from './versification/tables.json'
+import type { VersificationId } from './versification/versificationIds'
 
-export type VersificationId = 'org' | 'bs-eng' | 'bs-kjv' | 'bs-nrsv'
+export { VERSIFICATION_ID_LIST, type VersificationId } from './versification/versificationIds'
 
 /** The numbering every conversion goes through, and the one new internal keys are written in. */
 export const PIVOT_VERSIFICATION = 'org' satisfies VersificationId
@@ -56,6 +57,18 @@ const DEFINITIONS: Record<VersificationId, VersificationDefinition> = {
     overlays: ['eng-fixes', 'bs-eng', 'bs-kjv'],
   },
   'bs-nrsv': { table: 'eng', overlays: ['eng-fixes', 'bs-nrsv'] },
+  // The French Protestant Bibles number some books as org and others as the English Bibles;
+  // their Psalms are numbered as org (titles are verses), so org takes the fewest lines.
+  'bs-neg79': { table: 'org', overlays: ['bs-neg79'] },
+  'bs-ost': { table: 'org', overlays: ['bs-ost'] },
+  // Martin differs from Ostervald in a few chapters only.
+  'bs-fmar': { table: 'org', overlays: ['bs-ost', 'bs-fmar'] },
+  // Lausanne follows the KJV except in Joel, Mark 9-10 and 3 John.
+  'bs-lau': {
+    table: 'eng',
+    foldPsalmTitlesIntoVerse1: true,
+    overlays: ['eng-fixes', 'bs-eng', 'bs-kjv', 'bs-lau'],
+  },
 }
 
 export const VERSIFICATION_IDS = Object.keys(DEFINITIONS) as VersificationId[]
@@ -91,6 +104,10 @@ export const BIBLE_VERSIFICATIONS: Readonly<Record<string, VersificationId>> = {
   TR1624: 'bs-kjv',
   TR1894: 'bs-kjv',
   BHG: 'bs-nrsv',
+  NEG79: 'bs-neg79',
+  OST: 'bs-ost',
+  FMAR: 'bs-fmar',
+  LAU: 'bs-lau',
 }
 
 /**
@@ -168,10 +185,13 @@ const tables = compiledTables as unknown as VersificationTables
 
 const toRef = ([book, chapter, verse]: VrsVerse): VerseRef => ({ book, chapter, verse })
 
+/** An overlay chapter whose last verse is 0 does not exist (Joel 4 in a Bible with 3 chapters). */
 const applyChapters = (lastVerses: Map<number, number[]>, table: VrsTable): void => {
   for (const [book, chapter, lastVerse] of table.chapters) {
     const chapters = lastVerses.get(book) ?? []
-    chapters[chapter - 1] = lastVerse
+    if (lastVerse === 0) delete chapters[chapter - 1]
+    else chapters[chapter - 1] = lastVerse
+    while (chapters.length > 0 && chapters[chapters.length - 1] === undefined) chapters.length -= 1
     lastVerses.set(book, chapters)
   }
 }
@@ -209,6 +229,12 @@ const buildIndex = (definition: VersificationDefinition): VersificationIndex => 
       ...overlayPairs,
     ]
   }
+  // A line whose verse an overlay took out of its chapter is dropped (KJV Joel 3:6-21 in a
+  // Bible whose Joel 3 ends at 5).
+  pairs = pairs.filter(([[book, chapter, verse]]) => {
+    const lastVerse = lastVerses.get(book)?.[chapter - 1]
+    return lastVerse !== undefined && verse <= lastVerse
+  })
   const index: VersificationIndex = {
     lastVerses,
     zeroVerses: new Set(),
@@ -226,7 +252,7 @@ const buildIndex = (definition: VersificationDefinition): VersificationIndex => 
   }
   // As in Paratext, a verse no mapping names is the org verse of the same number, even when
   // another verse maps there too (KJV Nehemiah 7:68 and 7:69 are both LSG 7:68).
-  if (definition.table !== 'org') {
+  if (definition.table !== 'org' || definition.overlays) {
     const org = indexOf('org')
     for (const [book, chapters] of lastVerses) {
       chapters.forEach((lastVerse, chapterIndex) => {

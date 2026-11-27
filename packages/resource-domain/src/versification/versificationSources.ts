@@ -5,7 +5,16 @@ export const PARATEXT_TABLES = ['eng', 'org'] as const
 export type ParatextTableId = (typeof PARATEXT_TABLES)[number]
 
 /** The Bible Strong overlays, each listing only what differs from its base. */
-export const BIBLE_STRONG_OVERLAYS = ['eng-fixes', 'bs-eng', 'bs-kjv', 'bs-nrsv'] as const
+export const BIBLE_STRONG_OVERLAYS = [
+  'eng-fixes',
+  'bs-eng',
+  'bs-kjv',
+  'bs-nrsv',
+  'bs-neg79',
+  'bs-ost',
+  'bs-fmar',
+  'bs-lau',
+] as const
 export type BibleStrongOverlayId = (typeof BIBLE_STRONG_OVERLAYS)[number]
 
 export interface VersificationTables {

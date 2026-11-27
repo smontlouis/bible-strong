@@ -5,6 +5,7 @@ import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useAtomValue } from 'jotai/react'
 import { activeBibleTabVersionAtom } from '~state/tabs'
+import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking } from 'react-native'
@@ -65,6 +66,7 @@ const CommentaryEntryScreen = ({
   const pushRouteOnce = usePushRouteOnce()
   // Its passages open in the version being read.
   const readingVersion = useAtomValue(activeBibleTabVersionAtom)
+  const defaultVersion = useDefaultBibleVersion()
   const { t } = useTranslation()
   const canGoBackInStack = useCanGoBackInStack()
   const bottomInset = usePageBottomInset()
@@ -126,6 +128,11 @@ const CommentaryEntryScreen = ({
   }
 
   const { entry, projection, book, chapter } = parsed
+  // The commentary numbers its passages its own way: they open at the verses of the Bible shown.
+  const numbering = {
+    resource: `commentary:${entry.publicationId}`,
+    shownVersion: readingVersion ?? defaultVersion,
+  }
   const orderedSections = focusVerse
     ? (() => {
         const grouped = groupCommentarySectionsForVerse({
@@ -234,6 +241,7 @@ const CommentaryEntryScreen = ({
                     startVerse: section.rangeStartVerse,
                     endVerse: section.rangeEndVerse,
                     version: readingVersion,
+                    numbering,
                   })
                   if (route) pushRouteOnce(route)
                 }}
@@ -257,7 +265,7 @@ const CommentaryEntryScreen = ({
                   onLinkPress={href => {
                     const osis = commentaryHrefToOsis(href)
                     const route = osis
-                      ? getCommentaryBibleViewRoute(osis, readingVersion)
+                      ? getCommentaryBibleViewRoute(osis, readingVersion, numbering)
                       : undefined
                     if (route) pushRouteOnce(route)
                     else if (/^https?:\/\//iu.test(href)) void Linking.openURL(href)

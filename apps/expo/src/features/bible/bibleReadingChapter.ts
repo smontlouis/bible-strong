@@ -23,6 +23,7 @@ import type {
   BibleChapterPresentationSource,
 } from '~features/resources/bibleContentAccess'
 import type { ParallelVerse } from './BibleDOM/BibleDOMWrapper'
+import { alignParallelColumn, getParallelColumnChapters } from './parallelVersification'
 
 export type { RedWordsByVerse }
 
@@ -39,6 +40,11 @@ export interface BibleReadingChapterRequest {
 export interface BibleReadingParallelRequest {
   book: number
   chapter: number
+  /**
+   * The main version: a column numbered differently shows the verses that correspond to its
+   * chapter, from the chapters of its own numbering that hold them.
+   */
+  mainVersion?: string
   /** Each parallel version with its own Strong and interlinear modes. */
   parallelColumns: readonly BibleColumnTextModes[]
   /** The locale of a column that names none: the application's. */
@@ -96,40 +102,69 @@ const getParallelColumnInterlinearMode = (
     : undefined
 
 export const loadBibleReadingParallelVerses = async (
-  { book, chapter, parallelColumns, defaultInterlinearLocale }: BibleReadingParallelRequest,
+  {
+    book,
+    chapter,
+    mainVersion,
+    parallelColumns,
+    defaultInterlinearLocale,
+  }: BibleReadingParallelRequest,
   resourceAccess: ResourceAccessRegistry = defaultResourceAccess
 ): Promise<ParallelVerse[]> => {
   if (!parallelColumns.length) return []
 
-  const requests = parallelColumns.map(column => ({
-    book,
-    chapter,
-    version: column.version as VersionCode,
-    strongMode: resolveStrongBibleVersion(column.version, column.strongMode).strongMode,
-    interlinearMode: getParallelColumnInterlinearMode(column),
-    interlinearLocale: column.interlinearLocale ?? defaultInterlinearLocale,
-    interlinearLocaleAutomatic: !column.interlinearLocale,
-  }))
-  const parallelResults = resourceAccess.bibleContent.loadChapters
+  const columns = parallelColumns.map(column => {
+    const alignedChapters = mainVersion
+      ? getParallelColumnChapters({ book, chapter, mainVersion, columnVersion: column.version })
+      : undefined
+    return {
+      id: column.version as VersionCode,
+      alignedChapters,
+      interlinearMode: getParallelColumnInterlinearMode(column),
+      requests: (alignedChapters ?? [chapter]).map(columnChapter => ({
+        book,
+        chapter: columnChapter,
+        version: column.version as VersionCode,
+        strongMode: resolveStrongBibleVersion(column.version, column.strongMode).strongMode,
+        interlinearMode: getParallelColumnInterlinearMode(column),
+        interlinearLocale: column.interlinearLocale ?? defaultInterlinearLocale,
+        interlinearLocaleAutomatic: !column.interlinearLocale,
+      })),
+    }
+  })
+  const requests = columns.flatMap(column => column.requests)
+  const results = resourceAccess.bibleContent.loadChapters
     ? await resourceAccess.bibleContent.loadChapters(requests)
     : await Promise.all(requests.map(request => resourceAccess.bibleContent.loadChapter(request)))
 
-  return parallelResults.map((result, index) => {
-    const id = requests[index].version
-    if (result.success && result.data) {
+  let offset = 0
+  return columns.map(({ id, alignedChapters, interlinearMode, requests: columnRequests }) => {
+    const columnResults = results.slice(offset, offset + columnRequests.length)
+    offset += columnRequests.length
+    const failed = columnResults.find(result => !result.success || !result.data)
+    if (failed) {
       return {
         id,
-        verses: result.data.verses,
-        interlinearMode: requests[index]?.interlinearMode,
+        verses: [],
+        error: failed.success ? undefined : (failed.error as BibleError),
+        interlinearMode,
       }
     }
 
-    return {
-      id,
-      verses: [],
-      error: result.success ? undefined : (result.error as BibleError),
-      interlinearMode: requests[index]?.interlinearMode,
-    }
+    const verses = columnResults.flatMap(result => (result.success ? result.data.verses : []))
+    const aligned =
+      alignedChapters && mainVersion
+        ? alignParallelColumn({
+            book,
+            chapter,
+            mainVersion,
+            columnVersion: id,
+            columnVerses: verses,
+          })
+        : undefined
+    return aligned
+      ? { id, verses: aligned.verses, interlinearMode, alignment: aligned.alignment }
+      : { id, verses, interlinearMode }
   })
 }
 
@@ -159,7 +194,10 @@ export const getDisplayedParallelVerses = ({
   columns.map((column, index) => {
     const loaded = loadedVerses?.[index]
     const mainVerse = mainVerses[0]
-    const loadedVerse = loaded?.verses[0]
+    // An aligned column may start in another chapter (KJV Genesis 31:55 for LSG 32:1)
+    const loadedVerse = loaded?.alignment
+      ? { Livre: loaded.alignment.book, Chapitre: loaded.alignment.chapter }
+      : loaded?.verses[0]
     const showsMainChapter =
       mainVerse && loadedVerse ? isSameChapter(mainVerse, loadedVerse) : isLoadedForChapter
 

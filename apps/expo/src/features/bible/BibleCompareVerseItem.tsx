@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import type { ComponentPropsWithRef as UIComponentProps } from 'react'
+import { useTranslation } from 'react-i18next'
 import { StyleSheet, View } from 'react-native'
 import { twMerge } from '~common/ui/classNames'
 
@@ -23,9 +24,11 @@ import {
 } from '~helpers/strongBiblePublications'
 import type { StrongSelection } from '~helpers/strongSelection'
 import { removeBreakLines } from '~helpers/utils'
+import verseToReference from '~helpers/verseToReference'
 import { useResourcesLanguageValue } from '~state/resourcesLanguage'
 import type { VersionCode } from '~state/tabs'
 import CompareStrongVerseText from './CompareStrongVerseText'
+import { getCompareVerseKeys } from './parallelVersification'
 
 const Container = (
   componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
@@ -56,39 +59,103 @@ type CompareVerseItemProps = {
   versionId: VersionCode
   name: string
   selectedVerses: VerseIds
+  // The version the verses were selected in: they are read in each version's own numbering
+  sourceVersion?: string
   position: number
   strongMode?: boolean
   selectedStrongReference?: string
   onStrongSelect?: (selection: StrongSelection) => void
 }
 
+// The selected verses as a version numbers them, and whether that differs from the selection.
+const useVersionVerseKeys = (
+  selectedVerses: VerseIds,
+  sourceVersion: string | undefined,
+  versionId: string
+) => {
+  const selectedVerseKeys = Object.keys(selectedVerses)
+  const verseKeys = getCompareVerseKeys(selectedVerseKeys, sourceVersion, versionId)
+  return {
+    verseKeys,
+    isConverted:
+      verseKeys.length !== selectedVerseKeys.length || verseKeys.some(key => !selectedVerses[key]),
+  }
+}
+
+const CompareVerseItemTitle = ({
+  versionId,
+  name,
+  reference,
+}: {
+  versionId: string
+  name: string
+  reference?: string
+}) => (
+  <Box className="overflow-hidden border-continuous flex-row">
+    <Text className="text-dark-grey font-bold text-[14px] mb-[5px]">
+      {versionId} - {name}
+      {reference ? ` · ${reference}` : ''}
+    </Text>
+  </Box>
+)
+
+/** A version with no equivalent of the selected verses keeps its row (ADR draft, versification). */
+const NoEquivalentCompareVerseItem = ({ versionId, name }: { versionId: string; name: string }) => {
+  const { t } = useTranslation()
+  return (
+    <Container>
+      <CompareVerseItemTitle versionId={versionId} name={name} />
+      <Paragraph scale={-1} className="text-grey">
+        {t('compare.noEquivalentVerse')}
+      </Paragraph>
+    </Container>
+  )
+}
+
 const PlainCompareVerseItem = ({
   versionId,
   name,
   selectedVerses,
+  sourceVersion,
   position,
 }: CompareVerseItemProps) => {
   const resources = useResourceAccess()
-  const selectedVerseKeys = Object.keys(selectedVerses)
+  const { verseKeys: selectedVerseKeys, isConverted } = useVersionVerseKeys(
+    selectedVerses,
+    sourceVersion,
+    versionId
+  )
+  const versionVerses: VerseIds = Object.fromEntries(
+    selectedVerseKeys.map(key => [key, true] as const)
+  )
   const { data, error, isPending } = useQuery({
     queryKey: resourceQueryKeys.bibleVerseSelection(versionId, selectedVerseKeys),
     queryFn: () =>
       getVersesContent({
-        verses: selectedVerses,
+        verses: versionVerses,
         version: versionId,
         position,
         loadVerseTexts: (version, verseKeys) => loadBibleVerseTexts(resources, version, verseKeys),
       }),
     networkMode: 'always',
     staleTime: Infinity,
+    enabled: selectedVerseKeys.length > 0,
   })
+  if (!selectedVerseKeys.length)
+    return <NoEquivalentCompareVerseItem versionId={versionId} name={name} />
+
   const content = error ? 'Impossible de charger ce verset' : (data?.content ?? '')
 
-  const focusVerses = selectedVerseKeys.map(v => v.split('-')[v.split('-').length - 1]).map(Number)
+  const [book, chapter, verse] = selectedVerseKeys[0].split('-').map(Number)
+  // The reader opens one chapter: the converted verses may run into the next (KJV Malachi 3:18
+  // and 4:1 for LSG 3:18-19)
+  const focusVerses = selectedVerseKeys
+    .map(key => key.split('-').map(Number))
+    // eslint-disable-next-line eqeqeq
+    .filter(([keyBook, keyChapter]) => keyBook == book && keyChapter == chapter)
+    .map(([, , keyVerse]) => keyVerse)
 
   focusVerses.sort((a, b) => a - b)
-
-  const [book, chapter, verse] = selectedVerseKeys[0].split('-').map(Number)
 
   if (isPending) return null
 
@@ -105,11 +172,11 @@ const PlainCompareVerseItem = ({
       }}
     >
       <Container>
-        <Box className="overflow-hidden border-continuous flex-row">
-          <Text className="text-dark-grey font-bold text-[14px] mb-[5px]">
-            {versionId} - {name}
-          </Text>
-        </Box>
+        <CompareVerseItemTitle
+          versionId={versionId}
+          name={name}
+          reference={isConverted ? data?.title : undefined}
+        />
         <Paragraph scale={-1}>{removeBreakLines(content)}</Paragraph>
       </Container>
     </Link>
@@ -122,13 +189,18 @@ const StrongCompareVerseItem = ({
   versionId,
   name,
   selectedVerses,
+  sourceVersion,
   position,
   selectedStrongReference,
   onStrongSelect,
 }: CompareVerseItemProps & { versionId: LexiconCompareVersionId }) => {
   const resources = useResourceAccess()
   const strongLanguage = useResourcesLanguageValue().STRONG
-  const selectedVerseKeys = Object.keys(selectedVerses)
+  const { verseKeys: selectedVerseKeys, isConverted } = useVersionVerseKeys(
+    selectedVerses,
+    sourceVersion,
+    versionId
+  )
   const { data: strongVerses } = useQuery({
     queryKey: resourceQueryKeys.lexiconBibleVerseSelection({
       currentVersionId: versionId,
@@ -156,15 +228,17 @@ const StrongCompareVerseItem = ({
       if (!results.every(result => result.status === 'available')) return null
       return results.flatMap(result => (result.status === 'available' ? [result.verse] : []))
     },
+    enabled: selectedVerseKeys.length > 0,
     ...localQueryOptions,
   })
 
-  if (!strongVerses || !onStrongSelect) {
+  if (!strongVerses?.length || !onStrongSelect) {
     return (
       <PlainCompareVerseItem
         versionId={versionId}
         name={name}
         selectedVerses={selectedVerses}
+        sourceVersion={sourceVersion}
         position={position}
       />
     )
@@ -172,11 +246,11 @@ const StrongCompareVerseItem = ({
 
   return (
     <Container>
-      <Box className="overflow-hidden border-continuous flex-row">
-        <Text className="text-dark-grey font-bold text-[14px] mb-[5px]">
-          {versionId} - {name}
-        </Text>
-      </Box>
+      <CompareVerseItemTitle
+        versionId={versionId}
+        name={name}
+        reference={isConverted ? verseToReference(selectedVerseKeys) : undefined}
+      />
       {strongVerses.map(verse => (
         <CompareStrongVerseText
           key={`${verse.Livre}-${verse.Chapitre}-${verse.Verset}`}

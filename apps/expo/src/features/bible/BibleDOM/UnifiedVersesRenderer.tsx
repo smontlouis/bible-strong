@@ -24,6 +24,7 @@ import {
   getFadePosition,
   getFocusVerseNumbers,
   getParallelChapterRows,
+  getParallelVerseState,
   type ParallelChapterRow,
   getTaggedVersesByLastVerse,
   getVersesWithWordAnnotations,
@@ -32,6 +33,8 @@ import {
 import type { VerseTarget } from './AnnotationMode/verseTargets'
 import type { ResolvedPassageMediaChapter } from '../passageMedia'
 import type { PassageMediaGallerySection } from './passageMediaGallery'
+
+type HighlightColor = keyof RootStyles['settings']['colors'][keyof RootStyles['settings']['colors']]
 
 // ============================================================================
 // STYLED COMPONENTS
@@ -154,12 +157,31 @@ export function UnifiedVersesRenderer({
 
   // Pre-compute which verses have word annotations: O(a*r) once instead of O(n*a*r)
   const versesWithWordAnnotationsByKey = getVersesWithWordAnnotations(wordAnnotations, version)
-  const parallelVersesWithWordAnnotations = isParallelVerse
-    ? parallelVerses.map(parallel => ({
-        version: parallel.id,
-        verseKeys: getVersesWithWordAnnotations(wordAnnotations, parallel.id),
-      }))
-    : []
+  const versesWithWordAnnotationsByVersion = new Map(
+    isParallelVerse
+      ? [
+          ...parallelVerses.map(
+            parallel =>
+              [parallel.id, getVersesWithWordAnnotations(wordAnnotations, parallel.id)] as const
+          ),
+          [version, versesWithWordAnnotationsByKey] as const,
+        ]
+      : []
+  )
+  // Parallel reading: each column's verse by its own key, which an aligned column numbers
+  // otherwise than the row (ADR-0030)
+  const getVerseState = (cellVerse: TVerse, cellVersion: string, column: number) =>
+    getParallelVerseState({
+      verse: cellVerse,
+      version: cellVersion,
+      column,
+      annotationMode,
+      selectedVerses,
+      selectedVersesVersion,
+      highlightedVerses,
+      touchedVerse,
+      versesWithWordAnnotationsByVersion,
+    })
   const pericopeByVersion: Record<string, PericopeChapter | undefined> = {
     ...parallelPericopeChapters,
     [version]: pericopeChapter,
@@ -254,27 +276,14 @@ export function UnifiedVersesRenderer({
                 selectedCode={annotationMode ? null : selectedCode}
                 isSelectionMode={annotationMode ? undefined : isSelectionMode}
                 annotationMode={Boolean(annotationMode)}
-                selectedVersion={annotationMode ? null : selectedVersion}
-                touchedCell={touchedCell}
-                highlightedColor={
-                  highlight?.color as
-                    | keyof RootStyles['settings']['colors'][keyof RootStyles['settings']['colors']]
-                    | undefined
-                }
+                getVerseState={getVerseState}
+                highlightedColor={highlight?.color as HighlightColor | undefined}
                 isVerseToScroll={!annotationMode && !isContextFocused && verseToScroll == Verset}
                 isFocused={annotationMode ? undefined : isFocused}
                 fadePosition={fadePosition}
                 pericopeByVersion={pericopeByVersion}
                 navigateToPericope={navigateToPericope}
                 redWordsByVersion={redWordsByVersion}
-                versionsWithWordAnnotations={
-                  new Set([
-                    ...(versesWithWordAnnotationsByKey.has(verseKey) ? [version] : []),
-                    ...parallelVersesWithWordAnnotations
-                      .filter(parallel => parallel.verseKeys.has(verseKey))
-                      .map(parallel => parallel.version),
-                  ])
-                }
                 verseContent={verseContent}
                 commentaryChips={
                   annotationMode ? undefined : inlineCommentaries?.afterVerses[verseNumber]

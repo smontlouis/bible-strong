@@ -32,7 +32,8 @@ describe('Nave topic outline', () => {
     expect(outline.html).toBe(
       '<ul>' +
         '<li><b>LES INSTANCES DE</b><ul>' +
-        '<li><b>Isra&#xE9;lites dans le d&#xE9;sert</b><p><a href="/bible/lsg/deut/29/6">Deutéronome 29:6</a></p></li>' +
+        // The Nave counts KJV verses: its Deuteronomy 29:6 is LSG 29:5.
+        '<li><b>Isra&#xE9;lites dans le d&#xE9;sert</b><p><a href="/bible/lsg/deut/29/5">Deutéronome 29:5</a></p></li>' +
         '<li><p>Voir <a href="/nave/fr/temperance">La TEMP&#xC9;RANCE</a></p></li>' +
         '</ul></li>' +
         '<li><b>Caract&#xE8;re de</b><p><a href="/bible/lsg/ps/106/16">Psaumes 106:16</a></p></li>' +
@@ -45,10 +46,44 @@ describe('Nave topic outline', () => {
     expect(
       render('<p><a href="v=13-6-3,4,5,50,51">1 Chroniques 6:3-5,50-51</a></p>', 'fr').html
     ).toBe(
-      '<ul><li><p><a href="/bible/lsg/1chr/6/3-5">1 Chroniques 6:3-5</a>,<a href="/bible/lsg/1chr/6/50-51">50-51</a></p></li></ul>'
+      // KJV 1 Chronicles 6:1-15 is LSG 5:27-41, and KJV 6:50 is LSG 6:35.
+      '<ul><li><p><a href="/bible/lsg/1chr/5/29-31">1 Chroniques 5:29-31</a>; <a href="/bible/lsg/1chr/6/35-36">1 Chroniques 6:35-36</a></p></li></ul>'
+    )
+    expect(render('<p><a href="v=2-6-13,26,27">Exode 6:13,26-27</a></p>', 'fr').html).toBe(
+      '<ul><li><p><a href="/bible/lsg/exod/6/13">Exode 6:13</a>,<a href="/bible/lsg/exod/6/26-27">26-27</a></p></li></ul>'
     )
     expect(render('<ul><li><a href="v=25-3-33">Lamentation de Jérémie 3:33</a></ul>').html).toBe(
       '<ul><li><p><a href="/bible/kjv/lam/3/33">Lamentations 3:33</a></p></li></ul>'
+    )
+  })
+
+  it('links and labels the verses in the numbering of the Bible of the page, once', () => {
+    const fr = render(
+      '<p><a href="v=39-4-5">Malachie 4:5</a>; <a href="v=19-51-1">Psaumes 51:1</a>; <a href="v=4-16-35,36,37">Nombres 16:35-37</a>; <a href="v=29-3">Joël 3</a></p>',
+      'fr'
+    )
+    expect(fr.html).toBe(
+      '<ul><li><p>' +
+        '<a href="/bible/lsg/mal/3/23">Malachie 3:23</a>; ' +
+        '<a href="/bible/lsg/ps/51/3">Psaumes 51:3</a>; ' +
+        '<a href="/bible/lsg/num/16/35">Nombres 16:35</a>; <a href="/bible/lsg/num/17/1-2">Nombres 17:1-2</a>; ' +
+        '<a href="/bible/lsg/joel/4">Joël 4</a>' +
+        '</p></li></ul>'
+    )
+    // The source cites four references; the quoted verses are those the page links to.
+    expect(fr.referenceCount).toBe(4)
+    expect(fr.references).toEqual([
+      { book: 39, chapter: 3, verses: [23] },
+      { book: 19, chapter: 51, verses: [3] },
+      { book: 4, chapter: 16, verses: [35] },
+      { book: 4, chapter: 17, verses: [1, 2] },
+      { book: 29, chapter: 4, verses: [] },
+    ])
+    const en = render(
+      '<ul><li><a href="v=39-4-5">Malachie 4:5</a> <a href="v=19-51-1">Psaumes 51:1</a></ul>'
+    )
+    expect(en.html).toBe(
+      '<ul><li><p><a href="/bible/kjv/mal/4/5">Malachi 4:5</a> <a href="/bible/kjv/ps/51/1">Psalms 51:1</a></p></li></ul>'
     )
   })
 

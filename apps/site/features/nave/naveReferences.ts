@@ -1,4 +1,17 @@
+import {
+  bibleVersification,
+  compareVerseRefs,
+  convertRange,
+  convertVerseKeyToOne,
+  lastVerseOfChapter,
+  parseVerseKey,
+  RESOURCE_VERSIFICATIONS,
+  versesOfRange,
+  type VerseRef,
+  type VersificationId,
+} from '@bible-strong/resource-domain/versification'
 import { bibleBookName, bibleBookSlug } from '../bible/bibleBooks'
+import { defaultBibleVersionId } from '../bible/bibleVersions'
 import { buildBibleReferencePath } from '../resources/editorialLinks'
 import type { ResourceLanguage } from '../resources/publicSite'
 import { buildNavePath, parseNaveTopic } from './naveRoutes'
@@ -22,6 +35,87 @@ export const parseNaveVerseTarget = (target: string): NaveVerseReference | undef
   // Only a book the site reads can be named and linked.
   if (!bibleBookSlug(book) || !chapter || verses.includes(0)) return undefined
   return { book, chapter, verses }
+}
+
+type Numberings = { from: VersificationId; to: VersificationId }
+
+/**
+ * The verses of `to` a run of verses of `from` covers. A run opens at the verse that stands
+ * for its first one, a Psalm title left out (Nave Ps 51:1-2 is LSG 51:3-4); a whole chapter
+ * keeps everything it covers. Undefined when no verse of the run is in the numbering's table,
+ * and the run is then kept as written.
+ */
+const convertRun = (
+  { from, to }: Numberings,
+  book: number,
+  chapter: number,
+  { start, end }: NaveVerseRun,
+  wholeChapter: boolean
+): VerseRef[] | undefined => {
+  const source = { start: { book, chapter, verse: start }, end: { book, chapter, verse: end } }
+  if (!versesOfRange(from, source).length) return undefined
+  const range = convertRange(from, to, source)
+  if (!range) return []
+  const first = wholeChapter
+    ? undefined
+    : parseVerseKey(convertVerseKeyToOne(`${book}-${chapter}-${start}`, from, to) ?? '')
+  const opening =
+    first && compareVerseRefs(first, range.start) > 0 && compareVerseRefs(first, range.end) <= 0
+      ? first
+      : range.start
+  return versesOfRange(to, { start: opening, end: range.end })
+}
+
+/**
+ * A reference of a topic, written in the Nave's numbering (the KJV's), in the numbering of the
+ * Bible the page quotes and links to, that of the page language by default: one reference per
+ * chapter it falls in (KJV Numbers 16:36-50 is LSG 17:1-15), none when no cited verse has an
+ * equivalent there. A whole chapter stays one when its verses fill a chapter of the Bible
+ * (Nave Joel 3 is LSG Joel 4), else it becomes the verses it covers (Nave Malachi 4 is LSG
+ * Malachi 3:19-24). An unknown numbering leaves the reference as written.
+ */
+export const naveReferenceInBible = (
+  reference: NaveVerseReference,
+  language: ResourceLanguage,
+  versionId = defaultBibleVersionId(language)
+): NaveVerseReference[] => {
+  const from = RESOURCE_VERSIFICATIONS[`nave:${language}`]
+  const to = bibleVersification(versionId)
+  if (!from || !to || from === to) return [reference]
+  const { book, chapter, verses } = reference
+  const wholeChapter = verses.length === 0
+  const runs = wholeChapter
+    ? [{ start: 1, end: lastVerseOfChapter(from, book, chapter) ?? 1 }]
+    : naveVerseRuns(verses)
+
+  const byChapter = new Map<number, number[]>()
+  const add = (refChapter: number, verse?: number) => {
+    const list = byChapter.get(refChapter) ?? []
+    if (verse !== undefined && !list.includes(verse)) list.push(verse)
+    byChapter.set(refChapter, list)
+  }
+  for (const run of runs) {
+    const converted = convertRun({ from, to }, book, chapter, run, wholeChapter)
+    if (!converted) {
+      // A verse the table does not know is read as written, as before conversion.
+      if (wholeChapter) add(chapter)
+      else for (let verse = run.start; verse <= run.end; verse++) add(chapter, verse)
+      continue
+    }
+    for (const ref of converted) add(ref.chapter, ref.verse)
+  }
+
+  return [...byChapter].map(([refChapter, list]) => {
+    const last = lastVerseOfChapter(to, book, refChapter)
+    const fillsChapter =
+      wholeChapter &&
+      (list.length === 0 ||
+        (last !== undefined &&
+          Array.from({ length: last }, (_, index) => index + 1).every(verse =>
+            list.includes(verse)
+          )))
+    return { book, chapter: refChapter, verses: fillsChapter ? [] : list }
+  })
 }
 
 /** How many verses a topic page quotes in full; the outline cites them all. */
@@ -92,8 +186,8 @@ export type NaveLinkContext = {
 }
 
 /**
- * Resolves the two link schemes of a topic to site pages: `v=book-chapter-verses` to the
- * Bible of the page language and `w=normalizedName` to another topic. A verse list opens
+ * Resolves the two link schemes of a topic to site pages: `v=book-chapter-verses`, already in
+ * that Bible's numbering (`naveReferenceInBible`), to the Bible of the page language and `w=normalizedName` to another topic. A verse list opens
  * at its first run of consecutive verses. Anything else, or a topic the publication does
  * not hold, is left unresolved.
  */

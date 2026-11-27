@@ -10,6 +10,7 @@ import { getNoteRoute } from '~features/notes/routeParams'
 import { createVerseEndpoint, type RelationEndpoint } from '~features/studyRelations/domain'
 import { getBibleViewParamsForVerseKeys } from '~features/studyRelations/openableStudyObjects'
 import { getEntityRelationsRoute } from '~features/studyRelations/routeParams'
+import { bibleVerseInResource, commentaryResourceKey } from '~features/resources/resourceNumbering'
 import { appLogger } from '~helpers/agentObservability'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import { createStrongIdentity, type StrongIdentity } from '~helpers/strongIdentities'
@@ -477,7 +478,8 @@ const openCommentarySection = (
   if (!entry) return
   const data = getTabData(context)
   const book = data.selectedBook.Numero
-  const chapter = data.selectedChapter
+  // The commentary may number the reader's chapter in another: LSG Malachi 3:23 is in KJV 4.
+  const chapter = chip.chapter ?? data.selectedChapter
   const open = (sectionId?: string) =>
     world.navigate({
       pathname: '/commentary-entry',
@@ -496,7 +498,8 @@ const openCommentarySection = (
     item =>
       item.resource.resourceId === chip.resourceId &&
       item.resource.language === chip.language &&
-      item.resource.revision === chip.revision
+      item.resource.revision === chip.revision &&
+      (item.chapter ?? data.selectedChapter) === chapter
   )
   const request: InlineCommentaryRequest = {
     resourceId: chip.resourceId,
@@ -571,8 +574,18 @@ export const applyOpenIntent = async (intent: OpenIntent, context: OpenContext) 
       openCommentarySection(context, target)
       return
     case 'commentary-entry': {
-      // The commentary page finds the section of the verse itself, in the chapter it loads.
-      const { book, chapter, verse } = parseVerseKey(intent.verseKey)
+      // The commentary page finds the section of the verse itself, in the chapter it loads: the
+      // verse that stands for the studied one in the commentary's numbering (LSG Mal 3:23 is
+      // KJV Mal 4:5).
+      const resourceId = target.projectionId.slice(0, target.projectionId.lastIndexOf(':'))
+      const commentaryVerseKey = intent.verseKey
+        ? bibleVerseInResource(
+            intent.verseKey,
+            intent.version ?? data.selectedVersion,
+            commentaryResourceKey(resourceId)
+          )
+        : undefined
+      const { book, chapter, verse } = parseVerseKey(commentaryVerseKey)
       if (!book || !chapter || !verse) return
       world.navigate({
         pathname: '/commentary-entry',

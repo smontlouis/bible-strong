@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   naveQuotedVerses,
+  naveReferenceInBible,
   naveReferenceLinks,
   naveVerseRuns,
   parseNaveVerseTarget,
@@ -116,6 +117,46 @@ describe('naveQuotedVerses', () => {
       { book: 2, chapter: 6, verse: 20 },
       { book: 2, chapter: 6, verse: 23 },
       { book: 2, chapter: 6, verse: 25 },
+    ])
+  })
+})
+
+describe('naveReferenceInBible', () => {
+  it('reads a Nave reference in the LSG numbering of the French pages', () => {
+    expect(naveReferenceInBible({ book: 39, chapter: 4, verses: [5] }, 'fr')).toEqual([
+      { book: 39, chapter: 3, verses: [23] },
+    ])
+    expect(naveReferenceInBible({ book: 19, chapter: 51, verses: [1] }, 'fr')).toEqual([
+      { book: 19, chapter: 51, verses: [3] },
+    ])
+    // A run opens past the Psalm title its first verse holds.
+    expect(naveReferenceInBible({ book: 19, chapter: 51, verses: [1, 2] }, 'fr')).toEqual([
+      { book: 19, chapter: 51, verses: [3, 4] },
+    ])
+  })
+
+  it('keeps the English pages, read in the KJV, and unknown numberings as written', () => {
+    const reference = { book: 39, chapter: 4, verses: [5] }
+    expect(naveReferenceInBible(reference, 'en')).toEqual([reference])
+    expect(naveReferenceInBible(reference, 'fr', 'UNKNOWN')).toEqual([reference])
+  })
+
+  it('splits a range crossing a chapter of the Bible', () => {
+    expect(naveReferenceInBible({ book: 4, chapter: 16, verses: [35, 36, 37] }, 'fr')).toEqual([
+      { book: 4, chapter: 16, verses: [35] },
+      { book: 4, chapter: 17, verses: [1, 2] },
+    ])
+  })
+
+  it('keeps a whole chapter only when it fills one', () => {
+    expect(naveReferenceInBible({ book: 29, chapter: 3, verses: [] }, 'fr')).toEqual([
+      { book: 29, chapter: 4, verses: [] },
+    ])
+    expect(naveReferenceInBible({ book: 39, chapter: 4, verses: [] }, 'fr')).toEqual([
+      { book: 39, chapter: 3, verses: [19, 20, 21, 22, 23, 24] },
+    ])
+    expect(naveReferenceInBible({ book: 40, chapter: 3, verses: [] }, 'fr')).toEqual([
+      { book: 40, chapter: 3, verses: [] },
     ])
   })
 })

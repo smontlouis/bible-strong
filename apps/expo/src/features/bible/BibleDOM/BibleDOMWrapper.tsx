@@ -69,13 +69,31 @@ import { subscribeToHardwareBackPress } from '~helpers/hardwareBackPress'
 import type { ReaderIntentHandler, ReaderPageSignal } from '../readerIntent/types'
 import type { BibleDOMPaint } from '../sharedBibleDOMPaint'
 
+/**
+ * A parallel column numbered differently from the main version (LSG beside the KJV): which of
+ * its verses stand opposite each verse of the main version's chapter, through the
+ * versification table rather than by verse number. Each verse keeps its own number.
+ */
+export type ParallelColumnAlignment = {
+  // The main version's chapter the column was aligned to
+  book: number
+  chapter: number
+  // Main verse number → the keys of the column's verses shown opposite it, in order
+  versesByMainVerse: Record<string, string[]>
+  // Main verses merged with another one in the column: their verse is shown in that row
+  continuedMainVerses: string[]
+}
+
 export type ParallelVerse = {
   id: VersionCode
+  // The column's verses, with their own keys; an aligned column may hold another chapter's
   verses: Verse[]
   error?: BibleError
   interlinearMode?: InterlinearMode
   // Not loaded yet for the chapter shown: the column holds a placeholder
   isLoading?: boolean
+  // Numbered differently from the main version: rows follow the versification table
+  alignment?: ParallelColumnAlignment
 }
 
 /** A Strong or interlinear button of a parallel column title. */

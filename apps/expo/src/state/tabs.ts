@@ -137,6 +137,9 @@ export interface CompareTab extends TabBase {
   data: {
     selectedVerses: SelectedVerses
     strongMode?: boolean
+    // The version the verses were selected in: each compared version shows the verses that
+    // correspond to them in its own numbering. Absent: the keys are read as they are.
+    sourceVersion?: VersionCode
   }
 }
 
@@ -236,6 +239,11 @@ export interface CommentaryTab extends TabBase {
   type: 'commentary'
   data: {
     verse: string
+    /**
+     * The Bible the verse was read in: commentaries number some verses otherwise (LSG Mal 3:23 is
+     * KJV Mal 4:5). The default version when absent, as in tabs opened before it was kept.
+     */
+    version?: VersionCode
   }
 }
 

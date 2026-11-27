@@ -1,5 +1,6 @@
 import { transliterationTextStyle } from '~common/ui/textTypography'
 import { useQuery } from '@tanstack/react-query'
+import { useAtomValue } from 'jotai/react'
 import { ActivityIndicator, Linking } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import type { ReadingTypography } from '~common/readingHtml'
@@ -12,9 +13,12 @@ import { linkifyStrongEditorialBibleReferences } from '~features/lexique/strongE
 import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
 import { getBibleViewRouteForStrongOsisReference } from '~features/lexique/strongReferenceNavigation'
 import { createDictionaryInternalLinkRoute } from '~features/dictionnary/dictionaryInternalNavigation'
+import { naveHtmlInBible } from '~features/nave/naveBibleNumbering'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { getBook } from '~helpers/bibleBookCatalog'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { activeBibleTabVersionAtom } from '~state/tabs'
+import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 import { useTheme } from '~themes/ThemeProvider'
 import { parseReferencePreviewLink } from './referenceTarget'
 import { parseResourcePreviewLink, type ResourcePreviewTarget } from './resourceTarget'
@@ -31,6 +35,11 @@ export default function ResourcePreviewContent({
   const theme = useTheme()
   const push = usePushRouteOnce()
   const { t } = useTranslation()
+  // A topic's verses open where its preview shows them: in the version being read, else the
+  // default one, numbered as that Bible numbers them.
+  const readingVersion = useAtomValue(activeBibleTabVersionAtom)
+  const defaultVersion = useDefaultBibleVersion()
+  const naveVersion = target.kind === 'nave' ? readingVersion || defaultVersion : undefined
   const query = useQuery({
     queryKey: ['editorial-resource-preview', target],
     queryFn: () => loadResourcePreview(target, resources),
@@ -61,7 +70,7 @@ export default function ResourcePreviewContent({
             verse: String(first.start ?? 1),
             ...(verses.length ? { focusVerses: JSON.stringify(verses) } : {}),
             contextDisplayMode: 'focused',
-            version: bible.version,
+            version: bible.version || naveVersion,
           },
         }
       )
@@ -111,7 +120,9 @@ export default function ResourcePreviewContent({
             linkifyStrongEditorialBibleReferences(data.html, theme.colors.primary)
           )
         )
-      : data.html
+      : target.kind === 'nave' && naveVersion
+        ? naveHtmlInBible(data.html, target.source.language, naveVersion)
+        : data.html
   return (
     <Box className="gap-[8px]">
       {'original' in data && (

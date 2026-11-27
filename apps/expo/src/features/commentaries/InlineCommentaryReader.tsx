@@ -130,8 +130,9 @@ export default function InlineCommentaryReader({
                 className="text-link font-semibold"
                 onPress={() => {
                   if (!request) return
+                  // The section's chapter may not be the reader's (KJV Mal 4 read in LSG Mal 3).
                   void queryClient.invalidateQueries({
-                    queryKey: ['inline-commentary-index', request.book, request.chapter],
+                    queryKey: ['inline-commentary-index', request.book],
                   })
                   if (embedded) onClose()
                   else sheet.current?.dismiss()
