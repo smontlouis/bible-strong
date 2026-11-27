@@ -52,13 +52,29 @@ export default function AssistantLauncher() {
   return <AccountAssistant key={id} account={id} />
 }
 
+/**
+ * Where the bubble steps aside: the Premium page has its own Strobi, the daily meditation and the
+ * large audio player cover the place it rests on, and on iOS its layer is above the onboarding's
+ * full-screen modal.
+ */
+function useLauncherCovered() {
+  const pathname = usePathname()
+  const isAudioPlayerOpen = useAtomValue(bibleAudioPlayerOpenAtom)
+  const onboardingOnScreen = useAtomValue(onboardingOnScreenAtom)
+  return (
+    onboardingOnScreen ||
+    pathname === PREMIUM_PATH ||
+    pathname === DAILY_STORY_PATH ||
+    isAudioPlayerOpen
+  )
+}
+
 /** Strobi's bubble for a visitor: it moves, sleeps and is put away like an account's. */
 function GuestAssistant() {
   const { t } = useTranslation()
   const router = useRouter()
   const pathname = usePathname()
-  // The large audio player covers the bottom of the screen, where the bubble rests.
-  const isAudioPlayerOpen = useAtomValue(bibleAudioPlayerOpenAtom)
+  const covered = useLauncherCovered()
   const open = pathname === ASSISTANT_PATH
   const bubble = useStrobiBubble()
   const [asleep, setAsleep] = useState(false)
@@ -68,9 +84,7 @@ function GuestAssistant() {
       <AssistantLauncherButton
         animation={dragged ? 'excited' : asleep ? 'sleeping' : 'idle'}
         accessibilityLabel={t('assistant.modal.open')}
-        hidden={
-          open || pathname === PREMIUM_PATH || pathname === DAILY_STORY_PATH || isAudioPlayerOpen
-        }
+        hidden={open || covered}
         onPress={() => {
           if (!open) router.push(ASSISTANT_PATH)
         }}
@@ -96,8 +110,7 @@ function AccountAssistant({ account }: { account: string }) {
   const { t } = useTranslation()
   const router = useRouter()
   const pathname = usePathname()
-  // The large audio player covers the bottom of the screen, where the bubble rests.
-  const isAudioPlayerOpen = useAtomValue(bibleAudioPlayerOpenAtom)
+  const covered = useLauncherCovered()
   const open = pathname === ASSISTANT_PATH
   const liveContext = useReadingContext()
   const openInNewTab = useOpenInNewTab()
@@ -241,10 +254,7 @@ function AccountAssistant({ account }: { account: string }) {
       <AssistantLauncherButton
         animation={avatarAnimation}
         accessibilityLabel={t('assistant.modal.open')}
-        // The Premium page has its own Strobi.
-        hidden={
-          open || pathname === PREMIUM_PATH || pathname === DAILY_STORY_PATH || isAudioPlayerOpen
-        }
+        hidden={open || covered}
         onPress={() => {
           if (!open) router.push(ASSISTANT_PATH)
         }}
