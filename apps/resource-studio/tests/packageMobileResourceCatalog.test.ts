@@ -444,4 +444,151 @@ describe("mobile resource catalog", () => {
       Buffer.byteLength('{"local":true}\n')
     );
   });
+  test("repackages only the overridden entries on top of the delivered catalog", async () => {
+    const temporaryRoot = await mkdtemp(
+      path.join(os.tmpdir(), "mobile-resource-differential-")
+    );
+    const candidatePath = path.join(temporaryRoot, "candidate.json");
+    await writeFile(candidatePath, '{"corrected":true}\n');
+    const unchanged = {
+      id: "database:abbott:en",
+      url:
+        "https://api.bible-strong.app/v1/offline-artifacts/commentaries/commentary-abbott-en.sqlite.zip?sha256=" +
+        "c".repeat(64),
+      file: "commentaries/commentary-abbott-en.sqlite.zip",
+      entry: "commentary-abbott-en.sqlite",
+      entries: {
+        canonical: {
+          entry: "commentary-abbott-en.sqlite",
+          sha256: "d".repeat(64),
+          bytes: 7
+        }
+      },
+      archiveSha256: "c".repeat(64),
+      archiveBytes: 5,
+      contentSha256: "d".repeat(64),
+      contentBytes: 7,
+      installedBytes: 7,
+      peakInstallationBytes: 14,
+      strategy: "archive-extract",
+      resourceRevision: "abbott-en-1",
+      encryptedArchive: {
+        file: "commentaries/commentary-abbott-en.sqlite.encrypted.zip",
+        keyVersion: 1
+      }
+    };
+    const delivered = {
+      ...unchanged,
+      id: "bible:TEST",
+      file: "bibles/bible-hebrew.json.zip",
+      entry: "bible-hebrew.json",
+      strategy: "sqlite-import",
+      resourceRevision: undefined
+    };
+    const baseCatalogPath = path.join(temporaryRoot, "delivered.json");
+    // Delivered order is kept even where it is not sorted.
+    await writeFile(
+      baseCatalogPath,
+      `${JSON.stringify(
+        {
+          format: "bible-strong-mobile-resource-catalog",
+          schemaVersion: 1,
+          generatedAt: "2026-11-26T04:11:48.172Z",
+          resourceCount: 2,
+          resources: {
+            "database:abbott:en": unchanged,
+            "bible:TEST": delivered
+          }
+        },
+        null,
+        2
+      )}\n`
+    );
+    const inventory = [
+      {
+        id: "database:abbott:en",
+        artifactUrl:
+          "https://assets.test/commentaries/commentary-abbott-en.sqlite.zip",
+        sources: [
+          {
+            role: "canonical" as const,
+            sourceUrl:
+              "https://assets.test/commentaries/commentary-abbott-en.sqlite",
+            entry: "commentary-abbott-en.sqlite"
+          }
+        ],
+        strategy: "archive-extract" as const,
+        resourceRevision: "abbott-en-1"
+      },
+      {
+        id: "bible:TEST",
+        artifactUrl: "https://assets.test/bibles/bible-hebrew.json.zip",
+        sources: [
+          {
+            role: "canonical" as const,
+            sourceUrl: "https://assets.test/bibles/bible-hebrew.json",
+            entry: "bible-hebrew.json"
+          }
+        ],
+        strategy: "sqlite-import" as const
+      }
+    ];
+    const options = {
+      root: temporaryRoot,
+      inventory,
+      requiredIds: ["bible:TEST", "database:abbott:en"],
+      requiredBundleRoles: {},
+      sourceOverrides: { "bible:TEST": { canonical: candidatePath } },
+      baseCatalogPath,
+      fetcher: async () => {
+        throw new Error("unchanged sources must not be fetched");
+      }
+    };
+    const result = await buildMobileResourceCatalog({
+      ...options,
+      outputDir: "release",
+      generatedAt: "2026-11-27T12:00:00.000Z"
+    });
+    const catalog = JSON.parse(await readFile(result.catalogPath, "utf8"));
+    assert.equal(catalog.resourceCount, 2);
+    assert.equal(catalog.generatedAt, "2026-11-27T12:00:00.000Z");
+    assert.deepEqual(Object.keys(catalog.resources), [
+      "database:abbott:en",
+      "bible:TEST"
+    ]);
+    assert.equal(
+      JSON.stringify(catalog.resources["database:abbott:en"]),
+      JSON.stringify(unchanged)
+    );
+    const rebuilt = catalog.resources["bible:TEST"];
+    assert.equal(rebuilt.file, "bibles/bible-hebrew.json.zip");
+    assert.equal(rebuilt.entry, "bible-hebrew.json");
+    assert.equal(rebuilt.encryptedArchive, undefined);
+    assert.equal(
+      rebuilt.entries.canonical.bytes,
+      Buffer.byteLength('{"corrected":true}\n')
+    );
+    assert.equal(
+      rebuilt.url,
+      `https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-hebrew.json.zip?sha256=${rebuilt.archiveSha256}`
+    );
+
+    await assert.rejects(
+      buildMobileResourceCatalog({
+        ...options,
+        outputDir: "release-older",
+        generatedAt: "2026-11-01T00:00:00.000Z"
+      }),
+      /mobile-resource-base-catalog-newer/
+    );
+    await assert.rejects(
+      buildMobileResourceCatalog({
+        ...options,
+        outputDir: "release-without-overrides",
+        sourceOverrides: {},
+        generatedAt: "2026-11-27T12:00:00.000Z"
+      }),
+      /mobile-resource-base-catalog-overrides-required/
+    );
+  });
 });

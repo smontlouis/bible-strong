@@ -13,9 +13,14 @@ import {
   type BiblePublicationWorkflowOperations,
 } from './biblePublicationWorkflow'
 import {
+  assertCandidateCatalogChangesOnly,
   buildBiblePublicationOverlay,
+  catalogResourceCount,
   describeBiblePublicationBundle,
+  isBibleFamilyCatalogId,
+  selectBibleFamilyBaseline,
   type BiblePublicationOverlay,
+  type RawPublicationCatalog,
 } from './biblePublicationSet'
 import { findPublicationBundlesRecursively } from './publicationCatalog'
 import { formatPublicationCliFailure, resolveCatalogImportPolicy } from './publicationCliPolicy'
@@ -28,7 +33,6 @@ import { validatePublicationBundle } from './publicationBundle'
 import { WranglerR2ArtifactStore } from './wranglerR2ArtifactStore'
 import { isNativeFirebaseAppId } from '../runtime/firebaseAppCheck'
 
-const EXPECTED_RESOURCE_COUNT = 119
 const PRODUCTION_PUBLICATION_LOCK_ID = '204116128917'
 
 const runCommand = async (
@@ -145,8 +149,7 @@ type RawMobileCatalogEntry = {
   [key: string]: unknown
 }
 
-type RawMobileCatalog = {
-  resourceCount: number
+type RawMobileCatalog = RawPublicationCatalog & {
   resources: Record<string, RawMobileCatalogEntry>
 }
 
@@ -180,7 +183,11 @@ export const resourceApiRoute = (catalogId: string, probe: { book: number; chapt
 type WorkflowState = {
   appRoot: string
   makerRoot: string
-  publicationRoot: string
+  publicationRoots: string[]
+  /** The delivered catalog; its resource count and Bible family bound every check. */
+  committedCatalogPath: string
+  resourceCount: number
+  familyCatalogIds: string[]
   workspacePath: string
   ordinaryOutputPath: string
   catalogOutputPath: string
@@ -202,8 +209,20 @@ const createState = async (
   options: ReturnType<typeof parseBiblePublicationWorkflowArgs>
 ): Promise<WorkflowState> => {
   const makerRoot = options.makerRoot ?? path.resolve(appRoot, 'apps/resource-studio')
-  const publicationRoot =
-    options.publicationRoot ?? path.join(makerRoot, 'outputs/resource-publications')
+  // Published bundles stay in the release folders they were built in: the baseline is found
+  // by checksum anywhere under Resource Studio's outputs unless roots are given.
+  const publicationRoots = options.publicationRoots.length
+    ? options.publicationRoots
+    : [path.join(makerRoot, 'outputs')]
+  const committedCatalogPath = path.join(
+    appRoot,
+    'packages/resource-catalog/src/mobile-resource-catalog.json'
+  )
+  const committedCatalog = await readRawCatalog(committedCatalogPath)
+  const resourceCount = catalogResourceCount(committedCatalog, 'committed')
+  const familyCatalogIds = Object.keys(committedCatalog.resources)
+    .filter(isBibleFamilyCatalogId)
+    .sort()
   const safeDate = options.generatedAt.replace(/[^0-9A-Za-z]+/g, '-')
   const workspacePath =
     options.workspacePath ??
@@ -214,15 +233,20 @@ const createState = async (
     )
   await ensureFile(options.sourcePath, 'BIBLE_PUBLICATION_SOURCE_MISSING')
   await ensureFile(path.join(makerRoot, 'package.json'), 'BIBLE_PUBLICATION_MAKER_MISSING')
-  await access(publicationRoot).catch(() => {
-    throw new Error(`BIBLE_PUBLICATION_BASELINE_MISSING:${publicationRoot}`)
-  })
+  for (const publicationRoot of publicationRoots) {
+    await access(publicationRoot).catch(() => {
+      throw new Error(`BIBLE_PUBLICATION_BASELINE_MISSING:${publicationRoot}`)
+    })
+  }
   await mkdir(path.dirname(workspacePath), { recursive: true, mode: 0o700 })
   await mkdir(workspacePath, { recursive: false, mode: 0o700 })
   return {
     appRoot,
     makerRoot,
-    publicationRoot,
+    publicationRoots,
+    committedCatalogPath,
+    resourceCount,
+    familyCatalogIds,
     workspacePath,
     ordinaryOutputPath: path.join(workspacePath, 'ordinary-bibles'),
     catalogOutputPath: path.join(workspacePath, 'mobile-resources'),
@@ -275,13 +299,41 @@ const createOperations = (
       ? await findPublicationBundlesRecursively(options.dependentBundlePaths)
       : []
     state.candidateBundlePaths.push(...dependentBundles)
-    const baselineBundles = await findPublicationBundlesRecursively([state.publicationRoot])
+    // Only the Bible family can change, so only its published bundles form the baseline.
+    const committedCatalog = await readRawCatalog(state.committedCatalogPath)
+    const localBundles = await findPublicationBundlesRecursively(state.publicationRoots)
+    const manifests = await Promise.all(
+      localBundles.map(async bundlePath => ({
+        bundlePath,
+        manifest: await readFile(path.join(bundlePath, 'manifest.json'), 'utf8')
+          .then(text => JSON.parse(text) as unknown)
+          .catch(() => undefined),
+      }))
+    )
+    const selected = selectBibleFamilyBaseline(committedCatalog, manifests)
+    const baselineBundles = state.familyCatalogIds.map(catalogId => selected.get(catalogId)!)
+    // Each selected bundle must be the exact publication its committed entry delivers.
+    const validatedBaseline = await validateR2PublicationCatalog(
+      baselineBundles,
+      state.committedCatalogPath,
+      {
+        expectedCatalogResourceCount: state.resourceCount,
+        requiredCatalogIds: state.familyCatalogIds,
+      }
+    )
+    validatedBaseline.forEach((candidate, index) => {
+      if (candidate.catalogId !== state.familyCatalogIds[index]) {
+        throw new Error(
+          `BIBLE_PUBLICATION_BASELINE_IDENTITY_MISMATCH:${state.familyCatalogIds[index]}:${candidate.catalogId}`
+        )
+      }
+    })
     state.baselineBundlePaths = baselineBundles
     state.overlay = await buildBiblePublicationOverlay(
       baselineBundles,
       state.candidateBundlePaths,
       options.versionId,
-      EXPECTED_RESOURCE_COUNT
+      state.familyCatalogIds.length
     )
   },
 
@@ -296,12 +348,16 @@ const createOperations = (
       overrides[description.catalogId] = { canonical: validated.offlineArtifactPath }
     }
     await writeJson(state.catalogOverridesPath, overrides)
+    // Differential: the committed catalog is the base and only the overridden entries are
+    // packaged again. Their encryptedArchive comes back with `resources:offline:encrypt`.
     await runCommand(
       'yarn',
       [
         'resources:release:mobile',
         '--generated-at',
         options.generatedAt,
+        '--base-catalog',
+        state.committedCatalogPath,
         '--source-overrides',
         state.catalogOverridesPath,
         '--output-dir',
@@ -310,13 +366,18 @@ const createOperations = (
       state.makerRoot,
       buildEnvironment()
     )
+    assertCandidateCatalogChangesOnly(
+      await readRawCatalog(state.committedCatalogPath),
+      await readRawCatalog(state.catalogPath),
+      state.overlay.changedCatalogIds
+    )
   },
 
   validatePublicationSet: async () => {
     if (!state.overlay) throw new Error('BIBLE_PUBLICATION_OVERLAY_MISSING')
-    if (state.overlay.bundlePaths.length !== EXPECTED_RESOURCE_COUNT) {
+    if (state.overlay.bundlePaths.length !== state.familyCatalogIds.length) {
       throw new Error(
-        `BIBLE_PUBLICATION_OVERLAY_COUNT_MISMATCH:${state.overlay.bundlePaths.length}:${EXPECTED_RESOURCE_COUNT}`
+        `BIBLE_PUBLICATION_OVERLAY_COUNT_MISMATCH:${state.overlay.bundlePaths.length}:${state.familyCatalogIds.length}`
       )
     }
     await mkdir(state.baselineSnapshotPath)
@@ -380,10 +441,7 @@ const createOperations = (
         buildEnvironment()
       )
       if (untrackedFiles) throw new Error('BIBLE_PUBLICATION_WORKTREE_UNTRACKED')
-      const currentCatalog = path.join(
-        state.appRoot,
-        'packages/resource-catalog/src/mobile-resource-catalog.json'
-      )
+      const currentCatalog = state.committedCatalogPath
       await copyFile(currentCatalog, state.catalogBackupPath)
       const [currentCatalogJson, candidateCatalogJson] = await Promise.all([
         readRawCatalog(currentCatalog),
@@ -395,21 +453,31 @@ const createOperations = (
       }
       const liveCatalog = (await liveCatalogResponse.json()) as RawMobileCatalog
       if (
-        liveCatalog.resourceCount !== EXPECTED_RESOURCE_COUNT ||
+        currentCatalogJson.resourceCount !== state.resourceCount ||
+        liveCatalog.resourceCount !== state.resourceCount ||
         stableJson(liveCatalog.resources) !== stableJson(currentCatalogJson.resources)
       ) {
         throw new Error('BIBLE_PUBLICATION_LIVE_CATALOG_BASELINE_MISMATCH')
       }
-      if (candidateCatalogJson.resourceCount !== EXPECTED_RESOURCE_COUNT) {
+      if (candidateCatalogJson.resourceCount !== state.resourceCount) {
         throw new Error('BIBLE_PUBLICATION_CANDIDATE_CATALOG_COUNT_MISMATCH')
       }
+      assertCandidateCatalogChangesOnly(
+        currentCatalogJson,
+        candidateCatalogJson,
+        state.overlay.changedCatalogIds
+      )
       const baselineCandidates = await validateR2PublicationCatalog(
         state.baselineBundlePaths,
         currentCatalog,
-        { expectedCatalogResourceCount: EXPECTED_RESOURCE_COUNT }
+        {
+          expectedCatalogResourceCount: state.resourceCount,
+          requiredCatalogIds: state.familyCatalogIds,
+        }
       )
       await validateR2PublicationCatalog(state.overlay.bundlePaths, state.catalogPath, {
-        expectedCatalogResourceCount: EXPECTED_RESOURCE_COUNT,
+        expectedCatalogResourceCount: state.resourceCount,
+        requiredCatalogIds: state.familyCatalogIds,
       })
       const rollbackCandidates = baselineCandidates.filter(candidate =>
         state.overlay?.changedCatalogIds.includes(candidate.catalogId)
@@ -482,8 +550,14 @@ const createOperations = (
       await runCommand('yarn', ['wrangler', 'whoami'], state.appRoot, cloudflareEnvironment())
       return
     }
+    assertCandidateCatalogChangesOnly(
+      await readRawCatalog(state.committedCatalogPath),
+      await readRawCatalog(state.catalogPath),
+      state.overlay.changedCatalogIds
+    )
     await validateR2PublicationCatalog(state.overlay.bundlePaths, state.catalogPath, {
-      expectedCatalogResourceCount: EXPECTED_RESOURCE_COUNT,
+      expectedCatalogResourceCount: state.resourceCount,
+      requiredCatalogIds: state.familyCatalogIds,
     })
   },
 
@@ -495,7 +569,7 @@ const createOperations = (
       state.catalogPath,
       new WranglerR2ArtifactStore({ bucket, env: cloudflareEnvironment() }),
       {
-        expectedCatalogResourceCount: EXPECTED_RESOURCE_COUNT,
+        expectedCatalogResourceCount: state.resourceCount,
         bundleSelection: 'changed',
         onResult: (result, index, total) => {
           const detail = result.status === 'skipped' ? result.reason : result.key
@@ -552,8 +626,17 @@ const createOperations = (
   },
 
   encryptOfflineCopies: async () => {
-    // Re-encrypts only changed archives; unchanged ones are restored from the R2 index.
-    await runCommand('yarn', ['resources:offline:encrypt'], state.appRoot, cloudflareEnvironment())
+    // Only the changed entries lost their encryptedArchive: the others stay as committed.
+    if (!state.overlay) throw new Error('BIBLE_PUBLICATION_OVERLAY_MISSING')
+    await runCommand(
+      'yarn',
+      [
+        'resources:offline:encrypt',
+        ...state.overlay.changedCatalogIds.flatMap(catalogId => ['--resource', catalogId]),
+      ],
+      state.appRoot,
+      cloudflareEnvironment()
+    )
   },
 
   deployResourceWorker: async () => {

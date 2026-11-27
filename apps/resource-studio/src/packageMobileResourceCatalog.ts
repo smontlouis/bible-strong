@@ -312,6 +312,12 @@ export async function buildMobileResourceCatalog(
     appRoot?: string;
     sourceOverrides?: MobileResourceSourceOverrides;
     sourceOverridesPath?: string;
+    /**
+     * Differential release: the delivered catalog to start from. Only the
+     * resources named by the source overrides are packaged again; every other
+     * entry is carried over exactly as delivered.
+     */
+    baseCatalogPath?: string;
     generatedAt?: string;
     fetcher?: typeof fetch;
   } = {}
@@ -377,6 +383,26 @@ export async function buildMobileResourceCatalog(
       )
   );
 
+  const baseCatalog = options.baseCatalogPath
+    ? await readBaseCatalog(
+        path.resolve(root, options.baseCatalogPath),
+        requiredContract.resourceIds
+      )
+    : undefined;
+  const packagedIds = baseCatalog
+    ? new Set(Object.keys(sourceOverrides ?? {}))
+    : undefined;
+  if (packagedIds && packagedIds.size === 0) {
+    throw new Error("mobile-resource-base-catalog-overrides-required");
+  }
+  const generatedAt = options.generatedAt ?? new Date().toISOString();
+  if (
+    baseCatalog &&
+    !(Date.parse(generatedAt) >= Date.parse(baseCatalog.generatedAt))
+  ) {
+    throw new Error("mobile-resource-base-catalog-newer");
+  }
+
   const temporaryDir = `${outputDir}.tmp-${process.pid}-${randomUUID()}`;
   const downloadDir = path.join(temporaryDir, ".downloads");
   const stagingDir = path.join(temporaryDir, ".staging");
@@ -384,7 +410,10 @@ export async function buildMobileResourceCatalog(
   await mkdir(stagingDir, { recursive: true });
 
   try {
-    const entries = await mapConcurrent(inventory, 6, (resource) =>
+    const packagedInventory = packagedIds
+      ? inventory.filter((resource) => packagedIds.has(resource.id))
+      : inventory;
+    const entries = await mapConcurrent(packagedInventory, 6, (resource) =>
       packageResource({
         resource,
         outputDir: temporaryDir,
@@ -393,16 +422,33 @@ export async function buildMobileResourceCatalog(
         fetcher: options.fetcher ?? fetch
       })
     );
-    const resources = Object.fromEntries(
+    const packaged = Object.fromEntries(
       entries
         .sort((left, right) => left.id.localeCompare(right.id))
         .map((entry) => [entry.id, entry])
     );
+    // A differential release keeps the delivered order and every entry it did
+    // not package, encryptedArchive included; packaged entries come without
+    // one until `resources:offline:encrypt` restores it.
+    const resources = baseCatalog
+      ? Object.fromEntries(
+          Object.entries(baseCatalog.resources).map(([id, entry]) => [
+            id,
+            packaged[id] ?? entry
+          ])
+        )
+      : packaged;
+    const textMismatches = findInterlinearTextMismatches(resources);
+    if (textMismatches.length > 0) {
+      throw new Error(
+        `mobile-resource-interlinear-text-mismatch:${textMismatches.join(",")}`
+      );
+    }
     const catalog: MobileResourceCatalog = {
       format: "bible-strong-mobile-resource-catalog",
       schemaVersion: MOBILE_RESOURCE_CATALOG_SCHEMA_VERSION,
-      generatedAt: options.generatedAt ?? new Date().toISOString(),
-      resourceCount: entries.length,
+      generatedAt,
+      resourceCount: Object.keys(resources).length,
       resources
     };
     const catalogPath = path.join(temporaryDir, MOBILE_RESOURCE_CATALOG_FILE);
@@ -423,7 +469,7 @@ export async function buildMobileResourceCatalog(
       outputDir,
       catalogPath: path.join(outputDir, MOBILE_RESOURCE_CATALOG_FILE),
       catalogSha256,
-      resourceCount: entries.length
+      resourceCount: catalog.resourceCount
     };
   } catch (error) {
     await rm(temporaryDir, { recursive: true, force: true });
@@ -737,6 +783,29 @@ async function readSourceOverrides(
   return value as MobileResourceSourceOverrides;
 }
 
+async function readBaseCatalog(
+  catalogPath: string,
+  requiredIds: readonly string[]
+): Promise<MobileResourceCatalog> {
+  const catalog = JSON.parse(
+    await readFile(catalogPath, "utf8")
+  ) as MobileResourceCatalog;
+  const ids = Object.keys(catalog.resources ?? {});
+  if (
+    catalog.format !== "bible-strong-mobile-resource-catalog" ||
+    catalog.schemaVersion !== MOBILE_RESOURCE_CATALOG_SCHEMA_VERSION ||
+    typeof catalog.generatedAt !== "string" ||
+    catalog.resourceCount !== ids.length ||
+    ids.some((id) => catalog.resources[id]?.id !== id)
+  ) {
+    throw new Error(`mobile-resource-base-catalog-invalid:${catalogPath}`);
+  }
+  if ([...ids].sort().join("\n") !== [...requiredIds].sort().join("\n")) {
+    throw new Error("mobile-resource-base-catalog-ids-mismatch");
+  }
+  return catalog;
+}
+
 async function readInventory(
   inventoryPath: string
 ): Promise<MobileResourceInventoryEntry[]> {
@@ -879,6 +948,7 @@ export function parseMobileResourceCliArgs(
     "--output-dir",
     "--app-root",
     "--source-overrides",
+    "--base-catalog",
     "--generated-at"
   ]);
   const parsed: Record<string, string> = {};
@@ -907,6 +977,7 @@ async function main(): Promise<void> {
     outputDir: args["--output-dir"],
     appRoot: args["--app-root"],
     sourceOverridesPath: args["--source-overrides"],
+    baseCatalogPath: args["--base-catalog"],
     generatedAt: args["--generated-at"]
   });
   console.log(

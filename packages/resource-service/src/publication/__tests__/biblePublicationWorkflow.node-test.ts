@@ -191,6 +191,8 @@ describe('Bible publication workflow', () => {
       '../maker',
       '--publication-root',
       '../maker/outputs/resource-publications',
+      '--publication-root',
+      '../maker/outputs/releases',
       '--workspace',
       './candidate',
       '--activate-production',
@@ -205,7 +207,10 @@ describe('Bible publication workflow', () => {
       path.resolve('./interlinear-bhg'),
     ])
     assert.equal(options.makerRoot, path.resolve('../maker'))
-    assert.equal(options.publicationRoot, path.resolve('../maker/outputs/resource-publications'))
+    assert.deepEqual(options.publicationRoots, [
+      path.resolve('../maker/outputs/resource-publications'),
+      path.resolve('../maker/outputs/releases'),
+    ])
     assert.equal(options.workspacePath, path.resolve('./candidate'))
   })
 

@@ -6,7 +6,8 @@ export type BiblePublicationWorkflowOptions = {
   generatedAt: string
   activateProduction: boolean
   makerRoot?: string
-  publicationRoot?: string
+  /** Folders searched for the published Bible-family bundles; Resource Studio's outputs by default. */
+  publicationRoots: string[]
   workspacePath?: string
   dependentBundlePaths: string[]
 }
@@ -58,6 +59,7 @@ export const parseBiblePublicationWorkflowArgs = (
 ): BiblePublicationWorkflowOptions => {
   const values = new Map<string, string>()
   const dependentBundlePaths: string[] = []
+  const publicationRoots: string[] = []
   let activateProduction = false
   for (let index = 0; index < raw.length; index += 1) {
     const name = raw[index]
@@ -86,6 +88,8 @@ export const parseBiblePublicationWorkflowArgs = (
     }
     if (name === '--dependent-bundle') {
       dependentBundlePaths.push(path.resolve(value))
+    } else if (name === '--publication-root') {
+      publicationRoots.push(path.resolve(value))
     } else {
       if (values.has(name)) throw new Error(`BIBLE_PUBLICATION_OPTION_DUPLICATE:${name}`)
       values.set(name, value)
@@ -112,10 +116,8 @@ export const parseBiblePublicationWorkflowArgs = (
     generatedAt,
     activateProduction,
     dependentBundlePaths,
+    publicationRoots,
     ...(values.get('--maker-root') ? { makerRoot: path.resolve(values.get('--maker-root')!) } : {}),
-    ...(values.get('--publication-root')
-      ? { publicationRoot: path.resolve(values.get('--publication-root')!) }
-      : {}),
     ...(values.get('--workspace')
       ? { workspacePath: path.resolve(values.get('--workspace')!) }
       : {}),

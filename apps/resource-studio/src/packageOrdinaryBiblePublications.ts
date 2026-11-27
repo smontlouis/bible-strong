@@ -159,9 +159,21 @@ export const deliversSourceAsOfflineCopy = (bible: {
 type DeliveredCatalog = {
   resources: Record<
     string,
-    { entries?: { canonical?: { sha256: string } } } | undefined
+    { entry?: string; entries?: { canonical?: { sha256: string } } } | undefined
   >;
 };
+
+/**
+ * The name readers' Offline copies give the canonical JSON. A republished
+ * Bible keeps it, so the catalog entry and its installers do not change name
+ * (BHS stays `bible-hebrew.json`, SBLGNT `bible-greek.json`).
+ */
+export const deliveredOfflineEntry = (
+  deliveredCatalog: DeliveredCatalog,
+  versionId: string
+) =>
+  deliveredCatalog.resources[`bible:${versionId}`]?.entry ??
+  `bible-${versionId.toLowerCase()}.json`;
 
 export async function buildOrdinaryBiblePublications(options: {
   root?: string;
@@ -400,6 +412,7 @@ export async function buildOrdinaryBiblePublications(options: {
         },
         canon: { id: canon.id, orderedBooks: canon.orderedBooks },
         versification: canon.versification,
+        offlineEntry: deliveredOfflineEntry(deliveredCatalog, metadata.id),
         ...(offlineArtifact ? { offlineArtifact } : {})
       }).catch((cause: unknown) => {
         throw new Error(

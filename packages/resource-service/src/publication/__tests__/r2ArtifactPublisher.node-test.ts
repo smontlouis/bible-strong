@@ -680,4 +680,48 @@ describe('R2 artifact publisher', () => {
       await rm(root, { recursive: true, force: true })
     }
   })
+  it('scopes exhaustiveness to the required catalog entries', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'r2-artifact-scoped-'))
+
+    try {
+      const bundle = path.join(root, 'bundle')
+      const { manifest } = await writeStrongPublicationFixture(bundle)
+      const catalogPath = path.join(root, 'mobile-resource-catalog.json')
+      await writeMobileCatalog(catalogPath, {
+        'bible-strong:LSG': {
+          file: 'bibles/bible-lsg-strong.sqlite.zip',
+          archiveSha256: manifest.offlineArtifact.sha256,
+          archiveBytes: manifest.offlineArtifact.bytes,
+          contentSha256: manifest.offlineArtifact.contentSha256,
+        },
+        'database:TRESOR:fr': {
+          file: 'databases/commentaires-tresor.sqlite.zip',
+          archiveSha256: '0'.repeat(64),
+          archiveBytes: 1,
+          contentSha256: '1'.repeat(64),
+        },
+      })
+
+      const candidates = await validateR2PublicationCatalog([bundle], catalogPath, {
+        expectedCatalogResourceCount: 2,
+        requiredCatalogIds: ['bible-strong:LSG'],
+      })
+      assert.deepEqual(
+        candidates.map(candidate => candidate.catalogId),
+        ['bible-strong:LSG']
+      )
+      await assert.rejects(
+        validateR2PublicationCatalog([bundle], catalogPath, {
+          requiredCatalogIds: ['bible-strong:LSG', 'bible:LSG'],
+        }),
+        /R2_PUBLICATION_CATALOG_REQUIRED_RESOURCE_UNKNOWN:bible:LSG/
+      )
+      await assert.rejects(
+        validateR2PublicationCatalog([bundle], catalogPath),
+        /R2_PUBLICATION_CATALOG_INCOMPLETE:database:TRESOR:fr/
+      )
+    } finally {
+      await rm(root, { recursive: true, force: true })
+    }
+  })
 })

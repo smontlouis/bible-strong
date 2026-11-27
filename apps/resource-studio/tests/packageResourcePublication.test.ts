@@ -129,6 +129,48 @@ test("publishes one canonical Bible and its matching Offline-copy bundle", async
   );
 
   await assert.doesNotReject(validateBibleResourcePublication(outputDir));
+
+  // A Bible readers hold under another name keeps it inside its Offline copy.
+  const renamedDir = path.join(directory, "publication-delivered-entry");
+  const renamed = await buildBibleResourcePublication({
+    canonicalPath,
+    outputDir: renamedDir,
+    identity: { versionId: "TEST", language: "fr" },
+    rights: {
+      holder: "Test holder",
+      termsReference: "https://example.test/terms",
+      attribution: "Test Bible",
+      online: false,
+      offline: true
+    },
+    deliveryCapabilities: { onlineAccess: false, offlineDownload: true },
+    canon: { id: "test-canon", orderedBooks: [1] },
+    versification: "test",
+    generatedAt: "2026-08-16T00:00:00.000Z",
+    offlineEntry: "bible-hebrew.json"
+  });
+  assert.equal(renamed.manifest.canonical.path, "canonical/bible-test.json");
+  assert.equal(
+    renamed.manifest.offlineArtifact.path,
+    "offline/bible-test.json.zip"
+  );
+  assert.equal(renamed.manifest.offlineArtifact.entry, "bible-hebrew.json");
+  assert.equal(
+    renamed.manifest.offlineArtifact.entries?.canonical?.entry,
+    "bible-hebrew.json"
+  );
+  assert.equal(
+    renamed.manifest.offlineArtifact.contentSha256,
+    manifest.offlineArtifact.contentSha256
+  );
+  assert.equal(
+    (
+      await execFileAsync("unzip", ["-Z1", renamed.offlineArtifactPath])
+    ).stdout.trim(),
+    "bible-hebrew.json"
+  );
+  await assert.doesNotReject(validateBibleResourcePublication(renamedDir));
+
   const originalRevision = manifest.revision;
   manifest.rights.attribution = "Changed attribution";
   await writeFile(

@@ -116,6 +116,12 @@ export async function buildBibleResourcePublication(
       path: string;
       catalogEntry: MobileResourceCatalogEntry;
     };
+    /**
+     * Name of the canonical JSON inside a built Offline copy, when readers
+     * already hold this Bible under another name (BHS delivers
+     * `bible-hebrew.json`). `bible-<version>.json` by default.
+     */
+    offlineEntry?: string;
   }
 ): Promise<{
   outputDir: string;
@@ -142,6 +148,15 @@ export async function buildBibleResourcePublication(
   const derived = deriveCanonicalBibleManifestData(canonical, options);
   const normalizedVersion = options.identity.versionId.toLowerCase();
   const canonicalEntry = `bible-${normalizedVersion}.json`;
+  const offlineEntry = options.offlineEntry ?? canonicalEntry;
+  if (
+    path.basename(offlineEntry) !== offlineEntry ||
+    !offlineEntry.endsWith(".json")
+  ) {
+    throw new Error(
+      `resource-publication-offline-entry-invalid:${offlineEntry}`
+    );
+  }
   const archiveFile = options.offlineArtifact
     ? path.basename(options.offlineArtifact.path)
     : `${canonicalEntry}.zip`;
@@ -164,7 +179,7 @@ export async function buildBibleResourcePublication(
                       role: "canonical",
                       sourceUrl: `https://local.invalid/canonical/${canonicalEntry}`,
                       sourcePath: sourceCanonicalPath,
-                      entry: canonicalEntry
+                      entry: offlineEntry
                     }
                   ],
                   strategy: "sqlite-import"

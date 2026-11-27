@@ -46,6 +46,11 @@ export type R2PublicationBundleSelection = 'exhaustive' | 'changed'
 type R2PublicationCatalogOptions = {
   expectedCatalogResourceCount?: number
   bundleSelection?: R2PublicationBundleSelection
+  /**
+   * Catalog entries an exhaustive selection must cover; every entry by default. A Bible
+   * publication covers the Bible family only and carries the other entries unchanged.
+   */
+  requiredCatalogIds?: readonly string[]
 }
 
 export const immutableR2ArtifactKey = (stableKey: string, archiveSha256: string) =>
@@ -254,7 +259,12 @@ export const validateR2PublicationCatalog = async (
     seenKeys.add(candidate.stableKey)
   }
   if ((options.bundleSelection ?? 'exhaustive') === 'exhaustive') {
-    const missingIds = [...mobileCatalog.resources.keys()].filter(id => !seenIds.has(id))
+    const requiredIds = options.requiredCatalogIds ?? [...mobileCatalog.resources.keys()]
+    const unknownIds = requiredIds.filter(id => !mobileCatalog.resources.has(id))
+    if (unknownIds.length > 0) {
+      throw new Error(`R2_PUBLICATION_CATALOG_REQUIRED_RESOURCE_UNKNOWN:${unknownIds.join(',')}`)
+    }
+    const missingIds = requiredIds.filter(id => !seenIds.has(id))
     if (missingIds.length > 0) {
       throw new Error(`R2_PUBLICATION_CATALOG_INCOMPLETE:${missingIds.join(',')}`)
     }
