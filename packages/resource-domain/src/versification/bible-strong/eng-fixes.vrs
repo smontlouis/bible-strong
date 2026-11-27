@@ -1,0 +1,27 @@
+# Corrections to Paratext eng.vrs, shared by every Bible Strong numbering built on it
+# (bs-eng, bs-kjv, bs-nrsv). Each was checked on LSG (org) and KJV.
+#
+# Mapping lines go from eng to org. A line replaces every line of the base for the same verse
+# of the left side.
+#
+# Numbers 25:19 of org ("À la suite de cette plaie,") opens the sentence English Bibles number
+# 26:1 ("And it came to pass after the plague, that the LORD spake unto Moses…").
+NUM 26:1 = NUM 25:19
+NUM 26:1 = NUM 26:1
+#
+# Isaiah 64:1 of English Bibles ("Oh that thou wouldest rend the heavens…") ends org 63:19
+# ("… Oh ! si tu déchirais les cieux, et si tu descendais,"); eng.vrs reads it as org 64:1.
+ISA 64:1 = ISA 63:19
+#
+# Three English verses hold two org verses where eng.vrs names only the second:
+# KJV 1 Samuel 20:42 ("Go in peace… And he arose and departed") is LSG 20:42 and 21:1;
+# KJV 1 Kings 22:43 ("he walked in all the ways of Asa… nevertheless the high places were not
+# taken away") is LSG 22:43 and 22:44;
+# KJV 1 Chronicles 12:4 ("Ismaiah the Gibeonite… and Jeremiah, and Jahaziel…") is LSG 12:4 and
+# 12:5.
+1SA 20:42 = 1SA 20:42
+1SA 20:42 = 1SA 21:1
+1KI 22:43 = 1KI 22:43
+1KI 22:43 = 1KI 22:44
+1CH 12:4 = 1CH 12:4
+1CH 12:4 = 1CH 12:5

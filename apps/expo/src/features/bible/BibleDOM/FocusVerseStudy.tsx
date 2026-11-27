@@ -294,7 +294,7 @@ const FocusVerseStudy = ({
                       kind: 'endpoint',
                       endpoint: {
                         type: 'verse',
-                        verseKeys: [study.verseKey],
+                        verseKeys: [version.verseKey],
                         version: version.versionId,
                       },
                     })

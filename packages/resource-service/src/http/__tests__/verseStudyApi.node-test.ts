@@ -140,7 +140,21 @@ const strongLexicon = {
     )
   },
   findChapterEntities: (input: { bookCode: string; chapter: number }) =>
-    Effect.succeed({
+    input.bookCode === TIPNR_BOOK_CODES[18] && input.chapter === 51
+      ? Effect.succeed({
+          revision: 'entities-r1',
+          // The title of the Psalm is in verse 1, as in the KJV.
+          value: [
+            {
+              uniqueName: 'Bathsheba@2Sa.11.3',
+              name: 'Bathsheba',
+              category: 'person' as const,
+              type: 'Female',
+              verses: [1],
+            },
+          ],
+        })
+      : Effect.succeed({
       revision: 'entities-r1',
       value:
         input.bookCode === TIPNR_BOOK_CODES[42] && input.chapter === 3
@@ -167,50 +181,77 @@ const strongLexicon = {
 const notFound = (verseKey: string) =>
   Effect.fail(new SupplementaryContentNotFound({ resourceIdentity: 'fixture', verseKey }))
 
+// The keys each part was read at, for the studies in the pivot numbering.
+const partReads: string[] = []
+
 const supplementary = {
   findCrossReferences: (input: { verseKey: string }) =>
-    input.verseKey === '43-3-16'
+    (partReads.push(`cross-references:${input.verseKey}`), input.verseKey) === '39-4-5'
       ? Effect.succeed({
           language: 'fr' as const,
-          verseKey: '43-3-16',
+          verseKey: '39-4-5',
           revision: 'tresor-r1',
-          references: ['God.', '45-5-8', '62-4-9'],
+          // The Trésor numbers as the KJV: Psalm 38:18 of the KJV is LSG 38:19.
+          references: ['Elijah.', '40-11-14', '19-38-18'],
         })
-      : notFound(input.verseKey),
+      : input.verseKey === '43-3-16'
+        ? Effect.succeed({
+            language: 'fr' as const,
+            verseKey: '43-3-16',
+            revision: 'tresor-r1',
+            references: ['God.', '45-5-8', '62-4-9'],
+          })
+        : notFound(input.verseKey),
   findCommentaryVerseSections: (input: {
     collections: readonly string[]
     book: number
     chapter: number
     verse: number
   }) =>
-    Effect.succeed(
-      input.collections.flatMap(collection =>
-        collection === 'jfb'
-          ? []
-          : [
-              {
-                collection,
-                revision: `${collection}-r1`,
-                ...(input.verse === 16
-                  ? {
-                      section: {
-                        slug: '16-17',
-                        startVerse: 16,
-                        endVerse: 17,
-                        content: `<p>${collection} sur Jean 3.16</p>`,
-                      },
-                    }
-                  : {}),
-              },
-            ]
-      )
+    (partReads.push(
+      `commentaries:${input.collections.join('+')}:${input.book}-${input.chapter}-${input.verse}`
     ),
+    input.book === 39)
+      ? Effect.succeed(
+          input.collections.map(collection => ({
+            collection,
+            revision: `${collection}-r1`,
+            section: {
+              slug: '5-6',
+              startVerse: 5,
+              endVerse: 6,
+              content: `<p>${collection} sur Malachie 4.5</p>`,
+            },
+          }))
+        )
+      : Effect.succeed(
+          input.collections.flatMap(collection =>
+            collection === 'jfb'
+              ? []
+              : [
+                  {
+                    collection,
+                    revision: `${collection}-r1`,
+                    ...(input.verse === 16
+                      ? {
+                          section: {
+                            slug: '16-17',
+                            startVerse: 16,
+                            endVerse: 17,
+                            content: `<p>${collection} sur Jean 3.16</p>`,
+                          },
+                        }
+                      : {}),
+                  },
+                ]
+          )
+        ),
 } as unknown as SupplementaryRepositoryService
 
 const nave = (failing = false) =>
   ({
     findVerseTopics: (input: { language: 'fr' | 'en'; verseKey: string }) =>
-      failing
+      (partReads.push(`nave:${input.verseKey}`), failing)
         ? Effect.fail(new NaveRepositoryFailure({ cause: new Error('password=x') }))
         : input.verseKey === '43-3-16'
           ? Effect.succeed({
@@ -226,7 +267,8 @@ const nave = (failing = false) =>
   }) as unknown as NaveRepositoryService
 
 const dictionary = {
-  discoverPassageEntries: (input: { verseKey: string; language?: 'fr' | 'en' }) =>
+  discoverPassageEntries: (input: { verseKey: string; language?: 'fr' | 'en' }) => (
+    partReads.push(`dictionary:${input.verseKey}`),
     Effect.succeed(
       input.verseKey === '43-3-16'
         ? [
@@ -245,7 +287,8 @@ const dictionary = {
             },
           ]
         : []
-    ),
+    )
+  ),
 } as unknown as DictionaryRepositoryService
 
 const overrides = (withVerseRead = true): ResourceRepositoryOverrides => ({
@@ -270,6 +313,63 @@ const read = async (path: string, options: { failingNave?: boolean; verseRead?: 
 }
 
 describe('v1 verse study API', () => {
+  it('reads each part of a study in the pivot numbering at its own verse', async () => {
+    partReads.length = 0
+    chapterReads.length = 0
+    // LSG Malachi 3:23 ("Je vous enverrai Élie") is KJV Malachi 4:5.
+    const study = await read(
+      '/v1/verse-studies/fr/39-3-23?numbering=org&commentaries=barnes,aquifer-fr'
+    )
+    assert.equal(study.status, 200, JSON.stringify(study.body))
+    assert.equal(study.body.verseKey, '39-3-23')
+    assert.ok(partReads.includes('cross-references:39-4-5'))
+    assert.ok(partReads.includes('nave:39-4-5'))
+    // The French dictionaries are found in LSG, which numbers as the pivot.
+    assert.ok(partReads.includes('dictionary:39-3-23'))
+    // Barnes numbers as the KJV; Aquifer is not measured and is read at the verse as given.
+    assert.ok(partReads.includes('commentaries:barnes:39-4-5'))
+    assert.ok(partReads.includes('commentaries:aquifer-fr:39-3-23'))
+    assert.ok(chapterReads.some(entry => entry.endsWith(':39-3-23') || entry.endsWith(':39-3')))
+    // The targets come back in the pivot numbering, the words they bear on kept.
+    assert.deepEqual(study.body.crossReferences, ['Elijah.', '40-11-14', '19-38-19'])
+    // Barnes on KJV 4:5-6 is org 3:23-24, in the studied chapter.
+    const barnes = study.body.commentaries.find(
+      (section: { resource: { resourceId: string } }) => section.resource.resourceId === 'barnes'
+    )
+    assert.deepEqual([barnes.startVerse, barnes.endVerse], [23, 24])
+    assert.deepEqual(
+      study.body.commentaries.map(
+        (section: { resource: { resourceId: string } }) => section.resource.resourceId
+      ),
+      ['barnes', 'aquifer-fr']
+    )
+  })
+
+  it('reads an unmeasured resource at the reader verse of a KJV page', async () => {
+    partReads.length = 0
+    // KJV Psalm 51:1 ("Have mercy upon me", with the title) is org 51:3.
+    const study = await read(
+      '/v1/verse-studies/en/19-51-3?numbering=org&reader=bs-kjv&commentaries=barnes,mhm'
+    )
+    assert.equal(study.status, 200, JSON.stringify(study.body))
+    assert.ok(partReads.includes('cross-references:19-51-1'))
+    assert.ok(partReads.includes('nave:19-51-1'))
+    // Barnes is measured; MHM is not, and is read at the reader's verse, as before.
+    assert.ok(partReads.includes('commentaries:barnes+mhm:19-51-1'))
+    assert.deepEqual(
+      study.body.entities.map((entity: { name: string }) => entity.name),
+      ['Bathsheba']
+    )
+  })
+
+  it('reads every part at the verse as given without a numbering', async () => {
+    partReads.length = 0
+    await read('/v1/verse-studies/fr/39-3-23?commentaries=barnes')
+    assert.ok(partReads.includes('cross-references:39-3-23'))
+    assert.ok(partReads.includes('nave:39-3-23'))
+    assert.ok(partReads.includes('commentaries:barnes:39-3-23'))
+  })
+
   it('answers in one read what each route of its parts answers for the verse', async () => {
     chapterReads.length = 0
     cardReads.length = 0

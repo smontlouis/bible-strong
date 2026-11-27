@@ -1,0 +1,14 @@
+# Versification "Bible Strong KJV": an overlay on bs-eng.
+#
+# The KJV and the Bibles that follow it differ from eng in two chapters.
+#
+# 3 John has 14 verses: KJV 3 John 14 holds org 14 ("I trust I shall shortly see thee…") and
+# org 15 ("Peace be to thee. Our friends salute thee…").
+# Revelation 12 has 17 verses: KJV 13:1 ("And I stood upon the sand of the sea, and saw a
+# beast…") holds org 12:18 and org 13:1.
+3JN 1:14
+REV 12:17
+3JN 1:14 = 3JN 1:14
+3JN 1:14 = 3JN 1:15
+REV 13:1 = REV 12:18
+REV 13:1 = REV 13:1

@@ -497,6 +497,9 @@ describe('loadVerseStudy with the verse study of the Resource API', () => {
           commentaries: commentingOf('fr')
             .map(link => publicationIdOf('fr', link.id))
             .join(','),
+          // S21 numbers as the pivot: the study is asked in it.
+          numbering: 'org',
+          reader: 'org',
         },
       ],
       ['/v1/bibles/S21/verses', { references: '45-5-8,62-4-9,40-17-21' }],
@@ -570,5 +573,92 @@ describe('loadVerseStudy with the verse study of the Resource API', () => {
       )
       expect(new Set(verseStudyStrongCodes(spans))).toEqual(new Set(shown))
     }
+  })
+})
+
+describe('a verse page of a Bible that numbers differently', () => {
+  // KJF numbers as the KJV: its Psalm 51:3 ("Car je reconnais") is LSG 51:5, org 51:5. The
+  // Trésor names KJV 38:18, which is LSG 38:19 and KJF 38:18.
+  const fakeApi: Answer = (path, query) => {
+    if (path === '/v1/verse-studies/fr/19-51-5') {
+      return {
+        verseKey: '19-51-5',
+        language: 'fr',
+        words: { versionId: 'LSG', spans: [], entries: [] },
+        crossReferences: ['For I', '19-38-19'],
+        commentaries: [],
+        topics: [],
+        dictionary: [],
+        entities: [],
+      }
+    }
+    if (path === '/v1/bibles/chapters') {
+      return {
+        chapters: String(query.versions)
+          .split(',')
+          .map(versionId => ({
+            resource: { versionId },
+            book: query.book,
+            chapter: query.chapter,
+            verses: [1, 3, 5].map(number => ({
+              number,
+              text: `${versionId} ${query.book}-${query.chapter}-${number}`,
+            })),
+          })),
+      }
+    }
+    const verses = /^\/v1\/bibles\/([^/]+)\/verses$/u.exec(path)
+    if (verses) {
+      return {
+        verses: String(query.references)
+          .split(',')
+          .map(key => {
+            const [book, chapter, number] = key.split('-').map(Number)
+            return { book, chapter, number, text: `${verses[1]} ${key}` }
+          }),
+      }
+    }
+    return undefined
+  }
+
+  const studyOf = (versionId: string, verse: { book: number; chapter: number; verse: number }) =>
+    loadVerseStudy({
+      reads: createPageReads(),
+      language: 'fr',
+      versionId,
+      verse,
+      verseText: Promise.resolve(''),
+      carrying: Promise.resolve([]),
+      commenting: Promise.resolve([]),
+    })
+
+  it('asks the study at the pivot verse and shows what it names at the page verses', async () => {
+    answerWith(fakeApi)
+    const found = await studyOf('KJF', { book: 19, chapter: 51, verse: 3 })
+
+    const studyCall = vi
+      .mocked(readResource)
+      .mock.calls.find(([path]) => path.startsWith('/v1/verse-studies/'))
+    expect(studyCall).toEqual([
+      '/v1/verse-studies/fr/19-51-5',
+      { commentaries: undefined, numbering: 'org', reader: 'bs-kjv' },
+    ])
+    // The cross-reference is read in KJF at its own number.
+    expect(found.crossReferences.map(reference => reference.path)).toEqual(['/bible/kjf/ps/38/18'])
+    // LSG gives its verse 51:5, the verse KJF 51:3 stands for.
+    expect(found.versions.find(version => version.label.endsWith('(LSG)'))?.path).toBe(
+      '/bible/lsg/ps/51/5'
+    )
+  })
+
+  it('reads another Bible in another chapter when its numbering puts the verse there', async () => {
+    answerWith(fakeApi)
+    // LSG Malachi 3:23 is the KJV's Malachi 4:5.
+    await studyOf('LSG', { book: 39, chapter: 3, verse: 23 })
+    const chapterReads = vi
+      .mocked(readResource)
+      .mock.calls.filter(([path]) => path === '/v1/bibles/chapters')
+      .map(([, query]) => `${query?.versions}:${query?.book}-${query?.chapter}`)
+    expect(chapterReads).toContain('BHG:39-4')
   })
 })

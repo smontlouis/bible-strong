@@ -1,7 +1,13 @@
 // What the reader shows under a verse in focus (ADR-0088). It crosses into the Bible DOM, so
 // it holds plain data only. A section left undefined is still loading; an empty one is hidden.
 
-export type FocusStudyVersion = { versionId: string; name: string; text: string }
+export type FocusStudyVersion = {
+  versionId: string
+  name: string
+  text: string
+  /** The verse in that version's numbering, which may differ from the studied verse's. */
+  verseKey: string
+}
 
 export type FocusStudyWord = {
   /** The word as the Bible read writes it; an original word left untranslated has none. */

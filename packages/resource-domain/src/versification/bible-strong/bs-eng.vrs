@@ -1,0 +1,13 @@
+# Versification "Bible Strong English": an overlay on Paratext eng.vrs.
+#
+# The English Bibles published by Bible Strong have no verse 0: a Psalm title belongs to
+# verse 1. That rule is applied in code (`foldPsalmTitlesIntoVerse1`), not written here.
+#
+# Mapping lines go from this versification to org, as in Paratext. A line replaces every line of
+# the base for the same verse of the left side.
+#
+# 2 Corinthians 13: English Bibles count 14 verses where org counts 13, and eng.vrs gives no
+# mapping. KJV 13:12-13 ("Greet one another…", "All the saints salute you") is LSG 13:12, and
+# KJV 13:14 ("The grace of the Lord Jesus Christ…") is LSG 13:13.
+#! &2CO 13:12-13 = 2CO 13:12
+2CO 13:14 = 2CO 13:13

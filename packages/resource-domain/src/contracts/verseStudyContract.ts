@@ -21,6 +21,19 @@ export class VerseStudyPath extends Schema.Class<VerseStudyPath>('VerseStudyPath
 
 export class VerseStudyQuery extends Schema.Class<VerseStudyQuery>('VerseStudyQuery')({
   /**
+   * `org`: the verse key is in the pivot numbering (`@bible-strong/resource-domain/versification`).
+   * Each part is then read at the verse that stands for it in its resource's numbering, and the
+   * verse keys and verse numbers of the answer are in `org` too, so every Bible of a language
+   * shares the answer whatever its numbering. Without it, every part is read at the key as given.
+   */
+  numbering: Schema.optional(Schema.Literal('org')),
+  /**
+   * With `numbering`, the numbering of the reader's Bible: a resource whose numbering is not
+   * known is read at the reader's verse, as without `numbering`. Without it, such a resource is
+   * read at the `org` verse.
+   */
+  reader: Schema.optional(Schema.Literal('org', 'bs-eng', 'bs-kjv', 'bs-nrsv')),
+  /**
    * The commentaries whose section on the verse is read, separated by commas, in the order of
    * the answer. Without it, no commentary is read. The site names those that comment the
    * chapter, so every Bible of the language asks the same question.

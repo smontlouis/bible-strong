@@ -1251,6 +1251,8 @@ const VerseStudyApiLive = HttpApiBuilder.group(ResourceApi, 'verseStudies', hand
       chapter: chapter!,
       verse: verse!,
       commentaries: (urlParams.commentaries ?? '').split(',').filter(Boolean),
+      numbering: urlParams.numbering,
+      reader: urlParams.reader,
     }).pipe(
       Effect.tap(() => addResponseHeaders({ 'x-request-id': requestId })),
       Effect.mapError(cause => toHttpProblem(cause, requestId))

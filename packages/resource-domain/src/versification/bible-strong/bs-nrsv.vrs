@@ -1,0 +1,8 @@
+# Versification "Bible Strong NRSV": an overlay on Paratext eng.vrs, for BHG and the STEPBible
+# words filed under the NRSV (ADR-0078).
+#
+# Psalm titles keep their verse 0, as in eng.vrs.
+#
+# 2 Corinthians 13 has 13 verses, as in org: 13:12 holds the holy kiss and the greeting of the
+# saints, 13:13 the grace.
+2CO 13:13

@@ -21,12 +21,15 @@
     "./strong-lexicon": "./src/strongLexicon.ts",
     "./timeline-dates": "./src/timelineDates.ts",
     "./timeline-stage": "./src/timelineStage.ts",
-    "./verse-study": "./src/verseStudy.ts"
+    "./verse-study": "./src/verseStudy.ts",
+    "./versification": "./src/versification.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "tsx --test src/**/*.node-test.ts",
-    "timeline:layout": "node scripts/generate-timeline-layout.mjs"
+    "timeline:layout": "node scripts/generate-timeline-layout.mjs",
+    "versification:tables": "tsx scripts/generate-versification-tables.ts",
+    "versification:coverage": "tsx scripts/snapshot-bible-coverage.ts"
   },
   "dependencies": {
     "@babel/runtime": "^7.28.4",

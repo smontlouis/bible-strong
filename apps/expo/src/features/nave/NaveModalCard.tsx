@@ -6,6 +6,7 @@ import { useAtomValue } from 'jotai'
 import Box from '~common/ui/Box'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { useQuery } from '@tanstack/react-query'
+import { bibleVerseKeyInResource } from '@bible-strong/resource-domain/versification'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import NaveForVerse from './NaveModalForVerse'
 import { SheetScrollView } from '~common/sheet'
@@ -51,9 +52,16 @@ const NaveModalCard = ({ selectedVerse, selectedVersion, updateVerse }: Props) =
     staleTime: Infinity,
   })
 
+  // The Nave numbers its verses as the KJV: it is read at the verse that stands for the reader's.
+  const naveVerse = bibleVerseKeyInResource(
+    selectedVerse,
+    selectedVersion,
+    `nave:${resourceLang}`
+  )[0]
   const naveQuery = useQuery({
-    queryKey: ['nave', selectedVerse, resourceLang, isConnected],
-    queryFn: () => resources.nave.loadByVerse(selectedVerse, resourceLang),
+    queryKey: ['nave', naveVerse, resourceLang, isConnected],
+    queryFn: () => resources.nave.loadByVerse(naveVerse, resourceLang),
+    enabled: Boolean(naveVerse),
     ...staticResourceQueryOptions,
   })
   const { isLoading, error, data } = naveQuery

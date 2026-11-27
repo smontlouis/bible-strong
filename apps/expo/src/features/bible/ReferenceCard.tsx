@@ -3,6 +3,10 @@ import { titleFontStyle } from '~themes/styleValues'
 import React from 'react'
 import { ActivityIndicator, ScrollView } from 'react-native'
 import { useQuery } from '@tanstack/react-query'
+import {
+  bibleVerseKeyInResource,
+  resourceVerseKeyInBible,
+} from '@bible-strong/resource-domain/versification'
 import Empty from '~common/Empty'
 import Link from '~common/Link'
 import { VerseRefContent } from '~common/types'
@@ -24,6 +28,9 @@ import {
   resourceFailureFromAvailability,
 } from '~features/resources/resourceFailure'
 // TODO - SPLIT THIS :(
+
+/** The Trésor numbers its verses as the KJV: keys are converted to and from the reader's Bible. */
+const TRESOR = 'cross-references:TRESOR'
 
 const ReferenceItem = ({ reference, version }: { reference: string; version: VersionCode }) => {
   const stylingTheme = useStylingTheme()
@@ -118,11 +125,20 @@ export const ReferenceCard = ({
     staleTime: Infinity,
   })
 
+  // A verse of the reader's Bible may stand for several Trésor verses (LSG 2 Corinthians 13:12 is
+  // KJV 13:12-13), or none.
+  const tresorVerses = selectedVerse ? bibleVerseKeyInResource(selectedVerse, version, TRESOR) : []
   const referencesQuery = useQuery({
-    queryKey: resourceQueryKeys.bibleReferences(selectedVerse),
-    enabled: Boolean(selectedVerse),
+    queryKey: resourceQueryKeys.bibleReferences(tresorVerses.join(',')),
+    enabled: tresorVerses.length > 0,
     networkMode: 'always',
-    queryFn: async () => (await resources.bibleReading.loadTresorReferences(selectedVerse)) ?? null,
+    queryFn: async () => {
+      const lists = await Promise.all(
+        tresorVerses.map(verse => resources.bibleReading.loadTresorReferences(verse))
+      )
+      const found = lists.filter((list): list is TresorReferences => Boolean(list))
+      return found.length > 0 ? found.flat() : null
+    },
   })
   const { isPending: isLoading, error, data } = referencesQuery
 
@@ -163,6 +179,10 @@ export const ReferenceCard = ({
 
   if (!selectedVerse) return null
 
+  if (tresorVerses.length === 0) {
+    return <Empty message={t('resource.crossReferences.noneForVerse')} />
+  }
+
   if (isLoading || availabilityQuery.isPending) {
     return (
       <Box className="overflow-hidden border-continuous flex-[1] items-center justify-center min-h-[200px]">
@@ -202,7 +222,9 @@ const References = ({
       {references.map((ref, i) => {
         const splittedRef = ref.split('-')
         if (splittedRef.length === 3 && Number(splittedRef[0]) > 0) {
-          return <ReferenceItem key={ref + i} reference={ref} version={version} />
+          const verse = resourceVerseKeyInBible(ref, TRESOR, version)
+          if (!verse) return null
+          return <ReferenceItem key={ref + i} reference={verse} version={version} />
         }
 
         return (

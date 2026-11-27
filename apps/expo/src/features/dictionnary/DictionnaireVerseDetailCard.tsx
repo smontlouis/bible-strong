@@ -1,5 +1,6 @@
 import { useTheme as useStylingTheme } from '~themes/ThemeProvider'
 import { useQuery } from '@tanstack/react-query'
+import { bibleVerseKeyInResource } from '@bible-strong/resource-domain/versification'
 import { useAtomValue } from 'jotai'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -67,9 +68,16 @@ const DictionnaireVerseDetailScreen = ({
     updateVerse(direction)
   }
 
+  // Dictionary verse presences are found in a reference Bible of each language (LSG, KJV).
+  const dictionaryVerse = bibleVerseKeyInResource(
+    verseKey,
+    selectedVersion,
+    `dictionary-presence:${resourceLang}`
+  )[0]
   const anchorsQuery = useQuery({
-    queryKey: ['dictionary-passage-entries', verseKey, resourceLang],
-    queryFn: () => resources.dictionary.discoverPassageEntries(verseKey, resourceLang),
+    queryKey: ['dictionary-passage-entries', dictionaryVerse, resourceLang],
+    queryFn: () => resources.dictionary.discoverPassageEntries(dictionaryVerse, resourceLang),
+    enabled: Boolean(dictionaryVerse),
     ...localQueryOptions,
     ...staticResourceQueryOptions,
   })
