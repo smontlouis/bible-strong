@@ -135,36 +135,36 @@ Le nombre de lignes ne suffit pas comme mesure. BFC, FRC97, NFC et PDV2017 regro
 
 Les colonnes `org` et `eng` donnent le nombre de chapitres dont le dernier verset diffère de chaque table.
 
-| Famille | Bibles | Déclarée | ≠ `org` | ≠ `eng` | Écarts restants |
-|---|---|---|---:|---:|---|
-| **Hébraïque exacte** | LSG, NBS, NVS78P, DBY, DBR | `bible-strong-default` | 0 | 141 | aucun |
-| Hébraïque, presque | S21 | défaut | 1 | 140 | Nb 25 |
-| | BDS | défaut | 1 | 142 | 1 Ch 25 (regroupement) |
-| | BHS | défaut | 1 | 138 | **Joël 4 absent** |
-| | CHU | défaut | 5 | 142 | **Joël 4 absent, 2 Ch 36 vide**, Dt 34, Né 7, Jn 7 |
-| | BFC, FRC97 | défaut | 16 | 151 | regroupements de fin de chapitre, Ac 19:41 |
-| | NFC | défaut | 14 | 149 | idem |
-| | PDV2017 | défaut | 15 | 150 | idem, Rm 8, Jude |
-| | TLV | défaut | 11 | 138 | Nb 16-17 et 29-30 à l'anglaise, Dt 5, 1 S 23-24, Jr 30-31, Jon 4 |
-| | DEL | défaut | 6 | 145 | Jn 1, Ac 19, Rm 7, 1 Co 13, 2 Th 3, Ap 12 |
-| | BCC1923 | `…catholic-extended-esther-daniel` | 33 | 165 | Esther et Daniel grecs, versets isolés |
-| | SBLGNT (NT) | défaut | 2 | 4 | Jn 7, Rm 16 |
-| | POV (NT) | défaut | 4 | 6 | Mt 8-9, Mc 9, Lc 1 |
-| **Anglaise** | NLT | défaut | 141 | 0 | aucun |
-| | ESV, NIV, AMP | défaut | 142 | 1 | Ap 12 |
-| | GW, CSB | défaut | 140 | 1 | 2 Co 13 |
-| | **BHG** (NRSV, titres en verset 0) | défaut | 140 | 1 | 2 Co 13 |
-| | NET | défaut | 139 | 2 | Jon 1, 2 Co 13 |
-| **Anglaise, type KJV** | KJV, KJF, BSB, ASV, DARBY, RLT, RWEBSTER, RV1895, NKJV, NASB2020, NASB1995 | défaut | 143 | 2 | 3 Jn 1 (14 versets), Ap 12 (17 versets) |
-| | TR1624, TR1894 (NT) | défaut | 4 | 2 | idem |
-| | EASY | défaut | 147 | 6 | 1 Ch 25, 2 Ch 35, Éz 36, Dn 10, Rm 8, 1 Co 5 |
-| | LAU | `…french-4-chapter-joel` | 141 | 6 | Joël 2-4 à l'hébraïque, Mc 9-10, Ap 12 |
-| **Protestante française mixte** | NEG79 | défaut | 54 | 103 | Psaumes, Lv, Ct, Es, Éz et Mi à l'hébraïque ; Gn, Dt, Joël, Za et Mal à l'anglaise |
-| | OST | défaut | 76 | 88 | Psaumes presque hébraïques, Éz et Jon hébraïques, le reste surtout anglais |
-| | FMAR | défaut | 78 | 81 | comme OST, Ap 12 à l'anglaise |
-| **Septante** | LXX | `theotex-septuagint` | — | — | 55 chapitres ≠ `lxx`, dont Esdras, scindé par l'ADR-0018 |
-| | **LXX_FR** | **défaut** (à tort) | — | — | 53 chapitres ≠ `lxx`. Psaumes numérotés comme la Septante : LXX_FR Ps 51:2 est « Quand Doeg l'Iduméen… », soit le Ps 52 hébreu (lu dans l'API) |
-| **Vulgate** | VUL | `clementine-vulgate` | — | — | 17 chapitres ≠ `vul` (additions d'Esther, Ps 115-116, Gn 5) |
+| Famille | Bibles | Déclarée | Table Bible Strong | ≠ `org` | ≠ `eng` | Écarts restants |
+|---|---|---|---|---:|---:|---|
+| **Hébraïque exacte** | LSG, NBS, NVS78P, DBY, DBR | `bible-strong-default` | `org` | 0 | 141 | aucun |
+| Hébraïque, presque | S21 | défaut | `org` | 1 | 140 | Nb 25 |
+| | BDS | défaut | `org` | 1 | 142 | 1 Ch 25 (regroupement) |
+| | BHS | défaut | `org` | 1 | 138 | **Joël 4 absent** |
+| | CHU | défaut | `bs-chu` | 5 | 142 | **Joël 4 absent, 2 Ch 36 vide**, Dt 34, Né 7, Jn 7 |
+| | BFC, FRC97 | défaut | `bs-bfc` | 16 | 151 | regroupements de fin de chapitre, Ac 19:41 |
+| | NFC | défaut | `bs-nfc` | 14 | 149 | idem |
+| | PDV2017 | défaut | `bs-pdv` | 15 | 150 | idem, Rm 8, Jude |
+| | TLV | défaut | `bs-tlv` | 11 | 138 | Nb 16-17 et 29-30 à l'anglaise, Dt 5, 1 S 23-24, Jr 30-31, Jon 4 |
+| | DEL | défaut | `bs-del` | 6 | 145 | Jn 1, Ac 19, Rm 7, 1 Co 13, 2 Th 3, Ap 12 |
+| | BCC1923 | `…catholic-extended-esther-daniel` | non décrite | 33 | 165 | Esther et Daniel grecs, versets isolés |
+| | SBLGNT (NT) | défaut | `bs-sblgnt` | 2 | 4 | Jn 7, Rm 16 |
+| | POV (NT) | défaut | `bs-pov` | 4 | 6 | Mt 8-9, Mc 9, Lc 1 |
+| **Anglaise** | NLT | défaut | `bs-eng` | 141 | 0 | aucun |
+| | ESV, NIV, AMP | défaut | `bs-esv` (ESV), `bs-niv` (NIV, AMP) | 142 | 1 | Ap 12 |
+| | GW, CSB | défaut | `bs-gw`, `bs-csb` | 140 | 1 | 2 Co 13 |
+| | **BHG** (NRSV, titres en verset 0) | défaut | `bs-nrsv` | 140 | 1 | 2 Co 13 |
+| | NET | défaut | `bs-net` | 139 | 2 | Jon 1, 2 Co 13 |
+| **Anglaise, type KJV** | KJV, KJF, BSB, ASV, DARBY, RLT, RWEBSTER, RV1895, NKJV, NASB2020, NASB1995 | défaut | `bs-kjv` | 143 | 2 | 3 Jn 1 (14 versets), Ap 12 (17 versets) |
+| | TR1624, TR1894 (NT) | défaut | `bs-kjv` | 4 | 2 | idem |
+| | EASY | défaut | `bs-easy` | 147 | 6 | 1 Ch 25, 2 Ch 35, Éz 36, Dn 10, Rm 8, 1 Co 5 |
+| | LAU | `…french-4-chapter-joel` | `bs-lau` | 141 | 6 | Joël 2-4 à l'hébraïque, Mc 9-10, Ap 12 |
+| **Protestante française mixte** | NEG79 | défaut | `bs-neg79` | 54 | 103 | Psaumes, Lv, Ct, Es, Éz et Mi à l'hébraïque ; Gn, Dt, Joël, Za et Mal à l'anglaise |
+| | OST | défaut | `bs-ost` | 76 | 88 | Psaumes presque hébraïques, Éz et Jon hébraïques, le reste surtout anglais |
+| | FMAR | défaut | `bs-fmar` | 78 | 81 | comme OST, Ap 12 à l'anglaise |
+| **Septante** | LXX | `theotex-septuagint` | non décrite | — | — | 55 chapitres ≠ `lxx`, dont Esdras, scindé par l'ADR-0018 |
+| | **LXX_FR** | **défaut** (à tort) | non décrite | — | — | 53 chapitres ≠ `lxx`. Psaumes numérotés comme la Septante : LXX_FR Ps 51:2 est « Quand Doeg l'Iduméen… », soit le Ps 52 hébreu (lu dans l'API) |
+| **Vulgate** | VUL | `clementine-vulgate` | non décrite | — | — | 17 chapitres ≠ `vul` (additions d'Esther, Ps 115-116, Gn 5) |
 
 **À retenir :**
 - LSG, la Bible par défaut en français, est **identique à `org`** ; KJV, la Bible par défaut en anglais, est identique à `eng` sauf en 3 Jean et en Apocalypse 12.
@@ -261,6 +261,43 @@ Les désaccords se rangent en trois groupes :
 Sur LAU, le détecteur ne tranche pas : il déclare ambigus presque tous les livres où LAU diffère de la LSG, faute de témoin aussi littéral. J'ai donc lu Joël 2-4, Mc 9-10, 3 Jean et Ap 12-13 : la table suit le texte.
 
 **Mécanique.** Une surcouche peut retirer un chapitre (`JOL 4:0`), une ligne dont le verset sort du chapitre est abandonnée, et une surcouche posée sur `org` reçoit l'identité par défaut. `bs-eng`, `bs-kjv` et `bs-nrsv` en sortent inchangés, verset par verset.
+
+### 2.5 Les tables des autres Bibles
+
+Depuis le 27 novembre 2026, toutes les Bibles publiées ont une table, sauf BCC1923, LXX, LXX_FR et VUL. La colonne « Table Bible Strong » du tableau 2.2 donne la table de chacune.
+
+| Table | Bibles | Base | Lignes | Vérification |
+|---|---|---|---:|---|
+| `bs-esv` | ESV | `bs-eng` | 1 | texte : ESV Ap 12:17 finit par « And he stood on the sand of the sea » (LSG 12:18) |
+| `bs-niv` | NIV, AMP | `bs-eng` | 2 | texte : Ap 13:1 commence par le dragon sur le rivage, comme la KJV ; mais 3 Jean a 15 versets |
+| `bs-gw` | GW | `bs-eng` | 5 | 2 Co 13 en 13 versets ; Ex 27:14 et 38:14, Nb 4:47, Jr 27:19 contiennent le verset suivant |
+| `bs-csb` | CSB | `bs-eng` | 3 | 2 Co 13 en 13 versets ; Ac 24:6 contient 24:8 |
+| `bs-net` | NET | `bs-eng` | 1 | 2 Co 13 en 13 versets ; **pas de Jon 1:17** (LSG 2:1, le grand poisson) dans le texte publié |
+| `bs-easy` | EASY | `bs-eng` | 72 | lignes de plusieurs versets, lues dans la couverture et contrôlées sur le texte |
+| `bs-bfc` | BFC, FRC97 | `org` | 168 | idem ; Ac 19:40-41 = LSG 19:40 |
+| `bs-nfc` | NFC | `org` | 146 | idem |
+| `bs-pdv` | PDV2017 | `org` | 173 | idem |
+| `bs-tlv` | TLV | `org` | 13 | Nb 16-17, 25-26, 29-30 et 1 S 23-24 à l'anglaise ; Dt 5:17 réunit quatre commandements ; Jr 30:25 = LSG 31:1 ; Jon 4:10 contient 4:11 |
+| `bs-del` | DEL | `org` | 10 | lu dans l'hébreu : Jn 1:38, Ac 19:40, Rm 7:25, 1 Co 13:12 et 2 Th 3:16 coupés en deux ; Ap 13:1 comme la KJV |
+| `bs-chu` | CHU | `org` | 13 | Dt 32:50-34:12 décalé d'un verset ; Né 7 à l'anglaise ; Ps 119:72 contient 119:73 |
+| `bs-sblgnt` | SBLGNT | `org` | 0 | Jn 7 s'arrête au v. 52, Rm 16 au v. 24 |
+| `bs-pov` | POV | `org` | 5 | Mt 8:33, 9:37, Lc 1:79 et 3:6 contiennent le verset suivant ; Mc 9:50 coupé en deux |
+
+**Les lignes de plusieurs versets.** BFC, FRC97, NFC, PDV2017, EASY, et plus rarement GW, CSB et POV, impriment une ligne pour plusieurs versets (« 15-16 ») et la rangent sous son premier numéro ; les numéros suivants n'ont pas de ligne.
+- La couverture publiée le montre : `verseNumbersByBookChapter` liste les numéros présents. Un numéro absent appartient à la ligne qui le précède, et une ligne qui finit le chapitre plus tôt que sa base porte la fin du chapitre (BFC 1 Ch 25:9 = LSG 25:9-31).
+- La table envoie cette ligne vers tous ses versets (`1CH 25:9 = 1CH 25:9-31`) et raccourcit le chapitre. Un verset LSG ainsi couvert se lit sur la ligne qui le contient : LSG 1 Ch 25:20 est FRC97 25:9.
+- Les omissions de critique textuelle (Mt 17:21, Mc 9:44…) et 1 S 13:1, que BFC omet, gardent leur numéro.
+- Contrôle : pour chacune des 550 lignes environ, j'ai comparé la longueur du texte à celle des versets LSG (ou NIV pour EASY) qu'elle couvre. Les 60 cas douteux sont des résumés (BFC Nb 1:20 résume le recensement de 1:20-43, Gn 17:24 « Abraham avait quatre-vingt-dix-neuf ans et son fils Ismaël treize »). Je les ai lus : tous sont des regroupements.
+- FRC97 a exactement les mêmes lignes que BFC et partage sa table. NFC et PDV2017 en diffèrent par une centaine de numéros et ont la leur.
+- Le détecteur de Resource Studio échoue sur ces Bibles (mémoire saturée avant la fin du Pentateuque, à cause des grands regroupements).
+
+**Trous du texte publié, nommés par le test :** NET Jon 1:17 ; CHU Ps 119:8 et Jn 7:53 ; SBLGNT Jn 7:53 et Rm 16:25-27 ; CHU n'a ni Jl 4 ni 2 Ch 36, qui gardent les versets de `org`.
+
+**Titres des psaumes.** Les Bibles anglaises modernes n'impriment pas le titre dans le verset : leur v. 1 est le premier verset du psaume, comme dans `bs-eng`, qui y replie le titre.
+
+**Non décrites :**
+- **BCC1923** suit la Vulgate dans une dizaine de chapitres (Jos 21, Jg 5, 1 Ch 12, Né 7, Mt 17, Mc 4, 8 et 9, Ac 14). Elle a ses propres coupes ailleurs : Lv 24:23 et Dt 5:17-20, et des fins de chapitre en Ps 18, Ps 45, Is 21, Jr 20, Jn 11 et He 13. Il faut aussi trancher pour les additions grecques d'Esther (10:4-16:24) et de Daniel (3:24-90, 13, 14), que `org` range dans d'autres livres.
+- **LXX, LXX_FR et VUL** demandent les tables Paratext `lxx` et `vul` et la même décision pour les livres 67 à 77 et les structures de l'ADR-0018. Je les ai laissées hors de ce travail.
 
 ---
 

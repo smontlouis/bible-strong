@@ -1,0 +1,11 @@
+# Versification "Bible Strong CSB": an overlay on bs-eng, for the Christian Standard Bible.
+#
+# 2 Corinthians 13 has 13 verses, as in org: CSB 13:12 holds the holy kiss and the greeting of
+# the saints, 13:13 the grace.
+2CO 13:13
+2CO 13:13 = 2CO 13:13
+#
+# Acts 24:6 ("…and so we apprehended him. By examining him yourself you will be able to
+# discern…") holds 24:8, whose number CSB does not print; 24:7 is left out of the text.
+ACT 24:6 = ACT 24:6
+ACT 24:6 = ACT 24:8

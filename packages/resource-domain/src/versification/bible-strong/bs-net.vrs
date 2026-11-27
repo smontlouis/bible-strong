@@ -1,0 +1,11 @@
+# Versification "Bible Strong NET": an overlay on bs-eng, for the NET Bible.
+#
+# 2 Corinthians 13 has 13 verses, as in org: NET 13:12 holds the holy kiss and the greeting of
+# the saints, 13:13 the grace.
+2CO 13:13
+2CO 13:13 = 2CO 13:13
+#
+# Jonah 1 ends at 16: the published NET has no verse for org 2:1 (English 1:17, the great fish),
+# and NET 2:1 ("Jonah prayed to the Lord his God from the stomach of the fish") is org 2:2, as
+# in bs-eng.
+JON 1:16

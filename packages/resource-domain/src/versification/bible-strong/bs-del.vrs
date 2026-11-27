@@ -1,0 +1,32 @@
+# Versification "Bible Strong DEL": an overlay on Paratext org.vrs, for the Hebrew New Testament
+# of Delitzsch (DEL).
+#
+# DEL numbers as org except where it cuts a verse in two, and in Revelation 12-13, numbered as
+# the KJV.
+#
+JHN 1:52
+ACT 19:41
+ROM 7:26
+1CO 13:14
+2TH 3:19
+REV 12:17
+#
+# John 1:38-39 ("…and said to them:", "What are you seeking? They said: Rabbi, where do you
+# stay?") is org 1:38.
+#! &JHN 1:38-39 = JHN 1:38
+JHN 1:40-52 = JHN 1:39-51
+# Acts 19:41 ("When he had finished speaking these words, he dismissed the assembly") ends
+# org 19:40.
+#! &ACT 19:40-41 = ACT 19:40
+# Romans 7:25-26 (the thanksgiving, then "So with my mind I am a servant of the law of God…")
+# is org 7:25.
+#! &ROM 7:25-26 = ROM 7:25
+# 1 Corinthians 13:12-13 ("For now we see in a mirror…", "Now I know in part…") is org 13:12.
+#! &1CO 13:12-13 = 1CO 13:12
+1CO 13:14 = 1CO 13:13
+# 2 Thessalonians 3:16-17 (the Lord of peace…, "The Lord be with you all") is org 3:16.
+#! &2TH 3:16-17 = 2TH 3:16
+2TH 3:18-19 = 2TH 3:17-18
+# Revelation 13:1 opens with org 12:18 ("I stood on the sand of the sea").
+REV 13:1 = REV 12:18
+REV 13:1 = REV 13:1

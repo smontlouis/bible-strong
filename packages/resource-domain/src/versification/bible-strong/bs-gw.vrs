@@ -1,0 +1,14 @@
+# Versification "Bible Strong GW": an overlay on bs-eng, for GOD'S WORD Translation.
+#
+# 2 Corinthians 13 has 13 verses, as in org: GW 13:12 holds the holy kiss and the greeting of the
+# saints, 13:13 the blessing.
+2CO 13:13
+2CO 13:13 = 2CO 13:13
+#
+# GW prints four rows that stand for two verses, stored on the first number; the second number
+# has no row. Exodus 27:14 and 38:14 ("Each side ⌞of the entrance⌟ will be 22½ feet wide…") are
+# verses 14-15; Numbers 4:47 holds the total of 4:48; Jeremiah 27:19 holds 27:20.
+EXO 27:14 = EXO 27:14-15
+EXO 38:14 = EXO 38:14-15
+NUM 4:47 = NUM 4:47-48
+JER 27:19 = JER 27:19-20

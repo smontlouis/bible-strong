@@ -1,0 +1,172 @@
+# Versification "Bible Strong NFC": an overlay on Paratext org.vrs, for la Nouvelle Français courant (NFC).
+#
+# NFC numbers as org (LSG), as BFC does, but prints many rows that stand for several verses,
+# stored on the first number; the numbers that follow have no row. Each mapping line sends such a
+# row to every org verse it stands for. Where the row ends its chapter, the chapter ends there
+# too. Verses the text leaves out (1 Samuel 13:1, Matthew 17:21…) keep their number.
+#
+# The lines were read from the published coverage (the verse numbers each chapter has) and
+# checked against the texts (docs/research/versification.md, section 2.5).
+#
+GEN 20:17 36:40
+NUM 4:34
+2SA 17:28
+2KI 12:21
+1CH 6:62 25:9
+2CH 35:26
+PSA 2:11
+ECC 8:16
+DAN 10:20
+JOL 4:20
+ACT 19:41
+1CO 5:12
+#
+GEN 6:9 = GEN 6:9-10
+GEN 13:6 = GEN 13:6-7
+GEN 15:2 = GEN 15:2-3
+GEN 17:24 = GEN 17:24-25
+GEN 18:11 = GEN 18:11-12
+GEN 20:17 = GEN 20:17-18
+GEN 21:20 = GEN 21:20-21
+GEN 32:23 = GEN 32:23-24
+GEN 36:15 = GEN 36:15-16
+GEN 36:20 = GEN 36:20-21
+GEN 36:29 = GEN 36:29-30
+GEN 36:34 = GEN 36:34-39
+GEN 36:40 = GEN 36:40-43
+GEN 37:23 = GEN 37:23-24
+GEN 40:1 = GEN 40:1-2
+GEN 46:6 = GEN 46:6-7
+EXO 1:1 = EXO 1:1-4
+EXO 19:1 = EXO 19:1-2
+EXO 26:16 = EXO 26:16-17
+EXO 27:14 = EXO 27:14-15
+EXO 29:40 = EXO 29:40-41
+EXO 36:21 = EXO 36:21-22
+EXO 38:14 = EXO 38:14-15
+LEV 4:11 = LEV 4:11-12
+LEV 11:26 = LEV 11:26-28
+LEV 15:21 = LEV 15:21-22
+LEV 24:10 = LEV 24:10-11
+NUM 1:20 = NUM 1:20-43
+NUM 2:3 = NUM 2:3-8
+NUM 2:10 = NUM 2:10-15
+NUM 2:18 = NUM 2:18-23
+NUM 2:25 = NUM 2:25-30
+NUM 4:2 = NUM 4:2-3
+NUM 4:34 = NUM 4:34-49
+NUM 7:12 = NUM 7:12-83
+NUM 8:9 = NUM 8:9-10
+NUM 10:5 = NUM 10:5-6
+NUM 11:8 = NUM 11:8-9
+NUM 14:22 = NUM 14:22-23
+NUM 15:22 = NUM 15:22-23
+NUM 22:2 = NUM 22:2-4
+NUM 26:19 = NUM 26:19-21
+NUM 29:17 = NUM 29:17-34
+NUM 31:42 = NUM 31:42-43
+NUM 33:38 = NUM 33:38-39
+NUM 35:4 = NUM 35:4-5
+DEU 19:2 = DEU 19:2-3
+DEU 19:8 = DEU 19:8-9
+DEU 24:12 = DEU 24:12-13
+DEU 28:1 = DEU 28:1-2
+DEU 31:10 = DEU 31:10-11
+JOS 5:4 = JOS 5:4-5
+JOS 22:7 = JOS 22:7-8
+JDG 20:27 = JDG 20:27-28
+1SA 9:9 = 1SA 9:9-11
+1SA 17:5 = 1SA 17:5-6
+1SA 17:13 = 1SA 17:13-14
+2SA 4:6 = 2SA 4:6-7
+2SA 7:6 = 2SA 7:6-7
+2SA 13:37 = 2SA 13:37-38
+2SA 17:28 = 2SA 17:28-29
+2SA 24:11 = 2SA 24:11-12
+1KI 1:3 = 1KI 1:3-4
+1KI 6:20 = 1KI 6:20-21
+1KI 6:23 = 1KI 6:23-26
+1KI 7:13 = 1KI 7:13-14
+1KI 8:41 = 1KI 8:41-42
+1KI 9:10 = 1KI 9:10-11
+1KI 10:6 = 1KI 10:6-7
+1KI 11:9 = 1KI 11:9-10
+2KI 9:14 = 2KI 9:14-15
+2KI 12:1 = 2KI 12:1-2
+2KI 12:21 = 2KI 12:21-22
+2KI 22:5 = 2KI 22:5-6
+1CH 1:43 = 1CH 1:43-50
+1CH 3:6 = 1CH 3:6-8
+1CH 4:17 = 1CH 4:17-18
+1CH 4:28 = 1CH 4:28-32
+1CH 4:34 = 1CH 4:34-38
+1CH 5:1 = 1CH 5:1-3
+1CH 5:25 = 1CH 5:25-26
+1CH 6:42 = 1CH 6:42-45
+1CH 6:51 = 1CH 6:51-55
+1CH 6:56 = 1CH 6:56-61
+1CH 6:62 = 1CH 6:62-66
+1CH 8:14 = 1CH 8:14-16
+1CH 8:17 = 1CH 8:17-18
+1CH 8:19 = 1CH 8:19-21
+1CH 8:22 = 1CH 8:22-25
+1CH 8:26 = 1CH 8:26-27
+1CH 12:10 = 1CH 12:10-14
+1CH 16:12 = 1CH 16:12-13
+1CH 24:7 = 1CH 24:7-18
+1CH 25:9 = 1CH 25:9-31
+1CH 27:2 = 1CH 27:2-15
+2CH 3:11 = 2CH 3:11-13
+2CH 9:5 = 2CH 9:5-6
+2CH 34:10 = 2CH 34:10-11
+2CH 35:26 = 2CH 35:26-27
+EZR 7:1 = EZR 7:1-6
+NEH 8:1 = NEH 8:1-2
+NEH 10:10 = NEH 10:10-14
+NEH 10:15 = NEH 10:15-28
+NEH 12:28 = NEH 12:28-29
+EST 1:2 = EST 1:2-3
+EST 9:7 = EST 9:7-10
+PSA 2:11 = PSA 2:11-12
+PSA 55:3 = PSA 55:3-4
+PSA 77:6 = PSA 77:6-7
+PSA 83:10 = PSA 83:10-11
+PSA 105:5 = PSA 105:5-6
+PSA 140:9 = PSA 140:9-10
+PRO 6:16 = PRO 6:16-19
+PRO 30:15 = PRO 30:15-16
+PRO 30:18 = PRO 30:18-19
+PRO 30:21 = PRO 30:21-23
+PRO 30:29 = PRO 30:29-31
+ECC 7:27 = ECC 7:27-28
+ECC 8:16 = ECC 8:16-17
+ISA 7:8 = ISA 7:8-9
+ISA 8:14 = ISA 8:14-15
+ISA 59:5 = ISA 59:5-6
+JER 29:13 = JER 29:13-14
+JER 29:24 = JER 29:24-25
+JER 30:4 = JER 30:4-5
+JER 33:4 = JER 33:4-5
+JER 34:18 = JER 34:18-19
+JER 51:59 = JER 51:59-60
+EZK 40:8 = EZK 40:8-9
+EZK 42:17 = EZK 42:17-19
+EZK 48:30 = EZK 48:30-31
+DAN 9:1 = DAN 9:1-2
+DAN 10:20 = DAN 10:20-21
+JOL 4:20 = JOL 4:20-21
+MAL 2:1 = MAL 2:1-2
+LUK 23:44 = LUK 23:44-45
+LUK 23:50 = LUK 23:50-51
+JHN 4:1 = JHN 4:1-3
+ACT 1:21 = ACT 1:21-22
+ROM 3:25 = ROM 3:25-26
+1CO 5:3 = 1CO 5:3-4
+1CO 5:12 = 1CO 5:12-13
+2CO 12:3 = 2CO 12:3-4
+GAL 1:15 = GAL 1:15-16
+HEB 6:4 = HEB 6:4-6
+#
+# Acts 19 has 41 verses, as in the English Bibles: 19:41 (the town clerk dismisses the
+# assembly) is the end of org 19:40.
+#! &ACT 19:40-41 = ACT 19:40

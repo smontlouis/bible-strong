@@ -1,0 +1,19 @@
+# Versification "Bible Strong POV": an overlay on Paratext org.vrs, for the Parole vivante New
+# Testament (POV).
+#
+# POV numbers as org, but prints rows that stand for two verses, stored on the first number
+# (Luke 3:6 "…et toute l'humanité verra l'œuvre de salut de Dieu. Jean disait à ceux qui
+# venaient…" is verses 6-7; Matthew 8:33 holds 8:34, 9:37 holds 9:38, Luke 1:79 holds 1:80).
+#
+MAT 8:33 9:37
+MRK 9:51
+LUK 1:79
+#
+MAT 8:33 = MAT 8:33-34
+MAT 9:37 = MAT 9:37-38
+LUK 1:79 = LUK 1:79-80
+LUK 3:6 = LUK 3:6-7
+#
+# Mark 9 has 51 verses: POV 9:50-51 ("C'est une chose précieuse que le sel…", "Ayez du sel en
+# vous-mêmes…") is org 9:50.
+#! &MRK 9:50-51 = MRK 9:50

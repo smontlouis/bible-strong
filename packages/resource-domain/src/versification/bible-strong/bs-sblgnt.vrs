@@ -1,0 +1,7 @@
+# Versification "Bible Strong SBLGNT": an overlay on Paratext org.vrs, for the SBL Greek New
+# Testament.
+#
+# SBLGNT numbers as org. Its publication leaves out John 7:53-8:11 (8:1-11 keep their numbers)
+# and Romans 16:25-27 (the doxology): John 7 ends at 52 and Romans 16 at 24.
+JHN 7:52
+ROM 16:24

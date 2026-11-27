@@ -1,0 +1,7 @@
+# Versification "Bible Strong ESV": an overlay on bs-eng, for the English Standard Version.
+#
+# The ESV numbers as bs-eng except at the end of Revelation 12: ESV 12:17 ends with "And he stood
+# on the sand of the sea", which is org 12:18, so Revelation 12 has 17 verses and 13:1 is org 13:1
+# alone.
+REV 12:17
+REV 12:17 = REV 12:17-18

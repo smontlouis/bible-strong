@@ -1,0 +1,37 @@
+# Versification "Bible Strong CHU": an overlay on Paratext org.vrs, for the Chouraqui Bible.
+#
+# CHU numbers as org (Hebrew), Psalm titles included, except in the passages below, where the
+# published text is cut otherwise. Its publication lacks Joel 4 and 2 Chronicles 36, which keep
+# their org verses here.
+#
+DEU 34:11
+NEH 7:73
+JHN 7:52
+#
+# Deuteronomy 32:50-34:12 is one verse ahead: CHU 32:50 ("Meurs sur la montagne…, pour vous
+# être rebellés contre moi…") is org 32:50-51, CHU 32:52 ("Voici la bénédiction dont Moshè…")
+# is org 33:1, CHU 33:29 ("Moshè monte des steppes de Moab au mont Nebo…") is org 34:1, and CHU
+# 34:9 ("Il ne s'est pas encore levé d'inspiré en Israël comme Moshè…, pour tous les signes,
+# les prodiges,") is org 34:10 and the start of 34:11.
+DEU 32:50 = DEU 32:50-51
+DEU 32:51 = DEU 32:52
+DEU 32:52 = DEU 33:1
+DEU 33:1-28 = DEU 33:2-29
+DEU 33:29 = DEU 34:1
+DEU 34:1-8 = DEU 34:2-9
+DEU 34:9 = DEU 34:10-11
+DEU 34:10 = DEU 34:11
+DEU 34:11 = DEU 34:12
+#
+# Nehemiah 7:68-69 (horses and mules, camels and asses) is org 7:68, as in the English Bibles.
+#! &NEH 7:68-69 = NEH 7:68
+NEH 7:70-73 = NEH 7:69-72
+#
+# Psalm 119: the published CHU has no org 119:8 ("Je veux garder tes statuts…"); its 119:8 ("En
+# quoi, jeune, purifier sa voie ?") is org 119:9, and it prints no 119:9. CHU 119:72 ("…Tes mains
+# m'ont fait et m'affermissent…") holds 119:73, whose number it does not print.
+PSA 119:8 = PSA 119:9
+PSA 119:72 = PSA 119:72-73
+#
+# John 7 ends at 52, without "Examine, et tu verras…" nor 7:53 ("Et chacun s'en retourna dans sa
+# maison").

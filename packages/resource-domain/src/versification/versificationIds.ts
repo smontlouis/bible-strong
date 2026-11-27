@@ -11,6 +11,20 @@ export const VERSIFICATION_ID_LIST = [
   'bs-ost',
   'bs-fmar',
   'bs-lau',
+  'bs-esv',
+  'bs-niv',
+  'bs-gw',
+  'bs-csb',
+  'bs-net',
+  'bs-easy',
+  'bs-bfc',
+  'bs-nfc',
+  'bs-pdv',
+  'bs-tlv',
+  'bs-del',
+  'bs-chu',
+  'bs-sblgnt',
+  'bs-pov',
 ] as const
 
 export type VersificationId = (typeof VERSIFICATION_ID_LIST)[number]

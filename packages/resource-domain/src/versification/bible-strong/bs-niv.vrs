@@ -1,0 +1,8 @@
+# Versification "Bible Strong NIV": an overlay on bs-eng, for the NIV and the Amplified Bible.
+#
+# Both number as bs-eng except in Revelation 12-13, where they number as the KJV: Revelation 12
+# has 17 verses, and 13:1 opens with org 12:18 (NIV "The dragon stood on the shore of the sea.",
+# AMP "And the dragon (Satan) stood on the sandy shore of the sea.").
+REV 12:17
+REV 13:1 = REV 12:18
+REV 13:1 = REV 13:1

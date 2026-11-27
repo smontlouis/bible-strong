@@ -69,6 +69,47 @@ const DEFINITIONS: Record<VersificationId, VersificationDefinition> = {
     foldPsalmTitlesIntoVerse1: true,
     overlays: ['eng-fixes', 'bs-eng', 'bs-kjv', 'bs-lau'],
   },
+  // Modern English Bibles: bs-eng but a chapter or two, or rows that stand for several verses.
+  'bs-esv': {
+    table: 'eng',
+    foldPsalmTitlesIntoVerse1: true,
+    overlays: ['eng-fixes', 'bs-eng', 'bs-esv'],
+  },
+  'bs-niv': {
+    table: 'eng',
+    foldPsalmTitlesIntoVerse1: true,
+    overlays: ['eng-fixes', 'bs-eng', 'bs-niv'],
+  },
+  'bs-gw': {
+    table: 'eng',
+    foldPsalmTitlesIntoVerse1: true,
+    overlays: ['eng-fixes', 'bs-eng', 'bs-gw'],
+  },
+  'bs-csb': {
+    table: 'eng',
+    foldPsalmTitlesIntoVerse1: true,
+    overlays: ['eng-fixes', 'bs-eng', 'bs-csb'],
+  },
+  'bs-net': {
+    table: 'eng',
+    foldPsalmTitlesIntoVerse1: true,
+    overlays: ['eng-fixes', 'bs-eng', 'bs-net'],
+  },
+  'bs-easy': {
+    table: 'eng',
+    foldPsalmTitlesIntoVerse1: true,
+    overlays: ['eng-fixes', 'bs-eng', 'bs-easy'],
+  },
+  // The French common-language Bibles number as org, with rows that stand for several verses.
+  'bs-bfc': { table: 'org', overlays: ['bs-bfc'] },
+  'bs-nfc': { table: 'org', overlays: ['bs-nfc'] },
+  'bs-pdv': { table: 'org', overlays: ['bs-pdv'] },
+  // Bibles numbered as org but in a few chapters.
+  'bs-tlv': { table: 'org', overlays: ['bs-tlv'] },
+  'bs-del': { table: 'org', overlays: ['bs-del'] },
+  'bs-chu': { table: 'org', overlays: ['bs-chu'] },
+  'bs-sblgnt': { table: 'org', overlays: ['bs-sblgnt'] },
+  'bs-pov': { table: 'org', overlays: ['bs-pov'] },
 }
 
 export const VERSIFICATION_IDS = Object.keys(DEFINITIONS) as VersificationId[]
@@ -108,6 +149,22 @@ export const BIBLE_VERSIFICATIONS: Readonly<Record<string, VersificationId>> = {
   OST: 'bs-ost',
   FMAR: 'bs-fmar',
   LAU: 'bs-lau',
+  ESV: 'bs-esv',
+  NIV: 'bs-niv',
+  AMP: 'bs-niv',
+  GW: 'bs-gw',
+  CSB: 'bs-csb',
+  NET: 'bs-net',
+  EASY: 'bs-easy',
+  BFC: 'bs-bfc',
+  FRC97: 'bs-bfc',
+  NFC: 'bs-nfc',
+  PDV2017: 'bs-pdv',
+  TLV: 'bs-tlv',
+  DEL: 'bs-del',
+  CHU: 'bs-chu',
+  SBLGNT: 'bs-sblgnt',
+  POV: 'bs-pov',
 }
 
 /**

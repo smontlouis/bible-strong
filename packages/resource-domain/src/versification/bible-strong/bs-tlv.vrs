@@ -1,0 +1,34 @@
+# Versification "Bible Strong TLV": an overlay on Paratext org.vrs, for the Tree of Life Version.
+#
+# TLV numbers as org (Hebrew), Psalm titles included, except in the chapters below.
+#
+NUM 16:50 17:13 25:18 29:40 30:16
+DEU 5:30
+1SA 23:29 24:22
+JER 30:25 31:39
+JON 4:10
+#
+# Numbers 16-17, 25-26, 29-30 and 1 Samuel 23-24 as in the English Bibles (eng.vrs with the
+# corrections of eng-fixes.vrs).
+NUM 16:36-50 = NUM 17:1-15
+NUM 17:1-13 = NUM 17:16-28
+NUM 26:1 = NUM 25:19
+NUM 26:1 = NUM 26:1
+NUM 29:40 = NUM 30:1
+NUM 30:1-16 = NUM 30:2-17
+1SA 23:29 = 1SA 24:1
+1SA 24:1-22 = 1SA 24:2-23
+#
+# Deuteronomy 5:17 holds four commandments ("Do not murder. 'Do not commit adultery. 'Do not
+# steal. 'Do not bear false witness…"), org 5:17-20; TLV 5:18 ("Do not covet your neighbor's
+# wife…") is org 5:21.
+DEU 5:17 = DEU 5:17-20
+DEU 5:18-30 = DEU 5:21-33
+#
+# Jeremiah 30:25 ("'At that time,' declares Adonai, 'I will be God to all families of Israel…")
+# is org 31:1.
+JER 30:25 = JER 31:1
+JER 31:1-39 = JER 31:2-40
+#
+# Jonah 4:10 ends with org 4:11 ("So shouldn't I have pity on Nineveh…").
+JON 4:10 = JON 4:10-11
