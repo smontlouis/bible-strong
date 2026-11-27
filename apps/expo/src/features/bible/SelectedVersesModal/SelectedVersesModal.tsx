@@ -1,5 +1,6 @@
 import { SheetView } from '~common/sheet'
 import { useAtom } from 'jotai/react'
+import { useEffect } from 'react'
 import { Platform } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { HStack } from '~common/ui/Box'
@@ -16,6 +17,8 @@ import useVerseActions from './hooks/useVerseActions'
 import useVerseActiveStates from './hooks/useVerseActiveStates'
 import type { SelectedVersesModalProps } from './types'
 import { selectedVersesTabIndexAtom } from './selectedVersesTabIndex'
+import { requestFeatureOnboarding } from '~features/feature-onboarding/featureOnboardingRequests'
+import { ONBOARDING_IDS } from '~features/feature-onboarding/onboardingConfig'
 
 /**
  * The selected verses and what can be done with them: colors, then three groups of actions. The
@@ -74,6 +77,13 @@ const SelectedVersesModal = ({
   })
 
   const moreThanOneVerseSelected = Object.keys(selectedVerses).length > 1
+
+  // A first selection of verses explains the sheet, once it has risen. Not while verses are
+  // chosen for something else (a study, a link).
+  useEffect(() => {
+    if (!isSelectionMode) requestFeatureOnboarding(ONBOARDING_IDS.VERSE_SELECTION, { delayMs: 700 })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // The selection sheet holds it (see BibleSelectionSheet)
   return (

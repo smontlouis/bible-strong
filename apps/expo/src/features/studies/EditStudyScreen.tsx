@@ -26,6 +26,8 @@ import { createStudyEndpoint } from '~features/studyRelations/endpoints'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useRecordHistory } from '~features/history/useRecordHistory'
 import { createStudyContentAutosave } from './studyContentAutosave'
+import { requestFeatureOnboarding } from '~features/feature-onboarding/featureOnboardingRequests'
+import { ONBOARDING_IDS } from '~features/feature-onboarding/onboardingConfig'
 type EditStudyScreenProps = {
   studyAtom?: PrimitiveAtom<StudyTab>
   // Props passed directly (when called from StudiesTabScreen)
@@ -208,7 +210,10 @@ const EditStudyScreen = ({
         <FabButton
           accessibilityLabel={t('accessibility.editStudy')}
           icon="edit-2"
-          onPress={() => setIsReadOnly(false)}
+          onPress={() => {
+            setIsReadOnly(false)
+            requestFeatureOnboarding(ONBOARDING_IDS.STUDIES, { delayMs: 600 })
+          }}
         />
       )}
     </FormSheetScreen>

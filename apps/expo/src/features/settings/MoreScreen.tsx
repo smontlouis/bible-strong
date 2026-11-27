@@ -323,6 +323,14 @@ export const More = ({ closeMenu, inWorkspace = false }: MoreProps) => {
             iconTint="quint"
             label={t('Foire aux questions')}
           />
+          {Platform.OS !== 'web' && (
+            <ListRow
+              route="FeatureGuides"
+              icon={<FeatherIcon name="compass" size={18} color="quint" />}
+              iconTint="quint"
+              label={t('featureGuides.title')}
+            />
+          )}
           <ListRow
             onPress={() => contactDeveloperRef.current?.present()}
             icon={<FeatherIcon name="send" size={18} color="quint" />}

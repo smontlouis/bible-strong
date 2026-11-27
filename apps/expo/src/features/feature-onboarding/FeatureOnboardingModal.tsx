@@ -13,7 +13,10 @@ import {
 } from './atoms'
 import OnboardingFooter from './components/OnboardingFooter'
 import OnboardingStep from './components/OnboardingStep'
+import { settleLaterOnboardings } from './featureOnboardingRequests'
+import { useTabsOnboardingTrigger } from './hooks/useTabsOnboardingTrigger'
 import { getOnboardingConfig, type OnboardingId } from './onboardingConfig'
+
 const FeatureOnboardingModal = () => {
   const { t } = useTranslation()
 
@@ -42,6 +45,14 @@ const FeatureOnboardingModal = () => {
       setCurrentStep(step => step + 1)
     }
   }
+
+  // Whether this reader knows the places the later explanations show, decided on the first launch
+  // that has them, before the introduction of a new reader can finish.
+  useEffect(() => {
+    settleLaterOnboardings()
+  }, [])
+
+  useTabsOnboardingTrigger()
 
   // Auto-open when modalState changes
   // The effect synchronizes React state with the imperative native sheet API.

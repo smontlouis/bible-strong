@@ -9,6 +9,7 @@ import {
   countUserData,
   describeOfflineResources,
   describeSyncState,
+  planFeatureOnboardingsReset,
   planPassageTab,
 } from '../agentToolActions'
 
@@ -129,5 +130,21 @@ describe('agent tool actions', () => {
       },
       migration,
     })
+  })
+})
+
+describe('planFeatureOnboardingsReset', () => {
+  const completed = ['annotation-mode', 'tabs', 'studies']
+
+  it('keeps the explanations seen without a reset', () => {
+    expect(planFeatureOnboardingsReset(completed, undefined)).toEqual(completed)
+  })
+
+  it('takes out the explanations named', () => {
+    expect(planFeatureOnboardingsReset(completed, ['tabs'])).toEqual(['annotation-mode', 'studies'])
+  })
+
+  it('takes out every explanation', () => {
+    expect(planFeatureOnboardingsReset(completed, 'all')).toEqual([])
   })
 })

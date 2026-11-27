@@ -1,4 +1,5 @@
 import { useAtomValue } from 'jotai/react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, StyleSheet } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
@@ -18,7 +19,14 @@ import { popIn } from '~common/ui/motion'
 import { floatingShadow, radii } from '~common/ui/surfaces'
 import { getBiblePart, getBiblePartColors } from '~themes/bibleBookColors'
 import { useTheme } from '~themes/ThemeProvider'
-import { backgroundMusicStateAtom, bibleAudioPassageAtom, bibleAudioStateAtom } from '../atoms'
+import {
+  backgroundMusicStateAtom,
+  bibleAudioPassageAtom,
+  bibleAudioPlayerOpenAtom,
+  bibleAudioStateAtom,
+} from '../atoms'
+import { requestFeatureOnboarding } from '~features/feature-onboarding/featureOnboardingRequests'
+import { ONBOARDING_IDS } from '~features/feature-onboarding/onboardingConfig'
 import { openBibleAudioPlayer, stop, togglePlay } from '../bibleAudioPlayer'
 import BibleAudioCover from './BibleAudioCover'
 import MusicMiniPlayer from './MusicMiniPlayer'
@@ -53,6 +61,14 @@ const MiniPlayerContent = ({ variant, className }: BibleAudioMiniPlayerProps) =>
       'worklet'
       if (event.translationY < -24 || event.velocityY < -400) runOnJS(openBibleAudioPlayer)()
     })
+
+  // Once the large player is closed and the small one stands in the tab bar, the swipe that opens
+  // it again is explained.
+  const playerOpen = useAtomValue(bibleAudioPlayerOpenAtom)
+  const swipeable = variant === 'bar' && Boolean(passage) && !playerOpen
+  useEffect(() => {
+    if (swipeable) requestFeatureOnboarding(ONBOARDING_IDS.BIBLE_AUDIO, { delayMs: 800 })
+  }, [swipeable])
 
   // With no passage loaded, the row shows the background music if the reader plays some.
   if (!passage) {

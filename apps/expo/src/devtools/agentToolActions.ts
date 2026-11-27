@@ -1,7 +1,7 @@
 /**
  * What coding agents can ask the running app in development: open a passage, read the sync
- * state, count the user's study data, list the Offline copies. Each function returns plain
- * JSON and none of them writes user data. `AgentTools.tsx` exposes them on
+ * state, count the user's study data, list the Offline copies, read or replay the explanations
+ * of the app. Each function returns plain JSON and none of them writes user data. `AgentTools.tsx` exposes them on
  * `globalThis.__BIBLE_STRONG_AGENT__`, which agents call through the JS debugger.
  */
 import type { BcvLanguage } from '~helpers/bcvParser'
@@ -149,4 +149,22 @@ export const describeOfflineResources = (
     ),
     resources,
   }
+}
+
+export type FeatureOnboardingsArgs = {
+  /** Explanations to make unseen again, by id, or `all`. */
+  reset?: string[] | 'all'
+}
+
+/**
+ * The explanations seen once a reset is applied: the ids named, or every one, are taken out, so
+ * that each opens again the next time its place is used.
+ */
+export const planFeatureOnboardingsReset = (
+  completed: string[],
+  reset: FeatureOnboardingsArgs['reset']
+) => {
+  if (!reset) return completed
+  if (reset === 'all') return []
+  return completed.filter(id => !reset.includes(id))
 }

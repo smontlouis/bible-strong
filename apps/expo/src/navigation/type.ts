@@ -238,6 +238,7 @@ export type MainStackProps = {
   BibleDefaults: undefined
   Theme: undefined
   KeyboardShortcuts: undefined
+  FeatureGuides: undefined
   WordAnnotations: undefined
   EntityRelations: { endpoint: string }
 }

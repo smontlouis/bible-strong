@@ -3,6 +3,7 @@ const settingsPaths = new Set([
   '/more',
   '/theme',
   '/keyboard-shortcuts',
+  '/feature-guides',
   '/resource-language',
   '/bible-defaults',
   '/bible-share-options',

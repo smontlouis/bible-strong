@@ -8,8 +8,14 @@
  *
  * Every tool returns plain JSON; a tool that cannot do its job returns `{ error }`.
  */
+import { getDefaultStore } from 'jotai/vanilla'
 import { useEffect } from 'react'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
+import {
+  completedOnboardingsAtom,
+  featureOnboardingShownThisSessionAtom,
+  laterOnboardingsDecidedAtom,
+} from '~features/feature-onboarding/atoms'
 import { offlineResourceRegistry } from '~features/resources/resourceAvailability'
 import { firestoreSyncOutbox } from '~helpers/firestoreSyncOutbox'
 import { MOBILE_RESOURCE_CATALOG } from '~helpers/mobileResourceCatalog'
@@ -23,7 +29,9 @@ import {
   countUserData,
   describeOfflineResources,
   describeSyncState,
+  planFeatureOnboardingsReset,
   planPassageTab,
+  type FeatureOnboardingsArgs,
   type OpenPassageArgs,
 } from './agentToolActions'
 
@@ -50,6 +58,13 @@ const TOOLS = {
     description: 'Offline copies on the device: id, status, update available, installed size.',
     arguments: {},
   },
+  featureOnboardings: {
+    description:
+      'The explanations of the app (feature onboardings): which were seen, whether one was shown this session. With reset, makes some unseen again and frees the session.',
+    arguments: {
+      reset: 'Optional. Ids to make unseen (verse-selection, tabs…), or "all".',
+    },
+  },
 } as const
 
 const readSyncState = () => {
@@ -66,6 +81,22 @@ const readSyncState = () => {
   })
 }
 
+const featureOnboardings = ({ reset }: FeatureOnboardingsArgs = {}) => {
+  const jotai = getDefaultStore()
+  if (reset) {
+    jotai.set(
+      completedOnboardingsAtom,
+      planFeatureOnboardingsReset(jotai.get(completedOnboardingsAtom), reset)
+    )
+    jotai.set(featureOnboardingShownThisSessionAtom, false)
+  }
+  return {
+    seen: jotai.get(completedOnboardingsAtom),
+    laterDecided: jotai.get(laterOnboardingsDecidedAtom),
+    shownThisSession: jotai.get(featureOnboardingShownThisSessionAtom),
+  }
+}
+
 const createAgentApi = (openInNewTab: ReturnType<typeof useOpenInNewTab>) => ({
   help: () => TOOLS,
   openPassage: (args: OpenPassageArgs) => {
@@ -78,6 +109,7 @@ const createAgentApi = (openInNewTab: ReturnType<typeof useOpenInNewTab>) => ({
   userDataCounts: () => countUserData(store.getState()),
   offlineResources: () =>
     describeOfflineResources(offlineResourceRegistry.getSnapshot(), MOBILE_RESOURCE_CATALOG),
+  featureOnboardings,
 })
 
 declare global {

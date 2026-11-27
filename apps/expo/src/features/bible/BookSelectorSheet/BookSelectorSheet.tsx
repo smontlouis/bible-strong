@@ -35,6 +35,8 @@ import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { staticResourceQueryOptions } from '~helpers/queryOptions'
 
 import { bookSelectorDataAtom } from './state'
+import { requestFeatureOnboarding } from '~features/feature-onboarding/featureOnboardingRequests'
+import { ONBOARDING_IDS } from '~features/feature-onboarding/onboardingConfig'
 interface BookSelectorSheetProps {
   selectedBookNum?: number
   sheetRef: React.RefObject<SheetRef | null>
@@ -316,6 +318,7 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
         snapPoints={[1]}
         onPresent={() => {
           isPresentedRef.current = true
+          requestFeatureOnboarding(ONBOARDING_IDS.BOOK_SELECTOR, { delayMs: 400 })
         }}
         onDismiss={() => {
           isPresentedRef.current = false

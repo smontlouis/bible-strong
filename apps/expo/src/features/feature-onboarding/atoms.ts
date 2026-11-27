@@ -6,6 +6,16 @@ import type { FeatureOnboardingModalState } from './types'
 // Persisted atom tracking completed onboarding IDs
 export const completedOnboardingsAtom = atomWithAsyncStorage<string[]>('completedOnboardings', [])
 
+// Whether a reader who arrived with these explanations already had the app's introduction behind
+// them: decided once, on the first launch that has them (see decideLaterOnboardings).
+export const laterOnboardingsDecidedAtom = atomWithAsyncStorage<boolean>(
+  'laterOnboardingsDecided',
+  false
+)
+
+// One explanation per session at most: the next one waits for the next time its place is used.
+export const featureOnboardingShownThisSessionAtom = atom(false)
+
 // Onboarding navigation state atoms
 export const onboardingCurrentStepAtom = atom(0)
 
