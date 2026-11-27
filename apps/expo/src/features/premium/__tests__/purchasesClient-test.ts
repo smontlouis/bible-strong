@@ -4,6 +4,7 @@ import type { PremiumOfferPlan } from '../premiumOffer'
 import {
   buyPremium,
   isPurchasesAvailable,
+  loadPremiumOffer,
   releasePurchasesIdentity,
   resetPurchasesClientForTests,
   restorePremium,
@@ -13,10 +14,14 @@ import {
 
 let mockApiKey: string | undefined = 'test_key'
 const mockNativeModules: { RNPurchases?: object } = { RNPurchases: {} }
+const mockPlatform = { OS: 'ios' }
 
 jest.mock('react-native', () => ({
   get NativeModules() {
     return mockNativeModules
+  },
+  get Platform() {
+    return mockPlatform
   },
 }))
 
@@ -37,6 +42,12 @@ jest.mock('react-native-purchases', () => ({
     purchasePackage: jest.fn(),
     restorePurchases: jest.fn(),
     getOfferings: jest.fn(),
+    checkTrialOrIntroductoryPriceEligibility: jest.fn(),
+  },
+  INTRO_ELIGIBILITY_STATUS: {
+    INTRO_ELIGIBILITY_STATUS_UNKNOWN: 0,
+    INTRO_ELIGIBILITY_STATUS_INELIGIBLE: 1,
+    INTRO_ELIGIBILITY_STATUS_ELIGIBLE: 2,
   },
   LOG_LEVEL: { WARN: 'WARN' },
   PURCHASES_ERROR_CODE: { PURCHASE_CANCELLED_ERROR: '1' },
@@ -57,6 +68,65 @@ beforeEach(() => {
   resetPurchasesClientForTests()
   mockApiKey = 'test_key'
   mockNativeModules.RNPurchases = {}
+  mockPlatform.OS = 'ios'
+})
+
+describe('the free trial of the offer', () => {
+  const yearly = {
+    identifier: '$rc_annual',
+    product: {
+      identifier: 'premium.yearly',
+      price: 59.99,
+      priceString: '59,99 €',
+      pricePerMonthString: '5,00 €',
+      currencyCode: 'EUR',
+      introPrice: { price: 0, periodUnit: 'WEEK', periodNumberOfUnits: 1 },
+      defaultOption: null,
+    },
+  }
+  const monthly = {
+    identifier: '$rc_monthly',
+    product: {
+      identifier: 'premium.monthly',
+      price: 8.99,
+      priceString: '8,99 €',
+      pricePerMonthString: '8,99 €',
+      currencyCode: 'EUR',
+      introPrice: null,
+      defaultOption: null,
+    },
+  }
+  const offerings = { current: { annual: yearly, monthly } }
+
+  it('asks the App Store only about the products that have a trial', async () => {
+    sdk.getOfferings.mockResolvedValue(offerings as never)
+    sdk.checkTrialOrIntroductoryPriceEligibility.mockResolvedValue({
+      'premium.yearly': { status: 2, description: '' },
+    } as never)
+    const offer = await loadPremiumOffer()
+    expect(sdk.checkTrialOrIntroductoryPriceEligibility).toHaveBeenCalledWith(['premium.yearly'])
+    expect(offer.annual?.trial).toEqual({ unit: 'day', count: 7 })
+    expect(offer.monthly?.trial).toBeUndefined()
+  })
+
+  it('promises no trial when the App Store refuses it or cannot say', async () => {
+    sdk.getOfferings.mockResolvedValue(offerings as never)
+    for (const status of [0, 1]) {
+      sdk.checkTrialOrIntroductoryPriceEligibility.mockResolvedValue({
+        'premium.yearly': { status, description: '' },
+      } as never)
+      expect((await loadPremiumOffer()).annual?.trial).toBeUndefined()
+    }
+    sdk.checkTrialOrIntroductoryPriceEligibility.mockRejectedValue(new Error('offline'))
+    expect((await loadPremiumOffer()).annual?.trial).toBeUndefined()
+  })
+
+  it('trusts Google Play, which only sells the offers an account may take', async () => {
+    mockPlatform.OS = 'android'
+    sdk.getOfferings.mockResolvedValue(offerings as never)
+    expect((await loadPremiumOffer()).annual?.trial).toEqual({ unit: 'day', count: 7 })
+    expect(sdk.checkTrialOrIntroductoryPriceEligibility).not.toHaveBeenCalled()
+  })
 })
 
 describe('syncPurchasesIdentity', () => {

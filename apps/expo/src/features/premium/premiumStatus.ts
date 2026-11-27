@@ -23,6 +23,8 @@ export type PremiumStatus =
       /** ISO date of the end of the current period, or null for a grant with no end. */
       expiresAt: string | null
       willRenew: boolean
+      /** In the store's free trial: `expiresAt` is then its end, the day of the first payment. */
+      inTrial: boolean
       /** Where the reader manages the subscription, when the store gives one. */
       managementURL: string | null
     }
@@ -32,7 +34,14 @@ export type PremiumCustomerInfo = {
   entitlements: {
     active: Record<
       string,
-      { expirationDate: string | null; willRenew: boolean; store: string } | undefined
+      | {
+          expirationDate: string | null
+          willRenew: boolean
+          store: string
+          /** NORMAL, INTRO, TRIAL or PREPAID; lower case on the Web. */
+          periodType?: string | null
+        }
+      | undefined
     >
   }
   managementURL: string | null
@@ -56,6 +65,7 @@ export const toPremiumStatus = (info: PremiumCustomerInfo): PremiumStatus => {
     store,
     expiresAt: entitlement.expirationDate,
     willRenew: entitlement.willRenew,
+    inTrial: entitlement.periodType?.toUpperCase() === 'TRIAL',
     managementURL: info.managementURL,
   }
 }
@@ -65,7 +75,13 @@ export type WebCustomerInfo = {
   entitlements: {
     active: Record<
       string,
-      { expirationDate: Date | null; willRenew: boolean; store: string } | undefined
+      | {
+          expirationDate: Date | null
+          willRenew: boolean
+          store: string
+          periodType?: string | null
+        }
+      | undefined
     >
   }
   managementURL: string | null
@@ -81,6 +97,7 @@ export const toWebPremiumStatus = (info: WebCustomerInfo): PremiumStatus =>
             expirationDate: entitlement.expirationDate?.toISOString() ?? null,
             willRenew: entitlement.willRenew,
             store: entitlement.store.toUpperCase(),
+            periodType: entitlement.periodType,
           },
         ])
       ),

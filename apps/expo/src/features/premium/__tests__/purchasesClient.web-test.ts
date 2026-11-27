@@ -74,6 +74,7 @@ describe('the account on the Web', () => {
       store: 'STRIPE',
       expiresAt: '2027-11-10T12:00:00.000Z',
       willRenew: true,
+      inTrial: false,
       managementURL: 'https://billing.stripe.com/p/login/test',
     })
     expect(mockConfigure).toHaveBeenCalledWith({ apiKey: 'strp_sb_test', appUserId: 'reader' })

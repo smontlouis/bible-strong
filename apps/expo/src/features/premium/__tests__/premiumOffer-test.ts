@@ -1,6 +1,12 @@
 import type { PurchasesPackage } from 'react-native-purchases'
 
-import { annualSavingsPercent, toPremiumOffer, toWebPremiumOffer } from '../premiumOffer'
+import {
+  annualSavingsPercent,
+  toPremiumOffer,
+  toPremiumTrial,
+  toWebPremiumOffer,
+  trialEndDate,
+} from '../premiumOffer'
 
 const pkg = (price: number, currencyCode = 'EUR', pricePerMonthString: string | null = null) =>
   ({
@@ -39,6 +45,93 @@ describe('toPremiumOffer', () => {
       monthly: undefined,
       savingsPercent: null,
     })
+  })
+})
+
+const trialPkg = (
+  id: string,
+  trial: { introPrice?: object | null; defaultOption?: object | null }
+) =>
+  ({
+    identifier: id,
+    product: {
+      identifier: id,
+      price: 59.99,
+      priceString: '59,99 €',
+      pricePerMonthString: '5,00 €',
+      currencyCode: 'EUR',
+      introPrice: null,
+      defaultOption: null,
+      ...trial,
+    },
+  }) as unknown as PurchasesPackage
+
+describe('toPremiumTrial', () => {
+  it('reads a week as seven days and a year as twelve months', () => {
+    expect(toPremiumTrial('WEEK', 1)).toEqual({ unit: 'day', count: 7 })
+    expect(toPremiumTrial('day', 3)).toEqual({ unit: 'day', count: 3 })
+    expect(toPremiumTrial('MONTH', 1)).toEqual({ unit: 'month', count: 1 })
+    expect(toPremiumTrial('YEAR', 1)).toEqual({ unit: 'month', count: 12 })
+  })
+
+  it('gives no trial without a length', () => {
+    expect(toPremiumTrial('WEEK', 0)).toBeUndefined()
+    expect(toPremiumTrial(null, 1)).toBeUndefined()
+  })
+})
+
+describe('trialEndDate', () => {
+  it('ends the trial its length after today, the day of the first payment', () => {
+    const from = new Date(2026, 10, 27, 10)
+    expect(trialEndDate({ unit: 'day', count: 7 }, from)).toEqual(new Date(2026, 11, 4, 10))
+    expect(trialEndDate({ unit: 'month', count: 1 }, from)).toEqual(new Date(2026, 11, 27, 10))
+  })
+})
+
+describe('the trial of a store product', () => {
+  const appStoreTrial = trialPkg('premium.yearly', {
+    introPrice: {
+      price: 0,
+      priceString: '0,00 €',
+      cycles: 1,
+      period: 'P1W',
+      periodUnit: 'WEEK',
+      periodNumberOfUnits: 1,
+    },
+  })
+
+  it('reads the App Store’s free introductory offer when the account may take it', () => {
+    const offer = toPremiumOffer({ annual: appStoreTrial, monthly: null }, () => true)
+    expect(offer.annual?.trial).toEqual({ unit: 'day', count: 7 })
+  })
+
+  it('shows no trial to an account the store would refuse it to', () => {
+    const offer = toPremiumOffer({ annual: appStoreTrial, monthly: null }, () => false)
+    expect(offer.annual?.trial).toBeUndefined()
+    expect(offer.annual).toMatchObject({ price: 59.99 })
+  })
+
+  it('takes a paid introductory price for no trial', () => {
+    const paidIntro = trialPkg('premium.yearly', {
+      introPrice: { price: 1.99, periodUnit: 'MONTH', periodNumberOfUnits: 1 },
+    })
+    expect(toPremiumOffer({ annual: paidIntro, monthly: null }).annual?.trial).toBeUndefined()
+  })
+
+  it('reads the free phase of the option Google Play would sell', () => {
+    const playTrial = trialPkg('premium:yearly', {
+      defaultOption: { freePhase: { billingPeriod: { unit: 'WEEK', value: 1, iso8601: 'P1W' } } },
+    })
+    expect(toPremiumOffer({ annual: playTrial, monthly: null }).annual?.trial).toEqual({
+      unit: 'day',
+      count: 7,
+    })
+  })
+
+  it('has no trial without an offer', () => {
+    expect(toPremiumOffer({ annual: trialPkg('y', {}), monthly: null }).annual).not.toHaveProperty(
+      'trial'
+    )
   })
 })
 

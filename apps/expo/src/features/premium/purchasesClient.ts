@@ -1,5 +1,6 @@
-import { NativeModules } from 'react-native'
+import { NativeModules, Platform } from 'react-native'
 import Purchases, {
+  INTRO_ELIGIBILITY_STATUS,
   LOG_LEVEL,
   PURCHASES_ERROR_CODE,
   type CustomerInfo,
@@ -8,6 +9,7 @@ import Purchases, {
 
 import { revenueCatApiKey } from './premiumConfig'
 import {
+  storeProductTrial,
   toPremiumOffer,
   type PremiumBuyer,
   type PremiumOffer,
@@ -79,9 +81,35 @@ export const releasePurchasesIdentity = async (): Promise<void> => {
   await syncPurchasesIdentity(null)
 }
 
+/**
+ * The App Store shows a product's introductory offer to everyone, also to an account that has
+ * already had a subscription of the group (a former subscriber, an earlier trial). RevenueCat
+ * asks StoreKit which products this account may still take a trial on; an answer it cannot give
+ * (UNKNOWN) shows no trial, so that the page never promises one the store will not grant. Google
+ * Play already leaves out the offers an account may not take.
+ */
+const trialEligibility = async (
+  current: { annual: PurchasesPackage | null; monthly: PurchasesPackage | null } | null
+): Promise<(productId: string) => boolean> => {
+  if (Platform.OS !== 'ios') return () => true
+  const withTrial = [current?.annual, current?.monthly]
+    .filter((pkg): pkg is PurchasesPackage => !!pkg && !!storeProductTrial(pkg.product))
+    .map(pkg => pkg.product.identifier)
+  if (withTrial.length === 0) return () => false
+  try {
+    const eligibility = await Purchases.checkTrialOrIntroductoryPriceEligibility(withTrial)
+    return productId =>
+      eligibility[productId]?.status === INTRO_ELIGIBILITY_STATUS.INTRO_ELIGIBILITY_STATUS_ELIGIBLE
+  } catch (error) {
+    console.warn('[Premium] Trial eligibility not read', error)
+    return () => false
+  }
+}
+
 export const loadPremiumOffer = async (): Promise<PremiumOffer> => {
   const offerings = await Purchases.getOfferings()
-  return toPremiumOffer(offerings.current)
+  const current = offerings.current
+  return toPremiumOffer(current, await trialEligibility(current))
 }
 
 const isCancellation = (error: unknown): boolean => {

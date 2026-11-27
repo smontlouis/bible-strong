@@ -30,7 +30,12 @@ import PlanCard from './PlanCard'
 import PremiumHero from './PremiumHero'
 import PremiumWelcome from './PremiumWelcome'
 import { premiumPrivacyUrl, premiumTermsUrl } from './premiumConfig'
-import type { PremiumOffer, PremiumOfferPlan } from './premiumOffer'
+import {
+  trialEndDate,
+  type PremiumOffer,
+  type PremiumOfferPlan,
+  type PremiumTrial,
+} from './premiumOffer'
 import { premiumStatusAtom, type PremiumStore } from './premiumStatus'
 import { usePremiumVisible } from './premiumVisibility'
 import {
@@ -83,6 +88,8 @@ const PremiumScreen = () => {
   const [choice, setChoice] = useState<PlanChoice>('annual')
   const [busy, setBusy] = useState<'buy' | 'restore' | null>(null)
   const [welcome, setWelcome] = useState(false)
+  // The trial the purchase started, for the welcome to say so.
+  const [welcomeTrial, setWelcomeTrial] = useState<PremiumTrial | undefined>()
   // A purchase that ends elsewhere (the browser of the desktop app, a store that has to settle
   // the payment): the welcome waits for Premium to arrive.
   const [awaitingPremium, setAwaitingPremium] = useState(false)
@@ -136,6 +143,7 @@ const PremiumScreen = () => {
     setBusy('buy')
     try {
       const result = await buyPremium(selectedPlan, { email: user.email, language: lang })
+      setWelcomeTrial(selectedPlan.trial)
       if (result === 'purchased') setWelcome(true)
       if (result === 'pending') {
         setAwaitingPremium(true)
@@ -175,16 +183,44 @@ const PremiumScreen = () => {
     }
   }
 
-  const formatDate = (iso: string) =>
-    format(new Date(iso), 'd MMMM yyyy', { locale: getDateLocale(lang) })
+  const formatDate = (date: string | Date) =>
+    format(new Date(date), 'd MMMM yyyy', { locale: getDateLocale(lang) })
+
+  /** « 7 jours », « 1 mois »: how long a trial lasts, inside a sentence. */
+  const trialLength = (trial: PremiumTrial) =>
+    t(trial.unit === 'day' ? 'premiumPlan.trialDays' : 'premiumPlan.trialMonths', {
+      count: trial.count,
+    })
 
   const storeName = channel === 'play_store' ? 'Google Play' : 'App Store'
+  // A plan with a free trial says what happens when it ends, as App Review requires (3.1.2): its
+  // length, the price then charged, the day of that first payment and how to cancel before it.
+  const selectedTrial = throughStripe ? undefined : selectedPlan?.trial
+  const selectedPeriod =
+    selectedPlan && selectedPlan === offer?.monthly
+      ? t('premiumPlan.perMonthUnit')
+      : t('premiumPlan.perYear')
   const renewalTerms = throughStripe
     ? t('premiumPlan.renewalTermsWeb')
-    : t('premiumPlan.renewalTerms', { store: storeName })
+    : selectedTrial && selectedPlan
+      ? t('premiumPlan.trialTerms', {
+          length: trialLength(selectedTrial),
+          date: formatDate(trialEndDate(selectedTrial)),
+          price: selectedPlan.priceString,
+          period: selectedPeriod,
+          store: storeName,
+        })
+      : t('premiumPlan.renewalTerms', { store: storeName })
   const renewalShort = throughStripe
     ? t('premiumPlan.renewalShortWeb')
-    : t('premiumPlan.renewalShort', { store: storeName })
+    : selectedTrial && selectedPlan
+      ? t('premiumPlan.trialShort', {
+          length: trialLength(selectedTrial),
+          price: selectedPlan.priceString,
+          period: selectedPeriod,
+          store: storeName,
+        })
+      : t('premiumPlan.renewalShort', { store: storeName })
   const termsUrl = premiumTermsUrl(lang)
   const privacyUrl = premiumPrivacyUrl(lang)
   // The stores keep the purchases of their account: App Review asks for a way to restore them.
@@ -217,6 +253,27 @@ const PremiumScreen = () => {
     </ListSection>
   )
 
+  /** « 7 jours gratuits »: the badge of a plan that starts with a trial. */
+  const trialBadge = (trial: PremiumTrial) =>
+    t(trial.unit === 'day' ? 'premiumPlan.trialBadgeDays' : 'premiumPlan.trialBadgeMonths', {
+      count: trial.count,
+    })
+
+  // The annual card's line under its price: the month it comes to, and the saving when the
+  // trial takes the badge.
+  const annualDetail = (current: PremiumOffer) => {
+    const annual = current.annual
+    if (!annual) return undefined
+    const perMonth = annual.pricePerMonthString
+      ? t('premiumPlan.perMonth', { price: annual.pricePerMonthString })
+      : undefined
+    const savings =
+      annual.trial && !throughStripe && current.savingsPercent
+        ? t('premiumPlan.savings', { percent: current.savingsPercent })
+        : undefined
+    return [perMonth, savings].filter(Boolean).join(' · ') || undefined
+  }
+
   const note = (key: string) => (
     <Box className="px-[24px] mb-[22px]">
       <Text className="text-[15px] leading-[21px] text-grey text-center">{t(key)}</Text>
@@ -225,17 +282,22 @@ const PremiumScreen = () => {
 
   const renderPurchase = () => {
     if (active) {
+      const untilKey = status.inTrial
+        ? status.willRenew
+          ? 'premiumPlan.trialFirstPayment'
+          : 'premiumPlan.trialEndsOn'
+        : status.willRenew
+          ? 'premiumPlan.renewsOn'
+          : 'premiumPlan.endsOn'
       const until = status.expiresAt
-        ? t(status.willRenew ? 'premiumPlan.renewsOn' : 'premiumPlan.endsOn', {
-            date: formatDate(status.expiresAt),
-          })
+        ? t(untilKey, { date: formatDate(status.expiresAt) })
         : undefined
       return (
         <ListSection title={t('premiumPlan.yours')}>
           <ListRow
             icon={<FeatherIcon name="check" size={18} color="success" />}
             iconTint="success"
-            label={t('premiumPlan.active')}
+            label={t(status.inTrial ? 'premiumPlan.trialActive' : 'premiumPlan.active')}
             description={until}
             hasChevron={false}
           />
@@ -284,15 +346,13 @@ const PremiumScreen = () => {
             name={t('premiumPlan.annualName')}
             price={offer.annual.priceString}
             period={t('premiumPlan.perYear')}
-            detail={
-              offer.annual.pricePerMonthString
-                ? t('premiumPlan.perMonth', { price: offer.annual.pricePerMonthString })
-                : undefined
-            }
+            detail={annualDetail(offer)}
             badge={
-              offer.savingsPercent
-                ? t('premiumPlan.savings', { percent: offer.savingsPercent })
-                : undefined
+              offer.annual.trial && !throughStripe
+                ? trialBadge(offer.annual.trial)
+                : offer.savingsPercent
+                  ? t('premiumPlan.savings', { percent: offer.savingsPercent })
+                  : undefined
             }
             selected={selectedPlan === offer.annual}
             onPress={() => choose('annual')}
@@ -303,6 +363,9 @@ const PremiumScreen = () => {
             name={t('premiumPlan.monthlyName')}
             price={offer.monthly.priceString}
             period={t('premiumPlan.perMonthUnit')}
+            badge={
+              offer.monthly.trial && !throughStripe ? trialBadge(offer.monthly.trial) : undefined
+            }
             selected={selectedPlan === offer.monthly}
             onPress={() => choose('monthly')}
           />
@@ -370,7 +433,7 @@ const PremiumScreen = () => {
             isLoading={busy === 'buy'}
             disabled={!selectedPlan || busy !== null}
           >
-            {t('premiumPlan.subscribe')}
+            {t(selectedTrial ? 'premiumPlan.startTrial' : 'premiumPlan.subscribe')}
           </Button>
           <Text className="text-[12px] leading-[16px] text-grey text-center mt-[8px]">
             {renewalShort}
@@ -399,6 +462,16 @@ const PremiumScreen = () => {
 
       <PremiumWelcome
         visible={welcome}
+        trial={
+          welcomeTrial
+            ? {
+                length: trialLength(welcomeTrial),
+                date: formatDate(
+                  (status.kind === 'active' ? status.expiresAt : null) ?? trialEndDate(welcomeTrial)
+                ),
+              }
+            : undefined
+        }
         onAsk={
           canAsk
             ? () => {

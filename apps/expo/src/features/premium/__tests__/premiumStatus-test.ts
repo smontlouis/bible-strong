@@ -25,8 +25,20 @@ describe('toPremiumStatus', () => {
       store: 'APP_STORE',
       expiresAt: '2026-12-10T10:00:00Z',
       willRenew: false,
+      inTrial: false,
       managementURL: 'https://apps.apple.com/account/subscriptions',
     })
+  })
+
+  it('knows a free trial, whatever the case of its period type', () => {
+    const status = (periodType: string) =>
+      toPremiumStatus({
+        entitlements: { active: { premium: { ...entitlement(), periodType } } },
+        managementURL: null,
+      })
+    expect(status('TRIAL')).toMatchObject({ kind: 'active', inTrial: true })
+    expect(status('trial')).toMatchObject({ kind: 'active', inTrial: true })
+    expect(status('NORMAL')).toMatchObject({ kind: 'active', inTrial: false })
   })
 
   it('names a store it does not know OTHER', () => {
@@ -66,6 +78,7 @@ describe('toWebPremiumStatus', () => {
       store: 'STRIPE',
       expiresAt: '2027-11-10T12:00:00.000Z',
       willRenew: false,
+      inTrial: false,
       managementURL: 'https://billing.stripe.com/p/login/live',
     })
   })

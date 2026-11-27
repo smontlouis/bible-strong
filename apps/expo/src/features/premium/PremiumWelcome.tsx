@@ -15,7 +15,18 @@ import { useTheme } from '~themes/ThemeProvider'
 
 import Confetti from './Confetti'
 
-function Welcome({ onAsk, onClose }: { onAsk?: () => void; onClose: () => void }) {
+/** The free trial a purchase started: how long it lasts and the day of the first payment. */
+export type WelcomeTrial = { length: string; date: string }
+
+function Welcome({
+  trial,
+  onAsk,
+  onClose,
+}: {
+  trial?: WelcomeTrial
+  onAsk?: () => void
+  onClose: () => void
+}) {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
@@ -67,10 +78,10 @@ function Welcome({ onAsk, onClose }: { onAsk?: () => void; onClose: () => void }
               className="text-[30px] text-center mt-[8px]"
               style={titleFontStyle(theme)}
             >
-              {t('premiumPlan.welcome.title')}
+              {t(trial ? 'premiumPlan.welcome.trialTitle' : 'premiumPlan.welcome.title')}
             </Text>
             <Text className="text-[17px] leading-[24px] text-center mt-[12px]">
-              {t('premiumPlan.welcome.body')}
+              {trial ? t('premiumPlan.welcome.trialBody', trial) : t('premiumPlan.welcome.body')}
             </Text>
           </Animated.View>
         </Box>
@@ -99,19 +110,21 @@ function Welcome({ onAsk, onClose }: { onAsk?: () => void; onClose: () => void }
 }
 
 /**
- * The moment Premium starts: Strobi wakes up and celebrates under one shower of confetti, with
+ * The moment Premium starts, or its free trial: Strobi wakes up and celebrates under one shower of confetti, with
  * the success haptic. It leads to the assistant when this account can open it. It is a layer of
  * the Premium page, not a native modal: it appears while the store's sheet is still closing,
  * when iOS would refuse to present a modal over it.
  */
 const PremiumWelcome = ({
   visible,
+  trial,
   onAsk,
   onClose,
 }: {
   visible: boolean
+  trial?: WelcomeTrial
   onAsk?: () => void
   onClose: () => void
-}) => (visible ? <Welcome onAsk={onAsk} onClose={onClose} /> : null)
+}) => (visible ? <Welcome trial={trial} onAsk={onAsk} onClose={onClose} /> : null)
 
 export default PremiumWelcome

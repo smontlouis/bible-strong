@@ -1,5 +1,11 @@
 import type { PurchasesPackage } from 'react-native-purchases'
 
+/**
+ * A free trial the store gives before the first payment, as long as the store says (a week,
+ * seven days, a month): the app never assumes its length.
+ */
+export type PremiumTrial = { unit: 'day' | 'month'; count: number }
+
 /** One of the two ways to hold Premium, as the store prices it for this reader. */
 export type PremiumOfferPlan = {
   /**
@@ -12,6 +18,11 @@ export type PremiumOfferPlan = {
   /** The price brought to a month, for the annual plan. */
   pricePerMonthString: string | null
   currencyCode: string
+  /**
+   * The free trial this reader would start by buying the plan: only when the store offers one and
+   * this account may still take it. Undefined everywhere else, the Web included.
+   */
+  trial?: PremiumTrial
 }
 
 /** The current offering (`default` in RevenueCat): its annual and monthly packages. */
@@ -28,27 +39,84 @@ export const annualSavingsPercent = (annualPrice: number, monthlyPrice: number):
   return percent > 0 ? percent : null
 }
 
+/**
+ * A trial length as the stores write it: a unit and a number of them. Weeks become days, so that
+ * a week reads « 7 jours »; years become months.
+ */
+export const toPremiumTrial = (
+  unit: string | null | undefined,
+  count: number | null | undefined
+): PremiumTrial | undefined => {
+  if (!count || count <= 0) return undefined
+  switch (unit?.toUpperCase()) {
+    case 'DAY':
+      return { unit: 'day', count }
+    case 'WEEK':
+      return { unit: 'day', count: count * 7 }
+    case 'MONTH':
+      return { unit: 'month', count }
+    case 'YEAR':
+      return { unit: 'month', count: count * 12 }
+    default:
+      return undefined
+  }
+}
+
+/** When a trial started today ends, which is also the day of the first payment. */
+export const trialEndDate = (trial: PremiumTrial, from: Date = new Date()): Date => {
+  const end = new Date(from)
+  if (trial.unit === 'day') end.setDate(end.getDate() + trial.count)
+  else end.setMonth(end.getMonth() + trial.count)
+  return end
+}
+
+/**
+ * The free trial of a store product, before eligibility. Google Play gives the phases of the
+ * option it would sell, and only offers an account may take, so a free phase there is the
+ * trial this account starts. The App Store gives the introductory offer of the product whoever
+ * reads it: eligibility is checked apart (`loadPremiumOffer`).
+ */
+export const storeProductTrial = (
+  product: PurchasesPackage['product']
+): PremiumTrial | undefined => {
+  const freePhase = product.defaultOption?.freePhase
+  if (freePhase?.billingPeriod) {
+    return toPremiumTrial(freePhase.billingPeriod.unit, freePhase.billingPeriod.value)
+  }
+  const intro = product.introPrice
+  if (intro && intro.price === 0) return toPremiumTrial(intro.periodUnit, intro.periodNumberOfUnits)
+  return undefined
+}
+
 export const toPremiumOfferPlan = (
-  pkg: PurchasesPackage | null | undefined
-): PremiumOfferPlan | undefined =>
-  pkg
-    ? {
-        package: pkg,
-        price: pkg.product.price,
-        priceString: pkg.product.priceString,
-        pricePerMonthString: pkg.product.pricePerMonthString,
-        currencyCode: pkg.product.currencyCode,
-      }
-    : undefined
+  pkg: PurchasesPackage | null | undefined,
+  /** Whether this account may still take the trial; the App Store answers it apart. */
+  trialEligible = true
+): PremiumOfferPlan | undefined => {
+  if (!pkg) return undefined
+  const trial = trialEligible ? storeProductTrial(pkg.product) : undefined
+  return {
+    package: pkg,
+    price: pkg.product.price,
+    priceString: pkg.product.priceString,
+    pricePerMonthString: pkg.product.pricePerMonthString,
+    currencyCode: pkg.product.currencyCode,
+    ...(trial ? { trial } : {}),
+  }
+}
 
 export const toPremiumOffer = (
   current: {
     annual: PurchasesPackage | null
     monthly: PurchasesPackage | null
-  } | null
+  } | null,
+  /** The products whose trial this account may take; every product when not given. */
+  trialEligible: (productId: string) => boolean = () => true
 ): PremiumOffer => {
-  const annual = toPremiumOfferPlan(current?.annual)
-  const monthly = toPremiumOfferPlan(current?.monthly)
+  const plan = (pkg: PurchasesPackage | null | undefined) =>
+    toPremiumOfferPlan(pkg, pkg ? trialEligible(pkg.product.identifier) : false)
+  const annual = plan(current?.annual)
+  const monthly = plan(current?.monthly)
   const savingsPercent =
     annual && monthly && annual.currencyCode === monthly.currencyCode
       ? annualSavingsPercent(annual.price, monthly.price)
