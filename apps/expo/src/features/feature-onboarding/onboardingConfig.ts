@@ -37,6 +37,18 @@ export const ALL_ONBOARDING_IDS: OnboardingId[] = [
 /** The name of an explanation in the settings. */
 export const getOnboardingTitle = (id: OnboardingId, t: TFunction) => t(`onboarding.${id}.name`)
 
+/**
+ * The Web and the desktop app are used with a mouse: their explanations keep the text, without the
+ * drawn touches, and without the step that only teaches a touch.
+ */
+export const withoutTouchDemos = (config: OnboardingConfig | null): OnboardingConfig | null =>
+  config && {
+    ...config,
+    steps: config.steps
+      .filter(step => step.demo !== 'annotation-double-tap')
+      .map(({ demo: _demo, ...step }) => step),
+  }
+
 export const getOnboardingConfig = (id: OnboardingId, t: TFunction): OnboardingConfig | null => {
   switch (id) {
     case ONBOARDING_IDS.ANNOTATION_MODE:

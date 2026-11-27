@@ -114,18 +114,30 @@ export function ChapterLongPressDemo({ label }: { label: string }) {
   )
 }
 
-/** The button at the top right of the book selector turns the list into a grid. */
+/**
+ * The button at the top right of the book selector opens its settings: order, verse, display. The
+ * reader picks the display, and the list of books turns into a grid.
+ */
 export function BookSelectorDisplayDemo({ label }: { label: string }) {
-  const { progress, replay } = useDemoProgress(3000)
+  const { progress, replay } = useDemoProgress(3400)
   const button = { x: 222, y: 16, size: 26 }
+  const panel = { x: 112, y: 48, width: 136, rowHeight: 22 }
+  const displayRow = { x: panel.x + 60, y: panel.y + 8 + 2 * panel.rowHeight + 11 }
 
-  const listStyle = useAnimatedStyle(() => ({ opacity: at(progress.get(), [0.35, 0.5], [1, 0]) }))
+  const panelStyle = useAnimatedStyle(() => {
+    const shown = at(progress.get(), [0.2, 0.26, 0.5, 0.56], [0, 1, 1, 0])
+    return { opacity: shown, transform: [{ translateY: (1 - shown) * -6 }] }
+  })
+  const rowStyle = useAnimatedStyle(() => ({
+    opacity: at(progress.get(), [0.4, 0.43, 0.5], [0, 1, 1]),
+  }))
+  const listStyle = useAnimatedStyle(() => ({ opacity: at(progress.get(), [0.55, 0.65], [1, 0]) }))
   const gridStyle = useAnimatedStyle(() => {
-    const shown = at(progress.get(), [0.4, 0.58], [0, 1])
+    const shown = at(progress.get(), [0.58, 0.72], [0, 1])
     return { opacity: shown, transform: [{ scale: 0.94 + shown * 0.06 }] }
   })
   const buttonStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: at(progress.get(), [0.2, 0.25, 0.32], [1, 0.85, 1]) }],
+    transform: [{ scale: at(progress.get(), [0.14, 0.17, 0.22], [1, 0.85, 1]) }],
   }))
 
   return (
@@ -167,30 +179,74 @@ export function BookSelectorDisplayDemo({ label }: { label: string }) {
           )}
         </Shape>
       </MiniSurface>
+      <MiniSurface
+        x={panel.x}
+        y={panel.y}
+        width={panel.width}
+        height={16 + 3 * panel.rowHeight}
+        style={panelStyle}
+      >
+        <Shape
+          x={0}
+          y={0}
+          width={panel.width}
+          height={16 + 3 * panel.rowHeight}
+          className="rounded-[16px] border-[1px] border-separator"
+        />
+        <Shape
+          x={6}
+          y={8 + 2 * panel.rowHeight}
+          width={panel.width - 12}
+          height={panel.rowHeight}
+          className="rounded-[8px] bg-light-primary"
+          style={rowStyle}
+        />
+        {(['list', 'hash', 'grid'] as const).map((icon, index) => (
+          <Shape
+            key={icon}
+            x={12}
+            y={8 + index * panel.rowHeight}
+            width={panel.width - 24}
+            height={panel.rowHeight}
+          >
+            <Shape x={0} y={4} width={14} height={14} className="items-center justify-center">
+              <FeatherIcon name={icon} size={12} color="grey" />
+            </Shape>
+            <Bone x={22} y={8} width={44} />
+            <Bone x={78} y={8} width={30} className="bg-grey opacity-40" />
+          </Shape>
+        ))}
+      </MiniSurface>
       <Finger
         progress={progress}
         keys={{
-          times: [0, 0.1, 0.2, 0.27, 0.35, 0.45, 1],
+          times: [0, 0.08, 0.14, 0.18, 0.3, 0.38, 0.4, 0.45, 0.52, 1],
           x: [
-            button.x + 10,
+            button.x + 6,
             button.x + 13,
             button.x + 13,
             button.x + 13,
-            button.x + 13,
-            button.x + 13,
-            button.x + 13,
+            displayRow.x,
+            displayRow.x,
+            displayRow.x,
+            displayRow.x,
+            displayRow.x,
+            displayRow.x,
           ],
           y: [
             button.y + 50,
-            button.y + 17,
-            button.y + 17,
-            button.y + 17,
-            button.y + 17,
-            button.y + 17,
-            button.y + 17,
+            button.y + 13,
+            button.y + 13,
+            button.y + 13,
+            displayRow.y,
+            displayRow.y,
+            displayRow.y,
+            displayRow.y,
+            displayRow.y,
+            displayRow.y,
           ],
-          down: [0, 0, 1, 0, 0, 0, 0],
-          shown: [0, 1, 1, 1, 0, 0, 0],
+          down: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+          shown: [0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
         }}
       />
     </DemoStage>

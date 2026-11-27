@@ -1,5 +1,6 @@
 import { useAtom, useSetAtom } from 'jotai/react'
 import { useEffect } from 'react'
+import { Platform } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { SheetView } from '~common/sheet'
 import Sheet from '~common/ModalSheet'
@@ -15,7 +16,7 @@ import OnboardingFooter from './components/OnboardingFooter'
 import OnboardingStep from './components/OnboardingStep'
 import { settleLaterOnboardings } from './featureOnboardingRequests'
 import { useTabsOnboardingTrigger } from './hooks/useTabsOnboardingTrigger'
-import { getOnboardingConfig, type OnboardingId } from './onboardingConfig'
+import { getOnboardingConfig, withoutTouchDemos, type OnboardingId } from './onboardingConfig'
 
 const FeatureOnboardingModal = () => {
   const { t } = useTranslation()
@@ -27,7 +28,10 @@ const FeatureOnboardingModal = () => {
   // Atoms for footer state
   const [currentStep, setCurrentStep] = useAtom(onboardingCurrentStepAtom)
 
-  const config = modalState ? getOnboardingConfig(modalState.onboardingId as OnboardingId, t) : null
+  const touchConfig = modalState
+    ? getOnboardingConfig(modalState.onboardingId as OnboardingId, t)
+    : null
+  const config = Platform.OS === 'web' ? withoutTouchDemos(touchConfig) : touchConfig
   const totalSteps = config?.steps.length ?? 0
   const step = config?.steps[currentStep] ?? null
   const isLast = currentStep === totalSteps - 1

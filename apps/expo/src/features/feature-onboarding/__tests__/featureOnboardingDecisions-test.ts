@@ -3,7 +3,12 @@ import {
   decideLaterOnboardings,
   type FeatureOnboardingSituation,
 } from '../featureOnboardingDecisions'
-import { LATER_ONBOARDING_IDS, ONBOARDING_IDS } from '../onboardingConfig'
+import {
+  getOnboardingConfig,
+  LATER_ONBOARDING_IDS,
+  ONBOARDING_IDS,
+  withoutTouchDemos,
+} from '../onboardingConfig'
 
 describe('decideLaterOnboardings', () => {
   it('marks every later explanation seen for a reader who had the introduction', () => {
@@ -81,5 +86,17 @@ describe('canShowFeatureOnboarding', () => {
     const web = { ...free, platform: 'web' }
     for (const id of LATER_ONBOARDING_IDS) expect(canShowFeatureOnboarding(id, web)).toBe(false)
     expect(canShowFeatureOnboarding(ONBOARDING_IDS.ANNOTATION_MODE, web)).toBe(true)
+  })
+})
+
+describe('withoutTouchDemos', () => {
+  it('keeps the text of the annotation mode for a mouse, without its touches', () => {
+    const config = getOnboardingConfig(
+      ONBOARDING_IDS.ANNOTATION_MODE,
+      ((key: string) => key) as never
+    )
+    const web = withoutTouchDemos(config)
+    expect(web?.steps.some(step => step.demo)).toBe(false)
+    expect(web?.steps).toHaveLength((config?.steps.length ?? 0) - 1)
   })
 })

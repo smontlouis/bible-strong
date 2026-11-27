@@ -772,7 +772,7 @@
   "onboarding.annotationMode.step3.description": "Add notes to your selections and organize them with tags to find them easily.",
   "onboarding.demo.label": "Animation of the gesture. Tap it to play it again.",
   "onboarding.annotationMode.reopen.title": "Take up an annotation",
-  "onboarding.annotationMode.reopen.description": "Double-tap an annotation to select it: change its color or its style, add a note, or delete it.",
+  "onboarding.annotationMode.reopen.description": "Double-tap an annotation to take it up again; in free mode, a single tap is enough. Then change its color or its style, add a note, or delete it.",
   "onboarding.annotation-mode.name": "Free mode",
   "onboarding.verse-selection.name": "Selecting a verse",
   "onboarding.verse-selection.tabs.title": "Annotate, study, share",

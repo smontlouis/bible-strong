@@ -45,6 +45,8 @@ const pending = new Map<OnboardingId, ReturnType<typeof setTimeout>>()
  * the action: the delay lets what the action opens settle first. Checked again when it elapses.
  */
 export function requestFeatureOnboarding(id: OnboardingId, { delayMs = 0 } = {}) {
+  // A selection restored at launch can ask before the modal has settled the later explanations.
+  settleLaterOnboardings()
   if (!canShowFeatureOnboarding(id, readSituation())) return
   if (pending.has(id)) return
   const open = () => {

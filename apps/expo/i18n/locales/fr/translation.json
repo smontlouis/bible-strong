@@ -780,7 +780,7 @@
   "onboarding.annotationMode.step3.description": "Ajoutez des notes à vos sélections et organisez-les avec des étiquettes pour les retrouver facilement.",
   "onboarding.demo.label": "Animation du geste. Touchez-la pour la revoir.",
   "onboarding.annotationMode.reopen.title": "Reprendre une annotation",
-  "onboarding.annotationMode.reopen.description": "Touchez deux fois une annotation pour la sélectionner : changez sa couleur ou son style, ajoutez une note, ou supprimez-la.",
+  "onboarding.annotationMode.reopen.description": "Touchez deux fois une annotation pour la reprendre ; dans le mode libre, une seule touche suffit. Changez alors sa couleur ou son style, ajoutez une note, ou supprimez-la.",
   "onboarding.annotation-mode.name": "Le mode libre",
   "onboarding.verse-selection.name": "La sélection d’un verset",
   "onboarding.verse-selection.tabs.title": "Annoter, étudier, partager",
