@@ -9,6 +9,7 @@ import { timeout } from '~helpers/timeout'
 import { appLogger } from '~helpers/agentObservability'
 import { ttsVoiceAtom } from '../atoms'
 import PlayerOption from './PlayerOption'
+import { compareText } from '~helpers/compareText'
 export interface TTSVoiceButtonProps {
   currentVersion: VersionCode
 }
@@ -43,7 +44,7 @@ const TTSVoiceButton = ({ currentVersion }: TTSVoiceButtonProps) => {
     },
     ...(voices
       ?.filter(filterToKnownLanguages(currentVersion))
-      .sort((a, b) => a.name.localeCompare(b.name))
+      .sort((a, b) => compareText(a.name, b.name))
       .map(voice => ({
         value: voice.identifier,
         label: voice.name,

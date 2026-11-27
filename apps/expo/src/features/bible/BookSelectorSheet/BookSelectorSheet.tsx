@@ -37,6 +37,7 @@ import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import { bookSelectorDataAtom } from './state'
 import { requestFeatureOnboarding } from '~features/feature-onboarding/featureOnboardingRequests'
 import { ONBOARDING_IDS } from '~features/feature-onboarding/onboardingConfig'
+import { compareText } from '~helpers/compareText'
 interface BookSelectorSheetProps {
   selectedBookNum?: number
   sheetRef: React.RefObject<SheetRef | null>
@@ -169,7 +170,7 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
     if (isAlphabetical) {
       // Sorted as the reader sees them, in the reading's language
       return [...booksArray].sort((a, b) =>
-        getReadingBookName(a, selectedVersion).localeCompare(getReadingBookName(b, selectedVersion))
+        compareText(getReadingBookName(a, selectedVersion), getReadingBookName(b, selectedVersion))
       )
     }
     return booksArray

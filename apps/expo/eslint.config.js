@@ -44,6 +44,12 @@ module.exports = [
           message:
             "Import React Native components by name: on web, `import * as X from 'react-native'` bypasses Uniwind and ignores className.",
         },
+        // Hermes on Android builds a collator on every localeCompare call: sorting a list kept the
+        // JS thread busy for seconds on entry-level phones and raised ANRs.
+        {
+          selector: "CallExpression[callee.property.name='localeCompare']",
+          message: 'Use compareText from ~helpers/compareText: localeCompare is slow on Android.',
+        },
       ],
     },
   },

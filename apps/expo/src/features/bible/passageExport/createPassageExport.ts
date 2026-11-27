@@ -13,6 +13,7 @@ import {
   type RelationsObj,
   type VerseRelationEndpoint,
 } from '~features/studyRelations/domain'
+import { compareText } from '~helpers/compareText'
 
 export type PassageExportScope = 'selection' | 'chapter' | 'book'
 
@@ -237,7 +238,7 @@ const getTags = (tags: unknown, diagnostics: ExportDiagnostics): ExportTag[] => 
       }
       return [{ id: safeString(value.id) || key, name }]
     })
-    .sort((left, right) => left.name.localeCompare(right.name) || left.id.localeCompare(right.id))
+    .sort((left, right) => compareText(left.name, right.name) || compareText(left.id, right.id))
 }
 
 const getVerseEndpoint = (relation: Relation): VerseRelationEndpoint | undefined =>
@@ -485,7 +486,7 @@ const getTagsByVerse = (
     Array.from(tagsByVerse.entries()).map(([verseKey, tags]) => [
       verseKey,
       Array.from(tags.values()).sort(
-        (left, right) => left.name.localeCompare(right.name) || left.id.localeCompare(right.id)
+        (left, right) => compareText(left.name, right.name) || compareText(left.id, right.id)
       ),
     ])
   )

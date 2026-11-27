@@ -21,6 +21,7 @@ import PanelAction from './ContextualPanel/PanelAction'
 import Box, { TouchableBox } from './ui/Box'
 import Text from './ui/Text'
 import Checkbox from './ui/Checkbox'
+import { compareText } from '~helpers/compareText'
 
 export type HighlightOptionsProps = { verseIds?: VerseIds; annotationId?: string; color?: string }
 export default function HighlightOptions({ verseIds, annotationId, color }: HighlightOptionsProps) {
@@ -47,7 +48,7 @@ export default function HighlightOptions({ verseIds, annotationId, color }: High
   )
   const matchingTags = validTags
     .filter(tag => tag.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()))
-    .sort((a, b) => a.name.localeCompare(b.name))
+    .sort((a, b) => compareText(a.name, b.name))
   const web = Platform.OS === 'web'
   return (
     <Box className="absolute top-0 right-0">

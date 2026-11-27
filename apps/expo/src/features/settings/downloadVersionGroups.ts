@@ -1,4 +1,5 @@
 import type { Version } from '~helpers/bibleVersions'
+import { compareText } from '~helpers/compareText'
 
 export interface BibleVersionGroup {
   key: 'bible-fr' | 'bible-en' | 'bible-original'
@@ -23,7 +24,7 @@ export const buildBibleVersionGroups = (
     .sort((left, right) => {
       const leftName = appLanguage === 'en' ? (left.name_en ?? left.name) : left.name
       const rightName = appLanguage === 'en' ? (right.name_en ?? right.name) : right.name
-      return leftName.localeCompare(rightName, appLanguage)
+      return compareText(leftName, rightName, appLanguage)
     })
 
   return [

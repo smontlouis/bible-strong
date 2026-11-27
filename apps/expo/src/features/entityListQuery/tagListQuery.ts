@@ -2,6 +2,7 @@ import type { Tag } from '~common/types'
 import { entitiesArray } from '~redux/modules/user/tags'
 import { searchWithMatches } from '~features/search/shared/searchFuzzy'
 import type { TagListQueryState } from './tagListQueryState'
+import { compareText } from '~helpers/compareText'
 
 type TagEntityType = (typeof entitiesArray)[number]
 
@@ -67,20 +68,20 @@ export const buildTagListRows = (
     })
 
 const compareTitle = (left: TagListRow, right: TagListRow) =>
-  left.title.localeCompare(right.title, undefined, { sensitivity: 'base' }) ||
-  left.id.localeCompare(right.id)
+  compareText(left.title, right.title, undefined, { sensitivity: 'base' }) ||
+  compareText(left.id, right.id)
 
 const compareRows = (sort: TagListQueryState['sort']) => (left: TagListRow, right: TagListRow) => {
   switch (sort) {
     case 'name-desc':
       return (
-        -left.title.localeCompare(right.title, undefined, { sensitivity: 'base' }) ||
-        left.id.localeCompare(right.id)
+        -compareText(left.title, right.title, undefined, { sensitivity: 'base' }) ||
+        compareText(left.id, right.id)
       )
     case 'count-asc':
-      return left.itemCount - right.itemCount || left.id.localeCompare(right.id)
+      return left.itemCount - right.itemCount || compareText(left.id, right.id)
     case 'count-desc':
-      return right.itemCount - left.itemCount || left.id.localeCompare(right.id)
+      return right.itemCount - left.itemCount || compareText(left.id, right.id)
     case 'name-asc':
     default:
       return compareTitle(left, right)

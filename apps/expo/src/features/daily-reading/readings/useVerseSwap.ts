@@ -1,6 +1,7 @@
 import { useAtom } from 'jotai'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
 import { getReserveEntryKey, type DailyCollection } from './dailyReadingFormat'
+import { compareText } from '~helpers/compareText'
 
 const KEPT_DAYS = 7
 
@@ -24,7 +25,7 @@ export const useVerseSwap = (collection: DailyCollection | undefined, date: stri
     if (!next) return
     const kept = Object.entries(swaps)
       .filter(([day]) => day !== date)
-      .sort(([a], [b]) => b.localeCompare(a))
+      .sort(([a], [b]) => compareText(b, a))
       .slice(0, KEPT_DAYS - 1)
     setSwaps(Object.fromEntries([...kept, [date, { key: next, shown }]]))
   }

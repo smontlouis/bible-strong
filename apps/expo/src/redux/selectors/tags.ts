@@ -2,6 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { RootState } from '~redux/modules/reducer'
 import { Tag } from '~common/types'
 import { buildTagListRows } from '~features/entityListQuery/tagListQuery'
+import { compareText } from '~helpers/compareText'
 
 const selectTags = (state: RootState) => state.user.bible.tags
 const selectHighlights = (state: RootState) => state.user.bible.highlights
@@ -17,7 +18,7 @@ const selectWordAnnotations = (state: RootState) => state.user.bible.wordAnnotat
 export const sortedTagsSelector = createSelector([selectTags], (tags): Tag[] =>
   Object.values(tags)
     .filter(t => t.id)
-    .sort((a, b) => a.name.localeCompare(b.name))
+    .sort((a, b) => compareText(a.name, b.name))
 )
 
 export const selectTagListRows = createSelector(

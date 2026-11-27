@@ -35,6 +35,7 @@ import {
   buildGroupedWordAnnotations,
   type GroupedWordAnnotationRow,
 } from '~features/entityListQuery/wordAnnotationsQuery'
+import { compareText } from '~helpers/compareText'
 
 type TaggedEntity = { id: string | number; title: string; tags?: TagsObj }
 type HighlightVerseGroup = {
@@ -791,7 +792,7 @@ export const makeVerseGroupsForNoteSelector = () =>
           return verseEndpoint?.type === 'verse' ? verseEndpoint.verseKeys : []
         })
         .filter(verseKeys => verseKeys.length > 0)
-        .sort((a, b) => a[0].localeCompare(b[0]) || a.length - b.length)
+        .sort((a, b) => compareText(a[0], b[0]) || a.length - b.length)
     }
   )
 

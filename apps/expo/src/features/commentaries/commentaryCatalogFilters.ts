@@ -2,14 +2,15 @@ import {
   COMMENTARY_CATALOG,
   type CommentaryCatalogEntry,
 } from '@bible-strong/resource-catalog/commentaries'
+import { compareText } from '~helpers/compareText'
 
 export const COMMENTARY_TRADITIONS = [
   ...new Set(COMMENTARY_CATALOG.map(entry => entry.tradition)),
-].sort((left, right) => left.localeCompare(right, 'fr'))
+].sort((left, right) => compareText(left, right, 'fr'))
 
 export const COMMENTARY_CURRENTS = [
   ...new Set(COMMENTARY_CATALOG.flatMap(entry => [...entry.tags])),
-].sort((left, right) => left.localeCompare(right, 'fr'))
+].sort((left, right) => compareText(left, right, 'fr'))
 
 export const matchesCommentaryTaxonomyFilters = (
   entry: CommentaryCatalogEntry,

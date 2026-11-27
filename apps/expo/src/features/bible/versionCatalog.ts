@@ -3,6 +3,7 @@ import type {
   TranslationReadingProfile,
   Version,
 } from '~helpers/bibleVersions'
+import { compareText } from '~helpers/compareText'
 
 export type BibleVersionGrouping = 'alphabetical' | 'language' | 'style'
 export type BibleVersionAvailability = 'all' | 'downloaded'
@@ -108,10 +109,10 @@ const prepareCatalog = (
       displayName: getVersionDisplayName(version, uiLanguage),
     }))
     .sort((left, right) => {
-      const byName = left.displayName.localeCompare(right.displayName, uiLanguage, {
+      const byName = compareText(left.displayName, right.displayName, uiLanguage, {
         sensitivity: 'base',
       })
-      return byName || left.id.localeCompare(right.id, 'en', { sensitivity: 'base' })
+      return byName || compareText(left.id, right.id, 'en', { sensitivity: 'base' })
     })
 }
 
@@ -142,7 +143,7 @@ export const getVersionCatalogSections = ({
       if (left === uiLanguage) return -1
       if (right === uiLanguage) return 1
       return (
-        sortLabel(left).localeCompare(sortLabel(right), uiLanguage, { sensitivity: 'base' }) ||
+        compareText(sortLabel(left), sortLabel(right), uiLanguage, { sensitivity: 'base' }) ||
         Number(right === 'he-grc') - Number(left === 'he-grc')
       )
     })

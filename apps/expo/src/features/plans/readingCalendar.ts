@@ -3,6 +3,7 @@ import spurgeonCalendar from './spurgeonCalendar.json'
 import houstinCalendar from './houstinCalendar.json'
 import houstinSupplementSource from './houstinSupplements.json'
 import { meditationSupplements } from './meditationSupplements'
+import { compareText } from '~helpers/compareText'
 
 export type EditorialKind = 'reading-plan' | 'daily-meditation'
 
@@ -189,7 +190,7 @@ export const normalizeMeditationCollection = (plan: Plan): Plan => {
   }
   const usedSectionIds = new Set<string>()
   const sections = [...groups.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
+    .sort(([a], [b]) => compareText(a, b))
     .map(([month, entries]) => {
       const original = plan.sections.find(
         section =>
@@ -212,7 +213,7 @@ export const normalizeMeditationCollection = (plan: Plan): Plan => {
         title,
         subTitle: original?.subTitle ?? '',
         readingSlices: entries.sort((a, b) =>
-          (a.calendarDate ?? '').localeCompare(b.calendarDate ?? '')
+          compareText(a.calendarDate ?? '', b.calendarDate ?? '')
         ),
       }
     })

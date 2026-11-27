@@ -1,5 +1,6 @@
 import type { WordAnnotation } from '~redux/modules/user/wordAnnotations'
 import { isBookInTestament } from '~helpers/bibleBookCatalog'
+import { compareText } from '~helpers/compareText'
 
 export type GroupedWordAnnotationRow = {
   id: string
@@ -28,7 +29,7 @@ export const buildGroupedWordAnnotations = (
       verseKeys: annotation.ranges.map(range => range.verseKey),
       tags: annotation.tags,
     }))
-    .sort((a, b) => b.date - a.date || a.id.localeCompare(b.id))
+    .sort((a, b) => b.date - a.date || compareText(a.id, b.id))
 
 const compareVerseKeys = (left: string, right: string) => {
   const leftParts = left.split('-').map(Number)

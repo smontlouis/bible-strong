@@ -35,6 +35,7 @@ import {
   shouldClearPersistedReferenceFilter,
   wordAnnotationsListQueryAtom,
 } from '~state/entityListFilters'
+import { compareText } from '~helpers/compareText'
 
 const TabContainer = (
   componentProps: Omit<UIComponentProps<typeof View>, 'theme'> & {
@@ -288,9 +289,9 @@ const WordAnnotationsScreen = () => {
     })
     return filtered.sort((left, right) => {
       if (queryState.sort === 'newest')
-        return right.date - left.date || left.id.localeCompare(right.id)
+        return right.date - left.date || compareText(left.id, right.id)
       if (queryState.sort === 'oldest')
-        return left.date - right.date || left.id.localeCompare(right.id)
+        return left.date - right.date || compareText(left.id, right.id)
       const leftKey = left.ranges
         .map(range => range.verseKey.split('-').map(Number))
         .sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2])[0]
@@ -301,7 +302,7 @@ const WordAnnotationsScreen = () => {
         (leftKey?.[0] || 0) - (rightKey?.[0] || 0) ||
         (leftKey?.[1] || 0) - (rightKey?.[1] || 0) ||
         (leftKey?.[2] || 0) - (rightKey?.[2] || 0) ||
-        left.id.localeCompare(right.id)
+        compareText(left.id, right.id)
       )
     })
   })()
@@ -335,7 +336,7 @@ const WordAnnotationsScreen = () => {
       right: (typeof annotationsList)[number]
     ) =>
       (queryState.sort === 'oldest' ? left.date - right.date : right.date - left.date) ||
-      left.id.localeCompare(right.id)
+      compareText(left.id, right.id)
 
     return Array.from(groups.entries())
       .sort(([left], [right]) => compareVerseKeys(left, right))
@@ -362,13 +363,13 @@ const WordAnnotationsScreen = () => {
 
     return Array.from(groups.entries())
       .sort(([left], [right]) =>
-        queryState.sort === 'oldest' ? left.localeCompare(right) : right.localeCompare(left)
+        queryState.sort === 'oldest' ? compareText(left, right) : compareText(right, left)
       )
       .map(([date, groupedAnnotations]) => ({
         date,
         label: new Date(`${date}T12:00:00`).toLocaleDateString(),
         annotations: groupedAnnotations.sort(
-          (left, right) => left.date - right.date || left.id.localeCompare(right.id)
+          (left, right) => left.date - right.date || compareText(left.id, right.id)
         ),
       }))
   })()

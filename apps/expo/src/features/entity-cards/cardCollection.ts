@@ -6,6 +6,7 @@ import { TIPNR_BOOK_CODES } from '@bible-strong/resource-domain/strong-lexicon'
 
 import type { CardCatalog, CardLanguage, PublishedCard } from './cardCatalog'
 import { GOD_ENTITY, isCardCollected } from './chapterCards'
+import { compareText } from '~helpers/compareText'
 
 /** The eras of the cards in the order of the story; the beings and idols follow it. */
 export const CARD_ERA_ORDER = [
@@ -38,7 +39,7 @@ export const sortCardsByBible = (cards: PublishedCard[]) =>
       bibleRank(getFirstMention(left.entity)) * 10 +
         (left.stageIndex ?? 0) -
         (bibleRank(getFirstMention(right.entity)) * 10 + (right.stageIndex ?? 0)) ||
-      left.id.localeCompare(right.id)
+      compareText(left.id, right.id)
   )
 
 /** The book where a card's character is first met, as the card names it: « Genèse 2:19 » → « Genèse ». */

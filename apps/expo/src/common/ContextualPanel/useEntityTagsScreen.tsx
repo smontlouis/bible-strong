@@ -11,6 +11,7 @@ import PanelSearch from './PanelSearch'
 import PanelAction from './PanelAction'
 import type { PanelScreen } from './types'
 import type { VerseIds } from '~common/types'
+import { compareText } from '~helpers/compareText'
 
 export function useEntityTagsScreen(
   entity: 'studies' | 'links' | 'highlights' | 'wordAnnotations',
@@ -29,7 +30,7 @@ export function useEntityTagsScreen(
   )
   const matches = valid
     .filter(tag => tag.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()))
-    .sort((a, b) => a.name.localeCompare(b.name))
+    .sort((a, b) => compareText(a.name, b.name))
   const screen: PanelScreen = {
     title: t('Éditer les tags'),
     headerContent: <PanelSearch value={query} onChange={setQuery} />,

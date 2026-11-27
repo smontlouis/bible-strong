@@ -15,6 +15,7 @@ import {
 } from './bibleChapterContract'
 import { resolveHybridResourceSource, type HybridResourceSource } from './hybridResourcePolicy'
 import { canonicalListParameter } from '~helpers/canonicalListParameter'
+import { compareText } from '~helpers/compareText'
 
 export type BibleChapterUnavailableReason =
   | 'publication-not-available'
@@ -355,7 +356,7 @@ const isRejectedBatch = (result: {
 const compareVerseKeys = (left: string, right: string) => {
   const a = parseBibleVerseKey(left)!
   const b = parseBibleVerseKey(right)!
-  return a.book - b.book || a.chapter - b.chapter || a.verse - b.verse || left.localeCompare(right)
+  return a.book - b.book || a.chapter - b.chapter || a.verse - b.verse || compareText(left, right)
 }
 
 const toVerse = (

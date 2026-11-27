@@ -1,4 +1,5 @@
 import { searchWithMatches, type SearchableTextItem } from '~features/search/shared/searchFuzzy'
+import { compareText } from '~helpers/compareText'
 
 export type EntityListSort =
   | 'newest'
@@ -15,8 +16,8 @@ export type EntityListRow = SearchableTextItem & {
 }
 
 const titleCompare = (left: EntityListRow, right: EntityListRow) =>
-  left.title.localeCompare(right.title, undefined, { sensitivity: 'base' }) ||
-  left.id.localeCompare(right.id)
+  compareText(left.title, right.title, undefined, { sensitivity: 'base' }) ||
+  compareText(left.id, right.id)
 
 export const queryEntityList = <T extends EntityListRow>(
   rows: readonly T[],
@@ -27,27 +28,27 @@ export const queryEntityList = <T extends EntityListRow>(
   return matching.sort((left, right) => {
     switch (state.sort) {
       case 'oldest':
-        return Number(left.date || 0) - Number(right.date || 0) || left.id.localeCompare(right.id)
+        return Number(left.date || 0) - Number(right.date || 0) || compareText(left.id, right.id)
       case 'title-asc':
         return titleCompare(left, right)
       case 'title-desc':
         return (
-          -left.title.localeCompare(right.title, undefined, { sensitivity: 'base' }) ||
-          left.id.localeCompare(right.id)
+          -compareText(left.title, right.title, undefined, { sensitivity: 'base' }) ||
+          compareText(left.id, right.id)
         )
       case 'created-newest':
         return (
           Number(right.createdAt || 0) - Number(left.createdAt || 0) ||
-          left.id.localeCompare(right.id)
+          compareText(left.id, right.id)
         )
       case 'created-oldest':
         return (
           Number(left.createdAt || 0) - Number(right.createdAt || 0) ||
-          left.id.localeCompare(right.id)
+          compareText(left.id, right.id)
         )
       case 'newest':
       default:
-        return Number(right.date || 0) - Number(left.date || 0) || left.id.localeCompare(right.id)
+        return Number(right.date || 0) - Number(left.date || 0) || compareText(left.id, right.id)
     }
   }) as T[]
 }

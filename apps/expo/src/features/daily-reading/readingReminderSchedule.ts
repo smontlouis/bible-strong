@@ -4,6 +4,7 @@ import {
   getScheduledPlanDay,
   toCivilDate,
 } from '~features/plans/readingCalendar'
+import { compareText } from '~helpers/compareText'
 
 export interface ReadingReminder {
   id: string
@@ -94,7 +95,5 @@ export const buildReadingReminderSchedule = ({
       })
     }
   }
-  return result
-    .sort((a, b) => a.timestamp - b.timestamp || a.id.localeCompare(b.id))
-    .slice(0, limit)
+  return result.sort((a, b) => a.timestamp - b.timestamp || compareText(a.id, b.id)).slice(0, limit)
 }

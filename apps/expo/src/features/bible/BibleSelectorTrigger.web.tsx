@@ -33,6 +33,7 @@ import type { BibleSelectorTriggerProps } from './BibleSelectorTrigger'
 import { chapterReading } from '~state/tabs'
 import type { PanelScreen } from '~common/ContextualPanel/types'
 import type { Version } from '~helpers/bibleVersions'
+import { compareText } from '~helpers/compareText'
 
 function VersionPanel({
   children,
@@ -253,7 +254,7 @@ export function useBookPanelScreens({
         headerContent: <PanelSearch value={query} onChange={setQuery} />,
         content: nav => {
           const listed = [...books]
-            .sort((a, b) => (sort === 'alphabetical' ? nameOf(a).localeCompare(nameOf(b)) : 0))
+            .sort((a, b) => (sort === 'alphabetical' ? compareText(nameOf(a), nameOf(b)) : 0))
             .filter(item =>
               [nameOf(item), item.Nom].some(name =>
                 name.toLocaleLowerCase().includes(query.toLocaleLowerCase())

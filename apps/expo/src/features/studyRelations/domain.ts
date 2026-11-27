@@ -5,6 +5,7 @@ import { getWordAnnotationText } from '~redux/modules/user/wordAnnotationRanges'
 import verseToReference from '~helpers/verseToReference'
 import { getNoteTitle } from '~helpers/getNoteTitle'
 import i18n from '~i18n'
+import { compareText } from '~helpers/compareText'
 
 export type RelationKind = 'manual' | 'system'
 export type RelationType =
@@ -248,7 +249,7 @@ export const normalizeVerseKeys = (verseKeys: string[]): string[] => {
   return uniqueKeys.sort((a, b) => {
     const left = parseVerseKey(a)
     const right = parseVerseKey(b)
-    if (!left || !right) return a.localeCompare(b)
+    if (!left || !right) return compareText(a, b)
     return left.book - right.book || left.chapter - right.chapter || left.verse - right.verse
   })
 }

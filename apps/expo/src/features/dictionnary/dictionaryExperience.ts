@@ -4,6 +4,7 @@ import type {
   DictionaryPassageDiscoveryEntry,
 } from '~features/resources/dictionaryAccess'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
+import { compareText } from '~helpers/compareText'
 
 export type DictionaryPassageConcept = {
   key: string
@@ -35,7 +36,7 @@ export const pickPreferredDictionarySource = <
     const languageDifference =
       Number(right.resource.language === preferredLanguage) -
       Number(left.resource.language === preferredLanguage)
-    return languageDifference || sourcePriority(left).localeCompare(sourcePriority(right))
+    return languageDifference || compareText(sourcePriority(left), sourcePriority(right))
   })[0]
 
 export const groupDictionaryPassageEntries = (
@@ -57,11 +58,11 @@ export const groupDictionaryPassageEntries = (
         label: preferred.word,
         ...(preferred.correspondenceId ? { correspondenceId: preferred.correspondenceId } : {}),
         sources: [...sources].sort((left, right) =>
-          sourcePriority(left).localeCompare(sourcePriority(right))
+          compareText(sourcePriority(left), sourcePriority(right))
         ),
       }
     })
-    .sort((left, right) => left.label.localeCompare(right.label))
+    .sort((left, right) => compareText(left.label, right.label))
 }
 
 export const findDirectoryItemForArticle = (

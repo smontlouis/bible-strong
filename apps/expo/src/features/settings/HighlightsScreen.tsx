@@ -45,6 +45,7 @@ import {
   buildGroupedHighlights,
   type GroupedHighlightData,
 } from '~features/entityListQuery/highlightsQuery'
+import { compareText } from '~helpers/compareText'
 type UnifiedHighlightItem =
   | { type: 'highlight'; data: GroupedHighlightData }
   | { type: 'annotation'; data: GroupedWordAnnotation }
@@ -199,7 +200,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
     // Combine and sort by date descending
     return items.sort((a, b) => {
       if (filters.sort === 'oldest') {
-        return Number(a.data.date) - Number(b.data.date) || identity(a).localeCompare(identity(b))
+        return Number(a.data.date) - Number(b.data.date) || compareText(identity(a), identity(b))
       }
       if (filters.sort === 'bible') {
         const key = (item: UnifiedHighlightItem) => {
@@ -217,10 +218,10 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
           (left?.[0] || 0) - (right?.[0] || 0) ||
           (left?.[1] || 0) - (right?.[1] || 0) ||
           (left?.[2] || 0) - (right?.[2] || 0) ||
-          identity(a).localeCompare(identity(b))
+          compareText(identity(a), identity(b))
         )
       }
-      return Number(b.data.date) - Number(a.data.date) || identity(a).localeCompare(identity(b))
+      return Number(b.data.date) - Number(a.data.date) || compareText(identity(a), identity(b))
     })
   })()
 
