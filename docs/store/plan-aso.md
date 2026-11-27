@@ -11,7 +11,7 @@ Textes proposés pour l'étape 1 : `docs/store/fiches-stores.md`.
   - Sous-titre : « Hébreu, grec, audio et IA »
 - [x] 2. Réécrire les descriptions. Sur Play, c'est prioritaire pour la recherche : les termes clés y reviennent naturellement.
 - [x] 3. Remplir le texte promotionnel iOS, corriger l'URL de support, ajouter une URL marketing et une catégorie secondaire.
-- [ ] 4. Play : lancer la fiche personnalisée « bible » que propose la Console et une première expérience A/B.
+- [x] 4. Play : lancer la fiche personnalisée « bible » que propose la Console et une première expérience A/B (créée en brouillon, diffusion à 50 %).
 - [ ] 5. Corriger l'ANR Android et le taux de crash iOS. C'est un chantier technique à part.
 
 ## Étape 2 — Nouveau jeu de visuels (un design de base, décliné par format)
@@ -40,7 +40,7 @@ Textes proposés pour l'étape 1 : `docs/store/fiches-stores.md`.
 ## Étape 4 — En continu
 
 - [ ] Événements in-app et contenus promotionnels Play : « Lire la Bible en 2027 » en janvier, Avent, Pâques.
-- [ ] 3 ou 4 pages produit personnalisées, une par profil : hébreu-grec, assistant IA, audio, étude.
+- [ ] 3 ou 4 pages produit personnalisées, une par profil : hébreu-grec et assistant IA créées en brouillon (27 novembre), audio et étude à faire.
 - [ ] Tests A/B des captures.
 - [ ] Captures iPhone Duo avant avril 2027.
 

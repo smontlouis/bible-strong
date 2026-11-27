@@ -179,12 +179,30 @@ Bible Strong is an independent project, supported by donations and the Premium s
 
 Pour les personnes qui cherchent simplement « bible » (trafic signalé par la Play Console). L'accent passe de l'étude approfondie à la lecture quotidienne.
 
-| Champ | Texte | Long. |
-|---|---|---|
-| Titre (30) | `Bible Strong : Bible et audio` | 29 |
-| Description courte (80) | `La Bible Louis Segond et 40 versions, audio, verset du jour et méditation` | 73 |
+**État au 27 novembre 2026 : brouillon** dans la Play Console, nom de référence « Recherche bible (FR) » (le nom ne peut plus changer). Dupliquée de la fiche par défaut (mêmes visuels), diffusée à 50 % de l'audience ciblée (on peut monter, pas redescendre), sans date de fin. À publier depuis la Play Console.
 
-Description longue : celle de la fiche par défaut, avec « LIRE LA BIBLE » et « ÉCOUTER ET MÉDITER » placés en premier.
+Audience : mots-clés de recherche, sans restriction de pays : `bible`, `la bible`, `bible en français`, `bible francais`, `bible app`, `sainte bible`, `bible louis segond`, `louis segond`, `bible segond`, `bible audio`, `bible gratuite`, `bible française`, `application bible`. « bible strong » et les autres recherches de marque restent volontairement sur la fiche par défaut (45 % des visiteurs, 87 % de conversion).
+
+| Champ | FR | EN |
+|---|---|---|
+| Titre (30) | `Bible Strong : Bible et audio` (29) | `Bible Strong: Bible & Audio` (27) |
+| Description courte (80) | `La Bible Louis Segond et 40 versions, audio, verset du jour et méditation` (73) | `The KJV and 40+ Bible versions, audio Bible, verse of the day and devotional` (76) |
+
+Description longue : celle de la fiche par défaut, avec un premier paragraphe tourné vers la lecture et l'écoute, puis « LIRE LA BIBLE » et « ÉCOUTER ET MÉDITER » en premier (FR 2547 caractères, EN 2293).
+
+## App Store — pages produit personnalisées
+
+**État au 27 novembre 2026 : deux pages « Ready to Submit »**, pas soumises. Copiées de la 28.3.2 (header, image de recherche, captures), FR et EN.
+
+| Page | Product Page ID | Première capture | Mots-clés associés | Texte promo FR |
+|---|---|---|---|---|
+| Strobi — assistant d'étude | `df0f87c3-7e8c-42a2-b9ae-8bde3adea270` | 02 Strobi | aucun (aucun mot-clé « IA » dans la version en ligne) | Strobi, l'assistant d'étude, répond à vos questions sur la Bible en citant votre version et en montrant ses sources. Quelques questions gratuites chaque jour. |
+| Hébreu et grec | `a148dbaf-dfd5-42d2-b511-e778c72a2960` | 04 mot à mot | FR : hébreu, grec, concordance, lexique grec, lexique hébreu, strong français ; EN : Hebrew, Greek, concordance, Greek lexicon, Hebrew lexicon | Le mot hébreu ou grec derrière chaque mot de votre Bible : définition, translittération, concordance Strong et Bible interlinéaire. Gratuit et sans publicité. |
+
+- Les mots-clés proposés sont ceux de la **version en ligne** (28.2.4). Après la sortie de la 28.3.2, revoir l'association (par exemple « audio » pour une future page audio).
+- Lien public de chaque page : bouton « Copy Link » dans App Store Connect (`apps.apple.com/app/id1454738221?ppid=<Product Page ID>`).
+- Une page « Bible audio » demande d'abord des captures du lecteur audio et du Trésor sonore, absentes de la série actuelle.
+- Dans App Store Connect, le glisser-déposer des captures marche sur iPhone mais pas sur iPad : pour réordonner, « Remove All » puis renvoyer les fichiers un par un dans l'ordre voulu.
 
 ## Points à valider
 
@@ -192,4 +210,4 @@ Description longue : celle de la fiche par défaut, avec « LIRE LA BIBLE » et 
 2. **Strobi pour tous.** Les textes Play sont en ligne : Strobi devrait être ouvert à tous, sinon la fiche promet ce que certains ne voient pas.
 3. **« caucheranne »** : retiré des mots-clés. À remettre s'il a une raison d'être.
 4. **« What's New » EN de la 28.3.2** : commence par « What's new in version 28.2 ». À vérifier avant de soumettre.
-5. **Fiche Play personnalisée « bible »** : décrite plus haut, pas encore créée.
+5. **Fiche Play personnalisée « bible » et pages produit App Store** : créées en brouillon le 27 novembre, à publier ou soumettre.
