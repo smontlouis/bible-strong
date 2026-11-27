@@ -55,7 +55,7 @@
     },
     "BHS": {
       "text": {
-        "sourceUrl": "https://assets.bible-strong.app/bibles/bible-hebrew.json",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/sources/a49a105194e2e697ea1fe54ddf5882dbbdb0d0c5a2bb823117fedb789995288e/bible-hebrew.json",
         "entry": "bible-hebrew.json"
       }
     },
@@ -289,7 +289,7 @@
     },
     "OST": {
       "text": {
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/sources/6dbc819e6d528c3f7b4d1a85ed81788647cc7d593dcf983a0d08111c470590a0/bible-ost.json",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/sources/ebef813a126313b3570f71e8660e79dd9d06a2788fde5768644c896a8cc1ca93/bible-ost.json",
         "entry": "bible-ost.json"
       }
     },

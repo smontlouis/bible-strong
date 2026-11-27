@@ -319,8 +319,6 @@ const WITHOUT_EQUIVALENT: Readonly<Record<string, readonly string[]>> = {
 
 /** Org verses a numbering has no verse for, keyed by versification: verses its text lacks. */
 const ORG_WITHOUT_EQUIVALENT: Readonly<Record<string, readonly string[]>> = {
-  // The published Ostervald has no Psalm 40:17 ("Que tous ceux qui te cherchent…").
-  'bs-ost': ['19-40-17'],
   // The published NET has no Jonah 1:17 (org 2:1, the great fish).
   'bs-net': ['32-2-1'],
   // The published Chouraqui has no Psalm 119:8 ("Je veux garder tes statuts…") nor John 7:53.
@@ -394,7 +392,6 @@ describe('every verse goes to org and back', () => {
 const KNOWN_DIFFERENCES: Readonly<Record<string, readonly string[]>> = {
   S21: ['4-25'], // Numbers 25 ends at 18, as in English Bibles
   BDS: ['13-25'], // 1 Chronicles 25 ends with a merged verse
-  BHS: ['29-4'], // Joel 4 is missing from the publication
   CHU: ['14-36', '29-4'], // 2 Chronicles 36 and Joel 4 are missing from the publication
   LXX_FR: ['27-13', '27-14'], // Susanna and Bel are not translated
 }

@@ -6,17 +6,12 @@
 # Mapping lines go from FMAR to org. Each was checked against the alignment of the FMAR text
 # with the LSG text (docs/research/versification.md, section 2.4).
 #
-PSA 30:13 40:18 69:36 102:28 108:13 140:13
-ECC 12:14
-HOS 12:14
-JON 2:10
+PSA 30:13 69:36 102:28 108:13 140:13
 MRK 9:50 10:52
 ACT 24:28
 1CO 3:23
-REV 12:17
 #
-# Psalms 30 and 40, Matthew 11, Mark 9-10 and 1 Corinthians 3 are numbered as org.
-PSA 40:17 = PSA 40:17
+# Psalm 30, Matthew 11, Mark 9-10 and 1 Corinthians 3 are numbered as org.
 MAT 11:2 = MAT 11:2
 1CO 3:22 = 1CO 3:22
 #
@@ -43,29 +38,7 @@ PSA 140:1 = PSA 140:1
 PSA 140:1 = PSA 140:2
 PSA 140:2-13 = PSA 140:3-14
 #
-# Ecclesiastes 12 opens two verses earlier, as in OST, and its last verse ("Mon fils garde-toi
-# de ce qui est au-delà de ceci… Crains Dieu… Parce que Dieu amènera toute oeuvre en jugement…")
-# is org 12:12, 12:13 and 12:14.
-ECC 12:3-13 = ECC 12:1-11
-ECC 12:14 = ECC 12:12
-ECC 12:14 = ECC 12:13
-ECC 12:14 = ECC 12:14
-#
-# Hosea 12:14 ("Puis l'Éternel fit remonter Israël hors d'Égypte… Mais Éphraïm a provoqué Dieu…")
-# is org 12:14 and 12:15.
-HOS 12:14 = HOS 12:14
-HOS 12:14 = HOS 12:15
-#
-# Jonah 2:10 ("Mais moi, je te sacrifierai… Alors l'Éternel fit commandement au poisson…") is
-# org 2:10 and 2:11.
-JON 2:10 = JON 2:10
-JON 2:10 = JON 2:11
-#
 # Acts 24 has 28 verses: FMAR cuts org 24:18 in two (24:19 "Et c'étaient de certains Juifs
 # d'Asie,").
 #! &ACT 24:18-19 = ACT 24:18
 ACT 24:20-28 = ACT 24:19-27
-#
-# Revelation 12:17 ends with "Et je me tins sur le sable de la mer": it is org 12:17 and 12:18.
-REV 12:17 = REV 12:17
-REV 12:17 = REV 12:18

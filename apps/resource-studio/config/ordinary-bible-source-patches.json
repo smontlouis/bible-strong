@@ -181,6 +181,33 @@
       "textStyle": "no-breaks",
       "chapters": [
         {
+          "chapter": "19-40",
+          "reference": "Ps.40",
+          "provider": {
+            "id": "gratis-bible",
+            "work": "fr/ostv1996"
+          },
+          "evidence": "The source has no verse 17 and numbers verse 18 as 17. The Old Testament of this source reads as the Ostervald 1996 text of the Unbound Bible, which gratis-bible publishes as one OSIS file: there the chapter has its eighteen verses, and the seventeen rows of the source read the same.",
+          "response": {
+            "url": "https://raw.githubusercontent.com/gratis-bible/bible/master/fr/ostv1996.xml",
+            "fetchedAt": "2026-10-08T16:26:38.314Z",
+            "sha256": "8d7a29d61a50cbfffe65fc573b5a7e4d8bbd45a3ffd18bc4cc777ac920251006"
+          },
+          "supplied": {
+            "17": "e85cc47c4fa00478"
+          },
+          "renumbered": [
+            {
+              "first": 17,
+              "last": 17,
+              "by": 1,
+              "expect": "2584519a1a6e16f3"
+            }
+          ],
+          "dropped": {},
+          "kept": 16
+        },
+        {
           "chapter": "27-2",
           "reference": "Dan.2",
           "provider": {
@@ -367,8 +394,8 @@
       ],
       "patched": {
         "fileName": "bible-ost.json",
-        "sha256": "6dbc819e6d528c3f7b4d1a85ed81788647cc7d593dcf983a0d08111c470590a0",
-        "bytes": 5012088
+        "sha256": "ebef813a126313b3570f71e8660e79dd9d06a2788fde5768644c896a8cc1ca93",
+        "bytes": 5012265
       }
     },
     "PDV2017": {

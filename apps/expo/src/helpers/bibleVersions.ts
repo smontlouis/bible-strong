@@ -491,12 +491,24 @@ export const versions: Record<string, Version> = {
   },
   BHS: {
     id: 'BHS',
-    name: 'Biblia Hebraica Stuttgartensia (AT)',
-    name_en: 'Biblia Hebraica Stuttgartensia (OT)',
-    c: '© Deutsche Bibelgesellschaft, Stuttgart 1967/77',
+    name: 'Codex de Leningrad (AT)',
+    name_en: 'Leningrad Codex (OT)',
+    c: 'Westminster Leningrad Codex — domaine public',
     type: 'other',
     language: 'he',
     readingProfile: null,
+    // The text is the Westminster Leningrad Codex; the id keeps its former BHS label findable
+    searchKeywords: [
+      'BHS',
+      'Biblia Hebraica',
+      'WLC',
+      'Westminster',
+      'Leningrad',
+      'hébreu',
+      'hebrew',
+      'massorétique',
+      'masoretic',
+    ],
   },
   LXX: {
     id: 'LXX',

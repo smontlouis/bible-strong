@@ -969,6 +969,51 @@
           "expect": "5f02865e6cef7e26",
           "result": ["ac1dd4ffc6ff6e42", "de0030f3017f58b2"],
           "evidence": "The row holds verses 14 and 15 with a space between them, and verse 15 has no row. The same text in the CrossWire module FreBDM1744 2.0 ends verse 14 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "21-12-14",
+          "at": 152,
+          "marker": " ",
+          "expect": "3ba275bfd8934133",
+          "result": ["777ab737d204af8d", "0556b30af231a4ff"],
+          "evidence": "The row holds verses 14 to 16 of the chapter with a space between them and no row for the others. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) and the CrossWire module FreBDM1744 2.0 ends verse 14 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "21-12-15",
+          "at": 124,
+          "marker": " ",
+          "expect": "0556b30af231a4ff",
+          "result": ["f95b810a642848c5", "3c6410031cc94474"],
+          "evidence": "The row holds verses 15 and 16 with a space between them, and verse 16 has no row. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) and the CrossWire module FreBDM1744 2.0 ends verse 15 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "28-12-14",
+          "at": 98,
+          "marker": " ",
+          "expect": "d8c5f093775e0536",
+          "result": ["bfd931836ebe1e40", "325d3c875b646b36"],
+          "evidence": "The row holds verses 14 and 15 with a space between them, and verse 15 has no row. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) and the CrossWire module FreBDM1744 2.0 ends verse 14 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "32-2-10",
+          "at": 110,
+          "marker": " ",
+          "expect": "11d30461d7e4099d",
+          "result": ["dadb047719331506", "698f6f3ffa2995d6"],
+          "evidence": "The row holds verses 10 and 11 with a space between them, and verse 11 has no row. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) and the CrossWire module FreBDM1744 2.0 ends verse 10 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
+        },
+        {
+          "op": "split",
+          "ref": "66-12-17",
+          "at": 207,
+          "marker": " ",
+          "expect": "73ed8fdc116dc39c",
+          "result": ["29451cb7ff12bbf3", "292f30e5a0806cbd"],
+          "evidence": "The row holds verses 17 and 18 with a space between them, and verse 18 has no row. The same text in levigilant.com/bible_martin (the text of biblemartin.com, which this source was made from) and the CrossWire module FreBDM1744 2.0 ends verse 17 at this offset; what is on each side reads as its verse there, brackets and accents on capitals aside."
         }
       ]
     },
@@ -996,7 +1041,7 @@
       ]
     },
     "OST": {
-      "sourceSha256": "6dbc819e6d528c3f7b4d1a85ed81788647cc7d593dcf983a0d08111c470590a0",
+      "sourceSha256": "ebef813a126313b3570f71e8660e79dd9d06a2788fde5768644c896a8cc1ca93",
       "repairs": [
         {
           "op": "shift",

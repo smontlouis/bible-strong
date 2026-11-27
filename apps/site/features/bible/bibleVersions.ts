@@ -19,7 +19,7 @@ export const BIBLE_VERSIONS: readonly BibleVersion[] = [
   { id: 'BDS', name: 'Bible du Semeur', language: 'fr', copyright: '© 2000 Société Biblique Internationale' },
   { id: 'BFC', name: 'Bible en Français courant', language: 'fr', copyright: '© Alliance Biblique Française' },
   { id: 'BHG', name: 'Bible hébraïque et grecque', nameEn: 'Hebrew & Greek Bible', language: 'he-grc', copyright: 'STEPBible.org / Tyndale House Cambridge — CC BY 4.0' },
-  { id: 'BHS', name: 'Biblia Hebraica Stuttgartensia (AT)', nameEn: 'Biblia Hebraica Stuttgartensia (OT)', language: 'he', copyright: '© Deutsche Bibelgesellschaft, Stuttgart 1967/77' },
+  { id: 'BHS', name: 'Codex de Leningrad (AT)', nameEn: 'Leningrad Codex (OT)', language: 'he', copyright: 'Westminster Leningrad Codex — domaine public' },
   { id: 'BSB', name: 'Berean Standard Bible', language: 'en', copyright: '© Berean Bible — CC0 / Public Domain' },
   { id: 'CHU', name: 'Bible Chouraqui 1985', language: 'fr', copyright: '© 1977 Editions Desclée de Brouwer' },
   { id: 'CSB', name: 'Christian Standard Bible', language: 'en', copyright: '© 2017 Holman Bible Publishers' },

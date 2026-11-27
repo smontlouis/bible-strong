@@ -21,7 +21,7 @@ DEU 12:32 13:18 22:30 23:25 28:68 29:29
 2CH 1:17 2:18 13:22 14:15
 NEH 3:32 4:23 7:73 9:38 10:39
 JOB 38:38 39:38 40:28 41:25
-PSA 30:14 40:17
+PSA 30:14
 ECC 4:16 5:20 11:8 12:16
 SNG 6:13 7:13
 ISA 64:12
@@ -126,10 +126,6 @@ JOB 41:1-25 = JOB 41:2-26
 # Psalm 30: OST cuts the last verse in two. OST 30:13 ("Afin que ma gloire chante ta louange…")
 # and 30:14 ("Éternel, mon Dieu, je te célébrerai à toujours.") are org 30:13.
 #! &PSA 30:13-14 = PSA 30:13
-#
-# Psalm 40: the published OST has no verse for org 40:17 ("Que tous ceux qui te cherchent…"),
-# and numbers 17 the last verse ("Pour moi, je suis affligé et misérable…"), org 40:18.
-PSA 40:17 = PSA 40:18
 #
 # Ecclesiastes 12 opens two verses earlier: OST 12:1 ("Jeune homme, réjouis-toi…") is org 11:9.
 ECC 12:1-2 = ECC 11:9-10
