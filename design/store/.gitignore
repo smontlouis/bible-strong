@@ -1,0 +1,6 @@
+# Heavy images and licensed fonts stay out of git (see docs/store/fiches-stores.md)
+assets/
+captures/
+exports/
+final/
+fonts/
