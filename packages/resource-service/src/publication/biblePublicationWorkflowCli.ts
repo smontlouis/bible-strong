@@ -561,7 +561,12 @@ const createOperations = (
           throw new Error(`BIBLE_PUBLICATION_NEON_BASELINE_MISMATCH:${description.catalogId}`)
         }
       }
-      await runCommand('yarn', ['wrangler', 'whoami'], state.appRoot, cloudflareEnvironment())
+      await runCommand(
+        'yarn',
+        ['workspace', '@bible-strong/resource-service', 'wrangler', 'whoami'],
+        state.appRoot,
+        cloudflareEnvironment()
+      )
       return
     }
     assertCandidateCatalogChangesOnly(
