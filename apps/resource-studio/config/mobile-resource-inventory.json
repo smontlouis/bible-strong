@@ -251,7 +251,7 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/1fdc858fad816433ce0380b2e2cbf9973e4cdaf24ca74b01cb8c1e279ee7e8c2/bibles/bible-hebrew.json.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/43c2031a57c69145654ef29d51eee953684b7b4dbf8f439fe62eb31a3f578499/bibles/bible-hebrew.json.zip",
         "entry": "bible-hebrew.json"
       }
     ],

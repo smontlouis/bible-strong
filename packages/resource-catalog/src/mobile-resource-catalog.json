@@ -1,7 +1,7 @@
 {
   "format": "bible-strong-mobile-resource-catalog",
   "schemaVersion": 1,
-  "generatedAt": "2026-11-28T06:41:15.293Z",
+  "generatedAt": "2026-11-28T06:52:00.127Z",
   "resourceCount": 120,
   "resources": {
     "bible-interlinear:BHG:en": {
@@ -552,28 +552,28 @@
     },
     "bible:BHS": {
       "id": "bible:BHS",
-      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-hebrew.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-hebrew.json.zip?sha256=43c2031a57c69145654ef29d51eee953684b7b4dbf8f439fe62eb31a3f578499",
       "file": "bibles/bible-hebrew.json.zip",
       "entry": "bible-hebrew.json",
       "entries": {
         "canonical": {
           "entry": "bible-hebrew.json",
-          "sha256": "d21777aa6c78076c051e79880973bd1f78b1feb52cc51e2f46a3693bdfa31615",
-          "bytes": 5566623
+          "sha256": "45e20ab7301e3ffb6d556ab2ea6486ffeadad6794185653fb1a59738b1bbcc06",
+          "bytes": 6988272
         }
       },
-      "archiveSha256": "1fdc858fad816433ce0380b2e2cbf9973e4cdaf24ca74b01cb8c1e279ee7e8c2",
-      "archiveBytes": 1381187,
-      "contentSha256": "d21777aa6c78076c051e79880973bd1f78b1feb52cc51e2f46a3693bdfa31615",
-      "contentBytes": 5566623,
-      "installedBytes": 6958279,
-      "peakInstallationBytes": 18392609,
+      "archiveSha256": "43c2031a57c69145654ef29d51eee953684b7b4dbf8f439fe62eb31a3f578499",
+      "archiveBytes": 1447720,
+      "contentSha256": "45e20ab7301e3ffb6d556ab2ea6486ffeadad6794185653fb1a59738b1bbcc06",
+      "contentBytes": 6988272,
+      "installedBytes": 8735340,
+      "peakInstallationBytes": 22760725,
       "strategy": "sqlite-import",
       "encryptedArchive": {
-        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-hebrew.json.encrypted.zip?sha256=af3a45bd196677373fd8b0a4f6ba0062fbfe9c6f3f65350a90c686dc26ea047c",
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-hebrew.json.encrypted.zip?sha256=a6fc385a991ecf8f0c8bc3bf94704aa83f2a5bc0f7f6cff15e82d0850e814971",
         "file": "bibles/bible-hebrew.json.encrypted.zip",
-        "sha256": "af3a45bd196677373fd8b0a4f6ba0062fbfe9c6f3f65350a90c686dc26ea047c",
-        "bytes": 1382139,
+        "sha256": "a6fc385a991ecf8f0c8bc3bf94704aa83f2a5bc0f7f6cff15e82d0850e814971",
+        "bytes": 1448810,
         "keyVersion": 1
       }
     },
