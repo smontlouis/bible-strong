@@ -35,6 +35,20 @@ import { isNativeFirebaseAppId } from '../runtime/firebaseAppCheck'
 
 const PRODUCTION_PUBLICATION_LOCK_ID = '204116128917'
 
+/**
+ * What a Bible publication reads from the checkout. Only these must match the pushed master: the
+ * checkout is shared with other work (apps, designs, the lockfile) that a publication never reads.
+ */
+const PUBLICATION_INPUT_PATHS = [
+  'apps/resource-studio/config',
+  'apps/resource-studio/src',
+  'apps/resource-studio/workflows/words-of-jesus',
+  'apps/resource-studio/package.json',
+  'packages/resource-service',
+  'packages/resource-catalog',
+  'packages/resource-domain',
+] as const
+
 const runCommand = async (
   command: string,
   args: readonly string[],
@@ -409,7 +423,7 @@ const createOperations = (
       const appCheckToken = await mintResourceAppCheckToken()
       await runCommand(
         'git',
-        ['diff', '--quiet', 'HEAD', '--', '.'],
+        ['diff', '--quiet', 'HEAD', '--', ...PUBLICATION_INPUT_PATHS],
         state.appRoot,
         buildEnvironment()
       )
@@ -436,7 +450,7 @@ const createOperations = (
       }
       const untrackedFiles = await readCommandOutput(
         'git',
-        ['ls-files', '--others', '--exclude-standard'],
+        ['ls-files', '--others', '--exclude-standard', '--', ...PUBLICATION_INPUT_PATHS],
         state.appRoot,
         buildEnvironment()
       )
