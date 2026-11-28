@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url'
 import {
   assertCandidateCatalogChangesOnly,
   catalogResourceCount,
+  firstCanonicalChapter,
   isBibleFamilyCatalogId,
   resolveBiblePublicationOverlay,
   selectBibleFamilyBaseline,
@@ -230,5 +231,27 @@ describe('candidate catalog of a Bible publication', () => {
       () => assertCandidateCatalogChangesOnly(committed, candidateOf(committed), []),
       /BIBLE_PUBLICATION_CANDIDATE_CATALOG_UNRELATED_CHANGE:bible:BHS/
     )
+  })
+})
+
+describe('firstCanonicalChapter', () => {
+  it('reads the first chapter of a list of verses', () => {
+    assert.deepEqual(firstCanonicalChapter({ verses: [{ book: 1, chapter: 1, verse: 1 }] }), {
+      book: 1,
+      chapter: 1,
+      verse: 1,
+    })
+  })
+
+  it('reads the first chapter of a Schema V4 object keyed by numbers', () => {
+    assert.deepEqual(
+      firstCanonicalChapter({ verses: { '10': { '2': {} }, '2': { '7': {}, '3': {} } } }),
+      { book: 2, chapter: 3 }
+    )
+  })
+
+  it('finds no chapter without verses', () => {
+    assert.equal(firstCanonicalChapter({}), undefined)
+    assert.equal(firstCanonicalChapter({ verses: {} }), undefined)
   })
 })

@@ -104,6 +104,26 @@ export const resolveBiblePublicationOverlay = (
   }
 }
 
+/**
+ * The first chapter a canonical Bible holds, read to probe the live API: a list of verses, or a
+ * Schema V4 object of books, chapters and verses keyed by their numbers.
+ */
+export const firstCanonicalChapter = (
+  canonical: object
+): { book?: unknown; chapter?: unknown } | undefined => {
+  if (!('verses' in canonical)) return undefined
+  const verses = canonical.verses
+  if (Array.isArray(verses)) return verses[0] as { book?: unknown; chapter?: unknown } | undefined
+  if (!verses || typeof verses !== 'object') return undefined
+  const byNumber = (keys: string[]) =>
+    keys.filter(key => /^\d+$/u.test(key)).sort((left, right) => Number(left) - Number(right))
+  const book = byNumber(Object.keys(verses))[0]
+  const chapters = book ? (verses as Record<string, unknown>)[book] : undefined
+  if (!book || !chapters || typeof chapters !== 'object') return undefined
+  const chapter = byNumber(Object.keys(chapters))[0]
+  return chapter ? { book: Number(book), chapter: Number(chapter) } : undefined
+}
+
 export const describeBiblePublicationBundle = async (
   bundlePath: string
 ): Promise<BiblePublicationSetEntry> => {
@@ -116,10 +136,7 @@ export const describeBiblePublicationBundle = async (
     isInterlinearBiblePublicationBundleManifest(manifest)
       ? manifest.dependencies.bible
       : undefined
-  const firstVerse =
-    'verses' in canonical && Array.isArray(canonical.verses)
-      ? (canonical.verses[0] as { book?: unknown; chapter?: unknown } | undefined)
-      : undefined
+  const firstVerse = firstCanonicalChapter(canonical)
   return {
     bundlePath,
     catalogId,
