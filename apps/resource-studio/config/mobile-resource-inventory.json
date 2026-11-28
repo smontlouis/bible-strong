@@ -599,7 +599,7 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/f9b867113143a6bb54b1d7df62173fcff3e07db031f5172ba12e03d3a48dac12/bibles/bible-ost.json.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/1b5ee8ba9420fdf08bae40abfdc375a7a29c6cd148c43de63f46022c4233444f/bibles/bible-ost.json.zip",
         "entry": "bible-ost.json"
       }
     ],

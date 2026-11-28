@@ -1,7 +1,7 @@
 {
   "format": "bible-strong-mobile-resource-catalog",
   "schemaVersion": 1,
-  "generatedAt": "2026-11-26T04:11:48.172Z",
+  "generatedAt": "2026-11-28T06:30:32.996Z",
   "resourceCount": 120,
   "resources": {
     "bible-interlinear:BHG:en": {
@@ -1335,28 +1335,28 @@
     },
     "bible:OST": {
       "id": "bible:OST",
-      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-ost.json.zip?sha256=f9b867113143a6bb54b1d7df62173fcff3e07db031f5172ba12e03d3a48dac12",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-ost.json.zip?sha256=1b5ee8ba9420fdf08bae40abfdc375a7a29c6cd148c43de63f46022c4233444f",
       "file": "bibles/bible-ost.json.zip",
       "entry": "bible-ost.json",
       "entries": {
         "canonical": {
           "entry": "bible-ost.json",
-          "sha256": "9aeb644e4dc2f936ba39a31713f1803fb62d2654f71c9f9c53a4b7d08daa97eb",
-          "bytes": 6650270
+          "sha256": "1b194f3d76c0db0bf83babb6bf03c580ddc16cdb48dd0b6044e31724aeecda3e",
+          "bytes": 6650488
         }
       },
-      "archiveSha256": "f9b867113143a6bb54b1d7df62173fcff3e07db031f5172ba12e03d3a48dac12",
-      "archiveBytes": 1503637,
-      "contentSha256": "9aeb644e4dc2f936ba39a31713f1803fb62d2654f71c9f9c53a4b7d08daa97eb",
-      "contentBytes": 6650270,
-      "installedBytes": 8312838,
-      "peakInstallationBytes": 21804686,
+      "archiveSha256": "1b5ee8ba9420fdf08bae40abfdc375a7a29c6cd148c43de63f46022c4233444f",
+      "archiveBytes": 1503674,
+      "contentSha256": "1b194f3d76c0db0bf83babb6bf03c580ddc16cdb48dd0b6044e31724aeecda3e",
+      "contentBytes": 6650488,
+      "installedBytes": 8313110,
+      "peakInstallationBytes": 21805386,
       "strategy": "sqlite-import",
       "encryptedArchive": {
-        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-ost.json.encrypted.zip?sha256=33ef3e0d17dcc01d298c85456ed471d966ad3520bc41121e599b32c4d9a0243a",
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-ost.json.encrypted.zip?sha256=64bbc638c8e813fcfe3e9ecfa4736a0446f3f57668335b8996c29e90b10552d4",
         "file": "bibles/bible-ost.json.encrypted.zip",
-        "sha256": "33ef3e0d17dcc01d298c85456ed471d966ad3520bc41121e599b32c4d9a0243a",
-        "bytes": 1504844,
+        "sha256": "64bbc638c8e813fcfe3e9ecfa4736a0446f3f57668335b8996c29e90b10552d4",
+        "bytes": 1504877,
         "keyVersion": 1
       }
     },
