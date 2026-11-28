@@ -208,16 +208,21 @@ Description longue : celle de la fiche par défaut, avec un premier paragraphe t
 
 ## App Store — pages produit personnalisées
 
-**État au 27 novembre 2026 : deux pages « Ready to Submit »**, pas soumises. Copiées de la 28.3.2 (header, image de recherche, captures), FR et EN.
+**État au 28 novembre 2026 : quatre pages « Ready to Submit »**, pas soumises. Copiées de la 28.3.2 (header, image de recherche, captures), FR et EN.
 
 | Page | Product Page ID | Première capture | Mots-clés associés | Texte promo FR |
 |---|---|---|---|---|
 | Strobi — assistant d'étude | `df0f87c3-7e8c-42a2-b9ae-8bde3adea270` | 02 Strobi | aucun (aucun mot-clé « IA » dans la version en ligne) | Strobi, l'assistant d'étude, répond à vos questions sur la Bible en citant votre version et en montrant ses sources. Quelques questions gratuites chaque jour. |
 | Hébreu et grec | `a148dbaf-dfd5-42d2-b511-e778c72a2960` | 04 mot à mot | FR : hébreu, grec, concordance, lexique grec, lexique hébreu, strong français ; EN : Hebrew, Greek, concordance, Greek lexicon, Hebrew lexicon | Le mot hébreu ou grec derrière chaque mot de votre Bible : définition, translittération, concordance Strong et Bible interlinéaire. Gratuit et sans publicité. |
+| Bible audio — écoute | `759e38af-d248-4233-9ea2-af40b6e5be3e` | 11 « Écoutez la Bible », 12 « Choisissez la voix », 13 « Une musique douce en fond » (nouvelles), puis 01, 03, 04, 05, 08, 02, 10 | aucun | Écoutez la Bible : la Segond lue par Trésor sonore, avec ou sans musique de fond, chapitre après chapitre. Gratuit et sans publicité. |
+| Étude d'un verset | `b8f73dde-b299-43b8-a620-edd31db55e17` | 14 « Tout autour d'un verset », 15 « Les références croisées », 16 « Des dictionnaires bibliques » (nouvelles), puis 04, 09, 06, 01, 03, 05, 02 | aucun | Étudiez un verset en profondeur : autres versions, grec et hébreu mot à mot, références croisées, dictionnaires et commentaires. Gratuit et sans publicité. |
 
 - Les mots-clés proposés sont ceux de la **version en ligne** (28.2.4). Après la sortie de la 28.3.2, revoir l'association (par exemple « audio » pour une future page audio).
 - Lien public de chaque page : bouton « Copy Link » dans App Store Connect (`apps.apple.com/app/id1454738221?ppid=<Product Page ID>`).
-- Une page « Bible audio » demande d'abord des captures du lecteur audio et du Trésor sonore, absentes de la série actuelle.
+- Les deux pages du 28 novembre n'ont pas de vidéo (« Remove All » sur le jeu iPhone, puis les captures dans l'ordre voulu). L'iPad FR garde la série de la version ; l'iPad EN est renvoyé dans un ordre adapté à la page. Textes EN : « Listen to the Bible: the King James read aloud… » et « Study any verse in depth… ».
+- Nouveaux écrans iPhone dans le `.pen` : « iOS FR/EN 11 Audio » à « 16 Dictionnaires » (x 13060 à 19590). Exports dans `final/app-store/pages/`, captures brutes `captures/ios-fr|en/14-…20-…`.
+- Un nom de page supprimée reste réservé chez Apple : d'où « Bible audio — écoute » au lieu de « Bible audio ».
+- Défauts vus dans l'app anglaise pendant les captures : les références Nave restent en français (« Exode », « Matthieu »), l'étiquette des résultats de dictionnaire est « Dictionnaire », la puce « Easton + Webster 1828 » apparaît deux fois sur « Grace ».
 - Dans App Store Connect, le glisser-déposer des captures marche sur iPhone mais pas sur iPad : pour réordonner, « Remove All » puis renvoyer les fichiers un par un dans l'ordre voulu.
 
 ## Points à valider

@@ -40,7 +40,7 @@ Textes proposés pour l'étape 1 : `docs/store/fiches-stores.md`.
 ## Étape 4 — En continu
 
 - [ ] Événements in-app et contenus promotionnels Play : « Lire la Bible en 2027 » en janvier, Avent, Pâques.
-- [ ] 3 ou 4 pages produit personnalisées, une par profil : hébreu-grec et assistant IA créées en brouillon (27 novembre), audio et étude à faire.
+- [x] 4 pages produit personnalisées, une par profil : hébreu-grec et assistant IA (27 novembre), audio et étude d'un verset (28 novembre), toutes prêtes à soumettre.
 - [ ] Tests A/B des captures.
 - [ ] Captures iPhone Duo avant avril 2027.
 
