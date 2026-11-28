@@ -1,7 +1,7 @@
 {
   "format": "bible-strong-mobile-resource-catalog",
   "schemaVersion": 1,
-  "generatedAt": "2026-11-28T06:30:32.996Z",
+  "generatedAt": "2026-11-28T06:41:15.293Z",
   "resourceCount": 120,
   "resources": {
     "bible-interlinear:BHG:en": {
@@ -822,28 +822,28 @@
     },
     "bible:FMAR": {
       "id": "bible:FMAR",
-      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-fmar.json.zip?sha256=935b1a464fdd494dd6e79c880cd62ec2920aa3a5b9623fd3304c6d81739094a8",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-fmar.json.zip?sha256=8d1e70aba277e3e27488447a715b2b1d1711375e8563658e78647156db709d00",
       "file": "bibles/bible-fmar.json.zip",
       "entry": "bible-fmar.json",
       "entries": {
         "canonical": {
           "entry": "bible-fmar.json",
-          "sha256": "92b7ae5b6ca55afa00c20dfe28d0abb51c397c922136bf5695e9c74d24953df9",
-          "bytes": 7109899
+          "sha256": "62a225faeb4172fd12d3f0989489d7a46af7da8df2e425126edc98f37edcddcb",
+          "bytes": 7110239
         }
       },
-      "archiveSha256": "935b1a464fdd494dd6e79c880cd62ec2920aa3a5b9623fd3304c6d81739094a8",
-      "archiveBytes": 1588298,
-      "contentSha256": "92b7ae5b6ca55afa00c20dfe28d0abb51c397c922136bf5695e9c74d24953df9",
-      "contentBytes": 7109899,
-      "installedBytes": 8887374,
-      "peakInstallationBytes": 23289551,
+      "archiveSha256": "8d1e70aba277e3e27488447a715b2b1d1711375e8563658e78647156db709d00",
+      "archiveBytes": 1588305,
+      "contentSha256": "62a225faeb4172fd12d3f0989489d7a46af7da8df2e425126edc98f37edcddcb",
+      "contentBytes": 7110239,
+      "installedBytes": 8887799,
+      "peakInstallationBytes": 23290586,
       "strategy": "sqlite-import",
       "encryptedArchive": {
-        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-fmar.json.encrypted.zip?sha256=c3f4ff4f0ff430734dd43e01edbaa7a799b8b648924529d287e3f9c8a146ef7c",
+        "url": "https://api.bible-strong.app/v1/offline-archives/bibles/bible-fmar.json.encrypted.zip?sha256=e5b11f09266544324d2bef8968eb58a859182d53dc0c0ee5592f8bb94c357465",
         "file": "bibles/bible-fmar.json.encrypted.zip",
-        "sha256": "c3f4ff4f0ff430734dd43e01edbaa7a799b8b648924529d287e3f9c8a146ef7c",
-        "bytes": 1589680,
+        "sha256": "e5b11f09266544324d2bef8968eb58a859182d53dc0c0ee5592f8bb94c357465",
+        "bytes": 1589687,
         "keyVersion": 1
       }
     },

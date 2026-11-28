@@ -371,7 +371,7 @@
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/935b1a464fdd494dd6e79c880cd62ec2920aa3a5b9623fd3304c6d81739094a8/bibles/bible-fmar.json.zip",
+        "sourceUrl": "r2://bible-strong-resource-artifacts-prod/revisions/8d1e70aba277e3e27488447a715b2b1d1711375e8563658e78647156db709d00/bibles/bible-fmar.json.zip",
         "entry": "bible-fmar.json"
       }
     ],
